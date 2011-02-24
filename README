@@ -1,0 +1,58 @@
+       __ _____                     ________                              __
+      / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___  / /
+  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
+ /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
+ \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
+           \/              /____/                           version 0.3-RC.1
+
+http://terminal.jcubic.pl
+
+Licensed under GNU LGPL Version 3 license
+Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>
+
+JQuery Terminal Emulator is a plugin for creating command line interpreters in
+your applications. It can automatically call JSON-RPC service when user type
+commands or you can provide you own function in which you can parse user
+command. It's ideal if you want to provide additional functionality for power
+users. It can also be used to debug your aplication.
+
+Features:
+
+    * You can create interpreter for your JSON-RPC service with one line
+      of code.
+
+    * Support for authentication (you can provide function when user enter
+      login and password or if you use JSON-RPC it can automatically call
+      login function on the server and pass token to all functions)
+
+    * Stack of interpreters - you can create commands that trigger additional
+      interpreters (eg. you can use couple of JSON-RPC service and run them
+      when user type command)
+
+    * Support for command line history (it's stored in cookies by default so
+      you can get commands from previous session)
+
+    * Include keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
+
+    * Multiply terminals on one page (every terminal can have different
+      command, it's own authentication function and it's own command history)
+
+    * It catch all exceptions and display error messages in terminal
+      (you can see errors in your javascript and php code in terminal if they
+      are in interpreter function)
+
+Example of usage (javascript interpreter)
+
+$(document).ready(function($, undefined) {
+    $('#term_demo').terminal(function(command, term) {
+        var result = window.eval(command);
+        if (result != undefined) {
+            term.echo(String(result));
+        }
+    }, {
+        greetings: 'Javascript Interpreter',
+        name: 'js_demo',
+        height: 200,
+        width: 450,
+        prompt: 'js>'});
+});
