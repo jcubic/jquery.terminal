@@ -29,8 +29,7 @@ Features:
       interpreters (eg. you can use couple of JSON-RPC service and run them
       when user type command)
 
-    * Support for command line history (it's stored in cookies by default so
-      you can get commands from previous session)
+    * Support for command line history it use Local Storage if posible
 
     * Include keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
 
@@ -46,7 +45,7 @@ New in 0.3 version
     * Greetings with Terminal signature is resizing to fit the size of the
       terminal
 
-    * You can use basic formatic for text inside terminal
+    * You can use basic formating for text using echo function
     
     * You can use functions in echo method which will be call when you
       resize terminal or browser window.
