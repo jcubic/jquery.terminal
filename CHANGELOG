@@ -1,3 +1,7 @@
+0.3       fix resizing on start and issue with greetings
+          add formating strings to set style of text.
+          add to echo a function which will be called when terminal
+          is resized
 0.3-RC2   fix manipulation of long line commands
 0.3-RC1   add callbacks and new functions
           you can now overwrite keyboard shortcuts

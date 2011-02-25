@@ -3,7 +3,7 @@
   __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-           \/              /____/                           version 0.3-RC2
+           \/              /____/                              version 0.3
 
 http://terminal.jcubic.pl
 
@@ -41,6 +41,17 @@ Features:
       (you can see errors in your javascript and php code in terminal if they
       are in interpreter function)
 
+New in 0.3 version
+
+    * Greetings with Terminal signature is resizing to fit the size of the
+      terminal
+
+    * You can use basic formatic for text inside terminal
+    
+    * You can use functions in echo method which will be call when you
+      resize terminal or browser window.
+      
+      
 Example of usage (javascript interpreter)
 
 $(document).ready(function($, undefined) {
