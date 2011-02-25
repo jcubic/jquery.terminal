@@ -29,8 +29,6 @@
                                    ['greetings', 'prompt',
                                     'login', 'name', 'exit']);
         op.enabled = false;
-        //why I put this? - .append('<div></div>').
-        
         var terminal = this.terminal(eval, op).css('overflow', 'hidden');
         if (!options.title) {
             options.title = 'JQuery Terminal Emulator';
@@ -53,6 +51,7 @@
             },
             open: function(e, ui) {
                 terminal.focus();
+                terminal.resize();
             },
             show: 'fade',
             closeOnEscape: false

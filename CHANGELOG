@@ -1,0 +1,42 @@
+0.3-RC.1  add callbacks and new functions
+          you can now overwrite keyboard shortcuts
+          resizing recalculates lines lenght and redraw content
+          if you create plugin for elements that are not in the DOM
+          and then append it to DOM it's display corectly
+          put all dependencies in one file
+          Default greetings show terminal signature depending on
+          width of terminal
+          use Local Sorage for command line history if posible
+          remove access to command line (cmd plugin) and add interface
+          to allow interact with it
+
+0.2.3.9   fix append enter character (0x0D) to the command (thanks to marat
+          for reporting the bug)
+
+0.2.3.8   update mousewheel plugin which fix scrolling in Opera (Thanks for
+          Alexey Dubovtsev for reporting the bug)
+
+0.2.3.7   fix cursor in IE in tilda example
+
+0.2.3.6   fix json serialization in IE
+
+0.2.3.5   fix demos and clipboard textarea transparency in IE
+
+0.2.3.4   fix long lines in command line issue
+
+0.2.3.3   fix Terminal in Internet Exporer
+
+0.2.3.2   fix blank line issue (thanks to Chris Janicki for finding the
+          bug) and fix CTRL + Arrows scroll on CTRL+V
+
+0.2.3.1   allow CTRL+W CTRL+T
+
+0.2.3     fix for "(#$%.{" characters on Opera/Chrome, add cursor move
+          with CTRL+P, CTRL+N, CTRL+F, CTRL+B which also work in Chrome.
+          Fix Arrow Keys on Chrome (for cursor move and command line
+          history). Change License to LGPL3.
+
+0.2.2     fix down-arrow/open parentises issue in Opera and Chrome
+
+0.2.1     add support for paste from clipboard with CTRL+V (Copy to
+          clipboard is alway enabled on websites)
