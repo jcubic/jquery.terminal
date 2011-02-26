@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sat, 26 Feb 2011 20:26:27 +0000
+ * Date: Sat, 26 Feb 2011 20:32:17 +0000
  */
 
 /*
@@ -603,7 +603,6 @@ Array.prototype.has = function(val) {
                         return '<span>' + text + '</span>';
                     }
                 }).join('');
-                console.log(str.split(format_split_re));
             }
             return str;
         } else {
@@ -2008,7 +2007,6 @@ try {
             } else {
                 //this is not working ??? - Keypress is not call when there is ajax requests
                 if (e.which == 100 && e.ctrlKey) {
-                    console.log(requests);
                     for (var i=requests.length; i--;) {
                         var r = requests[i];
                         if (4 != r.readyState) {
