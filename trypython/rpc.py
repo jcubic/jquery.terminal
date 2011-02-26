@@ -4,7 +4,8 @@ import os, re, sys, types
 from json import handle_cgi, dump_exception, UserCodeException
 from StringIO import StringIO
 
-modules = ['os', 'subprocess', 'posix', 'sys', 'popen2', 'shutil']
+
+modules = ['os', 'subprocess', 'posix', 'sys', 'popen2', 'urllib', 'shutil']
 
 def uniq_id():
     try:
@@ -46,10 +47,10 @@ class Interpreter(object):
     def evaluate(self, session_id, code):
         global modules
         try:
+            env = {}
             session_file = 'session_%s.py' % session_id
             fake_stdout = StringIO()
             __stdout = sys.stdout
-            env = {}
             sys.stdout = fake_stdout
             exec(open(session_file), env)
             #don's show output from privous session
@@ -82,11 +83,14 @@ class Interpreter(object):
                     return msg
                 open(session_file, 'a+').write('\n%s' % code)
                 return fake_stdout.getvalue()
-               
+            
     
     def destroy(self, session_id):
         os.remove('session_%s.py' % session_id)
 
 #from time import sleep
-#sleep(1)
+#sleep(4)
+
 handle_cgi(Interpreter())
+
+
