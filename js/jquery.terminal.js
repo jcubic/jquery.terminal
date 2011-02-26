@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Fri, 25 Feb 2011 23:36:58 +0000
+ * Date: Sat, 26 Feb 2011 20:26:27 +0000
  */
 
 /*
@@ -1504,7 +1504,13 @@ try {
             scroll_to_bottom(self);
             return div;
         }
-       
+        function show_greetings() {
+            if (options.greetings === undefined) {
+                self.echo(self.signature);
+            } else if (typeof options.greetings == 'string') {
+                self.echo(options.greetings);
+            }
+        }
         // ----------------------------------------------------------
         // TERMINAL METHODS
         // ----------------------------------------------------------
@@ -1515,7 +1521,6 @@ try {
                 command_line.set('');
                 lines = [];
                 self.attr({ scrollTop: 0});
-                options.greetings = null;
                 return self;
             },
             paused: function() {
@@ -1917,7 +1922,7 @@ try {
                                 //restore commands and run interpreter
                                 command_line.commands(commands);
                                 prepare_top_interpreter();
-                                self.echo(options.greetings || self.signature);
+                                show_greetings();
                             } else {
                                 self.error('Wrong password try again');
                                 command_line.prompt('login:');
@@ -2059,7 +2064,7 @@ try {
                 login();
             } else {
                 prepare_top_interpreter();
-                self.echo(options.greetings || self.signature);
+                show_greetings();
             }
             if (typeof $.fn.init.prototype.mousewheel === 'function') {
                 self.mousewheel(function(event, delta) {
