@@ -6,7 +6,7 @@
     filter: alpha(opacity = 0.01);
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
 }
-.terminal > .clipboard {
+.cmd > .clipboard {
     position: fixed;
 }
 .terminal {

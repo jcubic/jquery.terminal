@@ -1,3 +1,4 @@
+0.3.1     fixing small bugs, speed up resizing
 0.3       fix resizing on start and issue with greetings
           add formating strings to set style of text.
           add to echo a function which will be called when terminal
