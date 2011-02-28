@@ -26,7 +26,8 @@
     };
     $.fn.dterm = function(eval, options) {
         var op = $.extend_if_has({}, options, 
-                                   ['greetings', 'prompt',
+                                   ['greetings', 'prompt', 'onInit',
+                                    'onExit', 'clear',
                                     'login', 'name', 'exit']);
         op.enabled = false;
         var terminal = this.terminal(eval, op).css('overflow', 'hidden');
