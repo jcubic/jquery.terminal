@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.3
+ *|           \/              /____/                              version 0.3.1
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,16 +21,12 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sat, 26 Feb 2011 20:32:17 +0000
+ * Date: Wed, 02 Mar 2011 11:37:04 +0000
  */
 
 /*
 
      TODO:
-           CTRL+C shoudn't scroll down
-
-
-           
            add destroy method to terminal (cmd alrady have it)
 
            add support for - $(...).each(function() { ... });
@@ -50,6 +46,19 @@
           }
 
           object as first arguments which maps commands arguments to methods
+          context of functions will be the terminal instance.
+
+          terminal({
+            js: function(a, b, c) {
+              this.echo(a + '__' + b + '__' + c);
+            },
+            mysql: function() {
+              var query = Array.prototype.splice(argument, 0).join(' ');
+            }
+          });
+    
+          if you type 'js foo bar baz' it will call js('foo', 'bar', 'baz');
+
 
 
 */
@@ -62,6 +71,15 @@ Array.prototype.has = function(val) {
     }
     return false;
 };
+
+// debug function
+function get_stack(caller) {
+    if (caller) {
+        return [caller.toString().match(/.*\n.*\n/)].concat(get_stack(caller.caller));
+    } else {
+        return [];
+    }
+}
 
 (function($, undefined) {
     
@@ -565,13 +583,18 @@ Array.prototype.has = function(val) {
     var format_split_re = /(\[\[[biu]*;[^;]*;[^\]]*\][^\]]*\])/g;
     // this capture elements
     var format_re = /\[\[([biu]*);([^;]*);([^\]]*)\]([^\]]*)\]/g;
+    //var format_re = /\[\[([biu]*);([^;]*);([^\]]*)\]([^\[][^\]]*|\[[^\]]*\][^\]]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     function encodeHTML(str) {
         if (typeof str == 'string') {
-            str = str.replace(/&/g, '&amp;');
+            str = str.replace(/&(?!#[0-9]*;)/g, '&amp;');
             str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             str = str.replace(/\n/g, '<br/>'); // I don't think that it find this
             str = str.replace(/ /g, '&nbsp;');
+            //str = str.replace(/---/g, '&mdash;');
+            //str = str.replace(/\.\.\./g, '&hellip;');
+            //str = str.replace(/sqrt\(([^\)]+)\)/g, "&radic;$1")
+            //str = str.replace(/sum\(([^\)]+)\)/g, "&sum;$1");
             str = str.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
             //support for formating foo[[u;;]bar]baz[[b;#fff;]quuz]zzz
             var splited = str.split(format_split_re);
@@ -901,6 +924,7 @@ Array.prototype.has = function(val) {
                     before.before(div(line));
                 });
             }
+            var count = 0;
             return function() {
                 var string = mask ? command.replace(/./g, '*') : command;
                 self.find('div').remove();
@@ -913,18 +937,28 @@ Array.prototype.has = function(val) {
                     if (position < first_len) {
                         draw_cursor_line(array[0], position);
                         lines_after(array.slice(1));
+                    } else if (position == first_len) {
+                        before.before(div(array[0]));
+                        draw_cursor_line(array[1], 0);
+                        lines_after(array.slice(2));
+                        
                     } else {
                         var num_lines = array.length;
                         var offset = 0;
-                        if (position <= first_len) {
+                        if (position < first_len) {
                             draw_cursor_line(array[0], position);
                             lines_after(array.slice(1));
+                        } else if (position == first_len) {
+                            before.before(div(array[0]));
+                            draw_cursor_line(array[1], 0);
+                            lines_after(array.slice(2));
                         } else {
                             var last = array.slice(-1)[0];
                             var from_last = string.length - position;
-                            if (from_last < last.length) {
+                            if (from_last <= last.length) {
                                 lines_before(array.slice(0, -1));
-                                draw_cursor_line(last, last.length-from_last-1);
+                                var pos = last.length==from_last ? 0 : last.length-from_last;
+                                draw_cursor_line(last, pos);
                             } else {
                                 // in the middle
                                 if (num_lines == 3) {
@@ -937,7 +971,19 @@ Array.prototype.has = function(val) {
                                     // more lines cursor in the middle
                                     var line_index = Math.floor((position+prompt_len) / num_chars);
                                     var current = array[line_index];
-                                    var pos = (position-first_len-1)%num_chars;
+                                    var sum = (function(array) {
+                                        var sum = 0;
+                                        for (var i=array.length; i--;) {
+                                            sum += array[i].length;
+                                        }
+                                        return sum;
+                                    })(array.slice(0, line_index));
+                                    var pos = position-sum;
+                                    // cursor on first character in line
+                                    if (pos == num_chars) {
+                                        pos = 0;
+                                        current = array[++line_index];
+                                    }
                                     var before_str = encodeHTML(current.slice(0, pos));
                                     draw_cursor_line(current, pos);
                                     lines_before(array.slice(0, line_index));
@@ -974,6 +1020,7 @@ Array.prototype.has = function(val) {
             };
         })();
         function keydown_event(e) {
+            //console.log('keydown ' + e.which);
             if (options.keydown && options.keydown(e) === false) {
                 return false;
             }
@@ -1002,7 +1049,7 @@ Array.prototype.has = function(val) {
                         --position;
                         redraw();
                     }
-                } else if (e.which == 9) { // TAB
+                } else if (e.which == 9 && !(e.ctrlKey || e.altKey)) { // TAB
                     self.insert('\t');
                 } else if (e.which == 46 || (e.which == 68 && e.ctrlKey)) { 
                     //DELETE or CTRL+D
@@ -1104,11 +1151,12 @@ Array.prototype.has = function(val) {
                         } else if (e.which == 86) {
                             //CTRL+V
                             clip.focus();
-                            window.setTimeout(function() {
+                            //wait until Browser insert text to textarea
+                            self.oneTime(1, function() {
                                 self.insert(clip.val());
                                 clip.blur();
                                 clip.val('');
-                            }, 1);
+                            });
                             return true;
                         } else if (e.which == 75) {
                             //CTRL+K
@@ -1207,7 +1255,7 @@ Array.prototype.has = function(val) {
             },
             position: function(n) {
                 if (typeof n == 'number') {
-                    position = n;
+                    position = n < 0 ? 0 : n > command.length ? command.length : n;
                     redraw();
                 } else {
                     return position;
@@ -1251,8 +1299,7 @@ Array.prototype.has = function(val) {
         self.name(options.name || '');
         prompt = options.prompt || '>';
         draw_prompt();
-
-        if (options.enabled === undefined && !options.enabled) {
+        if (options.enabled === undefined || options.enabled === true) {
             self.enable();
         }
         // Keystrokes
@@ -1287,35 +1334,6 @@ Array.prototype.has = function(val) {
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
-    /*
-// function tracing debug stuff
-
-var caller;
-        try {
-            caller = arguments.callee.caller.toString().match(/.*\n.*\n/)
-        } catch (e) {
-            caller = 'unknown';
-        }
-        try {
-            console.log('$(' + selector + ') -> ' + caller +
-                        '(context: ' + context
-                       );
-        } catch(e) {}
-
-  
-try {
-        console.log('sizzle(' + JSON.stringify(expr) + ')\n' +
-                    get_stack(arguments.callee.caller)
-                   );
-    
-    
-    } catch (e) {}
-
-try {
-        console.log(selector + ' call from ' + arguments.callee.caller.toString().match(/.*\n.*\n/));
-        } catch(e) {}
-
-    */
     var requests = [];
     
     $.jrpc = function(url, id, method, params, success, error) {
@@ -1346,7 +1364,7 @@ try {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.3';
+    var version = '0.3.1';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1394,7 +1412,11 @@ try {
             exit: true,
             clear: true,
             enabled: true,
-            login: null
+            login: null,
+            onInit: null,
+            onExit: null,
+            keypress: null,
+            keydown: null
         };
         if (options) {
             if (options.width) {
@@ -1421,6 +1443,7 @@ try {
         output = $('<div>').addClass('terminal-output').appendTo(self);
         self.addClass('terminal').append('<div/>');
         
+        //calculate numbers of characters base on 
         function get_num_chars() {
             var test = $('<span>x</span>').appendTo(self);
             var result = Math.floor(self.width() / test.width());
@@ -1431,17 +1454,17 @@ try {
         // display Exception on terminal
         function display_exception(e, label) {
             if (typeof e == 'string') {
-                self.echo('[' + label + ']: ' + e).addClass('error');
+                self.error('&#91;' + label + '&#93;: ' + e)
             } else {
                 //display filename and line which throw exeption
-                self.echo('[' + label + ']: ' + e.fileName + ': ' +
-                          e.message).addClass('error');
+                self.error('&#91;' + label + '&#93;: ' + e.fileName + ': ' +
+                           e.message);
                 self.pause();
                 $.get(e.fileName, function(file) {
                     self.resume();
                     var num = e.lineNumber - 1;
-                    self.echo('[' + e.lineNumber + ']' +
-                              file.split('\n')[num]).addClass('error');
+                    self.error('&#91;' + e.lineNumber + '&#93;: ' +
+                               file.split('\n')[num]);
                 });
             }
         }
@@ -1506,7 +1529,7 @@ try {
         function show_greetings() {
             if (options.greetings === undefined) {
                 self.echo(self.signature);
-            } else if (typeof options.greetings == 'string') {
+            } else if (options.greetings) {
                 self.echo(options.greetings);
             }
         }
@@ -1533,6 +1556,8 @@ try {
                 return self;
             },
             resume: function() {
+                //console.log('resume on ' + options.prompt + '\n' + 
+                //            get_stack(arguments.callee.caller).join(''));
                 if (command_line) {
                     self.enable();
                     command_line.show();
@@ -1554,10 +1579,15 @@ try {
                     return self;
                 } else {
                     terminals.front().disable();
-                    return terminals.rotate().enable();
+                    var next = terminals.rotate().enable();
+                    var x = next.offset().top - 50; // 100 provides buffer in viewport
+                    $('html,body').animate({scrollTop: x}, 500);
+                    return next;
                 }
             },
             focus: function(toggle) {
+                //console.log('focus on ' + options.prompt + '\n' + 
+                //            get_stack(arguments.callee.caller).join(''));
                 self.oneTime(1, function() {
                     if (terminals.length() == 1) {
                         if (toggle === false) {
@@ -1579,6 +1609,8 @@ try {
                 return self;
             },
             enable: function() {
+                //console.log('enable: ' + options.prompt + '\n' + 
+                //            get_stack(arguments.callee.caller).join(''));
                 if (num_chars === undefined) {
                     //enabling first time
                     self.resize();
@@ -1592,11 +1624,9 @@ try {
                 return self;
             },
             disable: function() {
-                if (!pause) {
-                    if (command_line) {
-                        pause = true;
-                        command_line.disable();
-                    }
+                if (command_line) {
+                    pause = true;
+                    command_line.disable();
                 }
                 return self;
             },
@@ -1607,12 +1637,12 @@ try {
                 var cols = self.cols();
                 var i = cols < 15 ? null : cols < 35 ? 0 : cols < 55 ? 1 : cols < 64 ? 2 : cols < 75 ? 3 : 4;
                 if (i !== null) {
-                    return signatures[i].join('\n');
+                    return signatures[i].join('\n') + '\n';
                 } else {
                     return '';
                 }
             },
-            /* PROMPT FUNCTIONS */
+            /* COMMAND LINE FUNCTIONS */
             get_command: function() {
                 return command_line.get();
             },
@@ -1635,7 +1665,9 @@ try {
                 return self;
             },
             get_output: function() {
-                return lines.join('\n');
+                return $.map(lines, function(i, item) {
+                    return typeof item == 'function' ? item() : item;
+                }).get().join('\n');
             },
             resize: function(width, height) {
                 if (width && height) {
@@ -1644,10 +1676,12 @@ try {
                 }
                 num_chars = get_num_chars();
                 command_line.resize(num_chars);
+                var o = output.detach();
                 output.html('');
                 $.each(lines, function(i, line) {
                     draw_line(typeof line == 'function' ? line() : line);
                 });
+                self.prepend(o);
                 scroll_to_bottom(self);
                 return self;
             },
@@ -1656,7 +1690,7 @@ try {
                 return draw_line(typeof line == 'function' ? line() : line);
             },
             error: function(message) {
-                return self.echo(message).addClass('error');
+                self.echo(message).addClass('error');
             },
             scroll: function(amount) {
                 if (amount > self.attr('scrollTop') && amount > 0) {
@@ -1692,13 +1726,15 @@ try {
                         var ueval = options['eval'];
                         _eval = make_json_rpc_eval_fun(ueval, self);
                     }
-                    interpreters.push({
+                    interpreters.push($.extend({'eval': _eval}, options));
+                    /*
                         name: options.name,
                         'eval': _eval,
                         prompt: options.prompt,
                         login: options.login,
+                        greetings: options.grettings,
                         onStart: options.onStart,
-                        onExit: options.onExit});
+                        onExit: options.onExit});*/
                     prepare_top_interpreter();
                 }
                 return self;
@@ -1710,8 +1746,8 @@ try {
                 if (interpreters.top().name === settings.name) {
                     if (settings.login) {
                         logout();
-                        if (typeof settings.onAfterLogout == 'function') {
-                            settings.onAfterLogout(self);
+                        if (typeof settings.onExit == 'function') {
+                            settings.onExit(self);
                         }
                     }
                 } else {
@@ -1747,11 +1783,11 @@ try {
                             terminal.echo(string);
                         }
                     } else {
-                        terminal.error('[RPC] ' + json.error.message);
+                        terminal.error('&#91;RPC&#93; ' + json.error.message);
                     }
                     terminal.resume();
                 }, function(xhr, status, error) {
-                    terminal.error('[AJAX] ' + status +
+                    terminal.error('&#91;AJAX&#93; ' + status +
                                    ' - Server reponse is: \n' +
                                    xhr.responseText);
                     terminal.resume();
@@ -1779,13 +1815,12 @@ try {
                         service(method, [token].concat(params));
                     } else {
                         //should never happen
-                        terminal.error('[AUTH] Access denied (no token)');
+                        terminal.error('&#91;AUTH&#93; Access denied (no token)');
                     }
                 }
             };
         }
 
-        
         var url;
         switch(typeof init_eval) {
         case 'string':
@@ -1836,7 +1871,7 @@ try {
                                }
                            }, function(xhr, status, error) {
                                self.resume();
-                               self.error('[AJAX] Response: ' +
+                               self.error('&#91;AJAX&#92; Response: ' +
                                           status + '\n' +
                                           xhr.responseText);
                            });
@@ -1920,8 +1955,8 @@ try {
                                 $.Storage.set('login' + name, user);
                                 //restore commands and run interpreter
                                 command_line.commands(commands);
-                                prepare_top_interpreter();
-                                show_greetings();
+                                // move this to one function init.
+                                initialize();
                             } else {
                                 self.error('Wrong password try again');
                                 command_line.prompt('login:');
@@ -1974,8 +2009,18 @@ try {
                 interpreter.onStart(self);
             }
         }
-               
+        
+        function initialize() {
+            prepare_top_interpreter();
+            show_greetings();
+            if (typeof settings.onInit == 'function') {
+                settings.onInit(self);
+            }
+        }
+        
         function key_press(e) {
+            
+            //console.log(e.charCode + '|' + e.which);
             if (!self.paused()) {
                 if (settings.keypress && settings.keypress(e) === false) {
                     return false;
@@ -1983,29 +2028,33 @@ try {
                 // CTRL+D
                 if (e.which == 100 && e.ctrlKey) {
                     if (settings.exit && command_line.get() === '') {
-                        if (settings.name == interpreters.top().name &&
-                            !settings.login) {
-                            self.echo("you can't exit from top interpreter");
-                        } else {
+                        if (interpreters.size() > 1 || settings.login !== undefined) {
                             self.pop('');
+                        } else {
+                            self.resume();
+                            self.echo('');
                         }
                     }
                     return false;
-                } else if (e.charCode == 118 && e.ctrlKey) {
-                    window.setTimeout(function() {
+                } else if (e.which == 118 && e.ctrlKey) {
+                    self.oneTime(1, function() {
                         self.attr({scrollTop:
                                    self.attr('scrollHeight')});
-                    }, 1);
+                    });
                     return true;
+                } else if (e.keyCode == 9 && e.ctrlKey) {
+                    self.focus(false);
                 } else if (e.which == 34) { // PAGE DOWN
                     self.scroll(self.height());
                 } else if (e.which == 33) { // PAGE UP
                     self.scroll(-self.height());
+                } else if (e.which == 99 && e.ctrlKey) { // CTRL+C
+                    return false;
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
             } else {
-                //this is not working ??? - Keypress is not call when there is ajax requests
+                //this is not working - Keypress is not call when there is ajax requests - ???
                 if (e.which == 100 && e.ctrlKey) {
                     for (var i=requests.length; i--;) {
                         var r = requests[i];
@@ -2045,15 +2094,14 @@ try {
             //self.resize();
             //num_chars = get_num_chars();
             terminals.append(self);
-            if (settings.enabled) {
+            //console.log(settings);
+            if (settings.enabled === true) {
                 self.focus();
             } else {
+                //console.log('disable ' + settings.prompt);
                 self.disable();
             }
             $(window).resize(self.resize);
-            if (typeof settings.onInit == 'function') {
-                settings.onInit(self);
-            }
             self.click(function() {
                 self.focus();
             });
@@ -2061,8 +2109,7 @@ try {
                 !self.login_name()) {
                 login();
             } else {
-                prepare_top_interpreter();
-                show_greetings();
+                initialize();
             }
             if (typeof $.fn.init.prototype.mousewheel === 'function') {
                 self.mousewheel(function(event, delta) {
@@ -2078,6 +2125,7 @@ try {
         }
         self.data('terminal', self);
         return self;
+
     }; //terminal plugin
 
 })(jQuery);
