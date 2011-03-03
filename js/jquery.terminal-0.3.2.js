@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.3.1
+ *|           \/              /____/                              version 0.3.2
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Wed, 02 Mar 2011 11:37:04 +0000
+ * Date: Thu, 03 Mar 2011 17:30:11 +0000
  */
 
 /*
@@ -1026,7 +1026,6 @@ function get_stack(caller) {
             }
             if (enabled) {
                 var pos, len, result;
-                
                 if (e.keyCode == 13) {
                     if (history && command) {
                         history.append(command);
@@ -1128,7 +1127,7 @@ function get_stack(caller) {
                 } else if (e.which == 35) {
                     //END
                     self.position(command.length);
-                } else if (e.metaKey) {
+                } else if (e.ctrlKey) {
                     if (e.shiftKey) { // CTRL+SHIFT+??
                         if (e.which == 84) {
                             //CTRL+SHIFT+T open closed tab
@@ -1304,12 +1303,15 @@ function get_stack(caller) {
         }
         // Keystrokes
         $(document.documentElement).keypress(function(e) {
-            if (enabled) {
-                var result;
-                if (options.keypress) {
-                    result = options.keypress(e);
-                }
-                if (result === undefined || result) {
+            var result;
+            if (e.ctrlKey && e.which == 99) {
+                return true;
+            }
+            if (options.keypress) {
+                result = options.keypress(e);
+            }
+            if (result === undefined || result) {
+                if (enabled) {
                     if ([38, 32, 13, 40, 0, 8].has(e.which) &&
                         e.keyCode != 123 && // for F12 which == 0
                         !(e.which == 40 && e.shiftKey ||
@@ -1322,7 +1324,10 @@ function get_stack(caller) {
                             return false;
                         }
                     }
+
                 }
+            } else {
+                return result;
             }
             if (e.which == 100 && e.ctrlKey) {
                 return false;
@@ -1364,7 +1369,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.3.1';
+    var version = '0.3.2';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2019,12 +2024,11 @@ function get_stack(caller) {
         }
         
         function key_press(e) {
-            
+            if (settings.keypress && settings.keypress(e, self) === false) {
+                return false;
+            }
             //console.log(e.charCode + '|' + e.which);
             if (!self.paused()) {
-                if (settings.keypress && settings.keypress(e) === false) {
-                    return false;
-                }
                 // CTRL+D
                 if (e.which == 100 && e.ctrlKey) {
                     if (settings.exit && command_line.get() === '') {
