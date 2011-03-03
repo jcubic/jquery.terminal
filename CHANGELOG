@@ -1,3 +1,5 @@
+0.3.3     fixing PAGE UP/DOWN
+0.3.2     fixing cursor in long lines
 0.3.1     fixing small bugs, speed up resizing
 0.3       fix resizing on start and issue with greetings
           add formating strings to set style of text.

@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.3.2
+ *|           \/              /____/                              version 0.3.3
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Thu, 03 Mar 2011 17:30:11 +0000
+ * Date: Thu, 03 Mar 2011 23:44:27 +0000
  */
 
 /*
@@ -1369,7 +1369,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.3.2';
+    var version = '0.3.3';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2048,12 +2048,10 @@ function get_stack(caller) {
                     return true;
                 } else if (e.keyCode == 9 && e.ctrlKey) {
                     self.focus(false);
-                } else if (e.which == 34) { // PAGE DOWN
+                } else if (e.keyCode == 34) { // PAGE DOWN
                     self.scroll(self.height());
-                } else if (e.which == 33) { // PAGE UP
+                } else if (e.keyCode == 33) { // PAGE UP
                     self.scroll(-self.height());
-                } else if (e.which == 99 && e.ctrlKey) { // CTRL+C
-                    return false;
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
