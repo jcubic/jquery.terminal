@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Thu, 03 Mar 2011 23:44:27 +0000
+ * Date: Mon, 07 Mar 2011 11:57:17 +0000
  */
 
 /*
@@ -1319,12 +1319,8 @@ function get_stack(caller) {
                         return false;
                     } else if (!e.ctrlKey && !(e.altKey && e.which == 100)) {
                         self.insert(String.fromCharCode(e.which));
-                        // opera +/-
-                        if (e.which == 45 || (e.shiftKey && e.which == 43)) {
-                            return false;
-                        }
+                        return false;
                     }
-
                 }
             } else {
                 return result;
