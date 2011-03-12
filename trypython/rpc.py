@@ -5,7 +5,8 @@ from json import handle_cgi, dump_exception, UserCodeException
 from StringIO import StringIO
 
 
-modules = ['os', 'subprocess', 'posix', 'sys', 'popen2', 'urllib', 'shutil']
+modules = ['os', 'subprocess', 'posix', 'sys', 'popen2', 'urllib', 'shutil',
+           'copy_reg', 'UserDict', 'posixpath', 'errno']
 
 def uniq_id():
     try:
@@ -29,6 +30,8 @@ def check_env(env, modules):
         elif type(v) == types.BuiltinFunctionType and v.__module__ in modules:
             if v.__module__ == 'posix':
                 module = 'os'
+            elif v.__module__ == 'posixpath':
+                module = 'path'
             else:
                 module = v.__module__
             return fun_emsg % module
