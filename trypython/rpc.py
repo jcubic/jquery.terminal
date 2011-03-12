@@ -4,9 +4,13 @@ import os, re, sys, types
 from json import handle_cgi, dump_exception, UserCodeException
 from StringIO import StringIO
 
-
-modules = ['os', 'subprocess', 'posix', 'sys', 'popen2', 'urllib', 'shutil',
-           'copy_reg', 'UserDict', 'posixpath', 'errno']
+# list of disabled modules
+modules = ['os', 'copy_reg', 'UserDict', 'posixpath', 'errno', 'subprocess',
+           'posix', 'popen2', 'urllib', 'shutil', 'UserDict', 'copy_reg',
+           'errno', 'posixpath', 'sys', 'errno', 'fcntl', 'gc', 'pickle',
+           'select', 'signal', 'traceback', 'types', 'sys', 'warnings', 
+           'socket', 'ssl', 'string', 'sys', 'time', 'errno', 'fnmatch', 
+           'stat']
 
 def uniq_id():
     try:
