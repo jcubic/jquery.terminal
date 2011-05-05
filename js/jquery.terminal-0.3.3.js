@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Mon, 07 Mar 2011 11:57:17 +0000
+ * Date: Thu, 05 May 2011 11:05:56 +0000
  */
 
 /*
@@ -1269,7 +1269,7 @@ function get_stack(caller) {
                 redraw();
             },
             enable: function() {
-                if (!this.isenabled()) {
+                if (!enabled) {
                     self.everyTime(500, 'blink', blink);
                     enabled = true;
                 }
@@ -1278,7 +1278,7 @@ function get_stack(caller) {
                 return enabled;
             },
             disable: function() {
-                if (this.isenabled()) {
+                if (enabled) {
                     self.stopTime('blink', blink);
                     self.find('.cursor').removeClass('inverted');
                     enabled = false;
@@ -1804,7 +1804,7 @@ function get_stack(caller) {
                     method = command;
                     params = [];
                 } else {
-                    command = command.split(/ */);
+                    command = command.split(/ +/);
                     method = command[0];
                     params = command.slice(1);
                 }
