@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Thu, 05 May 2011 11:05:56 +0000
+ * Date: Fri, 06 May 2011 13:01:06 +0000
  */
 
 /*
@@ -1312,10 +1312,10 @@ function get_stack(caller) {
             }
             if (result === undefined || result) {
                 if (enabled) {
-                    if ([38, 32, 13, 40, 0, 8].has(e.which) &&
+                    if ([38, 32, 13, 0, 8].has(e.which) &&
                         e.keyCode != 123 && // for F12 which == 0
-                        !(e.which == 40 && e.shiftKey ||
-                          e.which == 38 && e.shiftKey)) {
+                        //!(e.which == 40 && e.shiftKey ||
+                        !(e.which == 38 && e.shiftKey)) {
                         return false;
                     } else if (!e.ctrlKey && !(e.altKey && e.which == 100)) {
                         self.insert(String.fromCharCode(e.which));
