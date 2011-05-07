@@ -75,7 +75,7 @@ $.extend_if_has = function(desc, source, array) {
         $(document.documentElement).keypress(function(e) {
             if (e.which == 96) {
                 self.slideToggle('fast');
-                self.terminal.command_line.set('');
+                self.terminal.set_command('');
                 self.terminal.focus(focus = !focus);
                 self.terminal.attr({
                     scrollTop: self.terminal.attr("scrollHeight")
