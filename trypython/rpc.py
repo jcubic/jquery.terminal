@@ -10,7 +10,7 @@ modules = ['os', 'copy_reg', 'UserDict', 'posixpath', 'errno', 'subprocess',
            'errno', 'posixpath', 'sys', 'errno', 'fcntl', 'gc', 'pickle',
            'select', 'signal', 'traceback', 'types', 'sys', 'warnings', 
            'socket', 'ssl', 'string', 'sys', 'time', 'errno', 'fnmatch', 
-           'stat']
+           'stat', 'ctypes', 'ctypes.util']
 
 def uniq_id():
     try:
@@ -58,6 +58,7 @@ class Interpreter(object):
             session_file = 'session_%s.py' % session_id
             fake_stdout = StringIO()
             __stdout = sys.stdout
+            __import__ = lambda x:x
             sys.stdout = fake_stdout
             exec(open(session_file), env)
             #don's show output from privous session
