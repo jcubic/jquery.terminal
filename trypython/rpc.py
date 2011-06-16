@@ -54,11 +54,11 @@ class Interpreter(object):
     def evaluate(self, session_id, code):
         global modules
         try:
-            env = {}
+            env = {'__import__':lambda x:x}
             session_file = 'session_%s.py' % session_id
             fake_stdout = StringIO()
             __stdout = sys.stdout
-            __import__ = lambda x:x
+            
             sys.stdout = fake_stdout
             exec(open(session_file), env)
             #don's show output from privous session
