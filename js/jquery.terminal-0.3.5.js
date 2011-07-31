@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.3.4
+ *|           \/              /____/                              version 0.3.5
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sun, 08 May 2011 17:58:48 +0000
+ * Date: Sun, 31 Jul 2011 09:08:22 +0000
  */
 
 /*
@@ -1127,7 +1127,7 @@ function get_stack(caller) {
                 } else if (e.which == 35) {
                     //END
                     self.position(command.length);
-                } else if (e.ctrlKey) {
+                } else if (e.ctrlKey || e.metaKey) {
                     if (e.shiftKey) { // CTRL+SHIFT+??
                         if (e.which == 84) {
                             //CTRL+SHIFT+T open closed tab
@@ -1366,7 +1366,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.3.4';
+    var version = '0.3.5';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1492,7 +1492,9 @@ function get_stack(caller) {
         
         
         function scroll_to_bottom(terminal) {
-            terminal.scrollTop(self.attr('scrollHeight'));
+            var scrollHeight = self.prop ? self.prop('scrollHeight') : 
+                self.attr('scrollHeight');
+            terminal.scrollTop(scrollHeight);
         }
         function draw_line(string) {
              var string = typeof string == 'string' ?
@@ -1695,12 +1697,21 @@ function get_stack(caller) {
                 self.echo(message).addClass('error');
             },
             scroll: function(amount) {
-                if (amount > self.attr('scrollTop') && amount > 0) {
-                    self.attr('scrollTop', 0);
+                if (self.prop) {
+                    if (amount > self.prop('scrollTop') && amount > 0) {
+                        self.prop('scrollTop', 0);
+                    }
+                    var pos = self.prop('scrollTop');
+                    self.prop('scrollTop', pos + amount);
+                    return self;
+                } else {
+                    if (amount > self.attr('scrollTop') && amount > 0) {
+                        self.attr('scrollTop', 0);
+                    }
+                    var pos = self.attr('scrollTop');
+                    self.attr('scrollTop', pos + amount);
+                    return self;
                 }
-                var pos = self.attr('scrollTop');
-                self.attr('scrollTop', pos + amount);
-                return self;
             },
             logout: settings.login ? function() {
                 while (interpreters.size() > 1) {
