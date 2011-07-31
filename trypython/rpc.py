@@ -5,12 +5,25 @@ from json import handle_cgi, dump_exception, UserCodeException
 from StringIO import StringIO
 
 # list of disabled modules
-modules = ['os', 'copy_reg', 'UserDict', 'posixpath', 'errno', 'subprocess',
-           'posix', 'popen2', 'urllib', 'shutil', 'UserDict', 'copy_reg',
-           'errno', 'posixpath', 'sys', 'errno', 'fcntl', 'gc', 'pickle',
-           'select', 'signal', 'traceback', 'types', 'sys', 'warnings', 
-           'socket', 'ssl', 'string', 'sys', 'time', 'errno', 'fnmatch', 
-           'stat', 'ctypes', 'ctypes.util']
+modules = ['os', 'posixpath', 'subprocess', 'linecache', 'io', 'trace', 'rexec'
+           'posix', 'popen2', 'urllib', 'shutil', 'glob', 'UserDict', 'copy_reg',
+           'posixpath', 'sys', 'sys', 'socket', 'fnmatch', 'imghdr', 'macpath',
+           'stat', 'ctypes', 'ctypes.util', 'urllib2', 'binhex', 'pyclbr', 'mailcap',
+           'compiler.pycodegen', 'locale', 'webbrowser', 'getopt', 'getpass', 'cgi',
+           'pdb', 'cgitb', 'uu', 'compileall', 'CGIHTTPServer', 'linecache', 'mailbox',
+           'genericpath', 'pipes', 'mimify', 'symtable', 'unittest', 'SimpleHTTPServer'
+           'tarfile', 'tabnanny', 'timeit', 'dircache', 'nntplib', 'whichdb', 'filecmp',
+           'inspect', 'tempfile', 'site', 'UserString', 'mhlib', 'sndhdr', 'cProfile'
+           'ftplib', 'shlex', 'smtpd', 'email.utils', 'py_compile', 'imputils', 'bdb'
+           'xml', 'xml.sax', 'xml.sax.saxutils', 'pkgutil', 'asyncore', 'commands', 'mimetools'
+           'httplib', 'macurl2path', 'ntpath', 'pty', 'SimpleXMLRPCServer', 'optparse',
+           'base64', 'threading', 'posixfile', 'mimetypes', 'pprint', 'DocXMLRPCServer'
+           'platform', 'compiler.pyassem', 'compiler.pycodegen', 'compiler.symbols',
+           'compiler', 'bsddb', 'tokenize', 'SocketServer', 'calendar', 'copy', 'dbhash',
+           'encodings', 'runpy', 'sgmllib', 'poplib', 'decimal', 'xmllib', 'aifc', 'test',
+           'code', 'tabnanny', 'keyword', 'inspect', 'formatter', 'doctest', 'mhlib', 'UserString',
+           'token', 'email', 'json', 'telnetlib', 'BaseHTTPServer', 'StringIO', 'imputil', 'rfc822',
+           'contextlib', 'quopri', 'pydoc', 'dis', 'wsgiref', 'modulefinder', 're']
 
 def uniq_id():
     try:
@@ -54,7 +67,9 @@ class Interpreter(object):
     def evaluate(self, session_id, code):
         global modules
         try:
-            env = {'__import__':lambda x:x}
+            def no_import(module):
+                raise "For security reason you can't use __import__"
+            env = {'__import__': no_import}
             session_file = 'session_%s.py' % session_id
             fake_stdout = StringIO()
             __stdout = sys.stdout
