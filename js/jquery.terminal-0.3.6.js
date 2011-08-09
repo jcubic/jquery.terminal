@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sun, 31 Jul 2011 09:08:22 +0000
+ * Date: Tue, 09 Aug 2011 13:08:46 +0000
  */
 
 /*
@@ -1019,6 +1019,16 @@ function get_stack(caller) {
                 //change_num_chars();
             };
         })();
+        // paste content to terminal using hidden textarea
+        function paste() {
+            clip.focus();
+            //wait until Browser insert text to textarea
+            self.oneTime(1, function() {
+                self.insert(clip.val());
+                clip.blur();
+                clip.val('');
+            });
+        }
         function keydown_event(e) {
             //console.log('keydown ' + e.which);
             if (options.keydown && options.keydown(e) === false) {
@@ -1149,13 +1159,7 @@ function get_stack(caller) {
                             return true;
                         } else if (e.which == 86) {
                             //CTRL+V
-                            clip.focus();
-                            //wait until Browser insert text to textarea
-                            self.oneTime(1, function() {
-                                self.insert(clip.val());
-                                clip.blur();
-                                clip.val('');
-                            });
+                            paste();
                             return true;
                         } else if (e.which == 75) {
                             //CTRL+K
@@ -1189,7 +1193,6 @@ function get_stack(caller) {
                 
             } */
         }
-
 
         $.extend(self, {
             name: function(string) {
@@ -1491,10 +1494,10 @@ function get_stack(caller) {
         }
         
         
-        function scroll_to_bottom(terminal) {
+        function scroll_to_bottom() {
             var scrollHeight = self.prop ? self.prop('scrollHeight') : 
                 self.attr('scrollHeight');
-            terminal.scrollTop(scrollHeight);
+            self.scrollTop(scrollHeight);
         }
         function draw_line(string) {
              var string = typeof string == 'string' ?
@@ -1527,7 +1530,7 @@ function get_stack(caller) {
             }
             output.append(div);
             div.width('100%');
-            scroll_to_bottom(self);
+            scroll_to_bottom();
             return div;
         }
         function show_greetings() {
@@ -1537,6 +1540,16 @@ function get_stack(caller) {
                 self.echo(options.greetings);
             }
         }
+        function isScrolledIntoView(elem) {
+            var docViewTop = $(window).scrollTop();
+            var docViewBottom = docViewTop + $(window).height();
+            
+            var elemTop = $(elem).offset().top;
+            var elemBottom = elemTop + $(elem).height();
+
+            return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
+        }
+
         // ----------------------------------------------------------
         // TERMINAL METHODS
         // ----------------------------------------------------------
@@ -1565,7 +1578,7 @@ function get_stack(caller) {
                 if (command_line) {
                     self.enable();
                     command_line.show();
-                    scroll_to_bottom(self);
+                    scroll_to_bottom();
                 }
                 return self;
             },
@@ -1582,11 +1595,20 @@ function get_stack(caller) {
                 if (terminals.length() == 1) {
                     return self;
                 } else {
-                    terminals.front().disable();
-                    var next = terminals.rotate().enable();
-                    var x = next.offset().top - 50; // 100 provides buffer in viewport
-                    $('html,body').animate({scrollTop: x}, 500);
-                    return next;
+                    var offsetTop = self.offset().top;
+                    var height = self.height();
+                    var scrollTop = self.scrollTop();
+                    if (!isScrolledIntoView(self)) {
+                        self.enable();
+                        $('html,body').animate({scrollTop: offsetTop-50}, 500);
+                        return self;
+                    } else {
+                        terminals.front().disable();
+                        var next = terminals.rotate().enable();
+                        var x = next.offset().top - 50; // 100 provides buffer in viewport
+                        $('html,body').animate({scrollTop: x}, 500);
+                        return next;
+                    }
                 }
             },
             focus: function(toggle) {
@@ -1686,7 +1708,7 @@ function get_stack(caller) {
                     draw_line(typeof line == 'function' ? line() : line);
                 });
                 self.prepend(o);
-                scroll_to_bottom(self);
+                scroll_to_bottom();
                 return self;
             },
             echo: function(line) {
@@ -2048,13 +2070,12 @@ function get_stack(caller) {
                         }
                     }
                     return false;
-                } else if (e.which == 118 && e.ctrlKey) {
+                } else if (e.which == 118 && e.ctrlKey) { // CTRL+V
                     self.oneTime(1, function() {
-                        self.attr({scrollTop:
-                                   self.attr('scrollHeight')});
+                        scroll_to_bottom();
                     });
                     return true;
-                } else if (e.keyCode == 9 && e.ctrlKey) {
+                } else if (e.keyCode == 9 && e.ctrlKey) { // TAB
                     self.focus(false);
                 } else if (e.keyCode == 34) { // PAGE DOWN
                     self.scroll(self.height());
