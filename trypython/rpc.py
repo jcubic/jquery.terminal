@@ -23,7 +23,7 @@ modules = ['os', 'posixpath', 'subprocess', 'linecache', 'io', 'trace', 'rexec'
            'encodings', 'runpy', 'sgmllib', 'poplib', 'decimal', 'xmllib', 'aifc', 'test',
            'code', 'tabnanny', 'keyword', 'inspect', 'formatter', 'doctest', 'mhlib', 'UserString',
            'token', 'email', 'json', 'telnetlib', 'BaseHTTPServer', 'StringIO', 'imputil', 'rfc822',
-           'contextlib', 'quopri', 'pydoc', 'dis', 'wsgiref', 'modulefinder', 're']
+           'contextlib', 'quopri', 'pydoc', 'dis', 'wsgiref', 'modulefinder', 're', 'imp']
 
 def uniq_id():
     try:
