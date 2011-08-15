@@ -29,7 +29,7 @@ Features:
       interpreters (eg. you can use couple of JSON-RPC service and run them
       when user type command)
 
-    * Support for command line history it use Local Storage if posible
+    * Support for command line history it use Local Storage if possible
 
     * Include keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
 
