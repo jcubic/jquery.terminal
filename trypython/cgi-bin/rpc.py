@@ -56,7 +56,7 @@ def check_env(env, modules):
 class Interpreter(object):
     def start(self):
         session_id = uniq_id()
-        open('session_%s.py' % session_id, 'w')
+        open('../session_%s.py' % session_id, 'w')
         return session_id
 
     def info(self):
@@ -69,8 +69,13 @@ class Interpreter(object):
         try:
             def no_import(module):
                 raise "For security reason you can't use __import__"
-            env = {'__import__': no_import}
-            session_file = 'session_%s.py' % session_id
+
+            def no_open(filename, mode='r'):
+                raise "For security reason you can open files"
+
+            env = {'__import__': no_import, 'open': no_open, 'file': no_open}
+
+            session_file = '../session_%s.py' % session_id
             fake_stdout = StringIO()
             __stdout = sys.stdout
             
