@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.3.5
+ *|           \/              /____/                              version 0.3.6
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Tue, 09 Aug 2011 13:08:46 +0000
+ * Date: Sun, 11 Sep 2011 20:28:31 +0000
  */
 
 /*
@@ -1369,7 +1369,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.3.5';
+    var version = '0.3.6';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1750,7 +1750,7 @@ function get_stack(caller) {
             } : null,
             login_name: settings.login ? function() {
                 var name = settings.name;
-                return $.Storage.get('login_' + (name ? '_' + name : ''));
+                return $.Storage.get('login' + (name ? '_' + name : ''));
             } : null,
             name: function() {
                 return settings.name;
