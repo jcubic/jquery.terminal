@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sat, 01 Oct 2011 16:54:01 +0000
+ * Date: Sat, 01 Oct 2011 17:51:53 +0000
  */
 
 /*
@@ -700,6 +700,9 @@ function get_stack(caller) {
             },
             data: function() {
                 return data;
+            },
+            length: function() {
+                return data.length;
             },
             reset: function() {
                 pos = 0;
@@ -1467,10 +1470,11 @@ function get_stack(caller) {
             throw 'Sorry, but terminal said that "' + self.selector +
                 '" is not valid selector';
         }
+        // register ajaxSend for cancel requests on CTRL+D
+        self.ajaxSend(function(e, xhr, opt) {
+            requests.push(xhr);
+        });
         if (self.data('terminal')) {
-            self.ajaxSend(function(e, xhr, opt) {
-                requests.push(xhr);
-            });
             return self.data('terminal');
         }
         output = $('<div>').addClass('terminal-output').appendTo(self);
@@ -1695,6 +1699,9 @@ function get_stack(caller) {
                 } else {
                     return '';
                 }
+            },
+            version: function() {
+                return version;
             },
             /* COMMAND LINE FUNCTIONS */
             get_command: function() {
@@ -2081,40 +2088,46 @@ function get_stack(caller) {
             }
         }
         
-        function key_press(e) {
-            if (settings.keypress && settings.keypress(e, self) === false) {
+        function key_down(e) {
+            if (settings.keydown && settings.keydown(e, self) === false) {
                 return false;
             }
-            //console.log(e.charCode + '|' + e.which);
             if (!self.paused()) {
                 // CTRL+D
-                if (e.which == 100 && e.ctrlKey) {
-                    if (settings.exit && command_line.get() === '') {
-                        if (interpreters.size() > 1 || settings.login !== undefined) {
-                            self.pop('');
+                if (e.which == 68 && e.ctrlKey) {
+                    if (settings.exit) {
+                        if (command_line.get() === '') {
+                            if (interpreters.size() > 1 || settings.login !== undefined) {
+                                self.pop('');
+                            } else {
+                                self.resume();
+                                self.echo('');
+                            }
                         } else {
-                            self.resume();
-                            self.echo('');
+                            self.set_command('');
                         }
                     }
                     return false;
-                } else if (e.which == 118 && e.ctrlKey) { // CTRL+V
+                } else if (e.which == 86 && e.ctrlKey) { // CTRL+V
                     self.oneTime(1, function() {
                         scroll_to_bottom();
                     });
                     return true;
-                } else if (e.keyCode == 9 && e.ctrlKey) { // TAB
-                    self.focus(false);
-                } else if (e.keyCode == 34) { // PAGE DOWN
+                } else if (e.which == 9 && e.ctrlKey) { // CTRL+TAB
+                    if (terminals.length() > 1) {
+                        self.focus(false);
+                    }
+                    e.preventDefault();
+                } else if (e.which == 34) { // PAGE DOWN
                     self.scroll(self.height());
-                } else if (e.keyCode == 33) { // PAGE UP
+                } else if (e.which == 33) { // PAGE UP
                     self.scroll(-self.height());
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
             } else {
-                //this is not working - Keypress is not call when there is ajax requests - ???
-                if (e.which == 100 && e.ctrlKey) {
+                //this is not working - Keydown is not call when there is ajax requests - ???
+                if (e.which == 68 && e.ctrlKey) { // CTRL+D
                     for (var i=requests.length; i--;) {
                         var r = requests[i];
                         if (4 != r.readyState) {
@@ -2141,10 +2154,10 @@ function get_stack(caller) {
                 prompt: settings.prompt,
                 history: settings.history,
                 width: '100%',
-                keydown: settings.keydown ? function(e) {
-                    return settings.keydown(e, self);
+                keydown: key_down,
+                keypress: settings.keypress ? function(e) {
+                    return settings.keypress(e, self);
                 } : null,
-                keypress: key_press,
                 commands: commands
             });
             self.livequery(function() {
