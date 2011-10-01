@@ -56,5 +56,7 @@
     width: 100%;
     z-index: 1100;
 }
-              
+.clear {
+    clear: both;
+}
                     
