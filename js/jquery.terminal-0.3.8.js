@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.3.6
+ *|           \/              /____/                              version 0.3.8
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sun, 11 Sep 2011 20:28:31 +0000
+ * Date: Sat, 01 Oct 2011 15:03:28 +0000
  */
 
 /*
@@ -596,7 +596,7 @@ function get_stack(caller) {
             //str = str.replace(/sqrt\(([^\)]+)\)/g, "&radic;$1")
             //str = str.replace(/sum\(([^\)]+)\)/g, "&sum;$1");
             str = str.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
-            //support for formating foo[[u;;]bar]baz[[b;#fff;]quuz]zzz
+            //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
             var splited = str.split(format_split_re);
             if (splited.length > 1) {
                 str = $.map(splited, function(text) {
@@ -847,7 +847,6 @@ function get_stack(caller) {
         self.addClass('cmd');
         self.append('<span class="prompt"></span><span></span>' +
                     '<span class="cursor">&nbsp;</span><span></span>');
-
         var clip = $('<textarea/>').addClass('clipboard').appendTo(self);
         if (options.width) {
             self.width(options.width);
@@ -861,14 +860,12 @@ function get_stack(caller) {
         var prompt;
         var enabled = options.enabled;
         var name, history;
-        
-        var blink = (function() {
-            var cursor = self.find('.cursor');
-            return function(i) {
-                cursor.toggleClass('inverted');
-            };
-        })();
         var cursor = self.find('.cursor');
+        
+        function blink(i) {
+            cursor.toggleClass('inverted');
+        }
+        
         function change_num_chars() {
             var W = self.width();
             var w = cursor.innerWidth();
@@ -881,7 +878,6 @@ function get_stack(caller) {
             return [first].concat(str_parts(rest, num_chars));
         }
         var redraw = (function(self) {
-            var cursor = self.find('.cursor');
             var before = cursor.prev();
             var after = cursor.next();
             
@@ -916,7 +912,7 @@ function get_stack(caller) {
             function lines_after(lines) {
                 var last_ins = after;
                 $.each(lines, function(i, line) {
-                    last_ins = $(div(line)).insertAfter(last_ins);
+                    last_ins = $(div(line)).insertAfter(last_ins).addClass('clear');
                 });
             }
             function lines_before(lines) {
@@ -930,10 +926,37 @@ function get_stack(caller) {
                 self.find('div').remove();
                 before.html('');
                 // long line
-                if (string.length > num_chars - prompt_len - 1) {
-                    //cursor in first line
-                    var array = get_splited_command_line(string);
+                if (string.length > num_chars - prompt_len - 1 || string.match(/\n/)) {
+                    
+                    var array;
+                    // command contain new line characters
+                    if (string.match(/\n/)) {
+                        var tmp = string.split("\n");
+                        var first_len = num_chars - prompt_len - 1;
+                        // empty character after each line
+                        for (var i=0; i<tmp.length-1; ++i) {
+                            tmp[i] += ' ';
+                        }
+                        // split first line
+                        if (tmp[0].length > first_len) {
+                            array = [tmp[0].substring(0, first_len)]
+                            array = array.concat(str_parts(tmp[0].substring(first_len), num_chars));
+                        } else {
+                            array = [tmp[0]];
+                        }
+                        // process rest of the lines
+                        for (var i=1; i<tmp.length; ++i) {
+                            if (tmp[i].length > num_chars) {
+                                array = array.concat(str_parts(tmp[i], num_chars));
+                            } else {
+                                array.push(tmp[i]);
+                            }
+                        }
+                    } else {
+                        array = get_splited_command_line(string);
+                    }
                     var first_len = array[0].length;
+                    //cursor in first line
                     if (position < first_len) {
                         draw_cursor_line(array[0], position);
                         lines_after(array.slice(1));
@@ -941,7 +964,6 @@ function get_stack(caller) {
                         before.before(div(array[0]));
                         draw_cursor_line(array[1], 0);
                         lines_after(array.slice(2));
-                        
                     } else {
                         var num_lines = array.length;
                         var offset = 0;
@@ -955,9 +977,10 @@ function get_stack(caller) {
                         } else {
                             var last = array.slice(-1)[0];
                             var from_last = string.length - position;
+                            var pos = 0;
                             if (from_last <= last.length) {
                                 lines_before(array.slice(0, -1));
-                                var pos = last.length==from_last ? 0 : last.length-from_last;
+                                pos = last.length==from_last ? 0 : last.length-from_last;
                                 draw_cursor_line(last, pos);
                             } else {
                                 // in the middle
@@ -965,26 +988,29 @@ function get_stack(caller) {
                                     before.before('<div>' + encodeHTML(array[0]) +
                                                   '</div>');
                                     draw_cursor_line(array[1], position-first_len-1);
-                                    after.after('<div>' + encodeHTML(array[2]) +
+                                    after.after('<div class="clear">' + encodeHTML(array[2]) +
                                                 '</div>');
                                 } else {
-                                    // more lines cursor in the middle
-                                    var line_index = Math.floor((position+prompt_len) / num_chars);
-                                    var current = array[line_index];
-                                    var sum = (function(array) {
-                                        var sum = 0;
-                                        for (var i=array.length; i--;) {
-                                            sum += array[i].length;
+                                    // more lines, cursor in the middle
+                                    console && console.dir(array);
+                                    var line_index;
+                                    var current;
+                                    pos = position;
+                                    for (var i=0; i<array.length; ++i) {
+                                        if (pos > array[i].length) {
+                                            pos -= array[i].length;
+                                        } else {
+                                            break;
                                         }
-                                        return sum;
-                                    })(array.slice(0, line_index));
-                                    var pos = position-sum;
+                                    }
+                                    current = array[i];
+                                    line_index = i;
                                     // cursor on first character in line
-                                    if (pos == num_chars) {
+                                    if (pos == current.length) {
                                         pos = 0;
                                         current = array[++line_index];
                                     }
-                                    var before_str = encodeHTML(current.slice(0, pos));
+                                    
                                     draw_cursor_line(current, pos);
                                     lines_before(array.slice(0, line_index));
                                     lines_after(array.slice(line_index+1));
@@ -1036,7 +1062,7 @@ function get_stack(caller) {
             }
             if (enabled) {
                 var pos, len, result;
-                if (e.keyCode == 13) {
+                if (e.keyCode == 13) { // enter
                     if (history && command) {
                         history.append(command);
                     }
@@ -1088,9 +1114,11 @@ function get_stack(caller) {
                             --len;
                         }
                         for (var i = len; i > 0; --i) {
-                            if (command[i] == ' ' &&
-                                command[i + 1] != ' ') {
+                            if (command[i] == ' ' && command[i+1] != ' ') {
                                 pos = i + 1;
+                                break;
+                            } else if (command[i] == '\n' && command[i+1] != '\n') {
+                                pos = i;
                                 break;
                             }
                         }
@@ -1110,8 +1138,8 @@ function get_stack(caller) {
                         if (command[position] == ' ') {
                             ++position;
                         }
-                        var match = command.slice(position).match(/[^ ] {2,}| +[^ ]?/);
-                        if (!match || match[0].match(/^ +$/)) {
+                        var match = command.slice(position).match(/\S[\n\s]{2,}|[\n\s]+\S?/);
+                        if (!match || match[0].match(/^\s+$/)) {
                             position = command.length;
                         } else {
                             if (match[0][0] != ' ') {
@@ -1369,7 +1397,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.3.6';
+    var version = '0.3.8';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
