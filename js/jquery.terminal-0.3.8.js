@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sat, 01 Oct 2011 21:22:29 +0000
+ * Date: Sat, 01 Oct 2011 22:04:12 +0000
  */
 
 /*
@@ -1059,11 +1059,10 @@ function get_stack(caller) {
             });
         }
         function keydown_event(e) {
-            //console.log('keydown ' + e.which);
-            if (options.keydown && options.keydown(e) === false) {
-                return false;
-            }
             if (enabled) {
+                if (options.keydown && options.keydown(e) === false) {
+                    return false;
+                }
                 var pos, len, result;
                 if (e.keyCode == 13) { // enter
                     if (history && command) {
@@ -1089,8 +1088,8 @@ function get_stack(caller) {
                     }
                 } else if (e.which == 9 && !(e.ctrlKey || e.altKey)) { // TAB
                     self.insert('\t');
-                } else if (e.which == 46 || (e.which == 68 && e.ctrlKey)) { 
-                    //DELETE or CTRL+D
+                } else if (e.which == 46) { 
+                    //DELETE
                     if (command !== '' && position < command.length) {
                         command = command.slice(0, position) +
                             command.slice(position + 1, command.length);
@@ -1360,9 +1359,6 @@ function get_stack(caller) {
             } else {
                 return result;
             }
-            if (e.which == 100 && e.ctrlKey) {
-                return false;
-            }
         }).keydown(keydown_event);
         // characters
         return self;
@@ -1437,9 +1433,7 @@ function get_stack(caller) {
         var self = this;
         var lines = [];
         var output;
-        var terminal_id = (function() {
-            return terminals.length();
-        })();
+        var terminal_id = terminals.length();
         var num_chars; // numer of chars in line
         var settings = {
             name: null,
@@ -1464,8 +1458,6 @@ function get_stack(caller) {
             $.extend(settings, options);
         }
         var pause = !settings.enabled;
-        
-        
         if (self.length === 0) {
             throw 'Sorry, but terminal said that "' + self.selector +
                 '" is not valid selector';
@@ -2089,10 +2081,10 @@ function get_stack(caller) {
         }
         
         function key_down(e) {
-            if (settings.keydown && settings.keydown(e, self) === false) {
-                return false;
-            }
             if (!self.paused()) {
+                if (settings.keydown && settings.keydown(e, self) === false) {
+                    return false;
+                }
                 if (e.which == 68 && e.ctrlKey) { // CTRL+D
                     if (settings.exit) {
                         if (command_line.get() === '') {
@@ -2106,7 +2098,7 @@ function get_stack(caller) {
                             self.set_command('');
                         }
                     }
-                    return false;
+                    e.preventDefault();
                 } else if (e.which == 86 && e.ctrlKey) { // CTRL+V
                     self.oneTime(1, function() {
                         scroll_to_bottom();
@@ -2124,8 +2116,9 @@ function get_stack(caller) {
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
-            } else {
-                //this is not working - Keydown is not call when there is ajax requests - ???
+            }/* else {
+                // can't cancel ajax calls here - keydown is not firing when terminal is disabled
+                // and terminal is disabled when user call pause when calling ajax request
                 if (e.which == 68 && e.ctrlKey) { // CTRL+D
                     for (var i=requests.length; i--;) {
                         var r = requests[i];
@@ -2140,7 +2133,7 @@ function get_stack(caller) {
                     self.resume();
                     return false;
                 }
-            }
+            }*/
         }
         // INIT CODE
         if (valid('prompt', settings.prompt)) {
