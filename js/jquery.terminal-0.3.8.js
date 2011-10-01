@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sat, 01 Oct 2011 17:51:53 +0000
+ * Date: Sat, 01 Oct 2011 21:22:29 +0000
  */
 
 /*
@@ -2093,8 +2093,7 @@ function get_stack(caller) {
                 return false;
             }
             if (!self.paused()) {
-                // CTRL+D
-                if (e.which == 68 && e.ctrlKey) {
+                if (e.which == 68 && e.ctrlKey) { // CTRL+D
                     if (settings.exit) {
                         if (command_line.get() === '') {
                             if (interpreters.size() > 1 || settings.login !== undefined) {
@@ -2145,11 +2144,12 @@ function get_stack(caller) {
         }
         // INIT CODE
         if (valid('prompt', settings.prompt)) {
-            var interpreters = new Stack({'name': settings.name,
-                                          'eval': init_eval,
-                                          'prompt': settings.prompt,
-                                          'greetings': settings.greetings});
-
+            var interpreters = new Stack({
+                name: settings.name,
+                'eval': init_eval,
+                prompt: settings.prompt,
+                greetings: settings.greetings
+            });
             var command_line = self.find('.terminal-output').next().cmd({
                 prompt: settings.prompt,
                 history: settings.history,
