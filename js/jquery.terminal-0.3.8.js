@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sat, 01 Oct 2011 15:03:28 +0000
+ * Date: Sat, 01 Oct 2011 16:54:01 +0000
  */
 
 /*
@@ -1102,8 +1102,6 @@ function get_stack(caller) {
                            (e.which == 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
                     self.set(history.next());
-                } else if (e.which == 27) { //escape
-                    self.set('');
                 } else if (e.which == 37 ||
                            (e.which == 66 && e.ctrlKey)) {
                     //CTRL+LEFT ARROW or CTRL+B
@@ -1196,6 +1194,8 @@ function get_stack(caller) {
                             } else if (position != command.length) {
                                 self.set(command.slice(0, position));
                             }
+                        } else if (e.which == 85) { // CTRL+U
+                            self.set('');
                         } else if (e.which == 17) { //CTRL+TAB switch tab
                             return true;
                         }
