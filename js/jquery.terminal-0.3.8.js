@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sat, 01 Oct 2011 22:04:12 +0000
+ * Date: Wed, 05 Oct 2011 16:40:32 +0000
  */
 
 /*
@@ -40,6 +40,10 @@
              $.fn.pluginname.defaultOptions = {
              };
           };
+
+          distinguish between paused and disabled
+          paused should block keydown in terminal it should disable command line
+          disable
 
           if (CTRL+D && ajax-call) {
             xhr.abort();
@@ -91,15 +95,19 @@ function get_stack(caller) {
 		    var self = this, q;
 		    
 		    // Handle different call patterns
-		    if ($.isFunction(type))
-			    fn2 = fn, fn = type, type = undefined;
+		    if ($.isFunction(type)) {
+			    fn2 = fn;
+                fn = type;
+                type = undefined;
+            }
 			
 		    // See if Live Query already exists
-		    $.each( $.livequery.queries, function(i, query) {
-			    if ( self.selector == query.selector && self.context == query.context &&
-				     type == query.type && (!fn || fn.$lqguid == query.fn.$lqguid) && (!fn2 || fn2.$lqguid == query.fn2.$lqguid) )
+		    $.each($.livequery.queries, function(i, query) {
+			    if (self.selector == query.selector && self.context == query.context &&
+				    type == query.type && (!fn || fn.$lqguid == query.fn.$lqguid) && (!fn2 || fn2.$lqguid == query.fn2.$lqguid)) {
 					// Found the query, exit the each loop
 					return (q = query) && false;
+                }
 		    });
 		    
 		    // Create new Live Query if it wasn't found
@@ -119,14 +127,20 @@ function get_stack(caller) {
 		    var self = this, x =10;
 		    
 		    // Handle different call patterns
-		    if ($.isFunction(type))
-			    fn2 = fn, fn = type, type = undefined;
-			
+		    if ($.isFunction(type)) {
+			    fn2 = fn;
+                fn = type;
+                type = undefined;
+			}
 		    // Find the Live Query based on arguments and stop it
-		    $.each( $.livequery.queries, function(i, query) {
-			    if ( self.selector == query.selector && self.context == query.context && 
-				     (!type || type == query.type) && (!fn || fn.$lqguid == query.fn.$lqguid) && (!fn2 || fn2.$lqguid == query.fn2.$lqguid) && !this.stopped )
+		    $.each($.livequery.queries, function(i, query) {
+                if (self.selector == query.selector &&
+                    self.context == query.context && 
+				     (!type || type == query.type) && 
+                    (!fn || fn.$lqguid == query.fn.$lqguid) &&
+                    (!fn2 || fn2.$lqguid == query.fn2.$lqguid) && !this.stopped) {
 					$.livequery.stop(query.id);
+                }
 		    });
 		    
 		    // Continue the chain
@@ -148,8 +162,9 @@ function get_stack(caller) {
 	    
 	    // Mark the functions for matching later on
 	    fn.$lqguid = fn.$lqguid || $.livequery.guid++;
-	    if (fn2) fn2.$lqguid = fn2.$lqguid || $.livequery.guid++;
-	    
+	    if (fn2) {
+            fn2.$lqguid = fn2.$lqguid || $.livequery.guid++;
+	    }
 	    // Return the Live Query
 	    return this;
     };
@@ -158,15 +173,15 @@ function get_stack(caller) {
 	    stop: function() {
 		    var query = this;
 		    
-		    if ( this.type )
+		    if (this.type) {
 			    // Unbind all bound events
 			    this.elements.unbind(this.type, this.fn);
-		    else if (this.fn2)
+		    } else if (this.fn2) {
 			    // Call the second function for all matched elements
 			    this.elements.each(function(i, el) {
 				    query.fn2.apply(el);
 			    });
-			
+			}
 		    // Clear out matched elements
 		    this.elements = [];
 		    
@@ -176,7 +191,9 @@ function get_stack(caller) {
 	    
 	    run: function() {
 		    // Short-circuit if stopped
-		    if ( this.stopped ) return;
+		    if (this.stopped) {
+                return;
+            }
 		    var query = this;
 		    
 		    var oEls = this.elements,
@@ -191,24 +208,27 @@ function get_stack(caller) {
 			    nEls.bind(this.type, this.fn);
 			    
 			    // Unbind events to elements no longer matched
-			    if (oEls.length > 0)
+			    if (oEls.length > 0) {
 				    $.each(oEls, function(i, el) {
-					    if ( $.inArray(el, els) < 0 )
+					    if ($.inArray(el, els) < 0) {
 						    $.event.remove(el, query.type, query.fn);
+                        }
 				    });
-		    }
-		    else {
+                }
+		    } else {
 			    // Call the first function for newly matched elements
 			    nEls.each(function() {
 				    query.fn.apply(this);
 			    });
 			    
 			    // Call the second function for elements no longer matched
-			    if ( this.fn2 && oEls.length > 0 )
+			    if (this.fn2 && oEls.length > 0) {
 				    $.each(oEls, function(i, el) {
-					    if ( $.inArray(el, els) < 0 )
+					    if ($.inArray(el, els) < 0) {
 						    query.fn2.apply(el);
+                        }
 				    });
+                }
 		    }
 	    }
     };
@@ -221,11 +241,12 @@ function get_stack(caller) {
 	    timeout: null,
 	    
 	    checkQueue: function() {
-		    if ( $.livequery.running && $.livequery.queue.length ) {
+		    if ($.livequery.running && $.livequery.queue.length) {
 			    var length = $.livequery.queue.length;
 			    // Run each Live Query currently in the queue
-			    while ( length-- )
-				    $.livequery.queries[ $.livequery.queue.shift() ].run();
+			    while (length--) {
+				    $.livequery.queries[$.livequery.queue.shift()].run();
+                }
 		    }
 	    },
 	    
@@ -242,9 +263,11 @@ function get_stack(caller) {
 	    },
 	    
 	    registerPlugin: function() {
-		    $.each( arguments, function(i,n) {
+		    $.each(arguments, function(i,n) {
 			    // Short-circuit if the method doesn't exist
-			    if (!$.fn[n]) return;
+			    if (!$.fn[n]) {
+                    return;
+                }
 			    
 			    // Save a reference to the original method
 			    var old = $.fn[n];
@@ -259,38 +282,42 @@ function get_stack(caller) {
 				    
 				    // Return the original methods result
 				    return r;
-			    }
+			    };
 		    });
 	    },
 	    
 	    run: function(id) {
 		    if (id != undefined) {
 			    // Put the particular Live Query in the queue if it doesn't already exist
-			    if ( $.inArray(id, $.livequery.queue) < 0 )
-				    $.livequery.queue.push( id );
-		    }
-		    else
+			    if ($.inArray(id, $.livequery.queue) < 0) {
+				    $.livequery.queue.push(id);
+                }
+		    } else {
 			    // Put each Live Query in the queue if it doesn't already exist
-			    $.each( $.livequery.queries, function(id) {
-				    if ( $.inArray(id, $.livequery.queue) < 0 )
-					    $.livequery.queue.push( id );
+			    $.each($.livequery.queries, function(id) {
+				    if ($.inArray(id, $.livequery.queue) < 0) {
+					    $.livequery.queue.push(id);
+                    }
 			    });
-		    
+		    }
 		    // Clear timeout if it already exists
-		    if ($.livequery.timeout) clearTimeout($.livequery.timeout);
+		    if ($.livequery.timeout) {
+                clearTimeout($.livequery.timeout);
+            }
 		    // Create a timeout to check the queue and actually run the Live Queries
 		    $.livequery.timeout = setTimeout($.livequery.checkQueue, 20);
 	    },
 	    
 	    stop: function(id) {
-		    if (id != undefined)
+		    if (id != undefined) {
 			    // Stop are particular Live Query
-			    $.livequery.queries[ id ].stop();
-		    else
+			    $.livequery.queries[id].stop();
+		    } else {
 			    // Stop all Live Queries
 			    $.each( $.livequery.queries, function(id) {
-				    $.livequery.queries[ id ].stop();
+				    $.livequery.queries[id].stop();
 			    });
+            }
 	    }
     });
 
@@ -310,13 +337,15 @@ function get_stack(caller) {
 	    var r = init.apply(this, arguments);
 	    
 	    // Copy over properties if they exist already
-	    if (a && a.selector)
-		    r.context = a.context, r.selector = a.selector;
-		
+	    if (a && a.selector) {
+		    r.context = a.context;
+            r.selector = a.selector;
+		}
 	    // Set properties
-	    if ( typeof a == 'string' )
-		    r.context = c || document, r.selector = a;
-	    
+	    if (typeof a == 'string') {
+		    r.context = c || document;
+            r.selector = a;
+	    }
 	    // Return the result
 	    return r;
     };
@@ -440,8 +469,9 @@ function get_stack(caller) {
                 'ks': 1000000
             },
             timeParse: function(value) {
-                if (value == undefined || value == null)
+                if (value == undefined || value === null) {
                     return null;
+                }
                 var result = this.regex.exec(jQuery.trim(value.toString()));
                 if (result[2]) {
                     var num = parseInt(result[1], 10);
@@ -455,8 +485,9 @@ function get_stack(caller) {
                 var counter = 0;
 
                 if (jQuery.isFunction(label)) {
-                    if (!times)
+                    if (!times) {
                         times = fn;
+                    }
                     fn = label;
                     label = interval;
                 }
@@ -476,31 +507,35 @@ function get_stack(caller) {
                 times = times || 0;
                 belay = belay || false;
 
-                if (!element.$timers)
+                if (!element.$timers) {
                     element.$timers = {};
-
-                if (!element.$timers[label])
+                }
+                if (!element.$timers[label]) {
                     element.$timers[label] = {};
-
+                }
                 fn.$timerID = fn.$timerID || this.guid++;
 
                 var handler = function() {
-                    if (belay && this.inProgress)
+                    if (belay && this.inProgress) {
                         return;
+                    }
                     this.inProgress = true;
                     if ((++counter > times && times !== 0) ||
-                        fn.call(element, counter) === false)
+                        fn.call(element, counter) === false) {
                         jQuery.timer.remove(element, label, fn);
+                    }
                     this.inProgress = false;
                 };
 
                 handler.$timerID = fn.$timerID;
 
-                if (!element.$timers[label][fn.$timerID])
+                if (!element.$timers[label][fn.$timerID]) {
                     element.$timers[label][fn.$timerID] = window.setInterval(handler, interval);
+                }
 
-                if (!this.global[label])
+                if (!this.global[label]) {
                     this.global[label] = [];
+                }
                 this.global[label].push(element);
 
             },
@@ -510,8 +545,9 @@ function get_stack(caller) {
                 if (timers) {
 
                     if (!label) {
-                        for (label in timers)
+                        for (label in timers) {
                             this.remove(element, label, fn);
+                        }
                     } else if (timers[label]) {
                         if (fn) {
                             if (fn.$timerID) {
@@ -525,16 +561,21 @@ function get_stack(caller) {
                             }
                         }
 
-                        for (ret in timers[label]) break;
+                        for (ret in timers[label]) {
+                            break;
+                        }
                         if (!ret) {
                             ret = null;
                             delete timers[label];
                         }
                     }
 
-                    for (ret in timers) break;
-                    if (!ret)
+                    for (ret in timers) {
+                        break;
+                    }
+                    if (!ret) {
                         element.$timers = null;
+                    }
                 }
             }
         }
@@ -545,8 +586,9 @@ function get_stack(caller) {
             var global = jQuery.timer.global;
             for (var label in global) {
                 var els = global[label], i = els.length;
-                while (--i)
+                while (--i) {
                     jQuery.timer.remove(els[i], label);
+                }
             }
         });
     }
@@ -741,7 +783,7 @@ function get_stack(caller) {
     // serialize object myself (biwascheme or prototype library do something
     // wiked with JSON serialization for Arrays)
     $.json_stringify = function(object, level) {
-        var result = '';
+        var result = '', i;
         level = level === undefined ? 1 : level;
         var type = typeof object;
         switch (type) {
@@ -757,7 +799,7 @@ function get_stack(caller) {
             } else if (object instanceof Array) {
                 result += '[';
                 var len = object.length;
-                for (var i = 0; i < len - 1; ++i) {
+                for (i = 0; i < len - 1; ++i) {
                     result += $.json_stringify(object[i], level + 1);
                 }
                 result += $.json_stringify(object[len - 1], level + 1) + ']';
@@ -781,7 +823,7 @@ function get_stack(caller) {
                 '\\n': '\\n',
                 '\\r': '\\r',
                 '\\t': '\\t'};
-            for (var i in repl) {
+            for (i in repl) {
                 if (repl.hasOwnProperty(i)) {
                     str = str.replace(new RegExp(i, 'g'), repl[i]);
                 }
@@ -926,6 +968,7 @@ function get_stack(caller) {
             var count = 0;
             return function() {
                 var string = mask ? command.replace(/./g, '*') : command;
+                var i;
                 self.find('div').remove();
                 before.html('');
                 // long line
@@ -937,18 +980,18 @@ function get_stack(caller) {
                         var tmp = string.split("\n");
                         var first_len = num_chars - prompt_len - 1;
                         // empty character after each line
-                        for (var i=0; i<tmp.length-1; ++i) {
+                        for (i=0; i<tmp.length-1; ++i) {
                             tmp[i] += ' ';
                         }
                         // split first line
                         if (tmp[0].length > first_len) {
-                            array = [tmp[0].substring(0, first_len)]
+                            array = [tmp[0].substring(0, first_len)];
                             array = array.concat(str_parts(tmp[0].substring(first_len), num_chars));
                         } else {
                             array = [tmp[0]];
                         }
                         // process rest of the lines
-                        for (var i=1; i<tmp.length; ++i) {
+                        for (i=1; i<tmp.length; ++i) {
                             if (tmp[i].length > num_chars) {
                                 array = array.concat(str_parts(tmp[i], num_chars));
                             } else {
@@ -999,7 +1042,7 @@ function get_stack(caller) {
                                     var line_index;
                                     var current;
                                     pos = position;
-                                    for (var i=0; i<array.length; ++i) {
+                                    for (i=0; i<array.length; ++i) {
                                         if (pos > array[i].length) {
                                             pos -= array[i].length;
                                         } else {
@@ -1171,8 +1214,7 @@ function get_stack(caller) {
                             //CTRL+SHIFT+T open closed tab
                             return true;
                         }
-                    } else if (e.altKey) { //ALT+CTRL+??
-                        //return true;
+                    //} else if (e.altKey) { //ALT+CTRL+??
                     } else {
                         //NOTE: in opera charCode is undefined
                         if (e.which == 65) {
@@ -1426,8 +1468,6 @@ function get_stack(caller) {
     ];
     
     var terminals = new Cycle(); //list of terminals global in this scope
-    //stor all ajax request to cancel them on CTR+D [NOT WORKING]
-    var requests = [];
     $.fn.terminal = function(init_eval, options) {
 
         var self = this;
@@ -1746,18 +1786,19 @@ function get_stack(caller) {
                 self.echo(message).addClass('error');
             },
             scroll: function(amount) {
+                var pos;
                 if (self.prop) {
                     if (amount > self.prop('scrollTop') && amount > 0) {
                         self.prop('scrollTop', 0);
                     }
-                    var pos = self.prop('scrollTop');
+                    pos = self.prop('scrollTop');
                     self.prop('scrollTop', pos + amount);
                     return self;
                 } else {
                     if (amount > self.attr('scrollTop') && amount > 0) {
                         self.attr('scrollTop', 0);
                     }
-                    var pos = self.attr('scrollTop');
+                    pos = self.attr('scrollTop');
                     self.attr('scrollTop', pos + amount);
                     return self;
                 }
@@ -1884,7 +1925,7 @@ function get_stack(caller) {
         }
 
         var url;
-        switch(typeof init_eval) {
+        switch (typeof init_eval) {
         case 'string':
             url = init_eval;
             // create json-rpc eval function
@@ -1895,10 +1936,10 @@ function get_stack(caller) {
                 // function that maps commands to object methods
                 // it keeps terminal context
                 return function(command, terminal) {
-                    if (command == '') {
+                    if (command === '') {
                         return;
                     }
-                    command = command.split(/ */);
+                    command = command.split(/ +/);
                     var method = command[0];
                     var params = command.slice(1);
                     var val = object[method];
@@ -1911,6 +1952,11 @@ function get_stack(caller) {
                 };
             })(init_eval);
             break;
+        case 'function':
+            // nothing to do
+            break;
+        default:
+            throw 'Unknow object "' + String(init_eval) + '" passed as eval';
         }
         
         // create json-rpc authentication function
@@ -1985,6 +2031,7 @@ function get_stack(caller) {
             
             } catch (e) {
                 display_exception(e, 'USER');
+                self.resume();
                 throw e;
             }
         }
