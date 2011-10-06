@@ -1,3 +1,6 @@
+0.4       fix text formating when text splited into more then one line
+          you can pass nested objects as first argument
+          add tab completion with object passed as first argument
 0.3.8     fix cursor manipulation when command contain new line characters
 0.3.7     fix function terminal.login_name
 0.3.6     fix switch between terminals - when terminal is not visible scroll to current terminal

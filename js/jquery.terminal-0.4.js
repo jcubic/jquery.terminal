@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.3.8
+ *|           \/              /____/                              version 0.4
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Wed, 05 Oct 2011 16:40:32 +0000
+ * Date: Thu, 06 Oct 2011 19:52:56 +0000
  */
 
 /*
@@ -322,7 +322,9 @@ function get_stack(caller) {
     });
 
     // Register core DOM manipulation methods
-    $.livequery.registerPlugin('append', 'prepend', 'after', 'before', 'wrap', 'attr', 'removeAttr', 'addClass', 'removeClass', 'toggleClass', 'empty', 'remove');
+    $.livequery.registerPlugin('append', 'prepend', 'after', 'before', 'wrap',
+                               'attr', 'removeAttr', 'addClass', 'removeClass',
+                               'toggleClass', 'empty', 'remove');
 
     // Run Live Queries when the Document is ready
     $(function() { $.livequery.play(); });
@@ -625,7 +627,6 @@ function get_stack(caller) {
     var format_split_re = /(\[\[[biu]*;[^;]*;[^\]]*\][^\]]*\])/g;
     // this capture elements
     var format_re = /\[\[([biu]*);([^;]*);([^\]]*)\]([^\]]*)\]/g;
-    //var format_re = /\[\[([biu]*);([^;]*);([^\]]*)\]([^\[][^\]]*|\[[^\]]*\][^\]]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     function encodeHTML(str) {
         if (typeof str == 'string') {
@@ -633,10 +634,6 @@ function get_stack(caller) {
             str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             str = str.replace(/\n/g, '<br/>'); // I don't think that it find this
             str = str.replace(/ /g, '&nbsp;');
-            //str = str.replace(/---/g, '&mdash;');
-            //str = str.replace(/\.\.\./g, '&hellip;');
-            //str = str.replace(/sqrt\(([^\)]+)\)/g, "&radic;$1")
-            //str = str.replace(/sum\(([^\)]+)\)/g, "&sum;$1");
             str = str.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
             //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
             var splited = str.split(format_split_re);
@@ -752,7 +749,8 @@ function get_stack(caller) {
             append: function(item) {
                 data.push(item);
                 this.reset();
-            }});
+            }
+        });
     }
     // -----------------------------------------------------------------------
     // :: STACK DATA STRUCTURE
@@ -778,7 +776,8 @@ function get_stack(caller) {
             },
             top: function() {
                 return data.length > 0 ? data[data.length - 1] : null;
-            }});
+            }
+        });
     }
     // serialize object myself (biwascheme or prototype library do something
     // wiked with JSON serialization for Arrays)
@@ -1408,27 +1407,18 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
-    var requests = [];
     
     $.jrpc = function(url, id, method, params, success, error) {
         var request = $.json_stringify({
            'jsonrpc': '2.0', 'method': method,
             'params': params, 'id': id});
-        //terminals.front().echo(request);
         return $.ajax({
             url: url,
             data: request,
-            /*success: function(response) {
-            terminals.front().echo(JSON.stringify(response));
-            success(response);
-            },*/
             success: success,
             error: error,
             contentType: 'application/json',
             dataType: 'json',
-            beforeSend: function(jqXHR, settings) {
-                requests.push(jqXHR);
-            },
             async: true,
             cache: false,
             //timeout: 1,
@@ -1438,7 +1428,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.3.8';
+    var version = '0.4';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1466,23 +1456,25 @@ function get_stack(caller) {
          version_string,
          copyright]
     ];
-    
+    // for canceling on CTRL+D
+    var requests = [];
     var terminals = new Cycle(); //list of terminals global in this scope
     $.fn.terminal = function(init_eval, options) {
-
         var self = this;
         var lines = [];
         var output;
         var terminal_id = terminals.length();
         var num_chars; // numer of chars in line
+        var command_list = []; // for tab completion
         var settings = {
-            name: null,
+            name: '',
             prompt: '>',
             history: true,
             exit: true,
             clear: true,
             enabled: true,
             login: null,
+            tabcompletion: false,
             onInit: null,
             onExit: null,
             keypress: null,
@@ -1522,18 +1514,26 @@ function get_stack(caller) {
         
         // display Exception on terminal
         function display_exception(e, label) {
+            var message;
             if (typeof e == 'string') {
-                self.error('&#91;' + label + '&#93;: ' + e)
+                message = e;
             } else {
+                message = e.fileName + ': ' + e.message;
+            }
+            self.error('&#91;' + label + '&#93;: ' + message.replace(/\[/g, '&#91;').
+                       replace(/\]/g, '&#93;'));
+            
+            self.pause();
+            if (typeof e.fileName == 'string') {
                 //display filename and line which throw exeption
-                self.error('&#91;' + label + '&#93;: ' + e.fileName + ': ' +
-                           e.message);
-                self.pause();
                 $.get(e.fileName, function(file) {
                     self.resume();
                     var num = e.lineNumber - 1;
-                    self.error('&#91;' + e.lineNumber + '&#93;: ' +
-                               file.split('\n')[num]);
+                    var line = file.split('\n')[num];
+                    if (line) {
+                        var msg = line.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
+                        self.error('&#91;' + e.lineNumber + '&#93;: ' + msg);
+                    }
                 });
             }
         }
@@ -1564,10 +1564,17 @@ function get_stack(caller) {
             self.scrollTop(scrollHeight);
         }
         function draw_line(string) {
-             var string = typeof string == 'string' ?
-                string : String(string);
+            string = typeof string == 'string' ? string : String(string);
             var div;
             if (string.length > num_chars) {
+                // check if formating splits into two lines
+                /*if (format_re.test(string)) {
+                    var matched = string.match(format_re);
+                    for (var i=matched.length; i--;) {
+                        var idx = string.search(matched[i])
+                        matched[i]
+                    }
+                }*/
                 // string can have line break
                 var array = string.split('\n');
                 div = $('<div></div>');
@@ -1579,6 +1586,31 @@ function get_stack(caller) {
                         // if line is longer then width
                         if (array[i].length > num_chars) {
                             var parts = str_parts(array[i], num_chars);
+                            
+                            // TODO: move this to str_parts -> str_parts_formatting
+                            // search for formating splitted into lines
+                            for (var i=0,len=parts.length; i<len; ++i) {
+                                var re = /\[\[[biu]*;[^;]*;[^\]]*\]/;
+                                var format = parts[i].match(re);
+                                var found = false;
+                                if (format && !parts[i].match(format_split_re)) {
+                                    for (var j=i+1; j<len; ++j) {
+                                        if (parts[j].match(/\]/)) {
+                                            for (var k=i+1; k<=j; ++k) {
+                                                //console.log(k+' "'+parts[k]+'"');
+                                                re = /^\[\[[biu]*;[^;]*;[^\]]*\]/;
+                                                if (!parts[k].match(re)) {
+                                                    parts[k] = format[0] + parts[k];
+                                                }
+                                            }
+                                            break;
+                                        }
+                                        
+                                    }
+                                    parts[i] += ']';
+                                }
+                            }
+                            
                             $.each(parts, function(i, string) {
                                 $('<div/>').html(encodeHTML(string)).
                                     appendTo(div);
@@ -1597,6 +1629,7 @@ function get_stack(caller) {
             scroll_to_bottom();
             return div;
         }
+        
         function show_greetings() {
             if (options.greetings === undefined) {
                 self.echo(self.signature);
@@ -1604,7 +1637,8 @@ function get_stack(caller) {
                 self.echo(options.greetings);
             }
         }
-        function isScrolledIntoView(elem) {
+        
+        function is_scrolled_into_view(elem) {
             var docViewTop = $(window).scrollTop();
             var docViewBottom = docViewTop + $(window).height();
             
@@ -1662,7 +1696,7 @@ function get_stack(caller) {
                     var offsetTop = self.offset().top;
                     var height = self.height();
                     var scrollTop = self.scrollTop();
-                    if (!isScrolledIntoView(self)) {
+                    if (!is_scrolled_into_view(self)) {
                         self.enable();
                         $('html,body').animate({scrollTop: offsetTop-50}, 500);
                         return self;
@@ -1783,7 +1817,8 @@ function get_stack(caller) {
                 return draw_line(typeof line == 'function' ? line() : line);
             },
             error: function(message) {
-                self.echo(message).addClass('error');
+                //echo red message
+                self.echo('[[;#f00;]' + message + ']');
             },
             scroll: function(amount) {
                 var pos;
@@ -1830,14 +1865,6 @@ function get_stack(caller) {
                         _eval = make_json_rpc_eval_fun(ueval, self);
                     }
                     interpreters.push($.extend({'eval': _eval}, options));
-                    /*
-                        name: options.name,
-                        'eval': _eval,
-                        prompt: options.prompt,
-                        login: options.login,
-                        greetings: options.grettings,
-                        onStart: options.onStart,
-                        onExit: options.onExit});*/
                     prepare_top_interpreter();
                 }
                 return self;
@@ -1923,70 +1950,7 @@ function get_stack(caller) {
                 }
             };
         }
-
-        var url;
-        switch (typeof init_eval) {
-        case 'string':
-            url = init_eval;
-            // create json-rpc eval function
-            init_eval = make_json_rpc_eval_fun(init_eval, self);
-            break;
-        case 'object':
-            init_eval = (function(object) {
-                // function that maps commands to object methods
-                // it keeps terminal context
-                return function(command, terminal) {
-                    if (command === '') {
-                        return;
-                    }
-                    command = command.split(/ +/);
-                    var method = command[0];
-                    var params = command.slice(1);
-                    var val = object[method];
-                    if (typeof val == 'function') {
-                        val.apply(self, params);
-                    } else {
-                        self.echo("Command '" + method + "' Not Found");
-                    }
-                        
-                };
-            })(init_eval);
-            break;
-        case 'function':
-            // nothing to do
-            break;
-        default:
-            throw 'Unknow object "' + String(init_eval) + '" passed as eval';
-        }
         
-        // create json-rpc authentication function
-        if (url && typeof settings.login == 'string' || url) {
-            settings.login = (function(method) {
-                var id = 1;
-                return function(user, passwd, callback) {
-                    self.pause();
-                    $.jrpc(url,
-                           id++,
-                           method,
-                           [user, passwd],
-                           function(response) {
-                               
-                               self.resume();
-                               if (!response.error && response.result) {
-                                   callback(response.result);
-                               } else {
-                                   callback(null);
-                               }
-                           }, function(xhr, status, error) {
-                               self.resume();
-                               self.error('&#91;AJAX&#92; Response: ' +
-                                          status + '\n' +
-                                          xhr.responseText);
-                           });
-                };
-                //default name is login so you can pass true
-            })(typeof settings.login == 'boolean' ? 'login' : settings.login);
-        }
 
         //display prompt and last command
         function echo_command(command) {
@@ -2031,6 +1995,7 @@ function get_stack(caller) {
             
             } catch (e) {
                 display_exception(e, 'USER');
+                console.log(e.stack);
                 self.resume();
                 throw e;
             }
@@ -2098,7 +2063,6 @@ function get_stack(caller) {
             login();
         }
 
-
         //function enable history, set prompt, run eval function
         function prepare_top_interpreter() {
             var interpreter = interpreters.top();
@@ -2126,11 +2090,14 @@ function get_stack(caller) {
                 settings.onInit(self);
             }
         }
-        
+        var tab_count = 0;
         function key_down(e) {
             if (!self.paused()) {
                 if (settings.keydown && settings.keydown(e, self) === false) {
                     return false;
+                }
+                if (e.which != 9) { // not a TAB
+                    tab_count = 0;
                 }
                 if (e.which == 68 && e.ctrlKey) { // CTRL+D
                     if (settings.exit) {
@@ -2146,6 +2113,28 @@ function get_stack(caller) {
                         }
                     }
                     e.preventDefault();
+                } else if (settings.tabcompletion && e.which == 9) { // TAB
+                    ++tab_count;
+                    var command = command_line.get();
+                    if (!command.match(' ')) { // complete only first word
+                        var reg = new RegExp('^' + command);
+                        var commands = interpreters.top().command_list;
+                        var matched = [];
+                        for (var i=commands.length; i--;) {
+                            if (reg.test(commands[i])) {
+                                matched.push(commands[i]);
+                            }
+                        }
+                        if (matched.length == 1) {
+                            self.set_command(matched[0]);
+                        } else if (matched.length > 1) {
+                            if (tab_count >= 2) {
+                                echo_command(command);
+                                self.echo(matched.join('\t'));
+                            }
+                        }
+                    }
+                    return false;
                 } else if (e.which == 86 && e.ctrlKey) { // CTRL+V
                     self.oneTime(1, function() {
                         scroll_to_bottom();
@@ -2182,12 +2171,96 @@ function get_stack(caller) {
                 }
             }*/
         }
+        
         // INIT CODE
+        var url;
+        switch (typeof init_eval) {
+        case 'string':
+            url = init_eval;
+            // create json-rpc eval function
+            init_eval = make_json_rpc_eval_fun(init_eval, self);
+            break;
+        case 'object':
+            // top commands
+            for (var i in init_eval) {
+                command_list.push(i);
+            }
+            init_eval = (function make_eval(object) {
+                //
+                // function that maps commands to object methods
+                // it keeps terminal context
+                return function(command, terminal) {
+                    if (command === '') {
+                        return;
+                    }
+                    command = command.split(/ +/);
+                    var method = command[0];
+                    var params = command.slice(1);
+                    var val = object[method];
+                    var type = typeof val;
+                    if (type == 'function') {
+                        val.apply(self, params);
+                    } else if (type == 'object' || type == 'string') {
+                        var commands = [];
+                        if (type == 'object') {
+                            for (var m in val) {
+                                commands.push(m);
+                            }
+                            val = make_eval(val);
+                        }
+                        self.push(val, {
+                            prompt: method + '>',
+                            name: method,
+                            command_list: commands
+                        });
+                    } else {
+                        self.echo("[[;#f00;]Command '" + method + "' Not Found]");
+                    }
+                };
+            })(init_eval);
+            break;
+        case 'function':
+            // skip
+            break;
+        default:
+            throw 'Unknow object "' + String(init_eval) + '" passed as eval';
+        }
+        
+        // create json-rpc authentication function
+        if (url && typeof settings.login == 'string' || url) {
+            settings.login = (function(method) {
+                var id = 1;
+                return function(user, passwd, callback) {
+                    self.pause();
+                    $.jrpc(url,
+                           id++,
+                           method,
+                           [user, passwd],
+                           function(response) {
+                               
+                               self.resume();
+                               if (!response.error && response.result) {
+                                   callback(response.result);
+                               } else {
+                                   callback(null);
+                               }
+                           }, function(xhr, status, error) {
+                               self.resume();
+                               self.error('&#91;AJAX&#92; Response: ' +
+                                          status + '\n' +
+                                          xhr.responseText);
+                           });
+                };
+                //default name is login so you can pass true
+            })(typeof settings.login == 'boolean' ? 'login' : settings.login);
+        }
+        
         if (valid('prompt', settings.prompt)) {
             var interpreters = new Stack({
                 name: settings.name,
                 'eval': init_eval,
                 prompt: settings.prompt,
+                command_list: command_list,
                 greetings: settings.greetings
             });
             var command_line = self.find('.terminal-output').next().cmd({
