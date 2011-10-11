@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4
+ *|           \/              /____/                              version 0.4.1
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Thu, 06 Oct 2011 19:52:56 +0000
+ * Date: Tue, 11 Oct 2011 18:39:26 +0000
  */
 
 /*
@@ -621,18 +621,18 @@ function get_stack(caller) {
         }
         return result;
     }
-    // -----------------------------------------------------------------------
-    //bar</span>baz
     
-    var format_split_re = /(\[\[[biu]*;[^;]*;[^\]]*\][^\]]*\])/g;
-    // this capture elements
-    var format_re = /\[\[([biu]*);([^;]*);([^\]]*)\]([^\]]*)\]/g;
+    
+    // -----------------------------------------------------------------------
+    var format_split_re = /(\[\[[biu]*;[^;]*;[^\]]*\][^\]\[]*\])/g;
+    var format_re = /\[\[([biu]*);([^;]*);([^\]]*)\]([^\]\[]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     function encodeHTML(str) {
         if (typeof str == 'string') {
             str = str.replace(/&(?!#[0-9]*;)/g, '&amp;');
             str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            str = str.replace(/\n/g, '<br/>'); // I don't think that it find this
+            // I don't think that it find \n
+            str = str.replace(/\n/g, '<br/>');
             str = str.replace(/ /g, '&nbsp;');
             str = str.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
             //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
@@ -982,6 +982,7 @@ function get_stack(caller) {
                         for (i=0; i<tmp.length-1; ++i) {
                             tmp[i] += ' ';
                         }
+                        
                         // split first line
                         if (tmp[0].length > first_len) {
                             array = [tmp[0].substring(0, first_len)];
@@ -1037,7 +1038,6 @@ function get_stack(caller) {
                                                 '</div>');
                                 } else {
                                     // more lines, cursor in the middle
-                                    console && console.dir(array);
                                     var line_index;
                                     var current;
                                     pos = position;
@@ -1106,7 +1106,7 @@ function get_stack(caller) {
                     return false;
                 }
                 var pos, len, result;
-                if (e.keyCode == 13) { // enter
+                if (e.keyCode == 13) { //enter
                     if (history && command) {
                         history.append(command);
                     }
@@ -1428,7 +1428,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4';
+    var version = '0.4.1';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1492,12 +1492,13 @@ function get_stack(caller) {
         var pause = !settings.enabled;
         if (self.length === 0) {
             throw 'Sorry, but terminal said that "' + self.selector +
-                '" is not valid selector';
+                '" is not valid selector!';
         }
         // register ajaxSend for cancel requests on CTRL+D
         self.ajaxSend(function(e, xhr, opt) {
             requests.push(xhr);
         });
+        // terminal already exist
         if (self.data('terminal')) {
             return self.data('terminal');
         }
@@ -1512,6 +1513,10 @@ function get_stack(caller) {
             return result;
         }
         
+        function escape_brackets(string) {
+            return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
+        }
+        
         // display Exception on terminal
         function display_exception(e, label) {
             var message;
@@ -1520,9 +1525,7 @@ function get_stack(caller) {
             } else {
                 message = e.fileName + ': ' + e.message;
             }
-            self.error('&#91;' + label + '&#93;: ' + message.replace(/\[/g, '&#91;').
-                       replace(/\]/g, '&#93;'));
-            
+            self.error('&#91;' + label + '&#93;: ' + message);
             self.pause();
             if (typeof e.fileName == 'string') {
                 //display filename and line which throw exeption
@@ -1531,8 +1534,7 @@ function get_stack(caller) {
                     var num = e.lineNumber - 1;
                     var line = file.split('\n')[num];
                     if (line) {
-                        var msg = line.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
-                        self.error('&#91;' + e.lineNumber + '&#93;: ' + msg);
+                        self.error('&#91;' + e.lineNumber + '&#93;: ' +line);
                     }
                 });
             }
@@ -1563,62 +1565,131 @@ function get_stack(caller) {
                 self.attr('scrollHeight');
             self.scrollTop(scrollHeight);
         }
+        
+        //split string to array of strings with the same length and keep formatting
+        function get_formatted_lines(str, length) {
+            var result = [];
+            // TODO: split("\n")
+            var len = str.length;
+            if (len < length) {
+                return [str];
+            }
+            var prev_format = ''; // string from previus unclosed formating
+            for (var i = 0; i < len; i += length) {
+                var re_1 = /(\[\[[biu]*;[^;]*;\][^\]\[]*\]?)/g;
+                var re_2 = /(\[\[[biu]*;[^;]*;\])/;
+                var re_3 = /\[\[[biu]*;[^;]*;[^\]]*\][^\]]*\n+[^\]]*\]/;
+                var part = str.substring(i, i + length);
+                if (prev_format !== '') {
+                    part = prev_format + part;
+                }
+                var format = part.match(re_1);
+                if (format && format.length > 0) {
+                    var format_count = 0;
+                    for (var j=0,jlen=format.length; j<jlen; ++j) {
+                        format_count += format[j].match(re_2)[1].length;
+                        if (format[j][format[j].length-1] == "]") {
+                            format_count += 1;
+                        }
+                    }
+                    var last = format[format.length-1];
+                    if (prev_format !== '') {
+                        format_count -= prev_format.length;
+                    }
+                    part = prev_format + str.substring(i, i + length + format_count);
+                    i += format_count;
+                    if (last[last.length-1] != "]") {
+                        part += "]";
+                        prev_format = last.match(re_2)[1];
+                    } else {
+                        prev_format = '';
+                    }
+                } else {
+                    prev_format = '';
+                }
+                
+                result.push(part);
+            }
+            return result;
+        }
+        
+        function get_formatted_lines(str, length) {
+            var result = [];
+            var re_full = /(\[\[[biu]*;[^;]*;\][^\]\[]*\]?)/g;
+            var re_begin = /(\[\[[biu]*;[^;]*;\])/;
+            var array = str.split(/\n/g);
+            var prev_format = ''; // string from previus unclosed formating
+            for (var i = 0, len = array.length; i < len; ++i) {
+                if (prev_format !== '') {
+                    array[i] = prev_format + array[i];
+                    prev_format = '';
+                }
+                for (var j = 0, jlen = array[i].length; j < jlen; j += length) {
+                    var part = array[i].substring(j, j + length);
+                    if (prev_format !== '') {
+                        part = prev_format + part;
+                    }
+                    var format = part.match(re_full);
+                    if (format && format.length > 0) {
+                        var format_count = 0;
+                        for (var k=0, klen=format.length; k<klen; ++k) {
+                            format_count += format[k].match(re_begin)[1].length;
+                            if (format[k][format[k].length-1] == "]") {
+                                format_count += 1;
+                            }
+                        }
+                        
+                        var last = format[format.length-1];
+                        if (prev_format !== '') {
+                            format_count -= prev_format.length;
+                        }
+                        var end = j + length + format_count
+                        part = prev_format + array[i].substring(j, end);
+                        j += format_count;
+                        if (last[last.length-1] != "]") {
+                            part += "]";
+                            prev_format = last.match(re_begin)[1];
+                        } else {
+                            prev_format = '';
+                        }
+                    } else {
+                        prev_format = '';
+                    }
+                
+                    result.push(part);
+                }
+            }
+            return result;
+        }
+        
+        
+        
         function draw_line(string) {
             string = typeof string == 'string' ? string : String(string);
-            var div;
+            var div, i, len;
             if (string.length > num_chars) {
-                // check if formating splits into two lines
-                /*if (format_re.test(string)) {
-                    var matched = string.match(format_re);
-                    for (var i=matched.length; i--;) {
-                        var idx = string.search(matched[i])
-                        matched[i]
-                    }
-                }*/
                 // string can have line break
-                var array = string.split('\n');
+                //var array = string.split('\n');
+                // TODO: the way it should work
+                var array = get_formatted_lines(string, num_chars);
+                
                 div = $('<div></div>');
-                var len = array.length;
-                for (var i = 0; i < len; ++i) {
+                for (i = 0, len = array.length; i < len; ++i) {
                     if (array[i] === '' || array[i] == '\r') {
                         div.append('<div>&nbsp;</div>');
                     } else {
+                        $('<div/>').html(encodeHTML(array[i])).appendTo(div);
                         // if line is longer then width
+                        /*
                         if (array[i].length > num_chars) {
-                            var parts = str_parts(array[i], num_chars);
-                            
-                            // TODO: move this to str_parts -> str_parts_formatting
-                            // search for formating splitted into lines
-                            for (var i=0,len=parts.length; i<len; ++i) {
-                                var re = /\[\[[biu]*;[^;]*;[^\]]*\]/;
-                                var format = parts[i].match(re);
-                                var found = false;
-                                if (format && !parts[i].match(format_split_re)) {
-                                    for (var j=i+1; j<len; ++j) {
-                                        if (parts[j].match(/\]/)) {
-                                            for (var k=i+1; k<=j; ++k) {
-                                                //console.log(k+' "'+parts[k]+'"');
-                                                re = /^\[\[[biu]*;[^;]*;[^\]]*\]/;
-                                                if (!parts[k].match(re)) {
-                                                    parts[k] = format[0] + parts[k];
-                                                }
-                                            }
-                                            break;
-                                        }
-                                        
-                                    }
-                                    parts[i] += ']';
-                                }
-                            }
-                            
+                            var parts = get_formatted_lines(array[i], num_chars);
                             $.each(parts, function(i, string) {
                                 $('<div/>').html(encodeHTML(string)).
                                     appendTo(div);
                             });
                         } else {
-                            $('<div/>').html(encodeHTML(array[i])).
-                                appendTo(div);
-                        }
+                            $('<div/>').html(encodeHTML(array[i])).appendTo(div);
+                        }*/
                     }
                 }
             } else {
@@ -1818,7 +1889,7 @@ function get_stack(caller) {
             },
             error: function(message) {
                 //echo red message
-                self.echo('[[;#f00;]' + message + ']');
+                self.echo('[[;#f00;]' + escape_brackets(message) + ']');
             },
             scroll: function(amount) {
                 var pos;
@@ -1989,13 +2060,35 @@ function get_stack(caller) {
                     if (command == 'clear' && settings.clear) {
                         self.clear();
                     } else {
-                        interpreter['eval'](command, self);
+                        if (command.match(/\|/)) {
+                            var commands = command.split(/\s*\|\s*/);
+                            var results = [];
+                            //intercept echo calls
+                            var echo = self.echo;
+                            self.echo = function(str) {
+                                results.push(str);
+                            };
+                            interpreter['eval'](commands[0], self);
+                            for (var i=1,len=commands.length; i<len-1; ++i) {
+                                for (var j=0,len2=results.length; j<len2; ++j) {
+                                    var cmd = commands[i] + ' ' + results[j];
+                                    interpreter['eval'](cmd, self);
+                                }
+                            }
+                            // last command in pipe
+                            self.echo = echo; // restore echo
+                            for (j=0,len2=results.length; j<len2; ++j) {
+                                cmd = commands[len-1] + ' ' + results[j];
+                                interpreter['eval'](cmd, self);
+                            }
+                        } else {
+                            interpreter['eval'](command, self);
+                        }
                     }
                 }
             
             } catch (e) {
                 display_exception(e, 'USER');
-                console.log(e.stack);
                 self.resume();
                 throw e;
             }
@@ -2021,6 +2114,9 @@ function get_stack(caller) {
                     } else {
                         command_line.mask(false);
                         self.pause();
+                        if (typeof settings.login != 'function') {
+                            throw "Value of login property must be a function";
+                        }
                         settings.login(user, command, function(user_data) {
                             if (user_data) {
                                 var name = settings.name;
@@ -2131,6 +2227,7 @@ function get_stack(caller) {
                             if (tab_count >= 2) {
                                 echo_command(command);
                                 self.echo(matched.join('\t'));
+                                tab_count = 0;
                             }
                         }
                     }
@@ -2214,7 +2311,7 @@ function get_stack(caller) {
                             command_list: commands
                         });
                     } else {
-                        self.echo("[[;#f00;]Command '" + method + "' Not Found]");
+                        self.error("Command '" + method + "' Not Found");
                     }
                 };
             })(init_eval);
@@ -2279,11 +2376,9 @@ function get_stack(caller) {
             //self.resize();
             //num_chars = get_num_chars();
             terminals.append(self);
-            //console.log(settings);
             if (settings.enabled === true) {
                 self.focus();
             } else {
-                //console.log('disable ' + settings.prompt);
                 self.disable();
             }
             $(window).resize(self.resize);

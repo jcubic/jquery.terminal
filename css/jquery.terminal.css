@@ -23,19 +23,15 @@
 .terminal .terminal-output div {
     display: block;
 }
-.terminal, .terminal .terminal-output, .terminal .terminal-output div, .terminal .terminal-output div div, .cmd, .terminal .cmd span, .terminal .cmd div {
+.terminal, .terminal .terminal-output, .terminal .terminal-output div,
+.terminal .terminal-output div div, .cmd, .terminal .cmd span, .terminal .cmd div {
     font-family: monospace;
     color: #aaa;
     background-color: #000;
     font-size: 12px;
 }
-
 .terminal .cmd span {
     float: left;
-}
-.terminal div::selection, .terminal span::selection {
-    background-color: #aaa;
-    color: #000;
 }
 .terminal .cmd span.inverted {
     background-color: #aaa;
@@ -45,7 +41,10 @@
     background-color: #aaa;
     color: #000;
 }
-
+.terminal div::selection, .terminal span::selection {
+    background-color: #aaa;
+    color: #000;
+}
 .terminal .terminal-output div.error, .terminal .terminal-output div.error div {
     color: red;
 }
