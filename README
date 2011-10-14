@@ -3,7 +3,7 @@
   __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-           \/              /____/                              version 0.4.1
+           \/              /____/                              version 0.4.2
 
 http://terminal.jcubic.pl
 
@@ -29,11 +29,11 @@ Features:
       interpreters (eg. you can use couple of JSON-RPC service and run them
       when user type command)
 
-    * Command Tree - you can use nested objects each command will invoke a 
-      function if the value is an object it will create new interpreter and
+    * Command Tree - you can use nested objects. Each command will invoke a 
+      function, if the value is an object it will create new interpreter and
       use function from that object as commands. You can use as much nested
-      commands as you like. if the value is a string it will create JSON-RPC
-      service.
+      object/commands as you like. If the value is a string it will create
+      JSON-RPC service.
 
     * Support for command line history it use Local Storage if posible
 

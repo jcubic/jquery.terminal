@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.1
+ *|           \/              /____/                              version 0.4.2
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Tue, 11 Oct 2011 18:39:26 +0000
+ * Date: Fri, 14 Oct 2011 16:00:01 +0000
  */
 
 /*
@@ -48,22 +48,6 @@
           if (CTRL+D && ajax-call) {
             xhr.abort();
           }
-
-          object as first arguments which maps commands arguments to methods
-          context of functions will be the terminal instance.
-
-          terminal({
-            js: function(a, b, c) {
-              this.echo(a + '__' + b + '__' + c);
-            },
-            mysql: function() {
-              var query = Array.prototype.splice(argument, 0).join(' ');
-            }
-          });
-    
-          if you type 'js foo bar baz' it will call js('foo', 'bar', 'baz');
-
-
 
 */
 // return true if value is in array
@@ -639,8 +623,13 @@ function get_stack(caller) {
             var splited = str.split(format_split_re);
             if (splited.length > 1) {
                 str = $.map(splited, function(text) {
-                    if (text[0] == '[') {
+                    if (text === '') {
+                        return text;
+                    } else if (text[0] == '[') {
                         return text.replace(format_re, function(s, style, color, background, text) {
+                            if (text === '') {
+                                return '<span>&nbsp;</span>';
+                            }
                             var style_str = '';
                             if (style.indexOf('b') != -1) {
                                 style_str += 'font-weight:bold;';
@@ -1428,7 +1417,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.1';
+    var version = '0.4.2';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1621,8 +1610,13 @@ function get_stack(caller) {
             var prev_format = ''; // string from previus unclosed formating
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (prev_format !== '') {
-                    array[i] = prev_format + array[i];
-                    prev_format = '';
+                    if (array[i] === '') {
+                        result.push(prev_format + ']');
+                        continue;
+                    } else {
+                        array[i] = prev_format + array[i];
+                        prev_format = '';
+                    }
                 }
                 for (var j = 0, jlen = array[i].length; j < jlen; j += length) {
                     var part = array[i].substring(j, j + length);
@@ -1679,17 +1673,6 @@ function get_stack(caller) {
                         div.append('<div>&nbsp;</div>');
                     } else {
                         $('<div/>').html(encodeHTML(array[i])).appendTo(div);
-                        // if line is longer then width
-                        /*
-                        if (array[i].length > num_chars) {
-                            var parts = get_formatted_lines(array[i], num_chars);
-                            $.each(parts, function(i, string) {
-                                $('<div/>').html(encodeHTML(string)).
-                                    appendTo(div);
-                            });
-                        } else {
-                            $('<div/>').html(encodeHTML(array[i])).appendTo(div);
-                        }*/
                     }
                 }
             } else {
