@@ -1,3 +1,4 @@
+0.4.3     fix JSON-RPC when use without login
 0.4.2     fix formatting when text contain empty lines
 0.4.1     fix formatting when text contains newline characters
 0.4       fix text formating when text splited into more then one line

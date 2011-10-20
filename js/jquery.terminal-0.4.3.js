@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.2
+ *|           \/              /____/                              version 0.4.3
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Fri, 14 Oct 2011 16:00:01 +0000
+ * Date: Thu, 20 Oct 2011 14:31:02 +0000
  */
 
 /*
@@ -1089,6 +1089,7 @@ function get_stack(caller) {
                 clip.val('');
             });
         }
+        
         function keydown_event(e) {
             if (enabled) {
                 if (options.keydown && options.keydown(e) === false) {
@@ -1108,6 +1109,7 @@ function get_stack(caller) {
                     if (options.commands) {
                         options.commands(tmp);
                     }
+                    
                 } else if (e.which == 32) { //space
                     self.insert(' ');
                 } else if (e.which == 8) { //backspace
@@ -1417,7 +1419,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.2';
+    var version = '0.4.3';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1494,7 +1496,7 @@ function get_stack(caller) {
         output = $('<div>').addClass('terminal-output').appendTo(self);
         self.addClass('terminal').append('<div/>');
         
-        //calculate numbers of characters base on 
+        //calculate numbers of characters
         function get_num_chars() {
             var test = $('<span>x</span>').appendTo(self);
             var result = Math.floor(self.width() / test.width());
@@ -1558,56 +1560,10 @@ function get_stack(caller) {
         //split string to array of strings with the same length and keep formatting
         function get_formatted_lines(str, length) {
             var result = [];
-            // TODO: split("\n")
-            var len = str.length;
-            if (len < length) {
-                return [str];
-            }
-            var prev_format = ''; // string from previus unclosed formating
-            for (var i = 0; i < len; i += length) {
-                var re_1 = /(\[\[[biu]*;[^;]*;\][^\]\[]*\]?)/g;
-                var re_2 = /(\[\[[biu]*;[^;]*;\])/;
-                var re_3 = /\[\[[biu]*;[^;]*;[^\]]*\][^\]]*\n+[^\]]*\]/;
-                var part = str.substring(i, i + length);
-                if (prev_format !== '') {
-                    part = prev_format + part;
-                }
-                var format = part.match(re_1);
-                if (format && format.length > 0) {
-                    var format_count = 0;
-                    for (var j=0,jlen=format.length; j<jlen; ++j) {
-                        format_count += format[j].match(re_2)[1].length;
-                        if (format[j][format[j].length-1] == "]") {
-                            format_count += 1;
-                        }
-                    }
-                    var last = format[format.length-1];
-                    if (prev_format !== '') {
-                        format_count -= prev_format.length;
-                    }
-                    part = prev_format + str.substring(i, i + length + format_count);
-                    i += format_count;
-                    if (last[last.length-1] != "]") {
-                        part += "]";
-                        prev_format = last.match(re_2)[1];
-                    } else {
-                        prev_format = '';
-                    }
-                } else {
-                    prev_format = '';
-                }
-                
-                result.push(part);
-            }
-            return result;
-        }
-        
-        function get_formatted_lines(str, length) {
-            var result = [];
             var re_full = /(\[\[[biu]*;[^;]*;\][^\]\[]*\]?)/g;
             var re_begin = /(\[\[[biu]*;[^;]*;\])/;
             var array = str.split(/\n/g);
-            var prev_format = ''; // string from previus unclosed formating
+            var prev_format = ''; // string from previous unclosed formating
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (prev_format !== '') {
                     if (array[i] === '') {
@@ -1619,29 +1575,32 @@ function get_stack(caller) {
                     }
                 }
                 for (var j = 0, jlen = array[i].length; j < jlen; j += length) {
-                    var part = array[i].substring(j, j + length);
+                    var line = array[i].substring(j, j + length);
                     if (prev_format !== '') {
-                        part = prev_format + part;
+                        line = prev_format + line;
                     }
-                    var format = part.match(re_full);
+                    var format = line.match(re_full);
                     if (format && format.length > 0) {
                         var format_count = 0;
+                        //calculate number of characters that belong to formating
                         for (var k=0, klen=format.length; k<klen; ++k) {
                             format_count += format[k].match(re_begin)[1].length;
                             if (format[k][format[k].length-1] == "]") {
                                 format_count += 1;
                             }
                         }
-                        
-                        var last = format[format.length-1];
                         if (prev_format !== '') {
                             format_count -= prev_format.length;
                         }
-                        var end = j + length + format_count
-                        part = prev_format + array[i].substring(j, end);
+                        var end = j + length + format_count;
+                        //recalculate line
+                        line = prev_format + array[i].substring(j, end);
+                        format = line.match(re_full);
+                        var last = format[format.length-1];
                         j += format_count;
                         if (last[last.length-1] != "]") {
-                            part += "]";
+                            //last formating string string is not closed
+                            line += "]";
                             prev_format = last.match(re_begin)[1];
                         } else {
                             prev_format = '';
@@ -1650,13 +1609,11 @@ function get_stack(caller) {
                         prev_format = '';
                     }
                 
-                    result.push(part);
+                    result.push(line);
                 }
             }
             return result;
         }
-        
-        
         
         function draw_line(string) {
             string = typeof string == 'string' ? string : String(string);
@@ -2307,7 +2264,7 @@ function get_stack(caller) {
         }
         
         // create json-rpc authentication function
-        if (url && typeof settings.login == 'string' || url) {
+        if ((url && typeof settings.login == 'string') || (url && settings.login)) {
             settings.login = (function(method) {
                 var id = 1;
                 return function(user, passwd, callback) {
