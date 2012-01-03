@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.3
+ *|           \/              /____/                              version 0.4.4
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Thu, 20 Oct 2011 14:31:02 +0000
+ * Date: Tue, 03 Jan 2012 17:05:57 +0000
  */
 
 /*
@@ -1419,7 +1419,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.3';
+    var version = '0.4.4';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1495,12 +1495,16 @@ function get_stack(caller) {
         }
         output = $('<div>').addClass('terminal-output').appendTo(self);
         self.addClass('terminal').append('<div/>');
-        
+        function haveScrollbars() {
+            return self.get(0).scrollHeight > self.innerHeight();
+        }
         //calculate numbers of characters
         function get_num_chars() {
-            var test = $('<span>x</span>').appendTo(self);
-            var result = Math.floor(self.width() / test.width());
-            test.remove();
+            var cursor = self.find('.cursor');
+            var result = Math.floor(self.width() / cursor.width());
+            if (haveScrollbars()) {
+                result-=2;
+            }
             return result;
         }
         
@@ -2127,7 +2131,15 @@ function get_stack(caller) {
             }
         }
         var tab_count = 0;
+        var scrollBars = haveScrollbars();
         function key_down(e) {
+            // if scollbars appearance change we will have different number of chars
+            setTimeout(function() {
+                if (scrollBars != haveScrollbars()) {
+                    self.resize();
+                    scrollBars = haveScrollbars();
+                }
+            }, 1);
             if (!self.paused()) {
                 if (settings.keydown && settings.keydown(e, self) === false) {
                     return false;
@@ -2211,13 +2223,12 @@ function get_stack(caller) {
         
         // INIT CODE
         var url;
-        switch (typeof init_eval) {
-        case 'string':
-            url = init_eval;
-            // create json-rpc eval function
+        if (init_eval.constructor == String) {
+            url = init_eval; //url variable is use when making login function
             init_eval = make_json_rpc_eval_fun(init_eval, self);
-            break;
-        case 'object':
+        } else if (init_eval.constructor == Array) {
+            throw "You can't use array as eval";
+        } else if (typeof init_eval == 'object') {
             // top commands
             for (var i in init_eval) {
                 command_list.push(i);
@@ -2255,16 +2266,14 @@ function get_stack(caller) {
                     }
                 };
             })(init_eval);
-            break;
-        case 'function':
+        } else if (typeof init_eval == 'function') {
             // skip
-            break;
-        default:
+        } else {
             throw 'Unknow object "' + String(init_eval) + '" passed as eval';
         }
         
         // create json-rpc authentication function
-        if ((url && typeof settings.login == 'string') || (url && settings.login)) {
+        if (url && (typeof settings.login == 'string' || settings.login)) {
             settings.login = (function(method) {
                 var id = 1;
                 return function(user, passwd, callback) {
