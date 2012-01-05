@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.4
+ *|           \/              /____/                              version 0.4.5
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Tue, 03 Jan 2012 17:05:57 +0000
+ * Date: Thu, 05 Jan 2012 21:36:15 +0000
  */
 
 /*
@@ -963,6 +963,12 @@ function get_stack(caller) {
                 if (string.length > num_chars - prompt_len - 1 || string.match(/\n/)) {
                     
                     var array;
+                    var tabs = string.match(/\t/g);
+                    var tabs_rm = tabs ? tabs.length * 3 : 0;
+                    //quick tabulation hack
+                    if (tabs) {
+                        string = string.replace(/\t/g, '\x00\x00\x00\x00');
+                    }
                     // command contain new line characters
                     if (string.match(/\n/)) {
                         var tmp = string.split("\n");
@@ -990,6 +996,12 @@ function get_stack(caller) {
                     } else {
                         array = get_splited_command_line(string);
                     }
+                    if (tabs) {
+                        array = $.map(array, function(line) {
+                            return line.replace(/\x00\x00\x00\x00/g, '\t');
+                        });
+                    }
+                    
                     var first_len = array[0].length;
                     //cursor in first line
                     if (position < first_len) {
@@ -1016,14 +1028,15 @@ function get_stack(caller) {
                             if (from_last <= last.length) {
                                 lines_before(array.slice(0, -1));
                                 pos = last.length==from_last ? 0 : last.length-from_last;
-                                draw_cursor_line(last, pos);
+                                draw_cursor_line(last, pos+tabs_rm);
                             } else {
                                 // in the middle
                                 if (num_lines == 3) {
                                     before.before('<div>' + encodeHTML(array[0]) +
                                                   '</div>');
                                     draw_cursor_line(array[1], position-first_len-1);
-                                    after.after('<div class="clear">' + encodeHTML(array[2]) +
+                                    after.after('<div class="clear">' +
+                                                encodeHTML(array[2]) +
                                                 '</div>');
                                 } else {
                                     // more lines, cursor in the middle
@@ -1419,7 +1432,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.4';
+    var version = '0.4.5';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1584,6 +1597,15 @@ function get_stack(caller) {
                         line = prev_format + line;
                     }
                     var format = line.match(re_full);
+                    //shorter lines if tabs are present
+                    var tabs = line.match(/\t/g);
+                    var num_tabs = tabs ? tabs.length : 0;
+                    if (num_tabs > 0) {
+                        var remove_chars = num_tabs*3
+                        line = array[i].substring(j, j+length-remove_chars); 
+                        j -= remove_chars;
+                        console.log(remove_chars);
+                    }
                     if (format && format.length > 0) {
                         var format_count = 0;
                         //calculate number of characters that belong to formating
