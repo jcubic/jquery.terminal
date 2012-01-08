@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.5
+ *|           \/              /____/                              version 0.4.6
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Thu, 05 Jan 2012 21:36:15 +0000
+ * Date: Sun, 08 Jan 2012 19:25:00 +0000
  */
 
 /*
@@ -1116,13 +1116,12 @@ function get_stack(caller) {
                     history.last();
                     var tmp = command;
                     self.set('');
-                    if (typeof prompt == 'function') {
-                        draw_prompt();
-                    }
                     if (options.commands) {
                         options.commands(tmp);
                     }
-                    
+                    if (typeof prompt == 'function') {
+                        draw_prompt();
+                    }
                 } else if (e.which == 32) { //space
                     self.insert(' ');
                 } else if (e.which == 8) { //backspace
@@ -1268,7 +1267,7 @@ function get_stack(caller) {
                 
             } */
         }
-
+        
         $.extend(self, {
             name: function(string) {
                 if (string !== undefined) {
@@ -1329,6 +1328,9 @@ function get_stack(caller) {
                         throw 'prompt must be a function or string';
                     }
                     draw_prompt();
+                    // we could check if command is longer then numchars-new prompt
+                    redraw();
+                    
                 }
             },
             position: function(n) {
@@ -1339,6 +1341,14 @@ function get_stack(caller) {
                     return position;
                 }
             },
+            show: (function() {
+                var show = self.show;
+                return function() {
+                    show.apply(self, []);
+                    redraw();
+                    draw_prompt();
+                };
+            })(),
             resize: function(num) {
                 if (num) {
                     num_chars = num;
@@ -1432,7 +1442,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.5';
+    var version = '0.4.6';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1514,9 +1524,13 @@ function get_stack(caller) {
         //calculate numbers of characters
         function get_num_chars() {
             var cursor = self.find('.cursor');
-            var result = Math.floor(self.width() / cursor.width());
+            var cur_width = cursor.width()
+            var result = Math.floor(self.width() / cur_width);
             if (haveScrollbars()) {
-                result-=2;
+                // assume that scrollbars are 20px - in my Laptop with 
+                // Linux/Chrome they are 16px
+                var margins = self.innerWidth() - self.width();
+                result -= Math.ceil((20 - margins / 2) / (cur_width-1));
             }
             return result;
         }
@@ -1713,6 +1727,7 @@ function get_stack(caller) {
                 if (command_line) {
                     self.enable();
                     command_line.show();
+                    
                     scroll_to_bottom();
                 }
                 return self;
@@ -2026,30 +2041,7 @@ function get_stack(caller) {
                     if (command == 'clear' && settings.clear) {
                         self.clear();
                     } else {
-                        if (command.match(/\|/)) {
-                            var commands = command.split(/\s*\|\s*/);
-                            var results = [];
-                            //intercept echo calls
-                            var echo = self.echo;
-                            self.echo = function(str) {
-                                results.push(str);
-                            };
-                            interpreter['eval'](commands[0], self);
-                            for (var i=1,len=commands.length; i<len-1; ++i) {
-                                for (var j=0,len2=results.length; j<len2; ++j) {
-                                    var cmd = commands[i] + ' ' + results[j];
-                                    interpreter['eval'](cmd, self);
-                                }
-                            }
-                            // last command in pipe
-                            self.echo = echo; // restore echo
-                            for (j=0,len2=results.length; j<len2; ++j) {
-                                cmd = commands[len-1] + ' ' + results[j];
-                                interpreter['eval'](cmd, self);
-                            }
-                        } else {
-                            interpreter['eval'](command, self);
-                        }
+                        interpreter['eval'](command, self);
                     }
                 }
             
@@ -2155,13 +2147,16 @@ function get_stack(caller) {
         var tab_count = 0;
         var scrollBars = haveScrollbars();
         function key_down(e) {
-            // if scollbars appearance change we will have different number of chars
-            setTimeout(function() {
+            // after text pasted into textarea in cmd plugin
+            self.oneTime(5, function() {
                 if (scrollBars != haveScrollbars()) {
+                    // if scollbars appearance change we will have different 
+                    // number of chars
                     self.resize();
                     scrollBars = haveScrollbars();
                 }
-            }, 1);
+            });
+            
             if (!self.paused()) {
                 if (settings.keydown && settings.keydown(e, self) === false) {
                     return false;

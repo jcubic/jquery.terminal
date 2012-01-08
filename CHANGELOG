@@ -1,3 +1,5 @@
+0.4.6     remove undocumented pipe operator
+          refreash prompt on resume
 0.4.5     fix line wrapping when text contains tabulations
 0.4.4     fix line wrapping with scrollbars
 0.4.3     fix JSON-RPC when use without login
