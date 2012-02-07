@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.6
+ *|           \/              /____/                              version 0.4.7
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sun, 08 Jan 2012 19:25:00 +0000
+ * Date: Tue, 07 Feb 2012 22:18:58 +0000
  */
 
 /*
@@ -106,7 +106,6 @@ function get_stack(caller) {
 		    // Contnue the chain
 		    return this;
 	    },
-	    
 	    expire: function(type, fn, fn2) {
 		    var self = this, x =10;
 		    
@@ -119,8 +118,8 @@ function get_stack(caller) {
 		    // Find the Live Query based on arguments and stop it
 		    $.each($.livequery.queries, function(i, query) {
                 if (self.selector == query.selector &&
-                    self.context == query.context && 
-				     (!type || type == query.type) && 
+                    self.context == query.context &&
+				     (!type || type == query.type) &&
                     (!fn || fn.$lqguid == query.fn.$lqguid) &&
                     (!fn2 || fn2.$lqguid == query.fn2.$lqguid) && !this.stopped) {
 					$.livequery.stop(query.id);
@@ -613,7 +612,8 @@ function get_stack(caller) {
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     function encodeHTML(str) {
         if (typeof str == 'string') {
-            str = str.replace(/&(?!#[0-9]*;)/g, '&amp;');
+            // don't escape entities
+            str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
             str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             // I don't think that it find \n
             str = str.replace(/\n/g, '<br/>');
@@ -1098,18 +1098,27 @@ function get_stack(caller) {
             //wait until Browser insert text to textarea
             self.oneTime(1, function() {
                 self.insert(clip.val());
-                clip.blur();
-                clip.val('');
+                clip.blur().val('');
             });
         }
-        
         function keydown_event(e) {
             if (enabled) {
                 if (options.keydown && options.keydown(e) === false) {
                     return false;
                 }
                 var pos, len, result;
-                if (e.keyCode == 13) { //enter
+				if (e.altKey) {
+					// Chrome on Windows set ctrlKey and altKey for alt
+					// need to check for alt first
+                    //if (e.which == 18) { // press ALT
+                    if (e.which == 68) { //ALT+D
+						var regex  = /[^ ]+ |[^ ]+$/;
+                        self.set(command.slice(0, position) +
+                                 command.slice(position).replace(regex, ''),
+                                 true);
+                    }
+					return true;
+				} else if (e.keyCode == 13) { //enter
                     if (history && command) {
                         history.append(command);
                     }
@@ -1246,13 +1255,7 @@ function get_stack(caller) {
                             return true;
                         }
                     }
-                } else if (e.altKey) {
-                    //if (e.which == 18) { // press ALT
-                    if (e.which == 68) { //ALT+D
-                        self.set(command.slice(0, position) +
-                                 command.slice(position).replace(/[^ ]+ |[^ ]+$/, ''),
-                                 true);
-                    }
+                
                 } else {
                     return true;
                 }
@@ -1391,7 +1394,14 @@ function get_stack(caller) {
             self.enable();
         }
         // Keystrokes
-        $(document.documentElement).keypress(function(e) {
+		//document.documentElement
+		var object;
+		if ($.browser.msie) {
+			object = document.documentElement;
+		} else {
+			object = window;
+		}
+        $(object).keypress(function(e) {
             var result;
             if (e.ctrlKey && e.which == 99) {
                 return true;
@@ -1409,7 +1419,9 @@ function get_stack(caller) {
                     } else if (!e.ctrlKey && !(e.altKey && e.which == 100)) {
                         self.insert(String.fromCharCode(e.which));
                         return false;
-                    }
+                    } else if (e.altKey) {
+						self.insert(String.fromCharCode(e.which));
+					}
                 }
             } else {
                 return result;
@@ -1442,7 +1454,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.6';
+    var version = '0.4.7';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1615,11 +1627,13 @@ function get_stack(caller) {
                     var tabs = line.match(/\t/g);
                     var num_tabs = tabs ? tabs.length : 0;
                     if (num_tabs > 0) {
-                        var remove_chars = num_tabs*3
+                        var remove_chars = num_tabs*3;
                         line = array[i].substring(j, j+length-remove_chars); 
                         j -= remove_chars;
-                        console.log(remove_chars);
+                        //console.log(remove_chars);
                     }
+                    // TODO: this don't work on checker box
+                    // 
                     if (format && format.length > 0) {
                         var format_count = 0;
                         //calculate number of characters that belong to formating
@@ -1648,7 +1662,16 @@ function get_stack(caller) {
                     } else {
                         prev_format = '';
                     }
-                
+                    // shorter lines when html entities
+                    var entities = line.match(/(&(?:#[0-9]+|[A-Za-z]+);)/g);
+                    if (entities) {
+                        var count = 0;
+                        $.each(entities, function(i, entity) {
+                            count += entity.length-1;
+                        });
+                        line = array[i].substring(j, j+length-count);
+                        j -= count;
+                    }
                     result.push(line);
                 }
             }

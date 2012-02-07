@@ -1,3 +1,4 @@
+0.4.7     fix inserting special characters in Webkit on Windows
 0.4.6     remove undocumented pipe operator
           refreash prompt on resume
 0.4.5     fix line wrapping when text contains tabulations
