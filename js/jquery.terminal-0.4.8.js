@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.7
+ *|           \/              /____/                              version 0.4.8
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Tue, 07 Feb 2012 22:18:58 +0000
+ * Date: Thu, 01 Mar 2012 11:49:09 +0000
  */
 
 /*
@@ -1116,6 +1116,8 @@ function get_stack(caller) {
                         self.set(command.slice(0, position) +
                                  command.slice(position).replace(regex, ''),
                                  true);
+						// chrome jump to address bar
+						return false;
                     }
 					return true;
 				} else if (e.keyCode == 13) { //enter
@@ -1142,7 +1144,7 @@ function get_stack(caller) {
                     }
                 } else if (e.which == 9 && !(e.ctrlKey || e.altKey)) { // TAB
                     self.insert('\t');
-                } else if (e.which == 46) { 
+                } else if (e.which == 46) {
                     //DELETE
                     if (command !== '' && position < command.length) {
                         command = command.slice(0, position) +
@@ -1250,12 +1252,12 @@ function get_stack(caller) {
                                 self.set(command.slice(0, position));
                             }
                         } else if (e.which == 85) { // CTRL+U
-                            self.set('');
+                            self.set(command.slice(position, command.length));
+							self.position(0);
                         } else if (e.which == 17) { //CTRL+TAB switch tab
                             return true;
                         }
                     }
-                
                 } else {
                     return true;
                 }
@@ -1267,10 +1269,8 @@ function get_stack(caller) {
                     [35, 36, 37, 38, 39, 40].has(e.which)) {
                     return false;
                 }
-                
             } */
         }
-        
         $.extend(self, {
             name: function(string) {
                 if (string !== undefined) {
@@ -1333,7 +1333,6 @@ function get_stack(caller) {
                     draw_prompt();
                     // we could check if command is longer then numchars-new prompt
                     redraw();
-                    
                 }
             },
             position: function(n) {
@@ -1454,7 +1453,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.7';
+    var version = '{{VERSION}}';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2098,11 +2097,12 @@ function get_stack(caller) {
                         if (typeof settings.login != 'function') {
                             throw "Value of login property must be a function";
                         }
-                        settings.login(user, command, function(user_data) {
-                            if (user_data) {
+						var passwd = command;
+                        settings.login(user, passwd, function(token) {
+                            if (token) {
                                 var name = settings.name;
                                 name = (name ? '_' + name : '');
-                                $.Storage.set('token' + name, user_data);
+                                $.Storage.set('token' + name, token);
                                 $.Storage.set('login' + name, user);
                                 //restore commands and run interpreter
                                 command_line.commands(commands);
