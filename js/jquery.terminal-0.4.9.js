@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.8
+ *|           \/              /____/                              version 0.4.9
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Thu, 01 Mar 2012 11:49:09 +0000
+ * Date: Thu, 01 Mar 2012 13:45:02 +0000
  */
 
 /*
@@ -626,7 +626,11 @@ function get_stack(caller) {
                     if (text === '') {
                         return text;
                     } else if (text[0] == '[') {
-                        return text.replace(format_re, function(s, style, color, background, text) {
+                        return text.replace(format_re, function(s,
+																style,
+																color,
+																background,
+																text) {
                             if (text === '') {
                                 return '<span>&nbsp;</span>';
                             }
@@ -640,7 +644,6 @@ function get_stack(caller) {
                             if (style.indexOf('i') != -1) {
                                 style_str += 'font-style:italic; ';
                             }
-                            
                             if (color.match(color_hex_re)) {
                                 style_str += 'color:' + color + ';';
                             }
@@ -660,7 +663,12 @@ function get_stack(caller) {
             return '';
         }
     }
-    
+
+	// -----------------------------------------------------------------------
+	function skipFormattingCount(string) {
+		return string.replace(format_re, '$4').length;
+	}
+
     // -----------------------------------------------------------------------
     // CYCLE DATA STRUCTURE
     // -----------------------------------------------------------------------
@@ -913,7 +921,6 @@ function get_stack(caller) {
         var redraw = (function(self) {
             var before = cursor.prev();
             var after = cursor.next();
-            
             function draw_cursor_line(string, position) {
                 if (position == string.length) {
                     before.html(encodeHTML(string));
@@ -960,8 +967,8 @@ function get_stack(caller) {
                 self.find('div').remove();
                 before.html('');
                 // long line
-                if (string.length > num_chars - prompt_len - 1 || string.match(/\n/)) {
-                    
+                if (string.length > num_chars - prompt_len - 1 ||
+					string.match(/\n/)) {
                     var array;
                     var tabs = string.match(/\t/g);
                     var tabs_rm = tabs ? tabs.length * 3 : 0;
@@ -977,7 +984,6 @@ function get_stack(caller) {
                         for (i=0; i<tmp.length-1; ++i) {
                             tmp[i] += ' ';
                         }
-                        
                         // split first line
                         if (tmp[0].length > first_len) {
                             array = [tmp[0].substring(0, first_len)];
@@ -1001,7 +1007,6 @@ function get_stack(caller) {
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
                         });
                     }
-                    
                     var first_len = array[0].length;
                     //cursor in first line
                     if (position < first_len) {
@@ -1057,7 +1062,6 @@ function get_stack(caller) {
                                         pos = 0;
                                         current = array[++line_index];
                                     }
-                                    
                                     draw_cursor_line(current, pos);
                                     lines_before(array.slice(0, line_index));
                                     lines_after(array.slice(line_index+1));
@@ -1081,11 +1085,11 @@ function get_stack(caller) {
             var prompt_node = self.find('.prompt');
             return function() {
                 if (typeof prompt == 'string') {
-                    prompt_len = prompt.length;
+                    prompt_len = skipFormattingCount(prompt);
                     prompt_node.html(encodeHTML(prompt) + '&nbsp;');
                 } else {
                     prompt(function(string) {
-                        prompt_len = string.length;
+                        prompt_len = skipFormattingCount(string);
                         prompt_node.html(encodeHTML(string) + '&nbsp;');
                     });
                 }

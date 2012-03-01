@@ -1,3 +1,4 @@
+0.4.9     fix wrap first line when prompt contain formatting
 0.4.8     fix alt+d and ctrl+u
 0.4.7     fix inserting special characters in Webkit on Windows
 0.4.6     remove undocumented pipe operator
