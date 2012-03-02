@@ -14,14 +14,14 @@
  *
  * Storage plugin Distributed under the MIT License
  * Copyright (c) 2010 Dave Schindler
- * 
+ *
  * LiveQuery plugin Dual MIT and GPL
  * Copyright (c) 2008 Brandon Aaron (http://brandonaaron.net)
  *
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Thu, 01 Mar 2012 13:45:02 +0000
+ * Date: Fri, 02 Mar 2012 13:25:06 +0000
  */
 
 /*
@@ -70,21 +70,21 @@ function get_stack(caller) {
 }
 
 (function($, undefined) {
-    
+
     // ----------------------------------------
     // START Live Query plugin
     // ----------------------------------------
     $.extend($.fn, {
 	    livequery: function(type, fn, fn2) {
 		    var self = this, q;
-		    
+
 		    // Handle different call patterns
 		    if ($.isFunction(type)) {
 			    fn2 = fn;
                 fn = type;
                 type = undefined;
             }
-			
+
 		    // See if Live Query already exists
 		    $.each($.livequery.queries, function(i, query) {
 			    if (self.selector == query.selector && self.context == query.context &&
@@ -93,22 +93,22 @@ function get_stack(caller) {
 					return (q = query) && false;
                 }
 		    });
-		    
+
 		    // Create new Live Query if it wasn't found
 		    q = q || new $.livequery(this.selector, this.context, type, fn, fn2);
-		    
+
 		    // Make sure it is running
 		    q.stopped = false;
-		    
+
 		    // Run it immediately for the first time
 		    q.run();
-		    
+
 		    // Contnue the chain
 		    return this;
 	    },
 	    expire: function(type, fn, fn2) {
 		    var self = this, x =10;
-		    
+
 		    // Handle different call patterns
 		    if ($.isFunction(type)) {
 			    fn2 = fn;
@@ -125,7 +125,7 @@ function get_stack(caller) {
 					$.livequery.stop(query.id);
                 }
 		    });
-		    
+
 		    // Continue the chain
 		    return this;
 	    }
@@ -139,10 +139,10 @@ function get_stack(caller) {
 	    this.fn2      = fn2;
 	    this.elements = [];
 	    this.stopped  = false;
-	    
+
 	    // The id is the index of the Live Query in $.livequery.queries
 	    this.id = $.livequery.queries.push(this)-1;
-	    
+
 	    // Mark the functions for matching later on
 	    fn.$lqguid = fn.$lqguid || $.livequery.guid++;
 	    if (fn2) {
@@ -155,7 +155,7 @@ function get_stack(caller) {
     $.livequery.prototype = {
 	    stop: function() {
 		    var query = this;
-		    
+
 		    if (this.type) {
 			    // Unbind all bound events
 			    this.elements.unbind(this.type, this.fn);
@@ -167,29 +167,29 @@ function get_stack(caller) {
 			}
 		    // Clear out matched elements
 		    this.elements = [];
-		    
+
 		    // Stop the Live Query from running until restarted
 		    this.stopped = true;
 	    },
-	    
+
 	    run: function() {
 		    // Short-circuit if stopped
 		    if (this.stopped) {
                 return;
             }
 		    var query = this;
-		    
+
 		    var oEls = this.elements,
 			els  = $(this.selector, this.context),
 			nEls = els.not(oEls);
-		    
+
 		    // Set elements to the latest set of matched elements
 		    this.elements = els;
-		    
+
 		    if (this.type) {
 			    // Bind events to newly matched elements
 			    nEls.bind(this.type, this.fn);
-			    
+
 			    // Unbind events to elements no longer matched
 			    if (oEls.length > 0) {
 				    $.each(oEls, function(i, el) {
@@ -203,7 +203,7 @@ function get_stack(caller) {
 			    nEls.each(function() {
 				    query.fn.apply(this);
 			    });
-			    
+
 			    // Call the second function for elements no longer matched
 			    if (this.fn2 && oEls.length > 0) {
 				    $.each(oEls, function(i, el) {
@@ -222,7 +222,7 @@ function get_stack(caller) {
 	    queue: [],
 	    running: false,
 	    timeout: null,
-	    
+
 	    checkQueue: function() {
 		    if ($.livequery.running && $.livequery.queue.length) {
 			    var length = $.livequery.queue.length;
@@ -232,43 +232,43 @@ function get_stack(caller) {
                 }
 		    }
 	    },
-	    
+
 	    pause: function() {
 		    // Don't run anymore Live Queries until restarted
 		    $.livequery.running = false;
 	    },
-	    
+
 	    play: function() {
 		    // Restart Live Queries
 		    $.livequery.running = true;
 		    // Request a run of the Live Queries
 		    $.livequery.run();
 	    },
-	    
+
 	    registerPlugin: function() {
 		    $.each(arguments, function(i,n) {
 			    // Short-circuit if the method doesn't exist
 			    if (!$.fn[n]) {
                     return;
                 }
-			    
+
 			    // Save a reference to the original method
 			    var old = $.fn[n];
-			    
+
 			    // Create a new method
 			    $.fn[n] = function() {
 				    // Call the original method
 				    var r = old.apply(this, arguments);
-				    
+
 				    // Request a run of the Live Queries
 				    $.livequery.run();
-				    
+
 				    // Return the original methods result
 				    return r;
 			    };
 		    });
 	    },
-	    
+
 	    run: function(id) {
 		    if (id != undefined) {
 			    // Put the particular Live Query in the queue if it doesn't already exist
@@ -290,7 +290,7 @@ function get_stack(caller) {
 		    // Create a timeout to check the queue and actually run the Live Queries
 		    $.livequery.timeout = setTimeout($.livequery.checkQueue, 20);
 	    },
-	    
+
 	    stop: function(id) {
 		    if (id != undefined) {
 			    // Stop are particular Live Query
@@ -320,7 +320,7 @@ function get_stack(caller) {
     $.prototype.init = function(a,c) {
 	    // Call the original init and save the result
 	    var r = init.apply(this, arguments);
-	    
+
 	    // Copy over properties if they exist already
 	    if (a && a.selector) {
 		    r.context = a.context;
@@ -337,7 +337,7 @@ function get_stack(caller) {
 
     // Give the init function the jQuery prototype for later instantiation
     // (needed after Rev 4091)
-    $.prototype.init.prototype = $.prototype; 
+    $.prototype.init.prototype = $.prototype;
     // ----------------------------------------
     // START Storage plugin
     // ----------------------------------------
@@ -604,11 +604,11 @@ function get_stack(caller) {
         }
         return result;
     }
-    
-    
+
+
     // -----------------------------------------------------------------------
-    var format_split_re = /(\[\[[biu]*;[^;]*;[^\]]*\][^\]\[]*\])/g;
-    var format_re = /\[\[([biu]*);([^;]*);([^\]]*)\]([^\]\[]*)\]/g;
+    var format_split_re = /(\[\[[bius]*;[^;]*;[^\]]*\][^\]\[]*\])/g;
+    var format_re = /\[\[([bius]*);([^;]*);([^\]]*)\]([^\]\[]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     function encodeHTML(str) {
         if (typeof str == 'string') {
@@ -632,15 +632,24 @@ function get_stack(caller) {
 																background,
 																text) {
                             if (text === '') {
-                                return '<span>&nbsp;</span>';
+                                return '<span></span>';
                             }
                             var style_str = '';
+							
                             if (style.indexOf('b') != -1) {
                                 style_str += 'font-weight:bold;';
                             }
+							var text_decoration = 'text-decoration:';
                             if (style.indexOf('u') != -1) {
-                                style_str += 'text-decoration:underline;';
+                                text_decoration += 'underline ';
                             }
+							if (style.indexOf('s') != -1) {
+                                text_decoration += 'line-through';
+                            }
+							if (style.indexOf('s') != -1 ||
+								style.indexOf('u') != -1) {
+								style_str += text_decoration + ';';
+							}
                             if (style.indexOf('i') != -1) {
                                 style_str += 'font-style:italic; ';
                             }
@@ -902,17 +911,17 @@ function get_stack(caller) {
         var enabled = options.enabled;
         var name, history;
         var cursor = self.find('.cursor');
-        
+
         function blink(i) {
             cursor.toggleClass('inverted');
         }
-        
+
         function change_num_chars() {
             var W = self.width();
             var w = cursor.innerWidth();
             num_chars = Math.floor(W / w);
         }
-        
+
         function get_splited_command_line(string) {
             var first = string.substring(0, num_chars - prompt_len - 1);
             var rest = string.substring(num_chars - prompt_len - 1);
@@ -1267,7 +1276,7 @@ function get_stack(caller) {
                 }
                 return false;
             } /*else {
-                if ((e.altKey && e.which == 68) || 
+                if ((e.altKey && e.which == 68) ||
                     (e.ctrlKey && [65, 66, 68, 69, 80, 78, 70].has(e.which)) ||
                     // 68 == D
                     [35, 36, 37, 38, 39, 40].has(e.which)) {
@@ -1388,7 +1397,6 @@ function get_stack(caller) {
                 }
             }
         });
-        
         // INIT
         self.name(options.name || '');
         prompt = options.prompt || '>';
@@ -1436,7 +1444,6 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
-    
     $.jrpc = function(url, id, method, params, success, error) {
         var request = $.json_stringify({
            'jsonrpc': '2.0', 'method': method,
@@ -1453,11 +1460,11 @@ function get_stack(caller) {
             //timeout: 1,
             type: 'POST'});
     };
-    
+
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '{{VERSION}}';
+    var version = '0.4.9';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1542,18 +1549,18 @@ function get_stack(caller) {
             var cur_width = cursor.width()
             var result = Math.floor(self.width() / cur_width);
             if (haveScrollbars()) {
-                // assume that scrollbars are 20px - in my Laptop with 
+                // assume that scrollbars are 20px - in my Laptop with
                 // Linux/Chrome they are 16px
                 var margins = self.innerWidth() - self.width();
                 result -= Math.ceil((20 - margins / 2) / (cur_width-1));
             }
             return result;
         }
-        
+
         function escape_brackets(string) {
             return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
         }
-        
+
         // display Exception on terminal
         function display_exception(e, label) {
             var message;
@@ -1595,21 +1602,23 @@ function get_stack(caller) {
             }
             return true;
         }
-        
-        
+
+
         function scroll_to_bottom() {
-            var scrollHeight = self.prop ? self.prop('scrollHeight') : 
+            var scrollHeight = self.prop ? self.prop('scrollHeight') :
                 self.attr('scrollHeight');
             self.scrollTop(scrollHeight);
         }
-        
+
         //split string to array of strings with the same length and keep formatting
         function get_formatted_lines(str, length) {
             var result = [];
-            var re_full = /(\[\[[biu]*;[^;]*;\][^\]\[]*\]?)/g;
-            var re_begin = /(\[\[[biu]*;[^;]*;\])/;
+            var re_full = /(\[\[[bius]*;[^;]*;\][^\]\[]*\]?)/g;
+            var re_begin = /(\[\[[bius]*;[^;]*;\])/;
             var array = str.split(/\n/g);
             var prev_format = ''; // string from previous unclosed formating
+            var prev_partial = '';
+            // split by newlines
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (prev_format !== '') {
                     if (array[i] === '') {
@@ -1620,23 +1629,27 @@ function get_stack(caller) {
                         prev_format = '';
                     }
                 }
+                // iterate long lines
                 for (var j = 0, jlen = array[i].length; j < jlen; j += length) {
                     var line = array[i].substring(j, j + length);
                     if (prev_format !== '') {
                         line = prev_format + line;
                     }
+
                     var format = line.match(re_full);
                     //shorter lines if tabs are present
                     var tabs = line.match(/\t/g);
                     var num_tabs = tabs ? tabs.length : 0;
                     if (num_tabs > 0) {
                         var remove_chars = num_tabs*3;
-                        line = array[i].substring(j, j+length-remove_chars); 
+                        line = array[i].substring(j, j+length-remove_chars);
                         j -= remove_chars;
                         //console.log(remove_chars);
                     }
                     // TODO: this don't work on checker box
-                    // 
+                    //
+                    
+                    //if (format && format.length > 0
                     if (format && format.length > 0) {
                         var format_count = 0;
                         //calculate number of characters that belong to formating
@@ -1657,8 +1670,18 @@ function get_stack(caller) {
                         j += format_count;
                         if (last[last.length-1] != "]") {
                             //last formating string string is not closed
-                            line += "]";
                             prev_format = last.match(re_begin)[1];
+                            //end = j + prev_format.length;
+                            var prev_len = prev_format.length;
+                            var ending = array[i].substring(end, end+prev_len);
+                            line += ending;
+                            // formating ended if added new characters
+                            if (!ending.match(/\]/)) {
+                                line += ']';
+                            } else {
+                                prev_format = '';
+                            }
+                            j += prev_len;
                         } else {
                             prev_format = '';
                         }
@@ -1680,7 +1703,7 @@ function get_stack(caller) {
             }
             return result;
         }
-        
+
         function draw_line(string) {
             string = typeof string == 'string' ? string : String(string);
             var div, i, len;
@@ -1689,7 +1712,7 @@ function get_stack(caller) {
                 //var array = string.split('\n');
                 // TODO: the way it should work
                 var array = get_formatted_lines(string, num_chars);
-                
+
                 div = $('<div></div>');
                 for (i = 0, len = array.length; i < len; ++i) {
                     if (array[i] === '' || array[i] == '\r') {
@@ -1706,7 +1729,7 @@ function get_stack(caller) {
             scroll_to_bottom();
             return div;
         }
-        
+
         function show_greetings() {
             if (options.greetings === undefined) {
                 self.echo(self.signature);
@@ -1714,11 +1737,11 @@ function get_stack(caller) {
                 self.echo(options.greetings);
             }
         }
-        
+
         function is_scrolled_into_view(elem) {
             var docViewTop = $(window).scrollTop();
             var docViewBottom = docViewTop + $(window).height();
-            
+
             var elemTop = $(elem).offset().top;
             var elemBottom = elemTop + $(elem).height();
 
@@ -1728,7 +1751,7 @@ function get_stack(caller) {
         // ----------------------------------------------------------
         // TERMINAL METHODS
         // ----------------------------------------------------------
-        
+
         $.extend(self, {
             clear: function() {
                 output.html('');
@@ -1748,12 +1771,12 @@ function get_stack(caller) {
                 return self;
             },
             resume: function() {
-                //console.log('resume on ' + options.prompt + '\n' + 
+                //console.log('resume on ' + options.prompt + '\n' +
                 //            get_stack(arguments.callee.caller).join(''));
                 if (command_line) {
                     self.enable();
                     command_line.show();
-                    
+
                     scroll_to_bottom();
                 }
                 return self;
@@ -1788,7 +1811,7 @@ function get_stack(caller) {
                 }
             },
             focus: function(toggle) {
-                //console.log('focus on ' + options.prompt + '\n' + 
+                //console.log('focus on ' + options.prompt + '\n' +
                 //            get_stack(arguments.callee.caller).join(''));
                 self.oneTime(1, function() {
                     if (terminals.length() == 1) {
@@ -1811,7 +1834,7 @@ function get_stack(caller) {
                 return self;
             },
             enable: function() {
-                //console.log('enable: ' + options.prompt + '\n' + 
+                //console.log('enable: ' + options.prompt + '\n' +
                 //            get_stack(arguments.callee.caller).join(''));
                 if (num_chars === undefined) {
                     //enabling first time
@@ -1966,10 +1989,10 @@ function get_stack(caller) {
                     }
                 }
                 return self;
-                
+
             }
         });
-        
+
         //function constructor for eval
         function make_json_rpc_eval_fun(url, terminal) {
             var id = 1;
@@ -2028,7 +2051,6 @@ function get_stack(caller) {
                 }
             };
         }
-        
 
         //display prompt and last command
         function echo_command(command) {
@@ -2050,7 +2072,7 @@ function get_stack(caller) {
         function commands(command) {
             try {
                 var interpreter = interpreters.top();
-                
+
                 if (command == 'exit' && settings.exit) {
                     if (interpreters.size() == 1) {
                         if (settings.login) {
@@ -2070,14 +2092,14 @@ function get_stack(caller) {
                         interpreter['eval'](command, self);
                     }
                 }
-            
+
             } catch (e) {
                 display_exception(e, 'USER');
                 self.resume();
                 throw e;
             }
         }
-        
+
         // functions change prompt of command line to login to password
         // and call user login function with callback that set token
         // if user call it with value that is true
@@ -2101,7 +2123,7 @@ function get_stack(caller) {
                         if (typeof settings.login != 'function') {
                             throw "Value of login property must be a function";
                         }
-						var passwd = command;
+                        var passwd = command;
                         settings.login(user, passwd, function(token) {
                             if (token) {
                                 var name = settings.name;
@@ -2163,7 +2185,7 @@ function get_stack(caller) {
                 interpreter.onStart(self);
             }
         }
-        
+
         function initialize() {
             prepare_top_interpreter();
             show_greetings();
@@ -2177,13 +2199,13 @@ function get_stack(caller) {
             // after text pasted into textarea in cmd plugin
             self.oneTime(5, function() {
                 if (scrollBars != haveScrollbars()) {
-                    // if scollbars appearance change we will have different 
+                    // if scollbars appearance change we will have different
                     // number of chars
                     self.resize();
                     scrollBars = haveScrollbars();
                 }
             });
-            
+
             if (!self.paused()) {
                 if (settings.keydown && settings.keydown(e, self) === false) {
                     return false;
@@ -2264,7 +2286,6 @@ function get_stack(caller) {
                 }
             }*/
         }
-        
         // INIT CODE
         var url;
         if (init_eval.constructor == String) {
@@ -2278,7 +2299,6 @@ function get_stack(caller) {
                 command_list.push(i);
             }
             init_eval = (function make_eval(object) {
-                //
                 // function that maps commands to object methods
                 // it keeps terminal context
                 return function(command, terminal) {
@@ -2315,7 +2335,7 @@ function get_stack(caller) {
         } else {
             throw 'Unknow object "' + String(init_eval) + '" passed as eval';
         }
-        
+
         // create json-rpc authentication function
         if (url && (typeof settings.login == 'string' || settings.login)) {
             settings.login = (function(method) {
@@ -2327,7 +2347,6 @@ function get_stack(caller) {
                            method,
                            [user, passwd],
                            function(response) {
-                               
                                self.resume();
                                if (!response.error && response.result) {
                                    callback(response.result);
@@ -2344,7 +2363,6 @@ function get_stack(caller) {
                 //default name is login so you can pass true
             })(typeof settings.login == 'boolean' ? 'login' : settings.login);
         }
-        
         if (valid('prompt', settings.prompt)) {
             var interpreters = new Stack({
                 name: settings.name,
