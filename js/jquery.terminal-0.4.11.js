@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.10
+ *|           \/              /____/                              version 0.4.11
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sat, 03 Mar 2012 14:03:09 +0000
+ * Date: Sun, 04 Mar 2012 18:11:28 +0000
  */
 
 /*
@@ -1464,7 +1464,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.10';
+    var version = '0.4.11';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1629,6 +1629,11 @@ function get_stack(caller) {
                     } else {
                         array[i] = prev_format + array[i];
                         prev_format = '';
+                    }
+                } else {
+                    if (array[i] === '') {
+                        result.push('');
+                        continue;
                     }
                 }
                 var line = array[i];
