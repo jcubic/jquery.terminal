@@ -911,6 +911,9 @@ function get_stack(caller) {
         var enabled = options.enabled;
         var name, history;
         var cursor = self.find('.cursor');
+        
+        var validator = options.validator;
+        var onValidatorFail = options.onValidatorFail;
 
         function blink(i) {
             cursor.toggleClass('inverted');
@@ -1102,6 +1105,7 @@ function get_stack(caller) {
                         prompt_node.html(encodeHTML(string) + '&nbsp;');
                     });
                 }
+                $(document).scrollTop($(document).height()); // scroll to bottom
                 //change_num_chars();
             };
         })();
@@ -1134,6 +1138,12 @@ function get_stack(caller) {
                     }
                     return true;
                 } else if (e.keyCode == 13) { //enter
+                    if (validator && validator(command) === false) { 
+                        // invalid command
+                        onValidatorFail(command);
+                        return;
+                    }
+                
                     if (history && command) {
                         history.append(command);
                     }
@@ -1514,7 +1524,8 @@ function get_stack(caller) {
             onInit: null,
             onExit: null,
             keypress: null,
-            keydown: null
+            keydown: null,
+            historycolors: null
         };
         if (options) {
             if (options.width) {
@@ -1543,6 +1554,7 @@ function get_stack(caller) {
         function haveScrollbars() {
             return self.get(0).scrollHeight > self.innerHeight();
         }
+        
         //calculate numbers of characters
         function get_num_chars() {
             var cursor = self.find('.cursor');
@@ -2042,7 +2054,11 @@ function get_stack(caller) {
                     self.echo(string + ' ' + command);
                 });
             } else {
-                self.echo(prompt + ' ' +command);
+                if (settings.historycolors && settings.historycolors.prompt && settings.historycolors.command) {
+                    self.echo('[[;' + settings.historycolors.prompt + ';]' + prompt + '] [[;' + settings.historycolors.command + ';]' + command + ']');
+                } else {
+                    self.echo(prompt + ' ' +command); 
+                }
             }
         }
 
@@ -2350,6 +2366,7 @@ function get_stack(caller) {
                 command_list: command_list,
                 greetings: settings.greetings
             });
+            console.log(settings);
             var command_line = self.find('.terminal-output').next().cmd({
                 prompt: settings.prompt,
                 history: settings.history,
@@ -2358,7 +2375,10 @@ function get_stack(caller) {
                 keypress: settings.keypress ? function(e) {
                     return settings.keypress(e, self);
                 } : null,
-                commands: commands
+                commands: commands,
+                
+                validator: settings.validator,
+                onValidatorFail: settings.onValidatorFail
             });
             self.livequery(function() {
                 self.resize();
