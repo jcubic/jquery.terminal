@@ -1,3 +1,6 @@
+0.4.12    history return history object
+          add historyFilter
+          scroll_to_bottom on keydown
 0.4.11    fix blank lines when echo longer strings
 0.4.10    fix long line formatting and linebreak in the middle of formatting
 0.4.9     fix wrap first line when prompt contain formatting

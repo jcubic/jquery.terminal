@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.11
+ *|           \/              /____/                              version {{VER}}
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Sun, 04 Mar 2012 18:11:28 +0000
+ * Date: Wed, 04 Apr 2012 10:08:35 +0000
  */
 
 /*
@@ -1134,9 +1134,12 @@ function get_stack(caller) {
                     }
                     return true;
                 } else if (e.keyCode == 13) { //enter
-                    if (history && command) {
-                        history.append(command);
-                    }
+                    if ((history && command) &&
+    					((options.historyFilter &&
+						 options.historyFilter(command)) ||
+						 !options.historyFilter)) {
+							history.append(command);
+					}
                     history.last();
                     var tmp = command;
                     self.set('');
@@ -1464,7 +1467,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.11';
+    var version = '{{VER}}';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1767,7 +1770,7 @@ function get_stack(caller) {
                 return lines.length;
             },
             history: function() {
-                return command_line.history().data();
+                return command_line.history();
             },
             next: function() {
                 if (terminals.length() == 1) {
@@ -1863,6 +1866,9 @@ function get_stack(caller) {
                 }
                 return self;
             },
+			get_prompt: function() {
+				return command_line.prompt();
+			},
             set_command: function(command) {
                 command_line.set(command);
                 return self;
@@ -1941,8 +1947,7 @@ function get_stack(caller) {
             push: function(_eval, options) {
                 if (!options.prompt || valid('prompt', options.prompt)) {
                     if (typeof _eval == 'string') {
-                        var ueval = options['eval'];
-                        _eval = make_json_rpc_eval_fun(ueval, self);
+                        _eval = make_json_rpc_eval_fun(options['eval'], self);
                     }
                     interpreters.push($.extend({'eval': _eval}, options));
                     prepare_top_interpreter();
@@ -2184,7 +2189,9 @@ function get_stack(caller) {
                     scrollBars = haveScrollbars();
                 }
             });
-
+			self.oneTime(1, function() {
+				scroll_to_bottom();
+			});
             if (!self.paused()) {
                 if (settings.keydown && settings.keydown(e, self) === false) {
                     return false;
@@ -2195,7 +2202,8 @@ function get_stack(caller) {
                 if (e.which == 68 && e.ctrlKey) { // CTRL+D
                     if (settings.exit) {
                         if (command_line.get() === '') {
-                            if (interpreters.size() > 1 || settings.login !== undefined) {
+                            if (interpreters.size() > 1 ||
+								settings.login !== undefined) {
                                 self.pop('');
                             } else {
                                 self.resume();
@@ -2247,8 +2255,10 @@ function get_stack(caller) {
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
             }/* else {
-                // can't cancel ajax calls here - keydown is not firing when terminal is disabled
-                // and terminal is disabled when user call pause when calling ajax request
+                // can't cancel ajax calls here - keydown is not firing when
+                // terminal is disabled
+                // and terminal is disabled when user call pause when calling
+                // ajax request
                 if (e.which == 68 && e.ctrlKey) { // CTRL+D
                     for (var i=requests.length; i--;) {
                         var r = requests[i];
