@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Wed, 04 Apr 2012 13:47:44 +0000
+ * Date: Wed, 04 Apr 2012 14:14:43 +0000
  */
 
 /*
@@ -1306,6 +1306,9 @@ function get_stack(caller) {
                         position = command.length;
                     }
                     redraw();
+                    if (typeof options.onCommandChange == 'function') {
+                        options.onCommandChange(command);
+				    }
                 }
             },
             insert: function(string, stay) {
@@ -1321,6 +1324,9 @@ function get_stack(caller) {
                     position += string.length;
                 }
                 redraw();
+                if (typeof options.onCommandChange == 'function') {
+                    options.onCommandChange(command);
+				}
             },
             get: function() {
                 return command;
@@ -2186,9 +2192,6 @@ function get_stack(caller) {
                     scrollBars = haveScrollbars();
                 }
             });
-			self.oneTime(1, function() {
-				scroll_to_bottom();
-			});
             if (!self.paused()) {
                 if (settings.keydown && settings.keydown(e, self) === false) {
                     return false;
@@ -2368,6 +2371,12 @@ function get_stack(caller) {
                 keypress: settings.keypress ? function(e) {
                     return settings.keypress(e, self);
                 } : null,
+                onCommandChange: function(command) {
+                    if (typeof settings.onCommandChange == 'function') {
+                        settings.onCommandChange(command);
+                    }
+                    scroll_to_bottom();
+                },
                 commands: commands
             });
             self.livequery(function() {
