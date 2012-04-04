@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version {{VER}}
+ *|           \/              /____/                              version 0.4.12
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Wed, 04 Apr 2012 10:08:35 +0000
+ * Date: Wed, 04 Apr 2012 13:47:44 +0000
  */
 
 /*
@@ -1467,7 +1467,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '{{VER}}';
+    var version = '0.4.12';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2173,9 +2173,6 @@ function get_stack(caller) {
         function initialize() {
             prepare_top_interpreter();
             show_greetings();
-            if (typeof settings.onInit == 'function') {
-                settings.onInit(self);
-            }
         }
         var tab_count = 0;
         var scrollBars = haveScrollbars();
@@ -2277,6 +2274,9 @@ function get_stack(caller) {
         }
         // INIT CODE
         var url;
+		if (typeof settings.onInit == 'function') {
+            settings.onInit(self);
+        }
         if (init_eval.constructor == String) {
             url = init_eval; //url variable is use when making login function
             init_eval = make_json_rpc_eval_fun(init_eval, self);
