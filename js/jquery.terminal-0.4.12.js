@@ -1748,6 +1748,11 @@ function get_stack(caller) {
                 self.attr({ scrollTop: 0});
                 return self;
             },
+			clear_last: function(){
+				output.find('div:last').remove();
+				lines.pop();
+				return self;
+			},
             paused: function() {
                 return pause;
             },
