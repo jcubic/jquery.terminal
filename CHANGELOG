@@ -1,6 +1,8 @@
+0.4.14    terminal don't add space after prompt (prompt need to add this space)
+          fix historyFilter
 0.4.12    history return history object
           add historyFilter
-          new event onCommandChange that execute scroll_to_bottom 
+          new event onCommandChange that execute scroll_to_bottom
           add event onBeforeLogin
 0.4.11    fix blank lines when echo longer strings
 0.4.10    fix long line formatting and linebreak in the middle of formatting
