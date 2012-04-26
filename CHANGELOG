@@ -1,5 +1,6 @@
 0.4.14    terminal don't add space after prompt (prompt need to add this space)
           fix historyFilter
+          remove livequery
 0.4.12    history return history object
           add historyFilter
           new event onCommandChange that execute scroll_to_bottom

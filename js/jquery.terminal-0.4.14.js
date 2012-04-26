@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.12
+ *|           \/              /____/                              version 0.4.14
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Wed, 04 Apr 2012 16:30:49 +0000
+ * Date: Thu, 26 Apr 2012 10:02:04 +0000
  */
 
 /*
@@ -71,273 +71,6 @@ function get_stack(caller) {
 
 (function($, undefined) {
 
-    // ----------------------------------------
-    // START Live Query plugin
-    // ----------------------------------------
-    $.extend($.fn, {
-        livequery: function(type, fn, fn2) {
-            var self = this, q;
-
-            // Handle different call patterns
-            if ($.isFunction(type)) {
-                fn2 = fn;
-                fn = type;
-                type = undefined;
-            }
-
-            // See if Live Query already exists
-            $.each($.livequery.queries, function(i, query) {
-                if (self.selector == query.selector && self.context == query.context &&
-                    type == query.type && (!fn || fn.$lqguid == query.fn.$lqguid) && (!fn2 || fn2.$lqguid == query.fn2.$lqguid)) {
-                    // Found the query, exit the each loop
-                    return (q = query) && false;
-                }
-            });
-
-            // Create new Live Query if it wasn't found
-            q = q || new $.livequery(this.selector, this.context, type, fn, fn2);
-
-            // Make sure it is running
-            q.stopped = false;
-
-            // Run it immediately for the first time
-            q.run();
-
-            // Contnue the chain
-            return this;
-        },
-        expire: function(type, fn, fn2) {
-            var self = this, x =10;
-
-            // Handle different call patterns
-            if ($.isFunction(type)) {
-                fn2 = fn;
-                fn = type;
-                type = undefined;
-            }
-            // Find the Live Query based on arguments and stop it
-            $.each($.livequery.queries, function(i, query) {
-                if (self.selector == query.selector &&
-                    self.context == query.context &&
-                     (!type || type == query.type) &&
-                    (!fn || fn.$lqguid == query.fn.$lqguid) &&
-                    (!fn2 || fn2.$lqguid == query.fn2.$lqguid) && !this.stopped) {
-                    $.livequery.stop(query.id);
-                }
-            });
-
-            // Continue the chain
-            return this;
-        }
-    });
-
-    $.livequery = function(selector, context, type, fn, fn2) {
-        this.selector = selector;
-        this.context  = context || document;
-        this.type     = type;
-        this.fn       = fn;
-        this.fn2      = fn2;
-        this.elements = [];
-        this.stopped  = false;
-
-        // The id is the index of the Live Query in $.livequery.queries
-        this.id = $.livequery.queries.push(this)-1;
-
-        // Mark the functions for matching later on
-        fn.$lqguid = fn.$lqguid || $.livequery.guid++;
-        if (fn2) {
-            fn2.$lqguid = fn2.$lqguid || $.livequery.guid++;
-        }
-        // Return the Live Query
-        return this;
-    };
-
-    $.livequery.prototype = {
-        stop: function() {
-            var query = this;
-
-            if (this.type) {
-                // Unbind all bound events
-                this.elements.unbind(this.type, this.fn);
-            } else if (this.fn2) {
-                // Call the second function for all matched elements
-                this.elements.each(function(i, el) {
-                    query.fn2.apply(el);
-                });
-            }
-            // Clear out matched elements
-            this.elements = [];
-
-            // Stop the Live Query from running until restarted
-            this.stopped = true;
-        },
-
-        run: function() {
-            // Short-circuit if stopped
-            if (this.stopped) {
-                return;
-            }
-            var query = this;
-
-            var oEls = this.elements,
-            els  = $(this.selector, this.context),
-            nEls = els.not(oEls);
-
-            // Set elements to the latest set of matched elements
-            this.elements = els;
-
-            if (this.type) {
-                // Bind events to newly matched elements
-                nEls.bind(this.type, this.fn);
-
-                // Unbind events to elements no longer matched
-                if (oEls.length > 0) {
-                    $.each(oEls, function(i, el) {
-                        if ($.inArray(el, els) < 0) {
-                            $.event.remove(el, query.type, query.fn);
-                        }
-                    });
-                }
-            } else {
-                // Call the first function for newly matched elements
-                nEls.each(function() {
-                    query.fn.apply(this);
-                });
-
-                // Call the second function for elements no longer matched
-                if (this.fn2 && oEls.length > 0) {
-                    $.each(oEls, function(i, el) {
-                        if ($.inArray(el, els) < 0) {
-                            query.fn2.apply(el);
-                        }
-                    });
-                }
-            }
-        }
-    };
-
-    $.extend($.livequery, {
-        guid: 0,
-        queries: [],
-        queue: [],
-        running: false,
-        timeout: null,
-
-        checkQueue: function() {
-            if ($.livequery.running && $.livequery.queue.length) {
-                var length = $.livequery.queue.length;
-                // Run each Live Query currently in the queue
-                while (length--) {
-                    $.livequery.queries[$.livequery.queue.shift()].run();
-                }
-            }
-        },
-
-        pause: function() {
-            // Don't run anymore Live Queries until restarted
-            $.livequery.running = false;
-        },
-
-        play: function() {
-            // Restart Live Queries
-            $.livequery.running = true;
-            // Request a run of the Live Queries
-            $.livequery.run();
-        },
-
-        registerPlugin: function() {
-            $.each(arguments, function(i,n) {
-                // Short-circuit if the method doesn't exist
-                if (!$.fn[n]) {
-                    return;
-                }
-
-                // Save a reference to the original method
-                var old = $.fn[n];
-
-                // Create a new method
-                $.fn[n] = function() {
-                    // Call the original method
-                    var r = old.apply(this, arguments);
-
-                    // Request a run of the Live Queries
-                    $.livequery.run();
-
-                    // Return the original methods result
-                    return r;
-                };
-            });
-        },
-
-        run: function(id) {
-            if (id != undefined) {
-                // Put the particular Live Query in the queue if it doesn't already exist
-                if ($.inArray(id, $.livequery.queue) < 0) {
-                    $.livequery.queue.push(id);
-                }
-            } else {
-                // Put each Live Query in the queue if it doesn't already exist
-                $.each($.livequery.queries, function(id) {
-                    if ($.inArray(id, $.livequery.queue) < 0) {
-                        $.livequery.queue.push(id);
-                    }
-                });
-            }
-            // Clear timeout if it already exists
-            if ($.livequery.timeout) {
-                clearTimeout($.livequery.timeout);
-            }
-            // Create a timeout to check the queue and actually run the Live Queries
-            $.livequery.timeout = setTimeout($.livequery.checkQueue, 20);
-        },
-
-        stop: function(id) {
-            if (id != undefined) {
-                // Stop are particular Live Query
-                $.livequery.queries[id].stop();
-            } else {
-                // Stop all Live Queries
-                $.each( $.livequery.queries, function(id) {
-                    $.livequery.queries[id].stop();
-                });
-            }
-        }
-    });
-
-    // Register core DOM manipulation methods
-    $.livequery.registerPlugin('append', 'prepend', 'after', 'before', 'wrap',
-                               'attr', 'removeAttr', 'addClass', 'removeClass',
-                               'toggleClass', 'empty', 'remove');
-
-    // Run Live Queries when the Document is ready
-    $(function() { $.livequery.play(); });
-
-
-    // Save a reference to the original init method
-    var init = $.prototype.init;
-
-    // Create a new init method that exposes two new properties: selector and context
-    $.prototype.init = function(a,c) {
-        // Call the original init and save the result
-        var r = init.apply(this, arguments);
-
-        // Copy over properties if they exist already
-        if (a && a.selector) {
-            r.context = a.context;
-            r.selector = a.selector;
-        }
-        // Set properties
-        if (typeof a == 'string') {
-            r.context = c || document;
-            r.selector = a;
-        }
-        // Return the result
-        return r;
-    };
-
-    // Give the init function the jQuery prototype for later instantiation
-    // (needed after Rev 4091)
-    $.prototype.init.prototype = $.prototype;
     // ----------------------------------------
     // START Storage plugin
     // ----------------------------------------
@@ -674,8 +407,87 @@ function get_stack(caller) {
     }
 
     // -----------------------------------------------------------------------
+    //split string to array of strings with the same length and keep formatting
+    function get_formatted_lines(str, length) {
+        var array = str.split(/\n/g);
+        var re_format = /(\[\[[bius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
+        var re_begin = /(\[\[[bius]*;[^;]*;[^\]]*\])/;
+        var re_last = /\[\[[bius]*;?[^;]*;?[^\]]*\]?$/;
+        var formatting = false;
+        var in_text = false;
+        var braket = 0;
+        var prev_format = '';
+        var result = [];
+        for (var i = 0, len = array.length; i < len; ++i) {
+            if (prev_format !== '') {
+                if (array[i] === '') {
+                    result.push(prev_format + ']');
+                    continue;
+                } else {
+                    array[i] = prev_format + array[i];
+                    prev_format = '';
+                }
+            } else {
+                if (array[i] === '') {
+                    result.push('');
+                    continue;
+                }
+            }
+            var line = array[i];
+            var first_index = 0;
+            var count = 0;
+            for (var j=0, jlen=line.length; j<jlen; ++j) {
+                if (line[j] == '[' && line[j+1] == '[') {
+                    formatting = true;
+                } else if (formatting && line[j] == ']') {
+                    if (in_text) {
+                        formatting = false;
+                        in_text = false;
+                    } else {
+                        in_text = true;
+                    }
+                } else if ((formatting && in_text) || !formatting) {
+                    ++count;
+                }
+                if (count == length || j==jlen-1) {
+                    var output_line = line.substring(first_index, j+1);
+                    if (prev_format) {
+                        output_line = prev_format + output_line;
+                        if (output_line.match(']')) {
+                            prev_format = '';
+                        }
+                    }
+                    first_index = j+1;
+                    count = 0;
+                    var matched = output_line.match(re_format);
+                    if (matched) {
+                        var last = matched[matched.length-1];
+                        if (last[last.length-1] != ']') {
+                            prev_format = last.match(re_begin)[1];
+                            output_line += ']'
+                        } else if (output_line.match(re_last)) {
+                            var line_len = output_line.length;
+                            var f_len = line_len - last[last.length-1].length;
+                            output_line = output_line.replace(re_last, '');
+                            prev_format = last.match(re_begin)[1];
+                        }
+                    }
+                    result.push(output_line);
+                }
+            }
+        }
+        return result;
+    }
+
+
+    // -----------------------------------------------------------------------
     function skipFormattingCount(string) {
         return string.replace(format_re, '$4').length;
+    }
+
+    // -----------------------------------------------------------------------
+    function formattingCount(string) {
+        return string.length - skipFormattingCount(string);
     }
 
     // -----------------------------------------------------------------------
@@ -921,8 +733,20 @@ function get_stack(caller) {
             var w = cursor.innerWidth();
             num_chars = Math.floor(W / w);
         }
-
+        function str_repeat(str, n) {
+            var result = '';
+            for (var i = n; i--;) {
+                result += str;
+            }
+            return result;
+        }
         function get_splited_command_line(string) {
+            /*
+            string = str_repeat('x', prompt_len) + string;
+            var result = get_formatted_lines(string);
+            result[0] = result[0].substring(prompt_len);
+            return result;
+            */
             var first = string.substring(0, num_chars - prompt_len - 1);
             var rest = string.substring(num_chars - prompt_len - 1);
             return [first].concat(str_parts(rest, num_chars));
@@ -931,7 +755,8 @@ function get_stack(caller) {
             var before = cursor.prev();
             var after = cursor.next();
             function draw_cursor_line(string, position) {
-                if (position == string.length) {
+                var len = string.length;
+                if (position == len) {
                     before.html(encodeHTML(string));
                     cursor.html('&nbsp;');
                     after.html('');
@@ -948,7 +773,7 @@ function get_stack(caller) {
                     var c = string.slice(position, position + 1);
                     //cursor.html(string[position]));
                     cursor.html(c == ' ' ? '&nbsp;' : encodeHTML(c));
-                    if (position == string.lenght - 1) {
+                    if (position == string.length - 1) {
                         after.html('');
                     } else {
                         after.html(encodeHTML(string.slice(position + 1)));
@@ -961,7 +786,8 @@ function get_stack(caller) {
             function lines_after(lines) {
                 var last_ins = after;
                 $.each(lines, function(i, line) {
-                    last_ins = $(div(line)).insertAfter(last_ins).addClass('clear');
+                    last_ins = $(div(line)).insertAfter(last_ins).
+                        addClass('clear');
                 });
             }
             function lines_before(lines) {
@@ -1038,10 +864,11 @@ function get_stack(caller) {
                         } else {
                             var last = array.slice(-1)[0];
                             var from_last = string.length - position;
+                            var last_len = last.length;
                             var pos = 0;
-                            if (from_last <= last.length) {
+                            if (from_last <= last_len) {
                                 lines_before(array.slice(0, -1));
-                                pos = last.length==from_last ? 0 : last.length-from_last;
+                                pos = last_len==from_last ? 0 : last_len-from_last;
                                 draw_cursor_line(last, pos+tabs_rm);
                             } else {
                                 // in the middle
@@ -1058,8 +885,9 @@ function get_stack(caller) {
                                     var current;
                                     pos = position;
                                     for (i=0; i<array.length; ++i) {
-                                        if (pos > array[i].length) {
-                                            pos -= array[i].length;
+                                        var current_len = array[i].length;
+                                        if (pos > current_len) {
+                                            pos -= current_len;
                                         } else {
                                             break;
                                         }
@@ -1095,11 +923,11 @@ function get_stack(caller) {
             return function() {
                 if (typeof prompt == 'string') {
                     prompt_len = skipFormattingCount(prompt);
-                    prompt_node.html(encodeHTML(prompt) + '&nbsp;');
+                    prompt_node.html(encodeHTML(prompt));
                 } else {
                     prompt(function(string) {
                         prompt_len = skipFormattingCount(string);
-                        prompt_node.html(encodeHTML(string) + '&nbsp;');
+                        prompt_node.html(encodeHTML(string));
                     });
                 }
                 //change_num_chars();
@@ -1408,7 +1236,7 @@ function get_stack(caller) {
         });
         // INIT
         self.name(options.name || '');
-        prompt = options.prompt || '>';
+        prompt = options.prompt || '> ';
         draw_prompt();
         if (options.enabled === undefined || options.enabled === true) {
             self.enable();
@@ -1473,7 +1301,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.12';
+    var version = '0.4.14';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1513,13 +1341,14 @@ function get_stack(caller) {
         var command_list = []; // for tab completion
         var settings = {
             name: '',
-            prompt: '>',
+            prompt: '> ',
             history: true,
             exit: true,
             clear: true,
             enabled: true,
             login: null,
             tabcompletion: false,
+			historyFilter: null,
             onInit: null,
             onExit: null,
             keypress: null,
@@ -1618,79 +1447,6 @@ function get_stack(caller) {
                 self.attr('scrollHeight');
             self.scrollTop(scrollHeight);
         }
-
-        //split string to array of strings with the same length and keep formatting
-        function get_formatted_lines(str, length) {
-            var array = str.split(/\n/g);
-            var re_format = /(\[\[[bius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
-            var re_begin = /(\[\[[bius]*;[^;]*;[^\]]*\])/;
-            var re_last = /\[\[[bius]*;?[^;]*;?[^\]]*\]?$/;
-            var formatting = false;
-            var in_text = false;
-            var braket = 0;
-            var prev_format = '';
-            var result = [];
-            for (var i = 0, len = array.length; i < len; ++i) {
-                if (prev_format !== '') {
-                    if (array[i] === '') {
-                        result.push(prev_format + ']');
-                        continue;
-                    } else {
-                        array[i] = prev_format + array[i];
-                        prev_format = '';
-                    }
-                } else {
-                    if (array[i] === '') {
-                        result.push('');
-                        continue;
-                    }
-                }
-                var line = array[i];
-                var first_index = 0;
-                var count = 0;
-                for (var j=0, jlen=line.length; j<jlen; ++j) {
-                    if (line[j] == '[' && line[j+1] == '[') {
-                        formatting = true;
-                    } else if (formatting && line[j] == ']') {
-                        if (in_text) {
-                            formatting = false;
-                            in_text = false;
-                        } else {
-                            in_text = true;
-                        }
-                    } else if ((formatting && in_text) || !formatting) {
-                        ++count;
-                    }
-                    if (count == length || j==jlen-1) {
-                        var output_line = line.substring(first_index, j+1);
-                        if (prev_format) {
-                            output_line = prev_format + output_line;
-                            if (output_line.match(']')) {
-                                prev_format = '';
-                            }
-                        }
-                        first_index = j+1;
-                        count = 0;
-                        var matched = output_line.match(re_format);
-                        if (matched) {
-                            var last = matched[matched.length-1];
-                            if (last[last.length-1] != ']') {
-                                prev_format = last.match(re_begin)[1];
-                                output_line += ']'
-                            } else if (output_line.match(re_last)) {
-                                var line_len = output_line.length;
-                                var f_len = line_len - last[last.length-1].length;
-                                output_line = output_line.replace(re_last, '');
-                                prev_format = last.match(re_begin)[1];
-                            }
-                        }
-                        result.push(output_line);
-                    }
-                }
-            }
-            return result;
-        }
-
 
         function draw_line(string) {
             string = typeof string == 'string' ? string : String(string);
@@ -2050,10 +1806,10 @@ function get_stack(caller) {
             }
             if (typeof prompt == 'function') {
                 prompt(function(string) {
-                    self.echo(string + ' ' + command);
+                    self.echo(string + command);
                 });
             } else {
-                self.echo(prompt + ' ' +command);
+                self.echo(prompt + command);
             }
         }
 
@@ -2069,6 +1825,7 @@ function get_stack(caller) {
                             logout();
                         } else {
                             var msg = 'You can exit from main interpeter';
+							echo_command(command);
                             self.echo(msg);
                         }
                     } else {
@@ -2095,7 +1852,7 @@ function get_stack(caller) {
         // if user call it with value that is true
         function login() {
             var user = null;
-            command_line.prompt('login:');
+            command_line.prompt('login: ');
             // don't stor logins in history
             if (settings.history) {
                 command_line.history().disable();
@@ -2105,7 +1862,7 @@ function get_stack(caller) {
                     echo_command(command);
                     if (!user) {
                         user = command;
-                        command_line.prompt('password:');
+                        command_line.prompt('password: ');
                         command_line.mask(true);
                     } else {
                         command_line.mask(false);
@@ -2126,7 +1883,7 @@ function get_stack(caller) {
                                 initialize();
                             } else {
                                 self.error('Wrong password try again');
-                                command_line.prompt('login:');
+                                command_line.prompt('login: ');
                                 user = null;
                             }
                             self.resume();
@@ -2184,6 +1941,8 @@ function get_stack(caller) {
         }
         var tab_count = 0;
         var scrollBars = haveScrollbars();
+		var old_prompt;
+        var reverse_search = false;
         function key_down(e) {
             // after text pasted into textarea in cmd plugin
             self.oneTime(5, function() {
@@ -2215,7 +1974,7 @@ function get_stack(caller) {
                             self.set_command('');
                         }
                     }
-                    e.preventDefault();
+                    return false;
                 } else if (settings.tabcompletion && e.which == 9) { // TAB
                     ++tab_count;
                     var command = command_line.get();
@@ -2248,11 +2007,26 @@ function get_stack(caller) {
                     if (terminals.length() > 1) {
                         self.focus(false);
                     }
-                    e.preventDefault();
+                    return false;
                 } else if (e.which == 34) { // PAGE DOWN
                     self.scroll(self.height());
                 } else if (e.which == 33) { // PAGE UP
                     self.scroll(-self.height());
+				} else if (e.which == 82 && e.ctrlKey) { // CTRL+R
+                    if (reverse_search) {
+					    // go back in history
+                        
+                    } else {
+                        old_prompt = self.get_prompt();
+					    self.set_prompt("(reverse-i-search)`':");
+					    reverse_search = true;
+                    }
+                    return false;
+                } else if (e.which == 27) { // ESC
+                    if (reverse_search) {
+                        self.set_prompt(old_prompt);
+                        reverse_search = false;
+                    }
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
@@ -2315,7 +2089,7 @@ function get_stack(caller) {
                             val = make_eval(val);
                         }
                         self.push(val, {
-                            prompt: method + '>',
+                            prompt: method + '> ',
                             name: method,
                             command_list: commands
                         });
@@ -2368,6 +2142,7 @@ function get_stack(caller) {
             var command_line = self.find('.terminal-output').next().cmd({
                 prompt: settings.prompt,
                 history: settings.history,
+				historyFilter: settings.historyFilter,
                 width: '100%',
                 keydown: key_down,
                 keypress: settings.keypress ? function(e) {
@@ -2381,10 +2156,6 @@ function get_stack(caller) {
                 },
                 commands: commands
             });
-            self.livequery(function() {
-                self.resize();
-            });
-            //self.resize();
             //num_chars = get_num_chars();
             terminals.append(self);
             if (settings.enabled === true) {
