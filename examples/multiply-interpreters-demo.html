@@ -17,7 +17,7 @@
 <script>
 jQuery(document).ready(function($) {
     var id = 1;
-    $(document.documentElement).terminal(function(command, term) {
+    $('body').terminal(function(command, term) {
         if (command == 'help') {
             term.echo("available commands are mysql, js, test");
         } else if (command == 'test'){

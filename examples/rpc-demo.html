@@ -11,13 +11,12 @@
     <link href="../css/jquery.terminal.css" rel="stylesheet"/>
     <script>
 jQuery(document).ready(function($) {
-    $(document.documentElement).terminal("json-rpc-service-demo.php", {
+    $('body').terminal("json-rpc-service-demo.php", {
         login: true,
         greetings: "You are authenticated"
     });
-    $('body').css('display', 'none');
 });
     </script>
   </head>
-<body style="display:none">
+<body>
 </body>
