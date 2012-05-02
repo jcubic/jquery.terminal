@@ -29,6 +29,7 @@
     color: #aaa;
     background-color: #000;
     font-size: 12px;
+    line-height: 16px;
 }
 .terminal .cmd span {
     float: left;
