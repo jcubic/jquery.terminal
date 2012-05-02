@@ -1,3 +1,4 @@
+0.4.15    only one command from multiply commands is added to history
 0.4.14    terminal don't add space after prompt (prompt need to add this space)
           fix historyFilter
           remove livequery
