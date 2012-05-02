@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Thu, 26 Apr 2012 10:02:04 +0000
+ * Date: Wed, 02 May 2012 10:32:03 +0000
  */
 
 /*
@@ -1557,6 +1557,8 @@ function get_stack(caller) {
             focus: function(toggle) {
                 //console.log('focus on ' + options.prompt + '\n' +
                 //            get_stack(arguments.callee.caller).join(''));
+                // TODO: one terminal should go out of focus
+                // TODO: add onFocus and onBlur
                 self.oneTime(1, function() {
                     if (terminals.length() == 1) {
                         if (toggle === false) {
@@ -1961,18 +1963,16 @@ function get_stack(caller) {
                     tab_count = 0;
                 }
                 if (e.which == 68 && e.ctrlKey) { // CTRL+D
-                    if (settings.exit) {
-                        if (command_line.get() === '') {
-                            if (interpreters.size() > 1 ||
-								settings.login !== undefined) {
-                                self.pop('');
-                            } else {
-                                self.resume();
-                                self.echo('');
-                            }
+                    if (command_line.get() === '') {
+                        if (interpreters.size() > 1 ||
+							settings.login !== undefined) {
+                            self.pop('');
                         } else {
-                            self.set_command('');
+                            self.resume();
+                            self.echo('');
                         }
+                    } else {
+                        self.set_command('');
                     }
                     return false;
                 } else if (settings.tabcompletion && e.which == 9) { // TAB
