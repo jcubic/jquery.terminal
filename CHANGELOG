@@ -1,4 +1,7 @@
+0.4.16    add reverse history search on CTRL+R
+          fix cancel ajax call on CTRL+D
 0.4.15    only one command from multiply commands is added to history
+          CTRL+D is handled even if exit is false
 0.4.14    terminal don't add space after prompt (prompt need to add this space)
           fix historyFilter
           remove livequery

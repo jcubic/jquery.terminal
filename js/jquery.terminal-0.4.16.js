@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.15
+ *|           \/              /____/                              version 0.4.16
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Wed, 02 May 2012 10:41:10 +0000
+ * Date: Mon, 11 Jun 2012 16:47:11 +0000
  */
 
 /*
@@ -699,7 +699,8 @@ function get_stack(caller) {
             },
             disable: function() {
                 enabled = false;
-            }});
+            }
+        });
     }
     // -----------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
@@ -715,7 +716,10 @@ function get_stack(caller) {
         }
         var num_chars; // calculates by draw_prompt
         var prompt_len;
-
+        var reverse_search = false;
+        var reverse_search_string = '';
+        var reverse_search_position = null;
+        var backup_prompt;
         var mask = options.mask || false;
         var command = '';
         var position = 0;
@@ -726,6 +730,35 @@ function get_stack(caller) {
 
         function blink(i) {
             cursor.toggleClass('inverted');
+        }
+        function draw_reverse_prompt() {
+            prompt = "(reverse-i-search)`" + reverse_search_string + "': ";
+            draw_prompt();
+        }
+        function clear_reverse_state() {
+            prompt = backup_prompt;
+            reverse_search = false;
+            reverse_search_position = null;
+            reverse_search_string = '';
+        }
+        // if next is not defined or false it search for first item from the end
+        // if true it search for next item
+        function reverse_history_search(next) {
+            var history_data = history.data();
+            var regex = new RegExp('^' + reverse_search_string);
+            var len = history_data.length;
+            if (next && reverse_search_position > 0) {
+                len -= reverse_search_position;
+            }
+            for (var i=len; i--;) {
+                if (regex.test(history_data[i])) {
+                    reverse_search_position = history_data.length - i;
+                    position = 0;
+                    self.set(history_data[i], true);
+                    redraw();
+                    break;
+                }
+            }
         }
 
         function change_num_chars() {
@@ -943,12 +976,26 @@ function get_stack(caller) {
             });
         }
         function keydown_event(e) {
+            if (options.keydown && options.keydown(e) === false) {
+                return false;
+            }
             if (enabled) {
-                if (options.keydown && options.keydown(e) === false) {
-                    return false;
-                }
                 var pos, len, result;
-                if (e.altKey) {
+                // arrows / Home / End / ENTER
+                if (reverse_search && (e.which == 35 || e.which == 36 ||
+                                       e.which == 37 || e.which == 38 ||
+                                       e.which == 39 || e.which == 40 ||
+                                       e.which == 66 || e.which == 13 ||
+                                       e.which == 27)) {
+                    clear_reverse_state();
+                    draw_prompt();
+                    if (e.which == 27) { // ESC
+                        command = '';
+                    }
+                    redraw();
+                    // finish reverse search and execute normal event handler
+                    keydown_event.call(this, e);
+                } else if (e.altKey) {
                     // Chrome on Windows set ctrlKey and altKey for alt
                     // need to check for alt first
                     //if (e.which == 18) { // press ALT
@@ -980,13 +1027,23 @@ function get_stack(caller) {
                         draw_prompt();
                     }
                 } else if (e.which == 32) { //space
-                    self.insert(' ');
+                    if (reverse_search) {
+                        reverse_search_string += ' ';
+                        draw_reverse_prompt();
+                    } else {
+                        self.insert(' ');
+                    }
                 } else if (e.which == 8) { //backspace
-                    if (command !== '' && position > 0) {
-                        command = command.slice(0, position - 1) +
-                            command.slice(position, command.length);
-                        --position;
-                        redraw();
+                    if (reverse_search) {
+                        reverse_search_string = reverse_search_string.slice(0, -1);
+                        draw_reverse_prompt();
+                    } else {
+                        if (command !== '' && position > 0) {
+                            command = command.slice(0, position - 1) +
+                                command.slice(position, command.length);
+                            --position;
+                            redraw();
+                        }
                     }
                 } else if (e.which == 9 && !(e.ctrlKey || e.altKey)) { // TAB
                     self.insert('\t');
@@ -1031,6 +1088,17 @@ function get_stack(caller) {
                             --position;
                             redraw();
                         }
+                    }
+                } else if (e.which == 82 && e.ctrlKey) { // CTRL+R
+                    if (reverse_search) {
+                        console.log('deep search');
+                        reverse_history_search(true);
+                    } else {
+                        backup_prompt = prompt;
+                        draw_reverse_prompt();
+                        command = '';
+                        redraw();
+					    reverse_search = true;
                     }
                 } else if (e.which == 39 ||
                            (e.which == 70 && e.ctrlKey)) {
@@ -1213,6 +1281,7 @@ function get_stack(caller) {
             },
             enable: function() {
                 if (!enabled) {
+				    cursor.addClass('inverted');
                     self.everyTime(500, 'blink', blink);
                     enabled = true;
                 }
@@ -1223,7 +1292,7 @@ function get_stack(caller) {
             disable: function() {
                 if (enabled) {
                     self.stopTime('blink', blink);
-                    self.find('.cursor').removeClass('inverted');
+                    cursor.removeClass('inverted');
                     enabled = false;
                 }
             },
@@ -1256,7 +1325,7 @@ function get_stack(caller) {
             if (e.ctrlKey && e.which == 99) {
                 return true;
             }
-            if (options.keypress) {
+            if (!reverse_search && options.keypress) {
                 result = options.keypress(e);
             }
             if (result === undefined || result) {
@@ -1267,10 +1336,23 @@ function get_stack(caller) {
                         !(e.which == 38 && e.shiftKey)) {
                         return false;
                     } else if (!e.ctrlKey && !(e.altKey && e.which == 100)) {
-                        self.insert(String.fromCharCode(e.which));
+                        // TODO: this should be in one statement
+                        if (reverse_search) {
+                            reverse_search_string += String.fromCharCode(e.which);
+                            draw_reverse_prompt();
+                            reverse_history_search();
+                        } else {
+                            self.insert(String.fromCharCode(e.which));
+                        }
                         return false;
                     } else if (e.altKey) {
-                        self.insert(String.fromCharCode(e.which));
+                        if (reverse_search) {
+                            reverse_search_string += String.fromCharCode(e.which);
+                            draw_reverse_prompt();
+                            reverse_history_search();
+                        } else {
+                            self.insert(String.fromCharCode(e.which));
+                        }
                     }
                 }
             } else {
@@ -1303,7 +1385,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.15';
+    var version = '0.4.16';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1348,8 +1430,9 @@ function get_stack(caller) {
             exit: true,
             clear: true,
             enabled: true,
+            cancelableAjax: true,
             login: null,
-            tabcompletion: false,
+            tabcompletion: null,
 			historyFilter: null,
             onInit: null,
             onExit: null,
@@ -1385,7 +1468,7 @@ function get_stack(caller) {
         }
         //calculate numbers of characters
         function get_num_chars() {
-            var cursor = self.find('.cursor');
+            var cursor = $(this).find('.cursor');
             var cur_width = cursor.width()
             var result = Math.floor(self.width() / cur_width);
             if (haveScrollbars()) {
@@ -1426,7 +1509,7 @@ function get_stack(caller) {
 
         //validating if object is string or function, call that function and
         //display exeption if any
-        function valid(label, object) {
+        function validate(label, object) {
             try {
                 if (typeof object == 'function') {
                     object(function() {
@@ -1550,7 +1633,8 @@ function get_stack(caller) {
                     } else {
                         terminals.front().disable();
                         var next = terminals.rotate().enable();
-                        var x = next.offset().top - 50; // 100 provides buffer in viewport
+                        // 100 provides buffer in viewport
+                        var x = next.offset().top - 50;
                         $('html,body').animate({scrollTop: x}, 500);
                         return next;
                     }
@@ -1623,17 +1707,30 @@ function get_stack(caller) {
                 return command_line.get();
             },
             insert: function(string) {
-                command_line.insert(string);
-                return self;
+                if (typeof string == 'string') {
+                    command_line.insert(string);
+                    return self;
+                } else {
+                    throw "insert function argument is not a string";
+                }
             },
             set_prompt: function(prompt) {
-                if (valid('prompt', prompt)) {
-                    command_line.prompt(prompt);
+                if (validate('prompt', prompt)) {
+                    if (prompt.constructor == Function) {
+                        command_line.prompt(function(command) {
+                            prompt(command, self);
+                        });
+                    } else {
+                        command_line.prompt(prompt);
+                    }
+                    interpreters.top().prompt = prompt;
                 }
                 return self;
             },
 			get_prompt: function() {
-				return command_line.prompt();
+				return interpreters.top().prompt;
+                // command_line.prompt(); - can be a wrapper
+                //return command_line.prompt();
 			},
             set_command: function(command) {
                 command_line.set(command);
@@ -1643,14 +1740,20 @@ function get_stack(caller) {
                 command_line.mask(display);
                 return self;
             },
-            get_output: function() {
-                return $.map(lines, function(i, item) {
-                    return typeof item == 'function' ? item() : item;
-                }).get().join('\n');
+            get_output: function(raw) {
+                if (raw) {
+                    return lines;
+                } else {
+                    return $.map(lines, function(i, item) {
+                        return typeof item == 'function' ? item() : item;
+                    }).get().join('\n');
+                }
             },
             resize: function(width, height) {
-                if (width && height) {
+                if (width) {
                     self.width(width);
+                }
+                if (height) {
                     self.height(height);
                 }
                 num_chars = get_num_chars();
@@ -1658,7 +1761,7 @@ function get_stack(caller) {
                 var o = output.detach();
                 output.html('');
                 $.each(lines, function(i, line) {
-                    draw_line(typeof line == 'function' ? line() : line);
+                    draw_line(line.constructor == Function ? line() : line);
                 });
                 self.prepend(o);
                 scroll_to_bottom();
@@ -1711,7 +1814,7 @@ function get_stack(caller) {
                 return settings.name;
             },
             push: function(_eval, options) {
-                if (!options.prompt || valid('prompt', options.prompt)) {
+                if (!options.prompt || validate('prompt', options.prompt)) {
                     if (typeof _eval == 'string') {
                         _eval = make_json_rpc_eval_fun(options['eval'], self);
                     }
@@ -1927,7 +2030,13 @@ function get_stack(caller) {
             }
             name += terminal_id;
             command_line.name(name);
-            command_line.prompt(interpreter.prompt);
+            if (interpreter.prompt.constructor == Function) {
+                command_line.prompt(function(command) {
+                    interpreter.prompt(command, self);
+                });
+            } else {
+                command_line.prompt(interpreter.prompt);
+            }
             if (settings.history) {
                 command_line.history().enable();
             }
@@ -1945,8 +2054,6 @@ function get_stack(caller) {
         }
         var tab_count = 0;
         var scrollBars = haveScrollbars();
-		var old_prompt;
-        var reverse_search = false;
         function key_down(e) {
             // after text pasted into textarea in cmd plugin
             self.oneTime(5, function() {
@@ -1978,6 +2085,8 @@ function get_stack(caller) {
                     }
                     return false;
                 } else if (settings.tabcompletion && e.which == 9) { // TAB
+                    // TODO: move this to cmd plugin
+                    //       add tabcompletion = array | function
                     ++tab_count;
                     var command = command_line.get();
                     if (!command.match(' ')) { // complete only first word
@@ -2014,44 +2123,28 @@ function get_stack(caller) {
                     self.scroll(self.height());
                 } else if (e.which == 33) { // PAGE UP
                     self.scroll(-self.height());
-				} else if (e.which == 82 && e.ctrlKey) { // CTRL+R
-                    if (reverse_search) {
-					    // go back in history
-                        
-                    } else {
-                        old_prompt = self.get_prompt();
-					    self.set_prompt("(reverse-i-search)`':");
-					    reverse_search = true;
-                    }
-                    return false;
-                } else if (e.which == 27) { // ESC
-                    if (reverse_search) {
-                        self.set_prompt(old_prompt);
-                        reverse_search = false;
-                    }
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
-            }/* else {
-                // can't cancel ajax calls here - keydown is not firing when
-                // terminal is disabled
-                // and terminal is disabled when user call pause when calling
-                // ajax request
-                if (e.which == 68 && e.ctrlKey) { // CTRL+D
-                    for (var i=requests.length; i--;) {
-                        var r = requests[i];
-                        if (4 != r.readyState) {
-                            try {
-                                r.abort();
-                            } catch(e) {
-                                self.error('error in aborting ajax');
+            } else {
+                // cancel ajax requests
+                if (settings.cancelableAjax) {
+                    if (e.which == 68 && e.ctrlKey) { // CTRL+D
+                        for (var i=requests.length; i--;) {
+                            var r = requests[i];
+                            if (4 != r.readyState) {
+                                try {
+                                    r.abort();
+                                } catch(e) {
+                                    self.error('error in aborting ajax');
+                                }
                             }
                         }
+                        self.resume();
+                        return false;
                     }
-                    self.resume();
-                    return false;
                 }
-            }*/
+            }
         }
         // INIT CODE
         var url;
@@ -2133,7 +2226,7 @@ function get_stack(caller) {
                 //default name is login so you can pass true
             })(typeof settings.login == 'boolean' ? 'login' : settings.login);
         }
-        if (valid('prompt', settings.prompt)) {
+        if (validate('prompt', settings.prompt)) {
             var interpreters = new Stack({
                 name: settings.name,
                 'eval': init_eval,
