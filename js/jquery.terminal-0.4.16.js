@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Mon, 11 Jun 2012 20:18:18 +0000
+ * Date: Mon, 11 Jun 2012 20:27:43 +0000
  */
 
 /*
@@ -780,8 +780,8 @@ function get_stack(caller) {
             result[0] = result[0].substring(prompt_len);
             return result;
             */
-            var first = string.substring(0, num_chars - prompt_len - 1);
-            var rest = string.substring(num_chars - prompt_len - 1);
+            var first = string.substring(0, num_chars - prompt_len);
+            var rest = string.substring(num_chars - prompt_len);
             return [first].concat(str_parts(rest, num_chars));
         }
         var redraw = (function(self) {
