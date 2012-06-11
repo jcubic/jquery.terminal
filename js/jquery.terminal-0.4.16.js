@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Mon, 11 Jun 2012 20:27:43 +0000
+ * Date: Mon, 11 Jun 2012 20:29:45 +0000
  */
 
 /*
@@ -1091,7 +1091,6 @@ function get_stack(caller) {
                     }
                 } else if (e.which == 82 && e.ctrlKey) { // CTRL+R
                     if (reverse_search) {
-                        console.log('deep search');
                         reverse_history_search(true);
                     } else {
                         backup_prompt = prompt;
@@ -1754,7 +1753,6 @@ function get_stack(caller) {
                     self.width(width);
                     self.height(height);
                 }
-                console.log(num_chars);
                 num_chars = get_num_chars();
                 command_line.resize(num_chars);
                 var o = output.detach();
