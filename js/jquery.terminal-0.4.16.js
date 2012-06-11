@@ -21,7 +21,7 @@
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Mon, 11 Jun 2012 16:47:11 +0000
+ * Date: Mon, 11 Jun 2012 20:18:18 +0000
  */
 
 /*
@@ -1468,7 +1468,7 @@ function get_stack(caller) {
         }
         //calculate numbers of characters
         function get_num_chars() {
-            var cursor = $(this).find('.cursor');
+            var cursor = self.find('.cursor');
             var cur_width = cursor.width()
             var result = Math.floor(self.width() / cur_width);
             if (haveScrollbars()) {
@@ -1750,12 +1750,11 @@ function get_stack(caller) {
                 }
             },
             resize: function(width, height) {
-                if (width) {
+                if (width && height) {
                     self.width(width);
-                }
-                if (height) {
                     self.height(height);
                 }
+                console.log(num_chars);
                 num_chars = get_num_chars();
                 command_line.resize(num_chars);
                 var o = output.detach();
