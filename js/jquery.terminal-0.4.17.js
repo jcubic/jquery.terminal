@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 20 Jun 2012 08:21:39 +0000
+ * Date: Wed, 20 Jun 2012 14:22:35 +0000
  */
 
 /*
@@ -440,11 +440,13 @@ function get_stack(caller) {
             str = str.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
             //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
             var splited = str.split(format_split_re);
+            //console.log($.json_stringify(splited));
             if (splited.length > 1) {
-                str = $.map(splited, function(text) {
+                str = $.map(splited, function(text) {;
                     if (text === '') {
                         return text;
-                    } else if (text[0] == '[') {
+                    } else if (text.substring(0,1) == '[') {
+                        // use substring for IE quirks mode [0] don't work
                         return text.replace(format_re, function(s,
                                                                 style,
                                                                 color,
@@ -482,6 +484,7 @@ function get_stack(caller) {
                             return str;
                         });
                     } else {
+                        console.log('3');
                         return '<span>' + text + '</span>';
                     }
                 }).join('');
