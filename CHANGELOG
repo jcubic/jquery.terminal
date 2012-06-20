@@ -1,4 +1,6 @@
+0.4.17    fix IE formatting issue by adding cross-browser split
 0.4.16    add reverse history search on CTRL+R
+
           fix cancel ajax call on CTRL+D
 0.4.15    only one command from multiply commands is added to history
           CTRL+D is handled even if exit is false

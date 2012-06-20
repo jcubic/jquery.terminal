@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.16
+ *|           \/              /____/                              version 0.4.17
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -15,13 +15,14 @@
  * Storage plugin Distributed under the MIT License
  * Copyright (c) 2010 Dave Schindler
  *
- * LiveQuery plugin Dual MIT and GPL
- * Copyright (c) 2008 Brandon Aaron (http://brandonaaron.net)
- *
  * jQuery Timers licenced with the WTFPL
  * <http://jquery.offput.ca/every/>
  *
- * Date: Mon, 11 Jun 2012 20:29:45 +0000
+ * Cross-Browser Split 1.1.1
+ * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
+ * Available under the MIT License
+ *
+ * Date: Wed, 20 Jun 2012 08:21:39 +0000
  */
 
 /*
@@ -44,10 +45,6 @@
           distinguish between paused and disabled
           paused should block keydown in terminal it should disable command line
           disable
-
-          if (CTRL+D && ajax-call) {
-            xhr.abort();
-          }
 
 */
 // return true if value is in array
@@ -310,6 +307,95 @@ function get_stack(caller) {
             }
         });
     }
+    // ----------------------------------------
+    // START CROSS BROWSER SPLIT
+    // ----------------------------------------
+    
+    var split;
+
+    // Avoid running twice; that would break the `nativeSplit` reference
+    split = split || function (undef) {
+
+        var nativeSplit = String.prototype.split,
+        compliantExecNpcg = /()??/.exec("")[1] === undef, // NPCG: nonparticipating capturing group
+        self;
+
+        self = function (str, separator, limit) {
+            // If `separator` is not a regex, use `nativeSplit`
+            if (Object.prototype.toString.call(separator) !== "[object RegExp]") {
+                return nativeSplit.call(str, separator, limit);
+            }
+            var output = [],
+            flags = (separator.ignoreCase ? "i" : "") +
+                (separator.multiline  ? "m" : "") +
+                (separator.extended   ? "x" : "") + // Proposed for ES6
+                (separator.sticky     ? "y" : ""), // Firefox 3+
+                lastLastIndex = 0,
+            // Make `global` and avoid `lastIndex` issues by working with a copy
+            separator = new RegExp(separator.source, flags + "g"),
+            separator2, match, lastIndex, lastLength;
+            str += ""; // Type-convert
+            if (!compliantExecNpcg) {
+                // Doesn't need flags gy, but they don't hurt
+                separator2 = new RegExp("^" + separator.source + "$(?!\\s)", flags);
+            }
+            /* Values for `limit`, per the spec:
+         * If undefined: 4294967295 // Math.pow(2, 32) - 1
+         * If 0, Infinity, or NaN: 0
+         * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
+         * If negative number: 4294967296 - Math.floor(Math.abs(limit))
+         * If other: Type-convert, then use the above rules
+         */
+            limit = limit === undef ?
+                -1 >>> 0 : // Math.pow(2, 32) - 1
+                limit >>> 0; // ToUint32(limit)
+                while (match = separator.exec(str)) {
+                    // `separator.lastIndex` is not reliable cross-browser
+                    lastIndex = match.index + match[0].length;
+                    if (lastIndex > lastLastIndex) {
+                        output.push(str.slice(lastLastIndex, match.index));
+                        // Fix browsers whose `exec` methods don't consistently return `undefined` for
+                        // nonparticipating capturing groups
+                        if (!compliantExecNpcg && match.length > 1) {
+                            match[0].replace(separator2, function () {
+                                for (var i = 1; i < arguments.length - 2; i++) {
+                                    if (arguments[i] === undef) {
+                                        match[i] = undef;
+                                    }
+                                }
+                            });
+                        }
+                        if (match.length > 1 && match.index < str.length) {
+                            Array.prototype.push.apply(output, match.slice(1));
+                        }
+                        lastLength = match[0].length;
+                        lastLastIndex = lastIndex;
+                        if (output.length >= limit) {
+                            break;
+                        }
+                    }
+                    if (separator.lastIndex === match.index) {
+                        separator.lastIndex++; // Avoid an infinite loop
+                    }
+                }
+            if (lastLastIndex === str.length) {
+                if (lastLength || !separator.test("")) {
+                    output.push("");
+                }
+            } else {
+                output.push(str.slice(lastLastIndex));
+            }
+            return output.length > limit ? output.slice(0, limit) : output;
+        };
+
+        // For convenience
+        String.prototype.split = function (separator, limit) {
+            return self(this, separator, limit);
+        };
+
+        return self;
+
+    }();
 
     // -----------------------------------------------------------------------
     /*
@@ -1384,16 +1470,16 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.16';
+    var version = '0.4.17';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
     var signatures = [
         ['jQuery Terminal', '(c) 2011 jcubic'],
-        ['JQuery Terminal Emulator v. ' + version,
+        ['jQuery Terminal Emulator v. ' + version,
          copyright.replace(/ *<.*>/, '')],
-        ['JQuery Terminal Emulator version ' + version_string,
+        ['jQuery Terminal Emulator version ' + version_string,
          copyright],
         ['      _______                 ________                        __',
          '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
@@ -1489,7 +1575,11 @@ function get_stack(caller) {
             if (typeof e == 'string') {
                 message = e;
             } else {
-                message = e.fileName + ': ' + e.message;
+                if (typeof e.fileName == 'string') {
+                    message = e.fileName + ': ' + e.message;
+                } else {
+                    message = e.message;
+                }
             }
             self.error('&#91;' + label + '&#93;: ' + message);
             self.pause();
@@ -1500,7 +1590,7 @@ function get_stack(caller) {
                     var num = e.lineNumber - 1;
                     var line = file.split('\n')[num];
                     if (line) {
-                        self.error('&#91;' + e.lineNumber + '&#93;: ' +line);
+                        self.error('&#91;' + e.lineNumber + '&#93;: ' + line);
                     }
                 });
             }
