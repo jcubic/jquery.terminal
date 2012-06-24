@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 20 Jun 2012 14:22:35 +0000
+ * Date: Sun, 24 Jun 2012 11:03:14 +0000
  */
 
 /*
@@ -49,8 +49,9 @@
 */
 // return true if value is in array
 Array.prototype.has = function(val) {
+    "use strict";
     for (var i = this.length; i--;) {
-        if (this[i] == val) {
+        if (this[i] === val) {
             return true;
         }
     }
@@ -59,6 +60,7 @@ Array.prototype.has = function(val) {
 
 // debug function
 function get_stack(caller) {
+    "use strict";
     if (caller) {
         return [caller.toString().match(/.*\n.*\n/)].concat(get_stack(caller.caller));
     } else {
@@ -67,7 +69,7 @@ function get_stack(caller) {
 }
 
 (function($, undefined) {
-
+    "use strict";
     // ----------------------------------------
     // START Storage plugin
     // ----------------------------------------
@@ -184,7 +186,7 @@ function get_stack(caller) {
                 'ks': 1000000
             },
             timeParse: function(value) {
-                if (value == undefined || value === null) {
+                if (value === undefined || value === null) {
                     return null;
                 }
                 var result = this.regex.exec(jQuery.trim(value.toString()));
@@ -209,12 +211,12 @@ function get_stack(caller) {
 
                 interval = jQuery.timer.timeParse(interval);
 
-                if (typeof interval != 'number' ||
+                if (typeof interval !== 'number' ||
                     isNaN(interval) ||
                     interval <= 0) {
                     return;
                 }
-                if (times && times.constructor != Number) {
+                if (times && times.constructor !== Number) {
                     belay = !!times;
                     times = 0;
                 }
@@ -260,8 +262,10 @@ function get_stack(caller) {
                 if (timers) {
 
                     if (!label) {
-                        for (label in timers) {
-                            this.remove(element, label, fn);
+                        for (var lab in timers) {
+                            if (timers.hasOwnProperty(lab)) {
+                                this.remove(element, lab, fn);
+                            }
                         }
                     } else if (timers[label]) {
                         if (fn) {
@@ -270,14 +274,18 @@ function get_stack(caller) {
                                 delete timers[label][fn.$timerID];
                             }
                         } else {
-                            for (var fn in timers[label]) {
-                                window.clearInterval(timers[label][fn]);
-                                delete timers[label][fn];
+                            for (var _fn in timers[label]) {
+                                if (timers[label].hasOwnProperty(_fn)) {
+                                    window.clearInterval(timers[label][_fn]);
+                                    delete timers[label][_fn];
+                                }
                             }
                         }
 
                         for (ret in timers[label]) {
-                            break;
+                            if (timers[label].hasOwnProperty(ret)) {
+                                break;
+                            }
                         }
                         if (!ret) {
                             ret = null;
@@ -286,7 +294,9 @@ function get_stack(caller) {
                     }
 
                     for (ret in timers) {
-                        break;
+                        if (timers.hasOwnProperty(ret)) {
+                            break;
+                        }
                     }
                     if (!ret) {
                         element.$timers = null;
@@ -300,9 +310,11 @@ function get_stack(caller) {
         jQuery(window).one('unload', function() {
             var global = jQuery.timer.global;
             for (var label in global) {
-                var els = global[label], i = els.length;
-                while (--i) {
-                    jQuery.timer.remove(els[i], label);
+                if (global.hasOwnProperty(label)) {
+                    var els = global[label], i = els.length;
+                    while (--i) {
+                        jQuery.timer.remove(els[i], label);
+                    }
                 }
             }
         });
@@ -332,8 +344,8 @@ function get_stack(caller) {
                 (separator.sticky     ? "y" : ""), // Firefox 3+
                 lastLastIndex = 0,
             // Make `global` and avoid `lastIndex` issues by working with a copy
-            separator = new RegExp(separator.source, flags + "g"),
             separator2, match, lastIndex, lastLength;
+            separator = new RegExp(separator.source, flags + "g");
             str += ""; // Type-convert
             if (!compliantExecNpcg) {
                 // Doesn't need flags gy, but they don't hurt
@@ -346,10 +358,9 @@ function get_stack(caller) {
          * If negative number: 4294967296 - Math.floor(Math.abs(limit))
          * If other: Type-convert, then use the above rules
          */
-            limit = limit === undef ?
-                -1 >>> 0 : // Math.pow(2, 32) - 1
-                limit >>> 0; // ToUint32(limit)
-                while (match = separator.exec(str)) {
+            // ? Math.pow(2, 32) - 1 : ToUint32(limit)
+            limit = limit === undef ? -1 >>> 0 : limit >>> 0;
+            while (match = separator.exec(str)) {
                     // `separator.lastIndex` is not reliable cross-browser
                     lastIndex = match.index + match[0].length;
                     if (lastIndex > lastLastIndex) {
@@ -400,7 +411,7 @@ function get_stack(caller) {
     // -----------------------------------------------------------------------
     /*
     function decodeHTML(str) {
-        if (typeof str == 'string') {
+        if (typeof str === 'string') {
             str = str.replace(/&amp;/g, '&');
             str = str.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
             str = str.replace(/&#09;/g, '\t');
@@ -430,7 +441,7 @@ function get_stack(caller) {
     var format_re = /\[\[([bius]*);([^;]*);([^\]]*)\]([^\]\[]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     function encodeHTML(str) {
-        if (typeof str == 'string') {
+        if (typeof str === 'string') {
             // don't escape entities
             str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
             str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -442,11 +453,11 @@ function get_stack(caller) {
             var splited = str.split(format_split_re);
             //console.log($.json_stringify(splited));
             if (splited.length > 1) {
-                str = $.map(splited, function(text) {;
+                str = $.map(splited, function(text) {
                     if (text === '') {
                         return text;
-                    } else if (text.substring(0,1) == '[') {
-                        // use substring for IE quirks mode [0] don't work
+                    } else if (text.substring(0,1) === '[') {
+                        // use substring for IE quirks mode - [0] don't work
                         return text.replace(format_re, function(s,
                                                                 style,
                                                                 color,
@@ -456,21 +467,21 @@ function get_stack(caller) {
                                 return '<span>&nbsp;</span>';
                             }
                             var style_str = '';
-                            if (style.indexOf('b') != -1) {
+                            if (style.indexOf('b') !== -1) {
                                 style_str += 'font-weight:bold;';
                             }
                             var text_decoration = 'text-decoration:';
-                            if (style.indexOf('u') != -1) {
+                            if (style.indexOf('u') !== -1) {
                                 text_decoration += 'underline ';
                             }
-                            if (style.indexOf('s') != -1) {
+                            if (style.indexOf('s') !== -1) {
                                 text_decoration += 'line-through';
                             }
-                            if (style.indexOf('s') != -1 ||
-                                style.indexOf('u') != -1) {
+                            if (style.indexOf('s') !== -1 ||
+                                style.indexOf('u') !== -1) {
                                 style_str += text_decoration + ';';
                             }
-                            if (style.indexOf('i') != -1) {
+                            if (style.indexOf('i') !== -1) {
                                 style_str += 'font-style:italic; ';
                             }
                             if (color.match(color_hex_re)) {
@@ -484,7 +495,6 @@ function get_stack(caller) {
                             return str;
                         });
                     } else {
-                        console.log('3');
                         return '<span>' + text + '</span>';
                     }
                 }).join('');
@@ -526,9 +536,9 @@ function get_stack(caller) {
             var first_index = 0;
             var count = 0;
             for (var j=0, jlen=line.length; j<jlen; ++j) {
-                if (line[j] == '[' && line[j+1] == '[') {
+                if (line[j] === '[' && line[j+1] === '[') {
                     formatting = true;
-                } else if (formatting && line[j] == ']') {
+                } else if (formatting && line[j] === ']') {
                     if (in_text) {
                         formatting = false;
                         in_text = false;
@@ -538,7 +548,7 @@ function get_stack(caller) {
                 } else if ((formatting && in_text) || !formatting) {
                     ++count;
                 }
-                if (count == length || j==jlen-1) {
+                if (count === length || j === jlen-1) {
                     var output_line = line.substring(first_index, j+1);
                     if (prev_format) {
                         output_line = prev_format + output_line;
@@ -551,9 +561,9 @@ function get_stack(caller) {
                     var matched = output_line.match(re_format);
                     if (matched) {
                         var last = matched[matched.length-1];
-                        if (last[last.length-1] != ']') {
+                        if (last[last.length-1] !== ']') {
                             prev_format = last.match(re_begin)[1];
-                            output_line += ']'
+                            output_line += ']';
                         } else if (output_line.match(re_last)) {
                             var line_len = output_line.length;
                             var f_len = line_len - last[last.length-1].length;
@@ -587,10 +597,10 @@ function get_stack(caller) {
         var pos = 0;
         $.extend(this, {
             rotate: function() {
-                if (data.length == 1) {
+                if (data.length === 1) {
                     return data[0];
                 } else {
-                    if (pos == data.length - 1) {
+                    if (pos === data.length - 1) {
                         pos = 0;
                     } else {
                         ++pos;
@@ -634,7 +644,7 @@ function get_stack(caller) {
                 return data[pos];
             },
             right: function() {
-                if (pos == data.length - 1) {
+                if (pos === data.length - 1) {
                     pos = 0;
                 } else {
                     ++pos;
@@ -742,7 +752,7 @@ function get_stack(caller) {
         }
         result += (level > 1 ? ',' : '');
         // quick hacks below
-        if (level == 1) {
+        if (level === 1) {
             // fix last comma
             result = result.replace(/,([\]}])/g, '$1');
         }
@@ -762,7 +772,7 @@ function get_stack(caller) {
 
         $.extend(this, {
             append: function(item) {
-                if (enabled && bc.current() != item) {
+                if (enabled && bc.current() !== item) {
                     bc.append(item);
                     $.Storage.set(name + 'commands', $.json_stringify(bc.data()));
                 }
@@ -878,7 +888,7 @@ function get_stack(caller) {
             var after = cursor.next();
             function draw_cursor_line(string, position) {
                 var len = string.length;
-                if (position == len) {
+                if (position === len) {
                     before.html(encodeHTML(string));
                     cursor.html('&nbsp;');
                     after.html('');
@@ -894,8 +904,8 @@ function get_stack(caller) {
                     //fix for tilda in IE
                     var c = string.slice(position, position + 1);
                     //cursor.html(string[position]));
-                    cursor.html(c == ' ' ? '&nbsp;' : encodeHTML(c));
-                    if (position == string.length - 1) {
+                    cursor.html(c === ' ' ? '&nbsp;' : encodeHTML(c));
+                    if (position === string.length - 1) {
                         after.html('');
                     } else {
                         after.html(encodeHTML(string.slice(position + 1)));
@@ -920,7 +930,7 @@ function get_stack(caller) {
             var count = 0;
             return function() {
                 var string = mask ? command.replace(/./g, '*') : command;
-                var i;
+                var i, first_len;
                 self.find('div').remove();
                 before.html('');
                 // long line
@@ -936,7 +946,7 @@ function get_stack(caller) {
                     // command contain new line characters
                     if (string.match(/\n/)) {
                         var tmp = string.split("\n");
-                        var first_len = num_chars - prompt_len - 1;
+                        first_len = num_chars - prompt_len - 1;
                         // empty character after each line
                         for (i=0; i<tmp.length-1; ++i) {
                             tmp[i] += ' ';
@@ -964,12 +974,12 @@ function get_stack(caller) {
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
                         });
                     }
-                    var first_len = array[0].length;
+                    first_len = array[0].length;
                     //cursor in first line
                     if (position < first_len) {
                         draw_cursor_line(array[0], position);
                         lines_after(array.slice(1));
-                    } else if (position == first_len) {
+                    } else if (position === first_len) {
                         before.before(div(array[0]));
                         draw_cursor_line(array[1], 0);
                         lines_after(array.slice(2));
@@ -979,7 +989,7 @@ function get_stack(caller) {
                         if (position < first_len) {
                             draw_cursor_line(array[0], position);
                             lines_after(array.slice(1));
-                        } else if (position == first_len) {
+                        } else if (position === first_len) {
                             before.before(div(array[0]));
                             draw_cursor_line(array[1], 0);
                             lines_after(array.slice(2));
@@ -990,11 +1000,11 @@ function get_stack(caller) {
                             var pos = 0;
                             if (from_last <= last_len) {
                                 lines_before(array.slice(0, -1));
-                                pos = last_len==from_last ? 0 : last_len-from_last;
+                                pos = last_len === from_last ? 0 : last_len-from_last;
                                 draw_cursor_line(last, pos+tabs_rm);
                             } else {
                                 // in the middle
-                                if (num_lines == 3) {
+                                if (num_lines === 3) {
                                     before.before('<div>' + encodeHTML(array[0]) +
                                                   '</div>');
                                     draw_cursor_line(array[1], position-first_len-1);
@@ -1017,7 +1027,7 @@ function get_stack(caller) {
                                     current = array[i];
                                     line_index = i;
                                     // cursor on first character in line
-                                    if (pos == current.length) {
+                                    if (pos === current.length) {
                                         pos = 0;
                                         current = array[++line_index];
                                     }
@@ -1043,7 +1053,7 @@ function get_stack(caller) {
         var draw_prompt = (function() {
             var prompt_node = self.find('.prompt');
             return function() {
-                if (typeof prompt == 'string') {
+                if (typeof prompt === 'string') {
                     prompt_len = skipFormattingCount(prompt);
                     prompt_node.html(encodeHTML(prompt));
                 } else {
@@ -1071,14 +1081,14 @@ function get_stack(caller) {
             if (enabled) {
                 var pos, len, result;
                 // arrows / Home / End / ENTER
-                if (reverse_search && (e.which == 35 || e.which == 36 ||
-                                       e.which == 37 || e.which == 38 ||
-                                       e.which == 39 || e.which == 40 ||
-                                       e.which == 66 || e.which == 13 ||
-                                       e.which == 27)) {
+                if (reverse_search && (e.which === 35 || e.which === 36 ||
+                                       e.which === 37 || e.which === 38 ||
+                                       e.which === 39 || e.which === 40 ||
+                                       e.which === 66 || e.which === 13 ||
+                                       e.which === 27)) {
                     clear_reverse_state();
                     draw_prompt();
-                    if (e.which == 27) { // ESC
+                    if (e.which === 27) { // ESC
                         command = '';
                     }
                     redraw();
@@ -1087,8 +1097,8 @@ function get_stack(caller) {
                 } else if (e.altKey) {
                     // Chrome on Windows set ctrlKey and altKey for alt
                     // need to check for alt first
-                    //if (e.which == 18) { // press ALT
-                    if (e.which == 68) { //ALT+D
+                    //if (e.which === 18) { // press ALT
+                    if (e.which === 68) { //ALT+D
                         var regex  = /[^ ]+ |[^ ]+$/;
                         self.set(command.slice(0, position) +
                                  command.slice(position).replace(regex, ''),
@@ -1097,32 +1107,32 @@ function get_stack(caller) {
                         return false;
                     }
                     return true;
-                } else if (e.keyCode == 13) { //enter
+                } else if (e.keyCode === 13) { //enter
                     if ((history && command) &&
-    					((options.historyFilter &&
-						 options.historyFilter(command)) ||
-						 !options.historyFilter)) {
-                        if (history.data().slice(-1)[0] != command) {
-							history.append(command);
+                        ((options.historyFilter &&
+                         options.historyFilter(command)) ||
+                         !options.historyFilter)) {
+                        if (history.data().slice(-1)[0] !== command) {
+                            history.append(command);
                         }
-					}
+                    }
                     history.last();
                     var tmp = command;
                     self.set('');
                     if (options.commands) {
                         options.commands(tmp);
                     }
-                    if (typeof prompt == 'function') {
+                    if (typeof prompt === 'function') {
                         draw_prompt();
                     }
-                } else if (e.which == 32) { //space
+                } else if (e.which === 32) { //space
                     if (reverse_search) {
                         reverse_search_string += ' ';
                         draw_reverse_prompt();
                     } else {
                         self.insert(' ');
                     }
-                } else if (e.which == 8) { //backspace
+                } else if (e.which === 8) { //backspace
                     if (reverse_search) {
                         reverse_search_string = reverse_search_string.slice(0, -1);
                         draw_reverse_prompt();
@@ -1134,9 +1144,9 @@ function get_stack(caller) {
                             redraw();
                         }
                     }
-                } else if (e.which == 9 && !(e.ctrlKey || e.altKey)) { // TAB
+                } else if (e.which === 9 && !(e.ctrlKey || e.altKey)) { // TAB
                     self.insert('\t');
-                } else if (e.which == 46) {
+                } else if (e.which === 46) {
                     //DELETE
                     if (command !== '' && position < command.length) {
                         command = command.slice(0, position) +
@@ -1144,28 +1154,28 @@ function get_stack(caller) {
                         redraw();
                     }
                     return true;
-                } else if (history && e.which == 38 ||
-                           (e.which == 80 && e.ctrlKey)) {
+                } else if (history && e.which === 38 ||
+                           (e.which === 80 && e.ctrlKey)) {
                     //UP ARROW or CTRL+P
                     self.set(history.previous());
-                } else if (history && e.which == 40 ||
-                           (e.which == 78 && e.ctrlKey)) {
+                } else if (history && e.which === 40 ||
+                           (e.which === 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
                     self.set(history.next());
-                } else if (e.which == 37 ||
-                           (e.which == 66 && e.ctrlKey)) {
+                } else if (e.which === 37 ||
+                           (e.which === 66 && e.ctrlKey)) {
                     //CTRL+LEFT ARROW or CTRL+B
-                    if (e.ctrlKey && e.which != 66) {
+                    if (e.ctrlKey && e.which !== 66) {
                         len = position - 1;
                         pos = 0;
-                        if (command[len] == ' ') {
+                        if (command[len] === ' ') {
                             --len;
                         }
                         for (var i = len; i > 0; --i) {
-                            if (command[i] == ' ' && command[i+1] != ' ') {
+                            if (command[i] === ' ' && command[i+1] !== ' ') {
                                 pos = i + 1;
                                 break;
-                            } else if (command[i] == '\n' && command[i+1] != '\n') {
+                            } else if (command[i] === '\n' && command[i+1] !== '\n') {
                                 pos = i;
                                 break;
                             }
@@ -1178,7 +1188,7 @@ function get_stack(caller) {
                             redraw();
                         }
                     }
-                } else if (e.which == 82 && e.ctrlKey) { // CTRL+R
+                } else if (e.which === 82 && e.ctrlKey) { // CTRL+R
                     if (reverse_search) {
                         reverse_history_search(true);
                     } else {
@@ -1186,25 +1196,25 @@ function get_stack(caller) {
                         draw_reverse_prompt();
                         command = '';
                         redraw();
-					    reverse_search = true;
+                        reverse_search = true;
                     }
-                } else if (e.which == 39 ||
-                           (e.which == 70 && e.ctrlKey)) {
+                } else if (e.which === 39 ||
+                           (e.which === 70 && e.ctrlKey)) {
                     //RIGHT ARROW OR CTRL+F
-                    if (e.ctrlKey && e.which != 70) {
+                    if (e.ctrlKey && e.which !== 70) {
                         // jump to beginig or end of the word
-                        if (command[position] == ' ') {
+                        if (command[position] === ' ') {
                             ++position;
                         }
                         var match = command.slice(position).match(/\S[\n\s]{2,}|[\n\s]+\S?/);
                         if (!match || match[0].match(/^\s+$/)) {
                             position = command.length;
                         } else {
-                            if (match[0][0] != ' ') {
+                            if (match[0][0] !== ' ') {
                                 position += match.index + 1;
                             } else {
                                 position += match.index + match[0].length - 1;
-                                if (match[0][match[0].length-1] != ' ') {
+                                if (match[0][match[0].length-1] !== ' ') {
                                     --position;
                                 }
                             }
@@ -1216,47 +1226,47 @@ function get_stack(caller) {
                             redraw();
                         }
                     }
-                } else if (e.which == 123) { //F12 - Allow Firebug
+                } else if (e.which === 123) { //F12 - Allow Firebug
                     return true;
-                } else if (e.which == 36) { //HOME
+                } else if (e.which === 36) { //HOME
                     self.position(0);
-                } else if (e.which == 35) {
+                } else if (e.which === 35) {
                     //END
                     self.position(command.length);
                 } else if (e.ctrlKey || e.metaKey) {
                     if (e.shiftKey) { // CTRL+SHIFT+??
-                        if (e.which == 84) {
+                        if (e.which === 84) {
                             //CTRL+SHIFT+T open closed tab
                             return true;
                         }
                     //} else if (e.altKey) { //ALT+CTRL+??
                     } else {
                         //NOTE: in opera charCode is undefined
-                        if (e.which == 65) {
+                        if (e.which === 65) {
                             //CTRL+A
                             self.position(0);
-                        } else if (e.which == 69) {
+                        } else if (e.which === 69) {
                             //CTRL+E
                             self.position(command.length);
-                        } else if (e.which == 88 || e.which == 67 ||
-                                   e.which == 87 || e.which == 84) {
+                        } else if (e.which === 88 || e.which === 67 ||
+                                   e.which === 87 || e.which === 84) {
                             //CTRL+X CTRL+C CTRL+W CTRL+T
                             return true;
-                        } else if (e.which == 86) {
+                        } else if (e.which === 86) {
                             //CTRL+V
                             paste();
                             return true;
-                        } else if (e.which == 75) {
+                        } else if (e.which === 75) {
                             //CTRL+K
                             if (position === 0) {
                                 self.set('');
-                            } else if (position != command.length) {
+                            } else if (position !== command.length) {
                                 self.set(command.slice(0, position));
                             }
-                        } else if (e.which == 85) { // CTRL+U
+                        } else if (e.which === 85) { // CTRL+U
                             self.set(command.slice(position, command.length));
                             self.position(0);
-                        } else if (e.which == 17) { //CTRL+TAB switch tab
+                        } else if (e.which === 17) { //CTRL+TAB switch tab
                             return true;
                         }
                     }
@@ -1265,9 +1275,9 @@ function get_stack(caller) {
                 }
                 return false;
             } /*else {
-                if ((e.altKey && e.which == 68) ||
+                if ((e.altKey && e.which === 68) ||
                     (e.ctrlKey && [65, 66, 68, 69, 80, 78, 70].has(e.which)) ||
-                    // 68 == D
+                    // 68 === D
                     [35, 36, 37, 38, 39, 40].has(e.which)) {
                     return false;
                 }
@@ -1292,13 +1302,13 @@ function get_stack(caller) {
                         position = command.length;
                     }
                     redraw();
-                    if (typeof options.onCommandChange == 'function') {
+                    if (typeof options.onCommandChange === 'function') {
                         options.onCommandChange(command);
-				    }
+                    }
                 }
             },
             insert: function(string, stay) {
-                if (position == command.length) {
+                if (position === command.length) {
                     command += string;
                 } else if (position === 0) {
                     command = string + command;
@@ -1310,9 +1320,9 @@ function get_stack(caller) {
                     position += string.length;
                 }
                 redraw();
-                if (typeof options.onCommandChange == 'function') {
+                if (typeof options.onCommandChange === 'function') {
                     options.onCommandChange(command);
-				}
+                }
             },
             get: function() {
                 return command;
@@ -1332,8 +1342,8 @@ function get_stack(caller) {
                 if (user_prompt === undefined) {
                     return prompt;
                 } else {
-                    if (typeof user_prompt == 'string' ||
-                        typeof user_prompt == 'function') {
+                    if (typeof user_prompt === 'string' ||
+                        typeof user_prompt === 'function') {
                         prompt = user_prompt;
                     } else {
                         throw 'prompt must be a function or string';
@@ -1344,7 +1354,7 @@ function get_stack(caller) {
                 }
             },
             position: function(n) {
-                if (typeof n == 'number') {
+                if (typeof n === 'number') {
                     position = n < 0 ? 0 : n > command.length ? command.length : n;
                     redraw();
                 } else {
@@ -1369,7 +1379,7 @@ function get_stack(caller) {
             },
             enable: function() {
                 if (!enabled) {
-				    cursor.addClass('inverted');
+                    cursor.addClass('inverted');
                     self.everyTime(500, 'blink', blink);
                     enabled = true;
                 }
@@ -1385,7 +1395,7 @@ function get_stack(caller) {
                 }
             },
             mask: function(display) {
-                if (typeof display == 'boolean') {
+                if (typeof display === 'boolean') {
                     mask = display;
                     redraw();
                 } else {
@@ -1410,7 +1420,7 @@ function get_stack(caller) {
         }
         $(object).keypress(function(e) {
             var result;
-            if (e.ctrlKey && e.which == 99) {
+            if (e.ctrlKey && e.which === 99) {
                 return true;
             }
             if (!reverse_search && options.keypress) {
@@ -1419,11 +1429,11 @@ function get_stack(caller) {
             if (result === undefined || result) {
                 if (enabled) {
                     if ([38, 32, 13, 0, 8].has(e.which) &&
-                        e.keyCode != 123 && // for F12 which == 0
-                        //!(e.which == 40 && e.shiftKey ||
-                        !(e.which == 38 && e.shiftKey)) {
+                        e.keyCode !== 123 && // for F12 which === 0
+                        //!(e.which === 40 && e.shiftKey ||
+                        !(e.which === 38 && e.shiftKey)) {
                         return false;
-                    } else if (!e.ctrlKey && !(e.altKey && e.which == 100)) {
+                    } else if (!e.ctrlKey && !(e.altKey && e.which === 100)) {
                         // TODO: this should be in one statement
                         if (reverse_search) {
                             reverse_search_string += String.fromCharCode(e.which);
@@ -1521,7 +1531,7 @@ function get_stack(caller) {
             cancelableAjax: true,
             login: null,
             tabcompletion: null,
-			historyFilter: null,
+            historyFilter: null,
             onInit: null,
             onExit: null,
             keypress: null,
@@ -1557,7 +1567,7 @@ function get_stack(caller) {
         //calculate numbers of characters
         function get_num_chars() {
             var cursor = self.find('.cursor');
-            var cur_width = cursor.width()
+            var cur_width = cursor.width();
             var result = Math.floor(self.width() / cur_width);
             if (haveScrollbars()) {
                 // assume that scrollbars are 20px - in my Laptop with
@@ -1575,10 +1585,10 @@ function get_stack(caller) {
         // display Exception on terminal
         function display_exception(e, label) {
             var message;
-            if (typeof e == 'string') {
+            if (typeof e === 'string') {
                 message = e;
             } else {
-                if (typeof e.fileName == 'string') {
+                if (typeof e.fileName === 'string') {
                     message = e.fileName + ': ' + e.message;
                 } else {
                     message = e.message;
@@ -1586,7 +1596,7 @@ function get_stack(caller) {
             }
             self.error('&#91;' + label + '&#93;: ' + message);
             self.pause();
-            if (typeof e.fileName == 'string') {
+            if (typeof e.fileName === 'string') {
                 //display filename and line which throw exeption
                 $.get(e.fileName, function(file) {
                     self.resume();
@@ -1603,11 +1613,11 @@ function get_stack(caller) {
         //display exeption if any
         function validate(label, object) {
             try {
-                if (typeof object == 'function') {
+                if (typeof object === 'function') {
                     object(function() {
                         // don't care
                     });
-                } else if (typeof object != 'string') {
+                } else if (typeof object !== 'string') {
                     var msg = label + ' must be string or function';
                     throw msg;
                 }
@@ -1626,7 +1636,7 @@ function get_stack(caller) {
         }
 
         function draw_line(string) {
-            string = typeof string == 'string' ? string : String(string);
+            string = typeof string === 'string' ? string : String(string);
             var div, i, len;
             if (string.length > num_chars) {
                 // string can have line break
@@ -1636,7 +1646,7 @@ function get_stack(caller) {
 
                 div = $('<div></div>');
                 for (i = 0, len = array.length; i < len; ++i) {
-                    if (array[i] === '' || array[i] == '\r') {
+                    if (array[i] === '' || array[i] === '\r') {
                         div.append('<div>&nbsp;</div>');
                     } else {
                         $('<div/>').html(encodeHTML(array[i])).appendTo(div);
@@ -1712,7 +1722,7 @@ function get_stack(caller) {
                 return command_line.history();
             },
             next: function() {
-                if (terminals.length() == 1) {
+                if (terminals.length() === 1) {
                     return self;
                 } else {
                     var offsetTop = self.offset().top;
@@ -1738,7 +1748,7 @@ function get_stack(caller) {
                 // TODO: one terminal should go out of focus
                 // TODO: add onFocus and onBlur
                 self.oneTime(1, function() {
-                    if (terminals.length() == 1) {
+                    if (terminals.length() === 1) {
                         if (toggle === false) {
                             self.disable();
                         } else {
@@ -1799,7 +1809,7 @@ function get_stack(caller) {
                 return command_line.get();
             },
             insert: function(string) {
-                if (typeof string == 'string') {
+                if (typeof string === 'string') {
                     command_line.insert(string);
                     return self;
                 } else {
@@ -1808,7 +1818,7 @@ function get_stack(caller) {
             },
             set_prompt: function(prompt) {
                 if (validate('prompt', prompt)) {
-                    if (prompt.constructor == Function) {
+                    if (prompt.constructor === Function) {
                         command_line.prompt(function(command) {
                             prompt(command, self);
                         });
@@ -1819,11 +1829,11 @@ function get_stack(caller) {
                 }
                 return self;
             },
-			get_prompt: function() {
-				return interpreters.top().prompt;
+            get_prompt: function() {
+                return interpreters.top().prompt;
                 // command_line.prompt(); - can be a wrapper
                 //return command_line.prompt();
-			},
+            },
             set_command: function(command) {
                 command_line.set(command);
                 return self;
@@ -1837,7 +1847,7 @@ function get_stack(caller) {
                     return lines;
                 } else {
                     return $.map(lines, function(i, item) {
-                        return typeof item == 'function' ? item() : item;
+                        return typeof item === 'function' ? item() : item;
                     }).get().join('\n');
                 }
             },
@@ -1851,7 +1861,7 @@ function get_stack(caller) {
                 var o = output.detach();
                 output.html('');
                 $.each(lines, function(i, line) {
-                    draw_line(line.constructor == Function ? line() : line);
+                    draw_line(line.constructor === Function ? line() : line);
                 });
                 self.prepend(o);
                 scroll_to_bottom();
@@ -1859,7 +1869,7 @@ function get_stack(caller) {
             },
             echo: function(line) {
                 lines.push(line);
-                return draw_line(typeof line == 'function' ? line() : line);
+                return draw_line(typeof line === 'function' ? line() : line);
             },
             error: function(message) {
                 //echo red message
@@ -1905,7 +1915,7 @@ function get_stack(caller) {
             },
             push: function(_eval, options) {
                 if (!options.prompt || validate('prompt', options.prompt)) {
-                    if (typeof _eval == 'string') {
+                    if (typeof _eval === 'string') {
                         _eval = make_json_rpc_eval_fun(options['eval'], self);
                     }
                     interpreters.push($.extend({'eval': _eval}, options));
@@ -1920,14 +1930,14 @@ function get_stack(caller) {
                 if (interpreters.top().name === settings.name) {
                     if (settings.login) {
                         logout();
-                        if (typeof settings.onExit == 'function') {
+                        if (typeof settings.onExit === 'function') {
                             settings.onExit(self);
                         }
                     }
                 } else {
                     var current = interpreters.pop();
                     prepare_top_interpreter();
-                    if (typeof current.onExit == 'function') {
+                    if (typeof current.onExit === 'function') {
                         current.onExit(self);
                     }
                 }
@@ -1943,11 +1953,11 @@ function get_stack(caller) {
                 terminal.pause();
                 $.jrpc(url, id++, method, params, function(json) {
                     if (!json.error) {
-                        if (typeof json.result == 'string') {
+                        if (typeof json.result === 'string') {
                             terminal.echo(json.result);
                         } else if (json.result instanceof Array) {
                             terminal.echo(json.result.join(' '));
-                        } else if (typeof json.result == 'object') {
+                        } else if (typeof json.result === 'object') {
                             var string = '';
                             for (var f in json.result) {
                                 if (json.result.hasOwnProperty(f)) {
@@ -1981,7 +1991,7 @@ function get_stack(caller) {
                     method = command[0];
                     params = command.slice(1);
                 }
-                if (!settings.login || method == 'help') {
+                if (!settings.login || method === 'help') {
                     service(method, params);
                 } else {
                     var token = terminal.token();
@@ -2001,7 +2011,7 @@ function get_stack(caller) {
             if (command_line.mask()) {
                 command = command.replace(/./g, '*');
             }
-            if (typeof prompt == 'function') {
+            if (typeof prompt === 'function') {
                 prompt(function(string) {
                     self.echo(string + command);
                 });
@@ -2016,13 +2026,13 @@ function get_stack(caller) {
             try {
                 var interpreter = interpreters.top();
 
-                if (command == 'exit' && settings.exit) {
-                    if (interpreters.size() == 1) {
+                if (command === 'exit' && settings.exit) {
+                    if (interpreters.size() === 1) {
                         if (settings.login) {
                             logout();
                         } else {
                             var msg = 'You can exit from main interpeter';
-							echo_command(command);
+                            echo_command(command);
                             self.echo(msg);
                         }
                     } else {
@@ -2030,7 +2040,7 @@ function get_stack(caller) {
                     }
                 } else {
                     echo_command(command);
-                    if (command == 'clear' && settings.clear) {
+                    if (command === 'clear' && settings.clear) {
                         self.clear();
                     } else {
                         interpreter['eval'](command, self);
@@ -2064,7 +2074,7 @@ function get_stack(caller) {
                     } else {
                         command_line.mask(false);
                         self.pause();
-                        if (typeof settings.login != 'function') {
+                        if (typeof settings.login !== 'function') {
                             throw "Value of login property must be a function";
                         }
                         var passwd = command;
@@ -2120,7 +2130,7 @@ function get_stack(caller) {
             }
             name += terminal_id;
             command_line.name(name);
-            if (interpreter.prompt.constructor == Function) {
+            if (interpreter.prompt.constructor === Function) {
                 command_line.prompt(function(command) {
                     interpreter.prompt(command, self);
                 });
@@ -2131,23 +2141,24 @@ function get_stack(caller) {
                 command_line.history().enable();
             }
             command_line.set('');
-            if (typeof interpreter.onStart == 'function') {
+            if (typeof interpreter.onStart === 'function') {
                 interpreter.onStart(self);
             }
         }
         function initialize() {
             prepare_top_interpreter();
             show_greetings();
-		    if (typeof settings.onInit == 'function') {
+            if (typeof settings.onInit === 'function') {
                 settings.onInit(self);
             }
         }
         var tab_count = 0;
         var scrollBars = haveScrollbars();
         function key_down(e) {
+            var i;
             // after text pasted into textarea in cmd plugin
             self.oneTime(5, function() {
-                if (scrollBars != haveScrollbars()) {
+                if (scrollBars !== haveScrollbars()) {
                     // if scollbars appearance change we will have different
                     // number of chars
                     self.resize();
@@ -2158,13 +2169,13 @@ function get_stack(caller) {
                 if (settings.keydown && settings.keydown(e, self) === false) {
                     return false;
                 }
-                if (e.which != 9) { // not a TAB
+                if (e.which !== 9) { // not a TAB
                     tab_count = 0;
                 }
-                if (e.which == 68 && e.ctrlKey) { // CTRL+D
+                if (e.which === 68 && e.ctrlKey) { // CTRL+D
                     if (command_line.get() === '') {
                         if (interpreters.size() > 1 ||
-							settings.login !== undefined) {
+                            settings.login !== undefined) {
                             self.pop('');
                         } else {
                             self.resume();
@@ -2174,7 +2185,7 @@ function get_stack(caller) {
                         self.set_command('');
                     }
                     return false;
-                } else if (settings.tabcompletion && e.which == 9) { // TAB
+                } else if (settings.tabcompletion && e.which === 9) { // TAB
                     // TODO: move this to cmd plugin
                     //       add tabcompletion = array | function
                     ++tab_count;
@@ -2183,12 +2194,12 @@ function get_stack(caller) {
                         var reg = new RegExp('^' + command);
                         var commands = interpreters.top().command_list;
                         var matched = [];
-                        for (var i=commands.length; i--;) {
+                        for (i=commands.length; i--;) {
                             if (reg.test(commands[i])) {
                                 matched.push(commands[i]);
                             }
                         }
-                        if (matched.length == 1) {
+                        if (matched.length === 1) {
                             self.set_command(matched[0]);
                         } else if (matched.length > 1) {
                             if (tab_count >= 2) {
@@ -2199,19 +2210,19 @@ function get_stack(caller) {
                         }
                     }
                     return false;
-                } else if (e.which == 86 && e.ctrlKey) { // CTRL+V
+                } else if (e.which === 86 && e.ctrlKey) { // CTRL+V
                     self.oneTime(1, function() {
                         scroll_to_bottom();
                     });
                     return true;
-                } else if (e.which == 9 && e.ctrlKey) { // CTRL+TAB
+                } else if (e.which === 9 && e.ctrlKey) { // CTRL+TAB
                     if (terminals.length() > 1) {
                         self.focus(false);
                     }
                     return false;
-                } else if (e.which == 34) { // PAGE DOWN
+                } else if (e.which === 34) { // PAGE DOWN
                     self.scroll(self.height());
-                } else if (e.which == 33) { // PAGE UP
+                } else if (e.which === 33) { // PAGE UP
                     self.scroll(-self.height());
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
@@ -2219,10 +2230,10 @@ function get_stack(caller) {
             } else {
                 // cancel ajax requests
                 if (settings.cancelableAjax) {
-                    if (e.which == 68 && e.ctrlKey) { // CTRL+D
-                        for (var i=requests.length; i--;) {
+                    if (e.which === 68 && e.ctrlKey) { // CTRL+D
+                        for (i=requests.length; i--;) {
                             var r = requests[i];
-                            if (4 != r.readyState) {
+                            if (4 !== r.readyState) {
                                 try {
                                     r.abort();
                                 } catch(e) {
@@ -2238,18 +2249,20 @@ function get_stack(caller) {
         }
         // INIT CODE
         var url;
-        if (settings.login && typeof settings.onBeforeLogin == 'function') {
+        if (settings.login && typeof settings.onBeforeLogin === 'function') {
             settings.onBeforeLogin(self);
         }
-        if (init_eval.constructor == String) {
+        if (init_eval.constructor === String) {
             url = init_eval; //url variable is use when making login function
             init_eval = make_json_rpc_eval_fun(init_eval, self);
-        } else if (init_eval.constructor == Array) {
+        } else if (init_eval.constructor === Array) {
             throw "You can't use array as eval";
-        } else if (typeof init_eval == 'object') {
+        } else if (typeof init_eval === 'object') {
             // top commands
             for (var i in init_eval) {
-                command_list.push(i);
+                if (init_eval.hasOwnProperty(i)) {
+                    command_list.push(i);
+                }
             }
             init_eval = (function make_eval(object) {
                 // function that maps commands to object methods
@@ -2263,13 +2276,15 @@ function get_stack(caller) {
                     var params = command.slice(1);
                     var val = object[method];
                     var type = typeof val;
-                    if (type == 'function') {
+                    if (type === 'function') {
                         val.apply(self, params);
-                    } else if (type == 'object' || type == 'string') {
+                    } else if (type === 'object' || type === 'string') {
                         var commands = [];
-                        if (type == 'object') {
+                        if (type === 'object') {
                             for (var m in val) {
-                                commands.push(m);
+                                if (val.hasOwnProperty(m)) {
+                                    commands.push(m);
+                                }
                             }
                             val = make_eval(val);
                         }
@@ -2283,14 +2298,12 @@ function get_stack(caller) {
                     }
                 };
             })(init_eval);
-        } else if (typeof init_eval == 'function') {
-            // skip
-        } else {
+        } else if (typeof init_eval !== 'function') {
             throw 'Unknow object "' + String(init_eval) + '" passed as eval';
         }
 
         // create json-rpc authentication function
-        if (url && (typeof settings.login == 'string' || settings.login)) {
+        if (url && (typeof settings.login === 'string' || settings.login)) {
             settings.login = (function(method) {
                 var id = 1;
                 return function(user, passwd, callback) {
@@ -2314,7 +2327,7 @@ function get_stack(caller) {
                            });
                 };
                 //default name is login so you can pass true
-            })(typeof settings.login == 'boolean' ? 'login' : settings.login);
+            })(typeof settings.login === 'boolean' ? 'login' : settings.login);
         }
         if (validate('prompt', settings.prompt)) {
             var interpreters = new Stack({
@@ -2327,14 +2340,14 @@ function get_stack(caller) {
             var command_line = self.find('.terminal-output').next().cmd({
                 prompt: settings.prompt,
                 history: settings.history,
-				historyFilter: settings.historyFilter,
+                historyFilter: settings.historyFilter,
                 width: '100%',
                 keydown: key_down,
                 keypress: settings.keypress ? function(e) {
                     return settings.keypress(e, self);
                 } : null,
                 onCommandChange: function(command) {
-                    if (typeof settings.onCommandChange == 'function') {
+                    if (typeof settings.onCommandChange === 'function') {
                         settings.onCommandChange(command, self);
                     }
                     scroll_to_bottom();
