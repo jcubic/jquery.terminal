@@ -233,15 +233,15 @@ function get_stack(caller) {
                 fn.$timerID = fn.$timerID || this.guid++;
 
                 var handler = function() {
-                    if (belay && this.inProgress) {
+                    if (belay && handler.inProgress) {
                         return;
                     }
-                    this.inProgress = true;
+                    handler.inProgress = true;
                     if ((++counter > times && times !== 0) ||
                         fn.call(element, counter) === false) {
                         jQuery.timer.remove(element, label, fn);
                     }
-                    this.inProgress = false;
+                    handler.inProgress = false;
                 };
 
                 handler.$timerID = fn.$timerID;
