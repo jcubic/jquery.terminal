@@ -51,16 +51,6 @@
 (function($, undefined) {
     "use strict";
 
-    // return true if value is in array
-    function inArray(val, arr) {
-        for (var i = arr.length; i--;) {
-            if (arr[i] === val) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     // debug function
     function get_stack(caller) {
         if (caller) {
@@ -1276,9 +1266,9 @@
                 return false;
             } /*else {
                 if ((e.altKey && e.which === 68) ||
-                    (e.ctrlKey && inArray(e.which, [65, 66, 68, 69, 80, 78, 70])) ||
+                    (e.ctrlKey && $.inArray(e.which, [65, 66, 68, 69, 80, 78, 70]) > -1) ||
                     // 68 === D
-                    inArray(e.which, [35, 36, 37, 38, 39, 40])) {
+                    $.inArray(e.which, [35, 36, 37, 38, 39, 40]) > -1) {
                     return false;
                 }
             } */
@@ -1428,7 +1418,7 @@
             }
             if (result === undefined || result) {
                 if (enabled) {
-                    if (inArray(e.which, [38, 32, 13, 0, 8]) &&
+                    if ($.inArray(e.which, [38, 32, 13, 0, 8]) > -1 &&
                         e.keyCode !== 123 && // for F12 which === 0
                         //!(e.which === 40 && e.shiftKey ||
                         !(e.which === 38 && e.shiftKey)) {
