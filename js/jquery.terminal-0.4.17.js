@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 10 Jul 2012 18:51:17 +0000
+ * Date: Sat, 08 Sep 2012 16:51:28 +0000
  */
 
 /*
@@ -48,18 +48,20 @@
 
 */
 
+
+
 (function($, undefined) {
     "use strict";
-
     // debug function
     function get_stack(caller) {
+        "use strict";
         if (caller) {
-            return [caller.toString().match(/.*\n.*\n/)].concat(get_stack(caller.caller));
+            return [caller.toString().match(/.*\n.*\n/)].
+                concat(get_stack(caller.caller));
         } else {
             return [];
         }
     }
-
     // ----------------------------------------
     // START Storage plugin
     // ----------------------------------------
@@ -1268,9 +1270,10 @@
                 return false;
             } /*else {
                 if ((e.altKey && e.which === 68) ||
-                    (e.ctrlKey && $.inArray(e.which, [65, 66, 68, 69, 80, 78, 70]) > -1) ||
+                    (e.ctrlKey &&
+                     $.inArray(e.which, [65, 66, 68, 69, 80, 78, 70]) > -1) ||
                     // 68 === D
-                    $.inArray(e.which, [35, 36, 37, 38, 39, 40]) > -1) {
+                    [35, 36, 37, 38, 39, 40].has(e.which)) {
                     return false;
                 }
             } */
