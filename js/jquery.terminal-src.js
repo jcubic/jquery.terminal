@@ -2116,6 +2116,11 @@
         //this function is call only when options.login function is defined
         //check for this is in self.pop method
         function logout() {
+            if (typeof settings.onBeforelogout === 'function') {
+                if (settings.onBeforelogout(self) == false) {
+                    return;
+                }
+            }
             var name = settings.name;
             name = (name ? '_' + name : '');
             $.Storage.remove('token' + name, null);
@@ -2124,6 +2129,9 @@
                 command_line.history().disable();
             }
             login();
+            if (typeof settings.onAfterlogout === 'function') {
+                settings.onAfterlogout(self);
+            }
         }
 
         //function enable history, set prompt, run eval function
