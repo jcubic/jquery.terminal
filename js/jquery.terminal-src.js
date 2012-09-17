@@ -493,7 +493,7 @@
                     }
                 }).join('');
             }
-            return str;
+            return str.replace(/(http[^\s"']+)/, '<a target="_blank" href="$1">$1</a>');
         } else {
             return '';
         }
@@ -766,7 +766,7 @@
 
         $.extend(this, {
             append: function(item) {
-                if (enabled && bc.current() !== item) {
+                if (enabled) {
                     bc.append(item);
                     $.Storage.set(name + 'commands', $.json_stringify(bc.data()));
                 }
@@ -1824,7 +1824,7 @@
             },
             set_prompt: function(prompt) {
                 if (validate('prompt', prompt)) {
-                    if (prompt.constructor === Function) {
+                    if (typeof prompt == 'function') {
                         command_line.prompt(function(command) {
                             prompt(command, self);
                         });
@@ -1853,7 +1853,7 @@
                     return lines;
                 } else {
                     return $.map(lines, function(i, item) {
-                        return typeof item === 'function' ? item() : item;
+                        return typeof item == 'function' ? item() : item;
                     }).get().join('\n');
                 }
             },
@@ -1867,7 +1867,7 @@
                 var o = output.detach();
                 output.html('');
                 $.each(lines, function(i, line) {
-                    draw_line(line && line.constructor === Function ? line() : line);
+                    draw_line(line && typeof line == 'function' ? line() : line);
                 });
                 self.prepend(o);
                 scroll_to_bottom();
@@ -2144,7 +2144,7 @@
             }
             name += terminal_id;
             command_line.name(name);
-            if (interpreter.prompt.constructor === Function) {
+            if (typeof interpreter.prompt == 'function') {
                 command_line.prompt(function(command) {
                     interpreter.prompt(command, self);
                 });
@@ -2266,10 +2266,10 @@
         if (settings.login && typeof settings.onBeforeLogin === 'function') {
             settings.onBeforeLogin(self);
         }
-        if (init_eval.constructor === String) {
+        if (typeof init_eval == 'string') {
             url = init_eval; //url variable is use when making login function
             init_eval = make_json_rpc_eval_fun(init_eval, self);
-        } else if (init_eval.constructor === Array) {
+        } else if (typeof init_eval == 'object' && init_eval.constructor === Array) {
             throw "You can't use array as eval";
         } else if (typeof init_eval === 'object') {
             // top commands
