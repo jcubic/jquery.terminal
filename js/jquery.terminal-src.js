@@ -52,6 +52,15 @@
 
 (function($, undefined) {
     "use strict";
+
+    // map object to object
+    $.omap = function(o, fn) {
+        var result = {};
+        $.each(o, function(k, v) {
+            result[k] = fn.call(o, k, v);
+        });
+        return result;
+    };
     // debug function
     function get_stack(caller) {
         "use strict";
@@ -316,6 +325,7 @@
     // ----------------------------------------
     
     (function(undef) {
+
         // prevent double include
 
         if (!String.prototype.split.toString().match(/\[native/)) {
@@ -446,7 +456,7 @@
             //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
             var splited = str.split(format_split_re);
             //console.log($.json_stringify(splited));
-            if (splited.length > 1) {
+            if (splited && splited.length > 1) {
                 str = $.map(splited, function(text) {
                     if (text === '') {
                         return text;
@@ -493,12 +503,13 @@
                     }
                 }).join('');
             }
-            return str.replace(/(http[^\s"']+)/, '<a target="_blank" href="$1">$1</a>');
+            return str.replace(/(http((?!&[^;]+;)\S)+)/, '<a target="_blank" href="$1">$1</a>');
         } else {
             return '';
         }
     }
 
+    window.encode = encodeHTML;
     // -----------------------------------------------------------------------
     //split string to array of strings with the same length and keep formatting
     function get_formatted_lines(str, length) {
@@ -1602,9 +1613,9 @@
                 }
             }
             self.error('&#91;' + label + '&#93;: ' + message);
-            self.pause();
             if (typeof e.fileName === 'string') {
                 //display filename and line which throw exeption
+                self.pause();
                 $.get(e.fileName, function(file) {
                     self.resume();
                     var num = e.lineNumber - 1;
@@ -1613,6 +1624,9 @@
                         self.error('&#91;' + e.lineNumber + '&#93;: ' + line);
                     }
                 });
+            }
+            if (e.stack) {
+                self.error(e.stack);
             }
         }
 
@@ -1664,7 +1678,6 @@
             output.append(div);
             div.width('100%');
             scroll_to_bottom();
-            on_scrollbar_show_resize();
             return div;
         }
 
@@ -1689,8 +1702,7 @@
         // ----------------------------------------------------------
         // TERMINAL METHODS
         // ----------------------------------------------------------
-
-        $.extend(self, {
+        $.extend(self, $.omap({
             clear: function() {
                 output.html('');
                 command_line.set('');
@@ -1855,7 +1867,7 @@
                 } else {
                     return $.map(lines, function(i, item) {
                         return typeof item == 'function' ? item() : item;
-                    }).get().join('\n');
+                    }).join('\n');
                 }
             },
             resize: function(width, height) {
@@ -1876,11 +1888,13 @@
             },
             echo: function(line) {
                 lines.push(line);
-                return draw_line(typeof line === 'function' ? line() : line);
+                draw_line(typeof line === 'function' ? line() : line);
+                on_scrollbar_show_resize();
+                return self;
             },
             error: function(message) {
                 //echo red message
-                self.echo('[[;#f00;]' + escape_brackets(message) + ']');
+                return self.echo('[[;#f00;]' + escape_brackets(message) + ']');
             },
             scroll: function(amount) {
                 var pos;
@@ -1921,7 +1935,7 @@
                 return settings.name;
             },
             push: function(_eval, options) {
-                if (!options.prompt || validate('prompt', options.prompt)) {
+                if (options && (!options.prompt || validate('prompt', options.prompt)) || !options) {
                     if (typeof _eval === 'string') {
                         _eval = make_json_rpc_eval_fun(options['eval'], self);
                     }
@@ -1951,7 +1965,15 @@
                 return self;
 
             }
-        });
+        }, function(_, fun) {
+            return function() {
+                try {
+                    return fun.apply(this, Array.prototype.slice.apply(arguments));
+                } catch(e) {
+                    display_exception(e, 'TERMINAL');
+                }
+            };
+        }));
 
         //function constructor for eval
         function make_json_rpc_eval_fun(url, terminal) {
