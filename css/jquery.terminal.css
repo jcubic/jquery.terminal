@@ -23,8 +23,7 @@
 .terminal .terminal-output div {
     display: block;
 }
-.terminal, .terminal .terminal-output, .terminal .terminal-output div,
-.terminal .terminal-output div div, .cmd, .terminal .cmd span, .terminal .cmd div {
+.terminal {
     font-family: FreeMono, monospace;
     color: #aaa;
     background-color: #000;
