@@ -444,6 +444,7 @@
     var format_split_re = /(\[\[[bius]*;[^;]*;[^\]]*\][^\]\[]*\])/g;
     var format_re = /\[\[([bius]*);([^;]*);([^\]]*)\]([^\]\[]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
+    var url_re = /(https?:((?!&[^;]+;)[^\s:])+)/g;
     function encodeHTML(str) {
         if (typeof str === 'string') {
             // don't escape entities
@@ -503,7 +504,8 @@
                     }
                 }).join('');
             }
-            return str.replace(/(http((?!&[^;]+;)\S)+)/, '<a target="_blank" href="$1">$1</a>');
+            
+            return str.replace(url_re, '<a target="_blank" href="$1">$1</a>');
         } else {
             return '';
         }
@@ -1966,6 +1968,7 @@
 
             }
         }, function(_, fun) {
+            // wrap all functions and display execptions
             return function() {
                 try {
                     return fun.apply(this, Array.prototype.slice.apply(arguments));
