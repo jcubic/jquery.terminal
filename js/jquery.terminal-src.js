@@ -1568,10 +1568,10 @@
         });
         */
         //$('<input type="text"/>').hide().focus().appendTo(self);
+        //calculate numbers of characters
         function haveScrollbars() {
             return self.get(0).scrollHeight > self.innerHeight();
         }
-        //calculate numbers of characters
         function get_num_chars() {
             var cursor = self.find('.cursor');
             var cur_width = cursor.width();
@@ -1664,6 +1664,7 @@
             output.append(div);
             div.width('100%');
             scroll_to_bottom();
+            on_scrollbar_show_resize();
             return div;
         }
 
@@ -2166,18 +2167,25 @@
                 settings.onInit(self);
             }
         }
-        var tab_count = 0;
-        var scrollBars = haveScrollbars();
-        function key_down(e) {
-            var i;
-            // after text pasted into textarea in cmd plugin
-            self.oneTime(5, function() {
+        
+        var on_scrollbar_show_resize = (function() {
+            var scrollBars = haveScrollbars();
+            return function() {
                 if (scrollBars !== haveScrollbars()) {
                     // if scollbars appearance change we will have different
                     // number of chars
                     self.resize();
                     scrollBars = haveScrollbars();
                 }
+            };
+        })();
+        var tab_count = 0;
+        
+        function key_down(e) {
+            var i;
+            // after text pasted into textarea in cmd plugin
+            self.oneTime(5, function() {
+                on_scrollbar_show_resize();
             });
             if (!self.paused()) {
                 if (settings.keydown && settings.keydown(e, self) === false) {
