@@ -1,6 +1,6 @@
 0.4.19    add support for ANSI terminal formatting, fix cancelable ajax on
           CTRL+D, replace emails with link mailto, remove formatting processing
-          from command line
+          from command line, add text glow option to formatting
 0.4.18    fix scrollbar, better exceptions in chrome, replace urls with links
           one style for font and color in root .terminal class
 0.4.17    fix IE formatting issue by adding cross-browser split
