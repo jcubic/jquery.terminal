@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.18
+ *|           \/              /____/                              version 0.4.19
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sun, 23 Sep 2012 14:40:00 +0000
+ * Date: Sun, 23 Sep 2012 15:24:36 +0000
  */
 
 /*
@@ -917,11 +917,11 @@
             return function() {
                 if (typeof prompt === 'string') {
                     prompt_len = skipFormattingCount(prompt);
-                    prompt_node.html($.terminal.encode(prompt));
+                    prompt_node.html($.terminal.format(prompt));
                 } else {
                     prompt(function(string) {
                         prompt_len = skipFormattingCount(string);
-                        prompt_node.html($.terminal.encode(string));
+                        prompt_node.html($.terminal.format(string));
                     });
                 }
                 //change_num_chars();
@@ -1408,15 +1408,18 @@
         },
         // encode formating as html for inserto into DOM
         encode: function(str) {
+            // don't escape entities
+            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;')
+                      .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                        // I don't think that it find \n
+                      .replace(/\n/g, '<br/>')
+                      .replace(/ /g, '&nbsp;')
+                      .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+        },
+        format: function(str) {
             if (typeof str === 'string') {
-                str = $.terminal.from_ansi(str);
-                // don't escape entities
-                str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
-                str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                // I don't think that it find \n
-                str = str.replace(/\n/g, '<br/>');
-                str = str.replace(/ /g, '&nbsp;');
-                str = str.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                str = $.terminal.encode($.terminal.from_ansi(str));
+                
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splited = str.split(format_split_re);
                 //console.log($.json_stringify(splited));
@@ -1627,7 +1630,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.18';
+    var version = '0.4.19';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1807,11 +1810,11 @@
                     if (array[i] === '' || array[i] === '\r') {
                         div.append('<div>&nbsp;</div>');
                     } else {
-                        $('<div/>').html($.terminal.encode(array[i])).appendTo(div);
+                        $('<div/>').html($.terminal.format(array[i])).appendTo(div);
                     }
                 }
             } else {
-                div = $('<div/>').html($.terminal.encode(string));
+                div = $('<div/>').html($.terminal.format(string));
             }
             output.append(div);
             div.width('100%');
@@ -2182,6 +2185,7 @@
 
         //display prompt and last command
         function echo_command(command) {
+            command = command.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
             var prompt = command_line.prompt();
             if (command_line.mask()) {
                 command = command.replace(/./g, '*');

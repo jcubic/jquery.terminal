@@ -917,11 +917,11 @@
             return function() {
                 if (typeof prompt === 'string') {
                     prompt_len = skipFormattingCount(prompt);
-                    prompt_node.html($.terminal.encode(prompt));
+                    prompt_node.html($.terminal.format(prompt));
                 } else {
                     prompt(function(string) {
                         prompt_len = skipFormattingCount(string);
-                        prompt_node.html($.terminal.encode(string));
+                        prompt_node.html($.terminal.format(string));
                     });
                 }
                 //change_num_chars();
@@ -1408,15 +1408,18 @@
         },
         // encode formating as html for inserto into DOM
         encode: function(str) {
+            // don't escape entities
+            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;')
+                      .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                        // I don't think that it find \n
+                      .replace(/\n/g, '<br/>')
+                      .replace(/ /g, '&nbsp;')
+                      .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+        },
+        format: function(str) {
             if (typeof str === 'string') {
-                str = $.terminal.from_ansi(str);
-                // don't escape entities
-                str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
-                str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                // I don't think that it find \n
-                str = str.replace(/\n/g, '<br/>');
-                str = str.replace(/ /g, '&nbsp;');
-                str = str.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                str = $.terminal.encode($.terminal.from_ansi(str));
+                
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splited = str.split(format_split_re);
                 //console.log($.json_stringify(splited));
@@ -1807,11 +1810,11 @@
                     if (array[i] === '' || array[i] === '\r') {
                         div.append('<div>&nbsp;</div>');
                     } else {
-                        $('<div/>').html($.terminal.encode(array[i])).appendTo(div);
+                        $('<div/>').html($.terminal.format(array[i])).appendTo(div);
                     }
                 }
             } else {
-                div = $('<div/>').html($.terminal.encode(string));
+                div = $('<div/>').html($.terminal.format(string));
             }
             output.append(div);
             div.width('100%');
@@ -2182,6 +2185,7 @@
 
         //display prompt and last command
         function echo_command(command) {
+            command = command.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
             var prompt = command_line.prompt();
             if (command_line.mask()) {
                 command = command.replace(/./g, '*');
