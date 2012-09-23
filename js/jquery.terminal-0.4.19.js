@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 18 Sep 2012 13:23:49 +0000
+ * Date: Sun, 23 Sep 2012 14:40:00 +0000
  */
 
 /*
@@ -441,154 +441,9 @@
 
 
     // -----------------------------------------------------------------------
-    var format_split_re = /(\[\[[bius]*;[^;]*;[^\]]*\][^\]\[]*\])/g;
-    var format_re = /\[\[([bius]*);([^;]*);([^\]]*)\]([^\]\[]*)\]/g;
-    var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
-    var url_re = /(https?:((?!&[^;]+;)[^\s:])+)/g;
-    function encodeHTML(str) {
-        if (typeof str === 'string') {
-            // don't escape entities
-            str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
-            str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            // I don't think that it find \n
-            str = str.replace(/\n/g, '<br/>');
-            str = str.replace(/ /g, '&nbsp;');
-            str = str.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
-            //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
-            var splited = str.split(format_split_re);
-            //console.log($.json_stringify(splited));
-            if (splited && splited.length > 1) {
-                str = $.map(splited, function(text) {
-                    if (text === '') {
-                        return text;
-                    } else if (text.substring(0,1) === '[') {
-                        // use substring for IE quirks mode - [0] don't work
-                        return text.replace(format_re, function(s,
-                                                                style,
-                                                                color,
-                                                                background,
-                                                                text) {
-                            if (text === '') {
-                                return '<span>&nbsp;</span>';
-                            }
-                            var style_str = '';
-                            if (style.indexOf('b') !== -1) {
-                                style_str += 'font-weight:bold;';
-                            }
-                            var text_decoration = 'text-decoration:';
-                            if (style.indexOf('u') !== -1) {
-                                text_decoration += 'underline ';
-                            }
-                            if (style.indexOf('s') !== -1) {
-                                text_decoration += 'line-through';
-                            }
-                            if (style.indexOf('s') !== -1 ||
-                                style.indexOf('u') !== -1) {
-                                style_str += text_decoration + ';';
-                            }
-                            if (style.indexOf('i') !== -1) {
-                                style_str += 'font-style:italic; ';
-                            }
-                            if (color.match(color_hex_re)) {
-                                style_str += 'color:' + color + ';';
-                            }
-                            if (background.match(color_hex_re)) {
-                                style_str += 'background-color:' + background;
-                            }
-                            str = '<span style="' + style_str + '">' + text +
-                                '</span>';
-                            return str;
-                        });
-                    } else {
-                        return '<span>' + text + '</span>';
-                    }
-                }).join('');
-            }
-            
-            return str.replace(url_re, '<a target="_blank" href="$1">$1</a>');
-        } else {
-            return '';
-        }
-    }
 
-    window.encode = encodeHTML;
-    // -----------------------------------------------------------------------
-    //split string to array of strings with the same length and keep formatting
-    function get_formatted_lines(str, length) {
-        var array = str.split(/\n/g);
-        var re_format = /(\[\[[bius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
-        var re_begin = /(\[\[[bius]*;[^;]*;[^\]]*\])/;
-        var re_last = /\[\[[bius]*;?[^;]*;?[^\]]*\]?$/;
-        var formatting = false;
-        var in_text = false;
-        var braket = 0;
-        var prev_format = '';
-        var result = [];
-        for (var i = 0, len = array.length; i < len; ++i) {
-            if (prev_format !== '') {
-                if (array[i] === '') {
-                    result.push(prev_format + ']');
-                    continue;
-                } else {
-                    array[i] = prev_format + array[i];
-                    prev_format = '';
-                }
-            } else {
-                if (array[i] === '') {
-                    result.push('');
-                    continue;
-                }
-            }
-            var line = array[i];
-            var first_index = 0;
-            var count = 0;
-            for (var j=0, jlen=line.length; j<jlen; ++j) {
-                if (line[j] === '[' && line[j+1] === '[') {
-                    formatting = true;
-                } else if (formatting && line[j] === ']') {
-                    if (in_text) {
-                        formatting = false;
-                        in_text = false;
-                    } else {
-                        in_text = true;
-                    }
-                } else if ((formatting && in_text) || !formatting) {
-                    ++count;
-                }
-                if (count === length || j === jlen-1) {
-                    var output_line = line.substring(first_index, j+1);
-                    if (prev_format) {
-                        output_line = prev_format + output_line;
-                        if (output_line.match(']')) {
-                            prev_format = '';
-                        }
-                    }
-                    first_index = j+1;
-                    count = 0;
-                    var matched = output_line.match(re_format);
-                    if (matched) {
-                        var last = matched[matched.length-1];
-                        if (last[last.length-1] !== ']') {
-                            prev_format = last.match(re_begin)[1];
-                            output_line += ']';
-                        } else if (output_line.match(re_last)) {
-                            var line_len = output_line.length;
-                            var f_len = line_len - last[last.length-1].length;
-                            output_line = output_line.replace(re_last, '');
-                            prev_format = last.match(re_begin)[1];
-                        }
-                    }
-                    result.push(output_line);
-                }
-            }
-        }
-        return result;
-    }
-
-
-    // -----------------------------------------------------------------------
     function skipFormattingCount(string) {
-        return string.replace(format_re, '$4').length;
+        return $.terminal.strip(string).length;
     }
 
     // -----------------------------------------------------------------------
@@ -882,7 +737,7 @@
         function get_splited_command_line(string) {
             /*
             string = str_repeat('x', prompt_len) + string;
-            var result = get_formatted_lines(string);
+            var result = $.terminal.split_equal(string);
             result[0] = result[0].substring(prompt_len);
             return result;
             */
@@ -896,31 +751,31 @@
             function draw_cursor_line(string, position) {
                 var len = string.length;
                 if (position === len) {
-                    before.html(encodeHTML(string));
+                    before.html($.terminal.encode(string));
                     cursor.html('&nbsp;');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
                     //fix for tilda in IE
-                    cursor.html(encodeHTML(string.slice(0, 1)));
-                    //cursor.html(encodeHTML(string[0]));
-                    after.html(encodeHTML(string.slice(1)));
+                    cursor.html($.terminal.encode(string.slice(0, 1)));
+                    //cursor.html($.terminal.encode(string[0]));
+                    after.html($.terminal.encode(string.slice(1)));
                 } else {
-                    var before_str = encodeHTML(string.slice(0, position));
+                    var before_str = $.terminal.encode(string.slice(0, position));
                     before.html(before_str);
                     //fix for tilda in IE
                     var c = string.slice(position, position + 1);
                     //cursor.html(string[position]));
-                    cursor.html(c === ' ' ? '&nbsp;' : encodeHTML(c));
+                    cursor.html(c === ' ' ? '&nbsp;' : $.terminal.encode(c));
                     if (position === string.length - 1) {
                         after.html('');
                     } else {
-                        after.html(encodeHTML(string.slice(position + 1)));
+                        after.html($.terminal.encode(string.slice(position + 1)));
                     }
                 }
             }
             function div(string) {
-                return '<div>' + encodeHTML(string) + '</div>';
+                return '<div>' + $.terminal.encode(string) + '</div>';
             }
             function lines_after(lines) {
                 var last_ins = after;
@@ -1012,11 +867,11 @@
                             } else {
                                 // in the middle
                                 if (num_lines === 3) {
-                                    before.before('<div>' + encodeHTML(array[0]) +
+                                    before.before('<div>' + $.terminal.encode(array[0]) +
                                                   '</div>');
                                     draw_cursor_line(array[1], position-first_len-1);
                                     after.after('<div class="clear">' +
-                                                encodeHTML(array[2]) +
+                                                $.terminal.encode(array[2]) +
                                                 '</div>');
                                 } else {
                                     // more lines, cursor in the middle
@@ -1062,11 +917,11 @@
             return function() {
                 if (typeof prompt === 'string') {
                     prompt_len = skipFormattingCount(prompt);
-                    prompt_node.html(encodeHTML(prompt));
+                    prompt_node.html($.terminal.encode(prompt));
                 } else {
                     prompt(function(string) {
                         prompt_len = skipFormattingCount(string);
-                        prompt_node.html(encodeHTML(string));
+                        prompt_node.html($.terminal.encode(string));
                     });
                 }
                 //change_num_chars();
@@ -1468,6 +1323,287 @@
         // characters
         return self;
     };
+
+    // -------------------------------------------------------------------------
+    // :: TOOLS
+    // -------------------------------------------------------------------------
+
+    var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\])/g;
+    var format_re = /\[\[([gbius]*);([^;]*);([^\]]*)\]([^\]\[]*)\]/g;
+    var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
+    var url_re = /(https?:((?!&[^;]+;)[^\s:"'])+)/g;
+    var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
+    $.terminal = {
+        // split text into lines with equal width and make each line be renderd
+        // separatly (text formating can be longer then a line).
+        split_equal: function(str, length) {
+            var array = str.split(/\n/g);
+            var re_format = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
+            var re_begin = /(\[\[[gbius]*;[^;]*;[^\]]*\])/;
+            var re_last = /\[\[[gbius]*;?[^;]*;?[^\]]*\]?$/;
+            var formatting = false;
+            var in_text = false;
+            var braket = 0;
+            var prev_format = '';
+            var result = [];
+            for (var i = 0, len = array.length; i < len; ++i) {
+                if (prev_format !== '') {
+                    if (array[i] === '') {
+                        result.push(prev_format + ']');
+                        continue;
+                    } else {
+                        array[i] = prev_format + array[i];
+                        prev_format = '';
+                    }
+                } else {
+                    if (array[i] === '') {
+                        result.push('');
+                        continue;
+                    }
+                }
+                var line = array[i];
+                var first_index = 0;
+                var count = 0;
+                for (var j=0, jlen=line.length; j<jlen; ++j) {
+                    if (line[j] === '[' && line[j+1] === '[') {
+                        formatting = true;
+                    } else if (formatting && line[j] === ']') {
+                        if (in_text) {
+                            formatting = false;
+                            in_text = false;
+                        } else {
+                            in_text = true;
+                        }
+                    } else if ((formatting && in_text) || !formatting) {
+                        ++count;
+                    }
+                    if (count === length || j === jlen-1) {
+                        var output_line = line.substring(first_index, j+1);
+                        if (prev_format) {
+                            output_line = prev_format + output_line;
+                            if (output_line.match(']')) {
+                                prev_format = '';
+                            }
+                        }
+                        first_index = j+1;
+                        count = 0;
+                        var matched = output_line.match(re_format);
+                        if (matched) {
+                            var last = matched[matched.length-1];
+                            if (last[last.length-1] !== ']') {
+                                prev_format = last.match(re_begin)[1];
+                                output_line += ']';
+                            } else if (output_line.match(re_last)) {
+                                var line_len = output_line.length;
+                                var f_len = line_len - last[last.length-1].length;
+                                output_line = output_line.replace(re_last, '');
+                                prev_format = last.match(re_begin)[1];
+                            }
+                        }
+                        result.push(output_line);
+                    }
+                }
+            }
+            return result;
+        },
+        // encode formating as html for inserto into DOM
+        encode: function(str) {
+            if (typeof str === 'string') {
+                str = $.terminal.from_ansi(str);
+                // don't escape entities
+                str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
+                str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                // I don't think that it find \n
+                str = str.replace(/\n/g, '<br/>');
+                str = str.replace(/ /g, '&nbsp;');
+                str = str.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
+                var splited = str.split(format_split_re);
+                //console.log($.json_stringify(splited));
+                if (splited && splited.length > 1) {
+                    str = $.map(splited, function(text) {
+                        if (text === '') {
+                            return text;
+                        } else if (text.substring(0,1) === '[') {
+                            // use substring for IE quirks mode - [0] don't work
+                            return text.replace(format_re, function(s,
+                                                                    style,
+                                                                    color,
+                                                                    background,
+                                                                    text) {
+                                if (text === '') {
+                                    return '<span>&nbsp;</span>';
+                                }
+                                var style_str = '';
+                                if (style.indexOf('b') !== -1) {
+                                    style_str += 'font-weight:bold;';
+                                }
+                                var text_decoration = 'text-decoration:';
+                                if (style.indexOf('u') !== -1) {
+                                    text_decoration += 'underline ';
+                                }
+                                if (style.indexOf('s') !== -1) {
+                                    text_decoration += 'line-through';
+                                }
+                                if (style.indexOf('s') !== -1 ||
+                                    style.indexOf('u') !== -1) {
+                                    style_str += text_decoration + ';';
+                                }
+                                if (style.indexOf('i') !== -1) {
+                                    style_str += 'font-style:italic;';
+                                }
+                                if (color.match(color_hex_re)) {
+                                    style_str += 'color:' + color + ';';
+                                    if (style.indexOf('g') !== -1) {
+                                        style_str += 'text-shadow: 0 0 5px ' + color + ';';
+                                    }
+                                }
+                                if (background.match(color_hex_re)) {
+                                    style_str += 'background-color:' + background;
+                                }
+                                str = '<span style="' + style_str + '">' + text +
+                                    '</span>';
+                                return str;
+                            });
+                        } else {
+                            return '<span>' + text + '</span>';
+                        }
+                    }).join('');
+                }
+                return str.replace(url_re, '<a target="_blank" href="$1">$1</a>').
+                           replace(email_regex, '<a href="mailto:$1">$1</a>');
+            } else {
+                return '';
+            }
+        },
+        // remove formatting from text
+        strip: function(str) {
+            return str.replace(format_re, '$4');
+        },
+        // return active terminal
+        active: function() {
+        },
+        ansi_colors: {
+            normal: {
+                black: '#000',
+                red: '#AA0000',
+                green: '#008400',
+                yellow: '#AA5500',
+                blue: '#0000AA',
+                magenta: '#AA00AA',
+                cyan: '#00AAAA',
+                white: '#fff'
+            },
+            bold: {
+                white: '#fff',
+                red: '#FF5555',
+                green: '#44D544',
+                yellow: '#FFFF55',
+                blue: '#5555FF',
+                magenta: '#FF55FF',
+                cyan: '#55FFFF',
+                black: '#000'
+            }
+        },
+        from_ansi: (function() {
+            var color = {
+                30:	'black',
+                31:	'red',
+                32:	'green',
+                33:	'yellow',
+                34:	'blue',
+                35:	'magenta',
+                36:	'cyan',
+                37:	'white'
+            };
+            var background = {
+                40: 'black',
+                41: 'red',
+                42: 'green',
+                43: 'yellow',
+                44: 'blue',
+                45: 'magenta',
+                46: 'cyan',
+                47: 'white'
+            };
+            function format_ansi(code) {
+                var controls = code.split(';');
+                var num;
+                var styles = [];
+                var output_color = '';
+                var output_background = '';
+                for(var i in controls) {
+                    num = parseInt(controls[i], 10);
+                    if (num === 1) {
+                       styles.push('b');
+                    }
+                    if (num === 4) {
+                       styles.push('u');
+                    }
+                    if (background[num]) {
+                        output_background = background[num];
+                    }
+                    if (color[num]) {
+                        output_color = color[num];
+                    }
+                }
+                var normal = $.terminal.ansi_colors.normal;
+                var colors = normal;
+                for (var i=styles.length;i--;) {
+                    if (styles[i] == 'b') {
+                        if (output_color == '') {
+                            output_color = 'white';
+                        }
+                        colors = $.terminal.ansi_colors.bold;
+                        break;
+                    }
+                }
+                return '[[' + [styles.join(''),
+                               colors[output_color],
+                               normal[output_background]
+                              ].join(';') + ']';
+            }
+            return function(input) {
+                var splitted = input.split(/(\[[0-9;]*m)/g);
+                if (splitted.length == 1) {
+                    return input;
+                }
+                var output = [];
+                //skip closing at the begining
+                if (splitted.length > 3 && splitted.slice(0,3).join('') == '[0m') {
+                    splitted = splitted.slice(3);
+                }
+                var inside = false;
+                for (var i=0; i<splitted.length; ++i) {
+                    var match = splitted[i].match(/^\[([0-9;]*)m$/);
+                    if (match) {
+                        if (match[1] == '') {
+                            continue;
+                        }
+                        if (inside) {
+                            output.push(']');
+                            if (match[1] == '0') {
+                                //just closing
+                                inside = false;
+                            } else {
+                                // someone forget to close - process
+                                output.push(format_ansi(match[1]));
+                            }
+                        } else {
+                            inside = true;
+                            output.push(format_ansi(match[1]));
+                        }
+                    } else {
+                        output.push(splitted[i]);
+                    }
+                }
+                if (inside) {
+                    output.push(']');
+                }
+                return output.join('');
+            };
+        })()
+    };
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
@@ -1664,18 +1800,18 @@
                 // string can have line break
                 //var array = string.split('\n');
                 // TODO: the way it should work
-                var array = get_formatted_lines(string, num_chars);
+                var array = $.terminal.split_equal(string, num_chars);
 
                 div = $('<div></div>');
                 for (i = 0, len = array.length; i < len; ++i) {
                     if (array[i] === '' || array[i] === '\r') {
                         div.append('<div>&nbsp;</div>');
                     } else {
-                        $('<div/>').html(encodeHTML(array[i])).appendTo(div);
+                        $('<div/>').html($.terminal.encode(array[i])).appendTo(div);
                     }
                 }
             } else {
-                div = $('<div/>').html(encodeHTML(string));
+                div = $('<div/>').html($.terminal.encode(string));
             }
             output.append(div);
             div.width('100%');
@@ -1928,11 +2064,11 @@
             token: settings.login ? function() {
                 var name = settings.name;
                 return $.Storage.get('token' + (name ? '_' + name : ''));
-            } : null,
+            } : $.noop,
             login_name: settings.login ? function() {
                 var name = settings.name;
                 return $.Storage.get('login' + (name ? '_' + name : ''));
-            } : null,
+            } : $.noop,
             name: function() {
                 return settings.name;
             },
@@ -1945,6 +2081,13 @@
                     prepare_top_interpreter();
                 }
                 return self;
+            },
+            reset: function() {
+                self.clear();
+                while(interpreters.size() > 1) {
+                    interpreters.pop();
+                }
+                initialize();
             },
             pop: function(string) {
                 if (string !== undefined) {
@@ -2193,6 +2336,7 @@
             }
         }
         
+        // ---------------------------------------------------------------------
         var on_scrollbar_show_resize = (function() {
             var scrollBars = haveScrollbars();
             return function() {
@@ -2204,6 +2348,9 @@
                 }
             };
         })();
+        // ---------------------------------------------------------------------
+        // KEYDOWN EVENT HANDLER
+        // ---------------------------------------------------------------------
         var tab_count = 0;
         
         function key_down(e) {
@@ -2275,26 +2422,25 @@
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
             } else {
-                // cancel ajax requests
-                if (settings.cancelableAjax) {
-                    if (e.which === 68 && e.ctrlKey) { // CTRL+D
-                        for (i=requests.length; i--;) {
-                            var r = requests[i];
-                            if (4 !== r.readyState) {
-                                try {
-                                    r.abort();
-                                } catch(e) {
-                                    self.error('error in aborting ajax');
-                                }
+                if (e.which === 68 && e.ctrlKey) { // CTRL+D
+                    for (i=requests.length; i--;) {
+                        var r = requests[i];
+                        if (4 !== r.readyState) {
+                            try {
+                                r.abort();
+                            } catch(e) {
+                                self.error('error in aborting ajax');
                             }
                         }
-                        self.resume();
-                        return false;
                     }
+                    self.resume();
+                    return false;
                 }
             }
         }
+        // ---------------------------------------------------------------------
         // INIT CODE
+        // ---------------------------------------------------------------------
         var url;
         if (settings.login && typeof settings.onBeforeLogin === 'function') {
             settings.onBeforeLogin(self);
@@ -2412,7 +2558,7 @@
             self.click(function() {
                 self.focus();
             });
-            if (self.token && !self.token() && self.login_name &&
+            if (options.login && self.token && !self.token() && self.login_name &&
                 !self.login_name()) {
                 login();
             } else {
@@ -2434,5 +2580,4 @@
         return self;
 
     }; //terminal plugin
-
 })(jQuery);
