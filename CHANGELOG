@@ -1,3 +1,4 @@
+0.4.20    Add exec, greetings, onClear, onBlur, onFocus, onTerminalChange
 0.4.19    add support for ANSI terminal formatting, fix cancelable ajax on
           CTRL+D, replace emails with link mailto, remove formatting processing
           from command line, add text glow option to formatting

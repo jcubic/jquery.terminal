@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.19
+ *|           \/              /____/                              version 0.4.20
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sun, 23 Sep 2012 15:24:36 +0000
+ * Date: Mon, 24 Sep 2012 22:21:51 +0000
  */
 
 /*
@@ -1630,7 +1630,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.19';
+    var version = '0.4.20';
     var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1668,7 +1668,7 @@
         var terminal_id = terminals.length();
         var num_chars; // numer of chars in line
         var command_list = []; // for tab completion
-        var settings = {
+        var settings = $.extend({
             name: '',
             prompt: '> ',
             history: true,
@@ -1679,20 +1679,23 @@
             login: null,
             tabcompletion: null,
             historyFilter: null,
-            onInit: null,
-            onExit: null,
-            keypress: null,
-            keydown: null
-        };
-        if (options) {
-            if (options.width) {
-                self.width(options.width);
-            }
-            if (options.height) {
-                self.height(options.height);
-            }
-            $.extend(settings, options);
+            onInit: $.noop,
+            onClear: $.noop,
+            onBlur: $.noop,
+            onFocus: $.noop,
+            onTerminalChange: $.noop,
+            onExit: $.noop,
+            keypress: $.noop,
+            keydown: $.noop
+        }, options || {});
+
+        if (settings.width) {
+            self.width(settings.width);
         }
+        if (settings.height) {
+            self.height(settings.height);
+        }
+
         var pause = !settings.enabled;
         if (self.length === 0) {
             throw 'Sorry, but terminal said that "' + self.selector +
@@ -1843,12 +1846,27 @@
         // ----------------------------------------------------------
         // TERMINAL METHODS
         // ----------------------------------------------------------
+
+        var dalyed_commands = [];
         $.extend(self, $.omap({
             clear: function() {
                 output.html('');
+                settings.onClear(self);
                 command_line.set('');
                 lines = [];
                 self.attr({ scrollTop: 0});
+                return self;
+            },
+            exec: function(command, silent) {
+                if (pause) {
+                    dalyed_commands.push(command);
+                } else {
+                    commands(command, silent);
+                }
+                return self;
+            },
+            greetings: function() {
+                show_greetings();
                 return self;
             },
             paused: function() {
@@ -1856,8 +1874,9 @@
             },
             pause: function() {
                 if (command_line) {
+                    pause = true;
                     self.disable();
-                    command_line.hide();
+                    //command_line.hide();
                 }
                 return self;
             },
@@ -1866,8 +1885,13 @@
                 //            get_stack(arguments.callee.caller).join(''));
                 if (command_line) {
                     self.enable();
-                    command_line.show();
-
+                    var original = dalyed_commands;
+                    dalyed_commands = [];
+                    while (original.length) {
+                        var command = original.shift();
+                        self.exec(command);
+                    }
+                    //command_line.show();
                     scroll_to_bottom();
                 }
                 return self;
@@ -1898,6 +1922,7 @@
                         // 100 provides buffer in viewport
                         var x = next.offset().top - 50;
                         $('html,body').animate({scrollTop: x}, 500);
+                        settings.onTerminalChange(next);
                         return next;
                     }
                 }
@@ -1905,20 +1930,26 @@
             focus: function(toggle) {
                 //console.log('focus on ' + options.prompt + '\n' +
                 //            get_stack(arguments.callee.caller).join(''));
-                // TODO: one terminal should go out of focus
-                // TODO: add onFocus and onBlur
                 self.oneTime(1, function() {
                     if (terminals.length() === 1) {
                         if (toggle === false) {
-                            self.disable();
+                            if (settings.onBlur(self) !== false) {
+                                self.disable();
+                            }
                         } else {
-                            self.enable();
+                            if (settings.onFocus(self) !== false) {
+                                self.enable();
+                            }
                         }
                     } else {
                         if (toggle === false) {
                             self.next();
                         } else {
-                            terminals.front().disable();
+                            var front = terminals.front();
+                            if (front != self) {
+                                front.disable();
+                                settings.onTerminalChange(self);
+                            }
                             terminals.set(self);
                             self.enable();
                         }
@@ -2201,10 +2232,9 @@
 
         // wrapper over eval it implements exit and catch all exeptions
         // from user code and display them on terminal
-        function commands(command) {
+        function commands(command, silent) {
             try {
                 var interpreter = interpreters.top();
-
                 if (command === 'exit' && settings.exit) {
                     if (interpreters.size() === 1) {
                         if (settings.login) {
@@ -2218,7 +2248,9 @@
                         self.pop('exit');
                     }
                 } else {
-                    echo_command(command);
+                    if (!silent) {
+                        echo_command(command);
+                    }
                     if (command === 'clear' && settings.clear) {
                         self.clear();
                     } else {
@@ -2560,7 +2592,9 @@
             }
             $(window).resize(self.resize);
             self.click(function() {
-                self.focus();
+                if (!pause) {
+                    self.focus();
+                }
             });
             if (options.login && self.token && !self.token() && self.login_name &&
                 !self.login_name()) {
