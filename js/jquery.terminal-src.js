@@ -1675,6 +1675,7 @@
             exit: true,
             clear: true,
             enabled: true,
+            displayExceptions: true,
             cancelableAjax: true,
             login: null,
             tabcompletion: null,
@@ -1746,31 +1747,33 @@
 
         // display Exception on terminal
         function display_exception(e, label) {
-            var message;
-            if (typeof e === 'string') {
-                message = e;
-            } else {
-                if (typeof e.fileName === 'string') {
-                    message = e.fileName + ': ' + e.message;
+            if (settings.displayExceptions) {
+                var message;
+                if (typeof e === 'string') {
+                    message = e;
                 } else {
-                    message = e.message;
-                }
-            }
-            self.error('&#91;' + label + '&#93;: ' + message);
-            if (typeof e.fileName === 'string') {
-                //display filename and line which throw exeption
-                self.pause();
-                $.get(e.fileName, function(file) {
-                    self.resume();
-                    var num = e.lineNumber - 1;
-                    var line = file.split('\n')[num];
-                    if (line) {
-                        self.error('&#91;' + e.lineNumber + '&#93;: ' + line);
+                    if (typeof e.fileName === 'string') {
+                        message = e.fileName + ': ' + e.message;
+                    } else {
+                        message = e.message;
                     }
-                });
-            }
-            if (e.stack) {
-                self.error(e.stack);
+                }
+                self.error('&#91;' + label + '&#93;: ' + message);
+                if (typeof e.fileName === 'string') {
+                    //display filename and line which throw exeption
+                    self.pause();
+                    $.get(e.fileName, function(file) {
+                        self.resume();
+                        var num = e.lineNumber - 1;
+                        var line = file.split('\n')[num];
+                        if (line) {
+                            self.error('&#91;' + e.lineNumber + '&#93;: ' + line);
+                        }
+                    });
+                }
+                if (e.stack) {
+                    self.error(e.stack);
+                }
             }
         }
 
@@ -1851,7 +1854,12 @@
         $.extend(self, $.omap({
             clear: function() {
                 output.html('');
-                settings.onClear(self);
+                try {
+                    settings.onClear(self);
+                } catch (e) {
+                    display_exception(e, 'onClear');
+                    throw e;
+                }
                 command_line.set('');
                 lines = [];
                 self.attr({ scrollTop: 0});
@@ -1922,7 +1930,12 @@
                         // 100 provides buffer in viewport
                         var x = next.offset().top - 50;
                         $('html,body').animate({scrollTop: x}, 500);
-                        settings.onTerminalChange(next);
+                        try {
+                            settings.onTerminalChange(next);
+                        } catch (e) {
+                            display_exception(e, 'onTerminalChange');
+                            throw e;
+                        }
                         return next;
                     }
                 }
@@ -1933,12 +1946,22 @@
                 self.oneTime(1, function() {
                     if (terminals.length() === 1) {
                         if (toggle === false) {
-                            if (settings.onBlur(self) !== false) {
-                                self.disable();
+                            try {
+                                if (settings.onBlur(self) !== false) {
+                                    self.disable();
+                                }
+                            } catch (e) {
+                                display_exception(e, 'onBlur');
+                                throw e;
                             }
                         } else {
-                            if (settings.onFocus(self) !== false) {
-                                self.enable();
+                            try {
+                                if (settings.onFocus(self) !== false) {
+                                    self.enable();
+                                }
+                            } catch (e) {
+                                display_exception(e, 'onFocus');
+                                throw e;
                             }
                         }
                     } else {
@@ -1948,7 +1971,12 @@
                             var front = terminals.front();
                             if (front != self) {
                                 front.disable();
-                                settings.onTerminalChange(self);
+                                try {
+                                    settings.onTerminalChange(self);
+                                } catch (e) {
+                                    display_exception(e, 'onTerminalChange');
+                                    throw e;
+                                }
                             }
                             terminals.set(self);
                             self.enable();
@@ -2131,14 +2159,24 @@
                     if (settings.login) {
                         logout();
                         if (typeof settings.onExit === 'function') {
-                            settings.onExit(self);
+                            try {
+                                settings.onExit(self);
+                            } catch (e) {
+                                display_exception(e, 'onExit');
+                                throw e;
+                            }
                         }
                     }
                 } else {
                     var current = interpreters.pop();
                     prepare_top_interpreter();
                     if (typeof current.onExit === 'function') {
-                        current.onExit(self);
+                        try {
+                            settings.onExit(self);
+                        } catch (e) {
+                            display_exception(e, 'onExit');
+                            throw e;
+                        }
                     }
                 }
                 return self;
@@ -2324,8 +2362,13 @@
         //check for this is in self.pop method
         function logout() {
             if (typeof settings.onBeforelogout === 'function') {
-                if (settings.onBeforelogout(self) == false) {
-                    return;
+                try {
+                    if (settings.onBeforelogout(self) == false) {
+                        return;
+                    }
+                } catch (e) {
+                    display_exception(e, 'onBeforelogout');
+                    throw e;
                 }
             }
             var name = settings.name;
@@ -2337,7 +2380,12 @@
             }
             login();
             if (typeof settings.onAfterlogout === 'function') {
-                settings.onAfterlogout(self);
+                try {
+                    settings.onAfterlogout(self);
+                } catch (e) {
+                    display_exception(e, 'onAfterlogout');
+                    throw e;
+                }
             }
         }
 
@@ -2370,7 +2418,12 @@
             prepare_top_interpreter();
             show_greetings();
             if (typeof settings.onInit === 'function') {
-                settings.onInit(self);
+                try {
+                    settings.onInit(self);
+                } catch (e) {
+                    display_exception(e, 'OnInit');
+                    throw e;
+                }
             }
         }
         
@@ -2481,7 +2534,12 @@
         // ---------------------------------------------------------------------
         var url;
         if (settings.login && typeof settings.onBeforeLogin === 'function') {
-            settings.onBeforeLogin(self);
+            try {
+                settings.onBeforeLogin(self);
+            } catch (e) {
+                display_exception(e, 'onBeforeLogin');
+                throw e;
+            }
         }
         if (typeof init_eval == 'string') {
             url = init_eval; //url variable is use when making login function
@@ -2579,7 +2637,12 @@
                 } : null,
                 onCommandChange: function(command) {
                     if (typeof settings.onCommandChange === 'function') {
-                        settings.onCommandChange(command, self);
+                        try {
+                            settings.onCommandChange(command, self);
+                        } catch (e) {
+                            display_exception(e, 'onCommandChange');
+                            throw e;
+                        }
                     }
                     scroll_to_bottom();
                 },
