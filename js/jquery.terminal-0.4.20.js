@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 25 Sep 2012 11:04:42 +0000
+ * Date: Tue, 25 Sep 2012 15:50:31 +0000
  */
 
 /*
@@ -2109,6 +2109,7 @@
             },
             scroll: function(amount) {
                 var pos;
+                amount = Math.round(amount);
                 if (self.prop) {
                     if (amount > self.prop('scrollTop') && amount > 0) {
                         self.prop('scrollTop', 0);

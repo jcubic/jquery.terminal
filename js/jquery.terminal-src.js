@@ -2109,6 +2109,7 @@
             },
             scroll: function(amount) {
                 var pos;
+                amount = Math.round(amount);
                 if (self.prop) {
                     if (amount > self.prop('scrollTop') && amount > 0) {
                         self.prop('scrollTop', 0);
