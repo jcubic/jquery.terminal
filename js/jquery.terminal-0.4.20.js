@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 25 Sep 2012 00:35:41 +0000
+ * Date: Tue, 25 Sep 2012 00:43:12 +0000
  */
 
 /*
@@ -1331,7 +1331,7 @@
     var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\])/g;
     var format_re = /\[\[([gbius]*);([^;]*);([^\]]*)\]([^\]\[]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
-    var url_re = /(https?:((?!&[^;]+;)[^\s:"'])+)/g;
+    var url_re = /(https?:((?!&[^;]+;)[^\s:"'<)])+)/g;
     var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     $.terminal = {
         // split text into lines with equal width and make each line be renderd
