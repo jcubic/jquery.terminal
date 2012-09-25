@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 24 Sep 2012 22:21:51 +0000
+ * Date: Tue, 25 Sep 2012 00:03:13 +0000
  */
 
 /*
@@ -1859,7 +1859,7 @@
             },
             exec: function(command, silent) {
                 if (pause) {
-                    dalyed_commands.push(command);
+                    dalyed_commands.push([command, silent]);
                 } else {
                     commands(command, silent);
                 }
@@ -1889,7 +1889,7 @@
                     dalyed_commands = [];
                     while (original.length) {
                         var command = original.shift();
-                        self.exec(command);
+                        self.exec.apply(self, command);
                     }
                     //command_line.show();
                     scroll_to_bottom();
@@ -2241,7 +2241,9 @@
                             logout();
                         } else {
                             var msg = 'You can exit from main interpeter';
-                            echo_command(command);
+                            if (!silent) {
+                                echo_command(command);
+                            }
                             self.echo(msg);
                         }
                     } else {
