@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 25 Sep 2012 01:36:10 +0000
+ * Date: Tue, 25 Sep 2012 11:04:42 +0000
  */
 
 /*
@@ -1419,7 +1419,6 @@
         format: function(str) {
             if (typeof str === 'string') {
                 str = $.terminal.encode($.terminal.from_ansi(str));
-                
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splited = str.split(format_split_re);
                 //console.log($.json_stringify(splited));
@@ -1608,6 +1607,16 @@
                 return output.join('');
             };
         })()
+    };
+    
+    // -----------------------------------------------------------------------
+    // Helpers
+    // -----------------------------------------------------------------------
+    $.fn.visible = function() {
+        return this.css('visibility', 'visible');
+    };
+    $.fn.hidden = function() {
+        return this.css('visibility', 'hidden');
     };
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
@@ -1886,7 +1895,7 @@
                 if (command_line) {
                     pause = true;
                     self.disable();
-                    //command_line.hide();
+                    command_line.hidden();
                 }
                 return self;
             },
@@ -1901,7 +1910,7 @@
                         var command = original.shift();
                         self.exec.apply(self, command);
                     }
-                    //command_line.show();
+                    command_line.visible();
                     scroll_to_bottom();
                 }
                 return self;
