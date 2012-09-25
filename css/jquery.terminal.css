@@ -30,6 +30,9 @@
     font-size: 12px;
     line-height: 14px;
 }
+.terminal .terminal-output div span {
+    display: inline-block;
+}
 .terminal .cmd span {
     float: left;
 }

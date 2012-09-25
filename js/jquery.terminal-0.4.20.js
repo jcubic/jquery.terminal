@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 25 Sep 2012 00:43:12 +0000
+ * Date: Tue, 25 Sep 2012 01:36:10 +0000
  */
 
 /*
@@ -1329,7 +1329,7 @@
     // -------------------------------------------------------------------------
 
     var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\])/g;
-    var format_re = /\[\[([gbius]*);([^;]*);([^\]]*)\]([^\]\[]*)\]/g;
+    var format_re = /\[\[([gbius]*);([^;]*);([^;]*);?([^\]]*)\]([^\]\[]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     var url_re = /(https?:((?!&[^;]+;)[^\s:"'<)])+)/g;
     var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
@@ -1433,6 +1433,7 @@
                                                                     style,
                                                                     color,
                                                                     background,
+                                                                    _class,
                                                                     text) {
                                 if (text === '') {
                                     return '<span>&nbsp;</span>';
@@ -1464,9 +1465,10 @@
                                 if (background.match(color_hex_re)) {
                                     style_str += 'background-color:' + background;
                                 }
-                                str = '<span style="' + style_str + '">' + text +
-                                    '</span>';
-                                return str;
+                                var result = '<span style="' + style_str + '"' +
+                                    (_class != '' ? ' class="' + _class + '"' : '') +
+                                    '>' + text + '</span>';
+                                return result;
                             });
                         } else {
                             return '<span>' + text + '</span>';
@@ -1481,7 +1483,7 @@
         },
         // remove formatting from text
         strip: function(str) {
-            return str.replace(format_re, '$4');
+            return str.replace(format_re, '$5');
         },
         // return active terminal
         active: function() {
