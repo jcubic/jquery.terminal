@@ -8,7 +8,7 @@
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
- * Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>
  *
  * Includes:
  *
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 25 Sep 2012 15:50:31 +0000
+ * Date: Tue, 25 Sep 2012 16:28:05 +0000
  */
 
 /*
@@ -1642,12 +1642,12 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version = '0.4.20';
-    var copyright = 'Copyright (c) 2011 Jakub Jankiewicz <http://jcubic.pl>';
+    var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
     var signatures = [
-        ['jQuery Terminal', '(c) 2011 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2012 jcubic'],
         ['jQuery Terminal Emulator v. ' + version,
          copyright.replace(/ *<.*>/, '')],
         ['jQuery Terminal Emulator version ' + version_string,
@@ -2518,8 +2518,10 @@
                     }
                     return false;
                 } else if (e.which === 34) { // PAGE DOWN
+                    console.log(self.height());
                     self.scroll(self.height());
                 } else if (e.which === 33) { // PAGE UP
+                    console.log(self.height());
                     self.scroll(-self.height());
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
