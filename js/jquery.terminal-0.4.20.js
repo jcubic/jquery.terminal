@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 26 Sep 2012 18:55:40 +0000
+ * Date: Wed, 26 Sep 2012 19:09:00 +0000
  */
 
 /*
@@ -1486,6 +1486,7 @@
         },
         // return active terminal
         active: function() {
+            return terminals.front();
         },
         ansi_colors: {
             normal: {
@@ -2671,9 +2672,9 @@
             }
             $(window).resize(self.resize);
             self.click(function() {
-                //if (!pause) {
+                if (!(pause && self === $.terminal.active())) {
                     self.focus();
-                //}
+                }
             });
             if (options.login && self.token && !self.token() && self.login_name &&
                 !self.login_name()) {
