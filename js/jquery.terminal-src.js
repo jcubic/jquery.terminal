@@ -2017,7 +2017,6 @@
                 return self;
             },
             disable: function() {
-                console.log('disable');
                 if (command_line) {
                     pause = true;
                     command_line.disable();
