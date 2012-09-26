@@ -1952,14 +1952,15 @@
                     }
                 }
             },
-            focus: function(toggle) {
+            // silent used so events are not fired on init
+            focus: function(toggle, silent) {
                 //console.log('focus on ' + options.prompt + '\n' +
                 //            get_stack(arguments.callee.caller).join(''));
                 self.oneTime(1, function() {
                     if (terminals.length() === 1) {
                         if (toggle === false) {
                             try {
-                                if (settings.onBlur(self) !== false) {
+                                if (!silent && settings.onBlur(self) !== false) {
                                     self.disable();
                                 }
                             } catch (e) {
@@ -1968,7 +1969,7 @@
                             }
                         } else {
                             try {
-                                if (settings.onFocus(self) !== false) {
+                                if (!silent && settings.onFocus(self) !== false) {
                                     self.enable();
                                 }
                             } catch (e) {
@@ -1983,11 +1984,13 @@
                             var front = terminals.front();
                             if (front != self) {
                                 front.disable();
-                                try {
-                                    settings.onTerminalChange(self);
-                                } catch (e) {
-                                    display_exception(e, 'onTerminalChange');
-                                    throw e;
+                                if (!silent) {
+                                    try {
+                                        settings.onTerminalChange(self);
+                                    } catch (e) {
+                                        display_exception(e, 'onTerminalChange');
+                                        throw e;
+                                    }
                                 }
                             }
                             terminals.set(self);
@@ -2014,6 +2017,7 @@
                 return self;
             },
             disable: function() {
+                console.log('disable');
                 if (command_line) {
                     pause = true;
                     command_line.disable();
@@ -2667,13 +2671,13 @@
             //num_chars = get_num_chars();
             terminals.append(self);
             if (settings.enabled === true) {
-                self.focus();
+                self.focus(undefined, true);
             } else {
                 self.disable();
             }
             $(window).resize(self.resize);
             self.click(function() {
-                if (!(pause && self === $.terminal.active())) {
+                if (!(pause && terminals.length() > 1 && self === $.terminal.active())) {
                     self.focus();
                 }
             });
