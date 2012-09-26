@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 26 Sep 2012 19:09:00 +0000
+ * Date: Wed, 26 Sep 2012 19:33:14 +0000
  */
 
 /*
@@ -2463,10 +2463,11 @@
             self.oneTime(5, function() {
                 on_scrollbar_show_resize();
             });
+            if (settings.keydown && settings.keydown(e, self) === false) {
+                return false;
+            }
             if (!self.paused()) {
-                if (settings.keydown && settings.keydown(e, self) === false) {
-                    return false;
-                }
+                
                 if (e.which !== 9) { // not a TAB
                     tab_count = 0;
                 }
