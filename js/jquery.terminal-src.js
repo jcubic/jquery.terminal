@@ -2671,9 +2671,9 @@
             }
             $(window).resize(self.resize);
             self.click(function() {
-                if (!pause) {
+                //if (!pause) {
                     self.focus();
-                }
+                //}
             });
             if (options.login && self.token && !self.token() && self.login_name &&
                 !self.login_name()) {

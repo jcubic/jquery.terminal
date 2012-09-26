@@ -34,7 +34,7 @@
     display: inline-block;
 }
 .terminal .cmd span {
-    float: left;
+    display: inline-block;
 }
 .terminal .cmd span.inverted {
     background-color: #aaa;
