@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Thu, 27 Sep 2012 00:00:47 +0000
+ * Date: Thu, 27 Sep 2012 10:49:50 +0000
  */
 
 /*
@@ -2531,10 +2531,8 @@
                     }
                     return false;
                 } else if (e.which === 34) { // PAGE DOWN
-                    console.log(self.height());
                     self.scroll(self.height());
                 } else if (e.which === 33) { // PAGE UP
-                    console.log(self.height());
                     self.scroll(-self.height());
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});

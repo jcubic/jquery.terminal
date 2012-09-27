@@ -2531,10 +2531,8 @@
                     }
                     return false;
                 } else if (e.which === 34) { // PAGE DOWN
-                    console.log(self.height());
                     self.scroll(self.height());
                 } else if (e.which === 33) { // PAGE UP
-                    console.log(self.height());
                     self.scroll(-self.height());
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
