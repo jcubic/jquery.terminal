@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Thu, 27 Sep 2012 10:49:50 +0000
+ * Date: Thu, 27 Sep 2012 14:21:53 +0000
  */
 
 /*
@@ -1336,8 +1336,8 @@
     // :: TOOLS
     // -------------------------------------------------------------------------
 
-    var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\])/g;
-    var format_re = /\[\[([gbius]*);([^;]*);([^;]*);?([^\]]*)\]([^\]\[]*)\]/g;
+    var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]\[]*|\[*(?!\[)[^\]]*\][^\]]*)\])/g;
+    var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]\[]*|[^\[]*\[(?!\[)*[^\]]*\][^\]]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     var url_re = /(https?:((?!&[^;]+;)[^\s:"'<)])+)/g;
     var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
@@ -1429,7 +1429,6 @@
                 str = $.terminal.encode($.terminal.from_ansi(str));
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splited = str.split(format_split_re);
-                //console.log($.json_stringify(splited));
                 if (splited && splited.length > 1) {
                     str = $.map(splited, function(text) {
                         if (text === '') {
@@ -1482,8 +1481,13 @@
                         }
                     }).join('');
                 }
-                return str.replace(url_re, '<a target="_blank" href="$1">$1</a>').
-                           replace(email_regex, '<a href="mailto:$1">$1</a>');
+                
+                return str.replace(url_re, function(link) {
+                        var comma = link.match(/\.$/);
+                        link = link.replace(/\.$/, '');
+                        return '<a target="_blank" href="' + link + '">' + link + '</a>' +
+                            (comma ? '.' : '');
+                }).replace(email_regex, '<a href="mailto:$1">$1</a>');
             } else {
                 return '';
             }
@@ -1874,14 +1878,14 @@
         $.extend(self, $.omap({
             clear: function() {
                 output.html('');
+                command_line.set('');
+                lines = [];
                 try {
                     settings.onClear(self);
                 } catch (e) {
                     display_exception(e, 'onClear');
                     throw e;
                 }
-                command_line.set('');
-                lines = [];
                 self.attr({ scrollTop: 0});
                 return self;
             },
@@ -1909,8 +1913,6 @@
                 return self;
             },
             resume: function() {
-                //console.log('resume on ' + options.prompt + '\n' +
-                //            get_stack(arguments.callee.caller).join(''));
                 if (command_line) {
                     self.enable();
                     var original = dalyed_commands;
@@ -1962,8 +1964,6 @@
             },
             // silent used so events are not fired on init
             focus: function(toggle, silent) {
-                //console.log('focus on ' + options.prompt + '\n' +
-                //            get_stack(arguments.callee.caller).join(''));
                 self.oneTime(1, function() {
                     if (terminals.length() === 1) {
                         if (toggle === false) {
@@ -2010,8 +2010,6 @@
                 return self;
             },
             enable: function() {
-                //console.log('enable: ' + options.prompt + '\n' +
-                //            get_stack(arguments.callee.caller).join(''));
                 if (num_chars === undefined) {
                     //enabling first time
                     self.resize();
