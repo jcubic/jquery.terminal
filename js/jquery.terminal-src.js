@@ -1224,6 +1224,14 @@
                     return position;
                 }
             },
+            visible: (function() {
+                var visible = self.visible;
+                return function() {
+                    visible.apply(self, []);
+                    redraw();
+                    draw_prompt();
+                };
+            })(),
             show: (function() {
                 var show = self.show;
                 return function() {

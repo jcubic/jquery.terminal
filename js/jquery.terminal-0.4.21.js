@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 26 Sep 2012 22:12:47 +0000
+ * Date: Thu, 27 Sep 2012 00:00:47 +0000
  */
 
 /*
@@ -1224,6 +1224,14 @@
                     return position;
                 }
             },
+            visible: (function() {
+                var visible = self.visible;
+                return function() {
+                    visible.apply(self, []);
+                    redraw();
+                    draw_prompt();
+                };
+            })(),
             show: (function() {
                 var show = self.show;
                 return function() {
