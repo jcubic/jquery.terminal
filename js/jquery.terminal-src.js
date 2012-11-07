@@ -443,7 +443,7 @@
     // -----------------------------------------------------------------------
 
     function skipFormattingCount(string) {
-        return $.terminal.strip(string).length;
+        return $('<div>' + $.terminal.strip(string) + '</div>').text().length;
     }
 
     // -----------------------------------------------------------------------
@@ -917,10 +917,12 @@
             return function() {
                 if (typeof prompt === 'string') {
                     prompt_len = skipFormattingCount(prompt);
+                    console.log(prompt_len);
                     prompt_node.html($.terminal.format(prompt));
                 } else {
                     prompt(function(string) {
                         prompt_len = skipFormattingCount(string);
+                        console.log(prompt_len);
                         prompt_node.html($.terminal.format(string));
                     });
                 }
@@ -1487,7 +1489,8 @@
                         link = link.replace(/\.$/, '');
                         return '<a target="_blank" href="' + link + '">' + link + '</a>' +
                             (comma ? '.' : '');
-                }).replace(email_regex, '<a href="mailto:$1">$1</a>');
+                }).replace(email_regex, '<a href="mailto:$1">$1</a>').
+                   replace(/<span><br\/?><\/span>/g, '<br/>');
             } else {
                 return '';
             }
@@ -1897,6 +1900,9 @@
                 }
                 return self;
             },
+            commands: function() {
+                return interpreters.top().eval;
+            },
             greetings: function() {
                 show_greetings();
                 return self;
@@ -2194,7 +2200,7 @@
                     prepare_top_interpreter();
                     if (typeof current.onExit === 'function') {
                         try {
-                            settings.onExit(self);
+                            current.onExit(self);
                         } catch (e) {
                             display_exception(e, 'onExit');
                             throw e;
@@ -2202,7 +2208,6 @@
                     }
                 }
                 return self;
-
             }
         }, function(_, fun) {
             // wrap all functions and display execptions

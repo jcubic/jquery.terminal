@@ -20,8 +20,10 @@
     margin: 0;
     height: 1.3em;
 }
-.terminal .terminal-output div {
+.terminal .terminal-output div div, .terminal .prompt {
     display: block;
+    line-height: 9px;
+    height: 14px;
 }
 .terminal {
     font-family: FreeMono, monospace;
@@ -40,11 +42,12 @@
     background-color: #aaa;
     color: #000;
 }
-.terminal div::-moz-selection, .terminal span::-moz-selection {
+.terminal .terminal-output div div::-moz-selection, .terminal .terminal-output div span::-moz-selection {
     background-color: #aaa;
     color: #000;
 }
-.terminal div::selection, .terminal span::selection {
+.terminal .terminal-output div div::selection, .terminal .terminal-output div span::selection,
+.terminal .cmd > span::selection, .terminal .prompt span::selection {
     background-color: #aaa;
     color: #000;
 }

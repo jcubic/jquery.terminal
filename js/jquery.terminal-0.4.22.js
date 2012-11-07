@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.21
+ *|           \/              /____/                              version 0.4.22
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Thu, 27 Sep 2012 14:21:53 +0000
+ * Date: Wed, 07 Nov 2012 05:59:12 +0000
  */
 
 /*
@@ -443,7 +443,7 @@
     // -----------------------------------------------------------------------
 
     function skipFormattingCount(string) {
-        return $.terminal.strip(string).length;
+        return $('<div>' + $.terminal.strip(string) + '</div>').text().length;
     }
 
     // -----------------------------------------------------------------------
@@ -917,10 +917,12 @@
             return function() {
                 if (typeof prompt === 'string') {
                     prompt_len = skipFormattingCount(prompt);
+                    console.log(prompt_len);
                     prompt_node.html($.terminal.format(prompt));
                 } else {
                     prompt(function(string) {
                         prompt_len = skipFormattingCount(string);
+                        console.log(prompt_len);
                         prompt_node.html($.terminal.format(string));
                     });
                 }
@@ -1487,7 +1489,8 @@
                         link = link.replace(/\.$/, '');
                         return '<a target="_blank" href="' + link + '">' + link + '</a>' +
                             (comma ? '.' : '');
-                }).replace(email_regex, '<a href="mailto:$1">$1</a>');
+                }).replace(email_regex, '<a href="mailto:$1">$1</a>').
+                   replace(/<span><br\/?><\/span>/g, '<br/>');
             } else {
                 return '';
             }
@@ -1654,7 +1657,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.21';
+    var version = '0.4.22';
     var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1896,6 +1899,9 @@
                     commands(command, silent);
                 }
                 return self;
+            },
+            commands: function() {
+                return interpreters.top().eval;
             },
             greetings: function() {
                 show_greetings();
@@ -2194,7 +2200,7 @@
                     prepare_top_interpreter();
                     if (typeof current.onExit === 'function') {
                         try {
-                            settings.onExit(self);
+                            current.onExit(self);
                         } catch (e) {
                             display_exception(e, 'onExit');
                             throw e;
@@ -2202,7 +2208,6 @@
                     }
                 }
                 return self;
-
             }
         }, function(_, fun) {
             // wrap all functions and display execptions
