@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 07 Nov 2012 05:59:12 +0000
+ * Date: Thu, 15 Nov 2012 07:12:21 +0000
  */
 
 /*
@@ -917,12 +917,10 @@
             return function() {
                 if (typeof prompt === 'string') {
                     prompt_len = skipFormattingCount(prompt);
-                    console.log(prompt_len);
                     prompt_node.html($.terminal.format(prompt));
                 } else {
                     prompt(function(string) {
                         prompt_len = skipFormattingCount(string);
-                        console.log(prompt_len);
                         prompt_node.html($.terminal.format(string));
                     });
                 }

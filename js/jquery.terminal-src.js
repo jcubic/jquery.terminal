@@ -917,12 +917,10 @@
             return function() {
                 if (typeof prompt === 'string') {
                     prompt_len = skipFormattingCount(prompt);
-                    console.log(prompt_len);
                     prompt_node.html($.terminal.format(prompt));
                 } else {
                     prompt(function(string) {
                         prompt_len = skipFormattingCount(string);
-                        console.log(prompt_len);
                         prompt_node.html($.terminal.format(string));
                     });
                 }
