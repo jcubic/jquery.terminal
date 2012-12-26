@@ -45,7 +45,7 @@
             };
         }
         var self = this;
-        var dialog = this.dialog($.extend(options, {
+        this.dialog($.extend(options, {
             resizeStop: function(e, ui) {
                 var content = self.find('.ui-dialog-content');
                 terminal.resize(content.width(), content.height());
