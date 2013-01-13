@@ -1339,7 +1339,7 @@
     var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]\[]*|\[*(?!\[)[^\]]*\][^\]]*)\])/g;
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]\[]*|[^\[]*\[(?!\[)*[^\]]*\][^\]]*)\]/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
-    var url_re = /(https?:((?!&[^;]+;)[^\s:"'<)])+)/g;
+    var url_re = /(https?:((?!&[^;]+;)[^\s:"'<\[\]])+(\[.+?\])?)/g;
     var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     $.terminal = {
         // split text into lines with equal width and make each line be renderd
@@ -1483,9 +1483,16 @@
                 }
                 
                 return str.replace(url_re, function(link) {
+                        var text = link.match(/(.+)\[(.+)\]/);
+                        if (text) {
+                            link = text[text.length - 2];
+                            text = text[text.length - 1];
+                        } else {
+                            text = link;
+                        }
                         var comma = link.match(/\.$/);
                         link = link.replace(/\.$/, '');
-                        return '<a target="_blank" href="' + link + '">' + link + '</a>' +
+                        return '<a target="_blank" href="' + link + '">' + text + '</a>' +
                             (comma ? '.' : '');
                 }).replace(email_regex, '<a href="mailto:$1">$1</a>').
                    replace(/<span><br\/?><\/span>/g, '<br/>');
