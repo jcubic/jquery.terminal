@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Thu, 15 Nov 2012 07:12:21 +0000
+ * Date: Fri, 01 Mar 2013 13:54:32 +0000
  */
 
 /*
@@ -63,7 +63,6 @@
     };
     // debug function
     function get_stack(caller) {
-        "use strict";
         if (caller) {
             return [caller.toString().match(/.*\n.*\n/)].
                 concat(get_stack(caller.caller));
@@ -323,7 +322,7 @@
     // ----------------------------------------
     // START CROSS BROWSER SPLIT
     // ----------------------------------------
-    
+
     (function(undef) {
 
         // prevent double include
@@ -937,8 +936,11 @@
             });
         }
         function keydown_event(e) {
-            if (options.keydown && options.keydown(e) === false) {
-                return false;
+            if (options.keydown) {
+                var result = options.keydown(e);
+                if (result !== undefined) {
+                    return result;
+                }
             }
             if (enabled) {
                 var pos, len, result;
@@ -1481,7 +1483,7 @@
                         }
                     }).join('');
                 }
-                
+
                 return str.replace(url_re, function(link) {
                         var comma = link.match(/\.$/);
                         link = link.replace(/\.$/, '');
@@ -1622,7 +1624,7 @@
             };
         })()
     };
-    
+
     // -----------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------
@@ -1742,10 +1744,10 @@
         });
         /*
         self.bind('touchstart.touchScroll', function() {
-            
+
         });
         self.bind('touchmove.touchScroll', function() {
-            
+
         });
         */
         //$('<input type="text"/>').hide().focus().appendTo(self);
@@ -1763,6 +1765,7 @@
                 var margins = self.innerWidth() - self.width();
                 result -= Math.ceil((20 - margins / 2) / (cur_width-1));
             }
+
             return result;
         }
 
@@ -1845,7 +1848,7 @@
                     }
                 }
             } else {
-                div = $('<div/>').html($.terminal.format(string));
+                div = $('<div/>').html('<div>' + $.terminal.format(string) + '</div>');
             }
             output.append(div);
             div.width('100%');
@@ -2264,6 +2267,7 @@
                     params = command.slice(1);
                 }
                 if (!settings.login || method === 'help') {
+                    // allow to call help without token
                     service(method, params);
                 } else {
                     var token = terminal.token();
@@ -2332,7 +2336,7 @@
 
         // functions change prompt of command line to login to password
         // and call user login function with callback that set token
-        // if user call it with value that is true
+        // if user call it with value that is truthy
         function login() {
             var user = null;
             command_line.prompt('login: ');
@@ -2451,7 +2455,7 @@
                 }
             }
         }
-        
+
         // ---------------------------------------------------------------------
         var on_scrollbar_show_resize = (function() {
             var scrollBars = haveScrollbars();
@@ -2468,18 +2472,21 @@
         // KEYDOWN EVENT HANDLER
         // ---------------------------------------------------------------------
         var tab_count = 0;
-        
+
         function key_down(e) {
             var i;
             // after text pasted into textarea in cmd plugin
             self.oneTime(5, function() {
                 on_scrollbar_show_resize();
             });
-            if (settings.keydown && settings.keydown(e, self) === false) {
-                return false;
+            if (settings.keydown) {
+                var result = settings.keydown(e, self);
+                if (result !== undefined) {
+                    return result;
+                }
             }
             if (!self.paused()) {
-                
+
                 if (e.which !== 9) { // not a TAB
                     tab_count = 0;
                 }
