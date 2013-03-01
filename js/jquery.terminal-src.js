@@ -1105,6 +1105,7 @@
                         }
                     //} else if (e.altKey) { //ALT+CTRL+??
                     } else {
+                        console.log('1');
                         //NOTE: in opera charCode is undefined
                         if (e.which === 65) {
                             //CTRL+A
@@ -2532,7 +2533,7 @@
                     self.oneTime(1, function() {
                         scroll_to_bottom();
                     });
-                    return true;
+                    return;
                 } else if (e.which === 9 && e.ctrlKey) { // CTRL+TAB
                     if (terminals.length() > 1) {
                         self.focus(false);

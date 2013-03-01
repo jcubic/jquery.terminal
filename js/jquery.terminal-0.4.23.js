@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.22
+ *|           \/              /____/                              version 0.4.23
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Fri, 01 Mar 2013 13:54:32 +0000
+ * Date: Fri, 01 Mar 2013 14:38:40 +0000
  */
 
 /*
@@ -1105,6 +1105,7 @@
                         }
                     //} else if (e.altKey) { //ALT+CTRL+??
                     } else {
+                        console.log('1');
                         //NOTE: in opera charCode is undefined
                         if (e.which === 65) {
                             //CTRL+A
@@ -1657,7 +1658,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.22';
+    var version = '0.4.23';
     var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2532,7 +2533,7 @@
                     self.oneTime(1, function() {
                         scroll_to_bottom();
                     });
-                    return true;
+                    return;
                 } else if (e.which === 9 && e.ctrlKey) { // CTRL+TAB
                     if (terminals.length() > 1) {
                         self.focus(false);
