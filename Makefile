@@ -20,8 +20,8 @@ README: README.in .$(VERSION)
 .$(VERSION):
 	touch .$(VERSION)
 
-terminal.jquery.json: terminal.jquery.json.in
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" terminal.jquery.json.in > terminal.jquery.json
+terminal.jquery.json: manifest
+	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json
 
 www/Makefile: Makefile
 	$(SED) -e "s/{{VERSION}}/$(VERSION)/g" www/Makefile.in > www/Makefile
