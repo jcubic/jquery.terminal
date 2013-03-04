@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 04 Mar 2013 16:30:58 +0000
+ * Date: Mon, 04 Mar 2013 16:38:45 +0000
  */
 
 /*
@@ -1097,6 +1097,9 @@
                 } else if (e.which === 35) {
                     //END
                     self.position(command.length);
+                } else if (e.shiftKey && e.which == 45) { // Shift+Insert
+                    paste();
+                    return true;
                 } else if (e.ctrlKey || e.metaKey) {
                     if (e.shiftKey) { // CTRL+SHIFT+??
                         if (e.which === 84) {

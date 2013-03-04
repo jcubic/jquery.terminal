@@ -1097,6 +1097,9 @@
                 } else if (e.which === 35) {
                     //END
                     self.position(command.length);
+                } else if (e.shiftKey && e.which == 45) { // Shift+Insert
+                    paste();
+                    return true;
                 } else if (e.ctrlKey || e.metaKey) {
                     if (e.shiftKey) { // CTRL+SHIFT+??
                         if (e.which === 84) {
