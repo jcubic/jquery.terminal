@@ -1105,7 +1105,6 @@
                         }
                     //} else if (e.altKey) { //ALT+CTRL+??
                     } else {
-                        console.log('1');
                         //NOTE: in opera charCode is undefined
                         if (e.which === 65) {
                             //CTRL+A

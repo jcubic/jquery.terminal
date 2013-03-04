@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Fri, 01 Mar 2013 14:38:40 +0000
+ * Date: Mon, 04 Mar 2013 16:30:58 +0000
  */
 
 /*
@@ -1105,7 +1105,6 @@
                         }
                     //} else if (e.altKey) { //ALT+CTRL+??
                     } else {
-                        console.log('1');
                         //NOTE: in opera charCode is undefined
                         if (e.which === 65) {
                             //CTRL+A
