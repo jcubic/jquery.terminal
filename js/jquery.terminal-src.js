@@ -1742,9 +1742,9 @@
         }
         output = $('<div>').addClass('terminal-output').appendTo(self);
         self.addClass('terminal').append('<div/>');
-        self.click(function() {
+        /*self.click(function() {
             self.find('textarea').focus();
-        });
+        });*/
         /*
         self.bind('touchstart.touchScroll', function() {
 
