@@ -23,6 +23,7 @@
     padding: 0;
     margin: 0;
     height: 1.3em;
+    margin-top: 3px;
 }
 .terminal .terminal-output div div, .terminal .prompt {
     display: block;
@@ -30,8 +31,9 @@
     height: auto;
 }
 .terminal .prompt {
-    margin-top: 3px;
+    float: left;
 }
+
 .terminal {
     font-family: FreeMono, monospace;
     color: #aaa;
@@ -46,7 +48,8 @@
     display: inline-block;
 }
 .terminal .cmd span {
-    display: inline-block;
+    float: left;
+    /*display: inline-block; */
 }
 .terminal .cmd span.inverted {
     background-color: #aaa;
