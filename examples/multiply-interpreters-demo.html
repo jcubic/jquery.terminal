@@ -30,7 +30,7 @@ jQuery(document).ready(function($) {
                     term.echo('unknown command ' + command);
                 }
             }, {
-                prompt: 'test>',
+                prompt: 'test> ',
                 name: 'test'});
         } else if (command == "js") {
             term.push(function(command, term) {
@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
                 }
             }, {
                 name: 'js',
-                prompt: 'js>'});
+                prompt: 'js> '});
         } else if (command == 'mysql') {
             term.push(function(command, term) {
                 term.pause();
@@ -73,7 +73,7 @@ jQuery(document).ready(function($) {
                 greetings: "This is example of using mysql from terminal\n\
 you are allowed to execute: select, insert, update and delete from/to table:\n\
     table test(integer_value integer, varchar_value varchar(255))",
-                prompt: "mysql>"});
+                prompt: "mysql> "});
         } else {
             term.echo("unknow command " + command);
         }
