@@ -1289,12 +1289,7 @@
         // Keystrokes
         //document.documentElement
         var object;
-        if ($.browser.msie) {
-            object = document.documentElement;
-        } else {
-            object = window;
-        }
-        $(object).keypress(function(e) {
+        $(document.documentElement || window).keypress(function(e) {
             var result;
             if (e.ctrlKey && e.which === 99) {
                 return true;

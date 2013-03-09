@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 09 Mar 2013 08:53:08 +0000
+ * Date: Sat, 09 Mar 2013 09:05:10 +0000
  */
 
 /*
@@ -1289,12 +1289,7 @@
         // Keystrokes
         //document.documentElement
         var object;
-        if ($.browser.msie) {
-            object = document.documentElement;
-        } else {
-            object = window;
-        }
-        $(object).keypress(function(e) {
+        $(document.documentElement || window).keypress(function(e) {
             var result;
             if (e.ctrlKey && e.which === 99) {
                 return true;
