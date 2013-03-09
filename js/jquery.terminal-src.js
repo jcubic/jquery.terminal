@@ -1062,6 +1062,14 @@
                         redraw();
                         reverse_search = true;
                     }
+                } else if (e.which == 71 && e.ctrlKey) { // CTRL+G
+                    if (reverse_search) {
+                        prompt = backup_prompt;
+                        draw_prompt();
+                        command = '';
+                        redraw();
+                        reverse_search = false;
+                    }
                 } else if (e.which === 39 ||
                            (e.which === 70 && e.ctrlKey)) {
                     //RIGHT ARROW OR CTRL+F

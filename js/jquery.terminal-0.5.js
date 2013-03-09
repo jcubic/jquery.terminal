@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 09 Mar 2013 09:05:10 +0000
+ * Date: Sat, 09 Mar 2013 09:44:35 +0000
  */
 
 /*
@@ -1061,6 +1061,14 @@
                         command = '';
                         redraw();
                         reverse_search = true;
+                    }
+                } else if (e.which == 71 && e.ctrlKey) { // CTRL+G
+                    if (reverse_search) {
+                        prompt = backup_prompt;
+                        draw_prompt();
+                        command = '';
+                        redraw();
+                        reverse_search = false;
                     }
                 } else if (e.which === 39 ||
                            (e.which === 70 && e.ctrlKey)) {
