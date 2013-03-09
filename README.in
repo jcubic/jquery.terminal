@@ -30,7 +30,7 @@ Features:
       interpreters (eg. you can use couple of JSON-RPC service and run them
       when user type command)
 
-    * Command Tree - you can use nested objects. Each command will invoke a 
+    * Command Tree - you can use nested objects. Each command will invoke a
       function, if the value is an object it will create new interpreter and
       use function from that object as commands. You can use as much nested
       object/commands as you like. If the value is a string it will create
@@ -38,7 +38,7 @@ Features:
 
     * Support for command line history it use Local Storage if posible
 
-    * Support for tab completion if you create terminal from an object
+    * Support for tab completion
 
     * Include keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
 
@@ -48,8 +48,8 @@ Features:
     * It catch all exceptions and display error messages in terminal
       (you can see errors in your javascript and php code in terminal if they
       are in interpreter function)
-      
-      
+
+
 Example of usage (javascript interpreter)
 
 jQuery(function($, undefined) {
