@@ -1,3 +1,5 @@
+0.5       Tab completion work with callback function
+          Push command allow for objects
 0.4.23    Fix Style
 0.4.22
 0.4.21    Small fixes

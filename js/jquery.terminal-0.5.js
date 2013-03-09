@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.4.23
+ *|           \/              /____/                              version 0.5
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 05 Mar 2013 12:58:21 +0000
+ * Date: Sat, 09 Mar 2013 08:53:08 +0000
  */
 
 /*
@@ -1660,7 +1660,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.4.23';
+    var version = '0.5';
     var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1742,9 +1742,14 @@
         }
         output = $('<div>').addClass('terminal-output').appendTo(self);
         self.addClass('terminal').append('<div/>');
-        /*self.click(function() {
+        // keep focus in clipboard textarea in mobile
+        if (('ontouchstart' in window) || window.DocumentTouch &&
+            document instanceof DocumentTouch) {
+            self.click(function() {
+                self.find('textarea').focus();
+            });
             self.find('textarea').focus();
-        });*/
+        }
         /*
         self.bind('touchstart.touchScroll', function() {
 
@@ -2167,9 +2172,23 @@
                 return settings.name;
             },
             push: function(_eval, options) {
-                if (options && (!options.prompt || validate('prompt', options.prompt)) || !options) {
-                    if (typeof _eval === 'string') {
-                        _eval = make_json_rpc_eval_fun(options['eval'], self);
+                if (options && (!options.prompt || validate('prompt', options.prompt)) ||
+                    !options) {
+                    if ($.type(_eval) === 'string') {
+                        //_eval = make_json_rpc_eval_fun(options['eval'], self);
+                        _eval = make_json_rpc_eval_fun(_eval, self);
+                    } else if ($.type(_eval) === 'object') {
+                        var commands = [];
+                        for (var name in _eval) {
+                            commands.push(name);
+                        }
+                        _eval = make_eval_from_object(_eval);
+                        options = options || {};
+                        options['completion'] = function(term, string, callback) {
+                            callback(commands);
+                        };
+                    } else {
+                        throw "Invalid value as eval in push command";
                     }
                     interpreters.push($.extend({'eval': _eval}, options));
                     prepare_top_interpreter();
@@ -2510,10 +2529,24 @@
                     // TODO: move this to cmd plugin
                     //       add tabcompletion = array | function
                     ++tab_count;
-                    var command = command_line.get();
-                    if (!command.match(' ')) { // complete only first word
-                        var reg = new RegExp('^' + command);
-                        var commands = interpreters.top().command_list;
+                    var command = command_line.get().substring(0, command_line.position());
+                    var strings = command.split(' ');
+                    var string;
+                    if (strings.length == 1) {
+                        string = strings[0];
+                    } else {
+                        var string = strings[strings.length-1];
+                        for (var i=strings.length-1; i>0;i--) {
+                            // treat escape space as part of the string
+                            if (strings[i-1][strings[i-1].length-1] == '\\') {
+                                string = strings[i-1] + ' ' + string;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    var reg = new RegExp('^' + string);
+                    interpreters.top().completion(self, string, function(commands) {
                         var matched = [];
                         for (i=commands.length; i--;) {
                             if (reg.test(commands[i])) {
@@ -2521,7 +2554,7 @@
                             }
                         }
                         if (matched.length === 1) {
-                            self.set_command(matched[0]);
+                            self.insert(matched[0].replace(reg, ''));
                         } else if (matched.length > 1) {
                             if (tab_count >= 2) {
                                 echo_command(command);
@@ -2529,7 +2562,7 @@
                                 tab_count = 0;
                             }
                         }
-                    }
+                    });
                     return false;
                 } else if (e.which === 86 && e.ctrlKey) { // CTRL+V
                     self.oneTime(1, function() {
@@ -2577,6 +2610,42 @@
                 throw e;
             }
         }
+        function make_eval_from_object(object) {
+            // function that maps commands to object methods
+            // it keeps terminal context
+            return function(command, terminal) {
+                if (command === '') {
+                    return;
+                }
+                command = command.split(/ +/);
+                var method = command[0];
+                var params = command.slice(1);
+                var val = object[method];
+                var type = $.type(val);
+                if (type === 'function') {
+                    val.apply(self, params);
+                } else if (type === 'object' || type === 'string') {
+                    var commands = [];
+                    if (type === 'object') {
+                        for (var m in val) {
+                            if (val.hasOwnProperty(m)) {
+                                commands.push(m);
+                            }
+                        }
+                        val = make_eval_from_object(val);
+                    }
+                    self.push(val, {
+                        prompt: method + '> ',
+                        name: method,
+                        completion: function(term, string, callback) {
+                            callback(commands);
+                        }
+                    });
+                } else {
+                    self.error("Command '" + method + "' Not Found");
+                }
+            };
+        }
         if (typeof init_eval == 'string') {
             url = init_eval; //url variable is use when making login function
             init_eval = make_json_rpc_eval_fun(init_eval, self);
@@ -2589,40 +2658,7 @@
                     command_list.push(i);
                 }
             }
-            init_eval = (function make_eval(object) {
-                // function that maps commands to object methods
-                // it keeps terminal context
-                return function(command, terminal) {
-                    if (command === '') {
-                        return;
-                    }
-                    command = command.split(/ +/);
-                    var method = command[0];
-                    var params = command.slice(1);
-                    var val = object[method];
-                    var type = typeof val;
-                    if (type === 'function') {
-                        val.apply(self, params);
-                    } else if (type === 'object' || type === 'string') {
-                        var commands = [];
-                        if (type === 'object') {
-                            for (var m in val) {
-                                if (val.hasOwnProperty(m)) {
-                                    commands.push(m);
-                                }
-                            }
-                            val = make_eval(val);
-                        }
-                        self.push(val, {
-                            prompt: method + '> ',
-                            name: method,
-                            command_list: commands
-                        });
-                    } else {
-                        self.error("Command '" + method + "' Not Found");
-                    }
-                };
-            })(init_eval);
+            init_eval = make_eval_from_object(init_eval);
         } else if (typeof init_eval !== 'function') {
             throw 'Unknow object "' + String(init_eval) + '" passed as eval';
         }
@@ -2659,7 +2695,11 @@
                 name: settings.name,
                 'eval': init_eval,
                 prompt: settings.prompt,
-                command_list: command_list,
+                completion: settings.completion ?
+                    settings.completion :
+                    function(term, string, callback) {
+                        callback(command_list);
+                    },
                 greetings: settings.greetings
             });
             var command_line = self.find('.terminal-output').next().cmd({

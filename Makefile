@@ -1,4 +1,4 @@
-VERSION=0.4.23
+VERSION=0.5
 JSC=java -jar bin/closure.bin/compiler.jar --js
 SED=sed
 CP=cp
@@ -12,7 +12,7 @@ js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal-$(VERSION).js
 	$(JSC) js/jquery.terminal-$(VERSION).js > js/jquery.terminal-$(VERSION).min.js
 
 js/jquery.terminal-min.js: js/jquery.terminal-$(VERSION).min.js
-	$(CP) js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js	
+	$(CP) js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js
 
 README: README.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" < README.in > README
