@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sun, 10 Mar 2013 21:45:17 +0000
+ * Date: Sun, 10 Mar 2013 21:54:19 +0000
  */
 
 /*
@@ -2406,7 +2406,7 @@
                             if (settings.history) {
                                 command_line.history().enable();
                             }
-                        });
+                        }, self);
                     }
                 } catch (e) {
                     display_exception(e, 'LOGIN', self);
@@ -2674,7 +2674,7 @@
         if (url && (typeof settings.login === 'string' || settings.login)) {
             settings.login = (function(method) {
                 var id = 1;
-                return function(user, passwd, callback) {
+                return function(user, passwd, callback, term) {
                     self.pause();
                     $.jrpc(url,
                            id++,
