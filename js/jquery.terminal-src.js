@@ -911,7 +911,7 @@
                 }
             };
         })(self);
-
+        var last_command;
         var draw_prompt = (function() {
             var prompt_node = self.find('.prompt');
             return function() {
@@ -936,6 +936,7 @@
                 clip.blur().val('');
             });
         }
+        
         function keydown_event(e) {
             if (options.keydown) {
                 var result = options.keydown(e);
@@ -1059,6 +1060,7 @@
                     } else {
                         backup_prompt = prompt;
                         draw_reverse_prompt();
+                        last_command = command;
                         command = '';
                         redraw();
                         reverse_search = true;
@@ -1067,7 +1069,7 @@
                     if (reverse_search) {
                         prompt = backup_prompt;
                         draw_prompt();
-                        command = '';
+                        command = last_command;
                         redraw();
                         reverse_search = false;
                     }
@@ -1344,10 +1346,6 @@
     // -------------------------------------------------------------------------
     // :: TOOLS
     // -------------------------------------------------------------------------
-
-    var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]\[]*|\[*(?!\[)[^\]]*\][^\]]*)\])/g;
-    var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]\[]*|[^\[]*\[(?!\[)*[^\]]*\][^\]]*)\]/g;
-
     var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
