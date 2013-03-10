@@ -2264,15 +2264,11 @@
                         if (typeof json.result === 'string') {
                             terminal.echo(json.result);
                         } else if (json.result instanceof Array) {
-                            terminal.echo(json.result.join(' '));
+                            terminal.echo($.map(json.result, function(object) {
+                                return $.json_stringify(object);
+                            }).join(' '));
                         } else if (typeof json.result === 'object') {
-                            var string = '';
-                            for (var f in json.result) {
-                                if (json.result.hasOwnProperty(f)) {
-                                    string += f + ': ' + json.result[f] + '\n';
-                                }
-                            }
-                            terminal.echo(string);
+                            terminal.echo($.json_stringify(json.result));
                         }
                     } else {
                         terminal.error('&#91;RPC&#93; ' + json.error.message);

@@ -1,3 +1,6 @@
+0.5.1     function in push
+          allow to put braket in formatting (closed with escape)
+          print nested object in automatic rpc
 0.5       Tab completion work with callback function
           Push command allow for objects
           Add CTRL+G to cancel Reverse Search
