@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.5
+ *|           \/              /____/                              version 0.5.1
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 09 Mar 2013 09:59:29 +0000
+ * Date: Sun, 10 Mar 2013 20:48:26 +0000
  */
 
 /*
@@ -1347,15 +1347,19 @@
 
     var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]\[]*|\[*(?!\[)[^\]]*\][^\]]*)\])/g;
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]\[]*|[^\[]*\[(?!\[)*[^\]]*\][^\]]*)\]/g;
+
+    var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
+    var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     var url_re = /(https?:((?!&[^;]+;)[^\s:"'<)])+)/g;
     var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     $.terminal = {
-        // split text into lines with equal width and make each line be renderd
+        // split text into lines with equal length and make each line be renderd
         // separatly (text formating can be longer then a line).
         split_equal: function(str, length) {
             var array = str.split(/\n/g);
-            var re_format = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
+            //var re_format = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
+            var re_format = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
             var re_begin = /(\[\[[gbius]*;[^;]*;[^\]]*\])/;
             var re_last = /\[\[[gbius]*;?[^;]*;?[^\]]*\]?$/;
             var formatting = false;
@@ -1392,7 +1396,11 @@
                             in_text = true;
                         }
                     } else if ((formatting && in_text) || !formatting) {
-                        ++count;
+                        if (line[j] === ']' && line[j-1] === '\\') {
+                            --count; // escape \] count as one character
+                        } else {
+                            ++count;
+                        }
                     }
                     if (count === length || j === jlen-1) {
                         var output_line = line.substring(first_index, j+1);
@@ -1453,6 +1461,7 @@
                                 if (text === '') {
                                     return '<span>&nbsp;</span>';
                                 }
+                                text = text.replace(/\\]/g, ']');
                                 var style_str = '';
                                 if (style.indexOf('b') !== -1) {
                                     style_str += 'font-weight:bold;';
@@ -1664,7 +1673,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.5';
+    var version = '0.5.1';
     var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2191,7 +2200,7 @@
                         options['completion'] = function(term, string, callback) {
                             callback(commands);
                         };
-                    } else {
+                    } else if ($.type(_eval) != 'function') {
                         throw "Invalid value as eval in push command";
                     }
                     interpreters.push($.extend({'eval': _eval}, options));

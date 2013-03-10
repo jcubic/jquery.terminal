@@ -1347,15 +1347,19 @@
 
     var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]\[]*|\[*(?!\[)[^\]]*\][^\]]*)\])/g;
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]\[]*|[^\[]*\[(?!\[)*[^\]]*\][^\]]*)\]/g;
+
+    var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
+    var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     var url_re = /(https?:((?!&[^;]+;)[^\s:"'<)])+)/g;
     var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     $.terminal = {
-        // split text into lines with equal width and make each line be renderd
+        // split text into lines with equal length and make each line be renderd
         // separatly (text formating can be longer then a line).
         split_equal: function(str, length) {
             var array = str.split(/\n/g);
-            var re_format = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
+            //var re_format = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
+            var re_format = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
             var re_begin = /(\[\[[gbius]*;[^;]*;[^\]]*\])/;
             var re_last = /\[\[[gbius]*;?[^;]*;?[^\]]*\]?$/;
             var formatting = false;
@@ -1392,7 +1396,11 @@
                             in_text = true;
                         }
                     } else if ((formatting && in_text) || !formatting) {
-                        ++count;
+                        if (line[j] === ']' && line[j-1] === '\\') {
+                            --count; // escape \] count as one character
+                        } else {
+                            ++count;
+                        }
                     }
                     if (count === length || j === jlen-1) {
                         var output_line = line.substring(first_index, j+1);
@@ -1453,6 +1461,7 @@
                                 if (text === '') {
                                     return '<span>&nbsp;</span>';
                                 }
+                                text = text.replace(/\\]/g, ']');
                                 var style_str = '';
                                 if (style.indexOf('b') !== -1) {
                                     style_str += 'font-weight:bold;';
@@ -2191,7 +2200,7 @@
                         options['completion'] = function(term, string, callback) {
                             callback(commands);
                         };
-                    } else {
+                    } else if ($.type(_eval) != 'function') {
                         throw "Invalid value as eval in push command";
                     }
                     interpreters.push($.extend({'eval': _eval}, options));
