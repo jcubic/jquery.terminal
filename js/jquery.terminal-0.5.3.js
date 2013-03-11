@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 11 Mar 2013 20:04:24 +0000
+ * Date: Mon, 11 Mar 2013 20:36:49 +0000
  */
 
 /*
@@ -1107,8 +1107,27 @@
                         }
                     //} else if (e.altKey) { //ALT+CTRL+??
                     } else {
+                        if (e.which === 87) { // CTRL+W
+                            if (command !== '') {
+                                var first = command.slice(0, position);
+                                var last = command.slice(position+1);
+                                var m = first.match(/([^ ]+ *$)/);
+                                position = first.length-m[0].length;
+                                command = first.slice(0, position) + last;
+                                redraw();
+                            }
+                            return false;
+                        } else if (e.which === 72) { // CTRL+H
+                            if (command !== '' && position > 0) {
+                                command = command.slice(0, --position);
+                                if (position < command.length-1) {
+                                    command += command.slice(position);
+                                }
+                                redraw();
+                            }
+                            return false;
                         //NOTE: in opera charCode is undefined
-                        if (e.which === 65) {
+                        } else if (e.which === 65) {
                             //CTRL+A
                             self.position(0);
                         } else if (e.which === 69) {
@@ -2210,7 +2229,6 @@
                 if (options && (!options.prompt || validate('prompt', options.prompt)) ||
                     !options) {
                     interpreters.top().mask = command_line.mask();
-                    console.log(interpreters.top().mask);
                     if ($.type(_eval) === 'string') {
                         //_eval = make_json_rpc_eval_fun(options['eval'], self);
                         _eval = make_json_rpc_eval_fun(_eval, self);
