@@ -2202,11 +2202,13 @@
                 return $.Storage.get('login' + (name ? '_' + name : ''));
             } : $.noop,
             name: function() {
-                return settings.name;
+                return interpreters.top().name;
             },
             push: function(_eval, options) {
                 if (options && (!options.prompt || validate('prompt', options.prompt)) ||
                     !options) {
+                    interpreters.top().mask = command_line.mask();
+                    console.log(interpreters.top().mask);
                     if ($.type(_eval) === 'string') {
                         //_eval = make_json_rpc_eval_fun(options['eval'], self);
                         _eval = make_json_rpc_eval_fun(_eval, self);
@@ -2255,6 +2257,8 @@
                             throw e;
                         }
                     }
+                    // restore mask
+                    self.mask(interpreters.top().mask);
                 }
                 return self;
             },

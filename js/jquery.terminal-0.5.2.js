@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 11 Mar 2013 18:08:45 +0000
+ * Date: Mon, 11 Mar 2013 19:21:26 +0000
  */
 
 /*
@@ -2202,11 +2202,13 @@
                 return $.Storage.get('login' + (name ? '_' + name : ''));
             } : $.noop,
             name: function() {
-                return settings.name;
+                return interpreters.top().name;
             },
             push: function(_eval, options) {
                 if (options && (!options.prompt || validate('prompt', options.prompt)) ||
                     !options) {
+                    interpreters.top().mask = command_line.mask();
+                    console.log(interpreters.top().mask);
                     if ($.type(_eval) === 'string') {
                         //_eval = make_json_rpc_eval_fun(options['eval'], self);
                         _eval = make_json_rpc_eval_fun(_eval, self);
@@ -2227,13 +2229,6 @@
                     prepare_top_interpreter();
                 }
                 return self;
-            },
-            reset: function() {
-                self.clear();
-                while(interpreters.size() > 1) {
-                    interpreters.pop();
-                }
-                initialize();
             },
             pop: function(string) {
                 if (string !== undefined) {
@@ -2262,8 +2257,20 @@
                             throw e;
                         }
                     }
+                    // restore mask
+                    self.mask(interpreters.top().mask);
                 }
                 return self;
+            },
+            level: function() {
+                return interpreters.size();
+            },
+            reset: function() {
+                self.clear();
+                while(interpreters.size() > 1) {
+                    interpreters.pop();
+                }
+                initialize();
             }
         }, function(_, fun) {
             // wrap all functions and display execptions
