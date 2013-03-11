@@ -1,5 +1,6 @@
 0.5.3     level api function
           Restore mask on pop
+          click out of terminal remove focus
 0.5.2     fix entity in lines
           add data-text attribute to formatting span
 0.5.1     function in push
