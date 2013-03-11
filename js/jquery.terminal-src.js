@@ -1370,6 +1370,7 @@
                 } else {
                     semicolons = '';
                 }
+                //return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting
                 return '[[' + format + semicolons + text.replace(/\\\]/g, '&#93;') + ']' +
                     text + ']';
@@ -1510,8 +1511,9 @@
                                 }
                                 var result = '<span style="' + style_str + '"' +
                                     (_class !== '' ? ' class="' + _class + '"' : '') +
-                                    ' data-text="'+(data_text==''?text:data_text)+'"' +
-                                    '>' + text + '</span>';
+                                    ' data-text="'+
+                                    (data_text===''?text:data_text).replace('"', '&quote;')+
+                                    '">' + text + '</span>';
                                 return result;
                             });
                         } else {
@@ -2258,7 +2260,7 @@
                         }
                     }
                     // restore mask
-                    self.mask(interpreters.top().mask);
+                    self.set_mask(interpreters.top().mask);
                 }
                 return self;
             },
