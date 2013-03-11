@@ -1753,7 +1753,7 @@
         var num_chars; // numer of chars in line
         var command_list = []; // for tab completion
         var settings = $.extend({
-            name: '',
+            name: this.selector,
             prompt: '> ',
             history: true,
             exit: true,

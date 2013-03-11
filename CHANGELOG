@@ -2,6 +2,7 @@
           Restore mask on pop
           click out of terminal remove focus
           CTRL+H CTRL+W
+          use selector as default name for the terminal
 0.5.2     fix entity in lines
           add data-text attribute to formatting span
 0.5.1     function in push

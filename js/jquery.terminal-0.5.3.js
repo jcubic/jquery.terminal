@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 11 Mar 2013 20:36:49 +0000
+ * Date: Mon, 11 Mar 2013 20:46:44 +0000
  */
 
 /*
@@ -1753,7 +1753,7 @@
         var num_chars; // numer of chars in line
         var command_list = []; // for tab completion
         var settings = $.extend({
-            name: '',
+            name: this.selector,
             prompt: '> ',
             history: true,
             exit: true,
