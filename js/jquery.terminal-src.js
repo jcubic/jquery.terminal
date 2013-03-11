@@ -2228,13 +2228,6 @@
                 }
                 return self;
             },
-            reset: function() {
-                self.clear();
-                while(interpreters.size() > 1) {
-                    interpreters.pop();
-                }
-                initialize();
-            },
             pop: function(string) {
                 if (string !== undefined) {
                     echo_command(string);
@@ -2264,6 +2257,16 @@
                     }
                 }
                 return self;
+            },
+            level: function() {
+                return interpreters.size();
+            },
+            reset: function() {
+                self.clear();
+                while(interpreters.size() > 1) {
+                    interpreters.pop();
+                }
+                initialize();
             }
         }, function(_, fun) {
             // wrap all functions and display execptions
