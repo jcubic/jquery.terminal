@@ -1,6 +1,9 @@
+0.5.2     fix entity in lines
+          
 0.5.1     function in push
           allow to put braket in formatting (closed with escape)
           print nested object in automatic rpc
+          terminal instance in login callback
 0.5       Tab completion work with callback function
           Push command allow for objects
           Add CTRL+G to cancel Reverse Search

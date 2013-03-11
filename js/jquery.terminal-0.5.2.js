@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.5.1
+ *|           \/              /____/                              version 0.5.2
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sun, 10 Mar 2013 21:54:19 +0000
+ * Date: Mon, 11 Mar 2013 17:43:29 +0000
  */
 
 /*
@@ -439,18 +439,6 @@
         return result;
     }
 
-
-    // -----------------------------------------------------------------------
-
-    function skipFormattingCount(string) {
-        return $('<div>' + $.terminal.strip(string) + '</div>').text().length;
-    }
-
-    // -----------------------------------------------------------------------
-    function formattingCount(string) {
-        return string.length - skipFormattingCount(string);
-    }
-
     // -----------------------------------------------------------------------
     // CYCLE DATA STRUCTURE
     // -----------------------------------------------------------------------
@@ -630,7 +618,7 @@
             name += '_';
         }
         var data = $.Storage.get(name + 'commands');
-        var bc = new BCycle(data ? eval('(' + data + ')') : ['']);
+        var bc = new BCycle(data ? new Function('return ' + data + ';')() : ['']);
 
         $.extend(this, {
             append: function(item) {
@@ -1346,8 +1334,17 @@
     // -------------------------------------------------------------------------
     // :: TOOLS
     // -------------------------------------------------------------------------
+    function skipFormattingCount(string) {
+        return $('<div>' + $.terminal.strip(string) + '</div>').text().length;
+    }
+    // -------------------------------------------------------------------------
+    function formattingCount(string) {
+        return string.length - skipFormattingCount(string);
+    }
+    // -------------------------------------------------------------------------
     var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
-    var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
+    var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
+
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     var url_re = /(https?:((?!&[^;]+;)[^\s:"'<)])+)/g;
     var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
@@ -1357,7 +1354,8 @@
         split_equal: function(str, length) {
             var array = str.split(/\n/g);
             //var re_format = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
-            var re_format = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
+            var re_format = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
+            var re_format = /\[\[([gbius]*;[^;]*;[^;\]]*;|[^\]]*;?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
             var re_begin = /(\[\[[gbius]*;[^;]*;[^\]]*\])/;
             var re_last = /\[\[[gbius]*;?[^;]*;?[^\]]*\]?$/;
             var formatting = false;
@@ -1365,6 +1363,20 @@
             var braket = 0;
             var prev_format = '';
             var result = [];
+            str = str.replace(re_format, function(_, format, text) {
+                console.log(1);
+                var semicolons = format.match(/;/).length;
+                if (semicolons == 2) {
+                    semicolons = ';;';
+                } else if (semicolons == 3) {
+                    semicolons = ';';
+                } else {
+                    semicolons = '';
+                }
+                return '[[' + format + semicolons + text.replace(/\\\]/g, '&#93;') + ']' +
+                    text + ']';
+            });
+            console.log(str);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (prev_format !== '') {
                     if (array[i] === '') {
@@ -1394,10 +1406,21 @@
                             in_text = true;
                         }
                     } else if ((formatting && in_text) || !formatting) {
-                        if (line[j] === ']' && line[j-1] === '\\') {
-                            --count; // escape \] count as one character
-                        } else {
+                        if (line[j] === '&') { // treat entity as one character
+                            var m = line.substring(j).match(/^(&[^;]+;)/);
+                            if (!m) {
+                                throw "Unclosed html entity at char " + j;
+                            }
+                            j+=m[0].length-1;
                             ++count;
+                            continue;
+                        } else {
+                            // escape \] count as one character
+                            if (line[j] === ']' && line[j-1] === '\\') {
+                                --count;
+                            } else {
+                                ++count;
+                            }
                         }
                     }
                     if (count === length || j === jlen-1) {
@@ -1455,6 +1478,7 @@
                                                                     color,
                                                                     background,
                                                                     _class,
+                                                                    data_text,
                                                                     text) {
                                 if (text === '') {
                                     return '<span>&nbsp;</span>';
@@ -1488,7 +1512,8 @@
                                     style_str += 'background-color:' + background;
                                 }
                                 var result = '<span style="' + style_str + '"' +
-                                    (_class != '' ? ' class="' + _class + '"' : '') +
+                                    (_class !== '' ? ' class="' + _class + '"' : '') +
+                                    ' data-text="'+(data_text==''?text:data_text)+'"' +
                                     '>' + text + '</span>';
                                 return result;
                             });
@@ -1511,7 +1536,7 @@
         },
         // remove formatting from text
         strip: function(str) {
-            return str.replace(format_re, '$5');
+            return str.replace(format_re, '$6');
         },
         // return active terminal
         active: function() {
@@ -1671,7 +1696,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.5.1';
+    var version = '0.5.2';
     var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2319,6 +2344,7 @@
             }
             if (typeof prompt === 'function') {
                 prompt(function(string) {
+                    console.log(string + command);
                     self.echo(string + command);
                 });
             } else {
@@ -2336,7 +2362,7 @@
                         if (settings.login) {
                             logout();
                         } else {
-                            var msg = 'You can exit from main interpeter';
+                            var msg = "You can't exit from main interpeter";
                             if (!silent) {
                                 echo_command(command);
                             }
@@ -2505,7 +2531,7 @@
         function key_down(e) {
             var i;
             // after text pasted into textarea in cmd plugin
-            self.oneTime(5, function() {
+            self.oneTime(10, function() {
                 on_scrollbar_show_resize();
             });
             if (settings.keydown) {
