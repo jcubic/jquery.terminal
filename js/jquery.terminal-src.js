@@ -1133,7 +1133,7 @@
                             self.set(command.slice(position, command.length));
                             self.position(0);
                         } else if (e.which === 17) { //CTRL+TAB switch tab
-                            return true;
+                            return false;
                         }
                     }
                 } else {
@@ -2769,11 +2769,15 @@
             } else {
                 self.disable();
             }
+            $(document).click(function(e) {
+                if (!$(e.target).parents().hasClass('terminal')) {
+                    self.disable();
+                }
+            });
             $(window).resize(self.resize);
             self.click(function() {
-                if (!(pause && terminals.length() > 1 && self === $.terminal.active())) {
-                    self.focus();
-                }
+                //if (!(pause && terminals.length() > 1 && self === $.terminal.active())) {
+                self.focus();
             });
             if (options.login && self.token && !self.token() && self.login_name &&
                 !self.login_name()) {

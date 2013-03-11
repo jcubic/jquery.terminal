@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.5.2
+ *|           \/              /____/                              version 0.5.3
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 11 Mar 2013 19:30:48 +0000
+ * Date: Mon, 11 Mar 2013 20:04:24 +0000
  */
 
 /*
@@ -1133,7 +1133,7 @@
                             self.set(command.slice(position, command.length));
                             self.position(0);
                         } else if (e.which === 17) { //CTRL+TAB switch tab
-                            return true;
+                            return false;
                         }
                     }
                 } else {
@@ -1695,7 +1695,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.5.2';
+    var version = '0.5.3';
     var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2769,11 +2769,15 @@
             } else {
                 self.disable();
             }
+            $(document).click(function(e) {
+                if (!$(e.target).parents().hasClass('terminal')) {
+                    self.disable();
+                }
+            });
             $(window).resize(self.resize);
             self.click(function() {
-                if (!(pause && terminals.length() > 1 && self === $.terminal.active())) {
-                    self.focus();
-                }
+                //if (!(pause && terminals.length() > 1 && self === $.terminal.active())) {
+                self.focus();
             });
             if (options.login && self.token && !self.token() && self.login_name &&
                 !self.login_name()) {
