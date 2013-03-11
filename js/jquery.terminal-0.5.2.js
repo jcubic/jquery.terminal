@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 11 Mar 2013 17:43:29 +0000
+ * Date: Mon, 11 Mar 2013 17:57:27 +0000
  */
 
 /*
@@ -1352,7 +1352,6 @@
         // split text into lines with equal length and make each line be renderd
         // separatly (text formating can be longer then a line).
         split_equal: function(str, length) {
-            var array = str.split(/\n/g);
             //var re_format = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
             var re_format = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
             var re_format = /\[\[([gbius]*;[^;]*;[^;\]]*;|[^\]]*;?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
@@ -1363,9 +1362,8 @@
             var braket = 0;
             var prev_format = '';
             var result = [];
-            str = str.replace(re_format, function(_, format, text) {
-                console.log(1);
-                var semicolons = format.match(/;/).length;
+            var array = str.replace(re_format, function(_, format, text) {
+                var semicolons = format.match(/;/g).length;
                 if (semicolons == 2) {
                     semicolons = ';;';
                 } else if (semicolons == 3) {
@@ -1375,8 +1373,7 @@
                 }
                 return '[[' + format + semicolons + text.replace(/\\\]/g, '&#93;') + ']' +
                     text + ']';
-            });
-            console.log(str);
+            }).split(/\n/g);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (prev_format !== '') {
                     if (array[i] === '') {
