@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 11 Mar 2013 17:57:27 +0000
+ * Date: Mon, 11 Mar 2013 18:08:45 +0000
  */
 
 /*
@@ -1344,7 +1344,7 @@
     // -------------------------------------------------------------------------
     var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
-
+    var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     var url_re = /(https?:((?!&[^;]+;)[^\s:"'<)])+)/g;
     var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
@@ -1352,8 +1352,6 @@
         // split text into lines with equal length and make each line be renderd
         // separatly (text formating can be longer then a line).
         split_equal: function(str, length) {
-            //var re_format = /(\[\[[gbius]*;[^;]*;[^\]]*\][^\]\[]*\]?)/g;
-            var re_format = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
             var re_format = /\[\[([gbius]*;[^;]*;[^;\]]*;|[^\]]*;?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
             var re_begin = /(\[\[[gbius]*;[^;]*;[^\]]*\])/;
             var re_last = /\[\[[gbius]*;?[^;]*;?[^\]]*\]?$/;
@@ -1364,6 +1362,7 @@
             var result = [];
             var array = str.replace(re_format, function(_, format, text) {
                 var semicolons = format.match(/;/g).length;
+                // missing semicolons
                 if (semicolons == 2) {
                     semicolons = ';;';
                 } else if (semicolons == 3) {
@@ -1371,6 +1370,7 @@
                 } else {
                     semicolons = '';
                 }
+                // closing braket will break formatting
                 return '[[' + format + semicolons + text.replace(/\\\]/g, '&#93;') + ']' +
                     text + ']';
             }).split(/\n/g);
@@ -2341,7 +2341,6 @@
             }
             if (typeof prompt === 'function') {
                 prompt(function(string) {
-                    console.log(string + command);
                     self.echo(string + command);
                 });
             } else {
