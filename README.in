@@ -69,4 +69,5 @@ jQuery(function($, undefined) {
 ```
 
 Licensed under [GNU LGPL Version 3 license](http://www.gnu.org/licenses/lgpl.html)
+
 Copyright (c) 2011-2013 [Jakub Jankiewicz](http://jcubic.pl)
