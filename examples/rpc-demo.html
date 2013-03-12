@@ -10,12 +10,16 @@
     <script src="../js/jquery.terminal-min.js"></script>
     <link href="../css/jquery.terminal.css" rel="stylesheet"/>
     <script>
-jQuery(document).ready(function($) {
-    $('body').terminal("json-rpc-service-demo.php", {
-        login: true,
-        greetings: "You are authenticated"
+    jQuery(document).ready(function($) {
+        $('body').terminal("json-rpc-service-demo.php", {
+            login: true,
+            greetings: "You are authenticated",
+		    onBlur: function() {
+                // the height of the body is only 2 lines initialy
+		        return false;
+            }
+        });
     });
-});
     </script>
   </head>
 <body>

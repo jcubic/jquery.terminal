@@ -44,10 +44,10 @@ jQuery(document).ready(function($) {
         } else if (command == 'mysql') {
             term.push(function(command, term) {
                 term.pause();
-                $.jrpc("mysql-rpc-demo.php", 
-                       id++, 
-                       "query", 
-                       [command], 
+                $.jrpc("mysql-rpc-demo.php",
+                       id++,
+                       "query",
+                       [command],
                        function(data) {
                            term.resume();
                            if (data.error) {
@@ -64,8 +64,8 @@ jQuery(document).ready(function($) {
                            }
                        },
                        function(xhr, status, error) {
-                           term.error('[AJAX] ' + status + 
-                                      ' - Server reponse is: \n' + 
+                           term.error('[AJAX] ' + status +
+                                      ' - Server reponse is: \n' +
                                       xhr.responseText);
                            term.resume();
                        });
@@ -78,7 +78,11 @@ you are allowed to execute: select, insert, update and delete from/to table:\n\
             term.echo("unknow command " + command);
         }
     }, {
-        greetings: "multiply terminals demo use help to see available commands"
+        greetings: "multiply terminals demo use help to see available commands",
+        onBlur: function() {
+            // prevent loosing focus
+            return false;
+        }
     });
 });
 
