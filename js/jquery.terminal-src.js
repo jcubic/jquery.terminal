@@ -612,7 +612,7 @@
     // -----------------------------------------------------------------------
     // :: HISTORY CLASS
     // -----------------------------------------------------------------------
-    function History(name) {
+    function History(name, size) {
         var enabled = true;
         if (typeof name === 'string' && name !== '') {
             name += '_';
@@ -674,6 +674,7 @@
         var position = 0;
         var prompt;
         var enabled = options.enabled;
+        var historySize = options.historySize || 60;
         var name, history;
         var cursor = self.find('.cursor');
 
@@ -1172,7 +1173,7 @@
             name: function(string) {
                 if (string !== undefined) {
                     name = string;
-                    history = new History(string);
+                    history = new History(string, historySize);
                 } else {
                     return name;
                 }
@@ -1758,6 +1759,7 @@
             exit: true,
             clear: true,
             enabled: true,
+            historySize: 60,
             displayExceptions: true,
             cancelableAjax: true,
             login: null,
@@ -2336,9 +2338,11 @@
                     }
                     terminal.resume();
                 }, function(xhr, status, error) {
-                    terminal.error('&#91;AJAX&#93; ' + status +
-                                   ' - Server reponse is: \n' +
-                                   xhr.responseText);
+                    if (status !== 'abort') {
+                        terminal.error('&#91;AJAX&#93; ' + status +
+                                       ' - Server reponse is: \n' +
+                                       xhr.responseText);
+                    }
                     terminal.resume();
                 });
             };
@@ -2416,7 +2420,6 @@
                         interpreter['eval'](command, self);
                     }
                 }
-
             } catch (e) {
                 display_exception(e, 'USER');
                 self.resume();
@@ -2774,6 +2777,7 @@
                 prompt: settings.prompt,
                 history: settings.history,
                 historyFilter: settings.historyFilter,
+                historySize: settings.historySize,
                 width: '100%',
                 keydown: key_down,
                 keypress: settings.keypress ? function(e) {
