@@ -1,3 +1,4 @@
+0.5.4     fix scroll when attaching terminal to body in non Webkit browsers
 0.5.3     level api function
           Restore mask on pop
           click out of terminal remove focus
