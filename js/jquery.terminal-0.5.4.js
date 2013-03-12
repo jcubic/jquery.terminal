@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 12 Mar 2013 13:40:57 +0000
+ * Date: Tue, 12 Mar 2013 15:12:28 +0000
  */
 
 /*
@@ -2800,7 +2800,8 @@
                 self.disable();
             }
             $(document).click(function(e) {
-                if (!$(e.target).parents().hasClass('terminal')) {
+                if (!$(e.target).parents().hasClass('terminal') &&
+                    settings.onBlur(self) !== false) {
                     self.disable();
                 }
             });

@@ -2800,7 +2800,8 @@
                 self.disable();
             }
             $(document).click(function(e) {
-                if (!$(e.target).parents().hasClass('terminal')) {
+                if (!$(e.target).parents().hasClass('terminal') &&
+                    settings.onBlur(self) !== false) {
                     self.disable();
                 }
             });
