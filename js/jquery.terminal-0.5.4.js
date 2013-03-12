@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.5.3
+ *|           \/              /____/                              version 0.5.4
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 11 Mar 2013 20:46:44 +0000
+ * Date: Tue, 12 Mar 2013 13:40:57 +0000
  */
 
 /*
@@ -1133,8 +1133,7 @@
                         } else if (e.which === 69) {
                             //CTRL+E
                             self.position(command.length);
-                        } else if (e.which === 88 || e.which === 67 ||
-                                   e.which === 87 || e.which === 84) {
+                        } else if (e.which === 88 || e.which === 67 || e.which === 84) {
                             //CTRL+X CTRL+C CTRL+W CTRL+T
                             return true;
                         } else if (e.which === 86) {
@@ -1714,7 +1713,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.5.3';
+    var version = '0.5.4';
     var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1885,11 +1884,17 @@
             }
             return true;
         }
-
+        var scroll_object;
+        if (!navigator.userAgent.toLowerCase().match(/(webkit)[ \/]([\w.]+)/) &&
+            self[0].tagName.toLowerCase() == 'body') {
+            scroll_object = $('html');
+        } else {
+            scroll_object = self;
+        }
         function scroll_to_bottom() {
-            var scrollHeight = self.prop ? self.prop('scrollHeight') :
-                self.attr('scrollHeight');
-            self.scrollTop(scrollHeight);
+            var scrollHeight = scroll_object.prop ? scroll_object.prop('scrollHeight') :
+                scroll_object.attr('scrollHeight');
+            scroll_object.scrollTop(scrollHeight);
         }
 
         function draw_line(string) {
@@ -1939,7 +1944,7 @@
         // ----------------------------------------------------------
         // TERMINAL METHODS
         // ----------------------------------------------------------
-
+        var old_width, old_height;
         var dalyed_commands = [];
         $.extend(self, $.omap({
             clear: function() {
@@ -2165,15 +2170,22 @@
                     self.width(width);
                     self.height(height);
                 }
-                num_chars = get_num_chars();
-                command_line.resize(num_chars);
-                var o = output.detach();
-                output.html('');
-                $.each(lines, function(i, line) {
-                    draw_line(line && typeof line == 'function' ? line() : line);
-                });
-                self.prepend(o);
-                scroll_to_bottom();
+                width = self.width();
+                height = self.height();
+                // prevent too many calculations in IE because of resize event bug
+                if (old_height !== height || old_width !== width) {
+                    old_height = height;
+                    old_width = width;
+                    num_chars = get_num_chars();
+                    command_line.resize(num_chars);
+                    var o = output.detach();
+                    output.html('');
+                    $.each(lines, function(i, line) {
+                        draw_line(line && typeof line == 'function' ? line() : line);
+                    });
+                    self.prepend(o);
+                    scroll_to_bottom();
+                }
                 return self;
             },
             echo: function(line) {
@@ -2189,19 +2201,19 @@
             scroll: function(amount) {
                 var pos;
                 amount = Math.round(amount);
-                if (self.prop) {
-                    if (amount > self.prop('scrollTop') && amount > 0) {
-                        self.prop('scrollTop', 0);
+                if (scroll_object.prop) {
+                    if (amount > scroll_object.prop('scrollTop') && amount > 0) {
+                        scroll_object.prop('scrollTop', 0);
                     }
-                    pos = self.prop('scrollTop');
-                    self.prop('scrollTop', pos + amount);
+                    pos = scroll_object.prop('scrollTop');
+                    scroll_object.scrollTop(pos + amount);
                     return self;
                 } else {
-                    if (amount > self.attr('scrollTop') && amount > 0) {
-                        self.attr('scrollTop', 0);
+                    if (amount > scroll_object.attr('scrollTop') && amount > 0) {
+                        scroll_object.attr('scrollTop', 0);
                     }
-                    pos = self.attr('scrollTop');
-                    self.attr('scrollTop', pos + amount);
+                    pos = scroll_object.attr('scrollTop');
+                    scroll_object.scrollTop(pos + amount);
                     return self;
                 }
             },
