@@ -612,7 +612,7 @@
     // -----------------------------------------------------------------------
     // :: HISTORY CLASS
     // -----------------------------------------------------------------------
-    function History(name, size) {
+    function History(name) {
         var enabled = true;
         if (typeof name === 'string' && name !== '') {
             name += '_';
@@ -925,7 +925,7 @@
                 clip.blur().val('');
             });
         }
-        
+
         function keydown_event(e) {
             if (options.keydown) {
                 var result = options.keydown(e);
@@ -1746,78 +1746,10 @@
     var requests = [];
     var terminals = new Cycle(); //list of terminals global in this scope
     $.fn.terminal = function(init_eval, options) {
-        var self = this;
-        var lines = [];
-        var output;
-        var terminal_id = terminals.length();
-        var num_chars; // numer of chars in line
-        var command_list = []; // for tab completion
-        var settings = $.extend({
-            name: this.selector,
-            prompt: '> ',
-            history: true,
-            exit: true,
-            clear: true,
-            enabled: true,
-            historySize: 60,
-            displayExceptions: true,
-            cancelableAjax: true,
-            login: null,
-            tabcompletion: null,
-            historyFilter: null,
-            onInit: $.noop,
-            onClear: $.noop,
-            onBlur: $.noop,
-            onFocus: $.noop,
-            onTerminalChange: $.noop,
-            onExit: $.noop,
-            keypress: $.noop,
-            keydown: $.noop
-        }, options || {});
-
-        if (settings.width) {
-            self.width(settings.width);
-        }
-        if (settings.height) {
-            self.height(settings.height);
-        }
-
-        var pause = !settings.enabled;
-        if (self.length === 0) {
-            throw 'Sorry, but terminal said that "' + self.selector +
-                '" is not valid selector!';
-        }
-        // register ajaxSend for cancel requests on CTRL+D
-        self.ajaxSend(function(e, xhr, opt) {
-            requests.push(xhr);
-        });
-        // terminal already exist
-        if (self.data('terminal')) {
-            return self.data('terminal');
-        }
-        output = $('<div>').addClass('terminal-output').appendTo(self);
-        self.addClass('terminal').append('<div/>');
-        // keep focus in clipboard textarea in mobile
-        if (('ontouchstart' in window) || window.DocumentTouch &&
-            document instanceof DocumentTouch) {
-            self.click(function() {
-                self.find('textarea').focus();
-            });
-            self.find('textarea').focus();
-        }
-        /*
-        self.bind('touchstart.touchScroll', function() {
-
-        });
-        self.bind('touchmove.touchScroll', function() {
-
-        });
-        */
-        //$('<input type="text"/>').hide().focus().appendTo(self);
-        //calculate numbers of characters
         function haveScrollbars() {
             return self.get(0).scrollHeight > self.innerHeight();
         }
+        //calculate numbers of characters
         function get_num_chars() {
             var cursor = self.find('.cursor');
             var cur_width = cursor.width();
@@ -1831,11 +1763,9 @@
 
             return result;
         }
-
         function escape_brackets(string) {
             return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
         }
-
         // display Exception on terminal
         function display_exception(e, label) {
             if (settings.displayExceptions) {
@@ -1867,7 +1797,12 @@
                 }
             }
         }
-
+        var scroll_object;
+        function scroll_to_bottom() {
+            var scrollHeight = scroll_object.prop ? scroll_object.prop('scrollHeight') :
+                scroll_object.attr('scrollHeight');
+            scroll_object.scrollTop(scrollHeight);
+        }
         //validating if object is string or function, call that function and
         //display exeption if any
         function validate(label, object) {
@@ -1886,19 +1821,6 @@
             }
             return true;
         }
-        var scroll_object;
-        if (!navigator.userAgent.toLowerCase().match(/(webkit)[ \/]([\w.]+)/) &&
-            self[0].tagName.toLowerCase() == 'body') {
-            scroll_object = $('html');
-        } else {
-            scroll_object = self;
-        }
-        function scroll_to_bottom() {
-            var scrollHeight = scroll_object.prop ? scroll_object.prop('scrollHeight') :
-                scroll_object.attr('scrollHeight');
-            scroll_object.scrollTop(scrollHeight);
-        }
-
         function draw_line(string) {
             string = typeof string === 'string' ? string : String(string);
             var div, i, len;
@@ -1942,381 +1864,6 @@
 
             return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
         }
-
-        // ----------------------------------------------------------
-        // TERMINAL METHODS
-        // ----------------------------------------------------------
-        var old_width, old_height;
-        var dalyed_commands = [];
-        $.extend(self, $.omap({
-            clear: function() {
-                output.html('');
-                command_line.set('');
-                lines = [];
-                try {
-                    settings.onClear(self);
-                } catch (e) {
-                    display_exception(e, 'onClear');
-                    throw e;
-                }
-                self.attr({ scrollTop: 0});
-                return self;
-            },
-            exec: function(command, silent) {
-                if (pause) {
-                    dalyed_commands.push([command, silent]);
-                } else {
-                    commands(command, silent);
-                }
-                return self;
-            },
-            commands: function() {
-                return interpreters.top().eval;
-            },
-            greetings: function() {
-                show_greetings();
-                return self;
-            },
-            paused: function() {
-                return pause;
-            },
-            pause: function() {
-                if (command_line) {
-                    pause = true;
-                    self.disable();
-                    command_line.hidden();
-                }
-                return self;
-            },
-            resume: function() {
-                if (command_line) {
-                    self.enable();
-                    var original = dalyed_commands;
-                    dalyed_commands = [];
-                    while (original.length) {
-                        var command = original.shift();
-                        self.exec.apply(self, command);
-                    }
-                    command_line.visible();
-                    scroll_to_bottom();
-                }
-                return self;
-            },
-            cols: function() {
-                return num_chars;
-            },
-            rows: function() {
-                return lines.length;
-            },
-            history: function() {
-                return command_line.history();
-            },
-            next: function() {
-                if (terminals.length() === 1) {
-                    return self;
-                } else {
-                    var offsetTop = self.offset().top;
-                    var height = self.height();
-                    var scrollTop = self.scrollTop();
-                    if (!is_scrolled_into_view(self)) {
-                        self.enable();
-                        $('html,body').animate({scrollTop: offsetTop-50}, 500);
-                        return self;
-                    } else {
-                        terminals.front().disable();
-                        var next = terminals.rotate().enable();
-                        // 100 provides buffer in viewport
-                        var x = next.offset().top - 50;
-                        $('html,body').animate({scrollTop: x}, 500);
-                        try {
-                            settings.onTerminalChange(next);
-                        } catch (e) {
-                            display_exception(e, 'onTerminalChange');
-                            throw e;
-                        }
-                        return next;
-                    }
-                }
-            },
-            // silent used so events are not fired on init
-            focus: function(toggle, silent) {
-                self.oneTime(1, function() {
-                    if (terminals.length() === 1) {
-                        if (toggle === false) {
-                            try {
-                                if (!silent && settings.onBlur(self) !== false) {
-                                    self.disable();
-                                }
-                            } catch (e) {
-                                display_exception(e, 'onBlur');
-                                throw e;
-                            }
-                        } else {
-                            try {
-                                if (!silent && settings.onFocus(self) !== false) {
-                                    self.enable();
-                                }
-                            } catch (e) {
-                                display_exception(e, 'onFocus');
-                                throw e;
-                            }
-                        }
-                    } else {
-                        if (toggle === false) {
-                            self.next();
-                        } else {
-                            var front = terminals.front();
-                            if (front != self) {
-                                front.disable();
-                                if (!silent) {
-                                    try {
-                                        settings.onTerminalChange(self);
-                                    } catch (e) {
-                                        display_exception(e, 'onTerminalChange');
-                                        throw e;
-                                    }
-                                }
-                            }
-                            terminals.set(self);
-                            self.enable();
-                        }
-
-                    }
-                });
-                return self;
-            },
-            enable: function() {
-                if (num_chars === undefined) {
-                    //enabling first time
-                    self.resize();
-                }
-                if (pause) {
-                    if (command_line) {
-                        command_line.enable();
-                        pause = false;
-                    }
-                }
-                return self;
-            },
-            disable: function() {
-                if (command_line) {
-                    pause = true;
-                    command_line.disable();
-                }
-                return self;
-            },
-            enabled: function() {
-                return pause;
-            },
-            signature: function() {
-                var cols = self.cols();
-                var i = cols < 15 ? null : cols < 35 ? 0 : cols < 55 ? 1 : cols < 64 ? 2 : cols < 75 ? 3 : 4;
-                if (i !== null) {
-                    return signatures[i].join('\n') + '\n';
-                } else {
-                    return '';
-                }
-            },
-            version: function() {
-                return version;
-            },
-            /* COMMAND LINE FUNCTIONS */
-            get_command: function() {
-                return command_line.get();
-            },
-            insert: function(string) {
-                if (typeof string === 'string') {
-                    command_line.insert(string);
-                    return self;
-                } else {
-                    throw "insert function argument is not a string";
-                }
-            },
-            set_prompt: function(prompt) {
-                if (validate('prompt', prompt)) {
-                    if (typeof prompt == 'function') {
-                        command_line.prompt(function(command) {
-                            prompt(command, self);
-                        });
-                    } else {
-                        command_line.prompt(prompt);
-                    }
-                    interpreters.top().prompt = prompt;
-                }
-                return self;
-            },
-            get_prompt: function() {
-                return interpreters.top().prompt;
-                // command_line.prompt(); - can be a wrapper
-                //return command_line.prompt();
-            },
-            set_command: function(command) {
-                command_line.set(command);
-                return self;
-            },
-            set_mask: function(display) {
-                command_line.mask(display);
-                return self;
-            },
-            get_output: function(raw) {
-                if (raw) {
-                    return lines;
-                } else {
-                    return $.map(lines, function(i, item) {
-                        return typeof item == 'function' ? item() : item;
-                    }).join('\n');
-                }
-            },
-            resize: function(width, height) {
-                if (width && height) {
-                    self.width(width);
-                    self.height(height);
-                }
-                width = self.width();
-                height = self.height();
-                // prevent too many calculations in IE because of resize event bug
-                if (old_height !== height || old_width !== width) {
-                    old_height = height;
-                    old_width = width;
-                    num_chars = get_num_chars();
-                    command_line.resize(num_chars);
-                    var o = output.detach();
-                    output.html('');
-                    $.each(lines, function(i, line) {
-                        draw_line(line && typeof line == 'function' ? line() : line);
-                    });
-                    self.prepend(o);
-                    scroll_to_bottom();
-                }
-                return self;
-            },
-            echo: function(line) {
-                lines.push(line);
-                draw_line(typeof line === 'function' ? line() : line);
-                on_scrollbar_show_resize();
-                return self;
-            },
-            error: function(message) {
-                //echo red message
-                return self.echo('[[;#f00;]' + escape_brackets(message) + ']');
-            },
-            scroll: function(amount) {
-                var pos;
-                amount = Math.round(amount);
-                if (scroll_object.prop) {
-                    if (amount > scroll_object.prop('scrollTop') && amount > 0) {
-                        scroll_object.prop('scrollTop', 0);
-                    }
-                    pos = scroll_object.prop('scrollTop');
-                    scroll_object.scrollTop(pos + amount);
-                    return self;
-                } else {
-                    if (amount > scroll_object.attr('scrollTop') && amount > 0) {
-                        scroll_object.attr('scrollTop', 0);
-                    }
-                    pos = scroll_object.attr('scrollTop');
-                    scroll_object.scrollTop(pos + amount);
-                    return self;
-                }
-            },
-            logout: settings.login ? function() {
-                while (interpreters.size() > 1) {
-                    interpreters.pop();
-                }
-                logout();
-                return self;
-            } : function() {
-                throw "You don't have login function";
-            },
-            token: settings.login ? function() {
-                var name = settings.name;
-                return $.Storage.get('token' + (name ? '_' + name : ''));
-            } : $.noop,
-            login_name: settings.login ? function() {
-                var name = settings.name;
-                return $.Storage.get('login' + (name ? '_' + name : ''));
-            } : $.noop,
-            name: function() {
-                return interpreters.top().name;
-            },
-            push: function(_eval, options) {
-                if (options && (!options.prompt || validate('prompt', options.prompt)) ||
-                    !options) {
-                    interpreters.top().mask = command_line.mask();
-                    if ($.type(_eval) === 'string') {
-                        //_eval = make_json_rpc_eval_fun(options['eval'], self);
-                        _eval = make_json_rpc_eval_fun(_eval, self);
-                    } else if ($.type(_eval) === 'object') {
-                        var commands = [];
-                        for (var name in _eval) {
-                            commands.push(name);
-                        }
-                        _eval = make_eval_from_object(_eval);
-                        options = options || {};
-                        options['completion'] = function(term, string, callback) {
-                            callback(commands);
-                        };
-                    } else if ($.type(_eval) != 'function') {
-                        throw "Invalid value as eval in push command";
-                    }
-                    interpreters.push($.extend({'eval': _eval}, options));
-                    prepare_top_interpreter();
-                }
-                return self;
-            },
-            pop: function(string) {
-                if (string !== undefined) {
-                    echo_command(string);
-                }
-                if (interpreters.top().name === settings.name) {
-                    if (settings.login) {
-                        logout();
-                        if (typeof settings.onExit === 'function') {
-                            try {
-                                settings.onExit(self);
-                            } catch (e) {
-                                display_exception(e, 'onExit');
-                                throw e;
-                            }
-                        }
-                    }
-                } else {
-                    var current = interpreters.pop();
-                    prepare_top_interpreter();
-                    if (typeof current.onExit === 'function') {
-                        try {
-                            current.onExit(self);
-                        } catch (e) {
-                            display_exception(e, 'onExit');
-                            throw e;
-                        }
-                    }
-                    // restore mask
-                    self.set_mask(interpreters.top().mask);
-                }
-                return self;
-            },
-            level: function() {
-                return interpreters.size();
-            },
-            reset: function() {
-                self.clear();
-                while(interpreters.size() > 1) {
-                    interpreters.pop();
-                }
-                initialize();
-            }
-        }, function(_, fun) {
-            // wrap all functions and display execptions
-            return function() {
-                try {
-                    return fun.apply(this, Array.prototype.slice.apply(arguments));
-                } catch(e) {
-                    display_exception(e, 'TERMINAL');
-                }
-            };
-        }));
-
         //function constructor for eval
         function make_json_rpc_eval_fun(url, terminal) {
             var id = 1;
@@ -2420,6 +1967,7 @@
                         interpreter['eval'](command, self);
                     }
                 }
+
             } catch (e) {
                 display_exception(e, 'USER');
                 self.resume();
@@ -2548,19 +2096,6 @@
                 }
             }
         }
-
-        // ---------------------------------------------------------------------
-        var on_scrollbar_show_resize = (function() {
-            var scrollBars = haveScrollbars();
-            return function() {
-                if (scrollBars !== haveScrollbars()) {
-                    // if scollbars appearance change we will have different
-                    // number of chars
-                    self.resize();
-                    scrollBars = haveScrollbars();
-                }
-            };
-        })();
         // ---------------------------------------------------------------------
         // KEYDOWN EVENT HANDLER
         // ---------------------------------------------------------------------
@@ -2669,18 +2204,6 @@
                 }
             }
         }
-        // ---------------------------------------------------------------------
-        // INIT CODE
-        // ---------------------------------------------------------------------
-        var url;
-        if (settings.login && typeof settings.onBeforeLogin === 'function') {
-            try {
-                settings.onBeforeLogin(self);
-            } catch (e) {
-                display_exception(e, 'onBeforeLogin');
-                throw e;
-            }
-        }
         function make_eval_from_object(object) {
             // function that maps commands to object methods
             // it keeps terminal context
@@ -2717,122 +2240,603 @@
                 }
             };
         }
-        if (typeof init_eval == 'string') {
-            url = init_eval; //url variable is use when making login function
-            init_eval = make_json_rpc_eval_fun(init_eval, self);
-        } else if (typeof init_eval == 'object' && init_eval.constructor === Array) {
-            throw "You can't use array as eval";
-        } else if (typeof init_eval === 'object') {
-            // top commands
-            for (var i in init_eval) {
-                if (init_eval.hasOwnProperty(i)) {
-                    command_list.push(i);
-                }
-            }
-            init_eval = make_eval_from_object(init_eval);
-        } else if (typeof init_eval !== 'function') {
-            throw 'Unknow object "' + String(init_eval) + '" passed as eval';
-        }
-
-        // create json-rpc authentication function
-        if (url && (typeof settings.login === 'string' || settings.login)) {
-            settings.login = (function(method) {
-                var id = 1;
-                return function(user, passwd, callback, term) {
-                    self.pause();
-                    $.jrpc(url,
-                           id++,
-                           method,
-                           [user, passwd],
-                           function(response) {
-                               self.resume();
-                               if (!response.error && response.result) {
-                                   callback(response.result);
-                               } else {
-                                   callback(null);
-                               }
-                           }, function(xhr, status, error) {
-                               self.resume();
-                               self.error('&#91;AJAX&#92; Response: ' +
-                                          status + '\n' +
-                                          xhr.responseText);
-                           });
-                };
-                //default name is login so you can pass true
-            })(typeof settings.login === 'boolean' ? 'login' : settings.login);
-        }
-        if (validate('prompt', settings.prompt)) {
-            var interpreters = new Stack({
-                name: settings.name,
-                'eval': init_eval,
-                prompt: settings.prompt,
-                completion: settings.completion ?
-                    settings.completion :
-                    function(term, string, callback) {
-                        callback(command_list);
-                    },
-                greetings: settings.greetings
+        if (this.length > 1) {
+            return this.each(function() {
+                $.fn.terminal.call($(this), init_eval, options);
             });
-            var command_line = self.find('.terminal-output').next().cmd({
-                prompt: settings.prompt,
-                history: settings.history,
-                historyFilter: settings.historyFilter,
-                historySize: settings.historySize,
-                width: '100%',
-                keydown: key_down,
-                keypress: settings.keypress ? function(e) {
-                    return settings.keypress(e, self);
-                } : null,
-                onCommandChange: function(command) {
-                    if (typeof settings.onCommandChange === 'function') {
-                        try {
-                            settings.onCommandChange(command, self);
-                        } catch (e) {
-                            display_exception(e, 'onCommandChange');
-                            throw e;
+        } else {
+            var self = this;
+            var lines = [];
+            var output;
+            var terminal_id = terminals.length();
+            var num_chars; // numer of chars in line
+            var command_list = []; // for tab completion
+            var settings = $.extend({
+                name: self.selector,
+                prompt: '> ',
+                history: true,
+                exit: true,
+                clear: true,
+                enabled: true,
+                historySize: 60,
+                displayExceptions: true,
+                cancelableAjax: true,
+                login: null,
+                tabcompletion: null,
+                historyFilter: null,
+                onInit: $.noop,
+                onClear: $.noop,
+                onBlur: $.noop,
+                onFocus: $.noop,
+                onTerminalChange: $.noop,
+                onExit: $.noop,
+                keypress: $.noop,
+                keydown: $.noop
+            }, options || {});
+
+            if (settings.width) {
+                self.width(settings.width);
+            }
+            if (settings.height) {
+                self.height(settings.height);
+            }
+            if (!navigator.userAgent.toLowerCase().match(/(webkit)[ \/]([\w.]+)/) &&
+                self[0].tagName.toLowerCase() == 'body') {
+                scroll_object = $('html');
+            } else {
+                scroll_object = self;
+            }
+            var pause = !settings.enabled;
+            if (self.length === 0) {
+                throw 'Sorry, but terminal said that "' + self.selector +
+                    '" is not valid selector!';
+            }
+            // register ajaxSend for cancel requests on CTRL+D
+            self.ajaxSend(function(e, xhr, opt) {
+                requests.push(xhr);
+            });
+            // terminal already exist
+            if (self.data('terminal')) {
+                return self.data('terminal');
+            }
+            output = $('<div>').addClass('terminal-output').appendTo(self);
+            self.addClass('terminal').append('<div/>');
+            // keep focus in clipboard textarea in mobile
+            if (('ontouchstart' in window) || window.DocumentTouch &&
+                document instanceof DocumentTouch) {
+                self.click(function() {
+                    self.find('textarea').focus();
+                });
+                self.find('textarea').focus();
+            }
+            /*
+              self.bind('touchstart.touchScroll', function() {
+
+              });
+              self.bind('touchmove.touchScroll', function() {
+
+              });
+            */
+            //$('<input type="text"/>').hide().focus().appendTo(self);
+
+            // ----------------------------------------------------------
+            // TERMINAL METHODS
+            // ----------------------------------------------------------
+            var old_width, old_height;
+            var dalyed_commands = [];
+            $.extend(self, $.omap({
+                clear: function() {
+                    output.html('');
+                    command_line.set('');
+                    lines = [];
+                    try {
+                        settings.onClear(self);
+                    } catch (e) {
+                        display_exception(e, 'onClear');
+                        throw e;
+                    }
+                    self.attr({ scrollTop: 0});
+                    return self;
+                },
+                exec: function(command, silent) {
+                    if (pause) {
+                        dalyed_commands.push([command, silent]);
+                    } else {
+                        commands(command, silent);
+                    }
+                    return self;
+                },
+                commands: function() {
+                    return interpreters.top().eval;
+                },
+                greetings: function() {
+                    show_greetings();
+                    return self;
+                },
+                paused: function() {
+                    return pause;
+                },
+                pause: function() {
+                    if (command_line) {
+                        pause = true;
+                        self.disable();
+                        command_line.hidden();
+                    }
+                    return self;
+                },
+                resume: function() {
+                    if (command_line) {
+                        self.enable();
+                        var original = dalyed_commands;
+                        dalyed_commands = [];
+                        while (original.length) {
+                            var command = original.shift();
+                            self.exec.apply(self, command);
+                        }
+                        command_line.visible();
+                        scroll_to_bottom();
+                    }
+                    return self;
+                },
+                cols: function() {
+                    return num_chars;
+                },
+                rows: function() {
+                    return lines.length;
+                },
+                history: function() {
+                    return command_line.history();
+                },
+                next: function() {
+                    if (terminals.length() === 1) {
+                        return self;
+                    } else {
+                        var offsetTop = self.offset().top;
+                        var height = self.height();
+                        var scrollTop = self.scrollTop();
+                        if (!is_scrolled_into_view(self)) {
+                            self.enable();
+                            $('html,body').animate({scrollTop: offsetTop-50}, 500);
+                            return self;
+                        } else {
+                            terminals.front().disable();
+                            var next = terminals.rotate().enable();
+                            // 100 provides buffer in viewport
+                            var x = next.offset().top - 50;
+                            $('html,body').animate({scrollTop: x}, 500);
+                            try {
+                                settings.onTerminalChange(next);
+                            } catch (e) {
+                                display_exception(e, 'onTerminalChange');
+                                throw e;
+                            }
+                            return next;
                         }
                     }
-                    scroll_to_bottom();
                 },
-                commands: commands
-            });
-            //num_chars = get_num_chars();
-            terminals.append(self);
-            if (settings.enabled === true) {
-                self.focus(undefined, true);
-            } else {
-                self.disable();
+                // silent used so events are not fired on init
+                focus: function(toggle, silent) {
+                    self.oneTime(1, function() {
+                        if (terminals.length() === 1) {
+                            if (toggle === false) {
+                                try {
+                                    if (!silent && settings.onBlur(self) !== false) {
+                                        self.disable();
+                                    }
+                                } catch (e) {
+                                    display_exception(e, 'onBlur');
+                                    throw e;
+                                }
+                            } else {
+                                try {
+                                    if (!silent && settings.onFocus(self) !== false) {
+                                        self.enable();
+                                    }
+                                } catch (e) {
+                                    display_exception(e, 'onFocus');
+                                    throw e;
+                                }
+                            }
+                        } else {
+                            if (toggle === false) {
+                                self.next();
+                            } else {
+                                var front = terminals.front();
+                                if (front != self) {
+                                    front.disable();
+                                    if (!silent) {
+                                        try {
+                                            settings.onTerminalChange(self);
+                                        } catch (e) {
+                                            display_exception(e, 'onTerminalChange');
+                                            throw e;
+                                        }
+                                    }
+                                }
+                                terminals.set(self);
+                                self.enable();
+                            }
+
+                        }
+                    });
+                    return self;
+                },
+                enable: function() {
+                    if (num_chars === undefined) {
+                        //enabling first time
+                        self.resize();
+                    }
+                    if (pause) {
+                        if (command_line) {
+                            command_line.enable();
+                            pause = false;
+                        }
+                    }
+                    return self;
+                },
+                disable: function() {
+                    if (command_line) {
+                        pause = true;
+                        command_line.disable();
+                    }
+                    return self;
+                },
+                enabled: function() {
+                    return pause;
+                },
+                signature: function() {
+                    var cols = self.cols();
+                    var i = cols < 15 ? null : cols < 35 ? 0 : cols < 55 ? 1 : cols < 64 ? 2 : cols < 75 ? 3 : 4;
+                    if (i !== null) {
+                        return signatures[i].join('\n') + '\n';
+                    } else {
+                        return '';
+                    }
+                },
+                version: function() {
+                    return version;
+                },
+                /* COMMAND LINE FUNCTIONS */
+                get_command: function() {
+                    return command_line.get();
+                },
+                insert: function(string) {
+                    if (typeof string === 'string') {
+                        command_line.insert(string);
+                        return self;
+                    } else {
+                        throw "insert function argument is not a string";
+                    }
+                },
+                set_prompt: function(prompt) {
+                    if (validate('prompt', prompt)) {
+                        if (typeof prompt == 'function') {
+                            command_line.prompt(function(command) {
+                                prompt(command, self);
+                            });
+                        } else {
+                            command_line.prompt(prompt);
+                        }
+                        interpreters.top().prompt = prompt;
+                    }
+                    return self;
+                },
+                get_prompt: function() {
+                    return interpreters.top().prompt;
+                    // command_line.prompt(); - can be a wrapper
+                    //return command_line.prompt();
+                },
+                set_command: function(command) {
+                    command_line.set(command);
+                    return self;
+                },
+                set_mask: function(display) {
+                    command_line.mask(display);
+                    return self;
+                },
+                get_output: function(raw) {
+                    if (raw) {
+                        return lines;
+                    } else {
+                        return $.map(lines, function(i, item) {
+                            return typeof item == 'function' ? item() : item;
+                        }).join('\n');
+                    }
+                },
+                resize: function(width, height) {
+                    if (width && height) {
+                        self.width(width);
+                        self.height(height);
+                    }
+                    width = self.width();
+                    height = self.height();
+                    // prevent too many calculations in IE because of resize event bug
+                    if (old_height !== height || old_width !== width) {
+                        old_height = height;
+                        old_width = width;
+                        num_chars = get_num_chars();
+                        command_line.resize(num_chars);
+                        var o = output.detach();
+                        output.html('');
+                        $.each(lines, function(i, line) {
+                            draw_line(line && typeof line == 'function' ? line() : line);
+                        });
+                        self.prepend(o);
+                        scroll_to_bottom();
+                    }
+                    return self;
+                },
+                echo: function(line) {
+                    lines.push(line);
+                    draw_line(typeof line === 'function' ? line() : line);
+                    on_scrollbar_show_resize();
+                    return self;
+                },
+                error: function(message) {
+                    //echo red message
+                    return self.echo('[[;#f00;]' + escape_brackets(message) + ']');
+                },
+                scroll: function(amount) {
+                    var pos;
+                    amount = Math.round(amount);
+                    if (scroll_object.prop) {
+                        if (amount > scroll_object.prop('scrollTop') && amount > 0) {
+                            scroll_object.prop('scrollTop', 0);
+                        }
+                        pos = scroll_object.prop('scrollTop');
+                        scroll_object.scrollTop(pos + amount);
+                        return self;
+                    } else {
+                        if (amount > scroll_object.attr('scrollTop') && amount > 0) {
+                            scroll_object.attr('scrollTop', 0);
+                        }
+                        pos = scroll_object.attr('scrollTop');
+                        scroll_object.scrollTop(pos + amount);
+                        return self;
+                    }
+                },
+                logout: settings.login ? function() {
+                    while (interpreters.size() > 1) {
+                        interpreters.pop();
+                    }
+                    logout();
+                    return self;
+                } : function() {
+                    throw "You don't have login function";
+                },
+                token: settings.login ? function() {
+                    var name = settings.name;
+                    return $.Storage.get('token' + (name ? '_' + name : ''));
+                } : $.noop,
+                login_name: settings.login ? function() {
+                    var name = settings.name;
+                    return $.Storage.get('login' + (name ? '_' + name : ''));
+                } : $.noop,
+                name: function() {
+                    return interpreters.top().name;
+                },
+                push: function(_eval, options) {
+                    if (options && (!options.prompt || validate('prompt', options.prompt)) ||
+                        !options) {
+                        interpreters.top().mask = command_line.mask();
+                        if ($.type(_eval) === 'string') {
+                            //_eval = make_json_rpc_eval_fun(options['eval'], self);
+                            _eval = make_json_rpc_eval_fun(_eval, self);
+                        } else if ($.type(_eval) === 'object') {
+                            var commands = [];
+                            for (var name in _eval) {
+                                commands.push(name);
+                            }
+                            _eval = make_eval_from_object(_eval);
+                            options = options || {};
+                            options['completion'] = function(term, string, callback) {
+                                callback(commands);
+                            };
+                        } else if ($.type(_eval) != 'function') {
+                            throw "Invalid value as eval in push command";
+                        }
+                        interpreters.push($.extend({'eval': _eval}, options));
+                        prepare_top_interpreter();
+                    }
+                    return self;
+                },
+                pop: function(string) {
+                    if (string !== undefined) {
+                        echo_command(string);
+                    }
+                    if (interpreters.top().name === settings.name) {
+                        if (settings.login) {
+                            logout();
+                            if (typeof settings.onExit === 'function') {
+                                try {
+                                    settings.onExit(self);
+                                } catch (e) {
+                                    display_exception(e, 'onExit');
+                                    throw e;
+                                }
+                            }
+                        }
+                    } else {
+                        var current = interpreters.pop();
+                        prepare_top_interpreter();
+                        if (typeof current.onExit === 'function') {
+                            try {
+                                current.onExit(self);
+                            } catch (e) {
+                                display_exception(e, 'onExit');
+                                throw e;
+                            }
+                        }
+                        // restore mask
+                        self.set_mask(interpreters.top().mask);
+                    }
+                    return self;
+                },
+                level: function() {
+                    return interpreters.size();
+                },
+                reset: function() {
+                    self.clear();
+                    while(interpreters.size() > 1) {
+                        interpreters.pop();
+                    }
+                    initialize();
+                }
+            }, function(_, fun) {
+                // wrap all functions and display execptions
+                return function() {
+                    try {
+                        return fun.apply(this, Array.prototype.slice.apply(arguments));
+                    } catch(e) {
+                        display_exception(e, 'TERMINAL');
+                    }
+                };
+            }));
+
+            // ---------------------------------------------------------------------
+            var on_scrollbar_show_resize = (function() {
+                var scrollBars = haveScrollbars();
+                return function() {
+                    if (scrollBars !== haveScrollbars()) {
+                        // if scollbars appearance change we will have different
+                        // number of chars
+                        self.resize();
+                        scrollBars = haveScrollbars();
+                    }
+                };
+            })();
+
+            // ---------------------------------------------------------------------
+            // INIT CODE
+            // ---------------------------------------------------------------------
+            var url;
+            if (settings.login && typeof settings.onBeforeLogin === 'function') {
+                try {
+                    settings.onBeforeLogin(self);
+                } catch (e) {
+                    display_exception(e, 'onBeforeLogin');
+                    throw e;
+                }
             }
-            $(document).click(function(e) {
-                if (!$(e.target).parents().hasClass('terminal')) {
+
+            if (typeof init_eval == 'string') {
+                url = init_eval; //url variable is use when making login function
+                init_eval = make_json_rpc_eval_fun(init_eval, self);
+            } else if (typeof init_eval == 'object' && init_eval.constructor === Array) {
+                throw "You can't use array as eval";
+            } else if (typeof init_eval === 'object') {
+                // top commands
+                for (var i in init_eval) {
+                    if (init_eval.hasOwnProperty(i)) {
+                        command_list.push(i);
+                    }
+                }
+                init_eval = make_eval_from_object(init_eval);
+            } else if (typeof init_eval !== 'function') {
+                throw 'Unknow object "' + String(init_eval) + '" passed as eval';
+            }
+
+            // create json-rpc authentication function
+            if (url && (typeof settings.login === 'string' || settings.login)) {
+                settings.login = (function(method) {
+                    var id = 1;
+                    return function(user, passwd, callback, term) {
+                        self.pause();
+                        $.jrpc(url,
+                               id++,
+                               method,
+                               [user, passwd],
+                               function(response) {
+                                   self.resume();
+                                   if (!response.error && response.result) {
+                                       callback(response.result);
+                                   } else {
+                                       callback(null);
+                                   }
+                               }, function(xhr, status, error) {
+                                   self.resume();
+                                   self.error('&#91;AJAX&#92; Response: ' +
+                                              status + '\n' +
+                                              xhr.responseText);
+                               });
+                    };
+                    //default name is login so you can pass true
+                })(typeof settings.login === 'boolean' ? 'login' : settings.login);
+            }
+            if (validate('prompt', settings.prompt)) {
+                var interpreters = new Stack({
+                    name: settings.name,
+                    'eval': init_eval,
+                    prompt: settings.prompt,
+                    completion: settings.completion ?
+                        settings.completion :
+                        function(term, string, callback) {
+                            callback(command_list);
+                        },
+                    greetings: settings.greetings
+                });
+                var command_line = self.find('.terminal-output').next().cmd({
+                    prompt: settings.prompt,
+                    history: settings.history,
+                    historyFilter: settings.historyFilter,
+                    historySize: settings.historySize,
+                    width: '100%',
+                    keydown: key_down,
+                    keypress: settings.keypress ? function(e) {
+                        return settings.keypress(e, self);
+                    } : null,
+                    onCommandChange: function(command) {
+                        if (typeof settings.onCommandChange === 'function') {
+                            try {
+                                settings.onCommandChange(command, self);
+                            } catch (e) {
+                                display_exception(e, 'onCommandChange');
+                                throw e;
+                            }
+                        }
+                        scroll_to_bottom();
+                    },
+                    commands: commands
+                });
+                //num_chars = get_num_chars();
+                terminals.append(self);
+                if (settings.enabled === true) {
+                    self.focus(undefined, true);
+                } else {
                     self.disable();
                 }
-            });
-            $(window).resize(self.resize);
-            self.click(function() {
-                //if (!(pause && terminals.length() > 1 && self === $.terminal.active())) {
-                self.focus();
-            });
-            if (options.login && self.token && !self.token() && self.login_name &&
-                !self.login_name()) {
-                login();
-            } else {
-                initialize();
-            }
-            if (typeof $.fn.init.prototype.mousewheel === 'function') {
-                self.mousewheel(function(event, delta) {
-                    //self.echo(dir(event));
-                    if (delta > 0) {
-                        self.scroll(-40);
-                    } else {
-                        self.scroll(40);
+                $(document).click(function(e) {
+                    if (!$(e.target).parents().hasClass('terminal') &&
+                        settings.onBlur(self) !== false) {
+                        self.disable();
                     }
-                    return false;
-                }, true);
+                });
+                $(window).resize(self.resize);
+                self.click(function() {
+                    //if (!(pause && terminals.length() > 1 &&
+                    //     self === $.terminal.active())) {
+                    self.focus();
+                });
+                if (options.login && self.token && !self.token() && self.login_name &&
+                    !self.login_name()) {
+                    login();
+                } else {
+                    initialize();
+                }
+                if (typeof $.fn.init.prototype.mousewheel === 'function') {
+                    self.mousewheel(function(event, delta) {
+                        //self.echo(dir(event));
+                        if (delta > 0) {
+                            self.scroll(-40);
+                        } else {
+                            self.scroll(40);
+                        }
+                        return false;
+                    }, true);
+                }
             }
+            self.data('terminal', self);
+            return self;
         }
-        self.data('terminal', self);
-        return self;
-
     }; //terminal plugin
 })(jQuery);
