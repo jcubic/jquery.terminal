@@ -1934,11 +1934,12 @@
                 self.echo(prompt + command);
             }
         }
-
+        var prev_command;
         // wrapper over eval it implements exit and catch all exeptions
         // from user code and display them on terminal
         function commands(command, silent) {
             try {
+                prev_command = command;
                 var interpreter = interpreters.top();
                 if (command === 'exit' && settings.exit) {
                     if (interpreters.size() === 1) {
@@ -2336,11 +2337,13 @@
                     return self;
                 },
                 exec: function(command, silent) {
-                    if (pause) {
-                        dalyed_commands.push([command, silent]);
-                    } else {
-                        commands(command, silent);
-                    }
+                    try {
+                        if (pause) {
+                            dalyed_commands.push([command, silent]);
+                        } else {
+                            commands(command, silent);
+                        }
+                    } catch(e) { } // catch in commands
                     return self;
                 },
                 commands: function() {
@@ -2615,6 +2618,9 @@
                 push: function(_eval, options) {
                     if (options && (!options.prompt || validate('prompt', options.prompt)) ||
                         !options) {
+                        options = options || {};
+                        options.name = options.name || prev_command;
+                        console.log('name: ' + options.name);
                         interpreters.top().mask = command_line.mask();
                         if ($.type(_eval) === 'string') {
                             //_eval = make_json_rpc_eval_fun(options['eval'], self);
