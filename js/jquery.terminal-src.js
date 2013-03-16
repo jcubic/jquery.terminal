@@ -586,6 +586,9 @@
                     if (data[data.length-1] !== item) {
                         data.push(item);
                         pos = data.length-1;
+                        if (size && data.lenght > size) {
+                            data = data.slice(-size);
+                        }
                         $.Storage.set(name + 'commands', $.json_stringify(data));
                     }
                 }

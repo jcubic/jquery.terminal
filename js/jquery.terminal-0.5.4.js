@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 16 Mar 2013 12:37:27 +0000
+ * Date: Sat, 16 Mar 2013 12:44:03 +0000
  */
 
 /*
@@ -586,6 +586,9 @@
                     if (data[data.length-1] !== item) {
                         data.push(item);
                         pos = data.length-1;
+                        if (size && data.lenght > size) {
+                            data = data.slice(-size);
+                        }
                         $.Storage.set(name + 'commands', $.json_stringify(data));
                     }
                 }
