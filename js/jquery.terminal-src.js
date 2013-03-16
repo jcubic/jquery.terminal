@@ -446,6 +446,9 @@
         var data = init ? [init] : [];
         var pos = 0;
         $.extend(this, {
+            get: function() {
+                return data;
+            },
             rotate: function() {
                 if (data.length === 1) {
                     return data[0];
@@ -2403,7 +2406,7 @@
                     return num_chars;
                 },
                 rows: function() {
-                    return lines.length;
+                    return Math.floor(self.height() / self.find('.cursor').height());
                 },
                 history: function() {
                     return command_line.history();
@@ -2569,6 +2572,8 @@
                         self.width(width);
                         self.height(height);
                     }
+                    var width = self.width();
+                    var height = self.height();
                     num_chars = get_num_chars();
                     command_line.resize(num_chars);
                     var o = output.detach();
@@ -2578,8 +2583,13 @@
                     });
                     self.prepend(o);
                     scroll_to_bottom();
-                    if ($.type(settings.onResize) === 'function') {
+                    if ($.type(settings.onResize) === 'function' &&
+                        (old_height !== height || old_width !== width)) {
                         settings.onResize(self);
+                    }
+                    if (old_height !== height || old_width !== width) {
+                        old_height = height;
+                        old_width = width;
                     }
                     return self;
                 },
@@ -2838,8 +2848,7 @@
                     var height = self.height();
                     // prevent too many calculations in IE because of resize event bug
                     if (old_height !== height || old_width !== width) {
-                        old_height = height;
-                        old_width = width;
+                       
                         self.resize();
                     }
                 });
