@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Fri, 15 Mar 2013 16:23:35 +0000
+ * Date: Sat, 16 Mar 2013 10:05:46 +0000
  */
 
 /*
@@ -612,7 +612,7 @@
     // -----------------------------------------------------------------------
     // :: HISTORY CLASS
     // -----------------------------------------------------------------------
-    function History(name) {
+    function History(name, size) {
         var enabled = true;
         if (typeof name === 'string' && name !== '') {
             name += '_';
@@ -1365,7 +1365,7 @@
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
-    var url_re = /(https?:((?!&[^;]+;)[^\s:"'<)])+)/g;
+    var url_re = /(https?:\/\/[^\/]+\/?((?!&[^;]+;)[^\s:"'<)])+)/g;
     var email_regex = /((([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     $.terminal = {
         // split text into lines with equal length and make each line be renderd
@@ -1391,10 +1391,16 @@
                 }
                 //return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting
-                return '[[' + format + semicolons + text.replace(/\\\]/g, '&#93;') + ']' +
+                return '[[' + format + semicolons +
+                    text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n') + ']' +
                     text + ']';
             }).split(/\n/g);
             for (var i = 0, len = array.length; i < len; ++i) {
+                if (array[i] === '') {
+                    result.push('');
+                    continue;
+                }
+                /*
                 if (prev_format !== '') {
                     if (array[i] === '') {
                         result.push(prev_format + ']');
@@ -1403,12 +1409,7 @@
                         array[i] = prev_format + array[i];
                         prev_format = '';
                     }
-                } else {
-                    if (array[i] === '') {
-                        result.push('');
-                        continue;
-                    }
-                }
+                }*/
                 var line = array[i];
                 var first_index = 0;
                 var count = 0;
@@ -1442,6 +1443,7 @@
                     }
                     if (count === length || j === jlen-1) {
                         var output_line = line.substring(first_index, j+1);
+                        console.log(output_line);
                         if (prev_format) {
                             output_line = prev_format + output_line;
                             if (output_line.match(']')) {
@@ -1528,11 +1530,7 @@
                                 if (background.match(color_hex_re)) {
                                     style_str += 'background-color:' + background;
                                 }
-                                var result = '<span style="' + style_str + '"' +
-                                    (_class !== '' ? ' class="' + _class + '"' : '') +
-                                    ' data-text="'+
-                                    (data_text===''?text:data_text).replace('"', '&quote;')+
-                                    '">' + text + '</span>';
+                                var result = '<span style="' + style_str + '"' + (_class !== '' ? ' class="' + _class + '"' : '') + ' data-text="'+ (data_text==='' ? text : data_text.replace(/&#93;/g, ']')).replace('"', '&quote;') + '">' + text + '</span>';
                                 return result;
                             });
                         } else {
@@ -1540,14 +1538,18 @@
                         }
                     }).join('');
                 }
-
-                return str.replace(url_re, function(link) {
-                        var comma = link.match(/\.$/);
-                        link = link.replace(/\.$/, '');
-                        return '<a target="_blank" href="' + link + '">' + link + '</a>' +
-                            (comma ? '.' : '');
-                }).replace(email_regex, '<a href="mailto:$1">$1</a>').
-                   replace(/<span><br\/?><\/span>/g, '<br/>');
+                return $.map(str.split(/(<\/?span[^>]*>)/g), function(string) {
+                    if (!string.match(/span/)) {
+                        return string.replace(url_re, function(link) {
+                            var comma = link.match(/\.$/);
+                            link = link.replace(/\.$/, '');
+                            return '<a target="_blank" href="' + link + '">' + link + '</a>' +
+                                (comma ? '.' : '');
+                        }).replace(email_regex, '<a href="mailto:$1">$1</a>');
+                    } else {
+                        return string;
+                    }
+                }).join('').replace(/<span><br\/?><\/span>/g, '<br/>');
             } else {
                 return '';
             }
@@ -1779,7 +1781,7 @@
                         message = e.message;
                     }
                 }
-                self.error('&#91;' + label + '&#93;: ' + message);
+                self.error('&#91;' + label + '&#93;: ' + escape_brackets(message));
                 if (typeof e.fileName === 'string') {
                     //display filename and line which throw exeption
                     self.pause();
@@ -1788,12 +1790,13 @@
                         var num = e.lineNumber - 1;
                         var line = file.split('\n')[num];
                         if (line) {
-                            self.error('&#91;' + e.lineNumber + '&#93;: ' + line);
+                            self.error('&#91;' + e.lineNumber + '&#93;: ' +
+                                       escape_brackets(line));
                         }
                     });
                 }
                 if (e.stack) {
-                    self.error(e.stack);
+                    self.error(escape_brackets(e.stack));
                 }
             }
         }
