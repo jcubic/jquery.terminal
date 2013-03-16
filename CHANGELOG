@@ -3,6 +3,7 @@
           history have size
           You can type more characters in reverse search if command not found
           export/import
+          onResize event
 0.5.4     fix scroll when attaching terminal to body in non Webkit browsers
 0.5.3     level api function
           Restore mask on pop

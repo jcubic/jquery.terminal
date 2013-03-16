@@ -1784,8 +1784,7 @@
                         var num = e.lineNumber - 1;
                         var line = file.split('\n')[num];
                         if (line) {
-                            self.error('&#91;' + e.lineNumber + '&#93;: ' +
-                                       escape_brackets(line));
+                            self.error('&#91;' + e.lineNumber + '&#93;: ' + line);
                         }
                     });
                 }
@@ -2579,11 +2578,14 @@
                     });
                     self.prepend(o);
                     scroll_to_bottom();
+                    if ($.type(settings.onResize) === 'function') {
+                        settings.onResize(self);
+                    }
                     return self;
                 },
                 echo: function(line) {
                     lines.push(line);
-                    draw_line(typeof line === 'function' ? line() : line);
+                    draw_line($.type(line) === 'function' ? line() : line);
                     on_scrollbar_show_resize();
                     return self;
                 },
@@ -2664,7 +2666,7 @@
                     if (interpreters.top().name === settings.name) {
                         if (settings.login) {
                             logout();
-                            if (typeof settings.onExit === 'function') {
+                            if ($.type(settings.onExit) === 'function') {
                                 try {
                                     settings.onExit(self);
                                 } catch (e) {
@@ -2676,7 +2678,7 @@
                     } else {
                         var current = interpreters.pop();
                         prepare_top_interpreter();
-                        if (typeof current.onExit === 'function') {
+                        if ($.type(current.onExit) === 'function') {
                             try {
                                 current.onExit(self);
                             } catch (e) {
@@ -2730,7 +2732,7 @@
             // INIT CODE
             // ---------------------------------------------------------------------
             var url;
-            if (settings.login && typeof settings.onBeforeLogin === 'function') {
+            if (settings.login && $.type(settings.onBeforeLogin) === 'function') {
                 try {
                     settings.onBeforeLogin(self);
                 } catch (e) {
@@ -2739,12 +2741,12 @@
                 }
             }
 
-            if (typeof init_eval == 'string') {
+            if ($.type(init_eval) === 'string') {
                 url = init_eval; //url variable is use when making login function
                 init_eval = make_json_rpc_eval_fun(init_eval, self);
-            } else if (typeof init_eval == 'object' && init_eval.constructor === Array) {
+            } else if ($.type(init_eval) === 'array') {
                 throw "You can't use array as eval";
-            } else if (typeof init_eval === 'object') {
+            } else if ($.type(init_eval) === 'object') {
                 // top commands
                 for (var i in init_eval) {
                     if (init_eval.hasOwnProperty(i)) {
@@ -2752,12 +2754,12 @@
                     }
                 }
                 init_eval = make_eval_from_object(init_eval);
-            } else if (typeof init_eval !== 'function') {
+            } else if ($.type(init_eval) !== 'function') {
                 throw 'Unknow object "' + String(init_eval) + '" passed as eval';
             }
 
             // create json-rpc authentication function
-            if (url && (typeof settings.login === 'string' || settings.login)) {
+            if (url && ($.type(settings.login) === 'string' || settings.login)) {
                 settings.login = (function(method) {
                     var id = 1;
                     return function(user, passwd, callback, term) {
@@ -2781,7 +2783,7 @@
                                });
                     };
                     //default name is login so you can pass true
-                })(typeof settings.login === 'boolean' ? 'login' : settings.login);
+                })($.type(settings.login) === 'boolean' ? 'login' : settings.login);
             }
             if (validate('prompt', settings.prompt)) {
                 var interpreters = new Stack({
@@ -2806,7 +2808,7 @@
                         return settings.keypress(e, self);
                     } : null,
                     onCommandChange: function(command) {
-                        if (typeof settings.onCommandChange === 'function') {
+                        if ($.type(settings.onCommandChange) === 'function') {
                             try {
                                 settings.onCommandChange(command, self);
                             } catch (e) {
@@ -2852,7 +2854,7 @@
                 } else {
                     initialize();
                 }
-                if (typeof $.fn.init.prototype.mousewheel === 'function') {
+                if ($.type($.fn.init.prototype.mousewheel) === 'function') {
                     self.mousewheel(function(event, delta) {
                         //self.echo(dir(event));
                         if (delta > 0) {
