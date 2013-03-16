@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 16 Mar 2013 15:05:34 +0000
+ * Date: Sat, 16 Mar 2013 16:01:07 +0000
  */
 
 /*
@@ -1360,7 +1360,7 @@
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
-    var url_re = /(https?:\/\/[^\/]+\/?((?!&[^;]+;)[^\s:"'<)])+)/g;
+    var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     var email_regex = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     $.terminal = {
         // split text into lines with equal length and make each line be renderd
@@ -2119,7 +2119,6 @@
                 }
             }
             if (!self.paused()) {
-
                 if (e.which !== 9) { // not a TAB
                     tab_count = 0;
                 }
@@ -2345,14 +2344,28 @@
                     self.attr({ scrollTop: 0});
                     return self;
                 },
+                export_view: function() {
+                    return {
+                        prompt: self.get_prompt(),
+                        command: self.get_command(),
+                        position: command_line.position(),
+                        lines: lines.slice(0)
+                    };
+                },
+                import_view: function(view) {
+                    self.set_prompt(view.prompt);
+                    self.set_command(view.command);
+                    command_line.position(view.position);
+                    lines = view.lines;
+                    self.resize();
+                    return self;
+                },
                 exec: function(command, silent) {
-                    try {
-                        if (pause) {
-                            dalyed_commands.push([command, silent]);
-                        } else {
-                            commands(command, silent);
-                        }
-                    } catch(e) { } // catch in commands
+                    if (pause) {
+                        dalyed_commands.push([command, silent]);
+                    } else {
+                        commands(command, silent);
+                    }
                     return self;
                 },
                 commands: function() {
@@ -2557,22 +2570,15 @@
                         self.width(width);
                         self.height(height);
                     }
-                    width = self.width();
-                    height = self.height();
-                    // prevent too many calculations in IE because of resize event bug
-                    if (old_height !== height || old_width !== width) {
-                        old_height = height;
-                        old_width = width;
-                        num_chars = get_num_chars();
-                        command_line.resize(num_chars);
-                        var o = output.detach();
-                        output.html('');
-                        $.each(lines, function(i, line) {
-                            draw_line(line && typeof line == 'function' ? line() : line);
-                        });
-                        self.prepend(o);
-                        scroll_to_bottom();
-                    }
+                    num_chars = get_num_chars();
+                    command_line.resize(num_chars);
+                    var o = output.detach();
+                    output.html('');
+                    $.each(lines, function(i, line) {
+                        draw_line(line && typeof line == 'function' ? line() : line);
+                    });
+                    self.prepend(o);
+                    scroll_to_bottom();
                     return self;
                 },
                 echo: function(line) {
@@ -2629,7 +2635,6 @@
                         !options) {
                         options = options || {};
                         options.name = options.name || prev_command;
-                        console.log('name: ' + options.name);
                         interpreters.top().mask = command_line.mask();
                         if ($.type(_eval) === 'string') {
                             //_eval = make_json_rpc_eval_fun(options['eval'], self);
@@ -2700,7 +2705,10 @@
                     try {
                         return fun.apply(this, Array.prototype.slice.apply(arguments));
                     } catch(e) {
-                        display_exception(e, 'TERMINAL');
+                        if (_ !== 'exec') { // exec catch by command
+                            display_exception(e, 'TERMINAL');
+                        }
+                        throw e;
                     }
                 };
             }));
@@ -2823,7 +2831,16 @@
                         self.disable();
                     }
                 });
-                $(window).resize(self.resize);
+                $(window).resize(function() {
+                    var width = self.width();
+                    var height = self.height();
+                    // prevent too many calculations in IE because of resize event bug
+                    if (old_height !== height || old_width !== width) {
+                        old_height = height;
+                        old_width = width;
+                        self.resize();
+                    }
+                });
                 self.click(function() {
                     //if (!(pause && terminals.length() > 1 &&
                     //     self === $.terminal.active())) {
