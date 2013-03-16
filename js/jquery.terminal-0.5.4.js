@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 16 Mar 2013 14:44:23 +0000
+ * Date: Sat, 16 Mar 2013 14:51:06 +0000
  */
 
 /*
@@ -2238,12 +2238,14 @@
                 }
             };
         }
+        var self = this;
         if (this.length > 1) {
             return this.each(function() {
-                $.fn.terminal.call($(this), init_eval, options);
+                $.fn.terminal.call($(this),
+                                   init_eval,
+                                   $.extend({name: self.selector}, options));
             });
         } else {
-            var self = this;
             var lines = [];
             var output;
             var terminal_id = terminals.length();

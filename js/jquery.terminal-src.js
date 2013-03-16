@@ -2238,12 +2238,14 @@
                 }
             };
         }
+        var self = this;
         if (this.length > 1) {
             return this.each(function() {
-                $.fn.terminal.call($(this), init_eval, options);
+                $.fn.terminal.call($(this),
+                                   init_eval,
+                                   $.extend({name: self.selector}, options));
             });
         } else {
-            var self = this;
             var lines = [];
             var output;
             var terminal_id = terminals.length();
