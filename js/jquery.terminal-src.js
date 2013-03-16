@@ -681,18 +681,27 @@
         // if true it search for next item
         function reverse_history_search(next) {
             var history_data = history.data();
-            var regex = new RegExp('^' + reverse_search_string);
+            var regex;
             var len = history_data.length;
             if (next && reverse_search_position > 0) {
                 len -= reverse_search_position;
             }
-            for (var i=len; i--;) {
-                if (regex.test(history_data[i])) {
-                    reverse_search_position = history_data.length - i;
-                    position = 0;
-                    self.set(history_data[i], true);
-                    redraw();
-                    break;
+            if (reverse_search_string.length > 0) {
+                for (var j=reverse_search_string.length; j>0; j--) {
+                    regex = new RegExp('^' + reverse_search_string.substring(0, j));
+                    for (var i=len; i--;) {
+                        if (regex.test(history_data[i])) {
+                            reverse_search_position = history_data.length - i;
+                            position = 0;
+                            self.set(history_data[i], true);
+                            redraw();
+                            if (reverse_search_string.length !== j) {
+                                reverse_search_string = reverse_search_string.substring(0, j);
+                                draw_reverse_prompt();
+                            }
+                            return;
+                        }
+                    }
                 }
             }
         }
@@ -886,6 +895,7 @@
                 }
             };
         })(self);
+        var prevent_keypress;
         var last_command;
         var draw_prompt = (function() {
             var prompt_node = self.find('.prompt');
@@ -911,7 +921,6 @@
                 clip.blur().val('');
             });
         }
-        var prev_command;
         function keydown_event(e) {
             if (options.keydown) {
                 var result = options.keydown(e);
@@ -925,8 +934,7 @@
                 if (reverse_search && (e.which === 35 || e.which === 36 ||
                                        e.which === 37 || e.which === 38 ||
                                        e.which === 39 || e.which === 40 ||
-                                       e.which === 66 || e.which === 13 ||
-                                       e.which === 27)) {
+                                       e.which === 13 || e.which === 27)) {
                     clear_reverse_state();
                     draw_prompt();
                     if (e.which === 27) { // ESC
@@ -997,13 +1005,13 @@
                            (e.which === 80 && e.ctrlKey)) {
                     //UP ARROW or CTRL+P
                     if (history.end()) {
-                        prev_command = command;
+                        last_command = command;
                     }
                     self.set(history.previous());
                 } else if (history && e.which === 40 ||
                            (e.which === 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
-                    self.set(history.end() ? prev_command : history.next());
+                    self.set(history.end() ? last_command : history.next());
                 } else if (e.which === 37 ||
                            (e.which === 66 && e.ctrlKey)) {
                     //CTRL+LEFT ARROW or CTRL+B
@@ -1313,8 +1321,8 @@
                         // TODO: this should be in one statement
                         if (reverse_search) {
                             reverse_search_string += String.fromCharCode(e.which);
-                            draw_reverse_prompt();
                             reverse_history_search();
+                            draw_reverse_prompt();
                         } else {
                             self.insert(String.fromCharCode(e.which));
                         }
@@ -1322,8 +1330,8 @@
                     } else if (e.altKey) {
                         if (reverse_search) {
                             reverse_search_string += String.fromCharCode(e.which);
-                            draw_reverse_prompt();
                             reverse_history_search();
+                            draw_reverse_prompt();
                         } else {
                             self.insert(String.fromCharCode(e.which));
                         }
