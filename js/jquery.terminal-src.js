@@ -479,47 +479,6 @@
         });
     }
     // -----------------------------------------------------------------------
-    // :: BCYCLE DATA STRUCTURE // Two way cycle
-    // -----------------------------------------------------------------------
-    function BCycle(init) {
-        var data = init instanceof Array ? init : init ? [init] : [];
-        var pos = 0;
-        $.extend(this, {
-            left: function() {
-                if (pos === 0) {
-                    pos = data.length - 1;
-                } else {
-                    --pos;
-                }
-                return data[pos];
-            },
-            right: function() {
-                if (pos === data.length - 1) {
-                    pos = 0;
-                } else {
-                    ++pos;
-                }
-                return data[pos];
-            },
-            current: function() {
-                return data[pos];
-            },
-            data: function() {
-                return data;
-            },
-            length: function() {
-                return data.length;
-            },
-            reset: function() {
-                pos = 0;
-            },
-            append: function(item) {
-                data.push(item);
-                this.reset();
-            }
-        });
-    }
-    // -----------------------------------------------------------------------
     // :: STACK DATA STRUCTURE
     // -----------------------------------------------------------------------
     function Stack(init) {
@@ -618,29 +577,53 @@
             name += '_';
         }
         var data = $.Storage.get(name + 'commands');
-        var bc = new BCycle(data ? new Function('return ' + data + ';')() : ['']);
+        data = data ? new Function('return ' + data + ';')() : [];
+        var pos = data.length-1;
 
         $.extend(this, {
             append: function(item) {
                 if (enabled) {
-                    bc.append(item);
-                    $.Storage.set(name + 'commands', $.json_stringify(bc.data()));
+                    if (data[data.length-1] !== item) {
+                        data.push(item);
+                        pos = data.length-1;
+                        $.Storage.set(name + 'commands', $.json_stringify(data));
+                    }
                 }
             },
             data: function() {
-                return bc.data();
+                return data;
             },
             next: function() {
-                return bc.right();
+                if (pos < data.length-1) {
+                    ++pos;
+                }
+                if (pos !== -1) {
+                    return data[pos];
+                }
+            },
+            reset: function() {
+                pos = data.length-1;
             },
             last: function() {
-                bc.reset();
+                return data[length-1];
+            },
+            end: function() {
+                return pos === data.length-1;
+            },
+            position: function() {
+                return pos;
             },
             previous: function() {
-                return bc.left();
+                var old = pos;
+                if (pos > 0) {
+                    --pos;
+                }
+                if (old !== -1) {
+                    return data[old];
+                }
             },
             clear: function() {
-                bc = new BCycle();
+                data = [];
                 $.Storage.remove(name + 'commands');
             },
             enable: function() {
@@ -925,7 +908,7 @@
                 clip.blur().val('');
             });
         }
-
+        var prev_command;
         function keydown_event(e) {
             if (options.keydown) {
                 var result = options.keydown(e);
@@ -967,12 +950,10 @@
                         ((options.historyFilter &&
                          options.historyFilter(command)) ||
                          !options.historyFilter)) {
-                        if (history.data().slice(-1)[0] !== command) {
-                            history.append(command);
-                        }
+                        history.append(command);
                     }
-                    history.last();
                     var tmp = command;
+                    history.reset();
                     self.set('');
                     if (options.commands) {
                         options.commands(tmp);
@@ -1012,11 +993,14 @@
                 } else if (history && e.which === 38 ||
                            (e.which === 80 && e.ctrlKey)) {
                     //UP ARROW or CTRL+P
+                    if (history.end()) {
+                        prev_command = command;
+                    }
                     self.set(history.previous());
                 } else if (history && e.which === 40 ||
                            (e.which === 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
-                    self.set(history.next());
+                    self.set(history.end() ? prev_command : history.next());
                 } else if (e.which === 37 ||
                            (e.which === 66 && e.ctrlKey)) {
                     //CTRL+LEFT ARROW or CTRL+B
@@ -1443,7 +1427,6 @@
                     }
                     if (count === length || j === jlen-1) {
                         var output_line = line.substring(first_index, j+1);
-                        console.log(output_line);
                         if (prev_format) {
                             output_line = prev_format + output_line;
                             if (output_line.match(']')) {
