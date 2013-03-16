@@ -30,18 +30,6 @@
      TODO:
            add destroy method to terminal (cmd alrady have it)
 
-           add support for - $(...).each(function() { ... });
-
-           $.fn.pluginname = function(options) {
-             var settings = $.extend({}, $.fn.pluginname.defaultOptions, options);
-
-             return this.each(function() {
-                var $this = $(this);
-             });
-             $.fn.pluginname.defaultOptions = {
-             };
-          };
-
           distinguish between paused and disabled
           paused should block keydown in terminal it should disable command line
           disable

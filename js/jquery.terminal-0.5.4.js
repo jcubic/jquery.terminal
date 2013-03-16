@@ -22,25 +22,13 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 16 Mar 2013 17:58:09 +0000
+ * Date: Sat, 16 Mar 2013 18:21:03 +0000
  */
 
 /*
 
      TODO:
            add destroy method to terminal (cmd alrady have it)
-
-           add support for - $(...).each(function() { ... });
-
-           $.fn.pluginname = function(options) {
-             var settings = $.extend({}, $.fn.pluginname.defaultOptions, options);
-
-             return this.each(function() {
-                var $this = $(this);
-             });
-             $.fn.pluginname.defaultOptions = {
-             };
-          };
 
           distinguish between paused and disabled
           paused should block keydown in terminal it should disable command line
