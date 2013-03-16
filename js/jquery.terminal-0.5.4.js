@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 16 Mar 2013 14:51:06 +0000
+ * Date: Sat, 16 Mar 2013 15:05:34 +0000
  */
 
 /*
@@ -2100,12 +2100,19 @@
         var tab_count = 0;
 
         function key_down(e) {
+            var top = interpreters.top();
+            if ($.type(top.keydown) === 'function') {
+                var result = top.keydown(e, self);
+                if (result !== undefined) {
+                    return result;
+                }
+            }
             var i;
             // after text pasted into textarea in cmd plugin
             self.oneTime(10, function() {
                 on_scrollbar_show_resize();
             });
-            if (settings.keydown) {
+            if ($.type(settings.keydown) === 'function') {
                 var result = settings.keydown(e, self);
                 if (result !== undefined) {
                     return result;
