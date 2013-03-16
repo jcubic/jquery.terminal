@@ -1775,7 +1775,7 @@
                         message = e.message;
                     }
                 }
-                self.error('&#91;' + label + '&#93;: ' + escape_brackets(message));
+                self.error('&#91;' + label + '&#93;: ' + message);
                 if (typeof e.fileName === 'string') {
                     //display filename and line which throw exeption
                     self.pause();
@@ -1790,7 +1790,7 @@
                     });
                 }
                 if (e.stack) {
-                    self.error(escape_brackets(e.stack));
+                    self.error(e.stack);
                 }
             }
         }
