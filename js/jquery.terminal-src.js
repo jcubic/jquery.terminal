@@ -1811,7 +1811,7 @@
         function draw_line(string) {
             string = typeof string === 'string' ? string : String(string);
             var div, i, len;
-            if (string.length > num_chars) {
+            if (string.length > num_chars || string.match(/\n/)) {
                 // string can have line break
                 //var array = string.split('\n');
                 // TODO: the way it should work
@@ -1835,10 +1835,10 @@
         }
 
         function show_greetings() {
-            if (options.greetings === undefined) {
+            if (settings.greetings === undefined) {
                 self.echo(self.signature);
-            } else if (options.greetings) {
-                self.echo(options.greetings);
+            } else if (settings.greetings) {
+                self.echo(settings.greetings);
             }
         }
 
@@ -2818,7 +2818,7 @@
                     },
                     commands: commands
                 });
-                //num_chars = get_num_chars();
+                num_chars = get_num_chars();
                 terminals.append(self);
                 if (settings.enabled === true) {
                     self.focus(undefined, true);

@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.6
+ *|           \/              /____/                              version 0.6.1
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 16 Mar 2013 18:44:58 +0000
+ * Date: Sun, 17 Mar 2013 07:49:10 +0000
  */
 
 /*
@@ -1701,7 +1701,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.6';
+    var version = '0.6.1';
     var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1811,7 +1811,7 @@
         function draw_line(string) {
             string = typeof string === 'string' ? string : String(string);
             var div, i, len;
-            if (string.length > num_chars) {
+            if (string.length > num_chars || string.match(/\n/)) {
                 // string can have line break
                 //var array = string.split('\n');
                 // TODO: the way it should work
@@ -1835,10 +1835,10 @@
         }
 
         function show_greetings() {
-            if (options.greetings === undefined) {
+            if (settings.greetings === undefined) {
                 self.echo(self.signature);
-            } else if (options.greetings) {
-                self.echo(options.greetings);
+            } else if (settings.greetings) {
+                self.echo(settings.greetings);
             }
         }
 
@@ -2818,7 +2818,7 @@
                     },
                     commands: commands
                 });
-                //num_chars = get_num_chars();
+                num_chars = get_num_chars();
                 terminals.append(self);
                 if (settings.enabled === true) {
                     self.focus(undefined, true);
