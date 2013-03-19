@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 19 Mar 2013 09:50:07 +0000
+ * Date: Tue, 19 Mar 2013 11:33:56 +0000
  */
 
 /*
@@ -912,10 +912,12 @@
                 clip.blur().val('');
             });
         }
+        var prevent_keypress = false;
         function keydown_event(e) {
             if (options.keydown) {
                 var result = options.keydown(e);
                 if (result !== undefined) {
+                    prevent_keypress = true;
                     return result;
                 }
             }
@@ -1293,6 +1295,10 @@
         // Keystrokes
         var object;
         $(document.documentElement || window).keypress(function(e) {
+            if (prevent_keypress) {
+                prevent_keypress = false;
+                return false;
+            }
             var result;
             if (e.ctrlKey && e.which === 99) { // CTRL+C
                 return true;

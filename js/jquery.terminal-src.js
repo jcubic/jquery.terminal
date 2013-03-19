@@ -912,10 +912,12 @@
                 clip.blur().val('');
             });
         }
+        var prevent_keypress = false;
         function keydown_event(e) {
             if (options.keydown) {
                 var result = options.keydown(e);
                 if (result !== undefined) {
+                    prevent_keypress = true;
                     return result;
                 }
             }
@@ -1293,6 +1295,10 @@
         // Keystrokes
         var object;
         $(document.documentElement || window).keypress(function(e) {
+            if (prevent_keypress) {
+                prevent_keypress = false;
+                return false;
+            }
             var result;
             if (e.ctrlKey && e.which === 99) { // CTRL+C
                 return true;
