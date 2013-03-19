@@ -1291,11 +1291,10 @@
             self.enable();
         }
         // Keystrokes
-        //document.documentElement
         var object;
         $(document.documentElement || window).keypress(function(e) {
             var result;
-            if (e.ctrlKey && e.which === 99) {
+            if (e.ctrlKey && e.which === 99) { // CTRL+C
                 return true;
             }
             if (!reverse_search && options.keypress) {
@@ -1308,7 +1307,7 @@
                         //!(e.which === 40 && e.shiftKey ||
                         !(e.which === 38 && e.shiftKey)) {
                         return false;
-                    } else if (!e.ctrlKey && !(e.altKey && e.which === 100)) {
+                    } else if (!e.ctrlKey && !(e.altKey && e.which === 100)) { // ALT+D
                         // TODO: this should be in one statement
                         if (reverse_search) {
                             reverse_search_string += String.fromCharCode(e.which);
@@ -2198,6 +2197,22 @@
                 }
             }
         }
+
+        // function split arguments and work with string like
+        // 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ asd
+        function split_command_line(string) {
+            var re = /('(\\'|[^'])*'|"(\\"|[^"])*"|\/(\\\/|[^\/])*\/|(\\ |[^ ])+|[\w-]+)/g;
+            return $.map(string.match(re), function(arg) {
+                if ((arg[0] === "'" && arg[arg.length-1] === "'") ||
+                    (arg[0] === '"' && arg[arg.length-1] === '"')) {
+                    return arg.replace(/^['"]|['"]$/g, '').replace(/\\(['" ])/g, '$1');
+                } else if (arg[0] === '/' && arg[arg.length-1] == '/') {
+                    return new RegExp(arg.replace(/^\/|\/$/g, ''));
+                } else {
+                    return arg.replace(/\\ /g, ' ');
+                }
+            });
+        }
         function make_eval_from_object(object) {
             // function that maps commands to object methods
             // it keeps terminal context
@@ -2205,7 +2220,7 @@
                 if (command === '') {
                     return;
                 }
-                command = command.split(/ +/);
+                command = split_command_line(command);
                 var method = command[0];
                 var params = command.slice(1);
                 var val = object[method];
@@ -2225,9 +2240,9 @@
                     self.push(val, {
                         prompt: method + '> ',
                         name: method,
-                        completion: function(term, string, callback) {
+                        completion: type === 'object' ? function(term, string, callback) {
                             callback(commands);
-                        }
+                        } : undefined
                     });
                 } else {
                     self.error("Command '" + method + "' Not Found");
@@ -2836,7 +2851,6 @@
                     var height = self.height();
                     // prevent too many calculations in IE because of resize event bug
                     if (old_height !== height || old_width !== width) {
-                       
                         self.resize();
                     }
                 });
