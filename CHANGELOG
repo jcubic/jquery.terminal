@@ -1,3 +1,4 @@
+0.6.2     Fix arguments in object as eval, new option processArguments
 0.6.1     fix first echo (like greetings)
 0.6       fix formatting with links and emails and long lines
           history is a list with command as last element

@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 19 Mar 2013 09:00:00 +0000
+ * Date: Tue, 19 Mar 2013 09:50:07 +0000
  */
 
 /*
@@ -2200,16 +2200,46 @@
 
         // function split arguments and work with string like
         // 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ asd
+        // if processArguments is true then it create regex and numbers and
+        // replace escape characters
         function split_command_line(string) {
-            var re = /('(\\'|[^'])*'|"(\\"|[^"])*"|\/(\\\/|[^\/])*\/|(\\ |[^ ])+|[\w-]+)/g;
+            var re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])*\/|(\\ |[^ ])+|[\w-]+)/g;
             return $.map(string.match(re), function(arg) {
-                if ((arg[0] === "'" && arg[arg.length-1] === "'") ||
-                    (arg[0] === '"' && arg[arg.length-1] === '"')) {
-                    return arg.replace(/^['"]|['"]$/g, '').replace(/\\(['" ])/g, '$1');
-                } else if (arg[0] === '/' && arg[arg.length-1] == '/') {
-                    return new RegExp(arg.replace(/^\/|\/$/g, ''));
+                if (arg[0] === "'" && arg[arg.length-1] === "'") {
+                    return arg.replace(/^'|'$/g, '');
+                } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
+                    arg = arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
+                    if (settings.processArguments) {
+                        return arg.replace(/\\\\|\\t|\\n/g, function(string) {
+                            if (string[1] === 't') {
+                                return '\t';
+                            } else if (string[1] === 'n') {
+                                return '\n';
+                            } else {
+                                return '\\';
+                            }
+                        });
+                    } else {
+                        return arg;
+                    }
                 } else {
-                    return arg.replace(/\\ /g, ' ');
+                    if (settings.processArguments) {
+                        if (arg[0] === '/' && arg[arg.length-1] == '/') {
+                            return new RegExp(arg.replace(/^\/|\/$/g, ''));
+                        } else if (arg.match(/^-?[0-9]+$/)) {
+                            return parseInt(arg, 10);
+                        } else if (arg.match(/^-?[0-9]*\.[0-9]+$/)) {
+                            return parseFloat(arg);
+                        } else {
+                            return arg.replace(/\\ /g, ' ');
+                        }
+                    } else {
+                        if (arg[0] === '/' && arg[arg.length-1] == '/') {
+                            return arg;
+                        } else {
+                            return arg.replace(/\\ /g, ' ');
+                        }
+                    }
                 }
             });
         }
@@ -2272,6 +2302,7 @@
                 historySize: 60,
                 displayExceptions: true,
                 cancelableAjax: true,
+                processArguments: true,
                 login: null,
                 tabcompletion: null,
                 historyFilter: null,
