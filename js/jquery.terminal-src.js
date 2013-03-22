@@ -1891,11 +1891,11 @@
                     return;
                 }
                 var method, params;
-                if (!command.match(/[^ ]* /)) {
+                if (!command.match(/^[^ ]+ /)) {
                     method = command;
                     params = [];
                 } else {
-                    command = command.split(/ +/);
+                    command = split_command_line(command);
                     method = command[0];
                     params = command.slice(1);
                 }

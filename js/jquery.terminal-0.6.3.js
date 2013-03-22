@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 19 Mar 2013 11:33:56 +0000
+ * Date: Fri, 22 Mar 2013 09:12:35 +0000
  */
 
 /*
@@ -1891,11 +1891,11 @@
                     return;
                 }
                 var method, params;
-                if (!command.match(/[^ ]* /)) {
+                if (!command.match(/^[^ ]+ /)) {
                     method = command;
                     params = [];
                 } else {
-                    command = command.split(/ +/);
+                    command = split_command_line(command);
                     method = command[0];
                     params = command.slice(1);
                 }
