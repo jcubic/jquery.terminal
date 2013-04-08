@@ -2283,7 +2283,7 @@
                 var val = object[method];
                 var type = $.type(val);
                 if (type === 'function') {
-                    val.apply(self, params);
+                    return val.apply(self, params);
                 } else if (type === 'object' || type === 'string') {
                     var commands = [];
                     if (type === 'object') {

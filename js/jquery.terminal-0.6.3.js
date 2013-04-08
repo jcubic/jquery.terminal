@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 08 Apr 2013 12:25:41 +0000
+ * Date: Mon, 08 Apr 2013 12:32:34 +0000
  */
 
 /*
@@ -2283,7 +2283,7 @@
                 var val = object[method];
                 var type = $.type(val);
                 if (type === 'function') {
-                    val.apply(self, params);
+                    return val.apply(self, params);
                 } else if (type === 'object' || type === 'string') {
                     var commands = [];
                     if (type === 'object') {
