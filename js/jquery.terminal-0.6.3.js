@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.6.2
+ *|           \/              /____/                              version 0.6.3
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Fri, 22 Mar 2013 09:12:35 +0000
+ * Date: Mon, 08 Apr 2013 12:25:41 +0000
  */
 
 /*
@@ -1706,7 +1706,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.6.2';
+    var version = '0.6.3';
     var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -1954,10 +1954,31 @@
                     if (!silent) {
                         echo_command(command);
                     }
+                    var position = lines.length-1;
                     if (command === 'clear' && settings.clear) {
                         self.clear();
                     } else {
-                        interpreter['eval'](command, self);
+                        var result = interpreter['eval'](command, self);
+                        if (result !== undefined) {
+                            // was lines after echo_command (by eval)
+                            if (position === lines.length-1) {
+                                lines.pop();
+                                if (result !== false) {
+                                    self.echo(result);
+                                }
+                                self.resize();
+                            } else {
+                                if (result === false) {
+                                    lines = lines.slice(0, position).
+                                        concat(lines.slice(position+1));
+                                } else {
+                                    lines = lines.slice(0, position).
+                                        concat([result]).
+                                        concat(lines.slice(position+1));
+                                }
+                                self.resize();
+                            }
+                        }
                     }
                 }
 

@@ -1954,10 +1954,31 @@
                     if (!silent) {
                         echo_command(command);
                     }
+                    var position = lines.length-1;
                     if (command === 'clear' && settings.clear) {
                         self.clear();
                     } else {
-                        interpreter['eval'](command, self);
+                        var result = interpreter['eval'](command, self);
+                        if (result !== undefined) {
+                            // was lines after echo_command (by eval)
+                            if (position === lines.length-1) {
+                                lines.pop();
+                                if (result !== false) {
+                                    self.echo(result);
+                                }
+                                self.resize();
+                            } else {
+                                if (result === false) {
+                                    lines = lines.slice(0, position).
+                                        concat(lines.slice(position+1));
+                                } else {
+                                    lines = lines.slice(0, position).
+                                        concat([result]).
+                                        concat(lines.slice(position+1));
+                                }
+                                self.resize();
+                            }
+                        }
                     }
                 }
 
