@@ -23,7 +23,7 @@ body {
 jQuery(document).ready(function($) {
    $(window).scroll(function() {
       $('.tilda').each(function() {
-         $(this).css({top: $('body').attr('scrollTop')});
+         $(this).css({top: $('body').prop('scrollTop')});
       });
    });
 });
