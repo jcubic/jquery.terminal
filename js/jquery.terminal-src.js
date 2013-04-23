@@ -1381,7 +1381,6 @@
                     text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n') + ']' +
                     text + ']';
             }).split(/\n/g);
-            console.log(array);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');

@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 23 Apr 2013 14:45:16 +0000
+ * Date: Tue, 23 Apr 2013 15:01:12 +0000
  */
 
 /*
@@ -1381,7 +1381,6 @@
                     text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n') + ']' +
                     text + ']';
             }).split(/\n/g);
-            console.log(array);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');
