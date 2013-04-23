@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 08 Apr 2013 12:32:34 +0000
+ * Date: Tue, 23 Apr 2013 09:43:21 +0000
  */
 
 /*
@@ -1420,8 +1420,12 @@
                             if (!m) {
                                 throw "Unclosed html entity at char " + j;
                             }
-                            j+=m[0].length-1;
+                            j+=m[1].length-1;
                             ++count;
+                            // if entity is at the end there is no next loop - issue #77
+                            if (j == jlen-1) {
+                                result.push(output_line + m[1]);
+                            }
                             continue;
                         } else {
                             // escape \] count as one character
