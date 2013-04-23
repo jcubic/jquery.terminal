@@ -710,12 +710,6 @@
             return result;
         }
         function get_splited_command_line(string) {
-            /*
-            string = str_repeat('x', prompt_len) + string;
-            var result = $.terminal.split_equal(string);
-            result[0] = result[0].substring(prompt_len);
-            return result;
-            */
             var first = string.substring(0, num_chars - prompt_len);
             var rest = string.substring(num_chars - prompt_len);
             return [first].concat(str_parts(rest, num_chars));
@@ -886,7 +880,6 @@
                 }
             };
         })(self);
-        var prevent_keypress;
         var last_command;
         var draw_prompt = (function() {
             var prompt_node = self.find('.prompt');
@@ -912,12 +905,12 @@
                 clip.blur().val('');
             });
         }
-        var prevent_keypress = false;
+        //var prevent_keypress = false;
         function keydown_event(e) {
-            if (options.keydown) {
+            if (typeof options.keydown == 'function') {
                 var result = options.keydown(e);
                 if (result !== undefined) {
-                    prevent_keypress = true;
+                    //prevent_keypress = true;
                     return result;
                 }
             }
@@ -1295,15 +1288,17 @@
         // Keystrokes
         var object;
         $(document.documentElement || window).keypress(function(e) {
+            /*
             if (prevent_keypress) {
                 prevent_keypress = false;
                 return false;
             }
+            */
             var result;
             if (e.ctrlKey && e.which === 99) { // CTRL+C
                 return true;
             }
-            if (!reverse_search && options.keypress) {
+            if (!reverse_search && typeof options.keypress === 'function') {
                 result = options.keypress(e);
             }
             if (result === undefined || result) {
@@ -1386,6 +1381,7 @@
                     text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n') + ']' +
                     text + ']';
             }).split(/\n/g);
+            console.log(array);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');
@@ -1427,13 +1423,11 @@
                                 result.push(output_line + m[1]);
                             }
                             continue;
-                        } else {
+                        } else if (line[j] === ']' && line[j-1] === '\\') {
                             // escape \] count as one character
-                            if (line[j] === ']' && line[j-1] === '\\') {
-                                --count;
-                            } else {
-                                ++count;
-                            }
+                            --count;
+                        } else {
+                            ++count;
                         }
                     }
                     if (count === length || j === jlen-1) {
@@ -2202,8 +2196,8 @@
                 } else if (e.which === 9 && e.ctrlKey) { // CTRL+TAB
                     if (terminals.length() > 1) {
                         self.focus(false);
+                        return false;
                     }
-                    return false;
                 } else if (e.which === 34) { // PAGE DOWN
                     self.scroll(self.height());
                 } else if (e.which === 33) { // PAGE UP
@@ -2211,21 +2205,19 @@
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
-            } else {
-                if (e.which === 68 && e.ctrlKey) { // CTRL+D
-                    for (i=requests.length; i--;) {
-                        var r = requests[i];
-                        if (4 !== r.readyState) {
-                            try {
-                                r.abort();
-                            } catch(e) {
-                                self.error('error in aborting ajax');
-                            }
+            } else if (e.which === 68 && e.ctrlKey) { // CTRL+D
+                for (i=requests.length; i--;) {
+                    var r = requests[i];
+                    if (4 !== r.readyState) {
+                        try {
+                            r.abort();
+                        } catch(e) {
+                            self.error('error in aborting ajax');
                         }
                     }
-                    self.resume();
-                    return false;
                 }
+                self.resume();
+                return false;
             }
         }
 
