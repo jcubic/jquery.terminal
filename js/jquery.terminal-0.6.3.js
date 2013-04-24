@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 23 Apr 2013 15:01:12 +0000
+ * Date: Wed, 24 Apr 2013 12:02:10 +0000
  */
 
 /*
@@ -2657,7 +2657,9 @@
                 },
                 error: function(message) {
                     //echo red message
-                    return self.echo('[[;#f00;]' + escape_brackets(message) + ']');
+                    //quick hack to fix trailing back slash
+                    return self.echo('[[;#f00;]' + escape_brackets(message).
+                                     replace(/\\$/, '&#92;') + ']');
                 },
                 scroll: function(amount) {
                     var pos;

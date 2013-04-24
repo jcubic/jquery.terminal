@@ -2657,7 +2657,9 @@
                 },
                 error: function(message) {
                     //echo red message
-                    return self.echo('[[;#f00;]' + escape_brackets(message) + ']');
+                    //quick hack to fix trailing back slash
+                    return self.echo('[[;#f00;]' + escape_brackets(message).
+                                     replace(/\\$/, '&#92;') + ']');
                 },
                 scroll: function(amount) {
                     var pos;
