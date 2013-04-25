@@ -1416,7 +1416,6 @@
                                 throw "Unclosed html entity at char " + j;
                             }
                             j+=m[1].length-2; // because contine add 1 to j
-                            ++count;
                             // if entity is at the end there is no next loop - issue #77
                             if (j === jlen-1) {
                                 result.push(output_line + m[1]);
