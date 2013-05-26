@@ -1082,6 +1082,9 @@
                     paste();
                     return true;
                 } else if (e.ctrlKey || e.metaKey) {
+                    if (e.which === 192) { // CMD+` switch browser window on Mac
+                        return true;
+                    }
                     if (e.shiftKey) { // CTRL+SHIFT+??
                         if (e.which === 84) {
                             //CTRL+SHIFT+T open closed tab
