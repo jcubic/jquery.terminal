@@ -1082,6 +1082,15 @@
                     paste();
                     return true;
                 } else if (e.ctrlKey || e.metaKey) {
+                    if (e.which === 192) { // CMD+` switch browser window on Mac
+                        return true;
+                    }
+                    if (e.metaKey) {
+                        if(e.which === 82) // CMD+r page reload in Chrome Mac
+                            return true;
+                        if(e.which === 76)
+                            return true; // CMD+l jump into Ominbox on Chrome Mac
+                    }
                     if (e.shiftKey) { // CTRL+SHIFT+??
                         if (e.which === 84) {
                             //CTRL+SHIFT+T open closed tab
