@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Fri, 05 Jul 2013 17:13:58 +0000
+ * Date: Fri, 05 Jul 2013 17:46:49 +0000
  */
 
 /*
@@ -701,6 +701,7 @@
             var W = self.width();
             var w = cursor.innerWidth();
             num_chars = Math.floor(W / w);
+            console.log(num_chars);
         }
         function str_repeat(str, n) {
             var result = '';
@@ -807,7 +808,9 @@
                     }
                     first_len = array[0].length;
                     //cursor in first line
-                    if (position < first_len) {
+                    if (first_len === 0 && array.length === 1) {
+                        // skip empty line
+                    } else if (position < first_len) {
                         draw_cursor_line(array[0], position);
                         lines_after(array.slice(1));
                     } else if (position === first_len) {
@@ -2897,6 +2900,7 @@
                     commands: commands
                 });
                 num_chars = get_num_chars();
+                console.log(num_chars);
                 terminals.append(self);
                 if (settings.enabled === true) {
                     self.focus(undefined, true);
@@ -2910,11 +2914,13 @@
                     }
                 });
                 $(window).resize(function() {
-                    var width = self.width();
-                    var height = self.height();
-                    // prevent too many calculations in IE because of resize event bug
-                    if (old_height !== height || old_width !== width) {
-                        self.resize();
+                    if (self.is(':visible')) {
+                        var width = self.width();
+                        var height = self.height();
+                        // prevent too many calculations in IE because of resize event bug
+                        if (old_height !== height || old_width !== width) {
+                            self.resize();
+                        }
                     }
                 });
                 self.click(function() {
