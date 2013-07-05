@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Fri, 05 Jul 2013 17:03:02 +0000
+ * Date: Fri, 05 Jul 2013 17:13:58 +0000
  */
 
 /*
@@ -1469,7 +1469,7 @@
         // encode formating as html for inserto into DOM
         encode: function(str) {
             // don't escape entities
-            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;')
+            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;|[^=]+=)/, '&amp;')
                       .replace(/</g, '&lt;').replace(/>/g, '&gt;')
                         // I don't think that it find \n
                       .replace(/\n/g, '<br/>')

@@ -1469,7 +1469,7 @@
         // encode formating as html for inserto into DOM
         encode: function(str) {
             // don't escape entities
-            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;')
+            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;|[^=]+=)/, '&amp;')
                       .replace(/</g, '&lt;').replace(/>/g, '&gt;')
                         // I don't think that it find \n
                       .replace(/\n/g, '<br/>')
