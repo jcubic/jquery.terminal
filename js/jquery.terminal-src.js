@@ -2258,7 +2258,7 @@
                             return new RegExp(arg.replace(/^\/|\/$/g, ''));
                         } else if (arg.match(/^-?[0-9]+$/)) {
                             return parseInt(arg, 10);
-                        } else if (arg.match(/^-?[0-9]*\.[0-9]+$/)) {
+                        } else if (arg.match(/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/)) {
                             return parseFloat(arg);
                         } else {
                             return arg.replace(/\\ /g, ' ');

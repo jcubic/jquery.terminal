@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Thu, 25 Apr 2013 10:12:43 +0000
+ * Date: Fri, 05 Jul 2013 17:03:02 +0000
  */
 
 /*
@@ -1082,6 +1082,15 @@
                     paste();
                     return true;
                 } else if (e.ctrlKey || e.metaKey) {
+                    if (e.which === 192) { // CMD+` switch browser window on Mac
+                        return true;
+                    }
+                    if (e.metaKey) {
+                        if(e.which === 82) // CMD+r page reload in Chrome Mac
+                            return true;
+                        if(e.which === 76)
+                            return true; // CMD+l jump into Ominbox on Chrome Mac
+                    }
                     if (e.shiftKey) { // CTRL+SHIFT+??
                         if (e.which === 84) {
                             //CTRL+SHIFT+T open closed tab
@@ -2249,7 +2258,7 @@
                             return new RegExp(arg.replace(/^\/|\/$/g, ''));
                         } else if (arg.match(/^-?[0-9]+$/)) {
                             return parseInt(arg, 10);
-                        } else if (arg.match(/^-?[0-9]*\.[0-9]+$/)) {
+                        } else if (arg.match(/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/)) {
                             return parseFloat(arg);
                         } else {
                             return arg.replace(/\\ /g, ' ');
