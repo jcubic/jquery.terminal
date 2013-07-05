@@ -701,7 +701,6 @@
             var W = self.width();
             var w = cursor.innerWidth();
             num_chars = Math.floor(W / w);
-            console.log(num_chars);
         }
         function str_repeat(str, n) {
             var result = '';
@@ -2900,7 +2899,6 @@
                     commands: commands
                 });
                 num_chars = get_num_chars();
-                console.log(num_chars);
                 terminals.append(self);
                 if (settings.enabled === true) {
                     self.focus(undefined, true);
@@ -2928,7 +2926,7 @@
                     //     self === $.terminal.active())) {
                     self.focus();
                 });
-                if (options.login && self.token && !self.token() && self.login_name &&
+                if (settings.login && self.token && !self.token() && self.login_name &&
                     !self.login_name()) {
                     login();
                 } else {
