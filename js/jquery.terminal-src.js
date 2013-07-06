@@ -8,7 +8,7 @@
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
- * Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>
  *
  * Includes:
  *
@@ -1715,12 +1715,12 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version = '{{VER}}';
-    var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
+    var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2012 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2013 jcubic'],
         ['jQuery Terminal Emulator v. ' + version,
          copyright.replace(/ *<.*>/, '')],
         ['jQuery Terminal Emulator version ' + version_string,
@@ -1828,15 +1828,12 @@
                 finalize = line[1];
             } else {
                 string = line;
-                finalize = function () {};
+                finalize = $.noop;
             }
             string = $.type(string) === "function" ? string() : string;
             string = $.type(string) === "string" ? string : String(string);
             var div, i, len;
             if (string.length > num_chars || string.match(/\n/)) {
-                // string can have line break
-                //var array = string.split('\n');
-                // TODO: the way it should work
                 var array = $.terminal.split_equal($.terminal.from_ansi(string), num_chars);
 
                 div = $('<div></div>');

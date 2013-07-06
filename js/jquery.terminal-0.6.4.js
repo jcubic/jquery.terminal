@@ -4,11 +4,11 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.6.3
+ *|           \/              /____/                              version 0.6.4
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
- * Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>
  *
  * Includes:
  *
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 06 Jul 2013 07:14:02 +0000
+ * Date: Sat, 06 Jul 2013 07:56:46 +0000
  */
 
 /*
@@ -1714,13 +1714,13 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.6.3';
-    var copyright = 'Copyright (c) 2011-2012 Jakub Jankiewicz <http://jcubic.pl>';
+    var version = '0.6.4';
+    var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2012 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2013 jcubic'],
         ['jQuery Terminal Emulator v. ' + version,
          copyright.replace(/ *<.*>/, '')],
         ['jQuery Terminal Emulator version ' + version_string,
@@ -1821,13 +1821,19 @@
             }
             return true;
         }
-        function draw_line(string) {
-            string = typeof string === 'string' ? string : String(string);
+        function draw_line(line) {
+            var string, finalize;
+            if ($.type(line) === "array") {
+                string = line[0];
+                finalize = line[1];
+            } else {
+                string = line;
+                finalize = $.noop;
+            }
+            string = $.type(string) === "function" ? string() : string;
+            string = $.type(string) === "string" ? string : String(string);
             var div, i, len;
             if (string.length > num_chars || string.match(/\n/)) {
-                // string can have line break
-                //var array = string.split('\n');
-                // TODO: the way it should work
                 var array = $.terminal.split_equal($.terminal.from_ansi(string), num_chars);
 
                 div = $('<div></div>');
@@ -1843,6 +1849,7 @@
             }
             output.append(div);
             div.width('100%');
+            finalize(div);
             scroll_to_bottom();
             return div;
         }
@@ -2320,6 +2327,11 @@
                                    $.extend({name: self.selector}, options));
             });
         } else {
+            // array of line objects:
+            // - string (printed as-is)
+            // - function (called whenever necessary, result is printed)
+            // - array (expected form: [line, finalize function])
+            // - anything else (cast to string when painted)
             var lines = [];
             var output;
             var terminal_id = terminals.length();
@@ -2646,7 +2658,7 @@
                     var o = output.detach();
                     output.html('');
                     $.each(lines, function(i, line) {
-                        draw_line(line && typeof line == 'function' ? line() : line);
+                        draw_line(line);
                     });
                     self.prepend(o);
                     scroll_to_bottom();
@@ -2660,17 +2672,28 @@
                     }
                     return self;
                 },
-                echo: function(line) {
+                // Print data to terminal output. If a second argument is
+                // supplied it is called with the container div that holds the
+                // output (as a jquery object) every time the output is printed
+                // (including resize and scrolling)
+                // If the line is a function it will be called for every redraw.
+                echo: function(line, finalize) {
+                    if (finalize !== undefined) {
+                        line = [line, finalize];
+                    } else if ($.type(line) === "array") {
+                        // always wrap user arrays
+                        line = [line, function () { }];
+                    }
                     lines.push(line);
-                    draw_line($.type(line) === 'function' ? line() : line);
+                    draw_line(line);
                     on_scrollbar_show_resize();
                     return self;
                 },
-                error: function(message) {
+                error: function(message, finalize) {
                     //echo red message
                     //quick hack to fix trailing back slash
                     return self.echo('[[;#f00;]' + escape_brackets(message).
-                                     replace(/\\$/, '&#92;') + ']');
+                                     replace(/\\$/, '&#92;') + ']', finalize);
                 },
                 scroll: function(amount) {
                     var pos;
