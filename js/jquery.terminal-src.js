@@ -28,7 +28,7 @@
 /*
 
      TODO:
-           add destroy method to terminal (cmd alrady have it)
+           add destroy method to terminal (cmd already has it)
 
           distinguish between paused and disabled
           paused should block keydown in terminal it should disable command line
@@ -1833,6 +1833,15 @@
             string = $.type(string) === "function" ? string() : string;
             string = $.type(string) === "string" ? string : String(string);
             var div, i, len;
+
+	    // Early exit if we are allowing raw HTML output and this string begins
+	    // with settings.htmlRawPrefix
+	    if(settings.htmlRaw && 
+	       string.substring(0,settings.htmlRawPrefix.length) === settings.htmlRawPrefix)
+	    {
+		return draw_html(string);
+	    }
+
             if (string.length > num_chars || string.match(/\n/)) {
                 var array = $.terminal.split_equal($.terminal.from_ansi(string), num_chars);
 
@@ -1853,6 +1862,14 @@
             scroll_to_bottom();
             return div;
         }
+
+	function draw_html(string) {
+	    var div = $('<div/>').html('<div>' + string + '</div>');
+	    output.append(div);
+	    div.width('100%');
+	    scroll_to_bottom();
+	    return div;
+	}
 
         function show_greetings() {
             if (settings.greetings === undefined) {
@@ -2348,6 +2365,8 @@
                 displayExceptions: true,
                 cancelableAjax: true,
                 processArguments: true,
+		htmlRaw: false,
+		htmlRawPrefix: '<!--HTMLRAW-->',
                 login: null,
                 tabcompletion: null,
                 historyFilter: null,
