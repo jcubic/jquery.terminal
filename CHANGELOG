@@ -1,5 +1,5 @@
 0.6.4     Fix regexes, CMD+`, CMD+R, CMD+L on Mac, fix Resize if terminal is
-          hidden
+          hidden, fix wrap ANSI formatting
 0.6.3     Fix arguments in automatic JSON-RPC
 0.6.2     Fix arguments in object as eval, new option processArguments
 0.6.1     fix first echo (like greetings)
