@@ -1480,7 +1480,7 @@
         },
         format: function(str) {
             if (typeof str === 'string') {
-                str = $.terminal.encode($.terminal.from_ansi(str));
+                str = $.terminal.encode(str);
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splited = str.split(format_split_re);
                 if (splited && splited.length > 1) {
@@ -1640,6 +1640,7 @@
                               ].join(';') + ']';
             }
             return function(input) {
+                input = input.replace(/\\\x1B\[|\\x1B\[/g, '[');
                 var splitted = input.split(/(\[[0-9;]*m)/g);
                 if (splitted.length == 1) {
                     return input;
@@ -1827,7 +1828,7 @@
                 // string can have line break
                 //var array = string.split('\n');
                 // TODO: the way it should work
-                var array = $.terminal.split_equal(string, num_chars);
+                var array = $.terminal.split_equal($.terminal.from_ansi(string), num_chars);
 
                 div = $('<div></div>');
                 for (i = 0, len = array.length; i < len; ++i) {
