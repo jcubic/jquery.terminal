@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 06 Jul 2013 07:56:46 +0000
+ * Date: Sat, 06 Jul 2013 08:37:32 +0000
  */
 
 /*
@@ -1821,19 +1821,15 @@
             }
             return true;
         }
-        function draw_line(line) {
-            var string, finalize;
-            if ($.type(line) === "array") {
-                string = line[0];
-                finalize = line[1];
-            } else {
-                string = line;
-                finalize = $.noop;
-            }
+        function draw_line(string, options) {
+            var settings = $.extend({
+                raw: false,
+                finalize: $.noop
+            }, options || {});
             string = $.type(string) === "function" ? string() : string;
             string = $.type(string) === "string" ? string : String(string);
             var div, i, len;
-            if (string.length > num_chars || string.match(/\n/)) {
+            if (!settings.raw && (string.length > num_chars || string.match(/\n/))) {
                 var array = $.terminal.split_equal($.terminal.from_ansi(string), num_chars);
 
                 div = $('<div></div>');
@@ -1841,15 +1837,19 @@
                     if (array[i] === '' || array[i] === '\r') {
                         div.append('<div>&nbsp;</div>');
                     } else {
-                        $('<div/>').html($.terminal.format(array[i])).appendTo(div);
+                        $('<div/>').html(settings.raw ? array[i] : $.terminal.format(array[i])).appendTo(div);
                     }
                 }
+
             } else {
-                div = $('<div/>').html('<div>' + $.terminal.format(string) + '</div>');
+                if (!settings.raw) {
+                    string = $.terminal.format($.terminal.from_ansi(string));
+                }
+                div = $('<div/>').html('<div>' + string + '</div>');
             }
             output.append(div);
             div.width('100%');
-            finalize(div);
+            settings.finalize(div);
             scroll_to_bottom();
             return div;
         }
@@ -1931,7 +1931,7 @@
 
         //display prompt and last command
         function echo_command(command) {
-            command = command.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
+            command = escape_brackets($.terminal.encode(command));
             var prompt = command_line.prompt();
             if (command_line.mask()) {
                 command = command.replace(/./g, '*');
@@ -2658,7 +2658,7 @@
                     var o = output.detach();
                     output.html('');
                     $.each(lines, function(i, line) {
-                        draw_line(line);
+                        draw_line.apply(null, line);
                     });
                     self.prepend(o);
                     scroll_to_bottom();
@@ -2677,15 +2677,13 @@
                 // output (as a jquery object) every time the output is printed
                 // (including resize and scrolling)
                 // If the line is a function it will be called for every redraw.
-                echo: function(line, finalize) {
-                    if (finalize !== undefined) {
-                        line = [line, finalize];
-                    } else if ($.type(line) === "array") {
-                        // always wrap user arrays
-                        line = [line, function () { }];
-                    }
-                    lines.push(line);
-                    draw_line(line);
+                echo: function(string, options) {
+                    var settings = $.extend({
+                        raw: false,
+                        finalize: $.noop
+                    }, options || {});
+                    lines.push([string, settings]);
+                    draw_line(string, settings);
                     on_scrollbar_show_resize();
                     return self;
                 },
