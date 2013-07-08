@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 08 Jul 2013 20:11:23 +0000
+ * Date: Mon, 08 Jul 2013 20:13:10 +0000
  */
 
 /*
@@ -2190,6 +2190,11 @@
                     var clean = string.replace(special, '\\$1');
                     var reg = new RegExp('^' + clean);
                     interpreters.top().completion(self, string, function(commands) {
+                        var test = command_line.get().substring(0, command_line.position());
+                        if (test !== command) {
+                            // command line changed between TABS - ignore
+                            return;
+                        }
                         var matched = [];
                         for (i=commands.length; i--;) {
                             if (reg.test(commands[i])) {
