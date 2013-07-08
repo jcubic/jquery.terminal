@@ -2186,8 +2186,9 @@
                             }
                         }
                     }
-                    var special = /([\^\$\[\]\(\)\+\*\.\|])/g
-                    var reg = new RegExp('^' + string.replace(special, '\\$1'));
+                    var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
+                    var clean = string.replace(special, '\\$1');
+                    var reg = new RegExp('^' + clean);
                     interpreters.top().completion(self, string, function(commands) {
                         var matched = [];
                         for (i=commands.length; i--;) {
@@ -2202,6 +2203,20 @@
                                 echo_command(command);
                                 self.echo(matched.join('\t'));
                                 tab_count = 0;
+                            } else {
+                                var found = false;
+                                loop:
+                                for (var j=string.length; j<matched[0].length; ++j) {
+                                    for (i=1; i<matched.length; ++i) {
+                                        if (matched[0].charAt(j) !== matched[i].charAt(j)) {
+                                            break loop;
+                                        }
+                                    }
+                                    found = true;
+                                }
+                                if (found) {
+                                    self.insert(matched[0].slice(0, j).replace(reg, ''));
+                                }
                             }
                         }
                     });
