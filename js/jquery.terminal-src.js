@@ -2186,7 +2186,8 @@
                             }
                         }
                     }
-                    var reg = new RegExp('^' + string);
+                    var special = /([\^\$\[\]\(\)\+\*\.\|])/g
+                    var reg = new RegExp('^' + string.replace(special, '\\$1'));
                     interpreters.top().completion(self, string, function(commands) {
                         var matched = [];
                         for (i=commands.length; i--;) {

@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 08 Jul 2013 17:20:28 +0000
+ * Date: Mon, 08 Jul 2013 18:45:11 +0000
  */
 
 /*
@@ -2186,7 +2186,8 @@
                             }
                         }
                     }
-                    var reg = new RegExp('^' + string);
+                    var special = /([\^\$\[\]\(\)\+\*\.\|])/g
+                    var reg = new RegExp('^' + string.replace(special, '\\$1'));
                     interpreters.top().completion(self, string, function(commands) {
                         var matched = [];
                         for (i=commands.length; i--;) {
