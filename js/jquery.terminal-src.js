@@ -960,13 +960,6 @@
                     if (typeof prompt === 'function') {
                         draw_prompt();
                     }
-                } else if (e.which === 32) { //space
-                    if (reverse_search) {
-                        reverse_search_string += ' ';
-                        draw_reverse_prompt();
-                    } else {
-                        self.insert(' ');
-                    }
                 } else if (e.which === 8) { //backspace
                     if (reverse_search) {
                         reverse_search_string = reverse_search_string.slice(0, -1);
@@ -1314,12 +1307,12 @@
             }
             if (result === undefined || result) {
                 if (enabled) {
-                    if ($.inArray(e.which, [38, 32, 13, 0, 8]) > -1 &&
+                    if ($.inArray(e.which, [38, 13, 0, 8]) > -1 &&
                         e.keyCode !== 123 && // for F12 which === 0
                         //!(e.which === 40 && e.shiftKey ||
                         !(e.which === 38 && e.shiftKey)) {
                         return false;
-                    } else if (!e.ctrlKey && !(e.altKey && e.which === 100)) { // ALT+D
+                    } else if (!e.ctrlKey && !(e.altKey && e.which === 100) || e.altKey) { // ALT+D
                         // TODO: this should be in one statement
                         if (reverse_search) {
                             reverse_search_string += String.fromCharCode(e.which);
@@ -1329,14 +1322,6 @@
                             self.insert(String.fromCharCode(e.which));
                         }
                         return false;
-                    } else if (e.altKey) {
-                        if (reverse_search) {
-                            reverse_search_string += String.fromCharCode(e.which);
-                            reverse_history_search();
-                            draw_reverse_prompt();
-                        } else {
-                            self.insert(String.fromCharCode(e.which));
-                        }
                     }
                 }
             } else {
