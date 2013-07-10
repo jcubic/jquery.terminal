@@ -49,15 +49,6 @@
         });
         return result;
     };
-    // debug function
-    function get_stack(caller) {
-        if (caller) {
-            return [caller.toString().match(/.*\n.*\n/)].
-                concat(get_stack(caller.caller));
-        } else {
-            return [];
-        }
-    }
     // ----------------------------------------
     // START Storage plugin
     // ----------------------------------------
@@ -1553,17 +1544,27 @@
                 blue: '#0000AA',
                 magenta: '#AA00AA',
                 cyan: '#00AAAA',
-                white: '#fff'
+                white: '#AAA'
+            },
+            faited: {
+                black: '#000',
+                red: '#640000',
+                green: '#006100',
+                yellow: '#737300',
+                blue: '#000087',
+                magenta: '#650065',
+                cyan: '#008787',
+                white: '#818181'
             },
             bold: {
-                white: '#fff',
+                black: '#000',
                 red: '#FF5555',
                 green: '#44D544',
                 yellow: '#FFFF55',
                 blue: '#5555FF',
                 magenta: '#FF55FF',
                 cyan: '#55FFFF',
-                black: '#000'
+                white: '#fff'
             }
         },
         from_ansi: (function() {
@@ -1590,16 +1591,32 @@
             function format_ansi(code) {
                 var controls = code.split(';');
                 var num;
+                var faited = false;
+                var reverse = false;
+                var bold = false;
                 var styles = [];
                 var output_color = '';
                 var output_background = '';
                 for(var i in controls) {
                     num = parseInt(controls[i], 10);
-                    if (num === 1) {
-                       styles.push('b');
-                    }
-                    if (num === 4) {
-                       styles.push('u');
+                    switch(num) {
+                    case 1:
+                        styles.push('b');
+                        bold = true;
+                        faited = false;
+                        break;
+                    case 4:
+                        styles.push('u');
+                        break;
+                    case 3:
+                        styles.push('i');
+                        break;
+                    case 2:
+                        faited = true;
+                        bold = false;
+                        break;
+                    case 7:
+                        reverse = true;
                     }
                     if (background[num]) {
                         output_background = background[num];
@@ -1608,20 +1625,27 @@
                         output_color = color[num];
                     }
                 }
-                var normal = $.terminal.ansi_colors.normal;
-                var colors = normal;
-                for (var i=styles.length;i--;) {
-                    if (styles[i] == 'b') {
-                        if (output_color == '') {
-                            output_color = 'white';
-                        }
-                        colors = $.terminal.ansi_colors.bold;
-                        break;
-                    }
+                if (reverse) {
+                    var tmp = output_background;
+                    output_background = output_color;
+                    output_color = tmp;
+                }
+                if (!output_color) {
+                    output_color = reverse ? 'black' : 'white';
+                }
+                if (!output_background) {
+                    output_background = reverse ? 'white' : 'black';
+                }
+                var colors = $.terminal.ansi_colors.normal;
+                var backgrounds = $.terminal.ansi_colors.normal;
+                if (bold) {
+                    colors = backgrounds = $.terminal.ansi_colors.bold;
+                } else if (faited) {
+                    colors = backgrounds = $.terminal.ansi_colors.faited;
                 }
                 return '[[' + [styles.join(''),
                                colors[output_color],
-                               normal[output_background]
+                               backgrounds[output_background]
                               ].join(';') + ']';
             }
             return function(input) {
