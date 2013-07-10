@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 10 Jul 2013 16:48:24 +0000
+ * Date: Wed, 10 Jul 2013 17:11:58 +0000
  */
 
 /*
@@ -2264,6 +2264,10 @@
                             } else {
                                 return '\\';
                             }
+                        }).replace(/\\x([0-9a-f]+)/gi, function(hex) {
+                            return String.fromCharCode(parseInt(hex, 16));
+                        }).replace(/\\0([0-7]+)/g, function(oct) {
+                            return String.fromCharCode(parseInt(oct, 8));
                         });
                     } else {
                         return arg;

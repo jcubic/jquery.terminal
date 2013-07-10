@@ -2264,6 +2264,10 @@
                             } else {
                                 return '\\';
                             }
+                        }).replace(/\\x([0-9a-f]+)/gi, function(hex) {
+                            return String.fromCharCode(parseInt(hex, 16));
+                        }).replace(/\\0([0-7]+)/g, function(oct) {
+                            return String.fromCharCode(parseInt(oct, 8));
                         });
                     } else {
                         return arg;
