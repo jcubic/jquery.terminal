@@ -1625,8 +1625,7 @@
                               ].join(';') + ']';
             }
             return function(input) {
-                input = input.replace(/\\\x1B\[|\\x1B\[/g, '[');
-                var splitted = input.split(/(\[[0-9;]*m)/g);
+                var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
                 if (splitted.length == 1) {
                     return input;
                 }
@@ -1637,23 +1636,27 @@
                 }
                 var inside = false;
                 for (var i=0; i<splitted.length; ++i) {
-                    var match = splitted[i].match(/^\[([0-9;]*)m$/);
+                    var match = splitted[i].match(/^\x1B\[([0-9;]*)([A-Za-z])$/);
                     if (match) {
-                        if (match[1] == '') {
-                            continue;
-                        }
-                        if (inside) {
-                            output.push(']');
-                            if (match[1] == '0') {
-                                //just closing
-                                inside = false;
+                        switch (match[2]) {
+                        case 'm':
+                            if (match[1] == '') {
+                                continue;
+                            }
+                            if (inside) {
+                                output.push(']');
+                                if (match[1] == '0') {
+                                    //just closing
+                                    inside = false;
+                                } else {
+                                    // someone forget to close - process
+                                    output.push(format_ansi(match[1]));
+                                }
                             } else {
-                                // someone forget to close - process
+                                inside = true;
                                 output.push(format_ansi(match[1]));
                             }
-                        } else {
-                            inside = true;
-                            output.push(format_ansi(match[1]));
+                            break;
                         }
                     } else {
                         output.push(splitted[i]);
@@ -2264,9 +2267,9 @@
                             } else {
                                 return '\\';
                             }
-                        }).replace(/\\x([0-9a-f]+)/gi, function(hex) {
+                        }).replace(/\\x([0-9a-f]+)/gi, function(_, hex) {
                             return String.fromCharCode(parseInt(hex, 16));
-                        }).replace(/\\0([0-7]+)/g, function(oct) {
+                        }).replace(/\\0([0-7]+)/g, function(_, oct) {
                             return String.fromCharCode(parseInt(oct, 8));
                         });
                     } else {
