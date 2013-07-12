@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Fri, 12 Jul 2013 18:19:11 +0000
+ * Date: Fri, 12 Jul 2013 19:23:17 +0000
  */
 
 /*
@@ -1979,11 +1979,7 @@
                 if (command === '') {
                     return;
                 }
-                if (settings.processArguments) {
-                    command = $.terminal.parseCommand(command);
-                } else {
-                    command = $.terminal.splitCommand(command);
-                }
+                command = getProcessedCommand(command);
                 /*
                 var method, params;
                 if (!command.match(/^[^ ]+ /)) {
@@ -2390,6 +2386,16 @@
             });
         }
         */
+        // helper function
+        function getProcessedCommand(command) {
+            if ($.type(settings.processArguments) === 'function') {
+                return processCommand(command, settings.processArguments);
+            } else if (settings.processArguments) {
+                return $.terminal.parseCommand(command);
+            } else {
+                return $.terminal.splitCommand(command);
+            }
+        }
         function make_eval_from_object(object) {
             // function that maps commands to object methods
             // it keeps terminal context
@@ -2398,11 +2404,7 @@
                     return;
                 }
                 //command = split_command_line(command);
-                if (settings.processArguments) {
-                    command = $.terminal.parseCommand(command);
-                } else {
-                    command = $.terminal.splitCommand(command);
-                }
+                command = getProcessedCommand(command);
                 var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
