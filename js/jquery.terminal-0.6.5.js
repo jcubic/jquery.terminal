@@ -22,13 +22,12 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 10 Jul 2013 18:58:48 +0000
+ * Date: Fri, 12 Jul 2013 18:19:11 +0000
  */
 
 /*
 
      TODO:
-           add destroy method to terminal (cmd alrady have it)
 
           distinguish between paused and disabled
           paused should block keydown in terminal it should disable command line
@@ -1334,12 +1333,21 @@
         return string.length - skipFormattingCount(string);
     }
     // -------------------------------------------------------------------------
+    function processCommand(string, fn) {
+        var args = string.split(/( +)/);
+        return {
+            name: args[0],
+            args: fn(args.slice(2).join(''))
+        };
+    }
+    // -------------------------------------------------------------------------
     var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
-    var email_regex = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
+    var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
+    var command_re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])*\/|(\\ |[^ ])+|[\w-]+)/g;
     $.terminal = {
         // split text into lines with equal length and make each line be renderd
         // separatly (text formating can be longer then a line).
@@ -1518,7 +1526,7 @@
                             link = link.replace(/\.$/, '');
                             return '<a target="_blank" href="' + link + '">' + link + '</a>' +
                                 (comma ? '.' : '');
-                        }).replace(email_regex, '<a href="mailto:$1">$1</a>');
+                        }).replace(email_re, '<a href="mailto:$1">$1</a>');
                     } else {
                         return string;
                     }
@@ -1691,11 +1699,65 @@
                 }
                 return output.join('');
             };
-        })()
+        })(),
+        // function split arguments and work with string like
+        // 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ asd
+        // it create regex and numbers and replace escape characters in double quotes
+        parseArguments: function(string) {
+            return $.map(string.match(command_re) || [], function(arg) {
+                if (arg[0] === "'" && arg[arg.length-1] === "'") {
+                    return arg.replace(/^'|'$/g, '');
+                } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
+                    arg = arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
+                    return arg.replace(/\\\\|\\t|\\n/g, function(string) {
+                        if (string[1] === 't') {
+                            return '\t';
+                        } else if (string[1] === 'n') {
+                            return '\n';
+                        } else {
+                            return '\\';
+                        }
+                    }).replace(/\\x([0-9a-f]+)/gi, function(_, hex) {
+                        return String.fromCharCode(parseInt(hex, 16));
+                    }).replace(/\\0([0-7]+)/g, function(_, oct) {
+                        return String.fromCharCode(parseInt(oct, 8));
+                    });
+                } else if (arg[0] === '/' && arg[arg.length-1] == '/') {
+                    return new RegExp(arg.replace(/^\/|\/$/g, ''));
+                } else if (arg.match(/^-?[0-9]+$/)) {
+                    return parseInt(arg, 10);
+                } else if (arg.match(/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/)) {
+                    return parseFloat(arg);
+                } else {
+                    return arg.replace(/\\ /g, ' ');
+                }
+            });
+        },
+        // split arguments it only strip single and double quotes and escape space
+        splitArguments: function(string) {
+            return $.map(string.match(command_re) || [], function(arg) {
+                if (arg[0] === "'" && arg[arg.length-1] === "'") {
+                    return arg.replace(/^'|'$/g, '');
+                } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
+                    return arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
+                } else if (arg[0] === '/' && arg[arg.length-1] == '/') {
+                    return arg;
+                } else {
+                    return arg.replace(/\\ /g, ' ');
+                }
+            });
+        },
+        // two functions that return object {name,args}
+        parseCommand: function(string) {
+            return processCommand(string, $.terminal.parseArguments);
+        },
+        splitCommand: function(string) {
+            return processCommand(string, $.terminal.splitArguments);
+        }
     };
 
     // -----------------------------------------------------------------------
-    // Helpers
+    // Helper plugins
     // -----------------------------------------------------------------------
     $.fn.visible = function() {
         return this.css('visibility', 'visible');
@@ -1917,6 +1979,12 @@
                 if (command === '') {
                     return;
                 }
+                if (settings.processArguments) {
+                    command = $.terminal.parseCommand(command);
+                } else {
+                    command = $.terminal.splitCommand(command);
+                }
+                /*
                 var method, params;
                 if (!command.match(/^[^ ]+ /)) {
                     method = command;
@@ -1926,13 +1994,14 @@
                     method = command[0];
                     params = command.slice(1);
                 }
+                */
                 if (!settings.login || method === 'help') {
                     // allow to call help without token
-                    service(method, params);
+                    service(command.name, command.args);
                 } else {
                     var token = terminal.token();
                     if (token) {
-                        service(method, [token].concat(params));
+                        service(command.name, [token].concat(command.args));
                     } else {
                         //should never happen
                         terminal.error('&#91;AUTH&#93; Access denied (no token)');
@@ -2270,7 +2339,7 @@
                 return false;
             }
         }
-
+        /*
         // function split arguments and work with string like
         // 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ asd
         // if processArguments is true then it create regex and numbers and
@@ -2320,6 +2389,7 @@
                 }
             });
         }
+        */
         function make_eval_from_object(object) {
             // function that maps commands to object methods
             // it keeps terminal context
@@ -2327,13 +2397,16 @@
                 if (command === '') {
                     return;
                 }
-                command = split_command_line(command);
-                var method = command[0];
-                var params = command.slice(1);
-                var val = object[method];
+                //command = split_command_line(command);
+                if (settings.processArguments) {
+                    command = $.terminal.parseCommand(command);
+                } else {
+                    command = $.terminal.splitCommand(command);
+                }
+                var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
-                    return val.apply(self, params);
+                    return val.apply(self, command.args);
                 } else if (type === 'object' || type === 'string') {
                     var commands = [];
                     if (type === 'object') {
@@ -2345,14 +2418,14 @@
                         val = make_eval_from_object(val);
                     }
                     self.push(val, {
-                        prompt: method + '> ',
-                        name: method,
+                        prompt: command.name + '> ',
+                        name: command.name,
                         completion: type === 'object' ? function(term, string, callback) {
                             callback(commands);
                         } : undefined
                     });
                 } else {
-                    self.error("Command '" + method + "' Not Found");
+                    self.error("Command '" + command.name + "' Not Found");
                 }
             };
         }
