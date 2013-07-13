@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.6.5
+ *|           \/              /____/                              version 0.7.0
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 18:01:49 +0000
+ * Date: Sat, 13 Jul 2013 18:40:38 +0000
  */
 
 /*
@@ -1214,10 +1214,10 @@
             },
             destroy: function() {
                 $(document.documentElement || window).unbind('.cmd');
-				self.stopTime('blink', blink);
+                self.stopTime('blink', blink);
                 self.find('.cursor').next().remove().end().prev().remove().end().remove();
                 self.find('.prompt, .clipboard').remove();
-				self.removeClass('cmd').removeData('cmd');
+                self.removeClass('cmd').removeData('cmd');
                 return self;
             },
             prompt: function(user_prompt) {
@@ -1599,14 +1599,14 @@
         },
         from_ansi: (function() {
             var color = {
-                30:	'black',
-                31:	'red',
-                32:	'green',
-                33:	'yellow',
-                34:	'blue',
-                35:	'magenta',
-                36:	'cyan',
-                37:	'white'
+                30:    'black',
+                31:    'red',
+                32:    'green',
+                33:    'yellow',
+                34:    'blue',
+                35:    'magenta',
+                36:    'cyan',
+                37:    'white'
             };
             var background = {
                 40: 'black',
@@ -1810,14 +1810,13 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.6.5';
+    var version = '0.7.0';
     var copyright = '(c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
     var signatures = [
-        ['jQuery Terminal',
-		 '(c) 2011-2013 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2013 jcubic'],
         ['jQuery Terminal Emulator v. ' + version,
          copyright.replace(/ *<.*>/, '')],
         ['jQuery Terminal Emulator version ' + version_string,
@@ -1877,7 +1876,7 @@
                         message = e.message;
                     }
                 }
-				self.error('&#91;' + label + '&#93;: ' + message);
+                self.error('&#91;' + label + '&#93;: ' + message);
                 if (typeof e.fileName === 'string') {
                     //display filename and line which throw exeption
                     self.pause();
@@ -1935,11 +1934,11 @@
                     if (array[i] === '' || array[i] === '\r') {
                         div.append('<div>&nbsp;</div>');
                     } else {
-						if (line_settings.raw) {
-							$('<div/>').html(array[i]);
-						} else {
-							$('<div/>').html($.terminal.format(array[i])).appendTo(div);
-						}
+                        if (line_settings.raw) {
+                            $('<div/>').html(array[i]);
+                        } else {
+                            $('<div/>').html($.terminal.format(array[i])).appendTo(div);
+                        }
                     }
                 }
             } else {
@@ -1950,14 +1949,14 @@
             }
             output.append(div);
             div.width('100%');
-			line_settings.finalize(div);
-			if (settings.outputLimit >= 0) {
-				var limit = settings.outputLimit === 0 ? self.rows() : settings.outputLimit;
-				var lines = output.find('div div');
-				if (lines.length > limit) {
-					lines.slice(0, lines.length-limit+1).remove();
-				}
-			}
+            line_settings.finalize(div);
+            if (settings.outputLimit >= 0) {
+                var limit = settings.outputLimit === 0 ? self.rows() : settings.outputLimit;
+                var lines = output.find('div div');
+                if (lines.length > limit) {
+                    lines.slice(0, lines.length-limit+1).remove();
+                }
+            }
             scroll_to_bottom();
             return div;
         }
@@ -2410,7 +2409,7 @@
             if (self.data('terminal')) {
                 return self.data('terminal');
             }
-			if (self.length === 0) {
+            if (self.length === 0) {
                 throw 'Sorry, but terminal said that "' + self.selector +
                     '" is not valid selector!';
             }
@@ -2424,8 +2423,8 @@
             var terminal_id = terminals.length();
             var num_chars; // numer of chars in line
             var command_list = []; // for tab completion
-			var url;
-			var old_width, old_height;
+            var url;
+            var old_width, old_height;
             var dalyed_commands = []; // used when exec commands with pause
             var settings = $.extend({
                 name: self.selector,
@@ -2439,7 +2438,7 @@
                 cancelableAjax: true,
                 processArguments: true,
                 login: null,
-				outputLimit: -1,
+                outputLimit: -1,
                 tabcompletion: null,
                 historyFilter: null,
                 onInit: $.noop,
@@ -2703,7 +2702,7 @@
                     $.each(lines, function(i, line) {
                         draw_line.apply(null, line);
                     });
-					command_line.before(o);
+                    command_line.before(o);
                     scroll_to_bottom();
                     if ($.type(settings.onResize) === 'function' &&
                         (old_height !== height || old_width !== width)) {
@@ -2721,14 +2720,14 @@
                 // (including resize and scrolling)
                 // If the line is a function it will be called for every redraw.
                 echo: function(string, options) {
-					var settings = $.extend({
-						raw: false,
-						finalize: $.noop
-					}, options || {});
-					lines.push([string, settings]);
-					draw_line(string, settings);
-					on_scrollbar_show_resize();
-					return self;
+                    var settings = $.extend({
+                        raw: false,
+                        finalize: $.noop
+                    }, options || {});
+                    lines.push([string, settings]);
+                    draw_line(string, settings);
+                    on_scrollbar_show_resize();
+                    return self;
                 },
                 error: function(message, finalize) {
                     //echo red message
@@ -2846,30 +2845,30 @@
                         interpreters.pop();
                     }
                     initialize();
-					return self;
+                    return self;
                 },
                 purge: function() {
                     command_line.purge();
                     var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
                     $.Storage.remove(name + 'token');
                     $.Storage.remove(name + 'login');
-					return self;
+                    return self;
                 },
-				destroy: function() {
-					command_line.destroy().remove();
-					output.remove();
-					$(document).unbind('.terminal');
-					$(window).unbind('.terminal');
-					self.unbind('click, mousewheel');
-					self.removeData('terminal').removeClass('terminal');
-					if (settings.width) {
-						self.css('width', '');
-					}
-					if (settings.height) {
-						self.css('height', '');
-					}
-					return self;
-				}
+                destroy: function() {
+                    command_line.destroy().remove();
+                    output.remove();
+                    $(document).unbind('.terminal');
+                    $(window).unbind('.terminal');
+                    self.unbind('click, mousewheel');
+                    self.removeData('terminal').removeClass('terminal');
+                    if (settings.width) {
+                        self.css('width', '');
+                    }
+                    if (settings.height) {
+                        self.css('height', '');
+                    }
+                    return self;
+                }
             }, function(_, fun) {
                 // wrap all functions and display execptions
                 return function() {
@@ -2877,7 +2876,7 @@
                         return fun.apply(this, Array.prototype.slice.apply(arguments));
                     } catch(e) {
                         if (_ !== 'exec') { // exec catch by command
-							display_exception(e, 'TERMINAL');
+                            display_exception(e, 'TERMINAL');
                         }
                     }
                 };
@@ -2899,19 +2898,19 @@
             // ---------------------------------------------------------------------
             // INIT CODE
             // ---------------------------------------------------------------------
-			if (settings.width) {
+            if (settings.width) {
                 self.width(settings.width);
             }
             if (settings.height) {
                 self.height(settings.height);
             }
-			if (!navigator.userAgent.toLowerCase().match(/(webkit)[ \/]([\w.]+)/) &&
+            if (!navigator.userAgent.toLowerCase().match(/(webkit)[ \/]([\w.]+)/) &&
                 self[0].tagName.toLowerCase() == 'body') {
                 scroll_object = $('html');
             } else {
                 scroll_object = self;
             }
-			// register ajaxSend for cancel requests on CTRL+D
+            // register ajaxSend for cancel requests on CTRL+D
             self.ajaxSend(function(e, xhr, opt) {
                 requests.push(xhr);
             });
@@ -2935,7 +2934,7 @@
             */
             //$('<input type="text"/>').hide().focus().appendTo(self);
 
-			// before login event
+            // before login event
             if (settings.login && $.type(settings.onBeforeLogin) === 'function') {
                 try {
                     settings.onBeforeLogin(self);
@@ -3000,7 +2999,7 @@
                         },
                     greetings: settings.greetings
                 });
-				// CREATE COMMAND LINE
+                // CREATE COMMAND LINE
                 var command_line = $('<div/>').appendTo(self).cmd({
                     prompt: settings.prompt,
                     history: settings.history,
