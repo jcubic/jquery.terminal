@@ -560,7 +560,6 @@
         var data = $.Storage.get(name + 'commands');
         data = data ? new Function('return ' + data + ';')() : [];
         var pos = data.length-1;
-
         $.extend(this, {
             append: function(item) {
                 if (enabled) {
@@ -1273,7 +1272,7 @@
             }
         });
         // INIT
-        self.name(options.name || '');
+        self.name(options.name || options.prompt || '');
         prompt = options.prompt || '> ';
         draw_prompt();
         if (options.enabled === undefined || options.enabled === true) {
@@ -1819,6 +1818,7 @@
     // for canceling on CTRL+D
     var requests = [];
     var terminals = new Cycle(); //list of terminals global in this scope
+    var names = []; // stack if interpeter names
     $.fn.terminal = function(init_eval, options) {
         function haveScrollbars() {
             return self.get(0).scrollHeight > self.innerHeight();
@@ -2108,9 +2108,9 @@
                         settings.login(user, passwd, function(token) {
                             if (token) {
                                 var name = settings.name;
-                                name = (name ? '_' + name : '');
-                                $.Storage.set('token' + name, token);
-                                $.Storage.set('login' + name, user);
+                                name = (name ?  name + '_': '') + terminal_id + '_';
+                                $.Storage.set(name + 'token', token);
+                                $.Storage.set(name + 'login', user);
                                 //restore commands and run interpreter
                                 command_line.commands(commands);
                                 // move this to one function init.
@@ -2168,12 +2168,16 @@
         //function enable history, set prompt, run eval function
         function prepare_top_interpreter() {
             var interpreter = interpreters.top();
+            /*
             var name = '';
             if (interpreter.name !== undefined &&
                 interpreter.name !== '') {
                 name += interpreter.name + '_';
             }
-            name += terminal_id;
+            */
+            var name = settings.name + '_';
+            console.log(terminal_id);
+            name += terminal_id + (names.length ? '_' + names.join('_') : '');
             command_line.name(name);
             if (typeof interpreter.prompt == 'function') {
                 command_line.prompt(function(command) {
@@ -2835,11 +2839,11 @@
                 },
                 token: settings.login ? function() {
                     var name = settings.name;
-                    return $.Storage.get('token' + (name ? '_' + name : ''));
+                    return $.Storage.get((name ? name + '_': '') + terminal_id + '_token');
                 } : $.noop,
                 login_name: settings.login ? function() {
                     var name = settings.name;
-                    return $.Storage.get('login' + (name ? '_' + name : ''));
+                    return $.Storage.get((name ? name + '_': '') + terminal_id + '_login');
                 } : $.noop,
                 name: function() {
                     return interpreters.top().name;
@@ -2849,6 +2853,8 @@
                         !options) {
                         options = options || {};
                         options.name = options.name || prev_command;
+                        options.prompt = options.prompt || options.name + ' ';
+                        names.push(options.name);
                         interpreters.top().mask = command_line.mask();
                         if ($.type(_eval) === 'string') {
                             //_eval = make_json_rpc_eval_fun(options['eval'], self);
