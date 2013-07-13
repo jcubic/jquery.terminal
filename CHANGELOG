@@ -10,6 +10,7 @@
           Fix Tilda on Windows
           More ANSI codes
           Complete common string on TAB
+          Fix cancel ajax on CTRL+D when paused
 0.6.5     Finalize and raw options in echo
 0.6.4     Fix regexes, CMD+`, CMD+R, CMD+L on Mac, fix Resize if terminal is
           hidden, fix wrap ANSI formatting

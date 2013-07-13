@@ -2338,15 +2338,18 @@
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
             } else if (e.which === 68 && e.ctrlKey) { // CTRL+D
-                for (i=requests.length; i--;) {
-                    var r = requests[i];
-                    if (4 !== r.readyState) {
-                        try {
-                            r.abort();
-                        } catch(e) {
-                            self.error('error in aborting ajax');
+                if (requests.length) {
+                    for (i=requests.length; i--;) {
+                        var r = requests[i];
+                        if (4 !== r.readyState) {
+                            try {
+                                r.abort();
+                            } catch(e) {
+                                self.error('error in aborting ajax');
+                            }
                         }
                     }
+                    requests = [];
                 }
                 self.resume();
                 return false;
@@ -2911,7 +2914,7 @@
                 scroll_object = self;
             }
             // register ajaxSend for cancel requests on CTRL+D
-            self.ajaxSend(function(e, xhr, opt) {
+            $(document).bind('ajaxSend.terminal', function(e, xhr, opt) {
                 requests.push(xhr);
             });
             output = $('<div>').addClass('terminal-output').appendTo(self);
