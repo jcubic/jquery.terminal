@@ -23,7 +23,7 @@
     padding: 0;
     margin: 0;
     height: 1.3em;
-    margin-top: 3px;
+    /*margin-top: 3px; */
 }
 .terminal .terminal-output div div, .terminal .prompt {
     display: block;
@@ -42,7 +42,7 @@
     line-height: 14px;
 }
 .terminal-output > div {
-    padding-top: 3px;
+    /*padding-top: 3px;*/
 }
 .terminal .terminal-output div span {
     display: inline-block;

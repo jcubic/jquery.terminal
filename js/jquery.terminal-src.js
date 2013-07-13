@@ -1877,7 +1877,7 @@
                         message = e.message;
                     }
                 }
-                self.error('&#91;' + label + '&#93;: ' + message);
+				self.error('&#91;' + label + '&#93;: ' + message);
                 if (typeof e.fileName === 'string') {
                     //display filename and line which throw exeption
                     self.pause();
@@ -1920,14 +1920,14 @@
             return true;
         }
         function draw_line(string, options) {
-            var settings = $.extend({
+            var line_settings = $.extend({
                 raw: false,
                 finalize: $.noop
             }, options || {});
             string = $.type(string) === "function" ? string() : string;
             string = $.type(string) === "string" ? string : String(string);
             var div, i, len;
-            if (!settings.raw && (string.length > num_chars || string.match(/\n/))) {
+            if (!line_settings.raw && (string.length > num_chars || string.match(/\n/))) {
                 var array = $.terminal.split_equal($.terminal.from_ansi(string), num_chars);
 
                 div = $('<div></div>');
@@ -1935,18 +1935,29 @@
                     if (array[i] === '' || array[i] === '\r') {
                         div.append('<div>&nbsp;</div>');
                     } else {
-                        $('<div/>').html(settings.raw ? array[i] : $.terminal.format(array[i])).appendTo(div);
+						if (line_settings.raw) {
+							$('<div/>').html(array[i]);
+						} else {
+							$('<div/>').html($.terminal.format(array[i])).appendTo(div);
+						}
                     }
                 }
             } else {
-                if (!settings.raw) {
+                if (!line_settings.raw) {
                     string = $.terminal.format($.terminal.from_ansi(string));
                 }
                 div = $('<div/>').html('<div>' + string + '</div>');
             }
             output.append(div);
             div.width('100%');
-			settings.finalize(div);
+			line_settings.finalize(div);
+			if (settings.outputLimit >= 0) {
+				var limit = settings.outputLimit === 0 ? self.rows() : settings.outputLimit;
+				var lines = output.find('div div');
+				if (lines.length > limit) {
+					lines.slice(0, lines.length-limit+1).remove();
+				}
+			}
             scroll_to_bottom();
             return div;
         }
@@ -2428,6 +2439,7 @@
                 cancelableAjax: true,
                 processArguments: true,
                 login: null,
+				outputLimit: -1,
                 tabcompletion: null,
                 historyFilter: null,
                 onInit: $.noop,
@@ -2709,14 +2721,14 @@
                 // (including resize and scrolling)
                 // If the line is a function it will be called for every redraw.
                 echo: function(string, options) {
-                    var settings = $.extend({
-                        raw: false,
-                        finalize: $.noop
-                    }, options || {});
-                    lines.push([string, settings]);
-                    draw_line(string, settings);
-                    on_scrollbar_show_resize();
-                    return self;
+					var settings = $.extend({
+						raw: false,
+						finalize: $.noop
+					}, options || {});
+					lines.push([string, settings]);
+					draw_line(string, settings);
+					on_scrollbar_show_resize();
+					return self;
                 },
                 error: function(message, finalize) {
                     //echo red message
@@ -2867,7 +2879,6 @@
                         if (_ !== 'exec') { // exec catch by command
                             display_exception(e, 'TERMINAL');
                         }
-                        throw e;
                     }
                 };
             }));
