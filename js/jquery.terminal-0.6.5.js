@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 09:20:47 +0000
+ * Date: Sat, 13 Jul 2013 09:40:15 +0000
  */
 
 /*
@@ -625,6 +625,10 @@
     // -----------------------------------------------------------------------
     $.fn.cmd = function(options) {
         var self = this;
+        var maybe_data = self.data('cmd');
+        if (maybe_data) {
+            return maybe_data;
+        }
         self.addClass('cmd');
         self.append('<span class="prompt"></span><span></span>' +
                     '<span class="cursor">&nbsp;</span><span></span>');
@@ -1153,6 +1157,7 @@
                     name = string;
                     history = new History(string, historySize);
                     history_list.push(history);
+                    return self;
                 } else {
                     return name;
                 }
@@ -1162,6 +1167,7 @@
                     history_list[i].purge();
                 }
                 history_list = [];
+                return self;
             },
             history: function() {
                 return history;
@@ -1177,6 +1183,7 @@
                         options.onCommandChange(command);
                     }
                 }
+                return self;
             },
             insert: function(string, stay) {
                 if (position === command.length) {
@@ -1194,6 +1201,7 @@
                 if (typeof options.onCommandChange === 'function') {
                     options.onCommandChange(command);
                 }
+                return self;
             },
             get: function() {
                 return command;
@@ -1201,6 +1209,7 @@
             commands: function(commands) {
                 if (commands) {
                     options.commands = commands;
+                    return self;
                 } else {
                     return commands;
                 }
@@ -1208,6 +1217,7 @@
             destroy: function() {
                 $(document.documentElement).unbind('.commandline');
                 self.find('.prompt').remove();
+                return self;
             },
             prompt: function(user_prompt) {
                 if (user_prompt === undefined) {
@@ -1222,12 +1232,14 @@
                     draw_prompt();
                     // we could check if command is longer then numchars-new prompt
                     redraw();
+                    return self;
                 }
             },
             position: function(n) {
                 if (typeof n === 'number') {
                     position = n < 0 ? 0 : n > command.length ? command.length : n;
                     redraw();
+                    return self;
                 } else {
                     return position;
                 }
@@ -1255,6 +1267,7 @@
                     change_num_chars();
                 }
                 redraw();
+                return self;
             },
             enable: function() {
                 if (!enabled) {
@@ -1262,6 +1275,7 @@
                     self.everyTime(500, 'blink', blink);
                     enabled = true;
                 }
+                return self;
             },
             isenabled: function() {
                 return enabled;
@@ -1272,11 +1286,13 @@
                     cursor.removeClass('inverted');
                     enabled = false;
                 }
+                return self;
             },
             mask: function(display) {
                 if (typeof display === 'boolean') {
                     mask = display;
                     redraw();
+                    return self;
                 } else {
                     return mask;
                 }
@@ -1329,6 +1345,7 @@
             }
         }).keydown(keydown_event);
         // characters
+        self.data('cmd', self);
         return self;
     };
 
