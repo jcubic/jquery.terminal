@@ -1,3 +1,8 @@
+0.7.0     Add outputLimit, add method destroy
+          add utilities parseArguments, splitArguments, parseCommand and splitCommand
+          to $.terminal
+          Allow to overwrite, by user, parsing commands in object as eval
+          add method purge (that clear localStorage)
 0.6.5     Finalize and raw options in echo
 0.6.4     Fix regexes, CMD+`, CMD+R, CMD+L on Mac, fix Resize if terminal is
           hidden, fix wrap ANSI formatting
