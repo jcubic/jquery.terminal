@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 11:03:45 +0000
+ * Date: Sat, 13 Jul 2013 11:09:33 +0000
  */
 
 /*
@@ -1812,7 +1812,7 @@
     // -----------------------------------------------------------------------
     var version = '0.6.5';
     var copyright = '(c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
-    var version_strinzg = 'version ' + version;
+    var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
     var signatures = [
@@ -1938,7 +1938,6 @@
                         $('<div/>').html(settings.raw ? array[i] : $.terminal.format(array[i])).appendTo(div);
                     }
                 }
-
             } else {
                 if (!settings.raw) {
                     string = $.terminal.format($.terminal.from_ansi(string));

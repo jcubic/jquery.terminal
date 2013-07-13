@@ -1812,7 +1812,7 @@
     // -----------------------------------------------------------------------
     var version = '{{VER}}';
     var copyright = '(c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
-    var version_strinzg = 'version ' + version;
+    var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
     var signatures = [
@@ -1938,7 +1938,6 @@
                         $('<div/>').html(settings.raw ? array[i] : $.terminal.format(array[i])).appendTo(div);
                     }
                 }
-
             } else {
                 if (!settings.raw) {
                     string = $.terminal.format($.terminal.from_ansi(string));
@@ -1947,7 +1946,7 @@
             }
             output.append(div);
             div.width('100%');
-            settings.finalize(div);
+			settings.finalize(div);
             scroll_to_bottom();
             return div;
         }
