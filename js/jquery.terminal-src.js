@@ -612,6 +612,9 @@
             enable: function() {
                 enabled = true;
             },
+            purge: function() {
+                $.Storage.remove(name + 'commands');
+            },
             disable: function() {
                 enabled = false;
             }
@@ -1143,14 +1146,22 @@
                 }
             } */
         }
+        var history_list = [];
         $.extend(self, {
             name: function(string) {
                 if (string !== undefined) {
                     name = string;
                     history = new History(string, historySize);
+                    history_list.push(history);
                 } else {
                     return name;
                 }
+            },
+            purge: function() {
+                for (var i=history_list.length; i--;) {
+                    history_list[i].purge();
+                }
+                history_list = [];
             },
             history: function() {
                 return history;
@@ -2147,10 +2158,9 @@
                     throw e;
                 }
             }
-            var name = settings.name;
-            name = (name ? '_' + name : '');
-            $.Storage.remove('token' + name, null);
-            $.Storage.remove('login' + name, null);
+            var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
+            $.Storage.remove(name + 'token');
+            $.Storage.remove(name + 'login');
             if (settings.history) {
                 command_line.history().disable();
             }
@@ -2168,16 +2178,8 @@
         //function enable history, set prompt, run eval function
         function prepare_top_interpreter() {
             var interpreter = interpreters.top();
-            /*
-            var name = '';
-            if (interpreter.name !== undefined &&
-                interpreter.name !== '') {
-                name += interpreter.name + '_';
-            }
-            */
-            var name = settings.name + '_';
-            console.log(terminal_id);
-            name += terminal_id + (names.length ? '_' + names.join('_') : '');
+            var name = settings.name + '_' + terminal_id +
+                (names.length ? '_' + names.join('_') : '');
             command_line.name(name);
             if (typeof interpreter.prompt == 'function') {
                 command_line.prompt(function(command) {
@@ -2919,6 +2921,12 @@
                         interpreters.pop();
                     }
                     initialize();
+                },
+                purge: function() {
+                    command_line.purge();
+                    var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
+                    $.Storage.remove(name + 'token');
+                    $.Storage.remove(name + 'login');
                 }
             }, function(_, fun) {
                 // wrap all functions and display execptions
