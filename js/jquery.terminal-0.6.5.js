@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 09:06:20 +0000
+ * Date: Sat, 13 Jul 2013 09:08:21 +0000
  */
 
 /*
@@ -2881,6 +2881,7 @@
                     if (string !== undefined) {
                         echo_command(string);
                     }
+                    names.pop();
                     if (interpreters.top().name === settings.name) {
                         if (settings.login) {
                             logout();

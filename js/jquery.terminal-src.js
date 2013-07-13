@@ -2881,6 +2881,7 @@
                     if (string !== undefined) {
                         echo_command(string);
                     }
+                    names.pop();
                     if (interpreters.top().name === settings.name) {
                         if (settings.login) {
                             logout();
