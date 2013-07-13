@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 10:02:08 +0000
+ * Date: Sat, 13 Jul 2013 10:44:44 +0000
  */
 
 /*
@@ -1217,7 +1217,7 @@
 				self.stopTime('blink', blink);
                 self.find('.cursor').next().remove().end().prev().remove().end().remove();
                 self.find('.prompt, .clipboard').remove();
-				self.removeClass('cmd');
+				self.removeClass('cmd').removeData('cmd');
                 return self;
             },
             prompt: function(user_prompt) {
@@ -1309,12 +1309,6 @@
         // Keystrokes
         var object;
         $(document.documentElement || window).bind('keypress.cmd', function(e) {
-            /*
-            if (prevent_keypress) {
-                prevent_keypress = false;
-                return false;
-            }
-            */
             var result;
             if (e.ctrlKey && e.which === 99) { // CTRL+C
                 return true;
@@ -2009,17 +2003,6 @@
                     return;
                 }
                 command = getProcessedCommand(command);
-                /*
-                var method, params;
-                if (!command.match(/^[^ ]+ /)) {
-                    method = command;
-                    params = [];
-                } else {
-                    command = split_command_line(command);
-                    method = command[0];
-                    params = command.slice(1);
-                }
-                */
                 if (!settings.login || method === 'help') {
                     // allow to call help without token
                     service(command.name, command.args);
@@ -2359,57 +2342,6 @@
                 return false;
             }
         }
-        /*
-        // function split arguments and work with string like
-        // 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ asd
-        // if processArguments is true then it create regex and numbers and
-        // replace escape characters
-        function split_command_line(string) {
-            var re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])*\/|(\\ |[^ ])+|[\w-]+)/g;
-            return $.map(string.match(re), function(arg) {
-                if (arg[0] === "'" && arg[arg.length-1] === "'") {
-                    return arg.replace(/^'|'$/g, '');
-                } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
-                    arg = arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
-                    if (settings.processArguments) {
-                        return arg.replace(/\\\\|\\t|\\n/g, function(string) {
-                            if (string[1] === 't') {
-                                return '\t';
-                            } else if (string[1] === 'n') {
-                                return '\n';
-                            } else {
-                                return '\\';
-                            }
-                        }).replace(/\\x([0-9a-f]+)/gi, function(_, hex) {
-                            return String.fromCharCode(parseInt(hex, 16));
-                        }).replace(/\\0([0-7]+)/g, function(_, oct) {
-                            return String.fromCharCode(parseInt(oct, 8));
-                        });
-                    } else {
-                        return arg;
-                    }
-                } else {
-                    if (settings.processArguments) {
-                        if (arg[0] === '/' && arg[arg.length-1] == '/') {
-                            return new RegExp(arg.replace(/^\/|\/$/g, ''));
-                        } else if (arg.match(/^-?[0-9]+$/)) {
-                            return parseInt(arg, 10);
-                        } else if (arg.match(/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/)) {
-                            return parseFloat(arg);
-                        } else {
-                            return arg.replace(/\\ /g, ' ');
-                        }
-                    } else {
-                        if (arg[0] === '/' && arg[arg.length-1] == '/') {
-                            return arg;
-                        } else {
-                            return arg.replace(/\\ /g, ' ');
-                        }
-                    }
-                }
-            });
-        }
-        */
         // helper function
         function getProcessedCommand(command) {
             if ($.type(settings.processArguments) === 'function') {
@@ -2463,16 +2395,27 @@
                                    $.extend({name: self.selector}, options));
             });
         } else {
+            // terminal already exist
+            if (self.data('terminal')) {
+                return self.data('terminal');
+            }
+			if (self.length === 0) {
+                throw 'Sorry, but terminal said that "' + self.selector +
+                    '" is not valid selector!';
+            }
             // array of line objects:
             // - string (printed as-is)
             // - function (called whenever necessary, result is printed)
             // - array (expected form: [line, finalize function])
             // - anything else (cast to string when painted)
             var lines = [];
-            var output;
+            var output; // .terminal-output jquery object
             var terminal_id = terminals.length();
             var num_chars; // numer of chars in line
             var command_list = []; // for tab completion
+			var url;
+			var old_width, old_height;
+            var dalyed_commands = []; // used when exec commands with pause
             var settings = $.extend({
                 name: self.selector,
                 prompt: '> ',
@@ -2496,57 +2439,10 @@
                 keypress: $.noop,
                 keydown: $.noop
             }, options || {});
-
-            if (settings.width) {
-                self.width(settings.width);
-            }
-            if (settings.height) {
-                self.height(settings.height);
-            }
-            if (!navigator.userAgent.toLowerCase().match(/(webkit)[ \/]([\w.]+)/) &&
-                self[0].tagName.toLowerCase() == 'body') {
-                scroll_object = $('html');
-            } else {
-                scroll_object = self;
-            }
             var pause = !settings.enabled;
-            if (self.length === 0) {
-                throw 'Sorry, but terminal said that "' + self.selector +
-                    '" is not valid selector!';
-            }
-            // register ajaxSend for cancel requests on CTRL+D
-            self.ajaxSend(function(e, xhr, opt) {
-                requests.push(xhr);
-            });
-            // terminal already exist
-            if (self.data('terminal')) {
-                return self.data('terminal');
-            }
-            output = $('<div>').addClass('terminal-output').appendTo(self);
-            self.addClass('terminal').append('<div/>');
-            // keep focus in clipboard textarea in mobile
-            if (('ontouchstart' in window) || window.DocumentTouch &&
-                document instanceof DocumentTouch) {
-                self.click(function() {
-                    self.find('textarea').focus();
-                });
-                self.find('textarea').focus();
-            }
-            /*
-              self.bind('touchstart.touchScroll', function() {
-
-              });
-              self.bind('touchmove.touchScroll', function() {
-
-              });
-            */
-            //$('<input type="text"/>').hide().focus().appendTo(self);
-
             // ----------------------------------------------------------
             // TERMINAL METHODS
             // ----------------------------------------------------------
-            var old_width, old_height;
-            var dalyed_commands = [];
             $.extend(self, $.omap({
                 clear: function() {
                     output.html('');
@@ -2939,13 +2835,30 @@
                         interpreters.pop();
                     }
                     initialize();
+					return self;
                 },
                 purge: function() {
                     command_line.purge();
                     var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
                     $.Storage.remove(name + 'token');
                     $.Storage.remove(name + 'login');
-                }
+					return self;
+                },
+				destroy: function() {
+					command_line.destroy().remove();
+					output.remove();
+					$(document).unbind('.terminal');
+					$(window).unbind('.terminal');
+					self.unbind('click, mousewheel');
+					self.removeData('terminal').removeClass('terminal');
+					if (settings.width) {
+						self.css('width', '');
+					}
+					if (settings.height) {
+						self.css('height', '');
+					}
+					return self;
+				}
             }, function(_, fun) {
                 // wrap all functions and display execptions
                 return function() {
@@ -2976,7 +2889,43 @@
             // ---------------------------------------------------------------------
             // INIT CODE
             // ---------------------------------------------------------------------
-            var url;
+			if (settings.width) {
+                self.width(settings.width);
+            }
+            if (settings.height) {
+                self.height(settings.height);
+            }
+			if (!navigator.userAgent.toLowerCase().match(/(webkit)[ \/]([\w.]+)/) &&
+                self[0].tagName.toLowerCase() == 'body') {
+                scroll_object = $('html');
+            } else {
+                scroll_object = self;
+            }
+			// register ajaxSend for cancel requests on CTRL+D
+            self.ajaxSend(function(e, xhr, opt) {
+                requests.push(xhr);
+            });
+            output = $('<div>').addClass('terminal-output').appendTo(self);
+            self.addClass('terminal');
+            // keep focus in clipboard textarea in mobile
+            if (('ontouchstart' in window) || window.DocumentTouch &&
+                document instanceof DocumentTouch) {
+                self.click(function() {
+                    self.find('textarea').focus();
+                });
+                self.find('textarea').focus();
+            }
+            /*
+              self.bind('touchstart.touchScroll', function() {
+
+              });
+              self.bind('touchmove.touchScroll', function() {
+
+              });
+            */
+            //$('<input type="text"/>').hide().focus().appendTo(self);
+
+			// before login event
             if (settings.login && $.type(settings.onBeforeLogin) === 'function') {
                 try {
                     settings.onBeforeLogin(self);
@@ -2985,7 +2934,6 @@
                     throw e;
                 }
             }
-
             if ($.type(init_eval) === 'string') {
                 url = init_eval; //url variable is use when making login function
                 init_eval = make_json_rpc_eval_fun(init_eval, self);
@@ -3042,7 +2990,8 @@
                         },
                     greetings: settings.greetings
                 });
-                var command_line = self.find('.terminal-output').next().cmd({
+				// CREATE COMMAND LINE
+                var command_line = $('<div/>').appendTo(self).cmd({
                     prompt: settings.prompt,
                     history: settings.history,
                     historyFilter: settings.historyFilter,
@@ -3072,13 +3021,13 @@
                 } else {
                     self.disable();
                 }
-                $(document).click(function(e) {
+                $(document).bind('click.terminal', function(e) {
                     if (!$(e.target).parents().hasClass('terminal') &&
                         settings.onBlur(self) !== false) {
                         self.disable();
                     }
                 });
-                $(window).resize(function() {
+                $(window).bind('resize.terminal', function() {
                     if (self.is(':visible')) {
                         var width = self.width();
                         var height = self.height();
