@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 09:40:15 +0000
+ * Date: Sat, 13 Jul 2013 10:02:08 +0000
  */
 
 /*
@@ -692,7 +692,6 @@
                 }
             }
         }
-
         function change_num_chars() {
             var W = self.width();
             var w = cursor.innerWidth();
@@ -932,9 +931,8 @@
                     // need to check for alt first
                     //if (e.which === 18) { // press ALT
                     if (e.which === 68) { //ALT+D
-                        var regex  = /[^ ]+ |[^ ]+$/;
                         self.set(command.slice(0, position) +
-                                 command.slice(position).replace(regex, ''),
+                                 command.slice(position).replace(/[^ ]+ |[^ ]+$/, ''),
                                  true);
                         // chrome jump to address bar
                         return false;
@@ -1215,8 +1213,11 @@
                 }
             },
             destroy: function() {
-                $(document.documentElement).unbind('.commandline');
-                self.find('.prompt').remove();
+                $(document.documentElement || window).unbind('.cmd');
+				self.stopTime('blink', blink);
+                self.find('.cursor').next().remove().end().prev().remove().end().remove();
+                self.find('.prompt, .clipboard').remove();
+				self.removeClass('cmd');
                 return self;
             },
             prompt: function(user_prompt) {
@@ -1307,7 +1308,7 @@
         }
         // Keystrokes
         var object;
-        $(document.documentElement || window).keypress(function(e) {
+        $(document.documentElement || window).bind('keypress.cmd', function(e) {
             /*
             if (prevent_keypress) {
                 prevent_keypress = false;
@@ -1343,7 +1344,7 @@
             } else {
                 return result;
             }
-        }).keydown(keydown_event);
+        }).bind('keydown.cmd', keydown_event);
         // characters
         self.data('cmd', self);
         return self;
