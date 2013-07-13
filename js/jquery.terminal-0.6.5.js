@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 10:44:44 +0000
+ * Date: Sat, 13 Jul 2013 10:50:22 +0000
  */
 
 /*
@@ -2687,12 +2687,11 @@
                     var height = self.height();
                     num_chars = get_num_chars();
                     command_line.resize(num_chars);
-                    var o = output.detach();
-                    output.html('');
+                    var o = output.empty().detach();
                     $.each(lines, function(i, line) {
                         draw_line.apply(null, line);
                     });
-                    self.prepend(o);
+					command_line.before(o);
                     scroll_to_bottom();
                     if ($.type(settings.onResize) === 'function' &&
                         (old_height !== height || old_width !== width)) {
