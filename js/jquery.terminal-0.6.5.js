@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 12:58:57 +0000
+ * Date: Sat, 13 Jul 2013 18:01:49 +0000
  */
 
 /*
@@ -1479,8 +1479,8 @@
             // don't escape entities
             return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;|[^=]+=)/, '&amp;')
                       .replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                        // I don't think that it find \n
-                      .replace(/\n/g, '<br/>')
+                       // I don't think that it find \n
+                       //.replace(/\n/g, '<br/>')
                       .replace(/ /g, '&nbsp;')
                       .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
         },
@@ -2877,7 +2877,7 @@
                         return fun.apply(this, Array.prototype.slice.apply(arguments));
                     } catch(e) {
                         if (_ !== 'exec') { // exec catch by command
-                            display_exception(e, 'TERMINAL');
+							display_exception(e, 'TERMINAL');
                         }
                     }
                 };
