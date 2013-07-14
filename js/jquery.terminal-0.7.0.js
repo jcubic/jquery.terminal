@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 19:55:28 +0000
+ * Date: Sun, 14 Jul 2013 08:40:29 +0000
  */
 
 /*
@@ -2959,6 +2959,8 @@
                     }
                 }
                 init_eval = make_eval_from_object(init_eval);
+            } else if ($.type(init_eval) === 'undefined') {
+                init_eval = $.noop;
             } else if ($.type(init_eval) !== 'function') {
                 throw 'Unknow object "' + String(init_eval) + '" passed as eval';
             }

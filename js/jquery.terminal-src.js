@@ -2959,6 +2959,8 @@
                     }
                 }
                 init_eval = make_eval_from_object(init_eval);
+            } else if ($.type(init_eval) === 'undefined') {
+                init_eval = $.noop;
             } else if ($.type(init_eval) !== 'function') {
                 throw 'Unknow object "' + String(init_eval) + '" passed as eval';
             }
