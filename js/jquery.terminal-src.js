@@ -880,15 +880,15 @@
         var last_command;
         var draw_prompt = (function() {
             var prompt_node = self.find('.prompt');
+            function set(prompt) {
+                prompt_len = skipFormattingCount(prompt);
+                prompt_node.html($.terminal.format($.terminal.encode(prompt)));
+            }
             return function() {
                 if (typeof prompt === 'string') {
-                    prompt_len = skipFormattingCount(prompt);
-                    prompt_node.html($.terminal.format(prompt));
+                    set(prompt);
                 } else {
-                    prompt(function(string) {
-                        prompt_len = skipFormattingCount(string);
-                        prompt_node.html($.terminal.format(string));
-                    });
+                    prompt(set);
                 }
                 //change_num_chars();
             };
@@ -1430,7 +1430,7 @@
                         if (line[j] === '&') { // treat entity as one character
                             var m = line.substring(j).match(/^(&[^;]+;)/);
                             if (!m) {
-                                throw "Unclosed html entity at char " + j;
+                                throw "Unclosed html entity at char " + (j+1) + ' at line ' + (i+1);
                             }
                             j+=m[1].length-2; // because contine add 1 to j
                             // if entity is at the end there is no next loop - issue #77
@@ -1486,7 +1486,6 @@
         },
         format: function(str) {
             if (typeof str === 'string') {
-                str = $.terminal.encode(str);
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splited = str.split(format_split_re);
                 if (splited && splited.length > 1) {
@@ -1813,9 +1812,9 @@
             term.echo('$.terminal.format');
             assets($.terminal.format(string) === '<span style="font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;text-shadow:0 0 5px #fff;background-color:#000" data-text="Foo">Foo</span><span style="font-style:italic;" class="foo" data-text="Bar">Bar</span><span style="text-decoration:underline line-through overline;" data-text="Baz">Baz</span>', '\tformatting');
             string = 'http://terminal.jcubic.pl/examples.php https://www.google.com/?q=jquery%20terminal';
-            assets($.terminal.format(string) === '<a target="_blank" href="http://terminal.jcubic.pl/examples.php">http://terminal.jcubic.pl/examples.php</a>&nbsp;<a target="_blank" href="https://www.google.com/?q=jquery%20terminal">https://www.google.com/?q=jquery%20terminal</a>', '\turls');
+            assets($.terminal.format(string) === '<a target="_blank" href="http://terminal.jcubic.pl/examples.php">http://terminal.jcubic.pl/examples.php</a> <a target="_blank" href="https://www.google.com/?q=jquery%20terminal">https://www.google.com/?q=jquery%20terminal</a>', '\turls');
             string = 'foo@bar.com baz.quux@example.com';
-            assets($.terminal.format(string) === '<a href="mailto:foo@bar.com">foo@bar.com</a>&nbsp;<a href="mailto:baz.quux@example.com">baz.quux@example.com</a>', '\temails');
+            assets($.terminal.format(string) === '<a href="mailto:foo@bar.com">foo@bar.com</a> <a href="mailto:baz.quux@example.com">baz.quux@example.com</a>', '\temails');
             string = '-_-[[biugs;#fff;#000]Foo]-_-[[i;;;foo]Bar]-_-[[ous;;]Baz]-_-';
             assets($.terminal.strip(string) === '-_-Foo-_-Bar-_-Baz-_-', '$.terminal.strip');
             string = '[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sed dolor nisl, in suscipit justo. Donec a enim et est porttitor semper at vitae augue. Proin at nulla at dui mattis mattis. Nam a volutpat ante. Aliquam consequat dui eu sem convallis ullamcorper. Nulla suscipit, massa vitae suscipit ornare, tellus] est [[b;;#f00]consequat nunc, quis blandit elit odio eu arcu. Nam a urna nec nisl varius sodales. Mauris iaculis tincidunt orci id commodo. Aliquam] non magna quis [[i;;]tortor malesuada aliquam] eget ut lacus. Nam ut vestibulum est. Praesent volutpat tellus in eros dapibus elementum. Nam laoreet risus non nulla mollis ac luctus [[ub;#fff;]felis dapibus. Pellentesque mattis elementum augue non sollicitudin. Nullam lobortis fermentum elit ac mollis. Nam ac varius risus. Cras faucibus euismod nulla, ac auctor diam rutrum sit amet. Nulla vel odio erat], ac mattis enim.';
@@ -1981,6 +1980,9 @@
             string = $.type(string) === "function" ? string() : string;
             string = $.type(string) === "string" ? string : String(string);
             var div, i, len;
+            if (!line_settings.raw) {
+                string = $.terminal.encode(string);
+            }
             if (!line_settings.raw && (string.length > num_chars || string.match(/\n/))) {
                 var array = $.terminal.split_equal($.terminal.from_ansi(string), num_chars);
 
