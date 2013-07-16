@@ -1,3 +1,6 @@
+0.7.1     Add tests
+          terminal without eval
+          Fix issue with umpersand (unenclosed entinity) in multiline
 0.7.0     Add outputLimit, add method destroy
           add utilities parseArguments, splitArguments, parseCommand and splitCommand
           to $.terminal
