@@ -1831,7 +1831,6 @@
                 }
                 assets(success, '\tsplit ' + cols[i]);
             }
-            assets($.terminal.active() === term, '$.terminal.active');
         }
     };
 
