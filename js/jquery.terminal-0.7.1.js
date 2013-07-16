@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.7.0
+ *|           \/              /____/                              version 0.7.1
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 16 Jul 2013 17:24:35 +0000
+ * Date: Tue, 16 Jul 2013 19:24:10 +0000
  */
 
 /*
@@ -1430,7 +1430,9 @@
                         if (line[j] === '&') { // treat entity as one character
                             var m = line.substring(j).match(/^(&[^;]+;)/);
                             if (!m) {
-                                throw "Unclosed html entity at char " + (j+1) + ' at line ' + (i+1);
+                                // should never happen if used by terminal, because
+                                // it always call $.terminal.encode before this function
+                                throw "Unclosed html entity in line " + (i+1) + ' at char ' + (j+1);
                             }
                             j+=m[1].length-2; // because contine add 1 to j
                             // if entity is at the end there is no next loop - issue #77
@@ -1502,7 +1504,7 @@
                                                                     data_text,
                                                                     text) {
                                 if (text === '') {
-                                    return '<span>&nbsp;</span>';
+                                    return ''; //'<span>&nbsp;</span>';
                                 }
                                 text = text.replace(/\\]/g, ']');
                                 var style_str = '';
@@ -1866,7 +1868,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.7.0';
+    var version = '0.7.1';
     var copyright = '(c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right

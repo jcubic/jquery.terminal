@@ -1430,7 +1430,9 @@
                         if (line[j] === '&') { // treat entity as one character
                             var m = line.substring(j).match(/^(&[^;]+;)/);
                             if (!m) {
-                                throw "Unclosed html entity at char " + (j+1) + ' at line ' + (i+1);
+                                // should never happen if used by terminal, because
+                                // it always call $.terminal.encode before this function
+                                throw "Unclosed html entity in line " + (i+1) + ' at char ' + (j+1);
                             }
                             j+=m[1].length-2; // because contine add 1 to j
                             // if entity is at the end there is no next loop - issue #77
@@ -1502,7 +1504,7 @@
                                                                     data_text,
                                                                     text) {
                                 if (text === '') {
-                                    return '<span>&nbsp;</span>';
+                                    return ''; //'<span>&nbsp;</span>';
                                 }
                                 text = text.replace(/\\]/g, ']');
                                 var style_str = '';
