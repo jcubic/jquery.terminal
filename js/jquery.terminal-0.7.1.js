@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 16 Jul 2013 20:19:24 +0000
+ * Date: Tue, 16 Jul 2013 21:00:50 +0000
  */
 
 /*
@@ -1945,7 +1945,7 @@
     // :: Create eval function from Object if value is object it will create
     // :: nested interpterers
     // -----------------------------------------------------------------------
-    function make_eval_from_object(object) {
+    function make_object_eval_fun(object) {
         // function that maps commands to object methods
         // it keeps terminal context
         return function(command, terminal) {
@@ -1966,7 +1966,7 @@
                             commands.push(m);
                         }
                     }
-                    val = make_eval_from_object(val);
+                    val = make_object_eval_fun(val);
                 }
                 terminal.push(val, {
                     prompt: command.name + '> ',
@@ -2509,8 +2509,9 @@
                         }
                     }
                     requests = [];
+                    // only resume if there are ajax calls
+                    self.resume();
                 }
-                self.resume();
                 return false;
             }
         }
@@ -2551,10 +2552,13 @@
                 name: self.selector
             }, $.terminal.defaults, options || {});
             var pause = !settings.enabled;
-            // ----------------------------------------------------------
+            // -----------------------------------------------------------------------
             // TERMINAL METHODS
-            // ----------------------------------------------------------
+            // -----------------------------------------------------------------------
             $.extend(self, $.omap({
+                // -----------------------------------------------------------------------
+                // :: Clear the output
+                // -----------------------------------------------------------------------
                 clear: function() {
                     output.html('');
                     command_line.set('');
@@ -2568,6 +2572,9 @@
                     self.attr({ scrollTop: 0});
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Return object that can be use with import_view to restore the state
+                // -----------------------------------------------------------------------
                 export_view: function() {
                     return {
                         prompt: self.get_prompt(),
@@ -2576,6 +2583,9 @@
                         lines: lines.slice(0)
                     };
                 },
+                // -----------------------------------------------------------------------
+                // :: Restore the state of prevoius exported view
+                // -----------------------------------------------------------------------
                 import_view: function(view) {
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
@@ -2584,6 +2594,11 @@
                     self.resize();
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Exectue a command, it will handle commands that do AJAX calls
+                // :: and have delays, if second argument is set to true it will not
+                // :: echo executed command
+                // -----------------------------------------------------------------------
                 exec: function(command, silent) {
                     if (pause) {
                         dalyed_commands.push([command, silent]);
@@ -2592,16 +2607,28 @@
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Return commands function from top interpreter
+                // -----------------------------------------------------------------------
                 commands: function() {
                     return interpreters.top().eval;
                 },
+                // -----------------------------------------------------------------------
+                // :: Show user greetings or terminal sugnature
+                // -----------------------------------------------------------------------
                 greetings: function() {
                     show_greetings();
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Return true if terminal is pased false otherwise
+                // -----------------------------------------------------------------------
                 paused: function() {
                     return pause;
                 },
+                // -----------------------------------------------------------------------
+                // :: Pause the terminal, it should be used for ajax calls
+                // -----------------------------------------------------------------------
                 pause: function() {
                     if (command_line) {
                         pause = true;
@@ -2610,6 +2637,9 @@
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Resume previous paused terminal
+                // -----------------------------------------------------------------------
                 resume: function() {
                     if (command_line) {
                         self.enable();
@@ -2624,15 +2654,27 @@
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Return number of characters that fit into width of the terminal
+                // -----------------------------------------------------------------------
                 cols: function() {
                     return num_chars;
                 },
+                // -----------------------------------------------------------------------
+                // :: Return number of lines that fit into the height of the therminal
+                // -----------------------------------------------------------------------
                 rows: function() {
                     return Math.floor(self.height() / self.find('.cursor').height());
                 },
+                // -----------------------------------------------------------------------
+                // :: Return History object
+                // -----------------------------------------------------------------------
                 history: function() {
                     return command_line.history();
                 },
+                // -----------------------------------------------------------------------
+                // :: Switch to next terminal
+                // -----------------------------------------------------------------------
                 next: function() {
                     if (terminals.length() === 1) {
                         return self;
@@ -2660,7 +2702,11 @@
                         }
                     }
                 },
-                // silent used so events are not fired on init
+                // -----------------------------------------------------------------------
+                // :: Make terminal in focus or blur depend on first argument if there
+                // :: is more then one terminal it will switch to next one, if second
+                // :: argument is set to true the events will be not fired used on init
+                // -----------------------------------------------------------------------
                 focus: function(toggle, silent) {
                     self.oneTime(1, function() {
                         if (terminals.length() === 1) {
@@ -2702,11 +2748,13 @@
                                 terminals.set(self);
                                 self.enable();
                             }
-
                         }
                     });
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Enable terminal
+                // -----------------------------------------------------------------------
                 enable: function() {
                     if (num_chars === undefined) {
                         //enabling first time
@@ -2720,6 +2768,9 @@
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Disable terminal
+                // -----------------------------------------------------------------------
                 disable: function() {
                     if (command_line) {
                         pause = true;
@@ -2727,9 +2778,15 @@
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: return true if terminal is enabled
+                // -----------------------------------------------------------------------
                 enabled: function() {
                     return pause;
                 },
+                // -----------------------------------------------------------------------
+                // :: Return terminal signature depending on the size of the terminal
+                // -----------------------------------------------------------------------
                 signature: function() {
                     var cols = self.cols();
                     var i = cols < 15 ? null : cols < 35 ? 0 : cols < 55 ? 1 : cols < 64 ? 2 : cols < 75 ? 3 : 4;
@@ -2739,13 +2796,21 @@
                         return '';
                     }
                 },
+                // -----------------------------------------------------------------------
+                // :: Return version number
+                // -----------------------------------------------------------------------
                 version: function() {
                     return version;
                 },
-                /* COMMAND LINE FUNCTIONS */
+                // -----------------------------------------------------------------------
+                // :: Return current command entered by terminal
+                // -----------------------------------------------------------------------
                 get_command: function() {
                     return command_line.get();
                 },
+                // -----------------------------------------------------------------------
+                // :: Insert text into command line after the cursor
+                // -----------------------------------------------------------------------
                 insert: function(string) {
                     if (typeof string === 'string') {
                         command_line.insert(string);
@@ -2754,6 +2819,9 @@
                         throw "insert function argument is not a string";
                     }
                 },
+                // -----------------------------------------------------------------------
+                // :: Set the prompt of the command line
+                // -----------------------------------------------------------------------
                 set_prompt: function(prompt) {
                     if (validate('prompt', prompt)) {
                         if (typeof prompt == 'function') {
@@ -2767,28 +2835,43 @@
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Return the prompt used by terminal
+                // -----------------------------------------------------------------------
                 get_prompt: function() {
                     return interpreters.top().prompt;
                     // command_line.prompt(); - can be a wrapper
                     //return command_line.prompt();
                 },
+                // -----------------------------------------------------------------------
+                // :: Change the command line to the new one
+                // -----------------------------------------------------------------------
                 set_command: function(command) {
                     command_line.set(command);
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Enable or Disable mask depedning on the passed argument
+                // -----------------------------------------------------------------------
                 set_mask: function(display) {
                     command_line.mask(display);
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Return ouput of the terminal as text
+                // -----------------------------------------------------------------------
                 get_output: function(raw) {
                     if (raw) {
                         return lines;
                     } else {
-                        return $.map(lines, function(i, item) {
-                            return typeof item == 'function' ? item() : item;
+                        return $.map(lines, function(item) {
+                            return typeof item[0] == 'function' ? item[0]() : item[0];
                         }).join('\n');
                     }
                 },
+                // -----------------------------------------------------------------------
+                // :: Recalculate and redraw averything
+                // -----------------------------------------------------------------------
                 resize: function(width, height) {
                     if (width && height) {
                         self.width(width);
@@ -2804,7 +2887,7 @@
                     });
                     command_line.before(o);
                     scroll_to_bottom();
-                    if ($.type(settings.onResize) === 'function' &&
+                    if (typeof settings.onResize === 'function' &&
                         (old_height !== height || old_width !== width)) {
                         settings.onResize(self);
                     }
@@ -2814,11 +2897,13 @@
                     }
                     return self;
                 },
-                // Print data to terminal output. If a second argument is
-                // supplied it is called with the container div that holds the
-                // output (as a jquery object) every time the output is printed
-                // (including resize and scrolling)
-                // If the line is a function it will be called for every redraw.
+                // -----------------------------------------------------------------------
+                // :: Print data to terminal output. It can have two options
+                // :: a function that is called with the container div that holds the
+                // :: output (as a jquery object) every time the output is printed
+                // :: (including resize and scrolling)
+                // :: If the line is a function it will be called for every redraw.
+                // -----------------------------------------------------------------------
                 echo: function(string, options) {
                     var settings = $.extend({
                         raw: false,
@@ -2829,12 +2914,17 @@
                     on_scrollbar_show_resize();
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: echo red text
+                // -----------------------------------------------------------------------
                 error: function(message, finalize) {
-                    //echo red message
                     //quick hack to fix trailing back slash
                     return self.echo('[[;#f00;]' + $.terminal.escape_brackets(message).
                                      replace(/\\$/, '&#92;') + ']', finalize);
                 },
+                // -----------------------------------------------------------------------
+                // :: Scroll Div that hold the terminal
+                // -----------------------------------------------------------------------
                 scroll: function(amount) {
                     var pos;
                     amount = Math.round(amount);
@@ -2854,6 +2944,10 @@
                         return self;
                     }
                 },
+                // -----------------------------------------------------------------------
+                // :: Exit all interpreters and logout the function will throw exception
+                // :: if there is no login provided
+                // -----------------------------------------------------------------------
                 logout: settings.login ? function() {
                     while (interpreters.size() > 1) {
                         interpreters.pop();
@@ -2863,18 +2957,31 @@
                 } : function() {
                     throw "You don't have login function";
                 },
+                // -----------------------------------------------------------------------
+                // :: Function return token returned by callback function in login
+                // :: function it do nothing (return undefined) if there is no login
+                // -----------------------------------------------------------------------
                 token: settings.login ? function() {
                     var name = settings.name;
                     return $.Storage.get((name ? name + '_': '') + terminal_id + '_token');
                 } : $.noop,
+                // -----------------------------------------------------------------------
+                // :: Function return Login name entered by the user
+                // -----------------------------------------------------------------------
                 login_name: settings.login ? function() {
                     var name = settings.name;
                     return $.Storage.get((name ? name + '_': '') + terminal_id + '_login');
                 } : $.noop,
+                // -----------------------------------------------------------------------
+                // :: Function return name of current interpreter
+                // -----------------------------------------------------------------------
                 name: function() {
                     return interpreters.top().name;
                 },
-                push: function(_eval, options) {
+                // -----------------------------------------------------------------------
+                // :: Push new interenter on the Stack,
+                // -----------------------------------------------------------------------
+                push: function(interpreter, options) {
                     if (options && (!options.prompt || validate('prompt', options.prompt)) ||
                         !options) {
                         options = options || {};
@@ -2882,27 +2989,30 @@
                         options.prompt = options.prompt || options.name + ' ';
                         names.push(options.name);
                         interpreters.top().mask = command_line.mask();
-                        if ($.type(_eval) === 'string') {
-                            //_eval = make_json_rpc_eval_fun(options['eval'], self);
-                            _eval = make_json_rpc_eval_fun(_eval, self);
-                        } else if ($.type(_eval) === 'object') {
+                        var type = typeof interpreter;
+                        if (type === 'string') {
+                            interpreter = make_json_rpc_eval_fun(interpreter, self);
+                        } else if (type === 'object') {
                             var commands = [];
-                            for (var name in _eval) {
+                            for (var name in interpreter) {
                                 commands.push(name);
                             }
-                            _eval = make_eval_from_object(_eval);
+                            interpreter = make_object_eval_fun(interpreter);
                             options = options || {};
                             options['completion'] = function(term, string, callback) {
                                 callback(commands);
                             };
-                        } else if ($.type(_eval) != 'function') {
+                        } else if (type !== 'function') {
                             throw "Invalid value as eval in push command";
                         }
-                        interpreters.push($.extend({'eval': _eval}, options));
+                        interpreters.push($.extend({'eval': interpreter}, options));
                         prepare_top_interpreter();
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Remove last Interpreter from the Stack
+                // -----------------------------------------------------------------------
                 pop: function(string) {
                     if (string !== undefined) {
                         echo_command(string);
@@ -2936,9 +3046,15 @@
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Return how deep you are in nested interepter
+                // -----------------------------------------------------------------------
                 level: function() {
                     return interpreters.size();
                 },
+                // -----------------------------------------------------------------------
+                // :: Reinitialize the terminal
+                // -----------------------------------------------------------------------
                 reset: function() {
                     self.clear();
                     while(interpreters.size() > 1) {
@@ -2947,6 +3063,10 @@
                     initialize();
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Remove all local storage left by terminal, it will not logout you
+                // :: until you refresh the browser
+                // -----------------------------------------------------------------------
                 purge: function() {
                     command_line.purge();
                     var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
@@ -2954,6 +3074,11 @@
                     $.Storage.remove(name + 'login');
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Remove all events and DOM nodes left by terminal, it will not purge
+                // :: terminal so you will have the same state when you refresh the
+                // :: browser
+                // -----------------------------------------------------------------------
                 destroy: function() {
                     command_line.destroy().remove();
                     output.remove();
@@ -3055,7 +3180,7 @@
                         command_list.push(i);
                     }
                 }
-                init_eval = make_eval_from_object(init_eval);
+                init_eval = make_object_eval_fun(init_eval);
             } else if ($.type(init_eval) === 'undefined') {
                 init_eval = $.noop;
             } else if ($.type(init_eval) !== 'function') {
