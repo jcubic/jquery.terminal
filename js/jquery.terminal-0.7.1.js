@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 16 Jul 2013 21:00:50 +0000
+ * Date: Tue, 16 Jul 2013 21:29:04 +0000
  */
 
 /*
@@ -1984,17 +1984,22 @@
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        var cursor = terminal.find('.cursor');
-        var cur_width = cursor.width();
-        var result = Math.floor(terminal.width() / cur_width);
+        // Create fake terminal to calcualte the width of one character
+        // this will make terminal work if terminal div is not added to the
+        // DOM at init like with:
+        // $('<div/>').terminal().echo('foo bar').appendTo('body');
+        var temp = $('<div class="terminal"><span>&nbsp;</span></div>').
+            appendTo('body');
+        var width = temp.find('span').width();
+        temp.remove();
+        var result = Math.floor(terminal.width() / width);
         if (have_scrollbars(terminal)) {
             var SCROLLBAR_WIDTH = 20;
             // assume that scrollbars are 20px - in my Laptop with
             // Linux/Chrome they are 16px
             var margins = terminal.innerWidth() - terminal.width();
-            result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (cur_width-1));
+            result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
         }
-
         return result;
     }
     // -----------------------------------------------------------------------
