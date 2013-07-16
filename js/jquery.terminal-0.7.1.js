@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 16 Jul 2013 19:24:10 +0000
+ * Date: Tue, 16 Jul 2013 20:19:24 +0000
  */
 
 /*
@@ -885,12 +885,14 @@
                 prompt_node.html($.terminal.format($.terminal.encode(prompt)));
             }
             return function() {
-                if (typeof prompt === 'string') {
+                switch (typeof prompt) {
+                case 'string':
                     set(prompt);
-                } else {
+                    break;
+                case 'function':
                     prompt(set);
+                    break;
                 }
-                //change_num_chars();
             };
         })();
         // paste content to terminal using hidden textarea
@@ -1075,10 +1077,11 @@
                         return true;
                     }
                     if (e.metaKey) {
-                        if(e.which === 82) // CMD+r page reload in Chrome Mac
+                        if(e.which === 82) { // CMD+r page reload in Chrome Mac
                             return true;
-                        if(e.which === 76)
+                        } else if(e.which === 76) {
                             return true; // CMD+l jump into Ominbox on Chrome Mac
+                        }
                     }
                     if (e.shiftKey) { // CTRL+SHIFT+??
                         if (e.which === 84) {
@@ -1866,6 +1869,141 @@
     };
 
     // -----------------------------------------------------------------------
+    function is_scrolled_into_view(elem) {
+        var docViewTop = $(window).scrollTop();
+        var docViewBottom = docViewTop + $(window).height();
+
+        var elemTop = $(elem).offset().top;
+        var elemBottom = elemTop + $(elem).height();
+
+        return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
+    }
+    // -----------------------------------------------------------------------
+    // :: helper function
+    // -----------------------------------------------------------------------
+    function get_processed_command(command) {
+        if (typeof settings.processArguments === 'function') {
+            return processCommand(command, settings.processArguments);
+        } else if (settings.processArguments) {
+            return $.terminal.parseCommand(command);
+        } else {
+            return $.terminal.splitCommand(command);
+        }
+    }
+    // -----------------------------------------------------------------------
+    // :: Create Eval function from url string
+    // -----------------------------------------------------------------------
+    function make_json_rpc_eval_fun(url, terminal) {
+        var id = 1;
+        var service = function(method, params) {
+            terminal.pause();
+            $.jrpc(url, id++, method, params, function(json) {
+                if (!json.error) {
+                    if (typeof json.result === 'string') {
+                        terminal.echo(json.result);
+                    } else if (json.result instanceof Array) {
+                        terminal.echo($.map(json.result, function(object) {
+                            return $.json_stringify(object);
+                        }).join(' '));
+                    } else if (typeof json.result === 'object') {
+                        terminal.echo($.json_stringify(json.result));
+                    }
+                } else {
+                    terminal.error('&#91;RPC&#93; ' + json.error.message);
+                }
+                terminal.resume();
+            }, function(xhr, status, error) {
+                if (status !== 'abort') {
+                    terminal.error('&#91;AJAX&#93; ' + status +
+                                   ' - Server reponse is: \n' +
+                                   xhr.responseText);
+                }
+                terminal.resume();
+            });
+        };
+        //this is eval function
+        return function(command, terminal) {
+            if (command === '') {
+                return;
+            }
+            command = get_processed_command(command);
+            if (!settings.login || method === 'help') {
+                // allow to call help without token
+                service(command.name, command.args);
+            } else {
+                var token = terminal.token();
+                if (token) {
+                    service(command.name, [token].concat(command.args));
+                } else {
+                    //should never happen
+                    terminal.error('&#91;AUTH&#93; Access denied (no token)');
+                }
+            }
+        };
+    }
+    // -----------------------------------------------------------------------
+    // :: Create eval function from Object if value is object it will create
+    // :: nested interpterers
+    // -----------------------------------------------------------------------
+    function make_eval_from_object(object) {
+        // function that maps commands to object methods
+        // it keeps terminal context
+        return function(command, terminal) {
+            if (command === '') {
+                return;
+            }
+            //command = split_command_line(command);
+            command = get_processed_command(command);
+            var val = object[command.name];
+            var type = $.type(val);
+            if (type === 'function') {
+                return val.apply(self, command.args);
+            } else if (type === 'object' || type === 'string') {
+                var commands = [];
+                if (type === 'object') {
+                    for (var m in val) {
+                        if (val.hasOwnProperty(m)) {
+                            commands.push(m);
+                        }
+                    }
+                    val = make_eval_from_object(val);
+                }
+                terminal.push(val, {
+                    prompt: command.name + '> ',
+                    name: command.name,
+                    completion: type === 'object' ? function(term, string, callback) {
+                        callback(commands);
+                    } : undefined
+                });
+            } else {
+                terminal.error("Command '" + command.name + "' Not Found");
+            }
+        };
+    }
+    // -----------------------------------------------------------------------
+    // :: calculate numbers of characters
+    // -----------------------------------------------------------------------
+    function get_num_chars(terminal) {
+        var cursor = terminal.find('.cursor');
+        var cur_width = cursor.width();
+        var result = Math.floor(terminal.width() / cur_width);
+        if (have_scrollbars(terminal)) {
+            var SCROLLBAR_WIDTH = 20;
+            // assume that scrollbars are 20px - in my Laptop with
+            // Linux/Chrome they are 16px
+            var margins = terminal.innerWidth() - terminal.width();
+            result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (cur_width-1));
+        }
+
+        return result;
+    }
+    // -----------------------------------------------------------------------
+    // :: check if div have scrollbars (need to have overflow auto or always)
+    // -----------------------------------------------------------------------
+    function have_scrollbars(div) {
+        return div.get(0).scrollHeight > div.innerHeight();
+    }
+    // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version = '0.7.1';
@@ -1896,29 +2034,37 @@
          version_string,
          copyright]
     ];
+    $.terminal.defaults = {
+        prompt: '> ',
+        history: true,
+        exit: true,
+        clear: true,
+        enabled: true,
+        historySize: 60,
+        displayExceptions: true,
+        cancelableAjax: true,
+        processArguments: true,
+        login: null,
+        outputLimit: -1,
+        tabcompletion: null,
+        historyFilter: null,
+        onInit: $.noop,
+        onClear: $.noop,
+        onBlur: $.noop,
+        onFocus: $.noop,
+        onTerminalChange: $.noop,
+        onExit: $.noop,
+        keypress: $.noop,
+        keydown: $.noop
+    };
     // for canceling on CTRL+D
     var requests = [];
     var terminals = new Cycle(); //list of terminals global in this scope
     var names = []; // stack if interpeter names
     $.fn.terminal = function(init_eval, options) {
-        function haveScrollbars() {
-            return self.get(0).scrollHeight > self.innerHeight();
-        }
-        //calculate numbers of characters
-        function get_num_chars() {
-            var cursor = self.find('.cursor');
-            var cur_width = cursor.width();
-            var result = Math.floor(self.width() / cur_width);
-            if (haveScrollbars()) {
-                // assume that scrollbars are 20px - in my Laptop with
-                // Linux/Chrome they are 16px
-                var margins = self.innerWidth() - self.width();
-                result -= Math.ceil((20 - margins / 2) / (cur_width-1));
-            }
-
-            return result;
-        }
-        // display Exception on terminal
+        // -----------------------------------------------------------------------
+        // :: display Exception on terminal
+        // -----------------------------------------------------------------------
         function display_exception(e, label) {
             if (settings.displayExceptions) {
                 var message;
@@ -1949,14 +2095,16 @@
                 }
             }
         }
-        var scroll_object;
+        // -----------------------------------------------------------------------
         function scroll_to_bottom() {
             var scrollHeight = scroll_object.prop ? scroll_object.prop('scrollHeight') :
                 scroll_object.attr('scrollHeight');
             scroll_object.scrollTop(scrollHeight);
         }
-        //validating if object is string or function, call that function and
-        //display exeption if any
+        // -----------------------------------------------------------------------
+        // :: validating if object is string or function, call that function and
+        // :: display exeption if any
+        // -----------------------------------------------------------------------
         function validate(label, object) {
             try {
                 if (typeof object === 'function') {
@@ -1973,6 +2121,12 @@
             }
             return true;
         }
+        // -----------------------------------------------------------------------
+        // :: Draw line - can have line breaks and be longer then the width of
+        // :: the terminal, there are 2 options raw and finalize
+        // :: raw - will not encode the string and finalize if a function that
+        // :: will have div container of the line as first argument
+        // -----------------------------------------------------------------------
         function draw_line(string, options) {
             var line_settings = $.extend({
                 raw: false,
@@ -2018,7 +2172,9 @@
             scroll_to_bottom();
             return div;
         }
-
+        // -----------------------------------------------------------------------
+        // :: Display user greetings or terminal signature
+        // -----------------------------------------------------------------------
         function show_greetings() {
             if (settings.greetings === undefined) {
                 self.echo(self.signature);
@@ -2026,67 +2182,9 @@
                 self.echo(settings.greetings);
             }
         }
-
-        function is_scrolled_into_view(elem) {
-            var docViewTop = $(window).scrollTop();
-            var docViewBottom = docViewTop + $(window).height();
-
-            var elemTop = $(elem).offset().top;
-            var elemBottom = elemTop + $(elem).height();
-
-            return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
-        }
-        //function constructor for eval
-        function make_json_rpc_eval_fun(url, terminal) {
-            var id = 1;
-            var service = function(method, params) {
-                terminal.pause();
-                $.jrpc(url, id++, method, params, function(json) {
-                    if (!json.error) {
-                        if (typeof json.result === 'string') {
-                            terminal.echo(json.result);
-                        } else if (json.result instanceof Array) {
-                            terminal.echo($.map(json.result, function(object) {
-                                return $.json_stringify(object);
-                            }).join(' '));
-                        } else if (typeof json.result === 'object') {
-                            terminal.echo($.json_stringify(json.result));
-                        }
-                    } else {
-                        terminal.error('&#91;RPC&#93; ' + json.error.message);
-                    }
-                    terminal.resume();
-                }, function(xhr, status, error) {
-                    if (status !== 'abort') {
-                        terminal.error('&#91;AJAX&#93; ' + status +
-                                       ' - Server reponse is: \n' +
-                                       xhr.responseText);
-                    }
-                    terminal.resume();
-                });
-            };
-            //this is eval function
-            return function(command, terminal) {
-                if (command === '') {
-                    return;
-                }
-                command = getProcessedCommand(command);
-                if (!settings.login || method === 'help') {
-                    // allow to call help without token
-                    service(command.name, command.args);
-                } else {
-                    var token = terminal.token();
-                    if (token) {
-                        service(command.name, [token].concat(command.args));
-                    } else {
-                        //should never happen
-                        terminal.error('&#91;AUTH&#93; Access denied (no token)');
-                    }
-                }
-            };
-        }
-
-        //display prompt and last command
+        // -----------------------------------------------------------------------
+        // :: Display prompt and last command
+        // -----------------------------------------------------------------------
         function echo_command(command) {
             command = $.terminal.escape_brackets($.terminal.encode(command));
             var prompt = command_line.prompt();
@@ -2101,9 +2199,10 @@
                 self.echo(prompt + command);
             }
         }
-        var prev_command;
-        // wrapper over eval it implements exit and catch all exeptions
-        // from user code and display them on terminal
+        // -----------------------------------------------------------------------
+        // :: Wrapper over eval it implements exit and catch all exeptions
+        // :: from user code and display them on terminal
+        // -----------------------------------------------------------------------
         function commands(command, silent) {
             try {
                 prev_command = command;
@@ -2160,10 +2259,11 @@
                 throw e;
             }
         }
-
-        // functions change prompt of command line to login to password
-        // and call user login function with callback that set token
-        // if user call it with value that is truthy
+        // -----------------------------------------------------------------------
+        // :: Functions change prompt of command line to login to password
+        // :: and call user login function with callback that set token
+        // :: if user call it with value that is truthy
+        // -----------------------------------------------------------------------
         function login() {
             var user = null;
             command_line.prompt('login: ');
@@ -2212,10 +2312,11 @@
                 }
             });
         }
-
-        //logout function remove Storage, disable history and run login function
-        //this function is call only when options.login function is defined
-        //check for this is in self.pop method
+        // -----------------------------------------------------------------------
+        // :: Logout function remove Storage, disable history and run login function
+        // :: this function is call only when options.login function is defined
+        // :: check for this is in self.pop method
+        // -----------------------------------------------------------------------
         function logout() {
             if (typeof settings.onBeforelogout === 'function') {
                 try {
@@ -2243,8 +2344,9 @@
                 }
             }
         }
-
-        //function enable history, set prompt, run eval function
+        // -----------------------------------------------------------------------
+        // :: Function enable history, set prompt, run eval function
+        // -----------------------------------------------------------------------
         function prepare_top_interpreter() {
             var interpreter = interpreters.top();
             var name = settings.name + '_' + terminal_id +
@@ -2265,6 +2367,7 @@
                 interpreter.onStart(self);
             }
         }
+        // ---------------------------------------------------------------------
         function initialize() {
             prepare_top_interpreter();
             show_greetings();
@@ -2278,10 +2381,8 @@
             }
         }
         // ---------------------------------------------------------------------
-        // KEYDOWN EVENT HANDLER
+        // :: Keydown event handler
         // ---------------------------------------------------------------------
-        var tab_count = 0;
-
         function key_down(e) {
             var top = interpreters.top();
             if ($.type(top.keydown) === 'function') {
@@ -2413,59 +2514,15 @@
                 return false;
             }
         }
-        // helper function
-        function getProcessedCommand(command) {
-            if ($.type(settings.processArguments) === 'function') {
-                return processCommand(command, settings.processArguments);
-            } else if (settings.processArguments) {
-                return $.terminal.parseCommand(command);
-            } else {
-                return $.terminal.splitCommand(command);
-            }
-        }
-        function make_eval_from_object(object) {
-            // function that maps commands to object methods
-            // it keeps terminal context
-            return function(command, terminal) {
-                if (command === '') {
-                    return;
-                }
-                //command = split_command_line(command);
-                command = getProcessedCommand(command);
-                var val = object[command.name];
-                var type = $.type(val);
-                if (type === 'function') {
-                    return val.apply(self, command.args);
-                } else if (type === 'object' || type === 'string') {
-                    var commands = [];
-                    if (type === 'object') {
-                        for (var m in val) {
-                            if (val.hasOwnProperty(m)) {
-                                commands.push(m);
-                            }
-                        }
-                        val = make_eval_from_object(val);
-                    }
-                    self.push(val, {
-                        prompt: command.name + '> ',
-                        name: command.name,
-                        completion: type === 'object' ? function(term, string, callback) {
-                            callback(commands);
-                        } : undefined
-                    });
-                } else {
-                    self.error("Command '" + command.name + "' Not Found");
-                }
-            };
-        }
-        var self = this;
+        // -----------------------------------------------------------------------
         if (this.length > 1) {
             return this.each(function() {
                 $.fn.terminal.call($(this),
                                    init_eval,
-                                   $.extend({name: self.selector}, options));
+                                   $.extend({name: this.selector}, options));
             });
         } else {
+            var self = this;
             // terminal already exist
             if (self.data('terminal')) {
                 return self.data('terminal');
@@ -2474,6 +2531,9 @@
                 throw 'Sorry, but terminal said that "' + self.selector +
                     '" is not valid selector!';
             }
+            var scroll_object;
+            var prev_command;
+            var tab_count = 0; // for tab completion
             // array of line objects:
             // - string (printed as-is)
             // - function (called whenever necessary, result is printed)
@@ -2488,29 +2548,8 @@
             var old_width, old_height;
             var dalyed_commands = []; // used when exec commands with pause
             var settings = $.extend({
-                name: self.selector,
-                prompt: '> ',
-                history: true,
-                exit: true,
-                clear: true,
-                enabled: true,
-                historySize: 60,
-                displayExceptions: true,
-                cancelableAjax: true,
-                processArguments: true,
-                login: null,
-                outputLimit: -1,
-                tabcompletion: null,
-                historyFilter: null,
-                onInit: $.noop,
-                onClear: $.noop,
-                onBlur: $.noop,
-                onFocus: $.noop,
-                onTerminalChange: $.noop,
-                onExit: $.noop,
-                keypress: $.noop,
-                keydown: $.noop
-            }, options || {});
+                name: self.selector
+            }, $.terminal.defaults, options || {});
             var pause = !settings.enabled;
             // ----------------------------------------------------------
             // TERMINAL METHODS
@@ -2757,7 +2796,7 @@
                     }
                     var width = self.width();
                     var height = self.height();
-                    num_chars = get_num_chars();
+                    num_chars = get_num_chars(self);
                     command_line.resize(num_chars);
                     var o = output.empty().detach();
                     $.each(lines, function(i, line) {
@@ -2945,13 +2984,13 @@
 
             // ---------------------------------------------------------------------
             var on_scrollbar_show_resize = (function() {
-                var scrollBars = haveScrollbars();
+                var scroll_bars = have_scrollbars(self);
                 return function() {
-                    if (scrollBars !== haveScrollbars()) {
+                    if (scroll_bars !== have_scrollbars(self)) {
                         // if scollbars appearance change we will have different
                         // number of chars
                         self.resize();
-                        scrollBars = haveScrollbars();
+                        scroll_bars = have_scrollbars(self);
                     }
                 };
             })();
@@ -3086,7 +3125,7 @@
                     },
                     commands: commands
                 });
-                num_chars = get_num_chars();
+                num_chars = get_num_chars(self);
                 terminals.append(self);
                 if (settings.enabled === true) {
                     self.focus(undefined, true);
