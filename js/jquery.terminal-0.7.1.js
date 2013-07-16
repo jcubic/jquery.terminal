@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 13 Jul 2013 19:55:28 +0000
+ * Date: Tue, 16 Jul 2013 17:24:35 +0000
  */
 
 /*
@@ -880,15 +880,15 @@
         var last_command;
         var draw_prompt = (function() {
             var prompt_node = self.find('.prompt');
+            function set(prompt) {
+                prompt_len = skipFormattingCount(prompt);
+                prompt_node.html($.terminal.format($.terminal.encode(prompt)));
+            }
             return function() {
                 if (typeof prompt === 'string') {
-                    prompt_len = skipFormattingCount(prompt);
-                    prompt_node.html($.terminal.format(prompt));
+                    set(prompt);
                 } else {
-                    prompt(function(string) {
-                        prompt_len = skipFormattingCount(string);
-                        prompt_node.html($.terminal.format(string));
-                    });
+                    prompt(set);
                 }
                 //change_num_chars();
             };
@@ -1363,9 +1363,9 @@
         };
     }
     // -------------------------------------------------------------------------
-    var format_split_re = /(\[\[[gbius]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
-    var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
-    var format_re = /\[\[([gbius]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
+    var format_split_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
+    var format_re = /\[\[([gbiuso]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
+    var format_re = /\[\[([gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
@@ -1430,7 +1430,7 @@
                         if (line[j] === '&') { // treat entity as one character
                             var m = line.substring(j).match(/^(&[^;]+;)/);
                             if (!m) {
-                                throw "Unclosed html entity at char " + j;
+                                throw "Unclosed html entity at char " + (j+1) + ' at line ' + (i+1);
                             }
                             j+=m[1].length-2; // because contine add 1 to j
                             // if entity is at the end there is no next loop - issue #77
@@ -1486,7 +1486,6 @@
         },
         format: function(str) {
             if (typeof str === 'string') {
-                str = $.terminal.encode(str);
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splited = str.split(format_split_re);
                 if (splited && splited.length > 1) {
@@ -1510,16 +1509,18 @@
                                 if (style.indexOf('b') !== -1) {
                                     style_str += 'font-weight:bold;';
                                 }
-                                var text_decoration = 'text-decoration:';
+                                var text_decoration = [];
                                 if (style.indexOf('u') !== -1) {
-                                    text_decoration += 'underline ';
+                                    text_decoration.push('underline');
                                 }
                                 if (style.indexOf('s') !== -1) {
-                                    text_decoration += 'line-through';
+                                    text_decoration.push('line-through');
                                 }
-                                if (style.indexOf('s') !== -1 ||
-                                    style.indexOf('u') !== -1) {
-                                    style_str += text_decoration + ';';
+                                if (style.indexOf('o') !== -1) {
+                                    text_decoration.push('overline');
+                                }
+                                if (text_decoration.length) {
+                                    style_str += 'text-decoration:' + text_decoration.join(' ') + ';';
                                 }
                                 if (style.indexOf('i') !== -1) {
                                     style_str += 'font-style:italic;';
@@ -1527,7 +1528,7 @@
                                 if (color.match(color_hex_re)) {
                                     style_str += 'color:' + color + ';';
                                     if (style.indexOf('g') !== -1) {
-                                        style_str += 'text-shadow: 0 0 5px ' + color + ';';
+                                        style_str += 'text-shadow:0 0 5px ' + color + ';';
                                     }
                                 }
                                 if (background.match(color_hex_re)) {
@@ -1556,6 +1557,9 @@
             } else {
                 return '';
             }
+        },
+        escape_brackets: function(string) {
+            return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
         },
         // remove formatting from text
         strip: function(str) {
@@ -1594,19 +1598,19 @@
                 blue: '#5555FF',
                 magenta: '#FF55FF',
                 cyan: '#55FFFF',
-                white: '#fff'
+                white: '#FFF'
             }
         },
         from_ansi: (function() {
             var color = {
-                30:    'black',
-                31:    'red',
-                32:    'green',
-                33:    'yellow',
-                34:    'blue',
-                35:    'magenta',
-                36:    'cyan',
-                37:    'white'
+                30: 'black',
+                31: 'red',
+                32: 'green',
+                33: 'yellow',
+                34: 'blue',
+                35: 'magenta',
+                36: 'cyan',
+                37: 'white'
             };
             var background = {
                 40: 'black',
@@ -1775,6 +1779,58 @@
         },
         splitCommand: function(string) {
             return processCommand(string, $.terminal.splitArguments);
+        },
+        test: function() {
+            var term = $('body').terminal().css('margin', 0);
+            var margin = term.outerHeight() - term.height();
+            var $win = $(window);
+            function size() {
+                term.css('height', $(window).height()-20);
+            }
+            $win.resize(size).resize();
+            term.echo('Testing...');
+            function assets(cond, msg) {
+                term.echo(msg + ' &#91;' + (cond ? '[[b;#44D544;]PASS]' : '[[b;#FF5555;]FAIL]') + '&#93;');
+            }
+            var string = 'name "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
+            var cmd = $.terminal.splitCommand(string);
+            assets(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
+                  cmd.args[1] === 'baz' && cmd.args[2] === '/^asd [x]/' &&
+                  cmd.args[3] === 'str str' && cmd.args[4] === '10' &&
+                  cmd.args[5] === '1e10', '$.terminal.splitCommand');
+            cmd = $.terminal.parseCommand(string);
+            assets(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
+                  cmd.args[1] === 'baz' && $.type(cmd.args[2]) === 'regexp' &&
+                  cmd.args[2].source === '^asd [x]' &&
+                  cmd.args[3] === 'str str' && cmd.args[4] === 10 &&
+                  cmd.args[5] === 1e10, '$.terminal.parseCommand');
+            string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mBar\x1b[0m\x1b[7mBaz';
+            assets($.terminal.from_ansi(string) ===
+                  '[[;#640000;#008787]Foo][[biu;#44D544;#FF55FF]Bar][[;#000;#AAA]Baz]',
+                  '$.terminal.from_ansi');
+            string = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz]';
+            term.echo('$.terminal.format');
+            assets($.terminal.format(string) === '<span style="font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;text-shadow:0 0 5px #fff;background-color:#000" data-text="Foo">Foo</span><span style="font-style:italic;" class="foo" data-text="Bar">Bar</span><span style="text-decoration:underline line-through overline;" data-text="Baz">Baz</span>', '\tformatting');
+            string = 'http://terminal.jcubic.pl/examples.php https://www.google.com/?q=jquery%20terminal';
+            assets($.terminal.format(string) === '<a target="_blank" href="http://terminal.jcubic.pl/examples.php">http://terminal.jcubic.pl/examples.php</a> <a target="_blank" href="https://www.google.com/?q=jquery%20terminal">https://www.google.com/?q=jquery%20terminal</a>', '\turls');
+            string = 'foo@bar.com baz.quux@example.com';
+            assets($.terminal.format(string) === '<a href="mailto:foo@bar.com">foo@bar.com</a> <a href="mailto:baz.quux@example.com">baz.quux@example.com</a>', '\temails');
+            string = '-_-[[biugs;#fff;#000]Foo]-_-[[i;;;foo]Bar]-_-[[ous;;]Baz]-_-';
+            assets($.terminal.strip(string) === '-_-Foo-_-Bar-_-Baz-_-', '$.terminal.strip');
+            string = '[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sed dolor nisl, in suscipit justo. Donec a enim et est porttitor semper at vitae augue. Proin at nulla at dui mattis mattis. Nam a volutpat ante. Aliquam consequat dui eu sem convallis ullamcorper. Nulla suscipit, massa vitae suscipit ornare, tellus] est [[b;;#f00]consequat nunc, quis blandit elit odio eu arcu. Nam a urna nec nisl varius sodales. Mauris iaculis tincidunt orci id commodo. Aliquam] non magna quis [[i;;]tortor malesuada aliquam] eget ut lacus. Nam ut vestibulum est. Praesent volutpat tellus in eros dapibus elementum. Nam laoreet risus non nulla mollis ac luctus [[ub;#fff;]felis dapibus. Pellentesque mattis elementum augue non sollicitudin. Nullam lobortis fermentum elit ac mollis. Nam ac varius risus. Cras faucibus euismod nulla, ac auctor diam rutrum sit amet. Nulla vel odio erat], ac mattis enim.';
+            term.echo('$.terminal.split_equal');
+            var cols = [10, 40, 60, 400];
+            for (var i=cols.length; i--;) {
+                var lines = $.terminal.split_equal(string, cols[i]);
+                var success = true;
+                for (var j=0; j<lines.length; ++j) {
+                    if ($.terminal.strip(lines[j]).length > cols[i]) {
+                        success = false;
+                        break;
+                    }
+                }
+                assets(success, '\tsplit ' + cols[i]);
+            }
         }
     };
 
@@ -1860,9 +1916,6 @@
 
             return result;
         }
-        function escape_brackets(string) {
-            return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
-        }
         // display Exception on terminal
         function display_exception(e, label) {
             if (settings.displayExceptions) {
@@ -1926,6 +1979,9 @@
             string = $.type(string) === "function" ? string() : string;
             string = $.type(string) === "string" ? string : String(string);
             var div, i, len;
+            if (!line_settings.raw) {
+                string = $.terminal.encode(string);
+            }
             if (!line_settings.raw && (string.length > num_chars || string.match(/\n/))) {
                 var array = $.terminal.split_equal($.terminal.from_ansi(string), num_chars);
 
@@ -2030,7 +2086,7 @@
 
         //display prompt and last command
         function echo_command(command) {
-            command = escape_brackets($.terminal.encode(command));
+            command = $.terminal.escape_brackets($.terminal.encode(command));
             var prompt = command_line.prompt();
             if (command_line.mask()) {
                 command = command.replace(/./g, '*');
@@ -2735,7 +2791,7 @@
                 error: function(message, finalize) {
                     //echo red message
                     //quick hack to fix trailing back slash
-                    return self.echo('[[;#f00;]' + escape_brackets(message).
+                    return self.echo('[[;#f00;]' + $.terminal.escape_brackets(message).
                                      replace(/\\$/, '&#92;') + ']', finalize);
                 },
                 scroll: function(amount) {
@@ -2959,6 +3015,8 @@
                     }
                 }
                 init_eval = make_eval_from_object(init_eval);
+            } else if ($.type(init_eval) === 'undefined') {
+                init_eval = $.noop;
             } else if ($.type(init_eval) !== 'function') {
                 throw 'Unknow object "' + String(init_eval) + '" passed as eval';
             }
