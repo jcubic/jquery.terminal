@@ -2291,7 +2291,6 @@
                         }
                     }
                 }
-
             } catch (e) {
                 display_exception(e, 'USER');
                 self.resume();
@@ -2339,9 +2338,6 @@
                                 user = null;
                             }
                             self.resume();
-                            if (settings.history) {
-                                command_line.history().enable();
-                            }
                         }, self);
                     }
                 } catch (e) {
