@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 16 Jul 2013 21:29:04 +0000
+ * Date: Thu, 18 Jul 2013 18:41:18 +0000
  */
 
 /*
@@ -1879,108 +1879,6 @@
         return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
     }
     // -----------------------------------------------------------------------
-    // :: helper function
-    // -----------------------------------------------------------------------
-    function get_processed_command(command) {
-        if (typeof settings.processArguments === 'function') {
-            return processCommand(command, settings.processArguments);
-        } else if (settings.processArguments) {
-            return $.terminal.parseCommand(command);
-        } else {
-            return $.terminal.splitCommand(command);
-        }
-    }
-    // -----------------------------------------------------------------------
-    // :: Create Eval function from url string
-    // -----------------------------------------------------------------------
-    function make_json_rpc_eval_fun(url, terminal) {
-        var id = 1;
-        var service = function(method, params) {
-            terminal.pause();
-            $.jrpc(url, id++, method, params, function(json) {
-                if (!json.error) {
-                    if (typeof json.result === 'string') {
-                        terminal.echo(json.result);
-                    } else if (json.result instanceof Array) {
-                        terminal.echo($.map(json.result, function(object) {
-                            return $.json_stringify(object);
-                        }).join(' '));
-                    } else if (typeof json.result === 'object') {
-                        terminal.echo($.json_stringify(json.result));
-                    }
-                } else {
-                    terminal.error('&#91;RPC&#93; ' + json.error.message);
-                }
-                terminal.resume();
-            }, function(xhr, status, error) {
-                if (status !== 'abort') {
-                    terminal.error('&#91;AJAX&#93; ' + status +
-                                   ' - Server reponse is: \n' +
-                                   xhr.responseText);
-                }
-                terminal.resume();
-            });
-        };
-        //this is eval function
-        return function(command, terminal) {
-            if (command === '') {
-                return;
-            }
-            command = get_processed_command(command);
-            if (!settings.login || method === 'help') {
-                // allow to call help without token
-                service(command.name, command.args);
-            } else {
-                var token = terminal.token();
-                if (token) {
-                    service(command.name, [token].concat(command.args));
-                } else {
-                    //should never happen
-                    terminal.error('&#91;AUTH&#93; Access denied (no token)');
-                }
-            }
-        };
-    }
-    // -----------------------------------------------------------------------
-    // :: Create eval function from Object if value is object it will create
-    // :: nested interpterers
-    // -----------------------------------------------------------------------
-    function make_object_eval_fun(object) {
-        // function that maps commands to object methods
-        // it keeps terminal context
-        return function(command, terminal) {
-            if (command === '') {
-                return;
-            }
-            //command = split_command_line(command);
-            command = get_processed_command(command);
-            var val = object[command.name];
-            var type = $.type(val);
-            if (type === 'function') {
-                return val.apply(self, command.args);
-            } else if (type === 'object' || type === 'string') {
-                var commands = [];
-                if (type === 'object') {
-                    for (var m in val) {
-                        if (val.hasOwnProperty(m)) {
-                            commands.push(m);
-                        }
-                    }
-                    val = make_object_eval_fun(val);
-                }
-                terminal.push(val, {
-                    prompt: command.name + '> ',
-                    name: command.name,
-                    completion: type === 'object' ? function(term, string, callback) {
-                        callback(commands);
-                    } : undefined
-                });
-            } else {
-                terminal.error("Command '" + command.name + "' Not Found");
-            }
-        };
-    }
-    // -----------------------------------------------------------------------
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
@@ -2065,8 +1963,144 @@
     // for canceling on CTRL+D
     var requests = [];
     var terminals = new Cycle(); //list of terminals global in this scope
-    var names = []; // stack if interpeter names
-    $.fn.terminal = function(init_eval, options) {
+    $.fn.terminal = function(init_interpreter, options) {
+        // -----------------------------------------------------------------------
+        // :: helper function
+        // -----------------------------------------------------------------------
+        function get_processed_command(command) {
+            if (typeof settings.processArguments === 'function') {
+                return processCommand(command, settings.processArguments);
+            } else if (settings.processArguments) {
+                return $.terminal.parseCommand(command);
+            } else {
+                return $.terminal.splitCommand(command);
+            }
+        }
+        // -----------------------------------------------------------------------
+        // :: Create interpreter function from url string
+        // -----------------------------------------------------------------------
+        function make_json_rpc_interpreter(url, terminal) {
+            var id = 1;
+            var service = function(method, params) {
+                terminal.pause();
+                $.jrpc(url, id++, method, params, function(json) {
+                    if (!json.error) {
+                        if (typeof json.result === 'string') {
+                            terminal.echo(json.result);
+                        } else if (json.result instanceof Array) {
+                            terminal.echo($.map(json.result, function(object) {
+                                return $.json_stringify(object);
+                            }).join(' '));
+                        } else if (typeof json.result === 'object') {
+                            terminal.echo($.json_stringify(json.result));
+                        }
+                    } else {
+                        terminal.error('&#91;RPC&#93; ' + json.error.message);
+                    }
+                    terminal.resume();
+                }, function(xhr, status, error) {
+                    if (status !== 'abort') {
+                        terminal.error('&#91;AJAX&#93; ' + status +
+                                       ' - Server reponse is: \n' +
+                                       xhr.responseText);
+                    }
+                    terminal.resume();
+                });
+            };
+            //this is interpreter function
+            return function(command, terminal) {
+                if (command === '') {
+                    return;
+                }
+                command = get_processed_command(command);
+                if (!settings.login || method === 'help') {
+                    // allow to call help without token
+                    service(command.name, command.args);
+                } else {
+                    var token = terminal.token();
+                    if (token) {
+                        service(command.name, [token].concat(command.args));
+                    } else {
+                        //should never happen
+                        terminal.error('&#91;AUTH&#93; Access denied (no token)');
+                    }
+                }
+            };
+        }
+        // -----------------------------------------------------------------------
+        // :: Create interpreter function from Object if value is object it will
+        // :: create nested interpterers
+        // -----------------------------------------------------------------------
+        function make_object_interpreter(object) {
+            // function that maps commands to object methods
+            // it keeps terminal context
+            return function(command, terminal) {
+                if (command === '') {
+                    return;
+                }
+                //command = split_command_line(command);
+                command = get_processed_command(command);
+                var val = object[command.name];
+                var type = $.type(val);
+                if (type === 'function') {
+                    return val.apply(self, command.args);
+                } else if (type === 'object' || type === 'string') {
+                    var commands = [];
+                    if (type === 'object') {
+                        for (var m in val) {
+                            if (val.hasOwnProperty(m)) {
+                                commands.push(m);
+                            }
+                        }
+                        val = make_object_interpreter(val);
+                    }
+                    terminal.push(val, {
+                        prompt: command.name + '> ',
+                        name: command.name,
+                        completion: type === 'object' ? function(term, string, callback) {
+                            callback(commands);
+                        } : undefined
+                    });
+                } else {
+                    terminal.error("Command '" + command.name + "' Not Found");
+                }
+            };
+        }
+        // -----------------------------------------------------------------------
+        function make_interpreter(interpreter, finish) {
+            finish = finish || $.noop;
+            var type = $.type(interpreter);
+            var result = {};
+            if (type === 'string') {
+                self.pause();
+                result.interpreter = make_json_rpc_interpreter(interpreter, self);
+                $.jrpc(interpreter, 0, 'system.describe', [], function(ret) {
+                    var commands = $.map(ret.procs, function(item) {
+                        return item.name;
+                    });
+                    options.completion = function(term, string, callback) {
+                        callback(commands);
+                    };
+                    finish(result);
+                }, function() {
+                    finish(result);
+                });
+            } else if (type === 'object') {
+                var commands = [];
+                for (var name in interpreter) {
+                    commands.push(name);
+                }
+                result.interpreter = make_object_interpreter(interpreter);
+                result.completion = function(term, string, callback) {
+                    callback(commands);
+                };
+                finish(result);
+            } else if (type !== 'function') {
+                throw type + " is invalid interpreter value";
+            } else {
+                finish({interpreter: interpreter});
+            }
+        }
         // -----------------------------------------------------------------------
         // :: display Exception on terminal
         // -----------------------------------------------------------------------
@@ -2205,7 +2239,7 @@
             }
         }
         // -----------------------------------------------------------------------
-        // :: Wrapper over eval it implements exit and catch all exeptions
+        // :: Wrapper over interpreter, it implements exit and catch all exeptions
         // :: from user code and display them on terminal
         // -----------------------------------------------------------------------
         function commands(command, silent) {
@@ -2234,9 +2268,9 @@
                     if (command === 'clear' && settings.clear) {
                         self.clear();
                     } else {
-                        var result = interpreter['eval'](command, self);
+                        var result = interpreter.interpreter(command, self);
                         if (result !== undefined) {
-                            // was lines after echo_command (by eval)
+                            // was lines after echo_command (by interpreter)
                             if (position === lines.length-1) {
                                 lines.pop();
                                 if (result !== false) {
@@ -2298,7 +2332,6 @@
                                 $.Storage.set(name + 'login', user);
                                 //restore commands and run interpreter
                                 command_line.commands(commands);
-                                // move this to one function init.
                                 initialize();
                             } else {
                                 self.error('Wrong password try again');
@@ -2350,7 +2383,7 @@
             }
         }
         // -----------------------------------------------------------------------
-        // :: Function enable history, set prompt, run eval function
+        // :: Function enable history, set prompt, run interpreter function
         // -----------------------------------------------------------------------
         function prepare_top_interpreter() {
             var interpreter = interpreters.top();
@@ -2521,14 +2554,14 @@
             }
         }
         // -----------------------------------------------------------------------
+        var self = this;
         if (this.length > 1) {
             return this.each(function() {
                 $.fn.terminal.call($(this),
-                                   init_eval,
-                                   $.extend({name: this.selector}, options));
+                                   init_interpreter,
+                                   $.extend({name: self.selector}, options));
             });
         } else {
-            var self = this;
             // terminal already exist
             if (self.data('terminal')) {
                 return self.data('terminal');
@@ -2537,6 +2570,7 @@
                 throw 'Sorry, but terminal said that "' + self.selector +
                     '" is not valid selector!';
             }
+            var names = []; // stack if interpeter names
             var scroll_object;
             var prev_command;
             var tab_count = 0; // for tab completion
@@ -2553,9 +2587,7 @@
             var url;
             var old_width, old_height;
             var dalyed_commands = []; // used when exec commands with pause
-            var settings = $.extend({
-                name: self.selector
-            }, $.terminal.defaults, options || {});
+            var settings = $.extend({}, $.terminal.defaults, options || {});
             var pause = !settings.enabled;
             // -----------------------------------------------------------------------
             // TERMINAL METHODS
@@ -2616,7 +2648,7 @@
                 // :: Return commands function from top interpreter
                 // -----------------------------------------------------------------------
                 commands: function() {
-                    return interpreters.top().eval;
+                    return interpreters.top().interpreter;
                 },
                 // -----------------------------------------------------------------------
                 // :: Show user greetings or terminal sugnature
@@ -2993,25 +3025,14 @@
                         options.name = options.name || prev_command;
                         options.prompt = options.prompt || options.name + ' ';
                         names.push(options.name);
-                        interpreters.top().mask = command_line.mask();
-                        var type = typeof interpreter;
-                        if (type === 'string') {
-                            interpreter = make_json_rpc_eval_fun(interpreter, self);
-                        } else if (type === 'object') {
-                            var commands = [];
-                            for (var name in interpreter) {
-                                commands.push(name);
-                            }
-                            interpreter = make_object_eval_fun(interpreter);
-                            options = options || {};
-                            options['completion'] = function(term, string, callback) {
-                                callback(commands);
-                            };
-                        } else if (type !== 'function') {
-                            throw "Invalid value as eval in push command";
+                        var top = interpreters.top();
+                        if (top) {
+                            top.mask = command_line.mask();
                         }
-                        interpreters.push($.extend({'eval': interpreter}, options));
-                        prepare_top_interpreter();
+                        make_interpreter(interpreter, function(interpreter) {
+                            interpreters.push($.extend({}, interpreter, options));
+                            prepare_top_interpreter();
+                        });
                     }
                     return self;
                 },
@@ -3165,7 +3186,7 @@
             //$('<input type="text"/>').hide().focus().appendTo(self);
 
             // before login event
-            if (settings.login && $.type(settings.onBeforeLogin) === 'function') {
+            if (settings.login && typeof settings.onBeforeLogin === 'function') {
                 try {
                     settings.onBeforeLogin(self);
                 } catch (e) {
@@ -3173,32 +3194,14 @@
                     throw e;
                 }
             }
-            if ($.type(init_eval) === 'string') {
-                url = init_eval; //url variable is use when making login function
-                init_eval = make_json_rpc_eval_fun(init_eval, self);
-            } else if ($.type(init_eval) === 'array') {
-                throw "You can't use array as eval";
-            } else if ($.type(init_eval) === 'object') {
-                // top commands
-                for (var i in init_eval) {
-                    if (init_eval.hasOwnProperty(i)) {
-                        command_list.push(i);
-                    }
-                }
-                init_eval = make_object_eval_fun(init_eval);
-            } else if ($.type(init_eval) === 'undefined') {
-                init_eval = $.noop;
-            } else if ($.type(init_eval) !== 'function') {
-                throw 'Unknow object "' + String(init_eval) + '" passed as eval';
-            }
-
             // create json-rpc authentication function
-            if (url && ($.type(settings.login) === 'string' || settings.login)) {
+            if (typeof init_interpreter === 'string' &&
+                (typeof settings.login === 'string' || settings.login)) {
                 settings.login = (function(method) {
                     var id = 1;
                     return function(user, passwd, callback, term) {
                         self.pause();
-                        $.jrpc(url,
+                        $.jrpc(init_interpreter,
                                id++,
                                method,
                                [user, passwd],
@@ -3220,86 +3223,85 @@
                 })($.type(settings.login) === 'boolean' ? 'login' : settings.login);
             }
             if (validate('prompt', settings.prompt)) {
-                var interpreters = new Stack({
-                    name: settings.name,
-                    'eval': init_eval,
-                    prompt: settings.prompt,
-                    completion: settings.completion ?
-                        settings.completion :
-                        function(term, string, callback) {
-                            callback(command_list);
-                        },
-                    greetings: settings.greetings
-                });
-                // CREATE COMMAND LINE
-                var command_line = $('<div/>').appendTo(self).cmd({
-                    prompt: settings.prompt,
-                    history: settings.history,
-                    historyFilter: settings.historyFilter,
-                    historySize: settings.historySize,
-                    width: '100%',
-                    keydown: key_down,
-                    keypress: settings.keypress ? function(e) {
-                        return settings.keypress(e, self);
-                    } : null,
-                    onCommandChange: function(command) {
-                        if ($.type(settings.onCommandChange) === 'function') {
-                            try {
-                                settings.onCommandChange(command, self);
-                            } catch (e) {
-                                display_exception(e, 'onCommandChange');
-                                throw e;
+                var interpreters;
+                var command_line;
+                make_interpreter(init_interpreter, function(interpreter) {
+                    interpreters = new Stack($.extend({
+                        name: settings.name,
+                        prompt: settings.prompt,
+                        greetings: settings.greetings
+                    }, interpreter));
+                    // CREATE COMMAND LINE
+                    command_line = $('<div/>').appendTo(self).cmd({
+                        prompt: settings.prompt,
+                        history: settings.history,
+                        historyFilter: settings.historyFilter,
+                        historySize: settings.historySize,
+                        width: '100%',
+                        keydown: key_down,
+                        keypress: settings.keypress ? function(e) {
+                            return settings.keypress(e, self);
+                        } : null,
+                        onCommandChange: function(command) {
+                            if ($.type(settings.onCommandChange) === 'function') {
+                                try {
+                                    settings.onCommandChange(command, self);
+                                } catch (e) {
+                                    display_exception(e, 'onCommandChange');
+                                    throw e;
+                                }
                             }
-                        }
-                        scroll_to_bottom();
-                    },
-                    commands: commands
-                });
-                num_chars = get_num_chars(self);
-                terminals.append(self);
-                if (settings.enabled === true) {
-                    self.focus(undefined, true);
-                } else {
-                    self.disable();
-                }
-                $(document).bind('click.terminal', function(e) {
-                    if (!$(e.target).parents().hasClass('terminal') &&
-                        settings.onBlur(self) !== false) {
+                            scroll_to_bottom();
+                        },
+                        commands: commands
+                    });
+                    num_chars = get_num_chars(self);
+                    terminals.append(self);
+                    if (settings.enabled === true) {
+                        self.focus(undefined, true);
+                    } else {
                         self.disable();
                     }
-                });
-                $(window).bind('resize.terminal', function() {
-                    if (self.is(':visible')) {
-                        var width = self.width();
-                        var height = self.height();
-                        // prevent too many calculations in IE because of resize event bug
-                        if (old_height !== height || old_width !== width) {
-                            self.resize();
+                    $(document).bind('click.terminal', function(e) {
+                        if (!$(e.target).parents().hasClass('terminal') &&
+                            settings.onBlur(self) !== false) {
+                            self.disable();
                         }
+                    });
+                    $(window).bind('resize.terminal', function() {
+                        if (self.is(':visible')) {
+                            var width = self.width();
+                            var height = self.height();
+                            // prevent too many calculations in IE because of resize event
+                            // bug
+                            if (old_height !== height || old_width !== width) {
+                                self.resize();
+                            }
+                        }
+                    });
+                    self.click(function() {
+                        //if (!(pause && terminals.length() > 1 &&
+                        //     self === $.terminal.active())) {
+                        self.focus();
+                    });
+                    if (settings.login && self.token && !self.token() && self.login_name &&
+                        !self.login_name()) {
+                        login();
+                    } else {
+                        initialize();
+                    }
+                    if ($.type($.fn.init.prototype.mousewheel) === 'function') {
+                        self.mousewheel(function(event, delta) {
+                            //self.echo(dir(event));
+                            if (delta > 0) {
+                                self.scroll(-40);
+                            } else {
+                                self.scroll(40);
+                            }
+                            return false;
+                        }, true);
                     }
                 });
-                self.click(function() {
-                    //if (!(pause && terminals.length() > 1 &&
-                    //     self === $.terminal.active())) {
-                    self.focus();
-                });
-                if (settings.login && self.token && !self.token() && self.login_name &&
-                    !self.login_name()) {
-                    login();
-                } else {
-                    initialize();
-                }
-                if ($.type($.fn.init.prototype.mousewheel) === 'function') {
-                    self.mousewheel(function(event, delta) {
-                        //self.echo(dir(event));
-                        if (delta > 0) {
-                            self.scroll(-40);
-                        } else {
-                            self.scroll(40);
-                        }
-                        return false;
-                    }, true);
-                }
             }
             self.data('terminal', self);
             return self;
