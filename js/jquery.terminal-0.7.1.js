@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Thu, 18 Jul 2013 18:49:42 +0000
+ * Date: Thu, 18 Jul 2013 19:26:51 +0000
  */
 
 /*
@@ -1851,10 +1851,11 @@
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
-    $.jrpc = function(url, id, method, params, success, error) {
+    var id = 0;
+    $.jrpc = function(url, method, params, success, error) {
         var request = $.json_stringify({
            'jsonrpc': '2.0', 'method': method,
-            'params': params, 'id': id});
+            'params': params, 'id': ++id});
         return $.ajax({
             url: url,
             data: request,
@@ -1980,10 +1981,9 @@
         // :: Create interpreter function from url string
         // -----------------------------------------------------------------------
         function make_json_rpc_interpreter(url, terminal) {
-            var id = 1;
             var service = function(method, params) {
                 terminal.pause();
-                $.jrpc(url, id++, method, params, function(json) {
+                $.jrpc(url, method, params, function(json) {
                     if (!json.error) {
                         if (typeof json.result === 'string') {
                             terminal.echo(json.result);
@@ -2074,11 +2074,11 @@
             if (type === 'string') {
                 self.pause();
                 result.interpreter = make_json_rpc_interpreter(interpreter, self);
-                $.jrpc(interpreter, 0, 'system.describe', [], function(ret) {
+                $.jrpc(interpreter, 'system.describe', [], function(ret) {
                     var commands = $.map(ret.procs, function(item) {
                         return item.name;
                     });
-                    options.completion = function(term, string, callback) {
+                    result.completion = function(term, string, callback) {
                         callback(commands);
                     };
                     finish(result);
@@ -2098,7 +2098,7 @@
             } else if (type !== 'function') {
                 throw type + " is invalid interpreter value";
             } else {
-                finish({interpreter: interpreter});
+                finish({interpreter: interpreter, completion: settings.completion});
             }
         }
         // -----------------------------------------------------------------------
@@ -2583,7 +2583,10 @@
             var url;
             var old_width, old_height;
             var dalyed_commands = []; // used when exec commands with pause
-            var settings = $.extend({}, $.terminal.defaults, options || {});
+            var settings = $.extend({},
+                                    $.terminal.defaults,
+                                    {name: self.selector},
+                                    options || {});
             var pause = !settings.enabled;
             // -----------------------------------------------------------------------
             // TERMINAL METHODS
@@ -3194,11 +3197,9 @@
             if (typeof init_interpreter === 'string' &&
                 (typeof settings.login === 'string' || settings.login)) {
                 settings.login = (function(method) {
-                    var id = 1;
                     return function(user, passwd, callback, term) {
                         self.pause();
                         $.jrpc(init_interpreter,
-                               id++,
                                method,
                                [user, passwd],
                                function(response) {
