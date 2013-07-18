@@ -609,6 +609,9 @@
                 data = [];
                 $.Storage.remove(name + 'commands');
             },
+            enabled: function() {
+                return enabled;
+            },
             enable: function() {
                 enabled = true;
             },
@@ -1157,6 +1160,11 @@
                 if (string !== undefined) {
                     name = string;
                     history = new History(string, historySize);
+                    // disable new history if old was disabled
+                    var len = history_list.length;
+                    if (len && !history_list[len-1].enabled()) {
+                        history.disable();
+                    }
                     history_list.push(history);
                     return self;
                 } else {
@@ -2013,7 +2021,7 @@
                     return;
                 }
                 command = get_processed_command(command);
-                if (!settings.login || method === 'help') {
+                if (!settings.login || command.name === 'help') {
                     // allow to call help without token
                     service(command.name, command.args);
                 } else {
@@ -2393,9 +2401,6 @@
             } else {
                 command_line.prompt(interpreter.prompt);
             }
-            if (settings.history) {
-                command_line.history().enable();
-            }
             command_line.set('');
             if (typeof interpreter.onStart === 'function') {
                 interpreter.onStart(self);
@@ -2404,6 +2409,9 @@
         // ---------------------------------------------------------------------
         function initialize() {
             prepare_top_interpreter();
+            if (settings.history) {
+                command_line.history().enable();
+            }
             show_greetings();
             if (typeof settings.onInit === 'function') {
                 try {
