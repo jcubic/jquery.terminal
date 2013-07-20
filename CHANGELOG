@@ -1,3 +1,4 @@
+0.7.2     Fix purge, json-rpc, history. Improve json-rpc and add Check Arity
 0.7.1     Add tests
           terminal without eval
           Fix issue with umpersand (unenclosed entinity) in multiline
