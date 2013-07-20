@@ -1987,33 +1987,41 @@
             }
         }
         // -----------------------------------------------------------------------
+        // :: Display object on terminal
+        // -----------------------------------------------------------------------
+        function display_object(object) {
+            if (typeof object === 'string') {
+                self.echo(object);
+            } else if (object instanceof Array) {
+                self.echo($.map(object, function(object) {
+                    return $.json_stringify(object);
+                }).join(' '));
+            } else if (typeof object === 'object') {
+                self.echo($.json_stringify(object));
+            } else {
+                self.echo(object);
+            }
+        }
+        // -----------------------------------------------------------------------
         // :: Create interpreter function from url string
         // -----------------------------------------------------------------------
-        function make_json_rpc_interpreter(url, terminal) {
+        function make_basic_json_rpc_interpreter(url) {
             var service = function(method, params) {
-                terminal.pause();
+                self.pause();
                 $.jrpc(url, method, params, function(json) {
                     if (!json.error) {
-                        if (typeof json.result === 'string') {
-                            terminal.echo(json.result);
-                        } else if (json.result instanceof Array) {
-                            terminal.echo($.map(json.result, function(object) {
-                                return $.json_stringify(object);
-                            }).join(' '));
-                        } else if (typeof json.result === 'object') {
-                            terminal.echo($.json_stringify(json.result));
-                        }
+                        display_object(json.result);
                     } else {
-                        terminal.error('&#91;RPC&#93; ' + json.error.message);
+                        self.error('&#91;RPC&#93; ' + json.error.message);
                     }
-                    terminal.resume();
+                    self.resume();
                 }, function(xhr, status, error) {
                     if (status !== 'abort') {
-                        terminal.error('&#91;AJAX&#93; ' + status +
+                        self.error('&#91;AJAX&#93; ' + status +
                                        ' - Server reponse is: \n' +
                                        xhr.responseText);
                     }
-                    terminal.resume();
+                    self.resume();
                 });
             };
             //this is interpreter function
@@ -2040,7 +2048,7 @@
         // :: Create interpreter function from Object if value is object it will
         // :: create nested interpterers
         // -----------------------------------------------------------------------
-        function make_object_interpreter(object) {
+        function make_object_interpreter(object, arity) {
             // function that maps commands to object methods
             // it keeps terminal context
             return function(command, terminal) {
@@ -2052,7 +2060,7 @@
                 var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
-                    if (settings.checkArity && val.length !== command.args.length) {
+                    if (arity && val.length !== command.args.length) {
                         self.error("&#91;Arity&#93; wrong number of arguments. Function '" +
                                    command.name + "' expect " + val.length + ' got ' +
                                    command.args.length);
@@ -2067,7 +2075,7 @@
                                 commands.push(m);
                             }
                         }
-                        val = make_object_interpreter(val);
+                        val = make_object_interpreter(val, arity);
                     }
                     terminal.push(val, {
                         prompt: command.name + '> ',
@@ -2082,38 +2090,77 @@
             };
         }
         // -----------------------------------------------------------------------
-        function make_interpreter(interpreter, finish) {
-            finish = finish || $.noop;
+        function make_interpreter(interpreter, finalize) {
+            finalize = finalize || $.noop;
             var type = $.type(interpreter);
             var result = {};
             if (type === 'string') {
                 self.pause();
-                result.interpreter = make_json_rpc_interpreter(interpreter, self);
                 $.jrpc(interpreter, 'system.describe', [], function(ret) {
-                    var commands = $.map(ret.procs, function(item) {
-                        return item.name;
-                    });
-                    result.completion = function(term, string, callback) {
-                        callback(commands);
-                    };
-                    finish(result);
+                    var commands = [];
+                    if (ret.procs) {
+                        var interpreter_object = {};
+                        $.each(ret.procs, function(_, proc) {
+                            commands.push(proc.name);
+                            interpreter_object[proc.name] = function() {
+                                var args = Array.prototype.slice.call(arguments);
+                                if (settings.checkArity && proc.params &&
+                                    proc.params.length !== args.length) {
+                                    console.log(proc);
+                                    self.error("&#91;Arity&#93; wrong number of arguments."+
+                                               "Function '" + proc.name + "' expect " +
+                                               proc.params.length + ' got ' + args.length);
+                                } else {
+                                    self.pause();
+                                    $.jrpc(interpreter, proc.name, args, function(json) {
+                                        if (!json.error) {
+                                            display_object(json.result);
+                                        } else {
+                                            self.error('&#91;RPC&#93; ' + json.error.message);
+                                        }
+                                        self.resume();
+                                    }, function(xhr, status, error) {
+                                        if (status !== 'abort') {
+                                            self.error('&#91;AJAX&#93; ' + status +
+                                                       ' - Server reponse is: \n' +
+                                                       xhr.responseText);
+                                        }
+                                        self.resume();
+                                    });
+                                }
+                            };
+                        });
+                        result.interpreter = make_object_interpreter(interpreter_object,
+                                                                     false);
+                        result.completion = function(term, string, callback) {
+                            callback(commands);
+                        };
+                    } else {
+                        // no procs in system.describe
+                        result.interpreter = make_basic_json_rpc_interpreter(interpreter);
+                        result.interpreter = settings.completion;
+                    }
+                    self.resume();
+                    finalize(result);
                 }, function() {
-                    finish(result);
+                    result.completion = settings.completion;
+                    result.interpreter = make_basic_json_rpc_interpreter(interpreter);
+                    finalize(result);
                 });
             } else if (type === 'object') {
                 var commands = [];
                 for (var name in interpreter) {
                     commands.push(name);
                 }
-                result.interpreter = make_object_interpreter(interpreter);
+                result.interpreter = make_object_interpreter(interpreter, true);
                 result.completion = function(term, string, callback) {
                     callback(commands);
                 };
-                finish(result);
+                finalize(result);
             } else if (type !== 'function') {
                 throw type + " is invalid interpreter value";
             } else {
-                finish({interpreter: interpreter, completion: settings.completion});
+                finalize({interpreter: interpreter, completion: settings.completion});
             }
         }
         // -----------------------------------------------------------------------
