@@ -1393,7 +1393,7 @@
         split_equal: function(str, length) {
             var re_format = /\[\[([gbius]*;[^;]*;[^;\]]*;|[^\]]*;?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
             var re_begin = /(\[\[[gbius]*;[^;]*;[^\]]*\])/;
-            var re_last = /\[\[[gbius]*;?[^;]*;?[^\]]*\]?$/;
+            var re_last = /\[\[[gbius]*;[^;]*;[^\]]*\]?$/;
             var formatting = false;
             var in_text = false;
             var braket = 0;
@@ -1420,16 +1420,6 @@
                     result.push('');
                     continue;
                 }
-                /*
-                if (prev_format !== '') {
-                    if (array[i] === '') {
-                        result.push(prev_format + ']');
-                        continue;
-                    } else {
-                        array[i] = prev_format + array[i];
-                        prev_format = '';
-                    }
-                }*/
                 var line = array[i];
                 var first_index = 0;
                 var count = 0;
@@ -3031,8 +3021,8 @@
                         raw: false,
                         finalize: $.noop
                     }, options || {});
-                    lines.push([string, settings]);
                     draw_line(string, settings);
+                    lines.push([string, settings]);
                     on_scrollbar_show_resize();
                     return self;
                 },
