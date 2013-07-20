@@ -22,25 +22,15 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 20 Jul 2013 21:42:27 +0000
+ * Date: Sat, 20 Jul 2013 22:05:33 +0000
  */
-
-/*
-
-     TODO:
-
-          distinguish between paused and disabled
-          paused should block keydown in terminal it should disable command line
-          disable
-
-*/
-
 
 
 (function($, undefined) {
     "use strict";
-
-    // map object to object
+    // -----------------------------------------------------------------------
+    // :: map object to object
+    // -----------------------------------------------------------------------
     $.omap = function(o, fn) {
         var result = {};
         $.each(o, function(k, v) {
@@ -48,9 +38,9 @@
         });
         return result;
     };
-    // ----------------------------------------
-    // START Storage plugin
-    // ----------------------------------------
+    // -----------------------------------------------------------------------
+    // :: Storage plugin
+    // -----------------------------------------------------------------------
     // Private data
     var isLS = typeof window.localStorage !== 'undefined';
     // Private functions
@@ -125,11 +115,9 @@
             remove: isLS ? dls : dc
         }
     });
-    // ----------------------------------------
-    // END Storage plugin
-    // ----------------------------------------
-    // START jQuery Timers
-    // ----------------------------------------
+    // -----------------------------------------------------------------------
+    // :: jQuery Timers
+    // -----------------------------------------------------------------------
     jQuery.fn.extend({
         everyTime: function(interval, label, fn, times, belay) {
             return this.each(function() {
@@ -298,9 +286,9 @@
             }
         });
     }
-    // ----------------------------------------
-    // START CROSS BROWSER SPLIT
-    // ----------------------------------------
+    // -----------------------------------------------------------------------
+    // :: CROSS BROWSER SPLIT
+    // -----------------------------------------------------------------------
 
     (function(undef) {
 
@@ -405,6 +393,9 @@
     }
     */
     //split string to array of strings with the same length
+    // -----------------------------------------------------------------------
+    // :: Split String into equal parts
+    // -----------------------------------------------------------------------
     function str_parts(str, length) {
         var result = [];
         var len = str.length;
@@ -416,9 +407,8 @@
         }
         return result;
     }
-
     // -----------------------------------------------------------------------
-    // CYCLE DATA STRUCTURE
+    // :: CYCLE DATA STRUCTURE
     // -----------------------------------------------------------------------
     function Cycle(init) {
         var data = init ? [init] : [];
@@ -486,8 +476,10 @@
             }
         });
     }
-    // serialize object myself (biwascheme or prototype library do something
-    // wiked with JSON serialization for Arrays)
+    // -----------------------------------------------------------------------
+    // :: Serialize object myself (biwascheme or prototype library do something
+    // :: wiked with JSON serialization for Arrays)
+    // -----------------------------------------------------------------------
     $.json_stringify = function(object, level) {
         var result = '', i;
         level = level === undefined ? 1 : level;
@@ -653,22 +645,32 @@
         var historySize = options.historySize || 60;
         var name, history;
         var cursor = self.find('.cursor');
-
+        // -----------------------------------------------------------------------
+        // ::Blinking cursor function
+        // -----------------------------------------------------------------------
         function blink(i) {
             cursor.toggleClass('inverted');
         }
+        // -----------------------------------------------------------------------
+        // :: Set prompt for reverse search
+        // -----------------------------------------------------------------------
         function draw_reverse_prompt() {
             prompt = "(reverse-i-search)`" + reverse_search_string + "': ";
             draw_prompt();
         }
+        // -----------------------------------------------------------------------
+        // :: Disable reverse search
+        // -----------------------------------------------------------------------
         function clear_reverse_state() {
             prompt = backup_prompt;
             reverse_search = false;
             reverse_search_position = null;
             reverse_search_string = '';
         }
-        // if next is not defined or false it search for first item from the end
-        // if true it search for next item
+        // -----------------------------------------------------------------------
+        // :: Search through command line history. If next is not defined or false
+        // :: it search for first item from the end. If true it search for next item
+        // -----------------------------------------------------------------------
         function reverse_history_search(next) {
             var history_data = history.data();
             var regex;
@@ -695,11 +697,17 @@
                 }
             }
         }
+        // -----------------------------------------------------------------------
+        // :: Recalculate number of characters in command line
+        // -----------------------------------------------------------------------
         function change_num_chars() {
             var W = self.width();
             var w = cursor.innerWidth();
             num_chars = Math.floor(W / w);
         }
+        // -----------------------------------------------------------------------
+        // :: Return string repeated n times
+        // -----------------------------------------------------------------------
         function str_repeat(str, n) {
             var result = '';
             for (var i = n; i--;) {
@@ -707,14 +715,25 @@
             }
             return result;
         }
+        // -----------------------------------------------------------------------
+        // :: Split String that fit into command line where first line need to
+        // :: fit next to prompt (need to have less characters)
+        // -----------------------------------------------------------------------
         function get_splited_command_line(string) {
             var first = string.substring(0, num_chars - prompt_len);
             var rest = string.substring(num_chars - prompt_len);
             return [first].concat(str_parts(rest, num_chars));
         }
+        // -----------------------------------------------------------------------
+        // :: Function that display command line. Split long line and place cursor
+        // :: in right place
+        // -----------------------------------------------------------------------
         var redraw = (function(self) {
             var before = cursor.prev();
             var after = cursor.next();
+            // -----------------------------------------------------------------------
+            // :: Draw line with the cursor
+            // -----------------------------------------------------------------------
             function draw_cursor_line(string, position) {
                 var len = string.length;
                 if (position === len) {
@@ -744,6 +763,9 @@
             function div(string) {
                 return '<div>' + $.terminal.encode(string, true) + '</div>';
             }
+            // -----------------------------------------------------------------------
+            // :: Display lines afer cursor
+            // -----------------------------------------------------------------------
             function lines_after(lines) {
                 var last_ins = after;
                 $.each(lines, function(i, line) {
@@ -751,12 +773,18 @@
                         addClass('clear');
                 });
             }
+            // -----------------------------------------------------------------------
+            // :: Display lines before the cursor
+            // -----------------------------------------------------------------------
             function lines_before(lines) {
                 $.each(lines, function(i, line) {
                     before.before(div(line));
                 });
             }
             var count = 0;
+            // -----------------------------------------------------------------------
+            // :: Redraw function
+            // -----------------------------------------------------------------------
             return function() {
                 var string = mask ? command.replace(/./g, '*') : command;
                 var i, first_len;
@@ -881,6 +909,9 @@
             };
         })(self);
         var last_command;
+        // -----------------------------------------------------------------------
+        // :: Draw prompt that can be a function or a string
+        // -----------------------------------------------------------------------
         var draw_prompt = (function() {
             var prompt_node = self.find('.prompt');
             function set(prompt) {
@@ -898,7 +929,9 @@
                 }
             };
         })();
-        // paste content to terminal using hidden textarea
+        // -----------------------------------------------------------------------
+        // :: Paste content to terminal using hidden textarea
+        // -----------------------------------------------------------------------
         function paste() {
             clip.focus();
             //wait until Browser insert text to textarea
@@ -909,6 +942,9 @@
         }
         var first_up_history = true;
         //var prevent_keypress = false;
+        // -----------------------------------------------------------------------
+        // :: Keydown Event Handler
+        // -----------------------------------------------------------------------
         function keydown_event(e) {
             if (typeof options.keydown == 'function') {
                 var result = options.keydown(e);
@@ -1161,6 +1197,9 @@
             } */
         }
         var history_list = [];
+        // -----------------------------------------------------------------------
+        // :: Command Line Methods
+        // -----------------------------------------------------------------------
         $.extend(self, {
             name: function(string) {
                 if (string !== undefined) {
@@ -1316,7 +1355,9 @@
                 }
             }
         });
-        // INIT
+        // -----------------------------------------------------------------------
+        // :: INIT
+        // -----------------------------------------------------------------------
         self.name(options.name || options.prompt || '');
         prompt = options.prompt || '> ';
         draw_prompt();
@@ -1388,8 +1429,10 @@
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])*\/|(\\ |[^ ])+|[\w-]+)/g;
     $.terminal = {
-        // split text into lines with equal length and make each line be renderd
-        // separatly (text formating can be longer then a line).
+        // -----------------------------------------------------------------------
+        // :: split text into lines with equal length so each line can be renderd
+        // :: separatly (text formating can be longer then a line).
+        // -----------------------------------------------------------------------
         split_equal: function(str, length) {
             var re_format = /\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
             var re_begin = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/;
@@ -1485,7 +1528,9 @@
             }
             return result;
         },
-        // encode formating as html for inser into DOM
+        // -----------------------------------------------------------------------
+        // :: Encode formating as html for inser into DOM
+        // -----------------------------------------------------------------------
         encode: function(str, full) {
             // don't escape entities
             if (full) {
@@ -1497,6 +1542,9 @@
                       .replace(/ /g, '&nbsp;')
                       .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
         },
+        // -----------------------------------------------------------------------
+        // :: Replace terminal formatting with html
+        // -----------------------------------------------------------------------
         format: function(str) {
             if (typeof str === 'string') {
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
@@ -1571,17 +1619,27 @@
                 return '';
             }
         },
+        // -----------------------------------------------------------------------
+        // :: Replace brackets with html entities
+        // -----------------------------------------------------------------------
         escape_brackets: function(string) {
             return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
         },
-        // remove formatting from text
+        // -----------------------------------------------------------------------
+        // :: Remove formatting from text
+        // -----------------------------------------------------------------------
         strip: function(str) {
             return str.replace(format_re, '$6');
         },
-        // return active terminal
+        // -----------------------------------------------------------------------
+        // Return active terminal
+        // -----------------------------------------------------------------------
         active: function() {
             return terminals.front();
         },
+        // -----------------------------------------------------------------------
+        // :: Html colors taken from ANSI formatting in Linux Terminal
+        // -----------------------------------------------------------------------
         ansi_colors: {
             normal: {
                 black: '#000',
@@ -1614,6 +1672,9 @@
                 white: '#FFF'
             }
         },
+        // -----------------------------------------------------------------------
+        // :: Replace ANSI formatting with terminal formatting
+        // -----------------------------------------------------------------------
         from_ansi: (function() {
             var color = {
                 30: 'black',
@@ -1739,9 +1800,12 @@
                 return output.join('');
             };
         })(),
-        // function split arguments and work with string like
-        // 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ asd
-        // it create regex and numbers and replace escape characters in double quotes
+        // -----------------------------------------------------------------------
+        // :: Function split arguments and work with string like
+        // :: 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ asd
+        // :: it create regex and numbers and replace escape characters in double
+        // :: quotes
+        // -----------------------------------------------------------------------
         parseArguments: function(string) {
             return $.map(string.match(command_re) || [], function(arg) {
                 if (arg[0] === "'" && arg[arg.length-1] === "'") {
@@ -1772,7 +1836,9 @@
                 }
             });
         },
-        // split arguments it only strip single and double quotes and escape space
+        // -----------------------------------------------------------------------
+        // :: Split arguments it only strip single and double quotes and escape space
+        // -----------------------------------------------------------------------
         splitArguments: function(string) {
             return $.map(string.match(command_re) || [], function(arg) {
                 if (arg[0] === "'" && arg[arg.length-1] === "'") {
@@ -1786,13 +1852,22 @@
                 }
             });
         },
-        // two functions that return object {name,args}
+        // -----------------------------------------------------------------------
+        // :: Function that return object {name,args} arguments are parsed using
+        // :: parseArguments function
+        // -----------------------------------------------------------------------
         parseCommand: function(string) {
             return processCommand(string, $.terminal.parseArguments);
         },
+        // -----------------------------------------------------------------------
+        // :: Same parseCommand but arguments are parsed using splitArguments
+        // -----------------------------------------------------------------------
         splitCommand: function(string) {
             return processCommand(string, $.terminal.splitArguments);
         },
+        // -----------------------------------------------------------------------
+        // :: Test $.terminal functions using terminal
+        // -----------------------------------------------------------------------
         test: function() {
             var term = $('body').terminal().css('margin', 0);
             var margin = term.outerHeight() - term.height();
@@ -1802,34 +1877,34 @@
             }
             $win.resize(size).resize();
             term.echo('Testing...');
-            function assets(cond, msg) {
+            function asset(cond, msg) {
                 term.echo(msg + ' &#91;' + (cond ? '[[b;#44D544;]PASS]' : '[[b;#FF5555;]FAIL]') + '&#93;');
             }
             var string = 'name "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
             var cmd = $.terminal.splitCommand(string);
-            assets(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
+            asset(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
                   cmd.args[1] === 'baz' && cmd.args[2] === '/^asd [x]/' &&
                   cmd.args[3] === 'str str' && cmd.args[4] === '10' &&
                   cmd.args[5] === '1e10', '$.terminal.splitCommand');
             cmd = $.terminal.parseCommand(string);
-            assets(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
+            asset(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
                   cmd.args[1] === 'baz' && $.type(cmd.args[2]) === 'regexp' &&
                   cmd.args[2].source === '^asd [x]' &&
                   cmd.args[3] === 'str str' && cmd.args[4] === 10 &&
                   cmd.args[5] === 1e10, '$.terminal.parseCommand');
             string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mBar\x1b[0m\x1b[7mBaz';
-            assets($.terminal.from_ansi(string) ===
+            asset($.terminal.from_ansi(string) ===
                   '[[;#640000;#008787]Foo][[biu;#44D544;#FF55FF]Bar][[;#000;#AAA]Baz]',
                   '$.terminal.from_ansi');
             string = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz]';
             term.echo('$.terminal.format');
-            assets($.terminal.format(string) === '<span style="font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;text-shadow:0 0 5px #fff;background-color:#000" data-text="Foo">Foo</span><span style="font-style:italic;" class="foo" data-text="Bar">Bar</span><span style="text-decoration:underline line-through overline;" data-text="Baz">Baz</span>', '\tformatting');
+            asset($.terminal.format(string) === '<span style="font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;text-shadow:0 0 5px #fff;background-color:#000" data-text="Foo">Foo</span><span style="font-style:italic;" class="foo" data-text="Bar">Bar</span><span style="text-decoration:underline line-through overline;" data-text="Baz">Baz</span>', '\tformatting');
             string = 'http://terminal.jcubic.pl/examples.php https://www.google.com/?q=jquery%20terminal';
-            assets($.terminal.format(string) === '<a target="_blank" href="http://terminal.jcubic.pl/examples.php">http://terminal.jcubic.pl/examples.php</a> <a target="_blank" href="https://www.google.com/?q=jquery%20terminal">https://www.google.com/?q=jquery%20terminal</a>', '\turls');
+            asset($.terminal.format(string) === '<a target="_blank" href="http://terminal.jcubic.pl/examples.php">http://terminal.jcubic.pl/examples.php</a> <a target="_blank" href="https://www.google.com/?q=jquery%20terminal">https://www.google.com/?q=jquery%20terminal</a>', '\turls');
             string = 'foo@bar.com baz.quux@example.com';
-            assets($.terminal.format(string) === '<a href="mailto:foo@bar.com">foo@bar.com</a> <a href="mailto:baz.quux@example.com">baz.quux@example.com</a>', '\temails');
+            asset($.terminal.format(string) === '<a href="mailto:foo@bar.com">foo@bar.com</a> <a href="mailto:baz.quux@example.com">baz.quux@example.com</a>', '\temails');
             string = '-_-[[biugs;#fff;#000]Foo]-_-[[i;;;foo]Bar]-_-[[ous;;]Baz]-_-';
-            assets($.terminal.strip(string) === '-_-Foo-_-Bar-_-Baz-_-', '$.terminal.strip');
+            asset($.terminal.strip(string) === '-_-Foo-_-Bar-_-Baz-_-', '$.terminal.strip');
             string = '[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sed dolor nisl, in suscipit justo. Donec a enim et est porttitor semper at vitae augue. Proin at nulla at dui mattis mattis. Nam a volutpat ante. Aliquam consequat dui eu sem convallis ullamcorper. Nulla suscipit, massa vitae suscipit ornare, tellus] est [[b;;#f00]consequat nunc, quis blandit elit odio eu arcu. Nam a urna nec nisl varius sodales. Mauris iaculis tincidunt orci id commodo. Aliquam] non magna quis [[i;;]tortor malesuada aliquam] eget ut lacus. Nam ut vestibulum est. Praesent volutpat tellus in eros dapibus elementum. Nam laoreet risus non nulla mollis ac luctus [[ub;#fff;]felis dapibus. Pellentesque mattis elementum augue non sollicitudin. Nullam lobortis fermentum elit ac mollis. Nam ac varius risus. Cras faucibus euismod nulla, ac auctor diam rutrum sit amet. Nulla vel odio erat], ac mattis enim.';
             term.echo('$.terminal.split_equal');
             var cols = [10, 40, 60, 400];
@@ -1842,7 +1917,7 @@
                         break;
                     }
                 }
-                assets(success, '\tsplit ' + cols[i]);
+                asset(success, '\tsplit ' + cols[i]);
             }
         }
     };
@@ -1923,6 +1998,9 @@
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
+    // -----------------------------------------------------------------------
+    // :: Terminal Signatures
+    // -----------------------------------------------------------------------
     var signatures = [
         ['jQuery Terminal', '(c) 2011-2013 jcubic'],
         ['jQuery Terminal Emulator v. ' + version,
@@ -1946,6 +2024,9 @@
          version_string,
          copyright]
     ];
+    // -----------------------------------------------------------------------
+    // :: Default options
+    // -----------------------------------------------------------------------
     $.terminal.defaults = {
         prompt: '> ',
         history: true,
@@ -1970,9 +2051,11 @@
         keypress: $.noop,
         keydown: $.noop
     };
-    // for canceling on CTRL+D
-    var requests = [];
-    var terminals = new Cycle(); //list of terminals global in this scope
+    // -----------------------------------------------------------------------
+    // :: All terminal globals
+    // -----------------------------------------------------------------------
+    var requests = []; // for canceling on CTRL+D
+    var terminals = new Cycle(); // list of terminals global in this scope
     $.fn.terminal = function(init_interpreter, options) {
         // -----------------------------------------------------------------------
         // :: helper function
