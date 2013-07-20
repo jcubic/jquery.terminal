@@ -607,7 +607,7 @@
             },
             clear: function() {
                 data = [];
-                $.Storage.remove(name + 'commands');
+                this.purge();
             },
             enabled: function() {
                 return enabled;
@@ -907,6 +907,7 @@
                 clip.blur().val('');
             });
         }
+        var first_up_history = true;
         //var prevent_keypress = false;
         function keydown_event(e) {
             if (typeof options.keydown == 'function') {
@@ -918,6 +919,10 @@
             }
             if (enabled) {
                 var pos, len, result;
+                if (e.which !== 38 &&
+                    !(e.which === 80 && e.ctrlKey)) {
+                    first_up_history = true;
+                }
                 // arrows / Home / End / ENTER
                 if (reverse_search && (e.which === 35 || e.which === 36 ||
                                        e.which === 37 || e.which === 38 ||
@@ -984,9 +989,10 @@
                 } else if (history && e.which === 38 ||
                            (e.which === 80 && e.ctrlKey)) {
                     //UP ARROW or CTRL+P
-                    if (history.end()) {
+                    if (first_up_history) {
                         last_command = command;
                     }
+                    first_up_history = false;
                     self.set(history.previous());
                 } else if (history && e.which === 40 ||
                            (e.which === 78 && e.ctrlKey)) {
