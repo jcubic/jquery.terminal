@@ -4,7 +4,7 @@
   __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-           \/              /____/                              version 0.7.1
+           \/              /____/                              version 0.7.2
 ```
 http://terminal.jcubic.pl
 
@@ -19,7 +19,7 @@ users. It can also be used to debug your aplication.
 ### Features:
 
 * You can create interpreter for your JSON-RPC service with one line
-  of code.
+  of code (just use url as first argument).
 
 * Support for authentication (you can provide function when user enter
   login and password or if you use JSON-RPC it can automatically call
@@ -50,6 +50,9 @@ users. It can also be used to debug your aplication.
 
 ### Example of usage (javascript interpreter)
 
+This is code that use low level, that give you full control of the comands,
+just pass anything that user type into a function.
+
 ```javascript
 jQuery(function($, undefined) {
     $('#term_demo').terminal(function(command, term) {
@@ -67,6 +70,32 @@ jQuery(function($, undefined) {
         prompt: 'js> '});
 });
 ```
+
+Here is higher level, using object as interpreter, By default terminal will
+parse command that user type and replace number like strings with real numbers
+regex with regexes nad process escape characters in double quoted strings.
+Command foo will execute json-rpc from foo.php file.
+```
+jQuery(function($, undefined) {
+    $('#term_demo').terminal({
+        add: function(a, b) {
+            this.echo(a + b);
+        },
+        foo: 'foo.php',
+        bar: {
+            sub: function(a, b) {
+                this.echo(a - b);
+            }
+        }
+    }, {
+        height: 200,
+        width: 450,
+        prompt: 'demo> '});
+});
+```
+
+More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
+[full documentation](http://terminal.jcubic.pl/api_reference.php).
 
 Licensed under [GNU LGPL Version 3 license](http://www.gnu.org/licenses/lgpl.html)
 

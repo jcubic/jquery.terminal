@@ -4,7 +4,7 @@
     "description": "jQuery Terminal Emulator is a plugin for creating command line interpreters in your applications.",
     "version": "{{VER}}",
     "keywords": [
-        "terminal", "emulator", "prompt", "console", "rpc"
+        "terminal", "emulator", "prompt", "console", "keyboard", "type", "rpc", "input", "ui"
     ],
     "author": {
         "name": "Jakub Jankiewicz",
