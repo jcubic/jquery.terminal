@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 20 Jul 2013 09:55:25 +0000
+ * Date: Sat, 20 Jul 2013 12:56:53 +0000
  */
 
 /*
@@ -2449,12 +2449,28 @@
             }
         }
         // -----------------------------------------------------------------------
+        // :: Save interpreter name for use with purge
+        // -----------------------------------------------------------------------
+        function append_name(interpreter_name) {
+            var name = (settings.name ? settings.name + '_': '') +
+                terminal_id + "_interpreters";
+            var names = $.Storage.get(name);
+            if (names) {
+                names = new Function('return ' + names + ';')();
+            } else {
+                names = [];
+            }
+            names.push(interpreter_name);
+            $.Storage.set(name, $.json_stringify(names));
+        }
+        // -----------------------------------------------------------------------
         // :: Function enable history, set prompt, run interpreter function
         // -----------------------------------------------------------------------
         function prepare_top_interpreter() {
             var interpreter = interpreters.top();
-            var name = settings.name + '_' + terminal_id +
+            var name = (settings.name ? settings.name + '_': '') + terminal_id +
                 (names.length ? '_' + names.join('_') : '');
+            append_name(name);
             command_line.name(name);
             if (typeof interpreter.prompt == 'function') {
                 command_line.prompt(function(command) {
@@ -3163,10 +3179,15 @@
                 // :: until you refresh the browser
                 // -----------------------------------------------------------------------
                 purge: function() {
-                    command_line.purge();
-                    var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
-                    $.Storage.remove(name + 'token');
-                    $.Storage.remove(name + 'login');
+                    var prefix = (settings.name ? settings.name + '_': '') +
+                        terminal_id + '_';
+                    var names = $.Storage.get(prefix + 'interpreters');
+                    $.each(new Function('return ' + names + ';')(), function(_, name) {
+                        $.Storage.remove(name + '_commands');
+                    });
+                    $.Storage.remove(prefix + 'interpreters');
+                    $.Storage.remove(prefix + 'token');
+                    $.Storage.remove(prefix + 'login');
                     return self;
                 },
                 // -----------------------------------------------------------------------
