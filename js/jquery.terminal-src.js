@@ -718,31 +718,31 @@
             function draw_cursor_line(string, position) {
                 var len = string.length;
                 if (position === len) {
-                    before.html($.terminal.encode(string));
+                    before.html($.terminal.encode(string, true));
                     cursor.html('&nbsp;');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
                     //fix for tilda in IE
-                    cursor.html($.terminal.encode(string.slice(0, 1)));
+                    cursor.html($.terminal.encode(string.slice(0, 1), true));
                     //cursor.html($.terminal.encode(string[0]));
-                    after.html($.terminal.encode(string.slice(1)));
+                    after.html($.terminal.encode(string.slice(1), true));
                 } else {
-                    var before_str = $.terminal.encode(string.slice(0, position));
+                    var before_str = $.terminal.encode(string.slice(0, position), true);
                     before.html(before_str);
                     //fix for tilda in IE
                     var c = string.slice(position, position + 1);
                     //cursor.html(string[position]));
-                    cursor.html(c === ' ' ? '&nbsp;' : $.terminal.encode(c));
+                    cursor.html(c === ' ' ? '&nbsp;' : $.terminal.encode(c, true));
                     if (position === string.length - 1) {
                         after.html('');
                     } else {
-                        after.html($.terminal.encode(string.slice(position + 1)));
+                        after.html($.terminal.encode(string.slice(position + 1), true));
                     }
                 }
             }
             function div(string) {
-                return '<div>' + $.terminal.encode(string) + '</div>';
+                return '<div>' + $.terminal.encode(string, true) + '</div>';
             }
             function lines_after(lines) {
                 var last_ins = after;
@@ -836,11 +836,11 @@
                             } else {
                                 // in the middle
                                 if (num_lines === 3) {
-                                    before.before('<div>' + $.terminal.encode(array[0]) +
+                                    before.before('<div>' + $.terminal.encode(array[0], true) +
                                                   '</div>');
                                     draw_cursor_line(array[1], position-first_len-1);
                                     after.after('<div class="clear">' +
-                                                $.terminal.encode(array[2]) +
+                                                $.terminal.encode(array[2], true) +
                                                 '</div>');
                                 } else {
                                     // more lines, cursor in the middle
@@ -1488,12 +1488,14 @@
             return result;
         },
         // encode formating as html for inserto into DOM
-        encode: function(str) {
+        encode: function(str, full) {
             // don't escape entities
-            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;|[^=]+=)/, '&amp;')
-                      .replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                       // I don't think that it find \n
-                       //.replace(/\n/g, '<br/>')
+            if (full) {
+                str = str.replace(/&(?![^=]+=)/g, '&amp;');
+            } else {
+                str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;|[^=]+=)/g, '&amp;');
+            }
+            return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
                       .replace(/ /g, '&nbsp;')
                       .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
         },
@@ -2287,7 +2289,7 @@
         // :: Display prompt and last command
         // -----------------------------------------------------------------------
         function echo_command(command) {
-            command = $.terminal.escape_brackets($.terminal.encode(command));
+            command = $.terminal.escape_brackets($.terminal.encode(command, true));
             var prompt = command_line.prompt();
             if (command_line.mask()) {
                 command = command.replace(/./g, '*');
