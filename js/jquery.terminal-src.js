@@ -1391,9 +1391,9 @@
         // split text into lines with equal length and make each line be renderd
         // separatly (text formating can be longer then a line).
         split_equal: function(str, length) {
-            var re_format = /\[\[([gbius]*;[^;]*;[^;\]]*;|[^\]]*;?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
-            var re_begin = /(\[\[[gbius]*;[^;]*;[^\]]*\])/;
-            var re_last = /\[\[[gbius]*;[^;]*;[^\]]*\]?$/;
+            var re_format = /\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
+            var re_begin = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/;
+            var re_last = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/;
             var formatting = false;
             var in_text = false;
             var braket = 0;
@@ -1466,7 +1466,9 @@
                         count = 0;
                         var matched = output_line.match(re_format);
                         if (matched) {
+                            console.log(output_line);
                             var last = matched[matched.length-1];
+                            console.log(last);
                             if (last[last.length-1] !== ']') {
                                 prev_format = last.match(re_begin)[1];
                                 output_line += ']';
@@ -1483,7 +1485,7 @@
             }
             return result;
         },
-        // encode formating as html for inserto into DOM
+        // encode formating as html for inser into DOM
         encode: function(str, full) {
             // don't escape entities
             if (full) {
