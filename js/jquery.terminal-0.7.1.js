@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Thu, 18 Jul 2013 20:00:13 +0000
+ * Date: Sat, 20 Jul 2013 07:22:47 +0000
  */
 
 /*
@@ -1953,6 +1953,7 @@
         clear: true,
         enabled: true,
         historySize: 60,
+        checkArity: true,
         displayExceptions: true,
         cancelableAjax: true,
         processArguments: true,
@@ -2051,7 +2052,13 @@
                 var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
-                    return val.apply(self, command.args);
+                    if (settings.checkArity && val.length !== command.args.length) {
+                        self.error("&#91;Arity&#93; wrong number of arguments. Function '" +
+                                   command.name + "' expect " + val.length + ' got ' +
+                                   command.args.length);
+                    } else {
+                        return val.apply(self, command.args);
+                    }
                 } else if (type === 'object' || type === 'string') {
                     var commands = [];
                     if (type === 'object') {
