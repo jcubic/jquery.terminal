@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 20 Jul 2013 22:05:33 +0000
+ * Date: Sun, 21 Jul 2013 17:56:08 +0000
  */
 
 
@@ -1414,7 +1414,7 @@
     }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
-        var args = string.split(/( +)/);
+        var args = string.split(/(\s+)/);
         return {
             name: args[0],
             args: fn(args.slice(2).join(''))
@@ -1422,27 +1422,26 @@
     }
     // -------------------------------------------------------------------------
     var format_split_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
-    var format_re = /\[\[([gbiuso]*);([^;]*);([^;\]]*;|[^\]]*);?([^;\]]*;|[^\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
-    var format_re = /\[\[([gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
+    var format_parts_re = /\[\[([gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
+    var format_re = /\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
     var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
     var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])*\/|(\\ |[^ ])+|[\w-]+)/g;
+    var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/;
+    var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/;
     $.terminal = {
         // -----------------------------------------------------------------------
         // :: split text into lines with equal length so each line can be renderd
         // :: separatly (text formating can be longer then a line).
         // -----------------------------------------------------------------------
         split_equal: function(str, length) {
-            var re_format = /\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
-            var re_begin = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/;
-            var re_last = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/;
             var formatting = false;
             var in_text = false;
             var braket = 0;
             var prev_format = '';
             var result = [];
-            var array = str.replace(re_format, function(_, format, text) {
+            var array = str.replace(format_re, function(_, format, text) {
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
                 if (semicolons == 2) {
@@ -1507,19 +1506,17 @@
                         }
                         first_index = j+1;
                         count = 0;
-                        var matched = output_line.match(re_format);
+                        var matched = output_line.match(format_re);
                         if (matched) {
-                            console.log(output_line);
                             var last = matched[matched.length-1];
-                            console.log(last);
                             if (last[last.length-1] !== ']') {
-                                prev_format = last.match(re_begin)[1];
+                                prev_format = last.match(format_begin_re)[1];
                                 output_line += ']';
-                            } else if (output_line.match(re_last)) {
+                            } else if (output_line.match(format_last_re)) {
                                 var line_len = output_line.length;
                                 var f_len = line_len - last[last.length-1].length;
-                                output_line = output_line.replace(re_last, '');
-                                prev_format = last.match(re_begin)[1];
+                                output_line = output_line.replace(format_last_re, '');
+                                prev_format = last.match(format_begin_re)[1];
                             }
                         }
                         result.push(output_line);
@@ -1555,7 +1552,7 @@
                             return text;
                         } else if (text.substring(0,1) === '[') {
                             // use substring for IE quirks mode - [0] don't work
-                            return text.replace(format_re, function(s,
+                            return text.replace(format_parts_re, function(s,
                                                                     style,
                                                                     color,
                                                                     background,
@@ -1629,13 +1626,26 @@
         // :: Remove formatting from text
         // -----------------------------------------------------------------------
         strip: function(str) {
-            return str.replace(format_re, '$6');
+            return str.replace(format_parts_re, '$6');
         },
         // -----------------------------------------------------------------------
-        // Return active terminal
+        // :: Return active terminal
         // -----------------------------------------------------------------------
         active: function() {
             return terminals.front();
+        },
+        // -----------------------------------------------------------------------
+        // :: Replace ntroff (from man) formatting with terminal formatting
+        // -----------------------------------------------------------------------
+        from_ntroff: function(string) {
+            return string.replace(/((?:_\x08.|.\x08_)+)/g, function(full, g) {
+                return '[[u;;]' + full.replace(/_x08|\x08_|_\u0008|\u0008_/g, '') + ']';
+            }).replace(/((?:.\x08.)+)/g, function(full, g) {
+                return '[[b;#fff;]' + full.replace(/(.)(?:\x08|\u0008)(.)/g,
+                                                   function(full, g1, g2) {
+                                                       return g2;
+                                                   }) + ']';
+            });
         },
         // -----------------------------------------------------------------------
         // :: Html colors taken from ANSI formatting in Linux Terminal
@@ -1643,12 +1653,12 @@
         ansi_colors: {
             normal: {
                 black: '#000',
-                red: '#AA0000',
+                red: '#A00',
                 green: '#008400',
-                yellow: '#AA5500',
-                blue: '#0000AA',
-                magenta: '#AA00AA',
-                cyan: '#00AAAA',
+                yellow: '#A50',
+                blue: '#00A',
+                magenta: '#A0A',
+                cyan: '#0AA',
                 white: '#AAA'
             },
             faited: {
@@ -1663,12 +1673,12 @@
             },
             bold: {
                 black: '#000',
-                red: '#FF5555',
+                red: '#F55',
                 green: '#44D544',
-                yellow: '#FFFF55',
-                blue: '#5555FF',
-                magenta: '#FF55FF',
-                cyan: '#55FFFF',
+                yellow: '#FF5',
+                blue: '#55F',
+                magenta: '#F5F',
+                cyan: '#5FF',
                 white: '#FFF'
             }
         },
@@ -2189,7 +2199,6 @@
                                 var args = Array.prototype.slice.call(arguments);
                                 if (settings.checkArity && proc.params &&
                                     proc.params.length !== args.length) {
-                                    console.log(proc);
                                     self.error("&#91;Arity&#93; wrong number of arguments."+
                                                "Function '" + proc.name + "' expect " +
                                                proc.params.length + ' got ' + args.length);
@@ -2247,20 +2256,25 @@
             }
         }
         // -----------------------------------------------------------------------
+        // :: Return exception message as string
+        // -----------------------------------------------------------------------
+        function exception_message(e) {
+            if (typeof e === 'string') {
+                return e;
+            } else {
+                if (typeof e.fileName === 'string') {
+                    return e.fileName + ': ' + e.message;
+                } else {
+                    return e.message;
+                }
+            }
+        }
+        // -----------------------------------------------------------------------
         // :: display Exception on terminal
         // -----------------------------------------------------------------------
         function display_exception(e, label) {
             if (settings.displayExceptions) {
-                var message;
-                if (typeof e === 'string') {
-                    message = e;
-                } else {
-                    if (typeof e.fileName === 'string') {
-                        message = e.fileName + ': ' + e.message;
-                    } else {
-                        message = e.message;
-                    }
-                }
+                var message = exception_message(e);
                 self.error('&#91;' + label + '&#93;: ' + message);
                 if (typeof e.fileName === 'string') {
                     //display filename and line which throw exeption
@@ -2312,49 +2326,61 @@
         // :: will have div container of the line as first argument
         // -----------------------------------------------------------------------
         function draw_line(string, options) {
-            var line_settings = $.extend({
-                raw: false,
-                finalize: $.noop
-            }, options || {});
-            string = $.type(string) === "function" ? string() : string;
-            string = $.type(string) === "string" ? string : String(string);
-            var div, i, len;
-            if (!line_settings.raw) {
-                string = $.terminal.encode(string);
-            }
-            if (!line_settings.raw && (string.length > num_chars || string.match(/\n/))) {
-                var array = $.terminal.split_equal($.terminal.from_ansi(string), num_chars);
+            // prevent exception in display exception
+            try {
+                var line_settings = $.extend({
+                    raw: false,
+                    finalize: $.noop
+                }, options || {});
+                string = $.type(string) === "function" ? string() : string;
+                string = $.type(string) === "string" ? string : String(string);
+                var div, i, len;
+                if (!line_settings.raw) {
+                    string = $.terminal.encode(string);
+                }
+                string = $.terminal.from_ntroff(string);
+                string = $.terminal.from_ansi(string);
+                if (!line_settings.raw && (string.length > num_chars || string.match(/\n/))) {
+                    var array = $.terminal.split_equal(string, num_chars);
 
-                div = $('<div></div>');
-                for (i = 0, len = array.length; i < len; ++i) {
-                    if (array[i] === '' || array[i] === '\r') {
-                        div.append('<div>&nbsp;</div>');
-                    } else {
-                        if (line_settings.raw) {
-                            $('<div/>').html(array[i]);
+                    div = $('<div></div>');
+                    for (i = 0, len = array.length; i < len; ++i) {
+                        if (array[i] === '' || array[i] === '\r') {
+                            div.append('<div>&nbsp;</div>');
                         } else {
-                            $('<div/>').html($.terminal.format(array[i])).appendTo(div);
+                            if (line_settings.raw) {
+                                $('<div/>').html(array[i]);
+                            } else {
+                                $('<div/>').html($.terminal.format(array[i])).appendTo(div);
+                            }
                         }
                     }
+                } else {
+                    if (!line_settings.raw) {
+                        string = $.terminal.format(string);
+                    }
+                    div = $('<div/>').html('<div>' + string + '</div>');
                 }
-            } else {
-                if (!line_settings.raw) {
-                    string = $.terminal.format($.terminal.from_ansi(string));
+                output.append(div);
+                div.width('100%');
+                try {
+                    line_settings.finalize(div);
+                } catch(e) {
+                    display_exception(e, 'echo(finalize)');
                 }
-                div = $('<div/>').html('<div>' + string + '</div>');
+                if (settings.outputLimit >= 0) {
+                    var limit = settings.outputLimit === 0 ? self.rows() : settings.outputLimit;
+                    var lines = output.find('div div');
+                    if (lines.length > limit) {
+                        lines.slice(0, lines.length-limit+1).remove();
+                    }
+                }
+                scroll_to_bottom();
+                return div;
+            } catch(e) {
+                // don't display exception if exception throw in terminal
+                alert('Internal Exception:' + exception_message(e) + '\n' + e.stack);
             }
-            output.append(div);
-            div.width('100%');
-            line_settings.finalize(div);
-            if (settings.outputLimit >= 0) {
-                var limit = settings.outputLimit === 0 ? self.rows() : settings.outputLimit;
-                var lines = output.find('div div');
-                if (lines.length > limit) {
-                    lines.slice(0, lines.length-limit+1).remove();
-                }
-            }
-            scroll_to_bottom();
-            return div;
         }
         // -----------------------------------------------------------------------
         // :: Display user greetings or terminal signature
@@ -3292,8 +3318,9 @@
                         return fun.apply(this, Array.prototype.slice.apply(arguments));
                     } catch(e) {
                         if (_ !== 'exec') { // exec catch by command
-                            display_exception(e, 'TERMINAL');
+                                display_exception(e, 'TERMINAL');
                         }
+                        throw e;
                     }
                 };
             }));
