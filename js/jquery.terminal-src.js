@@ -1406,6 +1406,7 @@
     // :: TOOLS
     // -------------------------------------------------------------------------
     function skipFormattingCount(string) {
+        // this will covert html entities to single characters
         return $('<div>' + $.terminal.strip(string) + '</div>').text().length;
     }
     // -------------------------------------------------------------------------
@@ -1533,7 +1534,7 @@
             if (full) {
                 str = str.replace(/&(?![^=]+=)/g, '&amp;');
             } else {
-                str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;|[^=]+=)/g, '&amp;');
+                str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;|[^= "]+=[^=])/g, '&amp;');
             }
             return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
                       .replace(/ /g, '&nbsp;')
@@ -2139,7 +2140,7 @@
         }
         // -----------------------------------------------------------------------
         // :: Create interpreter function from Object if value is object it will
-        // :: create nested interpterers
+        // :: create nested interpreters
         // -----------------------------------------------------------------------
         function make_object_interpreter(object, arity) {
             // function that maps commands to object methods
@@ -2552,7 +2553,7 @@
         // -----------------------------------------------------------------------
         // :: Save interpreter name for use with purge
         // -----------------------------------------------------------------------
-        function append_name(interpreter_name) {
+        function maybe_append_name(interpreter_name) {
             var name = (settings.name ? settings.name + '_': '') +
                 terminal_id + "_interpreters";
             var names = $.Storage.get(name);
@@ -2561,8 +2562,10 @@
             } else {
                 names = [];
             }
-            names.push(interpreter_name);
-            $.Storage.set(name, $.json_stringify(names));
+            if (!$.inArray(interpreter_name, name)) {
+                names.push(interpreter_name);
+                $.Storage.set(name, $.json_stringify(names));
+            }
         }
         // -----------------------------------------------------------------------
         // :: Function enable history, set prompt, run interpreter function
@@ -2571,7 +2574,7 @@
             var interpreter = interpreters.top();
             var name = (settings.name ? settings.name + '_': '') + terminal_id +
                 (names.length ? '_' + names.join('_') : '');
-            append_name(name);
+            maybe_append_name(name);
             command_line.name(name);
             if (typeof interpreter.prompt == 'function') {
                 command_line.prompt(function(command) {
