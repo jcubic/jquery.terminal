@@ -1,3 +1,6 @@
+0.7.3     Add ANSI 256 (8bit) formatting from Xterm
+          Fix Regexes
+          Add ntroff formatting support (output from man)
 0.7.2     Fix purge, json-rpc, history. Improve json-rpc and add Check Arity
 0.7.1     Add tests
           terminal without eval
