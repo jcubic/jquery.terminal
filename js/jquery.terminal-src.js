@@ -3646,7 +3646,6 @@
                     } else {
                         initialize();
                     }
-                    display_exception('helo', 'USER[echo(finalize)]');
                     self.oneTime(100, function() {
                         $(window).bind('resize.terminal', function() {
                             if (self.is(':visible')) {
