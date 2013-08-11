@@ -2509,9 +2509,10 @@
                     tmp_output.children().appendTo(output);
                 } else {
                     // print all
+                    var wrapper;
                     $.each(output_buffer, function(i, line) {
                         if (line === NEW_LINE) {
-                            var wrapper = $('<div></div>');
+                            wrapper = $('<div></div>');
                         } else if (typeof line === 'function') {
                             wrapper.appendTo(output);
                             try {
@@ -2520,7 +2521,7 @@
                                 display_exception(e, 'USER:echo(finalize)');
                             }
                         } else {
-                            $('<div/>').appendTo(wrapper).width('100%');
+                            $('<div/>').html(line).appendTo(wrapper).width('100%');
                         }
                     });
                 }
