@@ -75,7 +75,8 @@ Here is higher level, using object as interpreter, By default terminal will
 parse command that user type and replace number like strings with real numbers
 regex with regexes nad process escape characters in double quoted strings.
 Command foo will execute json-rpc from foo.php file.
-```
+
+```javascript
 jQuery(function($, undefined) {
     $('#term_demo').terminal({
         add: function(a, b) {
