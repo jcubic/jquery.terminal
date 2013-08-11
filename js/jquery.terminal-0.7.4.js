@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sun, 11 Aug 2013 08:52:42 +0000
+ * Date: Sun, 11 Aug 2013 18:30:56 +0000
  */
 
 
@@ -1543,7 +1543,10 @@
         // -----------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // -----------------------------------------------------------------------
-        format: function(str) {
+        format: function(str, options) {
+            var settings = $.extend({}, {
+                linksNoReferrer: false
+            }, options || {});
             if (typeof str === 'string') {
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splited = str.split(format_split_re);
@@ -1606,7 +1609,9 @@
                         return string.replace(url_re, function(link) {
                             var comma = link.match(/\.$/);
                             link = link.replace(/\.$/, '');
-                            return '<a target="_blank" href="' + link + '">' + link + '</a>' +
+                            return '<a target="_blank"' +
+                                (settings.linksNoReferer ? ' rel="noreferrer" ' : '') +
+                                'href="' + link + '">' + link + '</a>' +
                                 (comma ? '.' : '');
                         }).replace(email_re, '<a href="mailto:$1">$1</a>');
                     } else {
@@ -2146,6 +2151,7 @@
         displayExceptions: true,
         cancelableAjax: true,
         processArguments: true,
+        linksNoReferrer: false,
         login: null,
         outputLimit: -1,
         tabcompletion: null,
@@ -2452,13 +2458,17 @@
                             if (line_settings.raw) {
                                 output_buffer.push(array[i]);
                             } else {
-                                output_buffer.push($.terminal.format(array[i]));
+                                output_buffer.push($.terminal.format(array[i], {
+                                    linksNoReferer: settings.linksNoReferer
+                                }));
                             }
                         }
                     }
                 } else {
                     if (!line_settings.raw) {
-                        string = $.terminal.format(string);
+                        string = $.terminal.format(string, {
+                            linksNoReferer: settings.linksNoReferer
+                        });
                     }
                     output_buffer.push(string);
                 }
