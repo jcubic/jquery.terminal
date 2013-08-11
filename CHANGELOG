@@ -1,3 +1,5 @@
+0.7.4     Fix interpreter when there is not system.describe in JSON-RPC
+          Add method flush and fix refresh
 0.7.3     Add ANSI 256 (8bit) formatting from Xterm
           Fix Regexes
           Add ntroff formatting support (output from man)

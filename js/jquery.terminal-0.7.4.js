@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.7.3
+ *|           \/              /____/                              version 0.7.4
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,12 +22,12 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 27 Jul 2013 10:02:35 +0000
+ * Date: Sun, 11 Aug 2013 06:25:25 +0000
  */
 
 
 (function($, undefined) {
-    "use strict";
+    //"use strict";
     // -----------------------------------------------------------------------
     // :: map object to object
     // -----------------------------------------------------------------------
@@ -2101,7 +2101,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.7.3';
+    var version = '0.7.4';
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2328,7 +2328,7 @@
                     } else {
                         // no procs in system.describe
                         result.interpreter = make_basic_json_rpc_interpreter(interpreter);
-                        result.interpreter = settings.completion;
+                        result.completion = settings.completion;
                     }
                     self.resume();
                     finalize(result);
@@ -2422,7 +2422,11 @@
         // :: the terminal, there are 2 options raw and finalize
         // :: raw - will not encode the string and finalize if a function that
         // :: will have div container of the line as first argument
+        // :: NOTE: it format and append lines to output_buffer the actual append
+        // :: to terminal output happen in flush function
         // -----------------------------------------------------------------------
+        var output_buffer = [];
+        var NEW_LINE = 1;
         function draw_line(string, options) {
             // prevent exception in display exception
             try {
@@ -2432,24 +2436,23 @@
                 }, options || {});
                 string = $.type(string) === "function" ? string() : string;
                 string = $.type(string) === "string" ? string : String(string);
-                var div, i, len;
+                var i, len;
                 if (!line_settings.raw) {
                     string = $.terminal.encode(string);
                 }
                 string = $.terminal.from_ntroff(string);
                 string = $.terminal.from_ansi(string);
+                output_buffer.push(NEW_LINE);
                 if (!line_settings.raw && (string.length > num_chars || string.match(/\n/))) {
                     var array = $.terminal.split_equal(string, num_chars);
-
-                    div = $('<div></div>');
                     for (i = 0, len = array.length; i < len; ++i) {
                         if (array[i] === '' || array[i] === '\r') {
-                            div.append('<div>&nbsp;</div>');
+                            output_buffer.push('&nbsp');
                         } else {
                             if (line_settings.raw) {
-                                $('<div/>').html(array[i]);
+                                output_buffer.push(array[i]);
                             } else {
-                                $('<div/>').html($.terminal.format(array[i])).appendTo(div);
+                                output_buffer.push($.terminal.format(array[i]));
                             }
                         }
                     }
@@ -2457,27 +2460,75 @@
                     if (!line_settings.raw) {
                         string = $.terminal.format(string);
                     }
-                    div = $('<div/>').html('<div>' + string + '</div>');
+                    output_buffer.push(string);
                 }
-                output.append(div);
-                div.width('100%');
-                try {
-                    line_settings.finalize(div);
-                } catch(e) {
-                    display_exception(e, 'echo(finalize)');
-                }
-                if (settings.outputLimit >= 0) {
-                    var limit = settings.outputLimit === 0 ? self.rows() : settings.outputLimit;
-                    var lines = output.find('div div');
-                    if (lines.length > limit) {
-                        lines.slice(0, lines.length-limit+1).remove();
-                    }
-                }
-                scroll_to_bottom();
-                return div;
+                output_buffer.push(line_settings.finalize);
             } catch(e) {
                 // don't display exception if exception throw in terminal
-                alert('Internal Exception:' + exception_message(e) + '\n' + e.stack);
+                alert('Internal Exception(draw_line):' + exception_message(e) + '\n' +
+                      e.stack);
+            }
+        }
+        // -----------------------------------------------------------------------
+        // :: Flush the output to the terminal
+        function flush() {
+            try {
+                if (settings.outputLimit >= 0) {
+                    var rows = self.rows();
+                    var limit = settings.outputLimit === 0 ? rows : settings.outputLimit;
+                    var lines = 0;
+                    var wrapper;
+                    var finalize;
+                    var tmp_output = $('<div/>');
+                    for (var i=output_buffer.length; i--;) {
+                        if (typeof output_buffer[i] === 'function') {
+                            finalize = output_buffer[i];
+                            wrapper = $('<div/>');
+                        } else if (output_buffer[i] === NEW_LINE) {
+                            wrapper.prependTo(tmp_output);
+                            try {
+                                finalize(wrapper);
+                            } catch(e) {
+                                display_exception(e, 'USER:echo(finalize)');
+                            }
+                        } else {
+                            wrapper.prepend('<div>' + output_buffer[i] + '</div>');
+                            if (++lines === limit) {
+                                if (output_buffer[i-1] !== NEW_LINE) {
+                                    // cut in the middle of the line
+                                    try {
+                                        finalize(wrapper);
+                                    } catch(e) {
+                                        display_exception(e, 'USER:echo(finalize)');
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    tmp_output.children().appendTo(output);
+                } else {
+                    // print all
+                    $.each(output_buffer, function(i, line) {
+                        if (line === NEW_LINE) {
+                            var wrapper = $('<div></div>');
+                        } else if (typeof line === 'function') {
+                            wrapper.appendTo(output);
+                            try {
+                                line(wrapper);
+                            } catch(e) {
+                                display_exception(e, 'USER:echo(finalize)');
+                            }
+                        } else {
+                            $('<div/>').appendTo(wrapper).width('100%');
+                        }
+                    });
+                }
+                scroll_to_bottom();
+                output_buffer = [];
+            } catch(e) {
+                alert('flush ' + exception_message(e) + '\n' +
+                      e.stack);
             }
         }
         // -----------------------------------------------------------------------
@@ -2987,7 +3038,11 @@
                 // :: Return number of lines that fit into the height of the therminal
                 // -----------------------------------------------------------------------
                 rows: function() {
-                    return Math.floor(self.height() / self.find('.cursor').height());
+                    var tmp = $('<div class="terminal"><span>&nbsp;</span></div>').
+                        appendTo('body');
+                    var ret = Math.floor(self.height() / tmp.height());
+                    tmp.remove();
+                    return ret;
                 },
                 // -----------------------------------------------------------------------
                 // :: Return History object
@@ -3206,10 +3261,10 @@
                     command_line.resize(num_chars);
                     var o = output.empty().detach();
                     $.each(lines, function(i, line) {
-                        draw_line.apply(null, line);
+                        draw_line.apply(null, line); // line is an array
                     });
                     command_line.before(o);
-                    scroll_to_bottom();
+                    flush();
                     if (typeof settings.onResize === 'function' &&
                         (old_height !== height || old_width !== width)) {
                         settings.onResize(self);
@@ -3220,6 +3275,9 @@
                     }
                     return self;
                 },
+                flush: function() {
+                    flush();
+                },
                 // -----------------------------------------------------------------------
                 // :: Print data to terminal output. It can have two options
                 // :: a function that is called with the container div that holds the
@@ -3228,13 +3286,32 @@
                 // :: If the line is a function it will be called for every redraw.
                 // -----------------------------------------------------------------------
                 echo: function(string, options) {
-                    var settings = $.extend({
-                        raw: false,
-                        finalize: $.noop
-                    }, options || {});
-                    draw_line(string, settings);
-                    lines.push([string, settings]);
-                    on_scrollbar_show_resize();
+                    try {
+                        var settings = $.extend({
+                            flush: true,
+                            raw: false,
+                            finalize: $.noop
+                        }, options || {});
+                        output_buffer = [];
+                        draw_line(string, settings);
+                        if (settings.flush) {
+                            flush();
+                        }
+                        lines.push([string, settings]);
+                        if (settings.outputLimit >= 0) {
+                            var limit = settings.outputLimit === 0 ?
+                                self.rows() :
+                                settings.outputLimit;
+                            var $lines = output.find('div div');
+                            if ($lines.length > limit) {
+                                $lines.slice(0, lines.length-limit+1).remove();
+                            }
+                        }
+                        on_scrollbar_show_resize();
+                    } catch(e) {
+                        alert('terminal.echo ' + exception_message(e) + '\n' +
+                              e.stack);
+                    }
                     return self;
                 },
                 // -----------------------------------------------------------------------
@@ -3558,17 +3635,6 @@
                             self.disable();
                         }
                     });
-                    $(window).bind('resize.terminal', function() {
-                        if (self.is(':visible')) {
-                            var width = self.width();
-                            var height = self.height();
-                            // prevent too many calculations in IE because of resize event
-                            // bug
-                            if (old_height !== height || old_width !== width) {
-                                self.resize();
-                            }
-                        }
-                    });
                     self.click(function() {
                         //if (!(pause && terminals.length() > 1 &&
                         //     self === $.terminal.active())) {
@@ -3580,6 +3646,19 @@
                     } else {
                         initialize();
                     }
+                    self.oneTime(100, function() {
+                        $(window).bind('resize.terminal', function() {
+                            if (self.is(':visible')) {
+                                var width = self.width();
+                                var height = self.height();
+                                // prevent too many calculations in IE because of resize event
+                                // bug
+                                if (old_height !== height || old_width !== width) {
+                                    self.resize();
+                                }
+                            }
+                        });
+                    });
                     if ($.type($.fn.init.prototype.mousewheel) === 'function') {
                         self.mousewheel(function(event, delta) {
                             //self.echo(dir(event));
