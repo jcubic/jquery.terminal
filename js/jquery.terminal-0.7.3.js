@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Thu, 08 Aug 2013 17:59:30 +0000
+ * Date: Sun, 11 Aug 2013 06:11:23 +0000
  */
 
 
@@ -2328,7 +2328,7 @@
                     } else {
                         // no procs in system.describe
                         result.interpreter = make_basic_json_rpc_interpreter(interpreter);
-                        result.interpreter = settings.completion;
+                        result.completion = settings.completion;
                     }
                     self.resume();
                     finalize(result);

@@ -2328,7 +2328,7 @@
                     } else {
                         // no procs in system.describe
                         result.interpreter = make_basic_json_rpc_interpreter(interpreter);
-                        result.interpreter = settings.completion;
+                        result.completion = settings.completion;
                     }
                     self.resume();
                     finalize(result);
