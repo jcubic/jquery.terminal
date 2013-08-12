@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sun, 11 Aug 2013 18:30:56 +0000
+ * Date: Mon, 12 Aug 2013 18:30:15 +0000
  */
 
 
@@ -2483,11 +2483,11 @@
         // :: Flush the output to the terminal
         function flush() {
             try {
+                var wrapper;
                 if (settings.outputLimit >= 0) {
                     var rows = self.rows();
                     var limit = settings.outputLimit === 0 ? rows : settings.outputLimit;
                     var lines = 0;
-                    var wrapper;
                     var finalize;
                     var tmp_output = $('<div/>');
                     for (var i=output_buffer.length; i--;) {
@@ -2519,7 +2519,6 @@
                     tmp_output.children().appendTo(output);
                 } else {
                     // print all
-                    var wrapper;
                     $.each(output_buffer, function(i, line) {
                         if (line === NEW_LINE) {
                             wrapper = $('<div></div>');
