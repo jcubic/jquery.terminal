@@ -1543,7 +1543,10 @@
         // -----------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // -----------------------------------------------------------------------
-        format: function(str) {
+        format: function(str, options) {
+            var settings = $.extend({}, {
+                linksNoReferrer: false
+            }, options || {});
             if (typeof str === 'string') {
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splited = str.split(format_split_re);
@@ -1606,7 +1609,9 @@
                         return string.replace(url_re, function(link) {
                             var comma = link.match(/\.$/);
                             link = link.replace(/\.$/, '');
-                            return '<a target="_blank" href="' + link + '">' + link + '</a>' +
+                            return '<a target="_blank"' +
+                                (settings.linksNoReferer ? ' rel="noreferrer" ' : '') +
+                                'href="' + link + '">' + link + '</a>' +
                                 (comma ? '.' : '');
                         }).replace(email_re, '<a href="mailto:$1">$1</a>');
                     } else {
@@ -2146,6 +2151,7 @@
         displayExceptions: true,
         cancelableAjax: true,
         processArguments: true,
+        linksNoReferrer: false,
         login: null,
         outputLimit: -1,
         tabcompletion: null,
@@ -2452,13 +2458,17 @@
                             if (line_settings.raw) {
                                 output_buffer.push(array[i]);
                             } else {
-                                output_buffer.push($.terminal.format(array[i]));
+                                output_buffer.push($.terminal.format(array[i], {
+                                    linksNoReferer: settings.linksNoReferer
+                                }));
                             }
                         }
                     }
                 } else {
                     if (!line_settings.raw) {
-                        string = $.terminal.format(string);
+                        string = $.terminal.format(string, {
+                            linksNoReferer: settings.linksNoReferer
+                        });
                     }
                     output_buffer.push(string);
                 }
@@ -2473,11 +2483,11 @@
         // :: Flush the output to the terminal
         function flush() {
             try {
+                var wrapper;
                 if (settings.outputLimit >= 0) {
                     var rows = self.rows();
                     var limit = settings.outputLimit === 0 ? rows : settings.outputLimit;
                     var lines = 0;
-                    var wrapper;
                     var finalize;
                     var tmp_output = $('<div/>');
                     for (var i=output_buffer.length; i--;) {
@@ -2509,7 +2519,6 @@
                     tmp_output.children().appendTo(output);
                 } else {
                     // print all
-                    var wrapper;
                     $.each(output_buffer, function(i, line) {
                         if (line === NEW_LINE) {
                             wrapper = $('<div></div>');
