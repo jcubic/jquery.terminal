@@ -2548,7 +2548,14 @@
             if (settings.greetings === undefined) {
                 self.echo(self.signature);
             } else if (settings.greetings) {
-                self.echo(settings.greetings);
+                switch(typeof settings.greetings){
+                    switch 'string':
+                        self.echo(settings.greetings);
+                        break;
+                    switch 'function':
+                        settings.greetings(self.echo);
+                        break;
+                }
             }
         }
         // -----------------------------------------------------------------------
