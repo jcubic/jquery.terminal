@@ -2721,7 +2721,7 @@
             } else {
                 names = [];
             }
-            if (!$.inArray(interpreter_name, names)) {
+            if ($.inArray(interpreter_name, names) == -1) {
                 names.push(interpreter_name);
                 $.Storage.set(name, $.json_stringify(names));
             }

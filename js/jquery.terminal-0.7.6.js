@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 26 Aug 2013 20:11:16 +0000
+ * Date: Mon, 26 Aug 2013 20:16:08 +0000
  */
 
 
@@ -2721,7 +2721,7 @@
             } else {
                 names = [];
             }
-            if (!$.inArray(interpreter_name, names)) {
+            if ($.inArray(interpreter_name, names) == -1) {
                 names.push(interpreter_name);
                 $.Storage.set(name, $.json_stringify(names));
             }
