@@ -2474,6 +2474,7 @@
                 }
                 output_buffer.push(line_settings.finalize);
             } catch(e) {
+                output_buffer = [];
                 // don't display exception if exception throw in terminal
                 alert('Internal Exception(draw_line):' + exception_message(e) + '\n' +
                       e.stack);
@@ -2720,7 +2721,7 @@
             } else {
                 names = [];
             }
-            if (!$.inArray(interpreter_name, name)) {
+            if (!$.inArray(interpreter_name, names)) {
                 names.push(interpreter_name);
                 $.Storage.set(name, $.json_stringify(names));
             }

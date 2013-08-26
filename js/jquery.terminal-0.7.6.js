@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.7.5
+ *|           \/              /____/                              version 0.7.6
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Tue, 13 Aug 2013 03:33:39 +0000
+ * Date: Mon, 26 Aug 2013 20:11:16 +0000
  */
 
 
@@ -2106,7 +2106,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.7.5';
+    var version = '0.7.6';
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -2474,6 +2474,7 @@
                 }
                 output_buffer.push(line_settings.finalize);
             } catch(e) {
+                output_buffer = [];
                 // don't display exception if exception throw in terminal
                 alert('Internal Exception(draw_line):' + exception_message(e) + '\n' +
                       e.stack);
@@ -2720,7 +2721,7 @@
             } else {
                 names = [];
             }
-            if (!$.inArray(interpreter_name, name)) {
+            if (!$.inArray(interpreter_name, names)) {
                 names.push(interpreter_name);
                 $.Storage.set(name, $.json_stringify(names));
             }
