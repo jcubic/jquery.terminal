@@ -953,7 +953,7 @@
                     return result;
                 }
             }
-            if (enabled) {
+            if (enabled && self.css('visibility') !== 'hidden') {
                 var pos, len, result;
                 if (e.which !== 38 &&
                     !(e.which === 80 && e.ctrlKey)) {
