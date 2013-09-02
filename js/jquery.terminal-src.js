@@ -1609,7 +1609,7 @@
                         return string.replace(url_re, function(link) {
                             var comma = link.match(/\.$/);
                             link = link.replace(/\.$/, '');
-                            return '<a target="_blank"' +
+                            return '<a target="_blank" ' +
                                 (settings.linksNoReferer ? ' rel="noreferrer" ' : '') +
                                 'href="' + link + '">' + link + '</a>' +
                                 (comma ? '.' : '');
@@ -1755,6 +1755,7 @@
                 35: 'magenta',
                 36: 'cyan',
                 37: 'white',
+
                 39: 'white' // default color
             };
             var background = {
@@ -1766,6 +1767,7 @@
                 45: 'magenta',
                 46: 'cyan',
                 47: 'white',
+
                 49: 'black' // default background
             };
             function format_ansi(code) {
@@ -1826,28 +1828,28 @@
                         process_8bit = false;
                     }
                 }
-                if (!output_color && reverse) {
-                    output_color = 'black';
+                if (reverse) {
+                    if (output_color && output_background) {
+                        var tmp = output_background;
+                        output_background = output_color;
+                        output_color = tmp;
+                    } else {
+                        output_color = 'black';
+                        output_background = 'white';
+                    }
                 }
-                if (!output_background && reverse) {
-                    output_background = 'white';
-                }
-                if (output_color && output_background && reverse) {
-                    var tmp = output_background;
-                    output_background = output_color;
-                    output_color = tmp;
-                }
-                var colors = $.terminal.ansi_colors.normal;
-                var backgrounds = $.terminal.ansi_colors.normal;
+                var colors, backgrounds;
                 if (bold) {
                     colors = backgrounds = $.terminal.ansi_colors.bold;
                 } else if (faited) {
                     colors = backgrounds = $.terminal.ansi_colors.faited;
+                } else {
+                    colors = backgrounds = $.terminal.ansi_colors.normal;
                 }
                 return [styles.join(''),
                         _8bit_color ? output_color : colors[output_color],
                         _8bit_background ? output_background : backgrounds[output_background]
-                       ]
+                       ];
             }
             return function(input) {
                 var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
@@ -1982,7 +1984,7 @@
         // :: Test $.terminal functions using terminal
         // -----------------------------------------------------------------------
         test: function() {
-            var term = $('body').terminal().css('margin', 0);
+            var term = $('body').terminal($.noop).css('margin', 0);
             var margin = term.outerHeight() - term.height();
             var $win = $(window);
             function size() {
@@ -1990,34 +1992,34 @@
             }
             $win.resize(size).resize();
             term.echo('Testing...');
-            function asset(cond, msg) {
+            function assert(cond, msg) {
                 term.echo(msg + ' &#91;' + (cond ? '[[b;#44D544;]PASS]' : '[[b;#FF5555;]FAIL]') + '&#93;');
             }
             var string = 'name "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
             var cmd = $.terminal.splitCommand(string);
-            asset(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
+            assert(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
                   cmd.args[1] === 'baz' && cmd.args[2] === '/^asd [x]/' &&
                   cmd.args[3] === 'str str' && cmd.args[4] === '10' &&
                   cmd.args[5] === '1e10', '$.terminal.splitCommand');
             cmd = $.terminal.parseCommand(string);
-            asset(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
+            assert(cmd.name === 'name' && cmd.args[0] === 'foo bar' &&
                   cmd.args[1] === 'baz' && $.type(cmd.args[2]) === 'regexp' &&
                   cmd.args[2].source === '^asd [x]' &&
                   cmd.args[3] === 'str str' && cmd.args[4] === 10 &&
                   cmd.args[5] === 1e10, '$.terminal.parseCommand');
             string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mBar\x1b[0m\x1b[7mBaz';
-            asset($.terminal.from_ansi(string) ===
-                  '[[;#640000;#008787]Foo][[biu;#44D544;#FF55FF]Bar][[;#000;#AAA]Baz]',
-                  '$.terminal.from_ansi');
+            assert($.terminal.from_ansi(string) ===
+                  '[[;#640000;#008787]Foo][[biu;#44D544;#F5F]Bar][[;#000;#AAA]Baz]',
+                   '$.terminal.from_ansi');
             string = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz]';
             term.echo('$.terminal.format');
-            asset($.terminal.format(string) === '<span style="font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;text-shadow:0 0 5px #fff;background-color:#000" data-text="Foo">Foo</span><span style="font-style:italic;" class="foo" data-text="Bar">Bar</span><span style="text-decoration:underline line-through overline;" data-text="Baz">Baz</span>', '\tformatting');
+            assert($.terminal.format(string) === '<span style="font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;text-shadow:0 0 5px #fff;background-color:#000" data-text="Foo">Foo</span><span style="font-style:italic;" class="foo" data-text="Bar">Bar</span><span style="text-decoration:underline line-through overline;" data-text="Baz">Baz</span>', '\tformatting');
             string = 'http://terminal.jcubic.pl/examples.php https://www.google.com/?q=jquery%20terminal';
-            asset($.terminal.format(string) === '<a target="_blank" href="http://terminal.jcubic.pl/examples.php">http://terminal.jcubic.pl/examples.php</a> <a target="_blank" href="https://www.google.com/?q=jquery%20terminal">https://www.google.com/?q=jquery%20terminal</a>', '\turls');
+            assert($.terminal.format(string) === '<a target="_blank" href="http://terminal.jcubic.pl/examples.php">http://terminal.jcubic.pl/examples.php</a> <a target="_blank" href="https://www.google.com/?q=jquery%20terminal">https://www.google.com/?q=jquery%20terminal</a>', '\turls');
             string = 'foo@bar.com baz.quux@example.com';
-            asset($.terminal.format(string) === '<a href="mailto:foo@bar.com">foo@bar.com</a> <a href="mailto:baz.quux@example.com">baz.quux@example.com</a>', '\temails');
+            assert($.terminal.format(string) === '<a href="mailto:foo@bar.com">foo@bar.com</a> <a href="mailto:baz.quux@example.com">baz.quux@example.com</a>', '\temails');
             string = '-_-[[biugs;#fff;#000]Foo]-_-[[i;;;foo]Bar]-_-[[ous;;]Baz]-_-';
-            asset($.terminal.strip(string) === '-_-Foo-_-Bar-_-Baz-_-', '$.terminal.strip');
+            assert($.terminal.strip(string) === '-_-Foo-_-Bar-_-Baz-_-', '$.terminal.strip');
             string = '[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sed dolor nisl, in suscipit justo. Donec a enim et est porttitor semper at vitae augue. Proin at nulla at dui mattis mattis. Nam a volutpat ante. Aliquam consequat dui eu sem convallis ullamcorper. Nulla suscipit, massa vitae suscipit ornare, tellus] est [[b;;#f00]consequat nunc, quis blandit elit odio eu arcu. Nam a urna nec nisl varius sodales. Mauris iaculis tincidunt orci id commodo. Aliquam] non magna quis [[i;;]tortor malesuada aliquam] eget ut lacus. Nam ut vestibulum est. Praesent volutpat tellus in eros dapibus elementum. Nam laoreet risus non nulla mollis ac luctus [[ub;#fff;]felis dapibus. Pellentesque mattis elementum augue non sollicitudin. Nullam lobortis fermentum elit ac mollis. Nam ac varius risus. Cras faucibus euismod nulla, ac auctor diam rutrum sit amet. Nulla vel odio erat], ac mattis enim.';
             term.echo('$.terminal.split_equal');
             var cols = [10, 40, 60, 400];
@@ -2030,7 +2032,7 @@
                         break;
                     }
                 }
-                asset(success, '\tsplit ' + cols[i]);
+                assert(success, '\tsplit ' + cols[i]);
             }
         }
     };
