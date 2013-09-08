@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 02 Sep 2013 10:08:33 +0000
+ * Date: Sun, 08 Sep 2013 08:20:42 +0000
  */
 
 
@@ -946,15 +946,15 @@
         // :: Keydown Event Handler
         // -----------------------------------------------------------------------
         function keydown_event(e) {
+            var result, pos, len;
             if (typeof options.keydown == 'function') {
-                var result = options.keydown(e);
+                result = options.keydown(e);
                 if (result !== undefined) {
                     //prevent_keypress = true;
                     return result;
                 }
             }
             if (enabled) {
-                var pos, len, result;
                 if (e.which !== 38 &&
                     !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
@@ -1812,6 +1812,7 @@
                         break;
                     case 7:
                         reverse = true;
+                        break;
                     default:
                         if (_8bit_color && process_8bit && palette[num-1]) {
                             output_color = palette[num-1];
@@ -1867,11 +1868,13 @@
                     if (match) {
                         switch (match[2]) {
                         case 'm':
-                            if (match[1] == '') {
+                            if (match[1] === '') {
                                 continue;
                             }
                             if (match[1] !== '0') {
                                 code = format_ansi(match[1]);
+                            } else {
+                                code = ['', ''];
                             }
                             if (inside) {
                                 output.push(']');
@@ -2475,7 +2478,7 @@
                     output_buffer.push(string);
                 }
                 output_buffer.push(line_settings.finalize);
-            } catch(e) {
+            } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
                 alert('Internal Exception(draw_line):' + exception_message(e) + '\n' +
@@ -2501,7 +2504,7 @@
                             wrapper.prependTo(tmp_output);
                             try {
                                 finalize(wrapper);
-                            } catch(e) {
+                            } catch (e) {
                                 display_exception(e, 'USER:echo(finalize)');
                             }
                         } else {
@@ -2511,7 +2514,7 @@
                                     // cut in the middle of the line
                                     try {
                                         finalize(wrapper);
-                                    } catch(e) {
+                                    } catch (e) {
                                         display_exception(e, 'USER:echo(finalize)');
                                     }
                                 }
@@ -2529,7 +2532,7 @@
                             wrapper.appendTo(output);
                             try {
                                 line(wrapper);
-                            } catch(e) {
+                            } catch (e) {
                                 display_exception(e, 'USER:echo(finalize)');
                             }
                         } else {
@@ -2539,7 +2542,7 @@
                 }
                 scroll_to_bottom();
                 output_buffer = [];
-            } catch(e) {
+            } catch (e) {
                 alert('flush ' + exception_message(e) + '\n' +
                       e.stack);
             }
@@ -2687,7 +2690,7 @@
         function logout() {
             if (typeof settings.onBeforelogout === 'function') {
                 try {
-                    if (settings.onBeforelogout(self) == false) {
+                    if (settings.onBeforelogout(self) === false) {
                         return;
                     }
                 } catch (e) {
@@ -2769,20 +2772,19 @@
         // :: Keydown event handler
         // ---------------------------------------------------------------------
         function key_down(e) {
-            var top = interpreters.top();
+            var result, i, top = interpreters.top();
             if ($.type(top.keydown) === 'function') {
-                var result = top.keydown(e, self);
+                result = top.keydown(e, self);
                 if (result !== undefined) {
                     return result;
                 }
             }
-            var i;
             // after text pasted into textarea in cmd plugin
             self.oneTime(10, function() {
                 on_scrollbar_show_resize();
             });
             if ($.type(settings.keydown) === 'function') {
-                var result = settings.keydown(e, self);
+                result = settings.keydown(e, self);
                 if (result !== undefined) {
                     return result;
                 }
@@ -2814,8 +2816,8 @@
                     if (strings.length == 1) {
                         string = strings[0];
                     } else {
-                        var string = strings[strings.length-1];
-                        for (var i=strings.length-1; i>0;i--) {
+                        string = strings[strings.length-1];
+                        for (i=strings.length-1; i>0;i--) {
                             // treat escape space as part of the string
                             if (strings[i-1][strings[i-1].length-1] == '\\') {
                                 string = strings[i-1] + ' ' + string;
@@ -2888,7 +2890,7 @@
                         if (4 !== r.readyState) {
                             try {
                                 r.abort();
-                            } catch(e) {
+                            } catch (error) {
                                 self.error('error in aborting ajax');
                             }
                         }
@@ -3268,8 +3270,8 @@
                         self.width(width);
                         self.height(height);
                     }
-                    var width = self.width();
-                    var height = self.height();
+                    width = self.width();
+                    height = self.height();
                     num_chars = get_num_chars(self);
                     command_line.resize(num_chars);
                     var o = output.empty().detach();
@@ -3321,7 +3323,7 @@
                             }
                         }
                         on_scrollbar_show_resize();
-                    } catch(e) {
+                    } catch (e) {
                         alert('terminal.echo ' + exception_message(e) + '\n' +
                               e.stack);
                     }
@@ -3506,7 +3508,7 @@
                 return function() {
                     try {
                         return fun.apply(this, Array.prototype.slice.apply(arguments));
-                    } catch(e) {
+                    } catch (e) {
                         if (_ !== 'exec') { // exec catch by command
                                 display_exception(e, 'TERMINAL');
                         }
