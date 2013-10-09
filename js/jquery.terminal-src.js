@@ -1987,13 +1987,16 @@
         // :: Test $.terminal functions using terminal
         // -----------------------------------------------------------------------
         test: function() {
-            var term = $('body').terminal($.noop).css('margin', 0);
-            var margin = term.outerHeight() - term.height();
-            var $win = $(window);
-            function size() {
-                term.css('height', $(window).height()-20);
+            var term = $.terminal.active();
+            if (!term) {
+                term = $('body').terminal($.noop).css('margin', 0);
+                var margin = term.outerHeight() - term.height();
+                var $win = $(window);
+                function size() {
+                    term.css('height', $(window).height()-20);
+                }
+                $win.resize(size).resize();
             }
-            $win.resize(size).resize();
             term.echo('Testing...');
             function assert(cond, msg) {
                 term.echo(msg + ' &#91;' + (cond ? '[[b;#44D544;]PASS]' : '[[b;#FF5555;]FAIL]') + '&#93;');
@@ -2612,7 +2615,6 @@
                                 if (result !== false) {
                                     self.echo(result);
                                 }
-                                self.resize();
                             } else {
                                 if (result === false) {
                                     lines = lines.slice(0, position).
@@ -2622,8 +2624,8 @@
                                         concat([result]).
                                         concat(lines.slice(position+1));
                                 }
-                                self.resize();
                             }
+                            self.resize();
                         }
                     }
                 }
@@ -3272,21 +3274,24 @@
                     }
                     width = self.width();
                     height = self.height();
-                    num_chars = get_num_chars(self);
-                    command_line.resize(num_chars);
-                    var o = output.empty().detach();
-                    $.each(lines, function(i, line) {
-                        draw_line.apply(null, line); // line is an array
-                    });
-                    command_line.before(o);
-                    flush();
-                    if (typeof settings.onResize === 'function' &&
-                        (old_height !== height || old_width !== width)) {
-                        settings.onResize(self);
-                    }
-                    if (old_height !== height || old_width !== width) {
-                        old_height = height;
-                        old_width = width;
+                    var new_num_chars = get_num_chars(self);
+                    if (new_num_chars !== num_chars) { // only if number of chars changed
+                        num_chars = new_num_chars;
+                        command_line.resize(num_chars);
+                        var o = output.empty().detach();
+                        $.each(lines, function(i, line) {
+                            draw_line.apply(null, line); // line is an array
+                        });
+                        command_line.before(o);
+                        flush();
+                        if (typeof settings.onResize === 'function' &&
+                            (old_height !== height || old_width !== width)) {
+                            settings.onResize(self);
+                        }
+                        if (old_height !== height || old_width !== width) {
+                            old_height = height;
+                            old_width = width;
+                        }
                     }
                     return self;
                 },
@@ -3637,7 +3642,6 @@
                         },
                         commands: commands
                     });
-                    num_chars = get_num_chars(self);
                     terminals.append(self);
                     if (settings.enabled === true) {
                         self.focus(undefined, true);
@@ -3661,6 +3665,8 @@
                     } else {
                         initialize();
                     }
+                    //num_chars = get_num_chars(self);
+                    self.resize();
                     self.oneTime(100, function() {
                         $(window).bind('resize.terminal', function() {
                             if (self.is(':visible')) {

@@ -1,4 +1,4 @@
-VERSION=0.7.6
+VERSION=0.7.7
 JSC=java -jar bin/closure.bin/compiler.jar --js
 SED=sed
 CP=cp
