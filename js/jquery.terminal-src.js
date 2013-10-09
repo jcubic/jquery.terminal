@@ -3665,8 +3665,8 @@
                     } else {
                         initialize();
                     }
-                    //num_chars = get_num_chars(self);
-                    self.resize();
+                    num_chars = get_num_chars(self);
+                    command_line.resize(num_chars);
                     self.oneTime(100, function() {
                         $(window).bind('resize.terminal', function() {
                             if (self.is(':visible')) {

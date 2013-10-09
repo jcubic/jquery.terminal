@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 09 Oct 2013 13:30:17 +0000
+ * Date: Wed, 09 Oct 2013 13:38:31 +0000
  */
 
 
@@ -3665,8 +3665,8 @@
                     } else {
                         initialize();
                     }
-                    //num_chars = get_num_chars(self);
-                    self.resize();
+                    num_chars = get_num_chars(self);
+                    command_line.resize(num_chars);
                     self.oneTime(100, function() {
                         $(window).bind('resize.terminal', function() {
                             if (self.is(':visible')) {
