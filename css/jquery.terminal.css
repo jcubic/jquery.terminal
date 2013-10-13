@@ -43,6 +43,7 @@
 }
 .terminal-output > div {
     /*padding-top: 3px;*/
+    min-height: 14px;
 }
 .terminal .terminal-output div span {
     display: inline-block;
