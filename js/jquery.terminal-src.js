@@ -3315,7 +3315,6 @@
                         output_buffer = [];
                         draw_line(string, settings);
                         if (settings.flush) {
-                            console.log('flush');
                             flush();
                         }
                         lines.push([string, settings]);
@@ -3329,7 +3328,6 @@
                             }
                         }
                         on_scrollbar_show_resize();
-                        console.log(string);
                     } catch (e) {
                         // if echo throw exception we can't use error to display that exception
                         alert('terminal.echo ' + exception_message(e) + '\n' +
@@ -3612,6 +3610,7 @@
                     //default name is login so you can pass true
                 })($.type(settings.login) === 'boolean' ? 'login' : settings.login);
             }
+            terminals.append(self);
             if (validate('prompt', settings.prompt)) {
                 var interpreters;
                 var command_line;
@@ -3645,7 +3644,6 @@
                         },
                         commands: commands
                     });
-                    terminals.append(self);
                     if (settings.enabled === true) {
                         self.focus(undefined, true);
                     } else {

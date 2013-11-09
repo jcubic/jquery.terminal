@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.7.7
+ *|           \/              /____/                              version 0.7.8
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Wed, 09 Oct 2013 13:38:31 +0000
+ * Date: Sat, 09 Nov 2013 18:26:07 +0000
  */
 
 
@@ -2114,7 +2114,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.7.7';
+    var version = '0.7.8';
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = 'version ' + version;
     //regex is for placing version string aligned to the right
@@ -3329,6 +3329,7 @@
                         }
                         on_scrollbar_show_resize();
                     } catch (e) {
+                        // if echo throw exception we can't use error to display that exception
                         alert('terminal.echo ' + exception_message(e) + '\n' +
                               e.stack);
                     }
@@ -3609,6 +3610,7 @@
                     //default name is login so you can pass true
                 })($.type(settings.login) === 'boolean' ? 'login' : settings.login);
             }
+            terminals.append(self);
             if (validate('prompt', settings.prompt)) {
                 var interpreters;
                 var command_line;
@@ -3642,7 +3644,6 @@
                         },
                         commands: commands
                     });
-                    terminals.append(self);
                     if (settings.enabled === true) {
                         self.focus(undefined, true);
                     } else {
