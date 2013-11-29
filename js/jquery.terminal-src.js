@@ -2115,8 +2115,9 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version = '{{VER}}';
+    var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
-    var version_string = 'version ' + version;
+    var version_string = version_set ? ' version ' + version : ' ';
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
     // -----------------------------------------------------------------------
@@ -2124,16 +2125,16 @@
     // -----------------------------------------------------------------------
     var signatures = [
         ['jQuery Terminal', '(c) 2011-2013 jcubic'],
-        ['jQuery Terminal Emulator v. ' + version,
+        ['jQuery Terminal Emulator' + (version_set ? ' v. ' + version : ''),
          copyright.replace(/ *<.*>/, '')],
-        ['jQuery Terminal Emulator version ' + version_string,
+        ['jQuery Terminal Emulator' + (version_set ? version_string : ''),
          copyright.replace(/^Copyright /, '')],
         ['      _______                 ________                        __',
          '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
          ' __ / / // / // / _  / _/ // / / / _  / _/     / /  \\/ / _ \\/ /',
          '/  / / // / // / ___/ // // / / / ___/ // / / / / /\\  / // / /__',
          '\\___/____ \\\\__/____/_/ \\__ / /_/____/_//_/ /_/ /_/  \\/\\__\\_\\___/',
-         '         \\/          /____/                                   '.replace(reg, '') +
+         '         \\/          /____/                                   '.replace(reg, ' ') +
          version_string,
          copyright],
         ['      __ _____                     ________                              __',
@@ -2361,10 +2362,17 @@
                     callback(commands);
                 };
                 finalize(result);
-            } else if (type !== 'function') {
-                throw type + " is invalid interpreter value";
             } else {
-                finalize({interpreter: interpreter, completion: settings.completion});
+                // allow $('<div/>).terminal();
+                if (type === 'undefined') {
+                    interpreter = $.noop;
+                } else if (type !== 'function') {
+                    throw type + " is invalid interpreter value";
+                }
+                finalize({
+                    interpreter: interpreter,
+                    completion: settings.completion
+                });
             }
         }
         // -----------------------------------------------------------------------
