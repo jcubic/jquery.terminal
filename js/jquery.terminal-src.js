@@ -673,14 +673,16 @@
         // -----------------------------------------------------------------------
         function reverse_history_search(next) {
             var history_data = history.data();
-            var regex;
+            var regex, save_string;
             var len = history_data.length;
             if (next && reverse_search_position > 0) {
                 len -= reverse_search_position;
             }
             if (reverse_search_string.length > 0) {
                 for (var j=reverse_search_string.length; j>0; j--) {
-                    regex = new RegExp('^' + reverse_search_string.substring(0, j));
+                    save_string = reverse_search_string.substring(0, j).
+                        replace(/([.*+{}\[\]?])/g, '\\$1');
+                    regex = new RegExp(save_string);
                     for (var i=len; i--;) {
                         if (regex.test(history_data[i])) {
                             reverse_search_position = history_data.length - i;
@@ -696,6 +698,7 @@
                     }
                 }
             }
+            reverse_search_string = ''; // clear if not found any
         }
         // -----------------------------------------------------------------------
         // :: Recalculate number of characters in command line
@@ -1078,6 +1081,7 @@
                         command = last_command;
                         redraw();
                         reverse_search = false;
+                        reverse_search_string = '';
                     }
                 } else if (e.which === 39 ||
                            (e.which === 70 && e.ctrlKey)) {

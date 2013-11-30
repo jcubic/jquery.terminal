@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.7.9
+ *|           \/              /____/                              version 0.7.10
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Fri, 29 Nov 2013 07:34:18 +0000
+ * Date: Sat, 30 Nov 2013 12:23:47 +0000
  */
 
 
@@ -673,14 +673,16 @@
         // -----------------------------------------------------------------------
         function reverse_history_search(next) {
             var history_data = history.data();
-            var regex;
+            var regex, save_string;
             var len = history_data.length;
             if (next && reverse_search_position > 0) {
                 len -= reverse_search_position;
             }
             if (reverse_search_string.length > 0) {
                 for (var j=reverse_search_string.length; j>0; j--) {
-                    regex = new RegExp('^' + reverse_search_string.substring(0, j));
+                    save_string = reverse_search_string.substring(0, j).
+                        replace(/([.*+{}\[\]?])/g, '\\$1');
+                    regex = new RegExp(save_string);
                     for (var i=len; i--;) {
                         if (regex.test(history_data[i])) {
                             reverse_search_position = history_data.length - i;
@@ -696,6 +698,7 @@
                     }
                 }
             }
+            reverse_search_string = ''; // clear if not found any
         }
         // -----------------------------------------------------------------------
         // :: Recalculate number of characters in command line
@@ -1078,6 +1081,7 @@
                         command = last_command;
                         redraw();
                         reverse_search = false;
+                        reverse_search_string = '';
                     }
                 } else if (e.which === 39 ||
                            (e.which === 70 && e.ctrlKey)) {
@@ -2114,7 +2118,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.7.9';
+    var version = '0.7.10';
     var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = version_set ? ' version ' + version : ' ';
