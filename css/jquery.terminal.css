@@ -1,3 +1,10 @@
+/*
+ * This css file is part of jquery terminal
+ *
+ * Licensed under GNU LGPL Version 3 license
+ * Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>
+ *
+ */
 .terminal .terminal-output .format, .terminal .cmd .format,
 .terminal .cmd .prompt, .terminal .cmd .prompt div, .terminal .terminal-output div div{
     display: inline-block;
