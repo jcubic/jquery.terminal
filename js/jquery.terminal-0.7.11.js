@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.7.10
+ *|           \/              /____/                              version 0.7.11
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 30 Nov 2013 12:23:47 +0000
+ * Date: Thu, 12 Dec 2013 20:55:07 +0000
  */
 
 
@@ -557,24 +557,16 @@
                 if (enabled) {
                     if (data[data.length-1] !== item) {
                         data.push(item);
-                        pos = data.length-1;
                         if (size && data.length > size) {
                             data = data.slice(-size);
                         }
+                        pos = data.length-1;
                         $.Storage.set(name + 'commands', $.json_stringify(data));
                     }
                 }
             },
             data: function() {
                 return data;
-            },
-            next: function() {
-                if (pos < data.length-1) {
-                    ++pos;
-                }
-                if (pos !== -1) {
-                    return data[pos];
-                }
             },
             reset: function() {
                 pos = data.length-1;
@@ -588,13 +580,24 @@
             position: function() {
                 return pos;
             },
+            current: function() {
+                return data[pos];
+            },
+            next: function() {
+                if (pos < data.length-1) {
+                    ++pos;
+                }
+                if (pos !== -1) {
+                    return data[pos];
+                }
+            },
             previous: function() {
                 var old = pos;
                 if (pos > 0) {
                     --pos;
                 }
                 if (old !== -1) {
-                    return data[old];
+                    return data[pos];
                 }
             },
             clear: function() {
@@ -1030,9 +1033,11 @@
                     //UP ARROW or CTRL+P
                     if (first_up_history) {
                         last_command = command;
+                        self.set(history.current());
+                    } else {
+                        self.set(history.previous());
                     }
                     first_up_history = false;
-                    self.set(history.previous());
                 } else if (history && e.which === 40 ||
                            (e.which === 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
@@ -2118,7 +2123,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.7.10';
+    var version = '0.7.11';
     var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = version_set ? ' version ' + version : ' ';
@@ -3319,6 +3324,7 @@
                 // -----------------------------------------------------------------------
                 echo: function(string, options) {
                     try {
+                        string = string || '';
                         var settings = $.extend({
                             flush: true,
                             raw: false,

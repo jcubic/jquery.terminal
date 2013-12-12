@@ -557,24 +557,16 @@
                 if (enabled) {
                     if (data[data.length-1] !== item) {
                         data.push(item);
-                        pos = data.length-1;
                         if (size && data.length > size) {
                             data = data.slice(-size);
                         }
+                        pos = data.length-1;
                         $.Storage.set(name + 'commands', $.json_stringify(data));
                     }
                 }
             },
             data: function() {
                 return data;
-            },
-            next: function() {
-                if (pos < data.length-1) {
-                    ++pos;
-                }
-                if (pos !== -1) {
-                    return data[pos];
-                }
             },
             reset: function() {
                 pos = data.length-1;
@@ -588,13 +580,24 @@
             position: function() {
                 return pos;
             },
+            current: function() {
+                return data[pos];
+            },
+            next: function() {
+                if (pos < data.length-1) {
+                    ++pos;
+                }
+                if (pos !== -1) {
+                    return data[pos];
+                }
+            },
             previous: function() {
                 var old = pos;
                 if (pos > 0) {
                     --pos;
                 }
                 if (old !== -1) {
-                    return data[old];
+                    return data[pos];
                 }
             },
             clear: function() {
@@ -1030,9 +1033,11 @@
                     //UP ARROW or CTRL+P
                     if (first_up_history) {
                         last_command = command;
+                        self.set(history.current());
+                    } else {
+                        self.set(history.previous());
                     }
                     first_up_history = false;
-                    self.set(history.previous());
                 } else if (history && e.which === 40 ||
                            (e.which === 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
@@ -3319,6 +3324,7 @@
                 // -----------------------------------------------------------------------
                 echo: function(string, options) {
                     try {
+                        string = string || '';
                         var settings = $.extend({
                             flush: true,
                             raw: false,
