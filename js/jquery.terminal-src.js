@@ -1422,12 +1422,17 @@
     function formattingCount(string) {
         return string.length - skipFormattingCount(string);
     }
+    function escape_regex(string) {
+        var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
+        return string.replace(special, '\\$1');
+    }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
         var args = string.split(/(\s+)/);
         return {
             name: args[0],
-            args: fn(args.slice(2).join(''))
+            args: fn(args.slice(2).join('')),
+            rest: string.replace(new RegExp('^' + escape_regex(args[0]) + ' '), '')
         };
     }
     // -------------------------------------------------------------------------
@@ -2845,9 +2850,7 @@
                             }
                         }
                     }
-                    var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
-                    var clean = string.replace(special, '\\$1');
-                    var reg = new RegExp('^' + clean);
+                    var reg = new RegExp('^' + escape_regex(string));
                     interpreters.top().completion(self, string, function(commands) {
                         var test = command_line.get().substring(0, command_line.position());
                         if (test !== command) {
@@ -3684,8 +3687,10 @@
                     } else {
                         initialize();
                     }
-                    num_chars = get_num_chars(self);
-                    command_line.resize(num_chars);
+                    if (self.is(':visible')) {
+                        num_chars = get_num_chars(self);
+                        command_line.resize(num_chars);
+                    }
                     self.oneTime(100, function() {
                         $(window).bind('resize.terminal', function() {
                             if (self.is(':visible')) {

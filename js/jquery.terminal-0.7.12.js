@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.7.11
+ *|           \/              /____/                              version 0.7.12
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Thu, 12 Dec 2013 20:55:07 +0000
+ * Date: Tue, 17 Dec 2013 16:24:17 +0000
  */
 
 
@@ -1422,12 +1422,17 @@
     function formattingCount(string) {
         return string.length - skipFormattingCount(string);
     }
+    function escape_regex(string) {
+        var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
+        return string.replace(special, '\\$1');
+    }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
         var args = string.split(/(\s+)/);
         return {
             name: args[0],
-            args: fn(args.slice(2).join(''))
+            args: fn(args.slice(2).join('')),
+            rest: string.replace(new RegExp('^' + escape_regex(args[0]) + ' '), '')
         };
     }
     // -------------------------------------------------------------------------
@@ -2123,7 +2128,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.7.11';
+    var version = '0.7.12';
     var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = version_set ? ' version ' + version : ' ';
@@ -2845,9 +2850,7 @@
                             }
                         }
                     }
-                    var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
-                    var clean = string.replace(special, '\\$1');
-                    var reg = new RegExp('^' + clean);
+                    var reg = new RegExp('^' + escape_regex(string));
                     interpreters.top().completion(self, string, function(commands) {
                         var test = command_line.get().substring(0, command_line.position());
                         if (test !== command) {
@@ -3684,8 +3687,10 @@
                     } else {
                         initialize();
                     }
-                    num_chars = get_num_chars(self);
-                    command_line.resize(num_chars);
+                    if (self.is(':visible')) {
+                        num_chars = get_num_chars(self);
+                        command_line.resize(num_chars);
+                    }
                     self.oneTime(100, function() {
                         $(window).bind('resize.terminal', function() {
                             if (self.is(':visible')) {
