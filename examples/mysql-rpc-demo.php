@@ -4,8 +4,8 @@ require('json-rpc.php');
 
 if(function_exists('xdebug_disable')) { xdebug_disable(); }
 
-mysql_connect('localhost', 'user', 'password');
-mysql_select_db('database_name');
+@mysql_connect('localhost', 'user', 'password');
+@mysql_select_db('database_name');
 
 class MysqlDemo {
   public function query($query) {
