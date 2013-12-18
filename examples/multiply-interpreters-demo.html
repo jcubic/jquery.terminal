@@ -45,12 +45,11 @@ jQuery(document).ready(function($) {
             term.push(function(command, term) {
                 term.pause();
                 $.jrpc("mysql-rpc-demo.php",
-                       id++,
                        "query",
                        [command],
                        function(data) {
                            term.resume();
-                           if (data.error) {
+                           if (data.error && data.error.message) {
                                term.error(data.error.message);
                            } else {
                                if (typeof data.result == 'boolean') {
