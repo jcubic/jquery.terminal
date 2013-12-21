@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 21 Dec 2013 16:48:46 +0000
+ * Date: Sat, 21 Dec 2013 16:57:21 +0000
  */
 
 
@@ -1503,7 +1503,7 @@
             return str.split(format_split_re);
         },
         // -----------------------------------------------------------------------
-        // :: split text into lines with equal length so each line can be renderd
+        // :: split text into lines with equal length so each line can be rendered
         // :: separatly (text formating can be longer then a line).
         // -----------------------------------------------------------------------
         split_equal: function(str, length) {
@@ -1512,6 +1512,8 @@
             var braket = 0;
             var prev_format = '';
             var result = [];
+            // add format text as 5th paramter to formatting it's used for
+            // data attribute in format function
             var array = str.replace(format_re, function(_, format, text) {
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
@@ -1522,8 +1524,9 @@
                 } else {
                     semicolons = '';
                 }
-                //return '[[' + format + ']' + text + ']';
-                // closing braket will break formatting
+                // return '[[' + format + ']' + text + ']';
+                // closing braket will break formatting so we need to escape those using
+                // html entity equvalent
                 return '[[' + format + semicolons +
                     text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n') + ']' +
                     text + ']';
