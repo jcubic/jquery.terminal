@@ -1409,7 +1409,7 @@
         // characters
         self.data('cmd', self);
         return self;
-    };
+    }; // cmd plugin
 
     // -------------------------------------------------------------------------
     // :: TOOLS
@@ -1422,30 +1422,86 @@
     function formattingCount(string) {
         return string.length - skipFormattingCount(string);
     }
-    function escape_regex(string) {
-        var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
-        return string.replace(special, '\\$1');
-    }
+    // -------------------------------------------------------------------------
+  
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
         var args = string.split(/(\s+)/);
         return {
             name: args[0],
             args: fn(args.slice(2).join('')),
-            rest: string.replace(new RegExp('^' + escape_regex(args[0]) + ' '), '')
+            rest: string.replace(new RegExp('^' + $.terminal.escape_regex(args[0]) + ' '), '')
         };
     }
+    var color_names = [
+        'aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige',
+        'bisque', 'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown',
+        'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral',
+        'cornflowerblue', 'cornsilk', 'crimson', 'cyan', 'darkblue', 'darkcyan',
+        'darkgoldenrod', 'darkgray', 'darkgreen', 'darkkhaki', 'darkmagenta',
+        'darkolivegreen', 'darkorange', 'darkorchid', 'darkred', 'darksalmon',
+        'darkseagreen', 'darkslateblue', 'darkslategray', 'darkturquoise',
+        'darkviolet', 'deeppink', 'deepskyblue', 'dimgray', 'dodgerblue',
+        'firebrick', 'floralwhite', 'forestgreen', 'fuchsia', 'gainsboro',
+        'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'greenyellow',
+        'honeydew', 'hotpink', 'indianred', 'indigo', 'ivory', 'khaki',
+        'lavender', 'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue',
+        'lightcoral', 'lightcyan', 'lightgoldenrodyellow', 'lightgreen',
+        'lightgrey', 'lightpink', 'lightsalmon', 'lightseagreen',
+        'lightskyblue', 'lightslategray', 'lightsteelblue', 'lightyellow',
+        'lime', 'limegreen', 'linen', 'magenta', 'maroon', 'mediumaquamarine',
+        'mediumblue', 'mediumorchid', 'mediumpurple', 'mediumseagreen',
+        'mediumslateblue', 'mediumspringgreen', 'mediumturquoise',
+        'mediumvioletred', 'midnightblue', 'mintcream', 'mistyrose', 'moccasin',
+        'navajowhite', 'navy', 'oldlace', 'olive', 'olivedrab', 'orange',
+        'orangered', 'orchid', 'palegoldenrod', 'palegreen', 'paleturquoise',
+        'palevioletred', 'papayawhip', 'peachpuff', 'peru', 'pink', 'plum',
+        'powderblue', 'purple', 'red', 'rosybrown', 'royalblue', 'saddlebrown',
+        'salmon', 'sandybrown', 'seagreen', 'seashell', 'sienna', 'silver',
+        'skyblue', 'slateblue', 'slategray', 'snow', 'springgreen', 'steelblue',
+        'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat',
+        'white', 'whitesmoke', 'yellow', 'yellowgreen'];
     // -------------------------------------------------------------------------
     var format_split_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
     var format_parts_re = /\[\[([gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
     var format_re = /\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
-    var color_hex_re = /#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})/;
+    var format_full_re = /^\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]$/gi;
+    var color_hex_re = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
     var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])*\/|(\\ |[^ ])+|[\w-]+)/g;
     var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/;
     var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/;
     $.terminal = {
+        // -----------------------------------------------------------------------
+        // :: Validate html color (it can be name or hex)
+        // -----------------------------------------------------------------------
+        valid_color: function(color) {
+            return color.match(color_hex_re) || $.inArray(color, color_names) !== -1;
+        },
+        // -----------------------------------------------------------------------
+        // :: Escape all special regex characters, so it can be use as regex to
+        // :: match exact string that contain those characters
+        // -----------------------------------------------------------------------
+        escape_regex: function(string) {
+            var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
+            return string.replace(special, '\\$1');
+        },
+        // -----------------------------------------------------------------------
+        // :: test if string contain formatting
+        // -----------------------------------------------------------------------
+        have_formatting: function(str) {
+            return str.match(format_re);
+        },
+        is_formatting: function(str) {
+            return str.match(format_full_re);
+        },
+        // -----------------------------------------------------------------------
+        // :: return array of formatting and text between them
+        // -----------------------------------------------------------------------
+        format_split: function(str) {
+            return str.split(format_split_re);
+        },
         // -----------------------------------------------------------------------
         // :: split text into lines with equal length so each line can be renderd
         // :: separatly (text formating can be longer then a line).
@@ -1563,7 +1619,7 @@
             }, options || {});
             if (typeof str === 'string') {
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
-                var splited = str.split(format_split_re);
+                var splited = $.terminal.format_split(str);
                 if (splited && splited.length > 1) {
                     str = $.map(splited, function(text) {
                         if (text === '') {
@@ -1596,21 +1652,31 @@
                                     text_decoration.push('overline');
                                 }
                                 if (text_decoration.length) {
-                                    style_str += 'text-decoration:' + text_decoration.join(' ') + ';';
+                                    style_str += 'text-decoration:' +
+                                        text_decoration.join(' ') + ';';
                                 }
                                 if (style.indexOf('i') !== -1) {
                                     style_str += 'font-style:italic;';
                                 }
-                                if (color.match(color_hex_re)) {
+                                if ($.terminal.valid_color(color)) {
                                     style_str += 'color:' + color + ';';
                                     if (style.indexOf('g') !== -1) {
                                         style_str += 'text-shadow:0 0 5px ' + color + ';';
                                     }
                                 }
-                                if (background.match(color_hex_re)) {
+                                if ($.terminal.valid_color(background)) {
                                     style_str += 'background-color:' + background;
                                 }
-                                var result = '<span style="' + style_str + '"' + (_class !== '' ? ' class="' + _class + '"' : '') + ' data-text="'+ (data_text==='' ? text : data_text.replace(/&#93;/g, ']')).replace('"', '&quote;') + '">' + text + '</span>';
+                                var data;
+                                if (data_text === '') {
+                                    data = text;
+                                } else {
+                                    data = data_text.replace(/&#93;/g, ']');
+                                }
+                                var result = '<span style="' + style_str + '"' +
+                                    (_class !== '' ? ' class="' + _class + '"' : '') +
+                                    ' data-text="'+ data.replace('"', '&quote;') +
+                                    '">' + text + '</span>';
                                 return result;
                             });
                         } else {
@@ -2662,10 +2728,10 @@
         // :: and call user login function with callback that set token
         // :: if user call it with value that is truthy
         // -----------------------------------------------------------------------
-        function login() {
+        function login(authenticate, success) {
             var user = null;
             command_line.prompt('login: ');
-            // don't stor logins in history
+            // don't store logins in history
             if (settings.history) {
                 command_line.history().disable();
             }
@@ -2683,15 +2749,22 @@
                             throw "Value of login property must be a function";
                         }
                         var passwd = command;
-                        settings.login(user, passwd, function(token) {
+                        authenticate(user, passwd, function(token) {
                             if (token) {
                                 var name = settings.name;
                                 name = (name ?  name + '_': '') + terminal_id + '_';
                                 $.Storage.set(name + 'token', token);
                                 $.Storage.set(name + 'login', user);
-                                //restore commands and run interpreter
+                                // restore commands and run interpreter
                                 command_line.commands(commands);
-                                initialize();
+                                if (settings.history) {
+                                    command_line.history().enable();
+                                }
+                                if (typeof success == 'function') {
+                                    // will be used only on init since users have know when
+                                    // login success
+                                    success();
+                                }
                             } else {
                                 self.error('Wrong password try again');
                                 command_line.prompt('login: ');
@@ -2725,10 +2798,7 @@
             var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
             $.Storage.remove(name + 'token');
             $.Storage.remove(name + 'login');
-            if (settings.history) {
-                command_line.history().disable();
-            }
-            login();
+            login(settings.login, initialize);
             if (typeof settings.onAfterlogout === 'function') {
                 try {
                     settings.onAfterlogout(self);
@@ -2779,9 +2849,6 @@
         // ---------------------------------------------------------------------
         function initialize() {
             prepare_top_interpreter();
-            if (settings.history) {
-                command_line.history().enable();
-            }
             show_greetings();
             if (typeof settings.onInit === 'function') {
                 try {
@@ -2850,7 +2917,7 @@
                             }
                         }
                     }
-                    var reg = new RegExp('^' + escape_regex(string));
+                    var reg = new RegExp('^' + $.terminal.escape_regex(string));
                     interpreters.top().completion(self, string, function(commands) {
                         var test = command_line.get().substring(0, command_line.position());
                         if (test !== command) {
@@ -3018,6 +3085,14 @@
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Prompt for login and password
+                // -----------------------------------------------------------------------
+                login: login,
+                // -----------------------------------------------------------------------
+                // :: User defined settings and defaults as well
+                // -----------------------------------------------------------------------
+                settings: settings,
                 // -----------------------------------------------------------------------
                 // :: Return commands function from top interpreter
                 // -----------------------------------------------------------------------
@@ -3683,7 +3758,7 @@
                     });
                     if (settings.login && self.token && !self.token() && self.login_name &&
                         !self.login_name()) {
-                        login();
+                        login(settings.login, initialize);
                     } else {
                         initialize();
                     }
