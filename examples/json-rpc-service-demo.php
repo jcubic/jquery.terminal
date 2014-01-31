@@ -1,8 +1,10 @@
 <?php
 
-require('json-rpc.php');
+require('json-rpc/json-rpc.php');
 
-if(function_exists('xdebug_disable')) { xdebug_disable(); }
+if (function_exists('xdebug_disable')) {
+    xdebug_disable();
+}
 
 class Demo {
   static $login_documentation = "login to the server (return token)";
