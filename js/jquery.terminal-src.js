@@ -649,7 +649,7 @@
         var name, history;
         var cursor = self.find('.cursor');
         // -----------------------------------------------------------------------
-        // ::Blinking cursor function
+        // :: Blinking cursor function
         // -----------------------------------------------------------------------
         function blink(i) {
             cursor.toggleClass('inverted');
@@ -1422,8 +1422,6 @@
     function formattingCount(string) {
         return string.length - skipFormattingCount(string);
     }
-    // -------------------------------------------------------------------------
-  
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
         var args = string.split(/(\s+)/);
@@ -2580,68 +2578,6 @@
             }
         }
         // -----------------------------------------------------------------------
-        // :: Flush the output to the terminal
-        function flush() {
-            try {
-                var wrapper;
-                if (settings.outputLimit >= 0) {
-                    var rows = self.rows();
-                    var limit = settings.outputLimit === 0 ? rows : settings.outputLimit;
-                    var lines = 0;
-                    var finalize;
-                    var tmp_output = $('<div/>');
-                    for (var i=output_buffer.length; i--;) {
-                        if (typeof output_buffer[i] === 'function') {
-                            finalize = output_buffer[i];
-                            wrapper = $('<div/>');
-                        } else if (output_buffer[i] === NEW_LINE) {
-                            wrapper.prependTo(tmp_output);
-                            try {
-                                finalize(wrapper);
-                            } catch (e) {
-                                display_exception(e, 'USER:echo(finalize)');
-                            }
-                        } else {
-                            wrapper.prepend('<div>' + output_buffer[i] + '</div>');
-                            if (++lines === limit) {
-                                if (output_buffer[i-1] !== NEW_LINE) {
-                                    // cut in the middle of the line
-                                    try {
-                                        finalize(wrapper);
-                                    } catch (e) {
-                                        display_exception(e, 'USER:echo(finalize)');
-                                    }
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    tmp_output.children().appendTo(output);
-                } else {
-                    // print all
-                    $.each(output_buffer, function(i, line) {
-                        if (line === NEW_LINE) {
-                            wrapper = $('<div></div>');
-                        } else if (typeof line === 'function') {
-                            wrapper.appendTo(output);
-                            try {
-                                line(wrapper);
-                            } catch (e) {
-                                display_exception(e, 'USER:echo(finalize)');
-                            }
-                        } else {
-                            $('<div/>').html(line).appendTo(wrapper).width('100%');
-                        }
-                    });
-                }
-                scroll_to_bottom();
-                output_buffer = [];
-            } catch (e) {
-                alert('flush ' + exception_message(e) + '\n' +
-                      e.stack);
-            }
-        }
-        // -----------------------------------------------------------------------
         // :: Display user greetings or terminal signature
         // -----------------------------------------------------------------------
         function show_greetings() {
@@ -2726,62 +2662,7 @@
                 throw e;
             }
         }
-        // -----------------------------------------------------------------------
-        // :: Functions change prompt of command line to login to password
-        // :: and call user login function with callback that set token
-        // :: if user call it with value that is truthy
-        // -----------------------------------------------------------------------
-        function login(authenticate, success) {
-            var user = null;
-            command_line.prompt('login: ');
-            // don't store logins in history
-            if (settings.history) {
-                command_line.history().disable();
-            }
-            command_line.commands(function(command) {
-                try {
-                    echo_command(command);
-                    if (!user) {
-                        user = command;
-                        command_line.prompt('password: ');
-                        command_line.mask(true);
-                    } else {
-                        command_line.mask(false);
-                        self.pause();
-                        if (typeof settings.login !== 'function') {
-                            throw "Value of login property must be a function";
-                        }
-                        var passwd = command;
-                        authenticate(user, passwd, function(token) {
-                            if (token) {
-                                var name = settings.name;
-                                name = (name ?  name + '_': '') + terminal_id + '_';
-                                $.Storage.set(name + 'token', token);
-                                $.Storage.set(name + 'login', user);
-                                // restore commands and run interpreter
-                                command_line.commands(commands);
-                                if (settings.history) {
-                                    command_line.history().enable();
-                                }
-                                if (typeof success == 'function') {
-                                    // will be used only on init since users have know when
-                                    // login success
-                                    success();
-                                }
-                            } else {
-                                self.error('Wrong password try again');
-                                command_line.prompt('login: ');
-                                user = null;
-                            }
-                            self.resume();
-                        }, self);
-                    }
-                } catch (e) {
-                    display_exception(e, 'LOGIN', self);
-                    throw e;
-                }
-            });
-        }
+        
         // -----------------------------------------------------------------------
         // :: Logout function remove Storage, disable history and run login function
         // :: this function is call only when options.login function is defined
@@ -2801,7 +2682,7 @@
             var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
             $.Storage.remove(name + 'token');
             $.Storage.remove(name + 'login');
-            login(settings.login, initialize);
+            self.login(settings.login, initialize);
             if (typeof settings.onAfterlogout === 'function') {
                 try {
                     settings.onAfterlogout(self);
@@ -3014,11 +2895,11 @@
             var names = []; // stack if interpeter names
             var scroll_object;
             var prev_command;
+            var loged_in = false;
             var tab_count = 0; // for tab completion
             // array of line objects:
-            // - string (printed as-is)
             // - function (called whenever necessary, result is printed)
-            // - array (expected form: [line, finalize function])
+            // - array (expected form: [line, settings])
             // - anything else (cast to string when painted)
             var lines = [];
             var output; // .terminal-output jquery object
@@ -3089,9 +2970,62 @@
                     return self;
                 },
                 // -----------------------------------------------------------------------
-                // :: Prompt for login and password
+                // :: Functions change prompt of command line to login to password
+                // :: and call user login function with callback that set token
+                // :: if user call it with value that is truthy
                 // -----------------------------------------------------------------------
-                login: login,
+                login: function(authenticate, success) {
+                    var user = null;
+                    command_line.prompt('login: ');
+                    // don't store logins in history
+                    if (settings.history) {
+                        command_line.history().disable();
+                    }
+                    command_line.commands(function(command) {
+                        try {
+                            echo_command(command);
+                            if (!user) {
+                                user = command;
+                                command_line.prompt('password: ');
+                                command_line.mask(true);
+                            } else {
+                                command_line.mask(false);
+                                self.pause();
+                                if (typeof settings.login !== 'function') {
+                                    throw "Value of login property must be a function";
+                                }
+                                var passwd = command;
+                                authenticate(user, passwd, function(token) {
+                                    if (token) {
+                                        var name = settings.name;
+                                        name = (name ?  name + '_': '') + terminal_id + '_';
+                                        $.Storage.set(name + 'token', token);
+                                        $.Storage.set(name + 'login', user);
+                                        // restore commands and run interpreter
+                                        command_line.commands(commands);
+                                        if (settings.history) {
+                                            command_line.history().enable();
+                                        }
+                                        if (typeof success == 'function') {
+                                            // will be used only on init since users have
+                                            // know when login success (they decide when it
+                                            // happen by calling the callback - this funtion)
+                                            success();
+                                        }
+                                    } else {
+                                        self.error('Wrong password try again');
+                                        command_line.prompt('login: ');
+                                        user = null;
+                                    }
+                                    self.resume();
+                                }, self);
+                            }
+                        } catch (e) {
+                            display_exception(e, 'LOGIN', self);
+                            throw e;
+                        }
+                    });
+                },
                 // -----------------------------------------------------------------------
                 // :: User defined settings and defaults as well
                 // -----------------------------------------------------------------------
@@ -3381,7 +3315,7 @@
                             draw_line.apply(null, line); // line is an array
                         });
                         command_line.before(o);
-                        flush();
+                        self.flush();
                         if (typeof settings.onResize === 'function' &&
                             (old_height !== height || old_width !== width)) {
                             settings.onResize(self);
@@ -3393,8 +3327,74 @@
                     }
                     return self;
                 },
+                // -----------------------------------------------------------------------
+                // :: Flush the output to the terminal
+                // -----------------------------------------------------------------------
                 flush: function() {
-                    flush();
+                    try {
+                        var wrapper;
+                        if (settings.outputLimit >= 0) {
+                            var rows = self.rows();
+                            var limit;
+                            if (settings.outputLimit === 0) {
+                                limit = rows;
+                            } else {
+                                limit = settings.outputLimit;
+                            }
+                            var lines = 0;
+                            var finalize;
+                            var tmp_output = $('<div/>');
+                            for (var i=output_buffer.length; i--;) {
+                                if (typeof output_buffer[i] === 'function') {
+                                    finalize = output_buffer[i];
+                                    wrapper = $('<div/>');
+                                } else if (output_buffer[i] === NEW_LINE) {
+                                    wrapper.prependTo(tmp_output);
+                                    try {
+                                        finalize(wrapper);
+                                    } catch (e) {
+                                        display_exception(e, 'USER:echo(finalize)');
+                                    }
+                                } else {
+                                    wrapper.prepend('<div>' + output_buffer[i] + '</div>');
+                                    if (++lines === limit) {
+                                        if (output_buffer[i-1] !== NEW_LINE) {
+                                            // cut in the middle of the line
+                                            try {
+                                                finalize(wrapper);
+                                            } catch (e) {
+                                                display_exception(e, 'USER:echo(finalize)');
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            tmp_output.children().appendTo(output);
+                        } else {
+                            // print all
+                            $.each(output_buffer, function(i, line) {
+                                if (line === NEW_LINE) {
+                                    wrapper = $('<div></div>');
+                                } else if (typeof line === 'function') {
+                                    wrapper.appendTo(output);
+                                    try {
+                                        line(wrapper);
+                                    } catch (e) {
+                                        display_exception(e, 'USER:echo(finalize)');
+                                    }
+                                } else {
+                                    $('<div/>').html(line).appendTo(wrapper).width('100%');
+                                }
+                            });
+                        }
+                        scroll_to_bottom();
+                        output_buffer = [];
+                    } catch (e) {
+                        alert('flush ' + exception_message(e) + '\n' +
+                              e.stack);
+                    }
+                    return self;
                 },
                 // -----------------------------------------------------------------------
                 // :: Print data to terminal output. It can have two options
@@ -3414,7 +3414,7 @@
                         output_buffer = [];
                         draw_line(string, settings);
                         if (settings.flush) {
-                            flush();
+                            self.flush();
                         }
                         lines.push([string, settings]);
                         if (settings.outputLimit >= 0) {
@@ -3454,15 +3454,14 @@
                         }
                         pos = scroll_object.prop('scrollTop');
                         scroll_object.scrollTop(pos + amount);
-                        return self;
                     } else {
                         if (amount > scroll_object.attr('scrollTop') && amount > 0) {
                             scroll_object.attr('scrollTop', 0);
                         }
                         pos = scroll_object.attr('scrollTop');
                         scroll_object.scrollTop(pos + amount);
-                        return self;
                     }
+                    return self;
                 },
                 // -----------------------------------------------------------------------
                 // :: Exit all interpreters and logout the function will throw exception
@@ -3759,9 +3758,8 @@
                         //     self === $.terminal.active())) {
                         self.focus();
                     });
-                    if (settings.login && self.token && !self.token() && self.login_name &&
-                        !self.login_name()) {
-                        login(settings.login, initialize);
+                    if (settings.login && !self.token() && !self.login_name()) {
+                        self.login(settings.login, initialize);
                     } else {
                         initialize();
                     }
