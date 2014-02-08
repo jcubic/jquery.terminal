@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Fri, 31 Jan 2014 09:52:22 +0000
+ * Date: Sat, 08 Feb 2014 19:45:56 +0000
  */
 
 
@@ -550,7 +550,7 @@
             name += '_';
         }
         var data = $.Storage.get(name + 'commands');
-        data = data ? new Function('return ' + data + ';')() : [];
+        data = data ? $.parseJSON(data) : [];
         var pos = data.length-1;
         $.extend(this, {
             append: function(item) {
@@ -2073,10 +2073,9 @@
                 term = $('body').terminal($.noop).css('margin', 0);
                 var margin = term.outerHeight() - term.height();
                 var $win = $(window);
-                function size() {
+                $win.resize(function() {
                     term.css('height', $(window).height()-20);
-                }
-                $win.resize(size).resize();
+                }).resize();
             }
             term.echo('Testing...');
             function assert(cond, msg) {
@@ -2335,15 +2334,15 @@
         // :: Create interpreter function from Object if value is object it will
         // :: create nested interpreters
         // -----------------------------------------------------------------------
-        function make_object_interpreter(object, arity) {
+        function make_object_interpreter(object, arity, fallback) {
             // function that maps commands to object methods
             // it keeps terminal context
-            return function(command, terminal) {
-                if (command === '') {
+            return function(user_command, terminal) {
+                if (user_command === '') {
                     return;
                 }
                 //command = split_command_line(command);
-                command = get_processed_command(command);
+                command = get_processed_command(user_command);
                 var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
@@ -2372,73 +2371,141 @@
                         } : undefined
                     });
                 } else {
-                    terminal.error("Command '" + command.name + "' Not Found");
+                    if ($.type(fallback) === 'function') {
+                        fallback(user_command, self);
+                    } else if ($.type(settings.onCommandNotFound) === 'function') {
+                        settings.onCommandNotFound(user_command, self);
+                    } else {
+                        terminal.error("Command '" + command.name + "' Not Found");
+                    }
                 }
             };
         }
         // -----------------------------------------------------------------------
-        function make_interpreter(interpreter, finalize) {
-            finalize = finalize || $.noop;
-            var type = $.type(interpreter);
-            var result = {};
-            if (type === 'string') {
-                self.pause();
-                $.jrpc(interpreter, 'system.describe', [], function(ret) {
-                    var commands = [];
-                    if (ret.procs) {
-                        var interpreter_object = {};
-                        $.each(ret.procs, function(_, proc) {
-                            commands.push(proc.name);
-                            interpreter_object[proc.name] = function() {
-                                var args = Array.prototype.slice.call(arguments);
-                                if (settings.checkArity && proc.params &&
-                                    proc.params.length !== args.length) {
-                                    self.error("&#91;Arity&#93; wrong number of arguments."+
-                                               "Function '" + proc.name + "' expect " +
-                                               proc.params.length + ' got ' + args.length);
-                                } else {
-                                    self.pause();
-                                    $.jrpc(interpreter, proc.name, args, function(json) {
-                                        if (!json.error) {
-                                            display_object(json.result);
-                                        } else {
-                                            self.error('&#91;RPC&#93; ' + json.error.message);
-                                        }
-                                        self.resume();
-                                    }, function(xhr, status, error) {
-                                        if (status !== 'abort') {
-                                            self.error('&#91;AJAX&#93; ' + status +
-                                                       ' - Server reponse is: \n' +
-                                                       xhr.responseText);
-                                        }
-                                        self.resume();
-                                    });
-                                }
-                            };
-                        });
-                        result.interpreter = make_object_interpreter(interpreter_object,
-                                                                     false);
-                        result.completion = function(term, string, callback) {
-                            callback(commands);
+        function make_json_rpc_object(url, complete) {
+            $.jrpc(url, 'system.describe', [], function(ret) {
+                var commands = [];
+                if (ret.procs) {
+                    var interpreter_object = {};
+                    $.each(ret.procs, function(_, proc) {
+                        interpreter_object[proc.name] = function() {
+                            var args = Array.prototype.slice.call(arguments);
+                            if (settings.checkArity && proc.params &&
+                                proc.params.length !== args.length) {
+                                self.error("&#91;Arity&#93; wrong number of arguments."+
+                                           "Function '" + proc.name + "' expect " +
+                                           proc.params.length + ' got ' + args.length);
+                            } else {
+                                self.pause();
+                                $.jrpc(url, proc.name, args, function(json) {
+                                    if (!json.error) {
+                                        display_object(json.result);
+                                    } else {
+                                        self.error('&#91;RPC&#93; ' + json.error.message);
+                                    }
+                                    self.resume();
+                                }, function(xhr, status, error) {
+                                    if (status !== 'abort') {
+                                        self.error('&#91;AJAX&#93; ' + status +
+                                                   ' - Server reponse is: \n' +
+                                                   xhr.responseText);
+                                    }
+                                    self.resume();
+                                });
+                            }
                         };
+                    });
+                    complete(interpreter_object);
+                } else {
+                    complete(null);
+                }
+            }, function() {
+                complete(null);
+            });
+        }
+        // -----------------------------------------------------------------------
+        function make_interpreter(user_interpreter, finalize) {
+            finalize = finalize || $.noop;
+            var type = $.type(user_interpreter);
+            var result = {};
+            var commands;
+            var rpc_count = 0;
+            var function_interpreter;
+            if (type === 'array') {
+                var object = {};
+                (function chain(interpreters, success) {
+                    if (interpreters.length) {
+                        var interpreter = interpreters[0];
+                        var type = $.type(interpreter);
+                        if (type === 'string') {
+                            rpc_count++;
+                            self.pause();
+                            if (settings.ignoreSystemDescribe) {
+                                if (rpc_count === 1) {
+                                    function_interpreter = make_basic_json_rpc_interpreter(interpreter);
+                                } else {
+                                    throw new Error("You can use only one rpc with ignoreSystemDescribe");
+                                }
+                                chain(interpreters.slice(1), success);
+                            } else {
+                                make_json_rpc_object(interpreter, function(new_object) {
+                                    // will ignore rpc in array that don't have system.describe
+                                    if (new_object) {
+                                        $.extend(object, new_object);
+                                    }
+                                    self.resume();
+                                    chain(interpreters.slice(1), success);
+                                });
+                            }
+                        } else if (type === 'function') {
+                            if (function_interpreter) {
+                                throw new Exception("You can't use more then one function (rpc with " +
+                                                    "ignoreSystemDescribe is count as one)");
+                            } else {
+                                function_interpreter = interpreter;
+                            }
+                        } else if (type === 'object') {
+                            $.extend(object, interpreter);
+                            chain(interpreters.slice(1), success);
+                        }
                     } else {
-                        // no procs in system.describe
-                        result.interpreter = make_basic_json_rpc_interpreter(interpreter);
-                        result.completion = settings.completion;
+                        success();
                     }
-                    self.resume();
-                    finalize(result);
-                }, function() {
-                    result.completion = settings.completion;
-                    result.interpreter = make_basic_json_rpc_interpreter(interpreter);
+                })(user_interpreter, function() {
+                    commands = Object.keys(object);
+                    console.log(object);
+                    result.interpreter = make_object_interpreter(object, false, function_interpreter);
+                    result.completion = function(term, string, callback) {
+                        callback(commands);
+                    };
                     finalize(result);
                 });
-            } else if (type === 'object') {
-                var commands = [];
-                for (var name in interpreter) {
-                    commands.push(name);
+            } else if (type === 'string') {
+                if (settings.ignoreSystemDescribe) {
+                    finalize({
+                        interpreter: make_basic_json_rpc_interpreter(user_interpreter),
+                        completion: settings.completion
+                    });
+                } else {
+                    self.pause();
+                    make_json_rpc_object(user_interpreter, function(object) {
+                        if (object) {
+                            result.interpreter = make_object_interpreter(object, false);
+                            result.completion = function(term, string, callback) {
+                                callback(commands);
+                            };
+                        } else {
+                            // no procs in system.describe
+                            result.interpreter = make_basic_json_rpc_interpreter(user_interpreter);
+                            result.completion = settings.completion;
+                        }
+                        self.resume();
+                        finalize(result);
+                    });
                 }
-                result.interpreter = make_object_interpreter(interpreter, true);
+            } else if (type === 'object') {
+                commands = Object.keys(user_interpreter);
+                result.interpreter = make_object_interpreter(user_interpreter, true);
                 result.completion = function(term, string, callback) {
                     callback(commands);
                 };
@@ -2446,15 +2513,40 @@
             } else {
                 // allow $('<div/>).terminal();
                 if (type === 'undefined') {
-                    interpreter = $.noop;
+                    user_interpreter = $.noop;
                 } else if (type !== 'function') {
                     throw type + " is invalid interpreter value";
                 }
                 finalize({
-                    interpreter: interpreter,
+                    interpreter: user_interpreter,
                     completion: settings.completion
                 });
             }
+        }
+        // -----------------------------------------------------------------------
+        // :: Create JSON-RPC authentication function
+        // -----------------------------------------------------------------------
+        function make_json_rpc_login(method_name) {
+            return function(user, passwd, callback, term) {
+                self.pause();
+                $.jrpc(init_interpreter,
+                       method_name,
+                       [user, passwd],
+                       function(response) {
+                           self.resume();
+                           if (!response.error && response.result) {
+                               callback(response.result);
+                           } else {
+                               callback(null);
+                           }
+                       }, function(xhr, status, error) {
+                           self.resume();
+                           self.error('&#91;AJAX&#92; Response: ' +
+                                      status + '\n' +
+                                      xhr.responseText);
+                       });
+            };
+            //default name is login so you can pass true
         }
         // -----------------------------------------------------------------------
         // :: Return exception message as string
@@ -2700,7 +2792,7 @@
                 terminal_id + "_interpreters";
             var names = $.Storage.get(name);
             if (names) {
-                names = new Function('return ' + names + ';')();
+                names = $.parseJSON(names);
             } else {
                 names = [];
             }
@@ -2712,7 +2804,7 @@
         // -----------------------------------------------------------------------
         // :: Function enable history, set prompt, run interpreter function
         // -----------------------------------------------------------------------
-        function prepare_top_interpreter() {
+        function prepare_top_interpreter(silent) {
             var interpreter = interpreters.top();
             var name = (settings.name ? settings.name + '_': '') + terminal_id +
                 (names.length ? '_' + names.join('_') : '');
@@ -2726,7 +2818,7 @@
                 command_line.prompt(interpreter.prompt);
             }
             command_line.set('');
-            if (typeof interpreter.onStart === 'function') {
+            if (!silent && typeof interpreter.onStart === 'function') {
                 interpreter.onStart(self);
             }
         }
@@ -2744,9 +2836,52 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: function complete the command
+        // ---------------------------------------------------------------------
+        function complete_helper(command, regex, commands) {
+            var test = command_line.get().substring(0, command_line.position());
+            if (test !== command) {
+                // command line changed between TABS - ignore
+                return;
+            }
+            var matched = [];
+            for (i=commands.length; i--;) {
+                if (regex.test(commands[i])) {
+                    matched.push(commands[i]);
+                }
+            }
+            if (matched.length === 1) {
+                self.insert(matched[0].replace(regex, ''));
+            } else if (matched.length > 1) {
+                if (tab_count >= 2) {
+                    echo_command(command);
+                    self.echo(matched.join('\t'));
+                    tab_count = 0;
+                } else {
+                    var found = false;
+                    var found_index;
+                    var j;
+                    loop:
+                    for (j=string.length; j<matched[0].length; ++j) {
+                        for (i=1; i<matched.length; ++i) {
+                            if (matched[0].charAt(j) !== matched[i].charAt(j)) {
+                                break loop;
+                            }
+                        }
+                        found = true;
+                    }
+                    if (found) {
+                        self.insert(matched[0].slice(0, j).replace(reg, ''));
+                    }
+                }
+            }
+        }
+        // ---------------------------------------------------------------------
         // :: Keydown event handler
         // ---------------------------------------------------------------------
         function key_down(e) {
+            // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more then
+            // one terminal)
             var result, i, top = interpreters.top();
             if ($.type(top.keydown) === 'function') {
                 result = top.keydown(e, self);
@@ -2801,43 +2936,19 @@
                             }
                         }
                     }
-                    var reg = new RegExp('^' + $.terminal.escape_regex(string));
-                    interpreters.top().completion(self, string, function(commands) {
-                        var test = command_line.get().substring(0, command_line.position());
-                        if (test !== command) {
-                            // command line changed between TABS - ignore
-                            return;
-                        }
-                        var matched = [];
-                        for (i=commands.length; i--;) {
-                            if (reg.test(commands[i])) {
-                                matched.push(commands[i]);
-                            }
-                        }
-                        if (matched.length === 1) {
-                            self.insert(matched[0].replace(reg, ''));
-                        } else if (matched.length > 1) {
-                            if (tab_count >= 2) {
-                                echo_command(command);
-                                self.echo(matched.join('\t'));
-                                tab_count = 0;
-                            } else {
-                                var found = false;
-                                loop:
-                                for (var j=string.length; j<matched[0].length; ++j) {
-                                    for (i=1; i<matched.length; ++i) {
-                                        if (matched[0].charAt(j) !== matched[i].charAt(j)) {
-                                            break loop;
-                                        }
-                                    }
-                                    found = true;
-                                }
-                                if (found) {
-                                    self.insert(matched[0].slice(0, j).replace(reg, ''));
-                                }
-                            }
-                        }
-                    });
+                    var regex = new RegExp('^' + $.terminal.escape_regex(string));
+                    switch ($.type(top.completion)) {
+                    case 'function':
+                        top.completion(self, string, function(commands) {
+                            complete_helper(command, regex, commands);
+                        });
+                        break;
+                    case 'array':
+                        complete_helper(command, regex, top.completion);
+                        break;
+                    default:
+                        throw new Error("Invalid completion for ");
+                    }
                     return false;
                 } else if (e.which === 86 && e.ctrlKey) { // CTRL+V
                     self.oneTime(1, function() {
@@ -2856,7 +2967,7 @@
                 } else {
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
-            } else if (e.which === 68 && e.ctrlKey) { // CTRL+D
+            } else if (e.which === 68 && e.ctrlKey) { // CTRL+D (if paused)
                 if (requests.length) {
                     for (i=requests.length; i--;) {
                         var r = requests[i];
@@ -3037,7 +3148,27 @@
                     return interpreters.top().interpreter;
                 },
                 // -----------------------------------------------------------------------
-                // :: Show user greetings or terminal sugnature
+                // :: Low Level method that overwrites interpreter
+                // -----------------------------------------------------------------------
+                setInterpreter: function(user_interpreter, login) {
+                    function overwrite_interpreter() {
+                        self.pause();
+                        make_interpreter(user_interpreter, function(result) {
+                            self.resume();
+                            var top = interpreters.top();
+                            $.extend(top, result);
+                            prepare_top_interpreter(true);
+                        });
+                    }
+                    if ($.type(user_interpreter) == 'string' && login) {
+                        var method = $.type(login) === 'boolean' ? 'login' : login;
+                        self.login(make_json_rpc_login, overwrite_interpreter);
+                    } else {
+                        overwrite_interpreter();
+                    }
+                },
+                // -----------------------------------------------------------------------
+                // :: Show user greetings or terminal signature
                 // -----------------------------------------------------------------------
                 greetings: function() {
                     show_greetings();
@@ -3511,8 +3642,9 @@
                         if (top) {
                             top.mask = command_line.mask();
                         }
-                        make_interpreter(interpreter, function(interpreter) {
-                            interpreters.push($.extend({}, interpreter, options));
+                        make_interpreter(interpreter, function(result) {
+                            // result is object with interpreter and completion properties
+                            interpreters.push($.extend({}, result, options));
                             prepare_top_interpreter();
                         });
                     }
@@ -3579,7 +3711,7 @@
                     var prefix = (settings.name ? settings.name + '_': '') +
                         terminal_id + '_';
                     var names = $.Storage.get(prefix + 'interpreters');
-                    $.each(new Function('return ' + names + ';')(), function(_, name) {
+                    $.each($.parseJSON(names), function(_, name) {
                         $.Storage.remove(name + '_commands');
                     });
                     $.Storage.remove(prefix + 'interpreters');
@@ -3685,28 +3817,9 @@
             // create json-rpc authentication function
             if (typeof init_interpreter === 'string' &&
                 (typeof settings.login === 'string' || settings.login)) {
-                settings.login = (function(method) {
-                    return function(user, passwd, callback, term) {
-                        self.pause();
-                        $.jrpc(init_interpreter,
-                               method,
-                               [user, passwd],
-                               function(response) {
-                                   self.resume();
-                                   if (!response.error && response.result) {
-                                       callback(response.result);
-                                   } else {
-                                       callback(null);
-                                   }
-                               }, function(xhr, status, error) {
-                                   self.resume();
-                                   self.error('&#91;AJAX&#92; Response: ' +
-                                              status + '\n' +
-                                              xhr.responseText);
-                               });
-                    };
-                    //default name is login so you can pass true
-                })($.type(settings.login) === 'boolean' ? 'login' : settings.login);
+                //default name is login so you can pass true
+                var login_name = $.type(settings.login) === 'boolean' ? 'login' : settings.login;
+                settings.login = make_json_rpc_login(login_name);
             }
             terminals.append(self);
             if (validate('prompt', settings.prompt)) {
