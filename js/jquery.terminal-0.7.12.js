@@ -22,12 +22,12 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 08 Feb 2014 19:45:56 +0000
+ * Date: Sat, 08 Feb 2014 22:10:58 +0000
  */
 
 
 (function($, undefined) {
-    //"use strict";
+    "use strict";
     // -----------------------------------------------------------------------
     // :: map object to object
     // -----------------------------------------------------------------------
@@ -2342,7 +2342,7 @@
                     return;
                 }
                 //command = split_command_line(command);
-                command = get_processed_command(user_command);
+                var command = get_processed_command(user_command);
                 var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
@@ -2838,8 +2838,9 @@
         // ---------------------------------------------------------------------
         // :: function complete the command
         // ---------------------------------------------------------------------
-        function complete_helper(command, regex, commands) {
+        function complete_helper(command, string, commands) {
             var test = command_line.get().substring(0, command_line.position());
+            var regex = new RegExp('^' + $.terminal.escape_regex(string));
             if (test !== command) {
                 // command line changed between TABS - ignore
                 return;
@@ -2936,15 +2937,21 @@
                             }
                         }
                     }
-                    var regex = new RegExp('^' + $.terminal.escape_regex(string));
-                    switch ($.type(top.completion)) {
+                    
+                    var completion;
+                    if (settings.completion || !top.completion) {
+                        completion = settings.completion;
+                    } else {
+                        completion = top.completion;
+                    }
+                    switch ($.type(completion)) {
                     case 'function':
-                        top.completion(self, string, function(commands) {
-                            complete_helper(command, regex, commands);
+                        completion(self, string, function(commands) {
+                            complete_helper(command, string, commands);
                         });
                         break;
                     case 'array':
-                        complete_helper(command, regex, top.completion);
+                        complete_helper(command, string, completion);
                         break;
                     default:
                         throw new Error("Invalid completion for ");

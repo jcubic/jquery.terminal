@@ -27,7 +27,7 @@
 
 
 (function($, undefined) {
-    //"use strict";
+    "use strict";
     // -----------------------------------------------------------------------
     // :: map object to object
     // -----------------------------------------------------------------------
@@ -2342,7 +2342,7 @@
                     return;
                 }
                 //command = split_command_line(command);
-                command = get_processed_command(user_command);
+                var command = get_processed_command(user_command);
                 var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
