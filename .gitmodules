@@ -1,0 +1,3 @@
+[submodule "examples/json-rpc"]
+	path = examples/json-rpc
+	url = git@github.com:jcubic/json-rpc.git
