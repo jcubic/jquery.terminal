@@ -2260,6 +2260,7 @@
         linksNoReferrer: false,
         login: null,
         outputLimit: -1,
+        onRPCError: null,
         completion: false,
         historyFilter: null,
         onInit: $.noop,
@@ -2318,14 +2319,14 @@
                         self.error('&#91;RPC&#93; ' + json.error.message);
                     }
                     self.resume();
-                }, function(xhr, status, error) {
+                }, typeof settings.onRPCError != 'function' ? function(xhr, status, error) {
                     if (status !== 'abort') {
                         self.error('&#91;AJAX&#93; ' + status +
                                        ' - Server reponse is: \n' +
                                        xhr.responseText);
                     }
                     self.resume();
-                });
+                } : settings.onRPCError);
             };
             //this is interpreter function
             return function(command, terminal) {
