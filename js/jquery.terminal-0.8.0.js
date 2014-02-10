@@ -4,7 +4,7 @@
  *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.7.12
+ *|           \/              /____/                              version 0.8.0
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 10 Feb 2014 11:07:10 +0000
+ * Date: Mon, 10 Feb 2014 13:44:20 +0000
  *
  */
 
@@ -2147,10 +2147,23 @@
         return $.ajax({
             url: url,
             data: request,
-            success: success,
+            success: function(result, status, jqXHR) {
+                try {
+                    var json = $.parseJSON(result);
+                } catch (e) {
+                    if (error) {
+                        error(jqXHR, 'Invalid JSON', e);
+                    } else {
+                        throw new Error('Invalid JSON');
+                    }
+                    return;
+                }
+                // don't catch errors in success callback
+                success(json, status, jqXHR);
+            },
             error: error,
             contentType: 'application/json',
-            dataType: 'json',
+            dataType: 'text',
             async: true,
             cache: false,
             //timeout: 1,
@@ -2198,7 +2211,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.7.12';
+    var version = '0.8.0';
     var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = version_set ? ' version ' + version : ' ';

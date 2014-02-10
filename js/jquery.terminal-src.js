@@ -2147,10 +2147,23 @@
         return $.ajax({
             url: url,
             data: request,
-            success: success,
+            success: function(result, status, jqXHR) {
+                try {
+                    var json = $.parseJSON(result);
+                } catch (e) {
+                    if (error) {
+                        error(jqXHR, 'Invalid JSON', e);
+                    } else {
+                        throw new Error('Invalid JSON');
+                    }
+                    return;
+                }
+                // don't catch errors in success callback
+                success(json, status, jqXHR);
+            },
             error: error,
             contentType: 'application/json',
-            dataType: 'json',
+            dataType: 'text',
             async: true,
             cache: false,
             //timeout: 1,
