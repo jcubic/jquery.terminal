@@ -2148,6 +2148,14 @@
             url: url,
             data: request,
             success: function(result, status, jqXHR) {
+                var content_type = jqXHR.getResponseHeader('Content-Type');
+                if (content_type != 'application/json') {
+                    if (console && console.warn) {
+                        console.warn('Response Content-Type is not application/json');
+                    } else {
+                        throw new Error('WARN: Response Content-Type is not application/json');
+                    }
+                }
                 try {
                     var json = $.parseJSON(result);
                 } catch (e) {

@@ -22,7 +22,7 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 10 Feb 2014 13:52:35 +0000
+ * Date: Mon, 10 Feb 2014 14:52:51 +0000
  *
  */
 
@@ -2148,6 +2148,14 @@
             url: url,
             data: request,
             success: function(result, status, jqXHR) {
+                var content_type = jqXHR.getResponseHeader('Content-Type');
+                if (content_type != 'application/json') {
+                    if (console && console.warn) {
+                        console.warn('Response Content-Type is not application/json');
+                    } else {
+                        throw new Error('WARN: Response Content-Type is not application/json');
+                    }
+                }
                 try {
                     var json = $.parseJSON(result);
                 } catch (e) {
