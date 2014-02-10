@@ -22,7 +22,8 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Sat, 08 Feb 2014 22:10:58 +0000
+ * Date: Mon, 10 Feb 2014 10:41:29 +0000
+ *
  */
 
 
@@ -991,20 +992,24 @@
                     }
                     return true;
                 } else if (e.keyCode === 13) { //enter
-                    if ((history && command) &&
-                        ((options.historyFilter &&
-                         options.historyFilter(command)) ||
-                         !options.historyFilter)) {
-                        history.append(command);
-                    }
-                    var tmp = command;
-                    history.reset();
-                    self.set('');
-                    if (options.commands) {
-                        options.commands(tmp);
-                    }
-                    if (typeof prompt === 'function') {
-                        draw_prompt();
+                    if (e.shiftKey) {
+                        self.insert('\n');
+                    } else {
+                        if ((history && command) &&
+                            ((options.historyFilter &&
+                              options.historyFilter(command)) ||
+                             !options.historyFilter)) {
+                            history.append(command);
+                        }
+                        var tmp = command;
+                        history.reset();
+                        self.set('');
+                        if (options.commands) {
+                            options.commands(tmp);
+                        }
+                        if (typeof prompt === 'function') {
+                            draw_prompt();
+                        }
                     }
                 } else if (e.which === 8) { //backspace
                     if (reverse_search) {

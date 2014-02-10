@@ -23,6 +23,7 @@
  * Available under the MIT License
  *
  * Date: {{DATE}}
+ *
  */
 
 
@@ -991,20 +992,24 @@
                     }
                     return true;
                 } else if (e.keyCode === 13) { //enter
-                    if ((history && command) &&
-                        ((options.historyFilter &&
-                         options.historyFilter(command)) ||
-                         !options.historyFilter)) {
-                        history.append(command);
-                    }
-                    var tmp = command;
-                    history.reset();
-                    self.set('');
-                    if (options.commands) {
-                        options.commands(tmp);
-                    }
-                    if (typeof prompt === 'function') {
-                        draw_prompt();
+                    if (e.shiftKey) {
+                        self.insert('\n');
+                    } else {
+                        if ((history && command) &&
+                            ((options.historyFilter &&
+                              options.historyFilter(command)) ||
+                             !options.historyFilter)) {
+                            history.append(command);
+                        }
+                        var tmp = command;
+                        history.reset();
+                        self.set('');
+                        if (options.commands) {
+                            options.commands(tmp);
+                        }
+                        if (typeof prompt === 'function') {
+                            draw_prompt();
+                        }
                     }
                 } else if (e.which === 8) { //backspace
                     if (reverse_search) {
