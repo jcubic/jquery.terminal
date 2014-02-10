@@ -2327,14 +2327,7 @@
                         self.error('&#91;RPC&#93; ' + json.error.message);
                     }
                     self.resume();
-                }, typeof settings.onRPCError != 'function' ? function(xhr, status, error) {
-                    if (status !== 'abort') {
-                        self.error('&#91;AJAX&#93; ' + status +
-                                       ' - Server reponse is: \n' +
-                                       xhr.responseText);
-                    }
-                    self.resume();
-                } : settings.onRPCError);
+                }, ajax_error);
             };
             //this is interpreter function
             return function(command, terminal) {
@@ -2408,6 +2401,17 @@
             };
         }
         // -----------------------------------------------------------------------
+        function ajax_error(xhr, status, error) {
+            if (typeof settings.onRPCError == 'function') {
+                settings.onRPCError.call(self, xhr, status, error);
+            } else if (status !== 'abort') {
+                self.error('&#91;AJAX&#93; ' + status +
+                           ' - Server reponse is: \n' +
+                           xhr.responseText);
+            }
+            self.resume();
+        }
+        // -----------------------------------------------------------------------
         function make_json_rpc_object(url, complete) {
             $.jrpc(url, 'system.describe', [], function(ret) {
                 var commands = [];
@@ -2430,14 +2434,7 @@
                                         self.error('&#91;RPC&#93; ' + json.error.message);
                                     }
                                     self.resume();
-                                }, function(xhr, status, error) {
-                                    if (status !== 'abort') {
-                                        self.error('&#91;AJAX&#93; ' + status +
-                                                   ' - Server reponse is: \n' +
-                                                   xhr.responseText);
-                                    }
-                                    self.resume();
-                                });
+                                }, ajax_error);
                             }
                         };
                     });
@@ -2565,12 +2562,7 @@
                            } else {
                                callback(null);
                            }
-                       }, function(xhr, status, error) {
-                           self.resume();
-                           self.error('&#91;AJAX&#92; Response: ' +
-                                      status + '\n' +
-                                      xhr.responseText);
-                       });
+                       }, ajax_error);
             };
             //default name is login so you can pass true
         }
