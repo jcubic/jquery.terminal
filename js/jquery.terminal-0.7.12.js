@@ -22,10 +22,9 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 10 Feb 2014 10:41:29 +0000
+ * Date: Mon, 10 Feb 2014 11:07:10 +0000
  *
  */
-
 
 (function($, undefined) {
     "use strict";
@@ -2248,7 +2247,7 @@
         linksNoReferrer: false,
         login: null,
         outputLimit: -1,
-        tabcompletion: null,
+        completion: false,
         historyFilter: null,
         onInit: $.noop,
         onClear: $.noop,
@@ -2851,7 +2850,7 @@
                 return;
             }
             var matched = [];
-            for (i=commands.length; i--;) {
+            for (var i=commands.length; i--;) {
                 if (regex.test(commands[i])) {
                     matched.push(commands[i]);
                 }
@@ -2922,18 +2921,18 @@
                         self.set_command('');
                     }
                     return false;
-                } else if (settings.tabcompletion && e.which === 9) { // TAB
+                } else if (settings.completion && e.which === 9) { // TAB
                     // TODO: move this to cmd plugin
-                    //       add tabcompletion = array | function
+                    //       add completion = array | function
                     ++tab_count;
                     var command = command_line.get().substring(0, command_line.position());
                     var strings = command.split(' ');
-                    var string;
+                    var string; // string before cursor that will be completed
                     if (strings.length == 1) {
                         string = strings[0];
                     } else {
                         string = strings[strings.length-1];
-                        for (i=strings.length-1; i>0;i--) {
+                        for (i=strings.length-1; i>0; i--) {
                             // treat escape space as part of the string
                             if (strings[i-1][strings[i-1].length-1] == '\\') {
                                 string = strings[i-1] + ' ' + string;
@@ -2942,9 +2941,8 @@
                             }
                         }
                     }
-                    
                     var completion;
-                    if (settings.completion || !top.completion) {
+                    if ((settings.completion && $.type(settings.completion) != 'boolean') || !top.completion) {
                         completion = settings.completion;
                     } else {
                         completion = top.completion;
@@ -2959,7 +2957,7 @@
                         complete_helper(command, string, completion);
                         break;
                     default:
-                        throw new Error("Invalid completion for ");
+                        throw new Error("Invalid completion");
                     }
                     return false;
                 } else if (e.which === 86 && e.ctrlKey) { // CTRL+V
