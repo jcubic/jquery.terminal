@@ -22,9 +22,147 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
- * Date: Mon, 10 Feb 2014 15:46:28 +0000
+ * sprintf.js
+ * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
+ * licensed under 3 clause BSD license
+ *
+ * Date: Tue, 11 Feb 2014 13:25:59 +0000
  *
  */
+
+// Sprintf
+(function(ctx) {
+	var sprintf = function() {
+		if (!sprintf.cache.hasOwnProperty(arguments[0])) {
+			sprintf.cache[arguments[0]] = sprintf.parse(arguments[0]);
+		}
+		return sprintf.format.call(null, sprintf.cache[arguments[0]], arguments);
+	};
+
+	sprintf.format = function(parse_tree, argv) {
+		var cursor = 1, tree_length = parse_tree.length, node_type = '', arg, output = [], i, k, match, pad, pad_character, pad_length;
+		for (i = 0; i < tree_length; i++) {
+			node_type = get_type(parse_tree[i]);
+			if (node_type === 'string') {
+				output.push(parse_tree[i]);
+			}
+			else if (node_type === 'array') {
+				match = parse_tree[i]; // convenience purposes only
+				if (match[2]) { // keyword argument
+					arg = argv[cursor];
+					for (k = 0; k < match[2].length; k++) {
+						if (!arg.hasOwnProperty(match[2][k])) {
+							throw(sprintf('[sprintf] property "%s" does not exist', match[2][k]));
+						}
+						arg = arg[match[2][k]];
+					}
+				}
+				else if (match[1]) { // positional argument (explicit)
+					arg = argv[match[1]];
+				}
+				else { // positional argument (implicit)
+					arg = argv[cursor++];
+				}
+
+				if (/[^s]/.test(match[8]) && (get_type(arg) != 'number')) {
+					throw(sprintf('[sprintf] expecting number but found %s', get_type(arg)));
+				}
+				switch (match[8]) {
+					case 'b': arg = arg.toString(2); break;
+					case 'c': arg = String.fromCharCode(arg); break;
+					case 'd': arg = parseInt(arg, 10); break;
+					case 'e': arg = match[7] ? arg.toExponential(match[7]) : arg.toExponential(); break;
+					case 'f': arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg); break;
+					case 'o': arg = arg.toString(8); break;
+					case 's': arg = ((arg = String(arg)) && match[7] ? arg.substring(0, match[7]) : arg); break;
+					case 'u': arg = arg >>> 0; break;
+					case 'x': arg = arg.toString(16); break;
+					case 'X': arg = arg.toString(16).toUpperCase(); break;
+				}
+				arg = (/[def]/.test(match[8]) && match[3] && arg >= 0 ? '+'+ arg : arg);
+				pad_character = match[4] ? match[4] == '0' ? '0' : match[4].charAt(1) : ' ';
+				pad_length = match[6] - String(arg).length;
+				pad = match[6] ? str_repeat(pad_character, pad_length) : '';
+				output.push(match[5] ? arg + pad : pad + arg);
+			}
+		}
+		return output.join('');
+	};
+
+	sprintf.cache = {};
+
+	sprintf.parse = function(fmt) {
+		var _fmt = fmt, match = [], parse_tree = [], arg_names = 0;
+		while (_fmt) {
+			if ((match = /^[^\x25]+/.exec(_fmt)) !== null) {
+				parse_tree.push(match[0]);
+			}
+			else if ((match = /^\x25{2}/.exec(_fmt)) !== null) {
+				parse_tree.push('%');
+			}
+			else if ((match = /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt)) !== null) {
+				if (match[2]) {
+					arg_names |= 1;
+					var field_list = [], replacement_field = match[2], field_match = [];
+					if ((field_match = /^([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
+						field_list.push(field_match[1]);
+						while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
+							if ((field_match = /^\.([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
+								field_list.push(field_match[1]);
+							}
+							else if ((field_match = /^\[(\d+)\]/.exec(replacement_field)) !== null) {
+								field_list.push(field_match[1]);
+							}
+							else {
+								throw('[sprintf] huh?');
+							}
+						}
+					}
+					else {
+						throw('[sprintf] huh?');
+					}
+					match[2] = field_list;
+				}
+				else {
+					arg_names |= 2;
+				}
+				if (arg_names === 3) {
+					throw('[sprintf] mixing positional and named placeholders is not (yet) supported');
+				}
+				parse_tree.push(match);
+			}
+			else {
+				throw('[sprintf] huh?');
+			}
+			_fmt = _fmt.substring(match[0].length);
+		}
+		return parse_tree;
+	};
+
+	var vsprintf = function(fmt, argv, _argv) {
+		_argv = argv.slice(0);
+		_argv.splice(0, 0, fmt);
+		return sprintf.apply(null, _argv);
+	};
+
+	/**
+	 * helpers
+	 */
+	function get_type(variable) {
+		return Object.prototype.toString.call(variable).slice(8, -1).toLowerCase();
+	}
+
+	function str_repeat(input, multiplier) {
+		for (var output = []; multiplier > 0; output[--multiplier] = input) {/* do nothing */}
+		return output.join('');
+	}
+
+	/**
+	 * export to either browser or node.js
+	 */
+	ctx.sprintf = sprintf;
+	ctx.vsprintf = vsprintf;
+})(typeof exports != "undefined" ? exports : window);
 
 (function($, undefined) {
     "use strict";
@@ -2268,6 +2406,7 @@
         linksNoReferrer: false,
         login: null,
         outputLimit: -1,
+        onAjaxError: null,
         onRPCError: null,
         completion: false,
         historyFilter: null,
@@ -2278,7 +2417,17 @@
         onTerminalChange: $.noop,
         onExit: $.noop,
         keypress: $.noop,
-        keydown: $.noop
+        keydown: $.noop,
+        strings: {
+            wrongPassword: "Wrong password try again!",
+            ajaxAbortError: "Error while aborting ajax call!",
+            wrongArity: "Wrong number of arguments. Function '%s' expect %s got %s!",
+            commandNotFound: "Command '%s' Not Found!",
+            oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescribe",
+            oneInterpreterFunction: "You can't use more then one function (rpc with " +
+                "ignoreSystemDescribe is count as one)",
+            loginFunctionMissing: "You don't have login function"
+        }
     };
     // -----------------------------------------------------------------------
     // :: All terminal globals
@@ -2315,6 +2464,16 @@
             }
         }
         // -----------------------------------------------------------------------
+        // :: Helper function
+        // -----------------------------------------------------------------------
+        function display_json_rpc_error(error) {
+            if (typeof settings.onRPCError === 'function') {
+                settings.onRPCError.call(self, error);
+            } else {
+                self.error('&#91;RPC&#93; ' + error.message);
+            }
+        }
+        // -----------------------------------------------------------------------
         // :: Create interpreter function from url string
         // -----------------------------------------------------------------------
         function make_basic_json_rpc_interpreter(url) {
@@ -2322,9 +2481,13 @@
                 self.pause();
                 $.jrpc(url, method, params, function(json) {
                     if (!json.error) {
-                        display_object(json.result);
+                        if (typeof settings.processRPCResponse === 'function') {
+                            settings.processRPCResponse.call(self, json.result);
+                        } else {
+                            display_object(json.result);
+                        }
                     } else {
-                        self.error('&#91;RPC&#93; ' + json.error.message);
+                        display_json_rpc_error(json.error);
                     }
                     self.resume();
                 }, ajax_error);
@@ -2366,20 +2529,17 @@
                 var type = $.type(val);
                 if (type === 'function') {
                     if (arity && val.length !== command.args.length) {
-                        self.error("&#91;Arity&#93; wrong number of arguments. Function '" +
-                                   command.name + "' expect " + val.length + ' got ' +
-                                   command.args.length);
+                        self.error("&#91;Arity&#93; " + sprintf($.terminal.defaults.strings.wrongArity,
+                                                                command.name,
+                                                                val.length,
+                                                                command.args.length));
                     } else {
                         return val.apply(self, command.args);
                     }
                 } else if (type === 'object' || type === 'string') {
                     var commands = [];
                     if (type === 'object') {
-                        for (var m in val) {
-                            if (val.hasOwnProperty(m)) {
-                                commands.push(m);
-                            }
-                        }
+                        commands = Object.keys(val);
                         val = make_object_interpreter(val, arity);
                     }
                     terminal.push(val, {
@@ -2395,15 +2555,15 @@
                     } else if ($.type(settings.onCommandNotFound) === 'function') {
                         settings.onCommandNotFound(user_command, self);
                     } else {
-                        terminal.error("Command '" + command.name + "' Not Found");
+                        terminal.error(sprintf($.terminal.defaults.strings.commandNotFound, command.name));
                     }
                 }
             };
         }
         // -----------------------------------------------------------------------
         function ajax_error(xhr, status, error) {
-            if (typeof settings.onRPCError == 'function') {
-                settings.onRPCError.call(self, xhr, status, error);
+            if (typeof settings.onAjaxError == 'function') {
+                settings.onAjaxError.call(self, xhr, status, error);
             } else if (status !== 'abort') {
                 self.error('&#91;AJAX&#93; ' + status +
                            ' - Server reponse is: \n' +
@@ -2418,6 +2578,7 @@
                 if (ret.procs) {
                     var interpreter_object = {};
                     $.each(ret.procs, function(_, proc) {
+                        // TODO: move if outside of function
                         interpreter_object[proc.name] = function() {
                             var args = Array.prototype.slice.call(arguments);
                             if (settings.checkArity && proc.params &&
@@ -2428,10 +2589,10 @@
                             } else {
                                 self.pause();
                                 $.jrpc(url, proc.name, args, function(json) {
-                                    if (!json.error) {
-                                        display_object(json.result);
+                                    if (json.error) {
+                                        display_json_rpc_error(json.error);
                                     } else {
-                                        self.error('&#91;RPC&#93; ' + json.error.message);
+                                        display_object(json.result);
                                     }
                                     self.resume();
                                 }, ajax_error);
@@ -2456,47 +2617,47 @@
             var function_interpreter;
             if (type === 'array') {
                 var object = {};
-                (function chain(interpreters, success) {
+                // recur will be called when previous acync call is finished
+                (function recur(interpreters, success) {
                     if (interpreters.length) {
-                        var interpreter = interpreters[0];
-                        var type = $.type(interpreter);
+                        var first = interpreters[0];
+                        var rest = interpreters.slice(1);
+                        var type = $.type(first);
                         if (type === 'string') {
                             rpc_count++;
                             self.pause();
                             if (settings.ignoreSystemDescribe) {
                                 if (rpc_count === 1) {
-                                    function_interpreter = make_basic_json_rpc_interpreter(interpreter);
+                                    function_interpreter = make_basic_json_rpc_interpreter(first);
                                 } else {
-                                    throw new Error("You can use only one rpc with ignoreSystemDescribe");
+                                    self.error($.terminal.defaults.strings.oneRPCWithIgnore);
                                 }
-                                chain(interpreters.slice(1), success);
+                                recur(rest, success);
                             } else {
-                                make_json_rpc_object(interpreter, function(new_object) {
+                                make_json_rpc_object(first, function(new_object) {
                                     // will ignore rpc in array that don't have system.describe
                                     if (new_object) {
                                         $.extend(object, new_object);
                                     }
                                     self.resume();
-                                    chain(interpreters.slice(1), success);
+                                    recur(rest, success);
                                 });
                             }
                         } else if (type === 'function') {
                             if (function_interpreter) {
-                                throw new Exception("You can't use more then one function (rpc with " +
-                                                    "ignoreSystemDescribe is count as one)");
+                                self.error($.terminal.defaults.strings.oneInterpreterFunction);
                             } else {
-                                function_interpreter = interpreter;
+                                function_interpreter = first;
                             }
                         } else if (type === 'object') {
-                            $.extend(object, interpreter);
-                            chain(interpreters.slice(1), success);
+                            $.extend(object, first);
+                            recur(rest, success);
                         }
                     } else {
                         success();
                     }
                 })(user_interpreter, function() {
                     commands = Object.keys(object);
-                    console.log(object);
                     result.interpreter = make_object_interpreter(object, false, function_interpreter);
                     result.completion = function(term, string, callback) {
                         callback(commands);
@@ -2528,7 +2689,7 @@
                 }
             } else if (type === 'object') {
                 commands = Object.keys(user_interpreter);
-                result.interpreter = make_object_interpreter(user_interpreter, true);
+                result.interpreter = make_object_interpreter(user_interpreter, settings.checkArity);
                 result.completion = function(term, string, callback) {
                     callback(commands);
                 };
@@ -2683,7 +2844,7 @@
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
-                alert('Internal Exception(draw_line):' + exception_message(e) + '\n' +
+                alert('[Internal Exception(draw_line)]:' + exception_message(e) + '\n' +
                       e.stack);
             }
         }
@@ -2999,7 +3160,7 @@
                             try {
                                 r.abort();
                             } catch (error) {
-                                self.error('error in aborting ajax');
+                                self.error($.terminal.defaults.strings.ajaxAbortError);
                             }
                         }
                     }
@@ -3148,7 +3309,7 @@
                                             success();
                                         }
                                     } else {
-                                        self.error('Wrong password try again');
+                                        self.error($.terminal.defaults.strings.wrongPassword);
                                         command_line.prompt('login: ');
                                         user = null;
                                     }
@@ -3546,7 +3707,7 @@
                         scroll_to_bottom();
                         output_buffer = [];
                     } catch (e) {
-                        alert('flush ' + exception_message(e) + '\n' +
+                        alert('[Flush] ' + exception_message(e) + '\n' +
                               e.stack);
                     }
                     return self;
@@ -3584,7 +3745,7 @@
                         on_scrollbar_show_resize();
                     } catch (e) {
                         // if echo throw exception we can't use error to display that exception
-                        alert('terminal.echo ' + exception_message(e) + '\n' +
+                        alert('[Terminal.echo] ' + exception_message(e) + '\n' +
                               e.stack);
                     }
                     return self;
@@ -3629,7 +3790,7 @@
                     logout();
                     return self;
                 } : function() {
-                    throw "You don't have login function";
+                    self.error($.terminal.defaults.strings.loginFunctionMissing);
                 },
                 // -----------------------------------------------------------------------
                 // :: Function return token returned by callback function in login
