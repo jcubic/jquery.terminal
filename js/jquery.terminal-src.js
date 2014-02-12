@@ -2426,7 +2426,10 @@
             oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescribe",
             oneInterpreterFunction: "You can't use more then one function (rpc with " +
                 "ignoreSystemDescribe is count as one)",
-            loginFunctionMissing: "You don't have login function"
+            loginFunctionMissing: "You don't have login function",
+            noTokenError: "Access denied (no token)",
+            serverResponse: "Server reponse is",
+            wrongGreetings: "Wrong value of greetings parameter"
         }
     };
     // -----------------------------------------------------------------------
@@ -2507,14 +2510,15 @@
                         service(command.name, [token].concat(command.args));
                     } else {
                         //should never happen
-                        terminal.error('&#91;AUTH&#93; Access denied (no token)');
+                        terminal.error('&#91;AUTH&#93; ' +
+                                       $.terminal.defaults.strings.noTokenError);
                     }
                 }
             };
         }
         // -----------------------------------------------------------------------
-        // :: Create interpreter function from Object if value is object it will
-        // :: create nested interpreters
+        // :: Create interpreter function from Object if values are objects it
+        // :: will create nested interpreters for them
         // -----------------------------------------------------------------------
         function make_object_interpreter(object, arity, fallback) {
             // function that maps commands to object methods
@@ -2529,10 +2533,11 @@
                 var type = $.type(val);
                 if (type === 'function') {
                     if (arity && val.length !== command.args.length) {
-                        self.error("&#91;Arity&#93; " + sprintf($.terminal.defaults.strings.wrongArity,
-                                                                command.name,
-                                                                val.length,
-                                                                command.args.length));
+                        self.error("&#91;Arity&#93; " +
+                                   sprintf($.terminal.defaults.strings.wrongArity,
+                                           command.name,
+                                           val.length,
+                                           command.args.length));
                     } else {
                         return val.apply(self, command.args);
                     }
@@ -2565,9 +2570,9 @@
             if (typeof settings.onAjaxError == 'function') {
                 settings.onAjaxError.call(self, xhr, status, error);
             } else if (status !== 'abort') {
-                self.error('&#91;AJAX&#93; ' + status +
-                           ' - Server reponse is: \n' +
-                           xhr.responseText);
+                self.error('&#91;AJAX&#93; ' + status + ' - ' +
+                           $.terminal.defaults.strings.serverResponse +
+                           ': \n' + xhr.responseText);
             }
             self.resume();
         }
@@ -2578,14 +2583,15 @@
                 if (ret.procs) {
                     var interpreter_object = {};
                     $.each(ret.procs, function(_, proc) {
-                        // TODO: move if outside of function
                         interpreter_object[proc.name] = function() {
                             var args = Array.prototype.slice.call(arguments);
                             if (settings.checkArity && proc.params &&
                                 proc.params.length !== args.length) {
-                                self.error("&#91;Arity&#93; wrong number of arguments."+
-                                           "Function '" + proc.name + "' expect " +
-                                           proc.params.length + ' got ' + args.length);
+                                self.error("&#91;Arity&#93; " +
+                                           sprintf($.terminal.defaults.strings.wrongArity,
+                                                   proc.name,
+                                                   proc.params.length,
+                                                   args.length));
                             } else {
                                 self.pause();
                                 $.jrpc(url, proc.name, args, function(json) {
@@ -2855,7 +2861,14 @@
             if (settings.greetings === undefined) {
                 self.echo(self.signature);
             } else if (settings.greetings) {
-                self.echo(settings.greetings);
+                var type = typeof settings.greetings;
+                if (type === 'string') {
+                    self.echo(settings.greetings);
+                } else if (type === 'function') {
+                    settings.greetings.call(self, self.echo);
+                } else {
+                    self.error($.terminal.defaults.strings.wrongGreetings);
+                }
             }
         }
         // -----------------------------------------------------------------------
