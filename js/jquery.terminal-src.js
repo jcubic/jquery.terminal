@@ -3109,6 +3109,8 @@
                         self.set_command('');
                     }
                     return false;
+                } else if (e.which === 76 && e.ctrlKey) { // CTRL+L
+                    self.clear();
                 } else if (settings.completion && e.which === 9) { // TAB
                     // TODO: move this to cmd plugin
                     //       add completion = array | function
