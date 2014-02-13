@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 12 Feb 2014 20:38:32 +0000
+ * Date: Thu, 13 Feb 2014 22:30:37 +0000
  *
  */
 
@@ -3270,11 +3270,15 @@
                 // :: and have delays, if second argument is set to true it will not
                 // :: echo executed command
                 // -----------------------------------------------------------------------
-                exec: function(command, silent) {
-                    if (pause) {
-                        dalyed_commands.push([command, silent]);
+                exec: function(command, options) {
+                    var settings = $.extend({}, {
+                        silent: false,
+                        force: false
+                    }, options);
+                    if (pause && !settings.force) {
+                        dalyed_commands.push([command, settings.silent]);
                     } else {
-                        commands(command, silent);
+                        commands(command, settings.silent);
                     }
                     return self;
                 },

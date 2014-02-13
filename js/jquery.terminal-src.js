@@ -3270,11 +3270,15 @@
                 // :: and have delays, if second argument is set to true it will not
                 // :: echo executed command
                 // -----------------------------------------------------------------------
-                exec: function(command, silent) {
-                    if (pause) {
-                        dalyed_commands.push([command, silent]);
+                exec: function(command, options) {
+                    var settings = $.extend({}, {
+                        silent: false,
+                        force: false
+                    }, options);
+                    if (pause && !settings.force) {
+                        dalyed_commands.push([command, settings.silent]);
                     } else {
-                        commands(command, silent);
+                        commands(command, settings.silent);
                     }
                     return self;
                 },
