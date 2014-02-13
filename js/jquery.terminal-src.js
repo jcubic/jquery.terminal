@@ -2096,8 +2096,6 @@
                             }
                             if (match[1] !== '0') {
                                 code = format_ansi(match[1]);
-                            } else {
-                                code = ['', ''];
                             }
                             if (inside) {
                                 output.push(']');
@@ -2119,14 +2117,16 @@
                                     }
                                 }
                             } else {
-                                inside = true;
-                                output.push('[[' + code.join(';') + ']');
-                                // store colors to next use
-                                if (code[1]) {
-                                    prev_color = code[1];
-                                }
-                                if (code[2]) {
-                                    prev_background = code[2];
+                                if (match[1] != '0') {
+                                    inside = true;
+                                    output.push('[[' + code.join(';') + ']');
+                                    // store colors to next use
+                                    if (code[1]) {
+                                        prev_color = code[1];
+                                    }
+                                    if (code[2]) {
+                                        prev_background = code[2];
+                                    }
                                 }
                             }
                             break;
