@@ -32,6 +32,13 @@
     height: 1.3em;
     /*margin-top: 3px; */
 }
+.cmd .cursor {
+  -webkit-transition: 0.3s;
+     -moz-transition: 0.3s;
+      -ms-transition: 0.3s;
+       -o-transition: 0.3s;
+          transition: 0.3s
+}
 .terminal .terminal-output div div, .cmd .prompt {
     display: block;
     line-height: 14px;
