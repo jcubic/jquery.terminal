@@ -6,6 +6,7 @@
           ignoreSystemDescribe option
           Handle invalid JSON-RPC
           CSS style for standalone cmd plugin
+          using CSS3 Animation for blinking if supported
           Fix [0m
           Better error handling (all messages are in $.terminal.defaults.strings)
           Named colors
