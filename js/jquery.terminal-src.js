@@ -786,6 +786,28 @@
         var historySize = options.historySize || 60;
         var name, history;
         var cursor = self.find('.cursor');
+        var animation;
+        if (supportAnimations()) {
+            animation = function(toggle) {
+                console.log('supported');
+                if (toggle) {
+                    cursor.addClass('blink');
+                } else {
+                    cursor.removeClass('blink');
+                }
+            };
+        } else {
+            animation = function(toggle) {
+                console.log('not supported');
+                if (toggle && !enabled) {
+                    cursor.addClass('inverted');
+                    self.everyTime(500, 'blink', blink);
+                } else if (enabled) {
+                    self.stopTime('blink', blink);
+                    cursor.removeClass('inverted');
+                }
+            };
+        }
         // -----------------------------------------------------------------------
         // :: Blinking cursor function
         // -----------------------------------------------------------------------
@@ -1478,22 +1500,16 @@
                 return self;
             },
             enable: function() {
-                if (!enabled) {
-                    cursor.addClass('inverted');
-                    self.everyTime(500, 'blink', blink);
-                    enabled = true;
-                }
+                enabled = true;
+                animation(true);
                 return self;
             },
             isenabled: function() {
                 return enabled;
             },
             disable: function() {
-                if (enabled) {
-                    self.stopTime('blink', blink);
-                    cursor.removeClass('inverted');
-                    enabled = false;
-                }
+                enabled = false;
+                animation(false);
                 return self;
             },
             mask: function(display) {
@@ -1563,6 +1579,29 @@
     // -------------------------------------------------------------------------
     function formattingCount(string) {
         return string.length - skipFormattingCount(string);
+    }
+    // -------------------------------------------------------------------------
+    // taken from https://hacks.mozilla.org/2011/09/detecting-and-generating-css-animations-in-javascript/
+    function supportAnimations() {
+        var animation = false,
+        animationstring = 'animation',
+        keyframeprefix = '',
+        domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
+        pfx  = '',
+        elm = document.createElement('div');
+        if (elm.style.animationName) { animation = true; }
+        if (animation === false) {
+            for (var i = 0; i < domPrefixes.length; i++) {
+                if (elm.style[ domPrefixes[i] + 'AnimationName' ] !== undefined) {
+                    pfx = domPrefixes[i];
+                    animationstring = pfx + 'Animation';
+                    keyframeprefix = '-' + pfx.toLowerCase() + '-';
+                    animation = true;
+                    break;
+                }
+            }
+        }
+        return animation;
     }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {

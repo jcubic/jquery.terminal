@@ -32,12 +32,51 @@
     height: 1.3em;
     /*margin-top: 3px; */
 }
-.cmd .cursor {
-  -webkit-transition: 0.3s;
-     -moz-transition: 0.3s;
-      -ms-transition: 0.3s;
-       -o-transition: 0.3s;
-          transition: 0.3s
+.cmd .cursor.blink {
+    -webkit-animation: blink 1s infinite steps(1, start);
+       -moz-animation: blink 1s infinite steps(1, start);
+        -ms-animation: blink 1s infinite steps(1, start);
+            animation: blink 1s infinite steps(1, start);
+}
+@keyframes blink {
+  0%, 100% {
+        background-color: #000;
+        color: #aaa;
+  }
+  50% {
+        background-color: #bbb; /* not #aaa because it's seem there is Google Chrome bug */
+        color: #000;
+  }
+}
+@-webkit-keyframes blink {
+  0%, 100% {
+        background-color: #000;
+        color: #aaa;
+  }
+  50% {
+        background-color: #bbb;
+        color: #000;
+  }
+}
+@-ms-keyframes blink {
+  0%, 100% {
+        background-color: #000;
+        color: #aaa;
+  }
+  50% {
+        background-color: #bbb;
+        color: #000;
+  }
+}
+@-moz-keyframes blink {
+  0%, 100% {
+        background-color: #000;
+        color: #aaa;
+  }
+  50% {
+        background-color: #bbb;
+        color: #000;
+  }
 }
 .terminal .terminal-output div div, .cmd .prompt {
     display: block;
@@ -47,7 +86,6 @@
 .cmd .prompt {
     float: left;
 }
-
 .terminal, .cmd {
     font-family: FreeMono, monospace;
     color: #aaa;
@@ -66,7 +104,7 @@
     float: left;
     /*display: inline-block; */
 }
-.cmd span.inverted {
+.cmd span.inverted, .cmd .cursor.blink {
     background-color: #aaa;
     color: #000;
 }
