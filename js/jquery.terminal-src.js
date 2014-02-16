@@ -789,7 +789,6 @@
         var animation;
         if (supportAnimations()) {
             animation = function(toggle) {
-                console.log('supported');
                 if (toggle) {
                     cursor.addClass('blink');
                 } else {
@@ -798,7 +797,6 @@
             };
         } else {
             animation = function(toggle) {
-                console.log('not supported');
                 if (toggle && !enabled) {
                     cursor.addClass('inverted');
                     self.everyTime(500, 'blink', blink);
@@ -2985,7 +2983,6 @@
                 throw e;
             }
         }
-        
         // -----------------------------------------------------------------------
         // :: Logout function remove Storage, disable history and run login function
         // :: this function is call only when options.login function is defined
@@ -3263,7 +3260,8 @@
                                     $.terminal.defaults,
                                     {name: self.selector},
                                     options || {});
-            var pause = !settings.enabled;
+            var enabled = settings.enabled;
+            var paused = false;
             // -----------------------------------------------------------------------
             // TERMINAL METHODS
             // -----------------------------------------------------------------------
@@ -3311,15 +3309,11 @@
                 // :: and have delays, if second argument is set to true it will not
                 // :: echo executed command
                 // -----------------------------------------------------------------------
-                exec: function(command, options) {
-                    var settings = $.extend({}, {
-                        silent: false,
-                        force: false
-                    }, options);
-                    if (pause && !settings.force) {
-                        dalyed_commands.push([command, settings.silent]);
+                exec: function(command, silent) {
+                    if (paused) {
+                        dalyed_commands.push([command, silent]);
                     } else {
-                        commands(command, settings.silent);
+                        commands(command, silent);
                     }
                     return self;
                 },
@@ -3421,14 +3415,14 @@
                 // :: Return true if terminal is pased false otherwise
                 // -----------------------------------------------------------------------
                 paused: function() {
-                    return pause;
+                    return paused;
                 },
                 // -----------------------------------------------------------------------
                 // :: Pause the terminal, it should be used for ajax calls
                 // -----------------------------------------------------------------------
                 pause: function() {
-                    if (command_line) {
-                        pause = true;
+                    if (!paused && command_line) {
+                        paused = true;
                         self.disable();
                         command_line.hidden();
                     }
@@ -3438,7 +3432,8 @@
                 // :: Resume previous paused terminal
                 // -----------------------------------------------------------------------
                 resume: function() {
-                    if (command_line) {
+                    if (command_line && paused) {
+                        paused = true;
                         self.enable();
                         var original = dalyed_commands;
                         dalyed_commands = [];
@@ -3561,11 +3556,9 @@
                         //enabling first time
                         self.resize();
                     }
-                    if (pause) {
-                        if (command_line) {
-                            command_line.enable();
-                            pause = false;
-                        }
+                    if (command_line) {
+                        command_line.enable();
+                        enabled = true;
                     }
                     return self;
                 },
@@ -3574,7 +3567,7 @@
                 // -----------------------------------------------------------------------
                 disable: function() {
                     if (command_line) {
-                        pause = true;
+                        enabled = false;
                         command_line.disable();
                     }
                     return self;
@@ -3583,7 +3576,7 @@
                 // :: return true if terminal is enabled
                 // -----------------------------------------------------------------------
                 enabled: function() {
-                    return pause;
+                    return enabled;
                 },
                 // -----------------------------------------------------------------------
                 // :: Return terminal signature depending on the size of the terminal
@@ -4098,9 +4091,13 @@
                         },
                         commands: commands
                     });
-                    if (settings.enabled === true) {
+                    console.log(' make_interpreter');
+                    console.log(self.selector);
+                    if (enabled) {
+                        console.log('enabled');
                         self.focus(undefined, true);
                     } else {
+                        console.log('disabled');
                         self.disable();
                     }
                     $(document).bind('click.terminal', function(e) {
