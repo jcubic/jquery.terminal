@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 16 Feb 2014 20:31:42 +0000
+ * Date: Sun, 16 Feb 2014 20:56:25 +0000
  *
  */
 
@@ -1603,7 +1603,7 @@
     }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
-        var args = string.split(/(\s+)/);
+        var args = string.replace(/^\s+|\s+$/g, '').split(/(\s+)/);
         return {
             name: args[0],
             args: fn(args.slice(2).join('')),

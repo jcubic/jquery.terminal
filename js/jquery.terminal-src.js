@@ -1603,7 +1603,7 @@
     }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
-        var args = string.split(/(\s+)/);
+        var args = string.replace(/^\s+|\s+$/g, '').split(/(\s+)/);
         return {
             name: args[0],
             args: fn(args.slice(2).join('')),
