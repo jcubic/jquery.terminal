@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 16 Feb 2014 21:20:47 +0000
+ * Date: Sun, 16 Feb 2014 21:27:58 +0000
  *
  */
 
@@ -1389,7 +1389,7 @@
             },
             purge: function() {
                 for (var i=history_list.length; i--;) {
-                    history_list[i].purge();
+                    history_list[i].clear(); // purge don't remove from memory
                 }
                 history_list = [];
                 return self;
@@ -3323,7 +3323,6 @@
                 // :: if user call it with value that is truthy
                 // -----------------------------------------------------------------------
                 login: function(authenticate, success) {
-                    console.log('T> login');
                     var user = null;
                     command_line.prompt('login: ');
                     // don't store logins in history
@@ -3424,7 +3423,6 @@
                 // -----------------------------------------------------------------------
                 pause: function() {
                     if (!paused && command_line) {
-                        console.log('T> pause');
                         paused = true;
                         self.disable();
                         command_line.hidden();
@@ -3436,7 +3434,6 @@
                 // -----------------------------------------------------------------------
                 resume: function() {
                     if (command_line && paused) {
-                        console.log('T> resume');
                         paused = false;
                         self.enable();
                         var original = dalyed_commands;
@@ -3951,9 +3948,12 @@
                     var prefix = (settings.name ? settings.name + '_': '') +
                         terminal_id + '_';
                     var names = $.Storage.get(prefix + 'interpreters');
+                    command_line.purge();
+                    /*
                     $.each($.parseJSON(names), function(_, name) {
                         $.Storage.remove(name + '_commands');
                     });
+                    */
                     $.Storage.remove(prefix + 'interpreters');
                     $.Storage.remove(prefix + 'token');
                     $.Storage.remove(prefix + 'login');
