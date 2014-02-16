@@ -4091,13 +4091,9 @@
                         },
                         commands: commands
                     });
-                    console.log(' make_interpreter');
-                    console.log(self.selector);
                     if (enabled) {
-                        console.log('enabled');
                         self.focus(undefined, true);
                     } else {
-                        console.log('disabled');
                         self.disable();
                     }
                     $(document).bind('click.terminal', function(e) {
