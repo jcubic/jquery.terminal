@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 16 Feb 2014 20:56:25 +0000
+ * Date: Sun, 16 Feb 2014 21:20:47 +0000
  *
  */
 
@@ -3323,6 +3323,7 @@
                 // :: if user call it with value that is truthy
                 // -----------------------------------------------------------------------
                 login: function(authenticate, success) {
+                    console.log('T> login');
                     var user = null;
                     command_line.prompt('login: ');
                     // don't store logins in history
@@ -3358,14 +3359,15 @@
                                             // will be used only on init since users have
                                             // know when login success (they decide when it
                                             // happen by calling the callback - this funtion)
+                                            self.resume(); // users can call pause in onInit
                                             success();
                                         }
                                     } else {
                                         self.error($.terminal.defaults.strings.wrongPassword);
                                         command_line.prompt('login: ');
                                         user = null;
+                                        self.resume();
                                     }
-                                    self.resume();
                                 }, self);
                             }
                         } catch (e) {
@@ -3422,6 +3424,7 @@
                 // -----------------------------------------------------------------------
                 pause: function() {
                     if (!paused && command_line) {
+                        console.log('T> pause');
                         paused = true;
                         self.disable();
                         command_line.hidden();
@@ -3433,6 +3436,7 @@
                 // -----------------------------------------------------------------------
                 resume: function() {
                     if (command_line && paused) {
+                        console.log('T> resume');
                         paused = false;
                         self.enable();
                         var original = dalyed_commands;
