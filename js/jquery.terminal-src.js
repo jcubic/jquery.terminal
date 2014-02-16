@@ -3311,8 +3311,10 @@
                 // -----------------------------------------------------------------------
                 exec: function(command, silent) {
                     if (paused) {
+                        console.log('x');
                         dalyed_commands.push([command, silent]);
                     } else {
+                        console.log('y');
                         commands(command, silent);
                     }
                     return self;
@@ -3433,7 +3435,7 @@
                 // -----------------------------------------------------------------------
                 resume: function() {
                     if (command_line && paused) {
-                        paused = true;
+                        paused = false;
                         self.enable();
                         var original = dalyed_commands;
                         dalyed_commands = [];

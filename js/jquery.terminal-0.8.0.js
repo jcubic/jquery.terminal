@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 16 Feb 2014 11:45:16 +0000
+ * Date: Sun, 16 Feb 2014 20:15:27 +0000
  *
  */
 
@@ -3311,8 +3311,10 @@
                 // -----------------------------------------------------------------------
                 exec: function(command, silent) {
                     if (paused) {
+                        console.log('x');
                         dalyed_commands.push([command, silent]);
                     } else {
+                        console.log('y');
                         commands(command, silent);
                     }
                     return self;
@@ -3433,7 +3435,7 @@
                 // -----------------------------------------------------------------------
                 resume: function() {
                     if (command_line && paused) {
-                        paused = true;
+                        paused = false;
                         self.enable();
                         var original = dalyed_commands;
                         dalyed_commands = [];
