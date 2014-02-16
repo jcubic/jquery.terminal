@@ -3311,10 +3311,8 @@
                 // -----------------------------------------------------------------------
                 exec: function(command, silent) {
                     if (paused) {
-                        console.log('x');
                         dalyed_commands.push([command, silent]);
                     } else {
-                        console.log('y');
                         commands(command, silent);
                     }
                     return self;
