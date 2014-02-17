@@ -1,10 +1,10 @@
 /**@license
- *|       __ _____                     ________                              __
- *|      / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___  / /
- *|  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
- *| /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
- *| \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *|           \/              /____/                              version 0.8.0
+ *       __ _____                     ________                              __
+ *      / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___  / /
+ *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
+ * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
+ * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
+ *           \/              /____/                              version 0.8.0
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -26,11 +26,10 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 17 Feb 2014 13:47:55 +0000
+ * Date: Mon, 17 Feb 2014 14:23:26 +0000
  *
  */
 
-// Sprintf
 (function(ctx) {
 	var sprintf = function() {
 		if (!sprintf.cache.hasOwnProperty(arguments[0])) {
@@ -781,7 +780,7 @@
         var mask = options.mask || false;
         var command = '';
         var selected_text = ''; // text from selection using CTRL+SHIFT+C (as in Xterm)
-        var kill_text = ''; // text from command that kill part of the text
+        var kill_text = ''; // text from command that kill part of the command
         var position = 0;
         var prompt;
         var enabled = options.enabled;
@@ -4133,7 +4132,7 @@
                         self.disable();
                     }
                     $(document).bind('click.terminal', function(e) {
-                        if (!$(e.target).parents().hasClass('terminal') &&
+                        if (!$(e.target).closest().hasClass('terminal') &&
                             settings.onBlur(self) !== false) {
                             self.disable();
                         }
