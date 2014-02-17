@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 17 Feb 2014 14:33:41 +0000
+ * Date: Mon, 17 Feb 2014 20:26:14 +0000
  *
  */
 
@@ -2647,7 +2647,7 @@
             }
         }
         // -----------------------------------------------------------------------
-        function make_json_rpc_object(url, complete) {
+        function make_json_rpc_object(url, success) {
             $.jrpc(url, 'system.describe', [], function(ret) {
                 var commands = [];
                 if (ret.procs) {
@@ -2675,12 +2675,12 @@
                             }
                         };
                     });
-                    complete(interpreter_object);
+                    success(interpreter_object);
                 } else {
-                    complete(null);
+                    success(null);
                 }
             }, function() {
-                complete(null);
+                success(null);
             });
         }
         // -----------------------------------------------------------------------
@@ -3133,7 +3133,7 @@
                         found = true;
                     }
                     if (found) {
-                        self.insert(matched[0].slice(0, j).replace(reg, ''));
+                        self.insert(matched[0].slice(0, j).replace(regex, ''));
                     }
                 }
             }
@@ -3184,6 +3184,8 @@
                     // TODO: move this to cmd plugin
                     //       add completion = array | function
                     ++tab_count;
+                    // cursor can be in the middle of the command
+                    // so we need to get the text before the cursor
                     var command = command_line.get().substring(0, command_line.position());
                     var strings = command.split(' ');
                     var string; // string before cursor that will be completed
@@ -3201,7 +3203,7 @@
                         }
                     }
                     var completion;
-                    if ((settings.completion && $.type(settings.completion) != 'boolean') || !top.completion) {
+                    if ((settings.completion && $.type(settings.completion) != 'boolean') && !top.completion) {
                         completion = settings.completion;
                     } else {
                         completion = top.completion;
