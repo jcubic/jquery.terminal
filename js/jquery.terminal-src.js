@@ -2437,7 +2437,7 @@
         enabled: true,
         historySize: 60,
         checkArity: true,
-        displayExceptions: true,
+        exceptionHandler: null,
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
@@ -2604,6 +2604,7 @@
         }
         // -----------------------------------------------------------------------
         function ajax_error(xhr, status, error) {
+            self.resume(); // onAjaxError can use pause/resume call it first
             if (typeof settings.onAjaxError == 'function') {
                 settings.onAjaxError.call(self, xhr, status, error);
             } else if (status !== 'abort') {
@@ -2611,7 +2612,6 @@
                            $.terminal.defaults.strings.serverResponse +
                            ': \n' + xhr.responseText);
             }
-            self.resume();
         }
         // -----------------------------------------------------------------------
         function make_json_rpc_object(url, complete) {
@@ -2776,19 +2776,19 @@
         function exception_message(e) {
             if (typeof e === 'string') {
                 return e;
+            } else if (typeof e.fileName === 'string') {
+                return e.fileName + ': ' + e.message;
             } else {
-                if (typeof e.fileName === 'string') {
-                    return e.fileName + ': ' + e.message;
-                } else {
-                    return e.message;
-                }
+                return e.message;
             }
         }
         // -----------------------------------------------------------------------
         // :: display Exception on terminal
         // -----------------------------------------------------------------------
         function display_exception(e, label) {
-            if (settings.displayExceptions) {
+            if (typeof settings.exceptionHandler == 'function') {
+                settings.exceptionHandler.call(self, e);
+            } else {
                 var message = exception_message(e);
                 self.error('&#91;' + label + '&#93;: ' + message);
                 if (typeof e.fileName === 'string') {
@@ -3948,12 +3948,10 @@
                     var prefix = (settings.name ? settings.name + '_': '') +
                         terminal_id + '_';
                     var names = $.Storage.get(prefix + 'interpreters');
-                    command_line.purge();
-                    /*
                     $.each($.parseJSON(names), function(_, name) {
                         $.Storage.remove(name + '_commands');
                     });
-                    */
+                    command_line.purge();
                     $.Storage.remove(prefix + 'interpreters');
                     $.Storage.remove(prefix + 'token');
                     $.Storage.remove(prefix + 'login');
