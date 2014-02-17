@@ -2989,28 +2989,28 @@
         // :: check for this is in self.pop method
         // -----------------------------------------------------------------------
         function logout() {
-            if (typeof settings.onBeforelogout === 'function') {
+            if (typeof settings.onBeforeLogout === 'function') {
                 try {
-                    if (settings.onBeforelogout(self) === false) {
+                    if (settings.onBeforeLogout(self) === false) {
                         return;
                     }
                 } catch (e) {
-                    display_exception(e, 'onBeforelogout');
+                    display_exception(e, 'onBeforeLogout');
                     throw e;
                 }
             }
             var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
             $.Storage.remove(name + 'token');
             $.Storage.remove(name + 'login');
-            self.login(settings.login, initialize);
-            if (typeof settings.onAfterlogout === 'function') {
+            if (typeof settings.onAfterLogout === 'function') {
                 try {
-                    settings.onAfterlogout(self);
+                    settings.onAfterLogout(self);
                 } catch (e) {
                     display_exception(e, 'onAfterlogout');
                     throw e;
                 }
             }
+            self.login(settings.login, initialize);
         }
         // -----------------------------------------------------------------------
         // :: Save interpreter name for use with purge
