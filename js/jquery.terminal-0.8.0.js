@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 17 Feb 2014 09:32:11 +0000
+ * Date: Mon, 17 Feb 2014 13:47:55 +0000
  *
  */
 
@@ -780,6 +780,8 @@
         var backup_prompt;
         var mask = options.mask || false;
         var command = '';
+        var selected_text = ''; // text from selection using CTRL+SHIFT+C (as in Xterm)
+        var kill_text = ''; // text from command that kill part of the text
         var position = 0;
         var prompt;
         var enabled = options.enabled;
@@ -1180,6 +1182,12 @@
                             redraw();
                         }
                     }
+                } else if (e.which === 67 && e.ctrlKey && e.shiftKey) { // CTRL+SHIFT+C
+                    selected_text = getSelectedText();
+                } else if (e.which === 86 && e.ctrlKey && e.shiftKey) {
+                    if (selected_text != '') {
+                        self.insert(selected_text);
+                    }
                 } else if (e.which === 9 && !(e.ctrlKey || e.altKey)) { // TAB
                     self.insert('\t');
                 } else if (e.which === 46) {
@@ -1306,12 +1314,14 @@
                         }
                     //} else if (e.altKey) { //ALT+CTRL+??
                     } else {
-                        if (e.which === 87) { // CTRL+W
-                            if (command !== '') {
+                        if (e.which === 81) { // CTRL+W
+                            // don't work in Chromium (can't prevent close tab)
+                            if (command !== '' && position !== 0) {
                                 var first = command.slice(0, position);
                                 var last = command.slice(position+1);
                                 var m = first.match(/([^ ]+ *$)/);
                                 position = first.length-m[0].length;
+                                kill_text = first.slice(position);
                                 command = first.slice(0, position) + last;
                                 redraw();
                             }
@@ -1335,6 +1345,10 @@
                         } else if (e.which === 88 || e.which === 67 || e.which === 84) {
                             //CTRL+X CTRL+C CTRL+W CTRL+T
                             return true;
+                        } else if (e.which === 89) { // CTRL+Y
+                            if (kill_text != '') {
+                                self.insert(kill_text);
+                            }
                         } else if (e.which === 86) {
                             //CTRL+V
                             paste();
@@ -1342,13 +1356,18 @@
                         } else if (e.which === 75) {
                             //CTRL+K
                             if (position === 0) {
+                                kill_text = command;
                                 self.set('');
                             } else if (position !== command.length) {
+                                kill_text = command.slice(position);
                                 self.set(command.slice(0, position));
                             }
                         } else if (e.which === 85) { // CTRL+U
-                            self.set(command.slice(position, command.length));
-                            self.position(0);
+                            if (command != '' && position != 0) {
+                                kill_text = command.slice(0, position);
+                                self.set(command.slice(position, command.length));
+                                self.position(0);
+                            }
                         } else if (e.which === 17) { //CTRL+TAB switch tab
                             return false;
                         }
@@ -2384,6 +2403,21 @@
             result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
         }
         return result;
+    }
+    // -----------------------------------------------------------------------
+    // :: Get Selected Text
+    // -----------------------------------------------------------------------
+    function getSelectedText() {
+        if (window.getSelection || document.getSelection) {
+            var selection = (window.getSelection || document.getSelection)();
+            if (selection.text) {
+                return selection.text;
+            } else {
+                return selection.toString();
+            }
+        } else if (document.selection) {
+            return document.selection.createRange().text;
+        }
     }
     // -----------------------------------------------------------------------
     // :: check if div have scrollbars (need to have overflow auto or always)
@@ -4104,10 +4138,16 @@
                             self.disable();
                         }
                     });
-                    self.click(function() {
+                    self.click(function(e) {
                         //if (!(pause && terminals.length() > 1 &&
                         //     self === $.terminal.active())) {
-                        self.focus();
+                        if (!self.enabled()) {
+                            self.focus();
+                        }
+                    }).mousedown(function(e) {
+                        if (e.which == 2) {
+                            self.insert(getSelectedText());
+                        }
                     });
                     if (settings.login && !self.token() && !self.login_name()) {
                         self.login(settings.login, initialize);
