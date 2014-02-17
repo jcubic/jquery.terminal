@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 17 Feb 2014 14:23:26 +0000
+ * Date: Mon, 17 Feb 2014 14:33:41 +0000
  *
  */
 
@@ -4132,14 +4132,12 @@
                         self.disable();
                     }
                     $(document).bind('click.terminal', function(e) {
-                        if (!$(e.target).closest().hasClass('terminal') &&
+                        if (!$(e.target).closest('.terminal').hasClass('terminal') &&
                             settings.onBlur(self) !== false) {
                             self.disable();
                         }
                     });
                     self.click(function(e) {
-                        //if (!(pause && terminals.length() > 1 &&
-                        //     self === $.terminal.active())) {
                         if (!self.enabled()) {
                             self.focus();
                         }

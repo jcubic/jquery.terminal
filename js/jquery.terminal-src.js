@@ -4132,14 +4132,12 @@
                         self.disable();
                     }
                     $(document).bind('click.terminal', function(e) {
-                        if (!$(e.target).closest().hasClass('terminal') &&
+                        if (!$(e.target).closest('.terminal').hasClass('terminal') &&
                             settings.onBlur(self) !== false) {
                             self.disable();
                         }
                     });
                     self.click(function(e) {
-                        //if (!(pause && terminals.length() > 1 &&
-                        //     self === $.terminal.active())) {
                         if (!self.enabled()) {
                             self.focus();
                         }
