@@ -2968,13 +2968,13 @@
                 var interpreter = interpreters.top();
                 if (command === 'exit' && settings.exit) {
                     if (interpreters.size() === 1) {
+                        if (!silent) {
+                            echo_command(command);
+                        }
                         if (settings.login) {
                             logout();
                         } else {
                             var msg = "You can't exit from main interpeter";
-                            if (!silent) {
-                                echo_command(command);
-                            }
                             self.echo(msg);
                         }
                     } else {
@@ -3378,7 +3378,7 @@
                                     throw "Value of login property must be a function";
                                 }
                                 var passwd = command;
-                                authenticate(user, passwd, function(token) {
+                                authenticate(user, passwd, function(token, silent) {
                                     if (token) {
                                         var name = settings.name;
                                         name = (name ?  name + '_': '') + terminal_id + '_';
@@ -3397,7 +3397,9 @@
                                             success();
                                         }
                                     } else {
-                                        self.error($.terminal.defaults.strings.wrongPassword);
+                                        if (!silent) {
+                                            self.error($.terminal.defaults.strings.wrongPassword);
+                                        }
                                         command_line.prompt('login: ');
                                         user = null;
                                         self.resume();
