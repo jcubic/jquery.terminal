@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 22 Feb 2014 11:25:32 +0000
+ * Date: Sat, 22 Feb 2014 19:51:48 +0000
  *
  */
 
@@ -592,6 +592,9 @@
     function Stack(init) {
         var data = init ? [init] : [];
         $.extend(this, {
+            map: function(fn) {
+                return $.map(data, fn);
+            },
             size: function() {
                 return data.length;
             },
@@ -683,10 +686,12 @@
     // -----------------------------------------------------------------------
     function History(name, size) {
         var enabled = true;
+        var storage_key = '';
         if (typeof name === 'string' && name !== '') {
-            name += '_';
+            storage_key = name + '_';
         }
-        var data = $.Storage.get(name + 'commands');
+        storage_key += 'commands';
+        var data = $.Storage.get(storage_key);
         data = data ? $.parseJSON(data) : [];
         var pos = data.length-1;
         $.extend(this, {
@@ -698,7 +703,7 @@
                             data = data.slice(-size);
                         }
                         pos = data.length-1;
-                        $.Storage.set(name + 'commands', $.json_stringify(data));
+                        $.Storage.set(storage_key, $.json_stringify(data));
                     }
                 }
             },
@@ -748,7 +753,7 @@
                 enabled = true;
             },
             purge: function() {
-                $.Storage.remove(name + 'commands');
+                $.Storage.remove(storage_key);
             },
             disable: function() {
                 enabled = false;
@@ -1393,23 +1398,19 @@
             name: function(string) {
                 if (string !== undefined) {
                     name = string;
+                    var enabled = history && history.enabled();
                     history = new History(string, historySize);
                     // disable new history if old was disabled
-                    var len = history_list.length;
-                    if (len && !history_list[len-1].enabled()) {
+                    if (!enabled) {
                         history.disable();
                     }
-                    history_list.push(history);
                     return self;
                 } else {
                     return name;
                 }
             },
             purge: function() {
-                for (var i=history_list.length; i--;) {
-                    history_list[i].clear(); // purge don't remove from memory
-                }
-                history_list = [];
+                history.clear();
                 return self;
             },
             history: function() {
@@ -2516,7 +2517,9 @@
             serverResponse: "Server reponse is",
             wrongGreetings: "Wrong value of greetings parameter",
             notWhileLogin: "You can't call that function while in login",
-            loginIsNotAFunction: "authenticate must be a function",
+            loginIsNotAFunction: "Authenticate must be a function",
+            noLoginInterpreter: "This interpreter didn't have login",
+            canExitError: "You can't exit from main interpeter",
             login: "login",
             password: "password"
         }
@@ -2708,7 +2711,7 @@
             var type = $.type(user_interpreter);
             var result = {};
             var commands;
-            var rpc_count = 0;
+            var rpc_count = 0; // only one rpc can be use for array
             var function_interpreter;
             if (type === 'array') {
                 var object = {};
@@ -2988,18 +2991,13 @@
                 prev_command = command;
                 var interpreter = interpreters.top();
                 if (command === 'exit' && settings.exit) {
-                    if (interpreters.size() === 1) {
+                    var count = interpreters.size();
+                        self.token()
+                    if (count == 1 && self.token() || count > 1) {
                         if (!silent) {
                             echo_command(command);
                         }
-                        if (settings.login) {
-                            logout();
-                        } else {
-                            var msg = "You can't exit from main interpeter";
-                            self.echo(msg);
-                        }
-                    } else {
-                        self.pop('exit');
+                        self.pop();
                     }
                 } else {
                     if (!silent) {
@@ -3042,7 +3040,7 @@
         // :: this function is call only when options.login function is defined
         // :: check for this is in self.pop method
         // -----------------------------------------------------------------------
-        function logout() {
+        function global_logout() {
             if (typeof settings.onBeforeLogout === 'function') {
                 try {
                     if (settings.onBeforeLogout(self) === false) {
@@ -3053,9 +3051,7 @@
                     throw e;
                 }
             }
-            var name = (settings.name ? settings.name + '_': '') + terminal_id + '_';
-            $.Storage.remove(name + 'token');
-            $.Storage.remove(name + 'login');
+            logout();
             if (typeof settings.onAfterLogout === 'function') {
                 try {
                     settings.onAfterLogout(self);
@@ -3067,12 +3063,17 @@
             self.login(settings.login, initialize);
         }
         // -----------------------------------------------------------------------
+        function logout() {
+            var name = self.prefix_name(true) + '_';
+            $.Storage.remove(name + 'token');
+            $.Storage.remove(name + 'login');
+        }
+        // -----------------------------------------------------------------------
         // :: Save interpreter name for use with purge
         // -----------------------------------------------------------------------
         function maybe_append_name(interpreter_name) {
-            var name = (settings.name ? settings.name + '_': '') +
-                terminal_id + "_interpreters";
-            var names = $.Storage.get(name);
+            var storage_key = self.prefix_name() + '_interpreters';
+            var names = $.Storage.get(storage_key);
             if (names) {
                 names = $.parseJSON(names);
             } else {
@@ -3080,7 +3081,7 @@
             }
             if ($.inArray(interpreter_name, names) == -1) {
                 names.push(interpreter_name);
-                $.Storage.set(name, $.json_stringify(names));
+                $.Storage.set(storage_key, $.json_stringify(names));
             }
         }
         // -----------------------------------------------------------------------
@@ -3088,9 +3089,10 @@
         // -----------------------------------------------------------------------
         function prepare_top_interpreter(silent) {
             var interpreter = interpreters.top();
-            var name = (settings.name ? settings.name + '_': '') + terminal_id +
-                (names.length ? '_' + names.join('_') : '');
-            maybe_append_name(name);
+            var name = self.prefix_name(true);
+            if (!in_login) {
+                maybe_append_name(name);
+            }
             command_line.name(name);
             if (typeof interpreter.prompt == 'function') {
                 command_line.prompt(function(command) {
@@ -3309,7 +3311,7 @@
                 throw 'Sorry, but terminal said that "' + self.selector +
                     '" is not valid selector!';
             }
-            var names = []; // stack if interpeter names
+            //var names = []; // stack if interpeter names
             var scroll_object;
             var prev_command;
             var loged_in = false;
@@ -3411,9 +3413,14 @@
                     if (typeof authenticate !== 'function') {
                         throw new Error($.terminal.strings.loginIsNotAFunction);
                     }
+                    if (self.token(true) && self.login_name(true)) {
+                        if (typeof success == 'function') {
+                            success();
+                        }
+                        return self;
+                    }
                     var user = null;
-                    //command_line.prompt('login: ');
-                    // don't store logins in history
+                    // don't store login data in history
                     if (settings.history) {
                         command_line.history().disable();
                     }
@@ -3427,8 +3434,7 @@
                                     if (settings.history) {
                                         command_line.history().enable();
                                     }
-                                    var name = settings.name;
-                                    name = (name ? name + '_': '') + terminal_id + '_';
+                                    var name = self.prefix_name(true) + '_';
                                     $.Storage.set(name + 'token', token);
                                     $.Storage.set(name + 'login', user);
                                     in_login = false;
@@ -3437,6 +3443,8 @@
                                         // login success (they decide when it happen
                                         // by calling the callback - this funtion)
                                         success();
+                                    } else {
+                                        self.resume();
                                     }
                                 } else {
                                     if (!silent) {
@@ -3915,10 +3923,11 @@
                 // :: if there is no login provided
                 // -----------------------------------------------------------------------
                 logout: settings.login ? function() {
-                    while (interpreters.size() > 1) {
-                        interpreters.pop();
+                    if (!self.token(true)) {
+                        self.error($.terminal.defaults.strings.noLoginInterpreter);
+                    } else {
+                        logout();
                     }
-                    logout();
                     return self;
                 } : function() {
                     self.error($.terminal.defaults.strings.loginFunctionMissing);
@@ -3927,22 +3936,32 @@
                 // :: Function return token returned by callback function in login
                 // :: function it do nothing (return undefined) if there is no login
                 // -----------------------------------------------------------------------
-                token: settings.login ? function() {
-                    var name = settings.name;
-                    return $.Storage.get((name ? name + '_': '') + terminal_id + '_token');
+                token: settings.login ? function(local) {
+                    return $.Storage.get(self.prefix_name(local) + '_token');
                 } : $.noop,
                 // -----------------------------------------------------------------------
                 // :: Function return Login name entered by the user
                 // -----------------------------------------------------------------------
-                login_name: settings.login ? function() {
-                    var name = settings.name;
-                    return $.Storage.get((name ? name + '_': '') + terminal_id + '_login');
+                login_name: settings.login ? function(local) {
+                    return $.Storage.get(self.prefix_name(local) + '_login');
                 } : $.noop,
                 // -----------------------------------------------------------------------
                 // :: Function return name of current interpreter
                 // -----------------------------------------------------------------------
                 name: function() {
                     return interpreters.top().name;
+                },
+                // -----------------------------------------------------------------------
+                // :: Function return prefix name for login/token
+                // -----------------------------------------------------------------------
+                prefix_name: function(local) {
+                    var name = (settings.name ? settings.name + '_' : '') + terminal_id;
+                    if (local && interpreters.size() > 1) {
+                        name += '_' + interpreters.map(function(intrp) {
+                            return intrp.name;
+                        }).slice(1).join('_');
+                    }
+                    return name;
                 },
                 // -----------------------------------------------------------------------
                 // :: Push new interenter on the Stack,
@@ -3953,7 +3972,7 @@
                         options = options || {};
                         options.name = options.name || prev_command;
                         options.prompt = options.prompt || options.name + ' ';
-                        names.push(options.name);
+                        //names.push(options.name);
                         var top = interpreters.top();
                         if (top) {
                             top.mask = command_line.mask();
@@ -3973,10 +3992,9 @@
                     if (string !== undefined) {
                         echo_command(string);
                     }
-                    names.pop();
-                    if (interpreters.top().name === settings.name) {
-                        if (settings.login) {
-                            logout();
+                    if (interpreters.size() == 1) {
+                        if (self.token()) { // global token
+                            global_logout();
                             if ($.type(settings.onExit) === 'function') {
                                 try {
                                     settings.onExit(self);
@@ -3985,8 +4003,13 @@
                                     throw e;
                                 }
                             }
+                        } else {
+                            self.error($.terminal.defaults.string.canExitError);
                         }
                     } else {
+                        if (self.token(true)) { // local token
+                            logout();
+                        }
                         var current = interpreters.pop();
                         prepare_top_interpreter();
                         if ($.type(current.onExit) === 'function') {
@@ -4024,16 +4047,15 @@
                 // :: until you refresh the browser
                 // -----------------------------------------------------------------------
                 purge: function() {
-                    var prefix = (settings.name ? settings.name + '_': '') +
-                        terminal_id + '_';
+                    var prefix = self.prefix_name() + '_';
                     var names = $.Storage.get(prefix + 'interpreters');
                     $.each($.parseJSON(names), function(_, name) {
                         $.Storage.remove(name + '_commands');
+                        $.Storage.remove(name + '_token');
+                        $.Storage.remove(name + '_login');
                     });
                     command_line.purge();
                     $.Storage.remove(prefix + 'interpreters');
-                    $.Storage.remove(prefix + 'token');
-                    $.Storage.remove(prefix + 'login');
                     return self;
                 },
                 // -----------------------------------------------------------------------
@@ -4137,94 +4159,93 @@
                 settings.login = make_json_rpc_login(settings.login);
             }
             terminals.append(self);
-            if (validate('prompt', settings.prompt)) {
-                var interpreters;
-                var command_line;
-                make_interpreter(init_interpreter, function(interpreter) {
-                    interpreters = new Stack($.extend({
-                        name: settings.name,
-                        prompt: settings.prompt,
-                        greetings: settings.greetings
-                    }, interpreter));
-                    // CREATE COMMAND LINE
-                    command_line = $('<div/>').appendTo(self).cmd({
-                        prompt: settings.prompt,
-                        history: settings.history,
-                        historyFilter: settings.historyFilter,
-                        historySize: settings.historySize,
-                        width: '100%',
-                        keydown: key_down,
-                        keypress: settings.keypress ? function(e) {
-                            return settings.keypress(e, self);
-                        } : null,
-                        onCommandChange: function(command) {
-                            if ($.type(settings.onCommandChange) === 'function') {
-                                try {
-                                    settings.onCommandChange(command, self);
-                                } catch (e) {
-                                    display_exception(e, 'onCommandChange');
-                                    throw e;
-                                }
+            var interpreters;
+            var command_line;
+            make_interpreter(init_interpreter, function(interpreter) {
+                interpreters = new Stack($.extend({
+                    name: settings.name,
+                    prompt: settings.prompt,
+                    greetings: settings.greetings
+                }, interpreter));
+                // CREATE COMMAND LINE
+                command_line = $('<div/>').appendTo(self).cmd({
+                    prompt: settings.prompt,
+                    history: settings.history,
+                    historyFilter: settings.historyFilter,
+                    historySize: settings.historySize,
+                    width: '100%',
+                    keydown: key_down,
+                    keypress: settings.keypress ? function(e) {
+                        return settings.keypress(e, self);
+                    } : null,
+                    onCommandChange: function(command) {
+                        if ($.type(settings.onCommandChange) === 'function') {
+                            try {
+                                settings.onCommandChange(command, self);
+                            } catch (e) {
+                                display_exception(e, 'onCommandChange');
+                                throw e;
                             }
-                            scroll_to_bottom();
-                        },
-                        commands: commands
-                    });
-                    if (enabled) {
-                        self.focus(undefined, true);
-                    } else {
+                        }
+                        scroll_to_bottom();
+                    },
+                    commands: commands
+                });
+                if (enabled) {
+                    self.focus(undefined, true);
+                } else {
+                    self.disable();
+                }
+                $(document).bind('click.terminal', function(e) {
+                    if (!$(e.target).closest('.terminal').hasClass('terminal') &&
+                        settings.onBlur(self) !== false) {
                         self.disable();
                     }
-                    $(document).bind('click.terminal', function(e) {
-                        if (!$(e.target).closest('.terminal').hasClass('terminal') &&
-                            settings.onBlur(self) !== false) {
-                            self.disable();
-                        }
-                    });
-                    self.click(function(e) {
-                        if (!self.enabled()) {
-                            self.focus();
-                        }
-                    }).mousedown(function(e) {
-                        if (e.which == 2) {
-                            self.insert(getSelectedText());
-                        }
-                    });
-                    if (settings.login && !self.token() && !self.login_name()) {
-                        self.login(settings.login, initialize);
-                    } else {
-                        initialize();
+                });
+                self.click(function(e) {
+                    if (!self.enabled()) {
+                        self.focus();
                     }
-                    if (self.is(':visible')) {
-                        num_chars = get_num_chars(self);
-                        command_line.resize(num_chars);
-                    }
-                    self.oneTime(100, function() {
-                        $(window).bind('resize.terminal', function() {
-                            if (self.is(':visible')) {
-                                var width = self.width();
-                                var height = self.height();
-                                // prevent too many calculations in IE because of resize event
-                                // bug
-                                if (old_height !== height || old_width !== width) {
-                                    self.resize();
-                                }
-                            }
-                        });
-                    });
-                    if ($.type($.fn.init.prototype.mousewheel) === 'function') {
-                        self.mousewheel(function(event, delta) {
-                            //self.echo(dir(event));
-                            if (delta > 0) {
-                                self.scroll(-40);
-                            } else {
-                                self.scroll(40);
-                            }
-                            return false;
-                        }, true);
+                }).mousedown(function(e) {
+                    if (e.which == 2) {
+                        self.insert(getSelectedText());
                     }
                 });
-            }
+                // ------------------------------------------------
+                // Run Login
+                if (settings.login) {
+                    self.login(settings.login, initialize);
+                } else {
+                    initialize();
+                }
+                if (self.is(':visible')) {
+                    num_chars = get_num_chars(self);
+                    command_line.resize(num_chars);
+                }
+                self.oneTime(100, function() {
+                    $(window).bind('resize.terminal', function() {
+                        if (self.is(':visible')) {
+                            var width = self.width();
+                            var height = self.height();
+                            // prevent too many calculations in IE
+                            if (old_height !== height || old_width !== width) {
+                                self.resize();
+                            }
+                        }
+                    });
+                });
+                if ($.type($.fn.init.prototype.mousewheel) === 'function') {
+                    self.mousewheel(function(event, delta) {
+                        //self.echo(dir(event));
+                        if (delta > 0) {
+                            self.scroll(-40);
+                        } else {
+                            self.scroll(40);
+                        }
+                        return false;
+                    }, true);
+                }
+            });
             self.data('terminal', self);
             return self;
         }
