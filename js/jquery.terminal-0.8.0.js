@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 22 Feb 2014 19:51:48 +0000
+ * Date: Sat, 22 Feb 2014 20:02:01 +0000
  *
  */
 
@@ -3923,10 +3923,8 @@
                 // :: if there is no login provided
                 // -----------------------------------------------------------------------
                 logout: settings.login ? function() {
-                    if (!self.token(true)) {
-                        self.error($.terminal.defaults.strings.noLoginInterpreter);
-                    } else {
-                        logout();
+                    while (interpreters.size() > 0) {
+                        self.pop();
                     }
                     return self;
                 } : function() {
@@ -3992,8 +3990,9 @@
                     if (string !== undefined) {
                         echo_command(string);
                     }
+                    var token = self.token(true);
                     if (interpreters.size() == 1) {
-                        if (self.token()) { // global token
+                        if (token) {
                             global_logout();
                             if ($.type(settings.onExit) === 'function') {
                                 try {
@@ -4007,7 +4006,7 @@
                             self.error($.terminal.defaults.string.canExitError);
                         }
                     } else {
-                        if (self.token(true)) { // local token
+                        if (token) {
                             logout();
                         }
                         var current = interpreters.pop();

@@ -3923,10 +3923,8 @@
                 // :: if there is no login provided
                 // -----------------------------------------------------------------------
                 logout: settings.login ? function() {
-                    if (!self.token(true)) {
-                        self.error($.terminal.defaults.strings.noLoginInterpreter);
-                    } else {
-                        logout();
+                    while (interpreters.size() > 0) {
+                        self.pop();
                     }
                     return self;
                 } : function() {
@@ -3992,8 +3990,9 @@
                     if (string !== undefined) {
                         echo_command(string);
                     }
+                    var token = self.token(true);
                     if (interpreters.size() == 1) {
-                        if (self.token()) { // global token
+                        if (token) {
                             global_logout();
                             if ($.type(settings.onExit) === 'function') {
                                 try {
@@ -4007,7 +4006,7 @@
                             self.error($.terminal.defaults.string.canExitError);
                         }
                     } else {
-                        if (self.token(true)) { // local token
+                        if (token) {
                             logout();
                         }
                         var current = interpreters.pop();
