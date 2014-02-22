@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 22 Feb 2014 20:02:01 +0000
+ * Date: Sat, 22 Feb 2014 20:10:07 +0000
  *
  */
 
@@ -2518,7 +2518,6 @@
             wrongGreetings: "Wrong value of greetings parameter",
             notWhileLogin: "You can't call that function while in login",
             loginIsNotAFunction: "Authenticate must be a function",
-            noLoginInterpreter: "This interpreter didn't have login",
             canExitError: "You can't exit from main interpeter",
             login: "login",
             password: "password"
