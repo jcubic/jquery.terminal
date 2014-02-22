@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 18 Feb 2014 09:45:23 +0000
+ * Date: Sat, 22 Feb 2014 11:25:32 +0000
  *
  */
 
@@ -1481,6 +1481,9 @@
                     return self;
                 }
             },
+            kill_text: function() {
+                return kill_text;
+            },
             position: function(n) {
                 if (typeof n === 'number') {
                     position = n < 0 ? 0 : n > command.length ? command.length : n;
@@ -2383,17 +2386,27 @@
         return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
     }
     // -----------------------------------------------------------------------
+    // :: Create fake terminal to calcualte the dimention of one character
+    // :: this will make terminal work if terminal div is not added to the
+    // :: DOM at init like with:
+    // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
+    // -----------------------------------------------------------------------
+    function char_size() {
+        var temp = $('<div class="terminal"><span>&nbsp;</span></div>').
+            appendTo('body');
+        var span = temp.find('span');
+        var result = {
+            width: span.width(),
+            height: span.height
+        };
+        temp.remove();
+        return result;
+    }
+    // -----------------------------------------------------------------------
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        // Create fake terminal to calcualte the width of one character
-        // this will make terminal work if terminal div is not added to the
-        // DOM at init like with:
-        // $('<div/>').terminal().echo('foo bar').appendTo('body');
-        var temp = $('<div class="terminal"><span>&nbsp;</span></div>').
-            appendTo('body');
-        var width = temp.find('span').width();
-        temp.remove();
+        var width = char_size().width;
         var result = Math.floor(terminal.width() / width);
         if (have_scrollbars(terminal)) {
             var SCROLLBAR_WIDTH = 20;
@@ -2405,7 +2418,8 @@
         return result;
     }
     // -----------------------------------------------------------------------
-    // :: Get Selected Text
+    // :: Get Selected Text (this is internal because it return text even if
+    // :: it's outside of terminal, is used to paste text to the terminal)
     // -----------------------------------------------------------------------
     function getSelectedText() {
         if (window.getSelection || document.getSelection) {
@@ -2500,7 +2514,11 @@
             loginFunctionMissing: "You don't have login function",
             noTokenError: "Access denied (no token)",
             serverResponse: "Server reponse is",
-            wrongGreetings: "Wrong value of greetings parameter"
+            wrongGreetings: "Wrong value of greetings parameter",
+            notWhileLogin: "You can't call that function while in login",
+            loginIsNotAFunction: "authenticate must be a function",
+            login: "login",
+            password: "password"
         }
     };
     // -----------------------------------------------------------------------
@@ -2787,17 +2805,19 @@
         // -----------------------------------------------------------------------
         // :: Create JSON-RPC authentication function
         // -----------------------------------------------------------------------
-        function make_json_rpc_login(method_name) {
+        function make_json_rpc_login(login) {
+            var method = $.type(login) === 'boolean' ? 'login' : login;
             return function(user, passwd, callback, term) {
                 self.pause();
                 $.jrpc(init_interpreter,
-                       method_name,
+                       method,
                        [user, passwd],
                        function(response) {
                            self.resume();
                            if (!response.error && response.result) {
                                callback(response.result);
                            } else {
+                               // null will trigger message that login fail
                                callback(null);
                            }
                        }, ajax_error);
@@ -3088,12 +3108,26 @@
         function initialize() {
             prepare_top_interpreter();
             show_greetings();
+            // was_paused flag is workaround for case when user call exec before
+            // login and pause in onInit, 3rd exec will have proper timing (will
+            // execute after onInit resume)
+            var was_paused = false;
             if (typeof settings.onInit === 'function') {
+                onPause = function() {
+                    was_paused = true;
+                };
                 try {
                     settings.onInit(self);
                 } catch (e) {
                     display_exception(e, 'OnInit');
                     throw e;
+                } finally {
+                    onPause = $.noop;
+                    if (!was_paused) {
+                        // resume login if user didn't call pause in onInit
+                        // if user pause in onInit wait with exec until it resume
+                        self.resume();
+                    }
                 }
             }
         }
@@ -3290,6 +3324,9 @@
             var num_chars; // numer of chars in line
             var command_list = []; // for tab completion
             var url;
+            var in_login = false; // some Methods should not be called when login
+            // TODO: Try to use mutex like counter for pause/resume
+            var onPause = $.noop; // used to indicate that user call pause onInit
             var old_width, old_height;
             var dalyed_commands = []; // used when exec commands with pause
             var settings = $.extend({},
@@ -3306,6 +3343,9 @@
                 // :: Clear the output
                 // -----------------------------------------------------------------------
                 clear: function() {
+                    if (in_login) {
+                        throw new Exception($.terminal.strings.notWhileLogin);
+                    }
                     output.html('');
                     command_line.set('');
                     lines = [];
@@ -3322,6 +3362,9 @@
                 // :: Return object that can be use with import_view to restore the state
                 // -----------------------------------------------------------------------
                 export_view: function() {
+                    if (in_login) {
+                        throw new Exception($.terminal.strings.notWhileLogin);
+                    }
                     return {
                         prompt: self.get_prompt(),
                         command: self.get_command(),
@@ -3333,6 +3376,9 @@
                 // :: Restore the state of prevoius exported view
                 // -----------------------------------------------------------------------
                 import_view: function(view) {
+                    if (in_login) {
+                        throw new Exception($.terminal.strings.notWhileLogin);
+                    }
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
                     command_line.position(view.position);
@@ -3359,58 +3405,51 @@
                 // :: if user call it with value that is truthy
                 // -----------------------------------------------------------------------
                 login: function(authenticate, success) {
+                    if (in_login) {
+                        throw new Error($.terminal.strings.notWhileLogin);
+                    }
+                    if (typeof authenticate !== 'function') {
+                        throw new Error($.terminal.strings.loginIsNotAFunction);
+                    }
                     var user = null;
-                    command_line.prompt('login: ');
+                    //command_line.prompt('login: ');
                     // don't store logins in history
                     if (settings.history) {
                         command_line.history().disable();
                     }
-                    command_line.commands(function(command) {
-                        try {
-                            echo_command(command);
-                            if (!user) {
-                                user = command;
-                                command_line.prompt('password: ');
-                                command_line.mask(true);
-                            } else {
-                                command_line.mask(false);
-                                self.pause();
-                                if (typeof settings.login !== 'function') {
-                                    throw "Value of login property must be a function";
-                                }
-                                var passwd = command;
-                                authenticate(user, passwd, function(token, silent) {
-                                    if (token) {
-                                        var name = settings.name;
-                                        name = (name ?  name + '_': '') + terminal_id + '_';
-                                        $.Storage.set(name + 'token', token);
-                                        $.Storage.set(name + 'login', user);
-                                        // restore commands and run interpreter
-                                        command_line.commands(commands);
-                                        if (settings.history) {
-                                            command_line.history().enable();
-                                        }
-                                        if (typeof success == 'function') {
-                                            // will be used only on init since users have
-                                            // know when login success (they decide when it
-                                            // happen by calling the callback - this funtion)
-                                            self.resume(); // users can call pause in onInit
-                                            success();
-                                        }
-                                    } else {
-                                        if (!silent) {
-                                            self.error($.terminal.defaults.strings.wrongPassword);
-                                        }
-                                        command_line.prompt('login: ');
-                                        user = null;
-                                        self.resume();
+                    in_login = true;
+                    return self.push(function(user) {
+                        self.set_mask(true).push(function(passwd) {
+                            self.pause();
+                            authenticate(user, passwd, function(token, silent) {
+                                if (token) {
+                                    self.pop().pop();
+                                    if (settings.history) {
+                                        command_line.history().enable();
                                     }
-                                }, self);
-                            }
-                        } catch (e) {
-                            display_exception(e, 'LOGIN', self);
-                            throw e;
-                        }
+                                    var name = settings.name;
+                                    name = (name ? name + '_': '') + terminal_id + '_';
+                                    $.Storage.set(name + 'token', token);
+                                    $.Storage.set(name + 'login', user);
+                                    in_login = false;
+                                    if (typeof success == 'function') {
+                                        // will be used internaly since users know when
+                                        // login success (they decide when it happen
+                                        // by calling the callback - this funtion)
+                                        success();
+                                    }
+                                } else {
+                                    if (!silent) {
+                                        self.error($.terminal.defaults.strings.wrongPassword);
+                                    }
+                                    self.pop().set_mask(false);
+                                }
+                            });
+                        }, {
+                            prompt: $.terminal.defaults.strings.password + ': '
+                        });
+                    }, {
+                        prompt: $.terminal.defaults.strings.login + ': '
                     });
                 },
                 // -----------------------------------------------------------------------
@@ -3437,8 +3476,7 @@
                         });
                     }
                     if ($.type(user_interpreter) == 'string' && login) {
-                        var method = $.type(login) === 'boolean' ? 'login' : login;
-                        self.login(make_json_rpc_login, overwrite_interpreter);
+                        self.login(make_json_rpc_login(login), overwrite_interpreter);
                     } else {
                         overwrite_interpreter();
                     }
@@ -3460,7 +3498,8 @@
                 // :: Pause the terminal, it should be used for ajax calls
                 // -----------------------------------------------------------------------
                 pause: function() {
-                    if (!paused && command_line) {
+                    onPause();
+                    if (!self.paused() && command_line) {
                         paused = true;
                         self.disable();
                         command_line.hidden();
@@ -3495,11 +3534,7 @@
                 // :: Return number of lines that fit into the height of the therminal
                 // -----------------------------------------------------------------------
                 rows: function() {
-                    var tmp = $('<div class="terminal"><span>&nbsp;</span></div>').
-                        appendTo('body');
-                    var ret = Math.floor(self.height() / tmp.height());
-                    tmp.remove();
-                    return ret;
+                    return Math.floor(self.height() / char_size().height);
                 },
                 // -----------------------------------------------------------------------
                 // :: Return History object
@@ -3636,10 +3671,23 @@
                     return version;
                 },
                 // -----------------------------------------------------------------------
+                // :: Return actual command line object (jquery object with cmd methods)
+                // -----------------------------------------------------------------------
+                cmd: function() {
+                    return command_line;
+                },
+                // -----------------------------------------------------------------------
                 // :: Return current command entered by terminal
                 // -----------------------------------------------------------------------
                 get_command: function() {
                     return command_line.get();
+                },
+                // -----------------------------------------------------------------------
+                // :: Change the command line to the new one
+                // -----------------------------------------------------------------------
+                set_command: function(command) {
+                    command_line.set(command);
+                    return self;
                 },
                 // -----------------------------------------------------------------------
                 // :: Insert text into command line after the cursor
@@ -3675,13 +3723,6 @@
                     return interpreters.top().prompt;
                     // command_line.prompt(); - can be a wrapper
                     //return command_line.prompt();
-                },
-                // -----------------------------------------------------------------------
-                // :: Change the command line to the new one
-                // -----------------------------------------------------------------------
-                set_command: function(command) {
-                    command_line.set(command);
-                    return self;
                 },
                 // -----------------------------------------------------------------------
                 // :: Enable or Disable mask depedning on the passed argument
@@ -4093,9 +4134,7 @@
             // create json-rpc authentication function
             if (typeof init_interpreter === 'string' &&
                 (typeof settings.login === 'string' || settings.login)) {
-                //default name is login so you can pass true
-                var login_name = $.type(settings.login) === 'boolean' ? 'login' : settings.login;
-                settings.login = make_json_rpc_login(login_name);
+                settings.login = make_json_rpc_login(settings.login);
             }
             terminals.append(self);
             if (validate('prompt', settings.prompt)) {
