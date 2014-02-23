@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 23 Feb 2014 19:37:18 +0000
+ * Date: Sun, 23 Feb 2014 21:25:59 +0000
  *
  */
 
@@ -1158,7 +1158,7 @@
                     if (e.shiftKey) {
                         self.insert('\n');
                     } else {
-                        if (history && command &&
+                        if (history && command && !mask &&
                             ((typeof options.historyFilter == 'function' &&
                               options.historyFilter(command)) ||
                              !options.historyFilter)) {
@@ -2506,7 +2506,8 @@
         keypress: $.noop,
         keydown: $.noop,
         strings: {
-            wrongPassword: "Wrong password try again!",
+            wrongPasswordTryAgain: "Wrong password try again!",
+            wrongPassword: "Wrong password!",
             ajaxAbortError: "Error while aborting ajax call!",
             wrongArity: "Wrong number of arguments. Function '%s' expect %s got %s!",
             commandNotFound: "Command '%s' Not Found!",
@@ -2986,9 +2987,15 @@
         // :: Wrapper over interpreter, it implements exit and catch all exeptions
         // :: from user code and display them on terminal
         // -----------------------------------------------------------------------
-        function commands(command, silent) {
+        function commands(command, silent, exec) {
             try {
-                prev_command = $.terminal.splitCommand(command).name;
+                if (!ghost()) {
+                    prev_command = $.terminal.splitCommand(command).name;
+                    if (exec && typeof settings.historyFilter == 'function' &&
+                        settings.historyFilter(command) || !settings.historyFilter) {
+                        command_line.history().append(command);
+                    }
+                }
                 var interpreter = interpreters.top();
                 if (command === 'exit' && settings.exit) {
                     var count = interpreters.size();
@@ -3007,6 +3014,7 @@
                     if (command === 'clear' && settings.clear) {
                         self.clear();
                     } else {
+                        // Execute command from the interpreter
                         var result = interpreter.interpreter(command, self);
                         if (result !== undefined) {
                             // was lines after echo_command (by interpreter)
@@ -3060,7 +3068,7 @@
                     throw e;
                 }
             }
-            self.login(settings.login, initialize);
+            self.login(settings.login, true, initialize);
         }
         // -----------------------------------------------------------------------
         function logout() {
@@ -3090,7 +3098,7 @@
         function prepare_top_interpreter(silent) {
             var interpreter = interpreters.top();
             var name = self.prefix_name(true);
-            if (!in_login) {
+            if (!ghost()) {
                 maybe_append_name(name);
             }
             command_line.name(name);
@@ -3174,6 +3182,12 @@
                     }
                 }
             }
+        }
+        // ---------------------------------------------------------------------
+        // :: IF Ghost don't store anything in localstorage
+        // ---------------------------------------------------------------------
+        function ghost() {
+            return in_login || command_line.mask();
         }
         // ---------------------------------------------------------------------
         // :: Keydown event handler
@@ -3348,9 +3362,6 @@
                 // :: Clear the output
                 // -----------------------------------------------------------------------
                 clear: function() {
-                    if (in_login) {
-                        throw new Exception(strings.notWhileLogin);
-                    }
                     output.html('');
                     command_line.set('');
                     lines = [];
@@ -3401,11 +3412,7 @@
                     if (paused) {
                         dalyed_commands.push([command, silent]);
                     } else {
-                        commands(command, silent);
-                        if (!in_login && typeof settings.historyFilter == 'function' &&
-                            settings.historyFilter(command) || !settings.historyFilter) {
-                            command_line.history().append(command);
-                        }
+                        commands(command, silent, true);
                     }
                     return self;
                 },
@@ -3414,7 +3421,7 @@
                 // :: and call user login function with callback that set token
                 // :: if user call it with value that is truthy
                 // -----------------------------------------------------------------------
-                login: function(authenticate, success) {
+                login: function(authenticate, infinite, success) {
                     if (in_login) {
                         throw new Error(strings.notWhileLogin);
                     }
@@ -3457,10 +3464,15 @@
                                             self.resume();
                                         }
                                     } else {
-                                        if (!silent) {
-                                            self.error(strings.wrongPassword);
+                                        self.resume();
+                                        if (infinite) {
+                                            self.error(strings.wrongPasswordTryAgain).
+                                                pop().set_mask(false);
+                                        } else {
+                                            in_login = false;
+                                            self.error(strings.wrongPassword).
+                                                pop().pop();
                                         }
-                                        self.pop().set_mask(false);
                                     }
                                 });
                             } catch(e) {
@@ -3497,7 +3509,9 @@
                         });
                     }
                     if ($.type(user_interpreter) == 'string' && login) {
-                        self.login(make_json_rpc_login(login), overwrite_interpreter);
+                        self.login(make_json_rpc_login(login),
+                                   true,
+                                   overwrite_interpreter);
                     } else {
                         overwrite_interpreter();
                     }
@@ -3538,8 +3552,7 @@
                         var original = dalyed_commands;
                         dalyed_commands = [];
                         while (original.length) {
-                            var command = original.shift();
-                            self.exec.apply(self, command);
+                            self.exec.apply(self, original.shift());
                         }
                         scroll_to_bottom();
                     }
@@ -4227,7 +4240,7 @@
                 // ------------------------------------------------
                 // Run Login
                 if (settings.login) {
-                    self.login(settings.login, initialize);
+                    self.login(settings.login, true, initialize);
                 } else {
                     initialize();
                 }
