@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 23 Feb 2014 16:42:20 +0000
+ * Date: Sun, 23 Feb 2014 18:28:04 +0000
  *
  */
 
@@ -3517,7 +3517,7 @@
                 // -----------------------------------------------------------------------
                 pause: function() {
                     onPause();
-                    if (!self.paused() && command_line) {
+                    if (!paused && command_line) {
                         paused = true;
                         self.disable();
                         command_line.hidden();
@@ -3528,16 +3528,16 @@
                 // :: Resume previous paused terminal
                 // -----------------------------------------------------------------------
                 resume: function() {
-                    if (command_line && paused) {
+                    if (paused && command_line) {
                         paused = false;
                         self.enable();
+                        command_line.visible();
                         var original = dalyed_commands;
                         dalyed_commands = [];
                         while (original.length) {
                             var command = original.shift();
                             self.exec.apply(self, command);
                         }
-                        command_line.visible();
                         scroll_to_bottom();
                     }
                     return self;
@@ -4095,7 +4095,7 @@
                     } catch (e) {
                         // exec catch by command (resume call exec)
                         if (_ !== 'exec' && _ !== 'resume') {
-                                display_exception(e, 'TERMINAL');
+                            display_exception(e, 'TERMINAL');
                         }
                         throw e;
                     }
