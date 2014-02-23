@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 23 Feb 2014 18:28:04 +0000
+ * Date: Sun, 23 Feb 2014 19:37:18 +0000
  *
  */
 
@@ -1158,8 +1158,8 @@
                     if (e.shiftKey) {
                         self.insert('\n');
                     } else {
-                        if ((history && command) &&
-                            ((options.historyFilter &&
+                        if (history && command &&
+                            ((typeof options.historyFilter == 'function' &&
                               options.historyFilter(command)) ||
                              !options.historyFilter)) {
                             history.append(command);
@@ -2988,7 +2988,7 @@
         // -----------------------------------------------------------------------
         function commands(command, silent) {
             try {
-                prev_command = command;
+                prev_command = $.terminal.splitCommand(command).name;
                 var interpreter = interpreters.top();
                 if (command === 'exit' && settings.exit) {
                     var count = interpreters.size();
@@ -3315,7 +3315,7 @@
             }
             //var names = []; // stack if interpeter names
             var scroll_object;
-            var prev_command;
+            var prev_command; // used for name on the terminal if not defined
             var loged_in = false;
             var tab_count = 0; // for tab completion
             // array of line objects:
@@ -3402,7 +3402,10 @@
                         dalyed_commands.push([command, silent]);
                     } else {
                         commands(command, silent);
-                        command_line.history().append(command);
+                        if (!in_login && typeof settings.historyFilter == 'function' &&
+                            settings.historyFilter(command) || !settings.historyFilter) {
+                            command_line.history().append(command);
+                        }
                     }
                     return self;
                 },
