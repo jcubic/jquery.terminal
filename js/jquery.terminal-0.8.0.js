@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 22 Feb 2014 20:10:07 +0000
+ * Date: Sun, 23 Feb 2014 14:50:13 +0000
  *
  */
 
@@ -1398,7 +1398,7 @@
             name: function(string) {
                 if (string !== undefined) {
                     name = string;
-                    var enabled = history && history.enabled();
+                    var enabled = history && history.enabled() || !history;
                     history = new History(string, historySize);
                     // disable new history if old was disabled
                     if (!enabled) {
@@ -2337,17 +2337,18 @@
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
-    var id = 0;
+    var ids = {};
     $.jrpc = function(url, method, params, success, error) {
+        ids[url] = ids[url] || 0;
         var request = $.json_stringify({
            'jsonrpc': '2.0', 'method': method,
-            'params': params, 'id': ++id});
+            'params': params, 'id': ++ids[url]});
         return $.ajax({
             url: url,
             data: request,
             success: function(result, status, jqXHR) {
                 var content_type = jqXHR.getResponseHeader('Content-Type');
-                if (content_type != 'application/json') {
+                if (!content_type.match(/application\/json/)) {
                     if (console && console.warn) {
                         console.warn('Response Content-Type is not application/json');
                     } else {
@@ -2602,7 +2603,7 @@
                     } else {
                         //should never happen
                         terminal.error('&#91;AUTH&#93; ' +
-                                       $.terminal.defaults.strings.noTokenError);
+                                       strings.noTokenError);
                     }
                 }
             };
@@ -2625,7 +2626,7 @@
                 if (type === 'function') {
                     if (arity && val.length !== command.args.length) {
                         self.error("&#91;Arity&#93; " +
-                                   sprintf($.terminal.defaults.strings.wrongArity,
+                                   sprintf(strings.wrongArity,
                                            command.name,
                                            val.length,
                                            command.args.length));
@@ -2651,7 +2652,7 @@
                     } else if ($.type(settings.onCommandNotFound) === 'function') {
                         settings.onCommandNotFound(user_command, self);
                     } else {
-                        terminal.error(sprintf($.terminal.defaults.strings.commandNotFound, command.name));
+                        terminal.error(sprintf(strings.commandNotFound, command.name));
                     }
                 }
             };
@@ -2663,7 +2664,7 @@
                 settings.onAjaxError.call(self, xhr, status, error);
             } else if (status !== 'abort') {
                 self.error('&#91;AJAX&#93; ' + status + ' - ' +
-                           $.terminal.defaults.strings.serverResponse +
+                           strings.serverResponse +
                            ': \n' + xhr.responseText);
             }
         }
@@ -2679,7 +2680,7 @@
                             if (settings.checkArity && proc.params &&
                                 proc.params.length !== args.length) {
                                 self.error("&#91;Arity&#93; " +
-                                           sprintf($.terminal.defaults.strings.wrongArity,
+                                           sprintf(strings.wrongArity,
                                                    proc.name,
                                                    proc.params.length,
                                                    args.length));
@@ -2727,7 +2728,7 @@
                                 if (rpc_count === 1) {
                                     function_interpreter = make_basic_json_rpc_interpreter(first);
                                 } else {
-                                    self.error($.terminal.defaults.strings.oneRPCWithIgnore);
+                                    self.error(strings.oneRPCWithIgnore);
                                 }
                                 recur(rest, success);
                             } else {
@@ -2742,7 +2743,7 @@
                             }
                         } else if (type === 'function') {
                             if (function_interpreter) {
-                                self.error($.terminal.defaults.strings.oneInterpreterFunction);
+                                self.error(strings.oneInterpreterFunction);
                             } else {
                                 function_interpreter = first;
                             }
@@ -2960,7 +2961,7 @@
                 } else if (type === 'function') {
                     settings.greetings.call(self, self.echo);
                 } else {
-                    self.error($.terminal.defaults.strings.wrongGreetings);
+                    self.error(strings.wrongGreetings);
                 }
             }
         }
@@ -3202,16 +3203,18 @@
                     tab_count = 0;
                 }
                 if (e.which === 68 && e.ctrlKey) { // CTRL+D
-                    if (command_line.get() === '') {
-                        if (interpreters.size() > 1 ||
-                            settings.login !== undefined) {
-                            self.pop('');
+                    if (!in_login) {
+                        if (command_line.get() === '') {
+                            if (interpreters.size() > 1 ||
+                                settings.login !== undefined) {
+                                self.pop('');
+                            } else {
+                                self.resume();
+                                self.echo('');
+                            }
                         } else {
-                            self.resume();
-                            self.echo('');
+                            self.set_command('');
                         }
-                    } else {
-                        self.set_command('');
                     }
                     return false;
                 } else if (e.which === 76 && e.ctrlKey) { // CTRL+L
@@ -3282,7 +3285,7 @@
                             try {
                                 r.abort();
                             } catch (error) {
-                                self.error($.terminal.defaults.strings.ajaxAbortError);
+                                self.error(strings.ajaxAbortError);
                             }
                         }
                     }
@@ -3334,6 +3337,7 @@
                                     $.terminal.defaults,
                                     {name: self.selector},
                                     options || {});
+            var strings = $.terminal.defaults.strings;
             var enabled = settings.enabled;
             var paused = false;
             // -----------------------------------------------------------------------
@@ -3345,7 +3349,7 @@
                 // -----------------------------------------------------------------------
                 clear: function() {
                     if (in_login) {
-                        throw new Exception($.terminal.strings.notWhileLogin);
+                        throw new Exception(strings.notWhileLogin);
                     }
                     output.html('');
                     command_line.set('');
@@ -3364,7 +3368,7 @@
                 // -----------------------------------------------------------------------
                 export_view: function() {
                     if (in_login) {
-                        throw new Exception($.terminal.strings.notWhileLogin);
+                        throw new Exception(strings.notWhileLogin);
                     }
                     return {
                         prompt: self.get_prompt(),
@@ -3378,7 +3382,7 @@
                 // -----------------------------------------------------------------------
                 import_view: function(view) {
                     if (in_login) {
-                        throw new Exception($.terminal.strings.notWhileLogin);
+                        throw new Exception(strings.notWhileLogin);
                     }
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
@@ -3393,10 +3397,12 @@
                 // :: echo executed command
                 // -----------------------------------------------------------------------
                 exec: function(command, silent) {
+                    // both commands executed here (resume will call Terminal::exec)
                     if (paused) {
                         dalyed_commands.push([command, silent]);
                     } else {
                         commands(command, silent);
+                        command_line.history().append(command);
                     }
                     return self;
                 },
@@ -3407,10 +3413,10 @@
                 // -----------------------------------------------------------------------
                 login: function(authenticate, success) {
                     if (in_login) {
-                        throw new Error($.terminal.strings.notWhileLogin);
+                        throw new Error(strings.notWhileLogin);
                     }
                     if (typeof authenticate !== 'function') {
-                        throw new Error($.terminal.strings.loginIsNotAFunction);
+                        throw new Error(strings.loginIsNotAFunction);
                     }
                     if (self.token(true) && self.login_name(true)) {
                         if (typeof success == 'function') {
@@ -3427,36 +3433,41 @@
                     return self.push(function(user) {
                         self.set_mask(true).push(function(passwd) {
                             self.pause();
-                            authenticate(user, passwd, function(token, silent) {
-                                if (token) {
-                                    self.pop().pop();
-                                    if (settings.history) {
-                                        command_line.history().enable();
-                                    }
-                                    var name = self.prefix_name(true) + '_';
-                                    $.Storage.set(name + 'token', token);
-                                    $.Storage.set(name + 'login', user);
-                                    in_login = false;
-                                    if (typeof success == 'function') {
-                                        // will be used internaly since users know when
-                                        // login success (they decide when it happen
-                                        // by calling the callback - this funtion)
-                                        success();
+                            try {
+                                authenticate(user, passwd, function(token, silent) {
+                                    if (token) {
+                                        self.pop().pop();
+                                        if (settings.history) {
+                                            command_line.history().enable();
+                                        }
+                                        var name = self.prefix_name(true) + '_';
+                                        $.Storage.set(name + 'token', token);
+                                        $.Storage.set(name + 'login', user);
+                                        in_login = false;
+                                        if (typeof success == 'function') {
+                                            // will be used internaly since users know
+                                            // when login success (they decide when
+                                            // it happen by calling the callback -
+                                            // this funtion)
+                                            success();
+                                        } else {
+                                            self.resume();
+                                        }
                                     } else {
-                                        self.resume();
+                                        if (!silent) {
+                                            self.error(strings.wrongPassword);
+                                        }
+                                        self.pop().set_mask(false);
                                     }
-                                } else {
-                                    if (!silent) {
-                                        self.error($.terminal.defaults.strings.wrongPassword);
-                                    }
-                                    self.pop().set_mask(false);
-                                }
-                            });
+                                });
+                            } catch(e) {
+                                display_exception(e, 'USER(authentication)');
+                            }
                         }, {
-                            prompt: $.terminal.defaults.strings.password + ': '
+                            prompt: strings.password + ': '
                         });
                     }, {
-                        prompt: $.terminal.defaults.strings.login + ': '
+                        prompt: strings.login + ': '
                     });
                 },
                 // -----------------------------------------------------------------------
@@ -3902,7 +3913,7 @@
                 scroll: function(amount) {
                     var pos;
                     amount = Math.round(amount);
-                    if (scroll_object.prop) {
+                    if (scroll_object.prop) { // work with jQuery > 1.6
                         if (amount > scroll_object.prop('scrollTop') && amount > 0) {
                             scroll_object.prop('scrollTop', 0);
                         }
@@ -3927,7 +3938,7 @@
                     }
                     return self;
                 } : function() {
-                    self.error($.terminal.defaults.strings.loginFunctionMissing);
+                    self.error(strings.loginFunctionMissing);
                 },
                 // -----------------------------------------------------------------------
                 // :: Function return token returned by callback function in login
@@ -4002,7 +4013,7 @@
                                 }
                             }
                         } else {
-                            self.error($.terminal.defaults.string.canExitError);
+                            self.error(strings.canExitError);
                         }
                     } else {
                         if (token) {
