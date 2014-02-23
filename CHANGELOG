@@ -1,3 +1,23 @@
+0.8.0     CTRL+L Clear terminal
+          Shift+Enter insert newline
+          Remove tabcompletion option (now completion can be true, array or function)
+          Add onRPCError callback
+          Interpreter can be an array
+          ignoreSystemDescribe option
+          Handle invalid JSON-RPC
+          CSS style for standalone cmd plugin
+          using CSS3 Animation for blinking if supported
+          Fix [0m
+          Better error handling (all messages are in $.terminal.defaults.strings)
+          Named colors for terminal formatting
+          expose settings and login function
+          more tools in $.terminal
+          paste kill text with CTRL+Y
+          paste text from selection using middle mouse button
+          Fix login, history and exec
+          Disable few things when in login function
+0.7.12    Fix terminal when start as invisible, rest property to parseCommand
+0.7.11    Fix last history command
 0.7.10    Fix reverse search
 0.7.9     Don't show version when use source file
 0.7.8     Allow to call $.terminal.active() in prompt

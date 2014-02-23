@@ -5,11 +5,11 @@
  * Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>
  *
  */
-.terminal .terminal-output .format, .terminal .cmd .format,
-.terminal .cmd .prompt, .terminal .cmd .prompt div, .terminal .terminal-output div div{
+.terminal .terminal-output .format, .cmd .format,
+.cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
     display: inline-block;
 }
-.terminal .clipboard {
+.cmd .clipboard {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -32,16 +32,61 @@
     height: 1.3em;
     /*margin-top: 3px; */
 }
-.terminal .terminal-output div div, .terminal .prompt {
+.cmd .cursor.blink {
+    -webkit-animation: blink 1s infinite steps(1, start);
+       -moz-animation: blink 1s infinite steps(1, start);
+        -ms-animation: blink 1s infinite steps(1, start);
+            animation: blink 1s infinite steps(1, start);
+}
+@keyframes blink {
+  0%, 100% {
+        background-color: #000;
+        color: #aaa;
+  }
+  50% {
+        background-color: #bbb; /* not #aaa because it's seem there is Google Chrome bug */
+        color: #000;
+  }
+}
+@-webkit-keyframes blink {
+  0%, 100% {
+        background-color: #000;
+        color: #aaa;
+  }
+  50% {
+        background-color: #bbb;
+        color: #000;
+  }
+}
+@-ms-keyframes blink {
+  0%, 100% {
+        background-color: #000;
+        color: #aaa;
+  }
+  50% {
+        background-color: #bbb;
+        color: #000;
+  }
+}
+@-moz-keyframes blink {
+  0%, 100% {
+        background-color: #000;
+        color: #aaa;
+  }
+  50% {
+        background-color: #bbb;
+        color: #000;
+  }
+}
+.terminal .terminal-output div div, .cmd .prompt {
     display: block;
     line-height: 14px;
     height: auto;
 }
-.terminal .prompt {
+.cmd .prompt {
     float: left;
 }
-
-.terminal {
+.terminal, .cmd {
     font-family: FreeMono, monospace;
     color: #aaa;
     background-color: #000;
@@ -55,11 +100,11 @@
 .terminal .terminal-output div span {
     display: inline-block;
 }
-.terminal .cmd span {
+.cmd span {
     float: left;
     /*display: inline-block; */
 }
-.terminal .cmd span.inverted {
+.cmd span.inverted, .cmd .cursor.blink {
     background-color: #aaa;
     color: #000;
 }
@@ -72,8 +117,8 @@
 .terminal .terminal-output div div::selection,
 .terminal .terminal-output div div a::selection,
 .terminal .terminal-output div span::selection,
-.terminal .cmd > span::selection,
-.terminal .prompt span::selection {
+.cmd > span::selection,
+.cmd .prompt span::selection {
     background-color: #aaa;
     color: #000;
 }
