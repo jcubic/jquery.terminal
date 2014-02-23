@@ -4093,7 +4093,8 @@
                     try {
                         return fun.apply(this, Array.prototype.slice.apply(arguments));
                     } catch (e) {
-                        if (_ !== 'exec') { // exec catch by command
+                        // exec catch by command (resume call exec)
+                        if (_ !== 'exec' && _ !== 'resume') {
                                 display_exception(e, 'TERMINAL');
                         }
                         throw e;

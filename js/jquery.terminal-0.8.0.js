@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 23 Feb 2014 14:50:13 +0000
+ * Date: Sun, 23 Feb 2014 16:42:20 +0000
  *
  */
 
@@ -4093,7 +4093,8 @@
                     try {
                         return fun.apply(this, Array.prototype.slice.apply(arguments));
                     } catch (e) {
-                        if (_ !== 'exec') { // exec catch by command
+                        // exec catch by command (resume call exec)
+                        if (_ !== 'exec' && _ !== 'resume') {
                                 display_exception(e, 'TERMINAL');
                         }
                         throw e;
