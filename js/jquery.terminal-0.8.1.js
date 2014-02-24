@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.8.0
+ *           \/              /____/                              version 0.8.1
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 24 Feb 2014 00:28:19 +0000
+ * Date: Mon, 24 Feb 2014 00:30:28 +0000
  *
  */
 
@@ -2446,7 +2446,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.8.0';
+    var version = '0.8.1';
     var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = version_set ? ' version ' + version : ' ';
