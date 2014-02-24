@@ -3469,12 +3469,16 @@
                                     } else {
                                         self.resume();
                                         if (infinite) {
-                                            self.error(strings.wrongPasswordTryAgain).
-                                                pop().set_mask(false);
+                                            if (!silent) {
+                                                self.error(strings.wrongPasswordTryAgain);
+                                            }
+                                            self.pop().set_mask(false);
                                         } else {
                                             in_login = false;
-                                            self.error(strings.wrongPassword).
-                                                pop().pop();
+                                            if (!silent) {
+                                                self.error(strings.wrongPassword);
+                                            }
+                                            self.pop().pop();
                                         }
                                     }
                                 });
@@ -3953,10 +3957,10 @@
                 // :: if there is no login provided
                 // -----------------------------------------------------------------------
                 logout: settings.login ? function() {
-                    while (interpreters.size() > 0) {
+                    while (interpreters.size() > 1) {
                         self.pop();
                     }
-                    return self;
+                    return self.pop();
                 } : function() {
                     self.error(strings.loginFunctionMissing);
                 },
@@ -4022,7 +4026,7 @@
                     }
                     var token = self.token(true);
                     if (interpreters.size() == 1) {
-                        if (token) {
+                        if (settings.login) {
                             global_logout();
                             if ($.type(settings.onExit) === 'function') {
                                 try {
@@ -4079,6 +4083,7 @@
                     var prefix = self.prefix_name() + '_';
                     var names = $.Storage.get(prefix + 'interpreters');
                     $.each($.parseJSON(names), function(_, name) {
+                        console.log(names);
                         $.Storage.remove(name + '_commands');
                         $.Storage.remove(name + '_token');
                         $.Storage.remove(name + '_login');
