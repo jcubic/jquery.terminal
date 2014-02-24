@@ -1,7 +1,7 @@
 0.8.0     CTRL+L Clear terminal
           Shift+Enter insert newline
           Remove tabcompletion option (now completion can be true, array or function)
-          Add onRPCError callback
+          Add onRPCError and exceptionHandler callbacks
           Interpreter can be an array
           ignoreSystemDescribe option
           Handle invalid JSON-RPC
