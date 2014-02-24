@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 24 Feb 2014 00:30:28 +0000
+ * Date: Mon, 24 Feb 2014 08:41:54 +0000
  *
  */
 
@@ -4083,7 +4083,6 @@
                     var prefix = self.prefix_name() + '_';
                     var names = $.Storage.get(prefix + 'interpreters');
                     $.each($.parseJSON(names), function(_, name) {
-                        console.log(names);
                         $.Storage.remove(name + '_commands');
                         $.Storage.remove(name + '_token');
                         $.Storage.remove(name + '_login');

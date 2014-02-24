@@ -4083,7 +4083,6 @@
                     var prefix = self.prefix_name() + '_';
                     var names = $.Storage.get(prefix + 'interpreters');
                     $.each($.parseJSON(names), function(_, name) {
-                        console.log(names);
                         $.Storage.remove(name + '_commands');
                         $.Storage.remove(name + '_token');
                         $.Storage.remove(name + '_login');
