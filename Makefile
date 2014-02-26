@@ -1,9 +1,12 @@
-VERSION=0.8.1
+VERSION=0.8.2
 COMPRESS=uglifyjs
 SED=sed
 CP=cp
 
-ALL: js/jquery.terminal-$(VERSION).js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js README.md www/Makefile terminal.jquery.json
+ALL: js/jquery.terminal-$(VERSION).js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js README.md www/Makefile terminal.jquery.json bower.json
+
+bower.json: bower.in
+	$(SED) -e "s/{{VER}}/$(VERSION)/g" bower.in > bower.json
 
 js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/`date -uR`/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js

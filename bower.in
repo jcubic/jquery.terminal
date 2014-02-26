@@ -1,0 +1,23 @@
+{
+    "name": "jquery.terminal",
+    "version": "{{VER}}",
+    "main": [
+        "js/jquery.terminal-min.js",
+        "css/jquery.terminal.css"
+    ],
+    "description": "jQuery Terminal Emulator is a plugin for creating command line interpreters in your applications.",
+    "license": "GNU LGPL 3",
+    "ignore": [
+        "examples",
+        "CHANGELOG",
+        "README.in",
+        "Makefile",
+        "manifest"
+    ],
+    "dependencies": {
+        "jquery": "latest"
+    },
+    "devDependencies": {
+        "<test-framework-name>": "<version>"
+    }
+}
