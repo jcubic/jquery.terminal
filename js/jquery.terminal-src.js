@@ -409,8 +409,7 @@
         }
     });
 
-    if (jQuery.browser && jQuery.browser.msie ||
-        /(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
+    if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
         jQuery(window).one('unload', function() {
             var global = jQuery.timer.global;
             for (var label in global) {
@@ -514,24 +513,8 @@
         return self;
 
     })();
-
     // -----------------------------------------------------------------------
-    /*
-    function decodeHTML(str) {
-        if (typeof str === 'string') {
-            str = str.replace(/&amp;/g, '&');
-            str = str.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-            str = str.replace(/&#09;/g, '\t');
-            str = str.replace(/<br\/?>/g, '\n').replace(/&nbsp;/g, ' ');
-            return str;
-        } else {
-            return '';
-        }
-    }
-    */
-    //split string to array of strings with the same length
-    // -----------------------------------------------------------------------
-    // :: Split String into equal parts
+    // :: Split string to array of strings with the same length
     // -----------------------------------------------------------------------
     function str_parts(str, length) {
         var result = [];
@@ -1190,7 +1173,7 @@
                 } else if (e.which === 67 && e.ctrlKey && e.shiftKey) { // CTRL+SHIFT+C
                     selected_text = getSelectedText();
                 } else if (e.which === 86 && e.ctrlKey && e.shiftKey) {
-                    if (selected_text != '') {
+                    if (selected_text !== '') {
                         self.insert(selected_text);
                     }
                 } else if (e.which === 9 && !(e.ctrlKey || e.altKey)) { // TAB
@@ -1351,7 +1334,7 @@
                             //CTRL+X CTRL+C CTRL+W CTRL+T
                             return true;
                         } else if (e.which === 89) { // CTRL+Y
-                            if (kill_text != '') {
+                            if (kill_text !== '') {
                                 self.insert(kill_text);
                             }
                         } else if (e.which === 86) {
@@ -1368,7 +1351,7 @@
                                 self.set(command.slice(0, position));
                             }
                         } else if (e.which === 85) { // CTRL+U
-                            if (command != '' && position != 0) {
+                            if (command !== '' && position !== 0) {
                                 kill_text = command.slice(0, position);
                                 self.set(command.slice(position, command.length));
                                 self.position(0);
@@ -2358,8 +2341,9 @@
                         throw new Error('WARN: Response Content-Type is not application/json');
                     }
                 }
+                var json;
                 try {
-                    var json = $.parseJSON(result);
+                    json = $.parseJSON(result);
                 } catch (e) {
                     if (error) {
                         error(jqXHR, 'Invalid JSON', e);
@@ -2987,7 +2971,7 @@
                 var interpreter = interpreters.top();
                 if (command === 'exit' && settings.exit) {
                     var count = interpreters.size();
-                        self.token()
+                        self.token();
                     if (count == 1 && self.token() || count > 1) {
                         if (!silent) {
                             echo_command(command);
