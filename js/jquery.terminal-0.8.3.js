@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 07 Mar 2014 00:58:00 +0000
+ * Date: Fri, 07 Mar 2014 01:17:36 +0000
  *
  */
 
@@ -4037,13 +4037,15 @@
                                 // self.pop on error
                                 self.login(options.login,
                                            false,
-                                           prepare_top_interpreter, self.pop);
+                                           prepare_top_interpreter,
+                                           self.pop);
                             } else if ($.type(interpreter) == 'string' &&
                                        l_type == 'string' || l_type == 'boolean') {
                                 var method = l_type == 'boolean' ? 'login' : options.login;
                                 self.login(make_json_rpc_login(interpreter, options.login),
                                            false,
-                                           prepare_top_interpreter, self.pop);
+                                           prepare_top_interpreter,
+                                           self.pop);
                             }
                         } else {
                             prepare_top_interpreter();
@@ -4224,7 +4226,7 @@
             // create json-rpc authentication function
             if (typeof init_interpreter === 'string' &&
                 (typeof settings.login === 'string' || settings.login)) {
-                settings.login = make_json_rpc_login(settings.login);
+                settings.login = make_json_rpc_login(init_interpreter, settings.login);
             }
             terminals.append(self);
             var interpreters;
