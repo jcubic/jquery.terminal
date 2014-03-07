@@ -1653,7 +1653,7 @@
     //var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     var url_re = /\bhttps?:\/\/(?:(?!&[^;]+;)[^\s"'<>)])+\b/g;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
-    var command_re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])*\/|(\\ |[^ ])+|[\w-]+)/g;
+    var command_re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])+\/[gimy]*|(\\ |[^ ])+|[\w-]+)/g;
     var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/;
     var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/;
     $.terminal = {
@@ -2211,8 +2211,9 @@
                     }).replace(/\\0([0-7]+)/g, function(_, oct) {
                         return String.fromCharCode(parseInt(oct, 8));
                     });
-                } else if (arg[0] === '/' && arg[arg.length-1] == '/') {
-                    return new RegExp(arg.replace(/^\/|\/$/g, ''));
+                } else if (arg.match(/^\/(\\\/|[^\/])+\/[gimy]*$/)) {
+                    var m = arg.match(/^\/([^\/]+)\/([^\/]*)$/);
+                    return new RegExp(m[1], m[2]);
                 } else if (arg.match(/^-?[0-9]+$/)) {
                     return parseInt(arg, 10);
                 } else if (arg.match(/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/)) {

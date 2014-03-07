@@ -1,5 +1,5 @@
 0.8.3     Fix completion in nested interpreters, login option in push
-          Remove pause/resume from login
+          Remove pause/resume from login, Fix parsing RegExes
 0.8.2     add Terminal::exception function
 0.8.1     Fix login/logout
 0.8.0     CTRL+L Clear terminal
