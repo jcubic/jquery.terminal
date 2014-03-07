@@ -2812,11 +2812,11 @@
         // -----------------------------------------------------------------------
         // :: Create JSON-RPC authentication function
         // -----------------------------------------------------------------------
-        function make_json_rpc_login(login) {
+        function make_json_rpc_login(url, login) {
             var method = $.type(login) === 'boolean' ? 'login' : login;
             return function(user, passwd, callback, term) {
                 self.pause();
-                $.jrpc(init_interpreter,
+                $.jrpc(url,
                        method,
                        [user, passwd],
                        function(response) {
@@ -3110,7 +3110,7 @@
             // execute after onInit resume)
             var was_paused = false;
             if (typeof settings.onInit === 'function') {
-                onPause = function() {
+                onPause = function() { // local in terminal
                     was_paused = true;
                 };
                 try {
@@ -3133,11 +3133,11 @@
         // ---------------------------------------------------------------------
         function complete_helper(command, string, commands) {
             var test = command_line.get().substring(0, command_line.position());
-            var regex = new RegExp('^' + $.terminal.escape_regex(string));
             if (test !== command) {
                 // command line changed between TABS - ignore
                 return;
             }
+            var regex = new RegExp('^' + $.terminal.escape_regex(string));
             var matched = [];
             for (var i=commands.length; i--;) {
                 if (regex.test(commands[i])) {
@@ -3189,6 +3189,13 @@
                     return result;
                 }
             }
+            var completion;
+            if ((settings.completion && $.type(settings.completion) != 'boolean') &&
+                !top.completion) {
+                completion = settings.completion;
+            } else {
+                completion = top.completion;
+            }
             // after text pasted into textarea in cmd plugin
             self.oneTime(10, function() {
                 on_scrollbar_show_resize();
@@ -3220,7 +3227,7 @@
                     return false;
                 } else if (e.which === 76 && e.ctrlKey) { // CTRL+L
                     self.clear();
-                } else if (settings.completion && e.which === 9) { // TAB
+                } else if (completion && e.which === 9) { // TAB
                     // TODO: move this to cmd plugin
                     //       add completion = array | function
                     ++tab_count;
@@ -3241,12 +3248,6 @@
                                 break;
                             }
                         }
-                    }
-                    var completion;
-                    if ((settings.completion && $.type(settings.completion) != 'boolean') && !top.completion) {
-                        completion = settings.completion;
-                    } else {
-                        completion = top.completion;
                     }
                     switch ($.type(completion)) {
                     case 'function':
@@ -3409,11 +3410,11 @@
                 // :: the callback that expects a token. The login is successful
                 // :: if the user calls it with value that is truthy
                 // -----------------------------------------------------------------------
-                login: function(authenticate, infinite, success) {
+                login: function(auth, infinite, success, error) {
                     if (in_login) {
                         throw new Error(strings.notWhileLogin);
                     }
-                    if (typeof authenticate !== 'function') {
+                    if (typeof auth !== 'function') {
                         throw new Error(strings.loginIsNotAFunction);
                     }
                     if (self.token(true) && self.login_name(true)) {
@@ -3429,10 +3430,9 @@
                     }
                     in_login = true;
                     return self.push(function(user) {
-                        self.set_mask(true).push(function(passwd) {
-                            self.pause();
+                        self.set_mask(true).push(function(pass) {
                             try {
-                                authenticate(user, passwd, function(token, silent) {
+                                auth.call(self, user, pass, function(token, silent) {
                                     if (token) {
                                         self.pop().pop();
                                         if (settings.history) {
@@ -3448,11 +3448,8 @@
                                             // it happen by calling the callback -
                                             // this funtion)
                                             success();
-                                        } else {
-                                            self.resume();
                                         }
                                     } else {
-                                        self.resume();
                                         if (infinite) {
                                             if (!silent) {
                                                 self.error(strings.wrongPasswordTryAgain);
@@ -3464,6 +3461,10 @@
                                                 self.error(strings.wrongPassword);
                                             }
                                             self.pop().pop();
+                                        }
+                                        // used only to call pop in push
+                                        if (typeof error == 'function') {
+                                            error();
                                         }
                                     }
                                 });
@@ -3501,7 +3502,7 @@
                         });
                     }
                     if ($.type(user_interpreter) == 'string' && login) {
-                        self.login(make_json_rpc_login(login),
+                        self.login(make_json_rpc_login(user_interpreter, login),
                                    true,
                                    overwrite_interpreter);
                     } else {
@@ -4019,22 +4020,35 @@
                 // :: Push a new interenter on the Stack
                 // -----------------------------------------------------------------------
                 push: function(interpreter, options) {
-                    if (options && (!options.prompt || validate('prompt', options.prompt)) ||
-                        !options) {
-                        options = options || {};
-                        options.name = options.name || prev_command;
-                        options.prompt = options.prompt || options.name + ' ';
-                        //names.push(options.name);
-                        var top = interpreters.top();
-                        if (top) {
-                            top.mask = command_line.mask();
-                        }
-                        make_interpreter(interpreter, function(result) {
-                            // result is object with interpreter and completion properties
-                            interpreters.push($.extend({}, result, options));
-                            prepare_top_interpreter();
-                        });
+                    options = options || {};
+                    options.name = options.name || prev_command;
+                    options.prompt = options.prompt || options.name + ' ';
+                    //names.push(options.name);
+                    var top = interpreters.top();
+                    if (top) {
+                        top.mask = command_line.mask();
                     }
+                    make_interpreter(interpreter, function(result) {
+                        // result is object with interpreter and completion properties
+                        interpreters.push($.extend({}, result, options));
+                        if (options.login) {
+                            var l_type = $.type(options.login);
+                            if (l_type == 'function') {
+                                // self.pop on error
+                                self.login(options.login,
+                                           false,
+                                           prepare_top_interpreter, self.pop);
+                            } else if ($.type(interpreter) == 'string' &&
+                                       l_type == 'string' || l_type == 'boolean') {
+                                var method = l_type == 'boolean' ? 'login' : options.login;
+                                self.login(make_json_rpc_login(interpreter, options.login),
+                                           false,
+                                           prepare_top_interpreter, self.pop);
+                            }
+                        } else {
+                            prepare_top_interpreter();
+                        }
+                    });
                     return self;
                 },
                 // -----------------------------------------------------------------------
