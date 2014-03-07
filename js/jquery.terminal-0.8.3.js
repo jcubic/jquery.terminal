@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 07 Mar 2014 01:17:36 +0000
+ * Date: Fri, 07 Mar 2014 01:34:58 +0000
  *
  */
 
@@ -2524,6 +2524,7 @@
             notWhileLogin: "You can't call that function while in login",
             loginIsNotAFunction: "Authenticate must be a function",
             canExitError: "You can't exit from main interpeter",
+            invalidCompletion: "Invalid completion",
             login: "login",
             password: "password"
         }
@@ -3259,7 +3260,8 @@
                         complete_helper(command, string, completion);
                         break;
                     default:
-                        throw new Error("Invalid completion");
+                        // terminal will not catch this because it's an event
+                        throw new Error($.terminal.defaults.strings.invalidCompletion);
                     }
                     return false;
                 } else if (e.which === 86 && e.ctrlKey) { // CTRL+V
