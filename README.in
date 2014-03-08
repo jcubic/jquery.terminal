@@ -95,6 +95,12 @@ jQuery(function($, undefined) {
 });
 ```
 
+You can create JSON-RPC interpreter with authentication with just one line:
+
+```javascript
+$('#term_demo').terminal('service.php', {login: true});
+```
+
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [full documentation](http://terminal.jcubic.pl/api_reference.php).
 
