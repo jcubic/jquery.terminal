@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 07 Mar 2014 08:38:46 +0000
+ * Date: Sat, 08 Mar 2014 10:01:35 +0000
  *
  */
 
@@ -1254,7 +1254,8 @@
                         if (command[position] === ' ') {
                             ++position;
                         }
-                        var match = command.slice(position).match(/\S[\n\s]{2,}|[\n\s]+\S?/);
+                        var re = /\S[\n\s]{2,}|[\n\s]+\S?/;
+                        var match = command.slice(position).match(re);
                         if (!match || match[0].match(/^\s+$/)) {
                             position = command.length;
                         } else {
@@ -3773,7 +3774,19 @@
                         num_chars = new_num_chars;
                         command_line.resize(num_chars);
                         var o = output.empty().detach();
-                        $.each(lines, function(i, line) {
+                        var lines_to_show;
+                        if (settings.outputLimit >= 0) {
+                            // flush will limit lines but if there is lot of
+                            // lines we don't need to show them and then remove
+                            // them from terminal
+                            var limit = settings.outputLimit === 0 ?
+                                self.rows() :
+                                settings.outputLimit;
+                            lines_to_show = lines.slice(lines.length-limit-1);
+                        } else {
+                            lines_to_show = lines;
+                        }
+                        $.each(lines_to_show, function(i, line) {
                             draw_line.apply(null, line); // line is an array
                         });
                         command_line.before(o);
@@ -3795,60 +3808,39 @@
                 flush: function() {
                     try {
                         var wrapper;
-                        if (settings.outputLimit >= 0) {
-                            var rows = self.rows();
-                            var limit;
-                            if (settings.outputLimit === 0) {
-                                limit = rows;
+                        // print all lines
+                        $.each(output_buffer, function(i, line) {
+                            if (line === NEW_LINE) {
+                                wrapper = $('<div></div>');
+                            } else if (typeof line === 'function') {
+                                wrapper.appendTo(output);
+                                try {
+                                    line(wrapper);
+                                } catch (e) {
+                                    display_exception(e, 'USER:echo(finalize)');
+                                }
                             } else {
-                                limit = settings.outputLimit;
+                                $('<div/>').html(line).appendTo(wrapper).width('100%');
                             }
-                            var lines = 0;
-                            var finalize;
-                            var tmp_output = $('<div/>');
-                            for (var i=output_buffer.length; i--;) {
-                                if (typeof output_buffer[i] === 'function') {
-                                    finalize = output_buffer[i];
-                                    wrapper = $('<div/>');
-                                } else if (output_buffer[i] === NEW_LINE) {
-                                    wrapper.prependTo(tmp_output);
-                                    try {
-                                        finalize(wrapper);
-                                    } catch (e) {
-                                        display_exception(e, 'USER:echo(finalize)');
+                        });
+                        if (settings.outputLimit >= 0) {
+                            var limit = settings.outputLimit === 0 ?
+                                self.rows() :
+                                settings.outputLimit;
+                            var $lines = output.find('div div');
+                            if ($lines.length > limit) {
+                                var for_remove = $lines.slice(0, lines.length-limit+1);
+                                // you can't get parent if you remove the element so
+                                // we first get the parent
+                                var parents = for_remove.parent();
+                                for_remove.remove();
+                                parents.each(function() {
+                                    var self = $(this);
+                                    if (self.is(':empty')) {
+                                        self.remove();
                                     }
-                                } else {
-                                    wrapper.prepend('<div>' + output_buffer[i] + '</div>');
-                                    if (++lines === limit) {
-                                        if (output_buffer[i-1] !== NEW_LINE) {
-                                            // cut in the middle of the line
-                                            try {
-                                                finalize(wrapper);
-                                            } catch (e) {
-                                                display_exception(e, 'USER:echo(finalize)');
-                                            }
-                                        }
-                                        break;
-                                    }
-                                }
+                                });
                             }
-                            tmp_output.children().appendTo(output);
-                        } else {
-                            // print all
-                            $.each(output_buffer, function(i, line) {
-                                if (line === NEW_LINE) {
-                                    wrapper = $('<div></div>');
-                                } else if (typeof line === 'function') {
-                                    wrapper.appendTo(output);
-                                    try {
-                                        line(wrapper);
-                                    } catch (e) {
-                                        display_exception(e, 'USER:echo(finalize)');
-                                    }
-                                } else {
-                                    $('<div/>').html(line).appendTo(wrapper).width('100%');
-                                }
-                            });
                         }
                         scroll_to_bottom();
                         output_buffer = [];
@@ -3875,18 +3867,9 @@
                         }, options || {});
                         output_buffer = [];
                         draw_line(string, settings);
+                        lines.push([string, settings]);
                         if (settings.flush) {
                             self.flush();
-                        }
-                        lines.push([string, settings]);
-                        if (settings.outputLimit >= 0) {
-                            var limit = settings.outputLimit === 0 ?
-                                self.rows() :
-                                settings.outputLimit;
-                            var $lines = output.find('div div');
-                            if ($lines.length > limit) {
-                                $lines.slice(0, lines.length-limit+1).remove();
-                            }
                         }
                         on_scrollbar_show_resize();
                     } catch (e) {
@@ -4291,16 +4274,28 @@
                         }
                     });
                 });
-                if ($.type($.fn.init.prototype.mousewheel) === 'function') {
+                var shift = false;
+                $(document).bind('keydown.terminal', function(e) {
+                    if (e.shiftKey) {
+                        shift = true;
+                    }
+                }).bind('keyup.terminal', function(e) {
+                    // in Google Chromium/Linux shiftKey is false
+                    if (e.shiftKey || e.which == 16) {
+                        shift = false;
+                    }
+                });
+                if ($.event.special.mousewheel) {
                     self.mousewheel(function(event, delta) {
-                        //self.echo(dir(event));
-                        if (delta > 0) {
-                            self.scroll(-40);
-                        } else {
-                            self.scroll(40);
+                        if (!shift) {
+                            if (delta > 0) {
+                                self.scroll(-40);
+                            } else {
+                                self.scroll(40);
+                            }
+                            //event.preventDefault();
                         }
-                        return false;
-                    }, true);
+                    });
                 }
             });
             self.data('terminal', self);
