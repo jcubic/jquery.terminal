@@ -104,7 +104,7 @@
     float: left;
     /*display: inline-block; */
 }
-.inverted, .cmd .cursor.blink {
+.terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
     background-color: #aaa;
     color: #000;
 }
