@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 08 Mar 2014 11:30:51 +0000
+ * Date: Sat, 08 Mar 2014 12:09:49 +0000
  *
  */
 
@@ -2383,12 +2383,12 @@
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
     function char_size() {
-        var temp = $('<div class="terminal"><span>&nbsp;</span></div>').
-            appendTo('body');
+        var temp = $('<div class="terminal"><div class="cmd"><span>&nbsp;' +
+                     '</span></div></div>').appendTo('body');
         var span = temp.find('span');
         var result = {
             width: span.width(),
-            height: span.height()
+            height: span.outerHeight()
         };
         temp.remove();
         return result;
@@ -2407,6 +2407,12 @@
             result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
         }
         return result;
+    }
+    // -----------------------------------------------------------------------
+    // :: Calculate number of lines that fit without scroll
+    // -----------------------------------------------------------------------
+    function get_num_rows(terminal) {
+        return Math.floor(terminal.height() / char_size().height);
     }
     // -----------------------------------------------------------------------
     // :: Get Selected Text (this is internal because it return text even if
@@ -3340,6 +3346,7 @@
             var output; // .terminal-output jquery object
             var terminal_id = terminals.length();
             var num_chars; // numer of chars in line
+            var num_rows; // number of lines that fit without scrollbar
             var command_list = []; // for tab completion
             var url;
             var in_login = false; // some Methods should not be called when login
@@ -3573,7 +3580,7 @@
                 // :: Return the number of lines that fit into the height of the terminal
                 // -----------------------------------------------------------------------
                 rows: function() {
-                    return Math.floor(self.height() / char_size().height);
+                    return num_rows;
                 },
                 // -----------------------------------------------------------------------
                 // :: Return the History object
@@ -3794,12 +3801,15 @@
                     width = self.width();
                     height = self.height();
                     var new_num_chars = get_num_chars(self);
+                    var new_num_rows = get_num_rows(self);
                     // only if number of chars changed
-                    if (new_num_chars !== num_chars) {
+                    if (new_num_chars !== num_chars || new_num_rows !== num_rows) {
                         num_chars = new_num_chars;
+                        num_rows = new_num_rows;
                         redraw();
                         if (typeof settings.onResize === 'function' &&
                             (old_height !== height || old_width !== width)) {
+                            console.log('onResize');
                             settings.onResize(self);
                         }
                         if (old_height !== height || old_width !== width) {
@@ -4268,6 +4278,7 @@
                 if (self.is(':visible')) {
                     num_chars = get_num_chars(self);
                     command_line.resize(num_chars);
+                    num_rows = get_num_rows(self);
                 }
                 self.oneTime(100, function() {
                     $(window).bind('resize.terminal', function() {
@@ -4281,18 +4292,18 @@
                         }
                     });
                 });
-                var shift = false;
-                $(document).bind('keydown.terminal', function(e) {
-                    if (e.shiftKey) {
-                        shift = true;
-                    }
-                }).bind('keyup.terminal', function(e) {
-                    // in Google Chromium/Linux shiftKey is false
-                    if (e.shiftKey || e.which == 16) {
-                        shift = false;
-                    }
-                });
                 if ($.event.special.mousewheel) {
+                    var shift = false;
+                    $(document).bind('keydown.terminal', function(e) {
+                        if (e.shiftKey) {
+                            shift = true;
+                        }
+                    }).bind('keyup.terminal', function(e) {
+                        // in Google Chromium/Linux shiftKey is false
+                        if (e.shiftKey || e.which == 16) {
+                            shift = false;
+                        }
+                    });
                     self.mousewheel(function(event, delta) {
                         if (!shift) {
                             if (delta > 0) {
