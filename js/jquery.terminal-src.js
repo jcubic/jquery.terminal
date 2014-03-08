@@ -2388,7 +2388,7 @@
         var span = temp.find('span');
         var result = {
             width: span.width(),
-            height: span.height
+            height: span.height()
         };
         temp.remove();
         return result;
@@ -2924,6 +2924,30 @@
             }
         }
         // -----------------------------------------------------------------------
+        // Redraw all lines
+        // -----------------------------------------------------------------------
+        function redraw() {
+            command_line.resize(num_chars);
+            var o = output.empty().detach();
+            var lines_to_show;
+            if (settings.outputLimit >= 0) {
+                // flush will limit lines but if there is lot of
+                // lines we don't need to show them and then remove
+                // them from terminal
+                var limit = settings.outputLimit === 0 ?
+                    self.rows() :
+                    settings.outputLimit;
+                lines_to_show = lines.slice(lines.length-limit-1);
+            } else {
+                lines_to_show = lines;
+            }
+            $.each(lines_to_show, function(i, line) {
+                draw_line.apply(null, line); // line is an array
+            });
+            command_line.before(o);
+            self.flush();
+        }
+        // -----------------------------------------------------------------------
         // :: Display user greetings or terminal signature
         // -----------------------------------------------------------------------
         function show_greetings() {
@@ -3375,7 +3399,7 @@
                     self.set_command(view.command);
                     command_line.position(view.position);
                     lines = view.lines;
-                    self.resize();
+                    redraw();
                     return self;
                 },
                 // -----------------------------------------------------------------------
@@ -3770,27 +3794,10 @@
                     width = self.width();
                     height = self.height();
                     var new_num_chars = get_num_chars(self);
-                    if (new_num_chars !== num_chars) { // only if number of chars changed
+                    // only if number of chars changed
+                    if (new_num_chars !== num_chars) {
                         num_chars = new_num_chars;
-                        command_line.resize(num_chars);
-                        var o = output.empty().detach();
-                        var lines_to_show;
-                        if (settings.outputLimit >= 0) {
-                            // flush will limit lines but if there is lot of
-                            // lines we don't need to show them and then remove
-                            // them from terminal
-                            var limit = settings.outputLimit === 0 ?
-                                self.rows() :
-                                settings.outputLimit;
-                            lines_to_show = lines.slice(lines.length-limit-1);
-                        } else {
-                            lines_to_show = lines;
-                        }
-                        $.each(lines_to_show, function(i, line) {
-                            draw_line.apply(null, line); // line is an array
-                        });
-                        command_line.before(o);
-                        self.flush();
+                        redraw();
                         if (typeof settings.onResize === 'function' &&
                             (old_height !== height || old_width !== width)) {
                             settings.onResize(self);
@@ -3873,7 +3880,8 @@
                         }
                         on_scrollbar_show_resize();
                     } catch (e) {
-                        // if echo throw exception we can't use error to display that exception
+                        // if echo throw exception we can't use error to display that
+                        // exception
                         alert('[Terminal.echo] ' + exception_message(e) + '\n' +
                               e.stack);
                     }
@@ -4002,16 +4010,15 @@
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, result, options));
                         if (options.login) {
-                            var l_type = $.type(options.login);
-                            if (l_type == 'function') {
+                            var type = $.type(options.login);
+                            if (type == 'function') {
                                 // self.pop on error
                                 self.login(options.login,
                                            false,
                                            prepare_top_interpreter,
                                            self.pop);
                             } else if ($.type(interpreter) == 'string' &&
-                                       l_type == 'string' || l_type == 'boolean') {
-                                var method = l_type == 'boolean' ? 'login' : options.login;
+                                       type == 'string' || type == 'boolean') {
                                 self.login(make_json_rpc_login(interpreter, options.login),
                                            false,
                                            prepare_top_interpreter,

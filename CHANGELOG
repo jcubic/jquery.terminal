@@ -1,3 +1,4 @@
+0.8.4     Fix redraw lines on import_view
 0.8.3     Fix completion in nested interpreters, login option in push
           Remove pause/resume from login, Fix parsing RegExes
           Fix display text with more then limit lines in one echo
