@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 08 Mar 2014 10:01:35 +0000
+ * Date: Sat, 08 Mar 2014 10:45:54 +0000
  *
  */
 
@@ -1910,9 +1910,9 @@
             return terminals.front();
         },
         // -----------------------------------------------------------------------
-        // :: Replace ntroff (from man) formatting with terminal formatting
+        // :: Replace overtyping (from man) formatting with terminal formatting
         // -----------------------------------------------------------------------
-        from_ntroff: function(string) {
+        overtyping: function(string) {
             return string.replace(/((?:_\x08.|.\x08_)+)/g, function(full, g) {
                 return '[[u;;]' + full.replace(/_x08|\x08_|_\u0008|\u0008_/g, '') + ']';
             }).replace(/((?:.\x08.)+)/g, function(full, g) {
@@ -2889,7 +2889,7 @@
                 if (!line_settings.raw) {
                     string = $.terminal.encode(string);
                 }
-                string = $.terminal.from_ntroff(string);
+                string = $.terminal.overtyping(string);
                 string = $.terminal.from_ansi(string);
                 output_buffer.push(NEW_LINE);
                 if (!line_settings.raw && (string.length > num_chars || string.match(/\n/))) {
