@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 08 Mar 2014 12:09:49 +0000
+ * Date: Sat, 08 Mar 2014 12:22:25 +0000
  *
  */
 
@@ -3809,7 +3809,6 @@
                         redraw();
                         if (typeof settings.onResize === 'function' &&
                             (old_height !== height || old_width !== width)) {
-                            console.log('onResize');
                             settings.onResize(self);
                         }
                         if (old_height !== height || old_width !== width) {

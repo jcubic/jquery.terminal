@@ -104,7 +104,7 @@
     float: left;
     /*display: inline-block; */
 }
-.cmd span.inverted, .cmd .cursor.blink {
+.inverted, .cmd .cursor.blink {
     background-color: #aaa;
     color: #000;
 }

@@ -3809,7 +3809,6 @@
                         redraw();
                         if (typeof settings.onResize === 'function' &&
                             (old_height !== height || old_width !== width)) {
-                            console.log('onResize');
                             settings.onResize(self);
                         }
                         if (old_height !== height || old_width !== width) {
