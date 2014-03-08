@@ -19,7 +19,7 @@
     "bugs": "https://github.com/jcubic/jquery.terminal/issues",
     "demo": "http://terminal.jcubic.pl/#demo",
     "docs": "http://terminal.jcubic.pl/api_reference.php",
-    "download": "https://github.com/jcubic/jquery.terminal/tarball/master",
+    "download": "https://github.com/jcubic/jquery.terminal/releases",
     "dependencies": {
         "jquery": ">=1.5"
     }
