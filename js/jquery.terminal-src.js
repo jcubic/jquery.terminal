@@ -1617,52 +1617,57 @@
             rest: string.replace(new RegExp('^' + $.terminal.escape_regex(args[0]) + ' '), '')
         };
     }
+    // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
     var color_names = [
-        'aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige',
-        'bisque', 'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown',
-        'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral',
+        'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
+        'fuchsia', 'green', 'lime', 'olive', 'yellow', 'navy', 'blue', 'teal',
+        'aqua', 'aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure',
+        'beige', 'bisque', 'black', 'blanchedalmond', 'blue', 'blueviolet',
+        'brown', 'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral',
         'cornflowerblue', 'cornsilk', 'crimson', 'cyan', 'darkblue', 'darkcyan',
-        'darkgoldenrod', 'darkgray', 'darkgreen', 'darkkhaki', 'darkmagenta',
-        'darkolivegreen', 'darkorange', 'darkorchid', 'darkred', 'darksalmon',
-        'darkseagreen', 'darkslateblue', 'darkslategray', 'darkturquoise',
-        'darkviolet', 'deeppink', 'deepskyblue', 'dimgray', 'dodgerblue',
-        'firebrick', 'floralwhite', 'forestgreen', 'fuchsia', 'gainsboro',
-        'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'greenyellow',
-        'honeydew', 'hotpink', 'indianred', 'indigo', 'ivory', 'khaki',
-        'lavender', 'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue',
-        'lightcoral', 'lightcyan', 'lightgoldenrodyellow', 'lightgreen',
+        'darkgoldenrod', 'darkgray', 'darkgreen', 'darkgrey', 'darkkhaki',
+        'darkmagenta', 'darkolivegreen', 'darkorange', 'darkorchid', 'darkred',
+        'darksalmon', 'darkseagreen', 'darkslateblue', 'darkslategray',
+        'darkslategrey', 'darkturquoise', 'darkviolet', 'deeppink',
+        'deepskyblue', 'dimgray', 'dimgrey', 'dodgerblue', 'firebrick',
+        'floralwhite', 'forestgreen', 'fuchsia', 'gainsboro', 'ghostwhite',
+        'gold', 'goldenrod', 'gray', 'green', 'greenyellow', 'grey', 'honeydew',
+        'hotpink', 'indianred', 'indigo', 'ivory', 'khaki', 'lavender',
+        'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue', 'lightcoral',
+        'lightcyan', 'lightgoldenrodyellow', 'lightgray', 'lightgreen',
         'lightgrey', 'lightpink', 'lightsalmon', 'lightseagreen',
-        'lightskyblue', 'lightslategray', 'lightsteelblue', 'lightyellow',
-        'lime', 'limegreen', 'linen', 'magenta', 'maroon', 'mediumaquamarine',
-        'mediumblue', 'mediumorchid', 'mediumpurple', 'mediumseagreen',
-        'mediumslateblue', 'mediumspringgreen', 'mediumturquoise',
-        'mediumvioletred', 'midnightblue', 'mintcream', 'mistyrose', 'moccasin',
-        'navajowhite', 'navy', 'oldlace', 'olive', 'olivedrab', 'orange',
-        'orangered', 'orchid', 'palegoldenrod', 'palegreen', 'paleturquoise',
-        'palevioletred', 'papayawhip', 'peachpuff', 'peru', 'pink', 'plum',
-        'powderblue', 'purple', 'red', 'rosybrown', 'royalblue', 'saddlebrown',
-        'salmon', 'sandybrown', 'seagreen', 'seashell', 'sienna', 'silver',
-        'skyblue', 'slateblue', 'slategray', 'snow', 'springgreen', 'steelblue',
-        'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat',
-        'white', 'whitesmoke', 'yellow', 'yellowgreen'];
+        'lightskyblue', 'lightslategray', 'lightslategrey', 'lightsteelblue',
+        'lightyellow', 'lime', 'limegreen', 'linen', 'magenta', 'maroon',
+        'mediumaquamarine', 'mediumblue', 'mediumorchid', 'mediumpurple',
+        'mediumseagreen', 'mediumslateblue', 'mediumspringgreen',
+        'mediumturquoise', 'mediumvioletred', 'midnightblue', 'mintcream',
+        'mistyrose', 'moccasin', 'navajowhite', 'navy', 'oldlace', 'olive',
+        'olivedrab', 'orange', 'orangered', 'orchid', 'palegoldenrod',
+        'palegreen', 'paleturquoise', 'palevioletred', 'papayawhip',
+        'peachpuff', 'peru', 'pink', 'plum', 'powderblue', 'purple', 'red',
+        'rosybrown', 'royalblue', 'saddlebrown', 'salmon', 'sandybrown',
+        'seagreen', 'seashell', 'sienna', 'silver', 'skyblue', 'slateblue',
+        'slategray', 'slategrey', 'snow', 'springgreen', 'steelblue', 'tan',
+        'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat', 'white',
+        'whitesmoke', 'yellow', 'yellowgreen'];
     // -------------------------------------------------------------------------
-    var format_split_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/;
-    var format_parts_re = /\[\[([gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/g;
+    var format_split_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/i;
+    var format_parts_re = /\[\[([gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
     var format_re = /\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
     var format_full_re = /^\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]$/gi;
-    var color_hex_re = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+    var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
     //var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     var url_re = /\bhttps?:\/\/(?:(?!&[^;]+;)[^\s"'<>)])+\b/g;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])+\/[gimy]*|(\\ |[^ ])+|[\w-]+)/g;
-    var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/;
-    var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/;
+    var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/i;
+    var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/i;
     $.terminal = {
         // -----------------------------------------------------------------------
         // :: Validate html color (it can be name or hex)
         // -----------------------------------------------------------------------
         valid_color: function(color) {
-            return color.match(color_hex_re) || $.inArray(color, color_names) !== -1;
+            return color.match(color_hex_re) || $.inArray(color.toLowerCase(), color_names) !== -1;
         },
         // -----------------------------------------------------------------------
         // :: Escape all special regex characters, so it can be use as regex to
