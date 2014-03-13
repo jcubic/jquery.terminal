@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.8.5
+ *           \/              /____/                              version 0.8.6
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 11 Mar 2014 11:35:25 +0000
+ * Date: Thu, 13 Mar 2014 13:07:39 +0000
  *
  */
 
@@ -2444,7 +2444,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.8.5';
+    var version = '0.8.6';
     var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = version_set ? ' version ' + version : ' ';
@@ -3167,7 +3167,7 @@
                 }
             }
             if (matched.length === 1) {
-                self.insert(matched[0].replace(regex, ''));
+                self.insert(matched[0].replace(regex, '') + ' ');
             } else if (matched.length > 1) {
                 if (tab_count >= 2) {
                     echo_command(command);

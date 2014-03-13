@@ -3167,7 +3167,7 @@
                 }
             }
             if (matched.length === 1) {
-                self.insert(matched[0].replace(regex, ''));
+                self.insert(matched[0].replace(regex, '') + ' ');
             } else if (matched.length > 1) {
                 if (tab_count >= 2) {
                     echo_command(command);
