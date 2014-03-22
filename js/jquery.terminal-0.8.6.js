@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 13 Mar 2014 17:21:46 +0000
+ * Date: Sat, 22 Mar 2014 12:39:43 +0000
  *
  */
 
@@ -2856,7 +2856,7 @@
                 }
             } else if (type === 'object') {
                 finalize({
-                    completion: make_object_interpreter(user_intrp,
+                    interpreter: make_object_interpreter(user_intrp,
                                                         settings.checkArity),
                     completion: Object.keys(user_intrp)
                 });
