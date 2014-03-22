@@ -1643,15 +1643,20 @@
     }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
-        string = string.replace(/^\s+|\s+$/g, '');
-        var args = string.split(/(\s+)/);
-        var re = new RegExp('^' + $.terminal.escape_regex(args[0]) + ' ');
-        var rest = string.replace(re, '');
-        return {
-            name: args[0],
-            args: fn(rest),
-            rest: rest
-        };
+        var m = string.match(/^([^\s]+)\s*(.*)$/);
+        if (m) {
+            return {
+                name: m[1],
+                args: fn(m[2]),
+                rest: m[2]
+            }
+        } else {
+            return {
+                name: '',
+                args: [],
+                rest: ''
+            }
+        }
     }
     // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
     var color_names = [

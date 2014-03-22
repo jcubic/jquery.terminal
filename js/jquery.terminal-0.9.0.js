@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.8.6
+ *           \/              /____/                              version 0.9.0
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 22 Mar 2014 12:39:43 +0000
+ * Date: Sat, 22 Mar 2014 13:45:58 +0000
  *
  */
 
@@ -1643,15 +1643,20 @@
     }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
-        string = string.replace(/^\s+|\s+$/g, '');
-        var args = string.split(/(\s+)/);
-        var re = new RegExp('^' + $.terminal.escape_regex(args[0]) + ' ');
-        var rest = string.replace(re, '');
-        return {
-            name: args[0],
-            args: fn(rest),
-            rest: rest
-        };
+        var m = string.match(/^([^\s]+)\s*(.*)$/);
+        if (m) {
+            return {
+                name: m[1],
+                args: fn(m[2]),
+                rest: m[2]
+            }
+        } else {
+            return {
+                name: '',
+                args: [],
+                rest: ''
+            }
+        }
     }
     // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
     var color_names = [
@@ -2510,7 +2515,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.8.6';
+    var version = '0.9.0';
     var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2014 Jakub Jankiewicz <http://jcubic'+
         '.pl>';
