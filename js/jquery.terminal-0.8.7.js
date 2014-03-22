@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.8.6
+ *           \/              /____/                              version 0.8.7
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 13 Mar 2014 13:07:39 +0000
+ * Date: Sat, 22 Mar 2014 13:32:26 +0000
  *
  */
 
@@ -1611,10 +1611,11 @@
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
         var args = string.replace(/^\s+|\s+$/g, '').split(/(\s+)/);
+        var rest = string.replace(/^[^\s]+\s*/, '');
         return {
             name: args[0],
-            args: fn(args.slice(2).join('')),
-            rest: string.replace(new RegExp('^' + $.terminal.escape_regex(args[0]) + ' '), '')
+            args: fn(rest),
+            rest: rest
         };
     }
     // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
@@ -2444,7 +2445,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.8.6';
+    var version = '0.8.7';
     var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = version_set ? ' version ' + version : ' ';

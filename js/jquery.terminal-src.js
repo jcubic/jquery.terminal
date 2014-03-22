@@ -1611,10 +1611,11 @@
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
         var args = string.replace(/^\s+|\s+$/g, '').split(/(\s+)/);
+        var rest = string.replace(/^[^\s]+\s*/, '');
         return {
             name: args[0],
-            args: fn(args.slice(2).join('')),
-            rest: string.replace(new RegExp('^' + $.terminal.escape_regex(args[0]) + ' '), '')
+            args: fn(rest),
+            rest: rest
         };
     }
     // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
