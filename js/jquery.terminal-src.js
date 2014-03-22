@@ -1118,7 +1118,7 @@
         // ---------------------------------------------------------------------
         function keydown_event(e) {
             var result, pos, len;
-            if (typeof options.keydown == 'function') {
+            if ($.isFunction(options.keydown)) {
                 result = options.keydown(e);
                 if (result !== undefined) {
                     //prevent_keypress = true;
@@ -1160,7 +1160,7 @@
                         self.insert('\n');
                     } else {
                         if (history && command && !mask &&
-                            ((typeof options.historyFilter == 'function' &&
+                            (($.isFunction(options.historyFilter) &&
                               options.historyFilter(command)) ||
                              !options.historyFilter)) {
                             history.append(command);
@@ -1171,7 +1171,7 @@
                         if (options.commands) {
                             options.commands(tmp);
                         }
-                        if (typeof prompt === 'function') {
+                        if ($.isFunction(prompt)) {
                             draw_prompt();
                         }
                     }
@@ -1430,7 +1430,7 @@
                         position = command.length;
                     }
                     redraw();
-                    if (typeof options.onCommandChange === 'function') {
+                    if ($.isFunction(options.onCommandChange)) {
                         options.onCommandChange(command);
                     }
                 }
@@ -1449,7 +1449,7 @@
                     position += string.length;
                 }
                 redraw();
-                if (typeof options.onCommandChange === 'function') {
+                if ($.isFunction(options.onCommandChange)) {
                     options.onCommandChange(command);
                 }
                 return self;
@@ -1573,7 +1573,7 @@
             if (e.ctrlKey && e.which === 99) { // CTRL+C
                 return true;
             }
-            if (!reverse_search && typeof options.keypress === 'function') {
+            if (!reverse_search && $.isFunction(options.keypress)) {
                 result = options.keypress(e);
             }
             if (result === undefined || result) {
@@ -2609,7 +2609,7 @@
         // :: helper function
         // ---------------------------------------------------------------------
         function get_processed_command(command) {
-            if (typeof settings.processArguments === 'function') {
+            if ($.isFunction(settings.processArguments)) {
                 return processCommand(command, settings.processArguments);
             } else if (settings.processArguments) {
                 return $.terminal.parseCommand(command);
@@ -2637,7 +2637,7 @@
         // :: Helper function
         // ---------------------------------------------------------------------
         function display_json_rpc_error(error) {
-            if (typeof settings.onRPCError === 'function') {
+            if ($.isFunction(settings.onRPCError)) {
                 settings.onRPCError.call(self, error);
             } else {
                 self.error('&#91;RPC&#93; ' + error.message);
@@ -2651,7 +2651,7 @@
                 self.pause();
                 $.jrpc(url, method, params, function(json) {
                     if (!json.error) {
-                        if (typeof settings.processRPCResponse === 'function') {
+                        if ($.isFunction(settings.processRPCResponse)) {
                             settings.processRPCResponse.call(self, json.result);
                         } else {
                             display_object(json.result);
@@ -2720,7 +2720,7 @@
                         completion: type === 'object' ? commands : undefined
                     });
                 } else {
-                    if ($.type(fallback) === 'function') {
+                    if ($.isFunction(fallback)) {
                         fallback(user_command, self);
                     } else if ($.isFunction(settings.onCommandNotFound)) {
                         settings.onCommandNotFound(user_command, self);
@@ -2734,7 +2734,7 @@
         // ---------------------------------------------------------------------
         function ajax_error(xhr, status, error) {
             self.resume(); // onAjaxError can use pause/resume call it first
-            if (typeof settings.onAjaxError == 'function') {
+            if ($.isFunction(settings.onAjaxError)) {
                 settings.onAjaxError.call(self, xhr, status, error);
             } else if (status !== 'abort') {
                 self.error('&#91;AJAX&#93; ' + status + ' - ' +
@@ -2916,7 +2916,7 @@
         // :: display Exception on terminal
         // ---------------------------------------------------------------------
         function display_exception(e, label) {
-            if (typeof settings.exceptionHandler == 'function') {
+            if ($.isFunction(settings.exceptionHandler)) {
                 settings.exceptionHandler.call(self, e);
             } else {
                 self.exception(e, label);
@@ -2938,7 +2938,7 @@
         // ---------------------------------------------------------------------
         function validate(label, object) {
             try {
-                if (typeof object === 'function') {
+                if ($.isFunction(object)) {
                     object(function() {
                         // don't care
                     });
@@ -3069,7 +3069,7 @@
                 }
                 break;
             }
-            if (typeof prompt === 'function') {
+            if ($.isFunction(prompt)) {
                 prompt(function(string) {
                     self.echo(string + command);
                 });
@@ -3085,7 +3085,7 @@
             try {
                 if (!ghost()) {
                     prev_command = $.terminal.splitCommand(command).name;
-                    if (exec && typeof settings.historyFilter == 'function' &&
+                    if (exec && $.isFunction(settings.historyFilter) &&
                         settings.historyFilter(command) ||
                         !settings.historyFilter) {
                         command_line.history().append(command);
@@ -3144,7 +3144,7 @@
         // :: function is defined. The check for this is in the self.pop method
         // ---------------------------------------------------------------------
         function global_logout() {
-            if (typeof settings.onBeforeLogout === 'function') {
+            if ($.isFunction(settings.onBeforeLogout)) {
                 try {
                     if (settings.onBeforeLogout(self) === false) {
                         return;
@@ -3155,7 +3155,7 @@
                 }
             }
             logout();
-            if (typeof settings.onAfterLogout === 'function') {
+            if ($.isFunction(settings.onAfterLogout)) {
                 try {
                     settings.onAfterLogout(self);
                 } catch (e) {
@@ -3197,7 +3197,7 @@
                 maybe_append_name(name);
             }
             command_line.name(name);
-            if (typeof interpreter.prompt == 'function') {
+            if ($.isFunction(interpreter.prompt)) {
                 command_line.prompt(function(command) {
                     interpreter.prompt(command, self);
                 });
@@ -3205,7 +3205,7 @@
                 command_line.prompt(interpreter.prompt);
             }
             command_line.set('');
-            if (!silent && typeof interpreter.onStart === 'function') {
+            if (!silent && $.isFunction(interpreter.onStart)) {
                 interpreter.onStart(self);
             }
         }
@@ -3217,7 +3217,7 @@
             // login and pause in onInit, 3rd exec will have proper timing (will
             // execute after onInit resume)
             var was_paused = false;
-            if (typeof settings.onInit === 'function') {
+            if ($.isFunction(settings.onInit)) {
                 onPause = function() { // local in terminal
                     was_paused = true;
                 };
@@ -3292,7 +3292,7 @@
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i, top = interpreters.top();
-            if ($.type(top.keydown) === 'function') {
+            if ($.isFunction(top.keydown)) {
                 result = top.keydown(e, self);
                 if (result !== undefined) {
                     return result;
@@ -3310,7 +3310,7 @@
             self.oneTime(10, function() {
                 on_scrollbar_show_resize();
             });
-            if ($.type(settings.keydown) === 'function') {
+            if ($.isFunction(settings.keydown)) {
                 result = settings.keydown(e, self);
                 if (result !== undefined) {
                     return result;
@@ -3528,11 +3528,11 @@
                     if (in_login) {
                         throw new Error(strings.notWhileLogin);
                     }
-                    if (typeof auth !== 'function') {
+                    if (!$.isFunction(auth)) {
                         throw new Error(strings.loginIsNotAFunction);
                     }
                     if (self.token(true) && self.login_name(true)) {
-                        if (typeof success == 'function') {
+                        if ($.isFunction(success)) {
                             success();
                         }
                         return self;
@@ -3556,7 +3556,7 @@
                                         $.Storage.set(name + 'token', token);
                                         $.Storage.set(name + 'login', user);
                                         in_login = false;
-                                        if (typeof success == 'function') {
+                                        if ($.isFunction(success)) {
                                             // will be used internaly since users know
                                             // when login success (they decide when
                                             // it happen by calling the callback -
@@ -3577,7 +3577,7 @@
                                             self.pop().pop();
                                         }
                                         // used only to call pop in push
-                                        if (typeof error == 'function') {
+                                        if ($.isFunction(error)) {
                                             error();
                                         }
                                     }
@@ -3852,7 +3852,7 @@
                 // -------------------------------------------------------------
                 set_prompt: function(prompt) {
                     if (validate('prompt', prompt)) {
-                        if (typeof prompt == 'function') {
+                        if ($.isFunction(prompt)) {
                             command_line.prompt(function(command) {
                                 prompt(command, self);
                             });
@@ -3910,14 +3910,11 @@
                         num_chars = new_num_chars;
                         num_rows = new_num_rows;
                         redraw();
-                        if (typeof settings.onResize === 'function' &&
-                            (old_height !== height || old_width !== width)) {
+                        if ($.isFunction(settings.onResize)) {
                             settings.onResize(self);
                         }
-                        if (old_height !== height || old_width !== width) {
-                            old_height = height;
-                            old_width = width;
-                        }
+                        old_height = height;
+                        old_width = width;
                     }
                     return self;
                 },
@@ -3931,7 +3928,7 @@
                         $.each(output_buffer, function(i, line) {
                             if (line === NEW_LINE) {
                                 wrapper = $('<div></div>');
-                            } else if (typeof line === 'function') {
+                            } else if ($.isFunction(line)) {
                                 wrapper.appendTo(output);
                                 try {
                                     line(wrapper);
@@ -4161,7 +4158,7 @@
                     if (interpreters.size() == 1) {
                         if (settings.login) {
                             global_logout();
-                            if ($.type(settings.onExit) === 'function') {
+                            if ($.isFunction(settings.onExit)) {
                                 try {
                                     settings.onExit(self);
                                 } catch (e) {
@@ -4178,7 +4175,7 @@
                         }
                         var current = interpreters.pop();
                         prepare_top_interpreter();
-                        if ($.type(current.onExit) === 'function') {
+                        if ($.isFunction(current.onExit)) {
                             try {
                                 current.onExit(self);
                             } catch (e) {
@@ -4348,7 +4345,7 @@
                         return settings.keypress(e, self);
                     } : null,
                     onCommandChange: function(command) {
-                        if ($.type(settings.onCommandChange) === 'function') {
+                        if ($.isFunction(settings.onCommandChange)) {
                             try {
                                 settings.onCommandChange(command, self);
                             } catch (e) {
