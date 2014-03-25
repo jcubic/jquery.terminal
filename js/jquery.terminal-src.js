@@ -2079,7 +2079,7 @@
         // :: Replace ANSI formatting with terminal formatting
         // ---------------------------------------------------------------------
         from_ansi: (function() {
-            var color = {
+            var color_list = {
                 30: 'black',
                 31: 'red',
                 32: 'green',
@@ -2091,7 +2091,7 @@
 
                 39: 'white' // default color
             };
-            var background = {
+            var background_list = {
                 40: 'black',
                 41: 'red',
                 42: 'green',
@@ -2149,13 +2149,13 @@
                     default:
                         if (_8bit_color && process_8bit && palette[num-1]) {
                             output_color = palette[num-1];
-                        } else if (color[num]) {
-                            output_color = color[num];
+                        } else if (color_list[num]) {
+                            output_color = color_list[num];
                         }
                         if (_8bit_background && process_8bit && palette[num-1]) {
                             output_background = palette[num-1];
-                        } else if (background[num]) {
-                            output_background = background[num];
+                        } else if (background_list[num]) {
+                            output_background = background_list[num];
                         }
                     }
                     if (num !== 5) {
@@ -2199,9 +2199,11 @@
                 }
                 var output = [];
                 //skip closing at the begining
-                if (splitted.length > 3 &&
-                    splitted.slice(0,3).join('') == '[0m') {
-                    splitted = splitted.slice(3);
+                if (splitted.length > 3) {
+                    var str = splitted.slice(0,3).join('');
+                    if (str == '[0m' || str == '[m') {
+                        splitted = splitted.slice(3);
+                    }
                 }
                 var next, prev_color, prev_background, code, match;
                 var inside = false;
@@ -2210,15 +2212,12 @@
                     if (match) {
                         switch (match[2]) {
                         case 'm':
-                            if (match[1] === '') {
-                                continue;
-                            }
                             if (match[1] !== '0') {
                                 code = format_ansi(match[1]);
                             }
                             if (inside) {
                                 output.push(']');
-                                if (match[1] == '0') {
+                                if (match[1] == '0' || match[1] == '') {
                                     //just closing
                                     inside = false;
                                     prev_color = prev_background = '';
