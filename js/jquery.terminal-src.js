@@ -3068,12 +3068,17 @@
                 }
                 break;
             }
+            var options = {
+                finalize: function(div) {
+                    div.addClass('command');
+                }
+            };
             if ($.isFunction(prompt)) {
                 prompt(function(string) {
-                    self.echo(string + command);
+                    self.echo(string + command, options);
                 });
             } else {
-                self.echo(prompt + command);
+                self.echo(prompt + command, options);
             }
         }
         // ---------------------------------------------------------------------
