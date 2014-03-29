@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 27 Mar 2014 12:31:16 +0000
+ * Date: Sat, 29 Mar 2014 21:51:34 +0000
  *
  */
 
@@ -1150,7 +1150,7 @@
                     if (e.which === 68) { //ALT+D
                         self.set(command.slice(0, position) +
                                  command.slice(position).
-                                 replace(/[^ ]+ |[^ ]+$/, ''), true);
+                                 replace(/[^ ]+(?= )|[^ ]+$/, ''), true);
                         // chrome jump to address bar
                         return false;
                     }
