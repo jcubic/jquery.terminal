@@ -1150,7 +1150,7 @@
                     if (e.which === 68) { //ALT+D
                         self.set(command.slice(0, position) +
                                  command.slice(position).
-                                 replace(/[^ ]+(?= )|[^ ]+$/, ''), true);
+                                 replace(/ *[^ ]+ *(?= )|[^ ]+$/, ''), true);
                         // chrome jump to address bar
                         return false;
                     }
