@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 29 Mar 2014 21:58:39 +0000
+ * Date: Sat, 29 Mar 2014 22:03:47 +0000
  *
  */
 
@@ -3200,7 +3200,7 @@
                 }
             }
             if (matched.length === 1) {
-                self.insert(matched[0].replace(regex, '') + ' ');
+                self.insert(matched[0].replace(regex, ''));
             } else if (matched.length > 1) {
                 if (tab_count >= 2) {
                     echo_command(command);
