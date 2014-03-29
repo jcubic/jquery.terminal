@@ -1547,11 +1547,11 @@
                 animation(false);
                 return self;
             },
-            mask: function(display) {
-                if (typeof display === 'undefined') {
+            mask: function(new_mask) {
+                if (typeof new_mask === 'undefined') {
                     return mask;
                 } else {
-                    mask = display;
+                    mask = new_mask;
                     redraw();
                     return self;
                 }
@@ -3006,7 +3006,7 @@
                 break;
             case 'boolean':
                 if (mask) {
-                    command = command.replace(/./g, mask);
+                    command = command.replace(/./g, settings.maskChar);
                 }
                 break;
             }
@@ -3823,7 +3823,7 @@
                 // :: strings longer then one)
                 // -------------------------------------------------------------
                 set_mask: function(mask) {
-                    command_line.mask(mask);
+                    command_line.mask(mask === true ? settings.maskChar : mask);
                     return self;
                 },
                 // -------------------------------------------------------------
