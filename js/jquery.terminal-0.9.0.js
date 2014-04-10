@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 10 Apr 2014 09:30:02 +0000
+ * Date: Thu, 10 Apr 2014 09:43:14 +0000
  *
  */
 
@@ -3057,7 +3057,8 @@
         // ---------------------------------------------------------------------
         function save_history_state(command) {
             var url = settings.historyStateUrlMapper(command);
-            history.pushState(save_state.length, null, url);
+            var title = settings.historyStateTitleMapper(command);
+            history.pushState(save_state.length, title, url);
             save_state.push(self.export_view());
         }
         // ---------------------------------------------------------------------
@@ -3298,10 +3299,10 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: IF Ghost don't store anything in localstorage
+        // :: If Ghost don't store anything in localstorage
         // ---------------------------------------------------------------------
         function ghost() {
-            return in_login || command_line.mask();
+            return in_login || command_line.mask() !== false;
         }
         // ---------------------------------------------------------------------
         // :: Keydown event handler
@@ -3465,9 +3466,16 @@
             var onPause = $.noop;//used to indicate that user call pause onInit
             var old_width, old_height;
             var dalyed_commands = []; // used when exec commands while paused
+            var uniqe_defaults = {
+                name: self.selector,
+                historyStateTitleMapper: function(command) {
+                    var title = $('title').text();
+                    return title + ' [' + command + ']';
+                }
+            };
             var settings = $.extend({},
                                     $.terminal.defaults,
-                                    {name: self.selector},
+                                    uniqe_defaults,
                                     options || {});
             var strings = $.terminal.defaults.strings;
             var enabled = settings.enabled;
