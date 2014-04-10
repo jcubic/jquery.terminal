@@ -2356,7 +2356,7 @@
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
-    var ids = {};
+    var ids = {}; // list of url based id of JSON-RPC
     $.jrpc = function(url, method, params, success, error) {
         ids[url] = ids[url] || 0;
         var request = $.json_stringify({
@@ -2520,6 +2520,15 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
+        historyState: false,
+        historyStateUrlMapper: (function() {
+            var base = window.location.href.replace(/\/[^\/]*$/, '');
+            return function(command) {
+                var cmd = $.terminal.splitCommand(command);
+                var url = base + '/' + cmd.name + '/' + cmd.args.join('/');
+                return url;
+            };
+        })(),
         login: null,
         outputLimit: -1,
         onAjaxError: null,
@@ -2538,11 +2547,13 @@
             wrongPasswordTryAgain: "Wrong password try again!",
             wrongPassword: "Wrong password!",
             ajaxAbortError: "Error while aborting ajax call!",
-            wrongArity: "Wrong number of arguments. Function '%s' expect %s got %s!",
+            wrongArity: "Wrong number of arguments. Function '%s' expect %s got"+
+                "%s!",
             commandNotFound: "Command '%s' Not Found!",
-            oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescribe",
-            oneInterpreterFunction: "You can't use more then one function (rpc with " +
-                "ignoreSystemDescribe is count as one)",
+            oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescr"+
+                "ibe",
+            oneInterpreterFunction: "You can't use more then one function (rpc"+
+                "with ignoreSystemDescribe is count as one)",
             loginFunctionMissing: "You don't have login function",
             noTokenError: "Access denied (no token)",
             serverResponse: "Server reponse is",
@@ -2551,13 +2562,15 @@
             loginIsNotAFunction: "Authenticate must be a function",
             canExitError: "You can't exit from main interpeter",
             invalidCompletion: "Invalid completion",
+            invalidSelector: 'Sorry, but terminal said that "%s" is not valid '+
+                'selector!',
             login: "login",
             password: "password"
         }
     };
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // :: All terminal globals
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     var requests = []; // for canceling on CTRL+D
     var terminals = new Cycle(); // list of terminals global in this scope
     $.fn.terminal = function(init_interpreter, options) {
@@ -3039,6 +3052,24 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: Helper function that save state of the terminal and push url using
+        // :: history API
+        // ---------------------------------------------------------------------
+        function save_history_state(command) {
+            var url = settings.historyStateUrlMapper(command);
+            history.pushState(save_state.length, null, url);
+            save_state.push(self.export_view());
+        }
+        // ---------------------------------------------------------------------
+        // :: Restore state using previously save state
+        // ---------------------------------------------------------------------
+        function restore_history_state() {
+            if (save_state.length &&
+                !(history.state == null && save_state.length == 1)) {
+                self.import_view(save_state[history.state || 0]);
+            }
+        }
+        // ---------------------------------------------------------------------
         // :: Wrapper over interpreter, it implements exit and catches all
         // :: exeptions from user code and displays them on the terminal
         // ---------------------------------------------------------------------
@@ -3072,6 +3103,17 @@
                     } else {
                         // Execute command from the interpreter
                         var result = interpreter.interpreter(command, self);
+                        if (settings.historyState &&
+                            $.isFunction(settings.historyStateUrlMapper)) {
+                            if (paused) {
+                                self.bind('resume', function() {
+                                    save_history_state(command);
+                                    self.unbind('resume');
+                                });
+                            } else {
+                                save_history_state(command);
+                            }
+                        }
                         if (result !== undefined) {
                             // was lines after echo_command (by interpreter)
                             if (position === lines.length-1) {
@@ -3195,6 +3237,21 @@
                         // resume
                         self.resume();
                     }
+                }
+            }
+            function setup() {
+                save_state.push(self.export_view());
+                $(window).on('popstate', restore_history_state);
+            }
+            if (settings.historyState) {
+                // onInit can pause display something after async call
+                if (paused) {
+                    self.bind('resume', function() {
+                        setup();
+                        self.unbind('resume');
+                    });
+                } else {
+                    setup();
                 }
             }
         }
@@ -3385,8 +3442,7 @@
                 return self.data('terminal');
             }
             if (self.length === 0) {
-                throw 'Sorry, but terminal said that "' + self.selector +
-                    '" is not valid selector!';
+                throw sprintf($.terminal.defaults.strings.invalidSelector, self.selector);
             }
             //var names = []; // stack if interpeter names
             var scroll_object;
@@ -3416,6 +3472,7 @@
             var strings = $.terminal.defaults.strings;
             var enabled = settings.enabled;
             var paused = false;
+            var save_state = [];
             // -----------------------------------------------------------------
             // TERMINAL METHODS
             // -----------------------------------------------------------------
@@ -3461,7 +3518,7 @@
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
                     command_line.position(view.position);
-                    lines = view.lines;
+                    lines = view.lines.slice(0);
                     redraw();
                     return self;
                 },
@@ -3622,6 +3679,7 @@
                         while (original.length) {
                             self.exec.apply(self, original.shift());
                         }
+                        self.trigger('resume');
                         scroll_to_bottom();
                     }
                     return self;
