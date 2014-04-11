@@ -3069,7 +3069,7 @@
         }
         // ---------------------------------------------------------------------
         // :: Restore state using previously save state, this function is used
-        // :: as 
+        // :: as event handler for popstate
         // ---------------------------------------------------------------------
         function restore_history_state() {
             try {
@@ -3082,9 +3082,7 @@
                         state = save_state[history.state.position];
                         terminal = terminals.get()[history.state.id];
                     }
-                    // if terminal got state because of command it need focus
-                    // TODO: what if user call API function outside of terminal?
-                    terminal.import_view(state.view).focus();
+                    terminal.import_view(state.view);
                     if (state.join.length) {
                         $.each(state.join, function(_, state) {
                             var terminal = terminals.get()[state.id];
@@ -3105,20 +3103,17 @@
         function commands(command, silent, exec) {
             // first command store state of the terminal before the command get
             // executed
-            console.log('first command');
             if (first_command && settings.historyState) {
                 first_command = false;
                 // join terminal sate to current history state of other terminal
                 if (save_state.length) {
-                    console.log('save_state.length');
                     var pos = history.state.position || save_state.length-1;
                     save_state[pos].join.push({
                         id: terminal_id,
-                        view: self.export_view()
+                        view: $.extend(self.export_view(), {focus: false})
                     });
                 } else {
                     save_state.push({view:self.export_view(), join:[]});
-                    console.log(save_state.length);
                 }
             }
             try {
@@ -3543,6 +3538,8 @@
                         throw new Exception(strings.notWhileLogin);
                     }
                     return {
+                        focus: enabled,
+                        mask: command_line.mask(),
                         prompt: self.get_prompt(),
                         command: self.get_command(),
                         position: command_line.position(),
@@ -3559,6 +3556,10 @@
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
                     command_line.position(view.position);
+                    command_line.mask(view.mask);
+                    if (view.focus) {
+                        self.focus();
+                    }
                     lines = view.lines.slice(0);
                     redraw();
                     return self;
