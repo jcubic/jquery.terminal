@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 10 Apr 2014 09:43:14 +0000
+ * Date: Fri, 11 Apr 2014 14:10:31 +0000
  *
  */
 
@@ -566,6 +566,9 @@
             },
             length: function() {
                 return data.length;
+            },
+            remove: function(index) {
+                data.splice(index, 0);
             },
             set: function(item) {
                 for (var i = data.length; i--;) {
@@ -2573,6 +2576,10 @@
     // -------------------------------------------------------------------------
     var requests = []; // for canceling on CTRL+D
     var terminals = new Cycle(); // list of terminals global in this scope
+    // state for all terminals, terminals can't have own array fo state because
+    // there is only one popstate event
+    var save_state = [];
+    var first_instance = true;
     $.fn.terminal = function(init_interpreter, options) {
         // ---------------------------------------------------------------------
         // :: helper function
@@ -3058,23 +3065,62 @@
         function save_history_state(command) {
             var url = settings.historyStateUrlMapper(command);
             var title = settings.historyStateTitleMapper(command);
-            history.pushState(save_state.length, title, url);
-            save_state.push(self.export_view());
+            self.save_state(title, url);
         }
         // ---------------------------------------------------------------------
-        // :: Restore state using previously save state
+        // :: Restore state using previously save state, this function is used
+        // :: as 
         // ---------------------------------------------------------------------
         function restore_history_state() {
-            if (save_state.length &&
-                !(history.state == null && save_state.length == 1)) {
-                self.import_view(save_state[history.state || 0]);
+            try {
+                if (save_state.length) {
+                    var state, terminal;
+                    if (history.state === null) {
+                        state = save_state[0];
+                        terminal = terminals.get()[0];
+                    } else {
+                        state = save_state[history.state.position];
+                        terminal = terminals.get()[history.state.id];
+                    }
+                    // if terminal got state because of command it need focus
+                    // TODO: what if user call API function outside of terminal?
+                    terminal.import_view(state.view).focus();
+                    if (state.join.length) {
+                        $.each(state.join, function(_, state) {
+                            var terminal = terminals.get()[state.id];
+                            terminal.import_view(state.view);
+                        });
+                    }
+                }
+            } catch(e) {
+                // display execetion on first terminal
+                display_exception(e, 'TERMINAL');
             }
         }
         // ---------------------------------------------------------------------
         // :: Wrapper over interpreter, it implements exit and catches all
         // :: exeptions from user code and displays them on the terminal
         // ---------------------------------------------------------------------
+        var first_command = true;
         function commands(command, silent, exec) {
+            // first command store state of the terminal before the command get
+            // executed
+            console.log('first command');
+            if (first_command && settings.historyState) {
+                first_command = false;
+                // join terminal sate to current history state of other terminal
+                if (save_state.length) {
+                    console.log('save_state.length');
+                    var pos = history.state.position || save_state.length-1;
+                    save_state[pos].join.push({
+                        id: terminal_id,
+                        view: self.export_view()
+                    });
+                } else {
+                    save_state.push({view:self.export_view(), join:[]});
+                    console.log(save_state.length);
+                }
+            }
             try {
                 if (!ghost()) {
                     prev_command = $.terminal.splitCommand(command).name;
@@ -3104,8 +3150,7 @@
                     } else {
                         // Execute command from the interpreter
                         var result = interpreter.interpreter(command, self);
-                        if (settings.historyState &&
-                            $.isFunction(settings.historyStateUrlMapper)) {
+                        if (settings.historyState) {
                             if (paused) {
                                 self.bind('resume', function() {
                                     save_history_state(command);
@@ -3240,20 +3285,9 @@
                     }
                 }
             }
-            function setup() {
-                save_state.push(self.export_view());
+            if (settings.historyState && first_instance) {
+                first_instance = false;
                 $(window).on('popstate', restore_history_state);
-            }
-            if (settings.historyState) {
-                // onInit can pause display something after async call
-                if (paused) {
-                    self.bind('resume', function() {
-                        setup();
-                        self.unbind('resume');
-                    });
-                } else {
-                    setup();
-                }
             }
         }
         // ---------------------------------------------------------------------
@@ -3480,7 +3514,6 @@
             var strings = $.terminal.defaults.strings;
             var enabled = settings.enabled;
             var paused = false;
-            var save_state = [];
             // -----------------------------------------------------------------
             // TERMINAL METHODS
             // -----------------------------------------------------------------
@@ -3529,6 +3562,17 @@
                     lines = view.lines.slice(0);
                     redraw();
                     return self;
+                },
+                // -------------------------------------------------------------
+                // :: Store current terminal state using History API
+                // -------------------------------------------------------------
+                save_state: function(title, url) {
+                    var state = {
+                        id: terminal_id,
+                        position: save_state.length
+                    };
+                    history.pushState(state, title, url);
+                    save_state.push({view:self.export_view(), join:[]});
                 },
                 // -------------------------------------------------------------
                 // :: Execute a command, it will handle commands that do AJAX
@@ -4265,6 +4309,11 @@
                     }
                     if (settings.height) {
                         self.css('height', '');
+                    }
+                    terminals.remove(terminal_id);
+                    if (!terminals.length()) {
+                        // last terminal
+                        $(window).off('popstate', restore_history_state);
                     }
                     return self;
                 }
