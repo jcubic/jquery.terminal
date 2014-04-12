@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 11 Apr 2014 14:36:24 +0000
+ * Date: Sat, 12 Apr 2014 09:16:42 +0000
  *
  */
 
@@ -189,6 +189,45 @@
             result[k] = fn.call(o, k, v);
         });
         return result;
+    };
+    var Clone = {
+        cloneObject: function(object) {
+            var tmp = {};
+            if (typeof object == 'object') {
+                if ($.isArray(object)) {
+                    return this.cloneArray(object);
+                } else if (object == null) {
+                    return object;
+                } else {
+                    for (var key in object) {
+                        if ($.isArray(object[key])) {
+                            tmp[key] = this.cloneArray(object[key]);
+                        } else if (typeof object[key] == 'object') {
+                            tmp[key] = this.cloneObject(object[key]);
+                        } else {
+                            tmp[key] = object[key];
+                        }
+                    }
+                }
+            }
+            return tmp;
+        },
+        cloneArray: function(array) {
+            if (!$.isFunction(Array.prototype.map)) {
+                throw new Error("You'r browser don't support ES5 array map " +
+                                "use es5-shim");
+            }
+            return array.slice(0).map(function(item) {
+                if (typeof item == 'object') {
+                    return this.cloneObject(item);
+                } else {
+                    return item;
+                }
+            }.bind(this));
+        }
+    };
+    $.clone = function(object) {
+        return Clone.cloneObject(object);
     };
     // -----------------------------------------------------------------------
     // :: Storage plugin
@@ -3543,7 +3582,7 @@
                         prompt: self.get_prompt(),
                         command: self.get_command(),
                         position: command_line.position(),
-                        lines: lines.slice(0)
+                        lines: $.clone(lines)
                     };
                 },
                 // -------------------------------------------------------------
@@ -3560,7 +3599,7 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    lines = view.lines.slice(0);
+                    lines = $.clone(view.lines);
                     redraw();
                     return self;
                 },
