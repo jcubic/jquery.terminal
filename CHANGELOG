@@ -1,3 +1,10 @@
+0.9.0     use History API, fix export/import
+          Focus/Blur on Window focus/blur
+          Allow to change mask char for passwords
+          Fix space after complete and in ALT+D
+          class .command in echo command
+          Fix ASNI Formatting bug
+0.8.7     Fix processing command function
 0.8.6     One space after fully completed command
 0.8.5     All regex for formatting case insensitive
 0.8.4     Fix redraw lines on import_view, fix calculating rows
