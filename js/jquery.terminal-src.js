@@ -226,7 +226,7 @@
             }.bind(this));
         }
     };
-    $.clone = function(object) {
+    var clone = function(object) {
         return Clone.cloneObject(object);
     };
     // -----------------------------------------------------------------------
@@ -3582,7 +3582,7 @@
                         prompt: self.get_prompt(),
                         command: self.get_command(),
                         position: command_line.position(),
-                        lines: $.clone(lines)
+                        lines: clone(lines)
                     };
                 },
                 // -------------------------------------------------------------
@@ -3599,7 +3599,7 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    lines = $.clone(view.lines);
+                    lines = clone(view.lines);
                     redraw();
                     return self;
                 },

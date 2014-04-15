@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 12 Apr 2014 09:16:42 +0000
+ * Date: Tue, 15 Apr 2014 21:39:42 +0000
  *
  */
 
@@ -226,7 +226,7 @@
             }.bind(this));
         }
     };
-    $.clone = function(object) {
+    var clone = function(object) {
         return Clone.cloneObject(object);
     };
     // -----------------------------------------------------------------------
@@ -3582,7 +3582,7 @@
                         prompt: self.get_prompt(),
                         command: self.get_command(),
                         position: command_line.position(),
-                        lines: $.clone(lines)
+                        lines: clone(lines)
                     };
                 },
                 // -------------------------------------------------------------
@@ -3599,7 +3599,7 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    lines = $.clone(view.lines);
+                    lines = clone(view.lines);
                     redraw();
                     return self;
                 },

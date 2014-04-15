@@ -2,7 +2,7 @@
           Focus/Blur on Window focus/blur
           Allow to change mask char for passwords
           Fix space after complete and in ALT+D
-          class .command in echo command
+          class .command in div created by echo command
           Fix ASNI Formatting bug
 0.8.7     Fix processing command function
 0.8.6     One space after fully completed command
