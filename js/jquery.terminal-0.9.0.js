@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 15 Apr 2014 21:39:42 +0000
+ * Date: 
  *
  */
 
@@ -4196,6 +4196,20 @@
                     return $.Storage.get(self.prefix_name(local) + '_token');
                 } : $.noop,
                 // -------------------------------------------------------------
+                // :: Function sets the token to the supplied value. This function
+                // :: works regardless of wherer settings.login is supplied
+                // -------------------------------------------------------------
+                set_token : function(token,local) {
+                    $.Storage.set(self.prefix_name(local) + '_token', token);
+                },
+                // -------------------------------------------------------------
+                // :: Function get the token either set by the login method or
+                // :: by the set_token method.
+                // -------------------------------------------------------------
+                get_token : function(local) {
+                    $.Storage.set(self.prefix_name(local) + '_token', token);
+                },
+                // -----------------------------------------------------------------------
                 // :: Function return Login name entered by the user
                 // -------------------------------------------------------------
                 login_name: settings.login ? function(local) {

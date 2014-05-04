@@ -4196,10 +4196,18 @@
                     return $.Storage.get(self.prefix_name(local) + '_token');
                 } : $.noop,
                 // -------------------------------------------------------------
-                // :: Function sets the token to the supplied value
+                // :: Function sets the token to the supplied value. This function
+                // :: works regardless of wherer settings.login is supplied
                 // -------------------------------------------------------------
-                set_token : function(token) {
-                    $.Storage.set(self.prefix_name() + '_token', token);
+                set_token : function(token,local) {
+                    $.Storage.set(self.prefix_name(local) + '_token', token);
+                },
+                // -------------------------------------------------------------
+                // :: Function get the token either set by the login method or
+                // :: by the set_token method.
+                // -------------------------------------------------------------
+                get_token : function(local) {
+                    $.Storage.set(self.prefix_name(local) + '_token', token);
                 },
                 // -----------------------------------------------------------------------
                 // :: Function return Login name entered by the user
