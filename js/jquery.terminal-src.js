@@ -4207,7 +4207,7 @@
                 // :: by the set_token method.
                 // -------------------------------------------------------------
                 get_token : function(local) {
-                    $.Storage.set(self.prefix_name(local) + '_token', token);
+                    return $.Storage.get(self.prefix_name(local) + '_token');
                 },
                 // -----------------------------------------------------------------------
                 // :: Function return Login name entered by the user
