@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: 
+ * Date: Mon, 12 May 2014 20:28:16 +0000
  *
  */
 
@@ -1077,7 +1077,7 @@
                             lines_after(array.slice(2));
                         } else {
                             var last = array.slice(-1)[0];
-                            var from_last = string.length - position;
+                            var from_last = string.length - position - tabs_rm;
                             var last_len = last.length;
                             var pos = 0;
                             if (from_last <= last_len) {
@@ -1087,7 +1087,7 @@
                                 } else {
                                     pos = last_len-from_last;
                                 }
-                                draw_cursor_line(last, pos+tabs_rm);
+                                draw_cursor_line(last, pos);
                             } else {
                                 // in the middle
                                 if (num_lines === 3) {
@@ -3964,8 +3964,8 @@
                 set_prompt: function(prompt) {
                     if (validate('prompt', prompt)) {
                         if ($.isFunction(prompt)) {
-                            command_line.prompt(function(command) {
-                                prompt(command, self);
+                            command_line.prompt(function(callback) {
+                                prompt(self, callback);
                             });
                         } else {
                             command_line.prompt(prompt);

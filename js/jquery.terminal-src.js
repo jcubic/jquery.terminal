@@ -3964,8 +3964,8 @@
                 set_prompt: function(prompt) {
                     if (validate('prompt', prompt)) {
                         if ($.isFunction(prompt)) {
-                            command_line.prompt(function(command) {
-                                prompt(command, self);
+                            command_line.prompt(function(callback) {
+                                prompt(self, callback);
                             });
                         } else {
                             command_line.prompt(prompt);
