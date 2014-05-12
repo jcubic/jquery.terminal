@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 12 May 2014 20:28:16 +0000
+ * Date: Mon, 12 May 2014 21:27:12 +0000
  *
  */
 
@@ -3964,8 +3964,8 @@
                 set_prompt: function(prompt) {
                     if (validate('prompt', prompt)) {
                         if ($.isFunction(prompt)) {
-                            command_line.prompt(function(callback) {
-                                prompt(self, callback);
+                            command_line.prompt(function(set) {
+                                prompt(set, self);
                             });
                         } else {
                             command_line.prompt(prompt);
