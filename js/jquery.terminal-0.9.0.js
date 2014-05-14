@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 12 May 2014 21:27:12 +0000
+ * Date: Wed, 14 May 2014 10:36:17 +0000
  *
  */
 
@@ -2524,7 +2524,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2013 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2014 jcubic'],
         ['jQuery Terminal Emulator' + (version_set ? ' v. ' + version : ''),
          copyright.replace(/ *<.*>/, '')],
         ['jQuery Terminal Emulator' + (version_set ? version_string : ''),
@@ -3964,8 +3964,8 @@
                 set_prompt: function(prompt) {
                     if (validate('prompt', prompt)) {
                         if ($.isFunction(prompt)) {
-                            command_line.prompt(function(set) {
-                                prompt(set, self);
+                            command_line.prompt(function(callback) {
+                                prompt(callback, self);
                             });
                         } else {
                             command_line.prompt(prompt);
