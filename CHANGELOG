@@ -4,6 +4,8 @@
           Fix space after complete and in ALT+D
           class .command in div created by echo command
           Fix ASNI Formatting bug
+          Terminal Function execution from echo comand (server can now
+          control the terminal)
 0.8.7     Fix processing command function
 0.8.6     One space after fully completed command
 0.8.5     All regex for formatting case insensitive

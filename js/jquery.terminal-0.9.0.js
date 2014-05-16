@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 14 May 2014 10:36:17 +0000
+ * Date: Fri, 16 May 2014 20:24:02 +0000
  *
  */
 
@@ -1937,9 +1937,9 @@
                                     return ''; //'<span>&nbsp;</span>';
                                 }
                                 text = text.replace(/\\]/g, ']');
-                                var style = '';
+                                var style_str = '';
                                 if (style.indexOf('b') !== -1) {
-                                    style += 'font-weight:bold;';
+                                    style_str += 'font-weight:bold;';
                                 }
                                 var text_decoration = [];
                                 if (style.indexOf('u') !== -1) {
@@ -1952,22 +1952,20 @@
                                     text_decoration.push('overline');
                                 }
                                 if (text_decoration.length) {
-                                    style += 'text-decoration:' +
+                                    style_str += 'text-decoration:' +
                                         text_decoration.join(' ') + ';';
                                 }
                                 if (style.indexOf('i') !== -1) {
-                                    style += 'font-style:italic;';
+                                    style_str += 'font-style:italic;';
                                 }
                                 if ($.terminal.valid_color(color)) {
-                                    style += 'color:' + color + ';';
+                                    style_str += 'color:' + color + ';';
                                     if (style.indexOf('g') !== -1) {
-                                        style += 'text-shadow:0 0 5px ' +
-                                            color + ';';
+                                        style_str += 'text-shadow:0 0 5px ' + color + ';';
                                     }
                                 }
                                 if ($.terminal.valid_color(background)) {
-                                    style += 'background-color:' +
-                                        background;
+                                    style_str += 'background-color:' + background;
                                 }
                                 var data;
                                 if (data_text === '') {
@@ -1975,7 +1973,7 @@
                                 } else {
                                     data = data_text.replace(/&#93;/g, ']');
                                 }
-                                var result = '<span style="' + style + '"';
+                                var result = '<span style="' + style_str + '"';
                                 if (_class !== '') {
                                     result += ' class="' + _class + '"';
                                 }
