@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 16 May 2014 20:24:02 +0000
+ * Date: Thu, 22 May 2014 18:22:28 +0000
  *
  */
 
@@ -1217,9 +1217,11 @@
                         self.insert('\n');
                     } else {
                         if (history && command && !mask &&
-                            (($.isFunction(options.historyFilter) &&
-                              options.historyFilter(command)) ||
-                             !options.historyFilter)) {
+                            ($.isFunction(options.historyFilter) && options.historyFilter(command)) ||
+                            (typeof options.historyFilter == 'object' &&
+                             options.historyFilter.constructor == RegExp &&
+                             command.match(options.historyFilter)) ||
+                            !options.historyFilter) {
                             history.append(command);
                         }
                         var tmp = command;
@@ -2560,6 +2562,7 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
+        Token: true,
         historyState: false,
         historyStateUrlMapper: (function() {
             var base = window.location.href.replace(/\/[^\/]*$/, '');
@@ -2615,8 +2618,8 @@
     var terminals = new Cycle(); // list of terminals global in this scope
     // state for all terminals, terminals can't have own array fo state because
     // there is only one popstate event
-    var save_state = [];
-    var first_instance = true;
+    var save_state = []; // hold objects returned by export_view by history API
+    var first_instance = true; // used by history state
     $.fn.terminal = function(init_interpreter, options) {
         // ---------------------------------------------------------------------
         // :: helper function
@@ -4178,10 +4181,10 @@
                 // :: exception if there is no login provided
                 // -------------------------------------------------------------
                 logout: settings.login ? function() {
-                    while (interpreters.size() > 1) {
+                    while (interpreters.size() > 0) {
                         self.pop();
                     }
-                    return self.pop();
+                    return self;
                 } : function() {
                     self.error(strings.loginFunctionMissing);
                 },
