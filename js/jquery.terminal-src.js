@@ -31,7 +31,7 @@
  * Copyright (c) 2010 Dave Schindler
  *
  * jQuery Timers licenced with the WTFPL
- * <http://jquery.offput.ca/every/>
+ * <http://jquery.offput.ca/timers/>
  *
  * Cross-Browser Split 1.1.1
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
@@ -42,6 +42,21 @@
  * licensed under 3 clause BSD license
  *
  * Date: {{DATE}}
+ *
+ * TODO: exec function from echo
+ *       custom formatter
+ *       formatter: function(text, options) { // term, cols ??
+ *           // covert hex to chars
+ *           text = text.replace(/0x[A-F]+/g, function(hex) {
+ *              return String.fromCharCode(parseInt(hex, 16));
+ *           });
+ *           return $.terminal.defaults.formatter(text);
+ *       }
+ * option - argumentSplitter: function(rest) { return rest.split(/\s+/g); }
+ * Wrap words mode - terminal.echo('asd', {wrapWords: true});
+ * local logout
+ * Debug interpreters names in LocalStorage
+ * onPositionChange event add to terminal
  *
  */
 
@@ -1195,7 +1210,7 @@
                     clear_reverse_state();
                     draw_prompt();
                     if (e.which === 27) { // ESC
-                        command = '';
+                        self.set('');
                     }
                     redraw();
                     // finish reverse search and execute normal event handler
@@ -1218,8 +1233,7 @@
                     } else {
                         if (history && command && !mask &&
                             ($.isFunction(options.historyFilter) && options.historyFilter(command)) ||
-                            (typeof options.historyFilter == 'object' &&
-                             options.historyFilter.constructor == RegExp &&
+                            (options.historyFilter instanceof RegExp &&
                              command.match(options.historyFilter)) ||
                             !options.historyFilter) {
                             history.append(command);
@@ -1240,10 +1254,7 @@
                         draw_reverse_prompt();
                     } else {
                         if (command !== '' && position > 0) {
-                            command = command.slice(0, position - 1) +
-                                command.slice(position, command.length);
-                            --position;
-                            redraw();
+                            self['delete'](-1);
                         }
                     }
                 } else if (e.which === 67 && e.ctrlKey && e.shiftKey) {
@@ -1257,11 +1268,7 @@
                     self.insert('\t');
                 } else if (e.which === 46) {
                     //DELETE
-                    if (command !== '' && position < command.length) {
-                        command = command.slice(0, position) +
-                            command.slice(position + 1, command.length);
-                        redraw();
-                    }
+                    self['delete'](1);
                     return true;
                 } else if (history && e.which === 38 ||
                            (e.which === 80 && e.ctrlKey)) {
@@ -1385,22 +1392,13 @@
                         if (e.which === 81) { // CTRL+W
                             // don't work in Chromium (can't prevent close tab)
                             if (command !== '' && position !== 0) {
-                                var first = command.slice(0, position);
-                                var last = command.slice(position+1);
-                                var m = first.match(/([^ ]+ *$)/);
-                                position = first.length-m[0].length;
-                                kill_text = first.slice(position);
-                                command = first.slice(0, position) + last;
-                                redraw();
+                                var m = command.slice(0, position).match(/([^ ]+ *$)/);
+                                kill_text = self['delete'](-m[0].length);
                             }
                             return false;
                         } else if (e.which === 72) { // CTRL+H
                             if (command !== '' && position > 0) {
-                                command = command.slice(0, --position);
-                                if (position < command.length-1) {
-                                    command += command.slice(position);
-                                }
-                                redraw();
+                                self['delete'](-1);
                             }
                             return false;
                         //NOTE: in opera charCode is undefined
@@ -1424,6 +1422,8 @@
                             return true;
                         } else if (e.which === 75) {
                             //CTRL+K
+                            kill_text = self['delete'](command.length-position);
+                            /*
                             if (position === 0) {
                                 kill_text = command;
                                 self.set('');
@@ -1431,12 +1431,10 @@
                                 kill_text = command.slice(position);
                                 self.set(command.slice(0, position));
                             }
+                            */
                         } else if (e.which === 85) { // CTRL+U
                             if (command !== '' && position !== 0) {
-                                kill_text = command.slice(0, position);
-                                self.set(command.slice(position,
-                                                       command.length));
-                                self.position(0);
+                                kill_text = self['delete'](-position);
                             }
                         } else if (e.which === 17) { //CTRL+TAB switch tab
                             return false;
@@ -1456,7 +1454,12 @@
                 }
             } */
         }
-        var history_list = [];
+        function fireChangeCommand() {
+            if ($.isFunction(options.onCommandChange)) {
+                options.onCommandChange(command);
+            }
+        }
+        var history_list = []; // TODO: check if needed
         // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
@@ -1482,16 +1485,39 @@
             history: function() {
                 return history;
             },
+            'delete': function(n, stay) {
+                var removed;
+                if (n == 0) {
+                    return self;
+                } else if (n < 0) {
+                    if (position > 0) {
+                        // this may look weird but if n is negative we need to use +
+                        removed = command.slice(0, position).slice(n);
+                        command = command.slice(0, position + n) +
+                            command.slice(position, command.length);
+                        if (!stay) {
+                            self.position(position+n);
+                        }
+                    }
+                } else {
+                    if (command !== '' && position < command.length) {
+                        removed = command.slice(position).slice(0, n);
+                        command = command.slice(0, position) +
+                            command.slice(position + n, command.length);
+                    }
+                }
+                redraw();
+                fireChangeCommand();
+                return removed;
+            },
             set: function(string, stay) {
                 if (string !== undefined) {
                     command = string;
                     if (!stay) {
-                        position = command.length;
+                        self.position(command.length);
                     }
                     redraw();
-                    if ($.isFunction(options.onCommandChange)) {
-                        options.onCommandChange(command);
-                    }
+                    fireChangeCommand();
                 }
                 return self;
             },
@@ -1505,12 +1531,10 @@
                         string + command.slice(position);
                 }
                 if (!stay) {
-                    position += string.length;
+                    self.position(string.length, true);
                 }
                 redraw();
-                if ($.isFunction(options.onCommandChange)) {
-                    options.onCommandChange(command);
-                }
+                fireChangeCommand();
                 return self;
             },
             get: function() {
@@ -1553,14 +1577,21 @@
             kill_text: function() {
                 return kill_text;
             },
-            position: function(n) {
+            position: function(n, relative) {
                 if (typeof n === 'number') {
-                    if (n < 0) {
-                        position = 0;
-                    } else if (n > command.length) {
-                        position = command.length;
+                    if (relative) {
+                        position += n;
                     } else {
-                        position = n;
+                        if (n < 0) {
+                            position = 0;
+                        } else if (n > command.length) {
+                            position = command.length;
+                        } else {
+                            position = n;
+                        }
+                    }
+                    if ($.isFunction(options.onPositionChange)) {
+                        options.onPositionChange(position);
                     }
                     redraw();
                     return self;
@@ -3031,7 +3062,8 @@
         // ---------------------------------------------------------------------
         function redraw() {
             command_line.resize(num_chars);
-            var o = output.empty().detach();
+            // we don't want reflow while processing lines
+            var detached_output = output.empty().detach();
             var lines_to_show;
             if (settings.outputLimit >= 0) {
                 // flush will limit lines but if there is lot of
@@ -3047,7 +3079,7 @@
             $.each(lines_to_show, function(i, line) {
                 draw_line.apply(null, line); // line is an array
             });
-            command_line.before(o);
+            command_line.before(detached_output); // reinsert output
             self.flush();
         }
         // ---------------------------------------------------------------------
@@ -3323,6 +3355,10 @@
             if (settings.historyState && first_instance) {
                 first_instance = false;
                 $(window).on('popstate', restore_history_state);
+                // clear history in refresh because the state is no preserve
+                // you end up with two states but it's better then states with urls
+                // that point to commands that don't exist
+                history.pushState(null, $('head title').text(), window.location.href);
             }
         }
         // ---------------------------------------------------------------------
@@ -4067,6 +4103,8 @@
                                 parents.each(function() {
                                     var self = $(this);
                                     if (self.is(':empty')) {
+                                        // there can be divs inside parent that
+                                        // was not removed
                                         self.remove();
                                     }
                                 });
@@ -4118,7 +4156,7 @@
                     //quick hack to fix trailing back slash
                     var str = $.terminal.escape_brackets(message).
                         replace(/\\$/, '&#92;');
-                    return self.echo('[[;#f00;]' + str + ']', finalize);
+                    return self.echo('[[;#f00;;error]' + str + ']', finalize);
                 },
                 // -------------------------------------------------------------
                 // :: Display Exception on terminal
@@ -4180,9 +4218,13 @@
                 // :: Exit all interpreters and logout. The function will throw
                 // :: exception if there is no login provided
                 // -------------------------------------------------------------
-                logout: settings.login ? function() {
-                    while (interpreters.size() > 0) {
-                        self.pop();
+                logout: settings.login ? function(local) {
+                    if (local) {
+                        // TODO: logout from current interpreter
+                    } else {
+                        while (interpreters.size() > 0) {
+                            self.pop();
+                        }
                     }
                     return self;
                 } : function() {
