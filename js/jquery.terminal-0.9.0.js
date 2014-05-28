@@ -41,7 +41,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 24 May 2014 20:30:22 +0000
+ * Date: Wed, 28 May 2014 08:44:42 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -1178,7 +1178,7 @@
         function paste() {
             clip.focus();
             //wait until Browser insert text to textarea
-            self.oneTime(1, function() {
+            self.oneTime(100, function() {
                 self.insert(clip.val());
                 clip.blur().val('');
             });
