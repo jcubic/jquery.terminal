@@ -2714,7 +2714,14 @@
                 if (command === '') {
                     return;
                 }
-                command = get_processed_command(command);
+                try {
+                    command = get_processed_command(command);
+                } catch(e) {
+                    // exception can be thrown on invalid regex
+                    terminal.error(e.toString());
+                    return;
+                    //throw e; // this will show stack in other try..catch
+                }
                 if (!settings.login || command.name === 'help') {
                     // allows to call help without a token
                     service(command.name, command.args);
@@ -2742,7 +2749,15 @@
                     return;
                 }
                 //command = split_command_line(command);
-                var command = get_processed_command(user_command);
+                var command;
+                try {
+                    command = get_processed_command(user_command);
+                } catch(e) {
+                    // exception can be thrown on invalid regex
+                    self.error(e.toString());
+                    return;
+                    //throw e; // this will show stack in other try..catch
+                }
                 var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
