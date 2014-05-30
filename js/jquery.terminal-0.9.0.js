@@ -37,11 +37,15 @@
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
  * Available under the MIT License
  *
+ * jQuery Caret
+ * Copyright (c) 2009, Gideon Sireling
+ * 3 clause BSD License
+ *
  * sprintf.js
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 28 May 2014 08:44:42 +0000
+ * Date: Fri, 30 May 2014 21:37:47 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -57,7 +61,10 @@
  * local logout
  * Debug interpreters names in LocalStorage
  * onPositionChange event add to terminal
- *
+ * exec callback / promise
+ * exec('asd').then(function() {
+ *   // executed;
+ * });
  */
 
 (function(ctx) {
@@ -583,6 +590,77 @@
 
     })();
     // -----------------------------------------------------------------------
+    // :: jQuery Caret
+    // -----------------------------------------------------------------------
+    $.fn.caret = function(pos) {
+        var target = this[0];
+        var isContentEditable = target.contentEditable === 'true';
+        //get
+        if (arguments.length == 0) {
+            //HTML5
+            if (window.getSelection) {
+                //contenteditable
+                if (isContentEditable) {
+                    target.focus();
+                    var range1 = window.getSelection().getRangeAt(0),
+                    range2 = range1.cloneRange();
+                    range2.selectNodeContents(target);
+                    range2.setEnd(range1.endContainer, range1.endOffset);
+                    return range2.toString().length;
+                }
+                //textarea
+                return target.selectionStart;
+            }
+            //IE<9
+            if (document.selection) {
+                target.focus();
+                //contenteditable
+                if (isContentEditable) {
+                    var range1 = document.selection.createRange(),
+                    range2 = document.body.createTextRange();
+                    range2.moveToElementText(target);
+                    range2.setEndPoint('EndToEnd', range1);
+                    return range2.text.length;
+                }
+                //textarea
+                var pos = 0,
+                range = target.createTextRange(),
+                range2 = document.selection.createRange().duplicate(),
+                bookmark = range2.getBookmark();
+                range.moveToBookmark(bookmark);
+                while (range.moveStart('character', -1) !== 0) pos++;
+                return pos;
+            }
+            //not supported
+            return 0;
+        }
+        //set
+        if (pos == -1)
+            pos = this[isContentEditable? 'text' : 'val']().length;
+        //HTML5
+        if (window.getSelection) {
+            //contenteditable
+            if (isContentEditable) {
+                target.focus();
+                window.getSelection().collapse(target.firstChild, pos);
+            }
+            //textarea
+            else
+                target.setSelectionRange(pos, pos);
+        }
+        //IE<9
+        else if (document.body.createTextRange) {
+            var range = document.body.createTextRange();
+            range.moveToElementText(target);
+            range.moveStart('character', pos);
+            range.collapse(true);
+            range.select();
+        }
+        if (!isContentEditable)
+            target.focus();
+        return pos;
+    };
+    // -----------------------------------------------------------------------
     // :: Split string to array of strings with the same length
     // -----------------------------------------------------------------------
     function str_parts(str, length) {
@@ -844,12 +922,33 @@
         var kill_text = ''; // text from command that kill part of the command
         var position = 0;
         var prompt;
-        var enabled = options.enabled;
+        var enabled;
         var historySize = options.historySize || 60;
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
-        if (supportAnimations()) {
+        function mobileFocus() {
+            if (isTouch()) {
+                if (enabled) {
+                    //$.terminal.active().echo('focus');
+                    clip.focus();
+                } else {
+                    //$.terminal.active().echo('blur');
+                    clip.blur();
+                }
+            }
+        }
+        // on mobile you can't delete character if input is empty (event
+        // will not fire) so we fake text entry, we could just put dummy
+        // data but we put real command and position
+        function fakeMobileEntry() {
+            if (isTouch()) {
+                clip.val(command).caret(position);
+            }
+        }
+        // terminal animation don't work on andorid because they animate
+        // 2 properties
+        if (false && (supportAnimations() && !isAndroid())) {
             animation = function(toggle) {
                 if (toggle) {
                     cursor.addClass('blink');
@@ -858,11 +957,14 @@
                 }
             };
         } else {
+            var animating = false;
             animation = function(toggle) {
-                if (toggle && !enabled) {
+                if (toggle && !animating) {
+                    animating = true;
                     cursor.addClass('inverted');
                     self.everyTime(500, 'blink', blink);
-                } else if (enabled) {
+                } else if (animating && !toggle) {
+                    animating = false;
                     self.stopTime('blink', blink);
                     cursor.removeClass('inverted');
                 }
@@ -910,7 +1012,7 @@
                     for (var i=len; i--;) {
                         if (regex.test(history_data[i])) {
                             reverse_search_position = history_data.length - i;
-                            position = 0;
+                            self.position(0);
                             self.set(history_data[i], true);
                             redraw();
                             if (rev_search_str.length !== j) {
@@ -1176,7 +1278,7 @@
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
         function paste() {
-            clip.focus();
+            clip.val('').focus();
             //wait until Browser insert text to textarea
             self.oneTime(100, function() {
                 self.insert(clip.val());
@@ -1232,7 +1334,8 @@
                         self.insert('\n');
                     } else {
                         if (history && command && !mask &&
-                            ($.isFunction(options.historyFilter) && options.historyFilter(command)) ||
+                            ($.isFunction(options.historyFilter) &&
+                             options.historyFilter(command)) ||
                             (options.historyFilter instanceof RegExp &&
                              command.match(options.historyFilter)) ||
                             !options.historyFilter) {
@@ -1307,7 +1410,7 @@
                     } else {
                         //LEFT ARROW or CTRL+B
                         if (position > 0) {
-                            --position;
+                            self.position(-1, true);
                             redraw();
                         }
                     }
@@ -1318,7 +1421,7 @@
                         backup_prompt = prompt;
                         draw_reverse_prompt();
                         last_command = command;
-                        command = '';
+                        self.set('');
                         redraw();
                         reverse_search = true;
                     }
@@ -1326,7 +1429,7 @@
                     if (reverse_search) {
                         prompt = backup_prompt;
                         draw_prompt();
-                        command = last_command;
+                        self.set(last_command);
                         redraw();
                         reverse_search = false;
                         rev_search_str = '';
@@ -1342,7 +1445,7 @@
                         var re = /\S[\n\s]{2,}|[\n\s]+\S?/;
                         var match = command.slice(position).match(re);
                         if (!match || match[0].match(/^\s+$/)) {
-                            position = command.length;
+                            self.position(command.length);
                         } else {
                             if (match[0][0] !== ' ') {
                                 position += match.index + 1;
@@ -1356,8 +1459,7 @@
                         redraw();
                     } else {
                         if (position < command.length) {
-                            ++position;
-                            redraw();
+                            self.position(1, true);
                         }
                     }
                 } else if (e.which === 123) { //F12 - Allow Firebug
@@ -1491,12 +1593,15 @@
                     return self;
                 } else if (n < 0) {
                     if (position > 0) {
-                        // this may look weird but if n is negative we need to use +
+                        // this may look weird but if n is negative we need
+                        // to use +
                         removed = command.slice(0, position).slice(n);
                         command = command.slice(0, position + n) +
                             command.slice(position, command.length);
                         if (!stay) {
                             self.position(position+n);
+                        } else {
+                            fireChangeCommand();
                         }
                     }
                 } else {
@@ -1504,10 +1609,12 @@
                         removed = command.slice(position).slice(0, n);
                         command = command.slice(0, position) +
                             command.slice(position + n, command.length);
+                        fireChangeCommand();
                     }
                 }
                 redraw();
-                fireChangeCommand();
+                
+                fakeMobileEntry();
                 return removed;
             },
             set: function(string, stay) {
@@ -1517,6 +1624,7 @@
                         self.position(command.length);
                     }
                     redraw();
+                    fakeMobileEntry();
                     fireChangeCommand();
                 }
                 return self;
@@ -1532,6 +1640,8 @@
                 }
                 if (!stay) {
                     self.position(string.length, true);
+                } else {
+                    fakeMobileEntry();
                 }
                 redraw();
                 fireChangeCommand();
@@ -1579,6 +1689,7 @@
             },
             position: function(n, relative) {
                 if (typeof n === 'number') {
+                    // if (position !== n) { this don't work, don't know why
                     if (relative) {
                         position += n;
                     } else {
@@ -1594,6 +1705,7 @@
                         options.onPositionChange(position);
                     }
                     redraw();
+                    fakeMobileEntry();
                     return self;
                 } else {
                     return position;
@@ -1627,6 +1739,7 @@
             enable: function() {
                 enabled = true;
                 animation(true);
+                mobileFocus();
                 return self;
             },
             isenabled: function() {
@@ -1635,6 +1748,7 @@
             disable: function() {
                 enabled = false;
                 animation(false);
+                mobileFocus();
                 return self;
             },
             mask: function(new_mask) {
@@ -1666,6 +1780,7 @@
             if (!reverse_search && $.isFunction(options.keypress)) {
                 result = options.keypress(e);
             }
+            //$.terminal.active().echo(JSON.stringify(result));
             if (result === undefined || result) {
                 if (enabled) {
                     if ($.inArray(e.which, [38, 13, 0, 8]) > -1 &&
@@ -1730,6 +1845,32 @@
             }
         }
         return animation;
+    }
+    // -------------------------------------------------------------------------
+    function isAndroid() {
+        return navigator.userAgent.toLowerCase().indexOf("android") != -1;
+    }
+    // -------------------------------------------------------------------------
+    function isTouch() {
+        return true;
+        return ('ontouchstart' in window) || window.DocumentTouch &&
+            document instanceof DocumentTouch;
+    }
+    // -------------------------------------------------------------------------
+    // taken from http://www.webistrate.com/javascript-set-cursor-position-of-
+    // textarea/
+    function setSelectionRange(input, selectionStart, selectionEnd) {
+        if (input.setSelectionRange) {
+            //input.focus();
+            input.setSelectionRange(selectionStart, selectionEnd);
+        }
+        else if (input.createTextRange) {
+            var range = input.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', selectionEnd);
+            range.moveStart('character', selectionStart);
+            range.select();
+        }
     }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
@@ -2595,14 +2736,6 @@
         linksNoReferrer: false,
         Token: true,
         historyState: false,
-        historyStateUrlMapper: (function() {
-            var base = window.location.href.replace(/\/[^\/]*$/, '');
-            return function(command) {
-                var cmd = $.terminal.splitCommand(command);
-                var url = base + '/' + cmd.name + '/' + cmd.args.join('/');
-                return url;
-            };
-        })(),
         login: null,
         outputLimit: -1,
         onAjaxError: null,
@@ -2636,8 +2769,11 @@
             loginIsNotAFunction: "Authenticate must be a function",
             canExitError: "You can't exit from main interpeter",
             invalidCompletion: "Invalid completion",
+            hashChangeMissing: "You need to include hashchange jquery plugin " +
+                "for history to work",
             invalidSelector: 'Sorry, but terminal said that "%s" is not valid '+
                 'selector!',
+            invalidTerminalId: 'Invalid Terminal ID',
             login: "login",
             password: "password"
         }
@@ -2650,6 +2786,9 @@
     // state for all terminals, terminals can't have own array fo state because
     // there is only one popstate event
     var save_state = []; // hold objects returned by export_view by history API
+    var hash_commands;
+    var change_hash = false; // don't change hash on Init
+    var fire_hash_change = true;
     var first_instance = true; // used by history state
     $.fn.terminal = function(init_interpreter, options) {
         // ---------------------------------------------------------------------
@@ -2714,7 +2853,14 @@
                 if (command === '') {
                     return;
                 }
-                command = get_processed_command(command);
+                try {
+                    command = get_processed_command(command);
+                } catch(e) {
+                    // exception can be thrown on invalid regex
+                    terminal.error(e.toString());
+                    return;
+                    //throw e; // this will show stack in other try..catch
+                }
                 if (!settings.login || command.name === 'help') {
                     // allows to call help without a token
                     service(command.name, command.args);
@@ -2742,7 +2888,15 @@
                     return;
                 }
                 //command = split_command_line(command);
-                var command = get_processed_command(user_command);
+                var command;
+                try {
+                    command = get_processed_command(user_command);
+                } catch(e) {
+                    // exception can be thrown on invalid regex
+                    self.error(e.toString());
+                    return;
+                    //throw e; // this will show stack in other try..catch
+                }
                 var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
@@ -3011,7 +3165,6 @@
         var NEW_LINE = 1;
         function draw_line(string, options) {
             // prevent exception in display exception
-            try {
                 var line_settings = $.extend({
                     raw: false,
                     finalize: $.noop
@@ -3050,6 +3203,7 @@
                     output_buffer.push(string);
                 }
                 output_buffer.push(line_settings.finalize);
+            try {
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
@@ -3076,11 +3230,15 @@
             } else {
                 lines_to_show = lines;
             }
-            $.each(lines_to_show, function(i, line) {
-                draw_line.apply(null, line); // line is an array
-            });
-            command_line.before(detached_output); // reinsert output
-            self.flush();
+            try {
+                $.each(lines_to_show, function(i, line) {
+                    draw_line.apply(null, line); // line is an array
+                });
+                command_line.before(detached_output); // reinsert output
+                self.flush();
+            } catch(e) {
+                alert('Exception in redraw\n' + e.stack);
+            }
         }
         // ---------------------------------------------------------------------
         // :: Display user greetings or terminal signature
@@ -3131,13 +3289,29 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: Helper function that save state of the terminal and push url using
-        // :: history API
+        // :: Helper function that restore state. Call import_view or exec
         // ---------------------------------------------------------------------
-        function save_history_state(command) {
-            var url = settings.historyStateUrlMapper(command);
-            var title = settings.historyStateTitleMapper(command);
-            self.save_state(title, url);
+        function restore_state(spec) {
+            // spec [terminal_id, state_index, command]
+            var terminal = terminals.get()[spec[0]];
+            if (!terminal) {
+                throw new Error(strings.invalidTerminalId);
+            }
+            if (save_state[spec[1]]) { // state exists
+                terminal.import_view(save_state[spec[1]]);
+            } else if (spec[2] !== null) { // don't exec terminal init
+                // restore state
+                change_hash = false;
+                terminal.exec(spec[2]);
+                if (paused) {
+                    terminal.bind('resume.hash', function() {
+                        change_hash = true;
+                        terminal.unbind('resume.hash');
+                    });
+                } else {
+                    change_hash = true;
+                }
+            }
         }
         // ---------------------------------------------------------------------
         // :: Restore state using previously save state, this function is used
@@ -3151,7 +3325,7 @@
                         state = save_state[0];
                         terminal = terminals.get()[0];
                     } else {
-                        state = save_state[history.state.position];
+                        state = save_state[history.state.pos];
                         terminal = terminals.get()[history.state.id];
                     }
                     terminal.import_view(state.view);
@@ -3177,6 +3351,8 @@
             // executed
             if (first_command && settings.historyState) {
                 first_command = false;
+                self.save_state(null); // init state
+                /*
                 // join terminal sate to current history state of other terminal
                 if (save_state.length) {
                     var pos = history.state.position || save_state.length-1;
@@ -3186,9 +3362,15 @@
                     });
                 } else {
                     save_state.push({view:self.export_view(), join:[]});
-                }
+                }*/
             }
             try {
+                // this callback can disable commands
+                if ($.isFunction(settings.onBeforeCommand)) {
+                    if (settings.onBeforeCommand(self, command) === false) {
+                        return;
+                    }
+                }
                 if (!ghost()) {
                     prev_command = $.terminal.splitCommand(command).name;
                     if (exec && $.isFunction(settings.historyFilter) &&
@@ -3198,6 +3380,9 @@
                     }
                 }
                 var interpreter = interpreters.top();
+                if (!silent) {
+                    echo_command(command);
+                }
                 if (command === 'exit' && settings.exit) {
                     var count = interpreters.size();
                         self.token();
@@ -3208,23 +3393,29 @@
                         self.pop();
                     }
                 } else {
-                    if (!silent) {
-                        echo_command(command);
-                    }
                     var position = lines.length-1;
                     if (command === 'clear' && settings.clear) {
                         self.clear();
                     } else {
                         // Execute command from the interpreter
                         var result = interpreter.interpreter(command, self);
-                        if (settings.historyState) {
-                            if (paused) {
-                                self.bind('resume', function() {
-                                    save_history_state(command);
-                                    self.unbind('resume');
-                                });
-                            } else {
-                                save_history_state(command);
+                        // if command call pause - wait until resume
+                        if (paused) {
+                            self.bind('resume.command', function() {
+                                if ($.isFunction(settings.onAfterCommand)) {
+                                    settings.onAfterCommand(self, command);
+                                }
+                                if (settings.historyState) {
+                                    self.save_state(command);
+                                }
+                                self.unbind('resume.command');
+                            });
+                        } else {
+                            if ($.isFunction(settings.onAfterCommand)) {
+                                settings.onAfterCommand(self, command);
+                            }
+                            if (settings.historyState) {
+                                self.save_state(command);
                             }
                         }
                         if (result !== undefined) {
@@ -3354,11 +3545,29 @@
             }
             if (settings.historyState && first_instance) {
                 first_instance = false;
-                $(window).on('popstate', restore_history_state);
-                // clear history in refresh because the state is no preserve
-                // you end up with two states but it's better then states with urls
-                // that point to commands that don't exist
-                history.pushState(null, $('head title').text(), window.location.href);
+                if ($.fn.hashchange) {
+                    $(window).hashchange(function() {
+                        if (fire_hash_change) {
+                            try {
+                                if (location.hash) {
+                                    var hash = location.hash.replace(/^#/, '');
+                                    hash_commands = $.parseJSON(hash);
+                                } else {
+                                    hash_commands = [];
+                                }
+                                if (hash_commands.length) {
+                                    restore_state(hash_commands[hash_commands.length-1]);
+                                } else if (save_state[0]) {
+                                    self.import_view(save_state[0]);
+                                }
+                            } catch(e) {
+                                display_exception(e, 'TERMINAL');
+                            }
+                        }
+                    });
+                } else {
+                    self.error(strings.hashChangeMissing);
+                }
             }
         }
         // ---------------------------------------------------------------------
@@ -3464,6 +3673,7 @@
                 } else if (completion && e.which === 9) { // TAB
                     // TODO: move this to cmd plugin
                     //       add completion = array | function
+                    //       !!! Problem complete more then one key need terminal
                     ++tab_count;
                     // cursor can be in the middle of the command
                     // so we need to get the text before the cursor
@@ -3643,13 +3853,27 @@
                 // -------------------------------------------------------------
                 // :: Store current terminal state using History API
                 // -------------------------------------------------------------
-                save_state: function(title, url) {
-                    var state = {
-                        id: terminal_id,
-                        position: save_state.length
-                    };
-                    history.pushState(state, title, url);
-                    save_state.push({view:self.export_view(), join:[]});
+                save_state: function(command) {
+                    //save_state.push({view:self.export_view(), join:[]});
+                    save_state.push(self.export_view());
+                    if (!$.isArray(hash_commands)) {
+                        hash_commands = [];
+                    }
+                    if (command !== null) {
+                        var state = [
+                            terminal_id,
+                            save_state.length-1,
+                            command
+                        ];
+                        hash_commands.push(state);
+                        if (change_hash) {
+                            fire_hash_change = false;
+                            location.hash = $.json_stringify(hash_commands);
+                            setTimeout(function() {
+                                fire_hash_change = true;
+                            }, 100);
+                        }
+                    }
                 },
                 // -------------------------------------------------------------
                 // :: Execute a command, it will handle commands that do AJAX
@@ -3872,11 +4096,11 @@
                 // ::  the events will be not fired. Used on init
                 // -------------------------------------------------------------
                 focus: function(toggle, silent) {
-                    self.oneTime(1, function() {
                         if (terminals.length() === 1) {
                             if (toggle === false) {
                                 try {
-                                    if (!silent && settings.onBlur(self) !== false) {
+                                    if (!silent && settings.onBlur(self) !== false ||
+                                        silent) {
                                         self.disable();
                                     }
                                 } catch (e) {
@@ -3885,7 +4109,8 @@
                                 }
                             } else {
                                 try {
-                                    if (!silent && settings.onFocus(self) !== false) {
+                                    if (!silent && settings.onFocus(self) !== false ||
+                                        silent) {
                                         self.enable();
                                     }
                                 } catch (e) {
@@ -3913,6 +4138,8 @@
                                 self.enable();
                             }
                         }
+                    // why this delay
+                    self.oneTime(1, function() {
                     });
                     return self;
                 },
@@ -4283,7 +4510,9 @@
                 push: function(interpreter, options) {
                     options = options || {};
                     options.name = options.name || prev_command;
-                    options.prompt = options.prompt || options.name + ' ';
+                    if (options.prompt == undefined) {
+                        options.prompt = options.name + ' ';
+                    }
                     //names.push(options.name);
                     var top = interpreters.top();
                     if (top) {
@@ -4465,6 +4694,7 @@
             output = $('<div>').addClass('terminal-output').appendTo(self);
             self.addClass('terminal');
             // keep focus in clipboard textarea in mobile
+            /*
             if (('ontouchstart' in window) || window.DocumentTouch &&
                 document instanceof DocumentTouch) {
                 self.click(function() {
@@ -4472,6 +4702,7 @@
                 });
                 self.find('textarea').focus();
             }
+            */
             /*
               self.bind('touchstart.touchScroll', function() {
 
@@ -4514,9 +4745,12 @@
                     historySize: settings.historySize,
                     width: '100%',
                     keydown: key_down,
-                    keypress: settings.keypress ? function(e) {
-                        return settings.keypress(e, self);
-                    } : null,
+                    keypress: function(e) {
+                        var result, i, top = interpreters.top();
+                        if ($.isFunction(top.keypress)) {
+                            return top.keypress(e, self);
+                        }
+                    },
                     onCommandChange: function(command) {
                         if ($.isFunction(settings.onCommandChange)) {
                             try {
@@ -4542,25 +4776,28 @@
                         self.disable();
                     }
                 });
-                var was_enabled;
+                var old_enabled;
                 var $win = $(window).focus(function() {
-                    if (was_enabled) {
+                    if (old_enabled) {
                         self.focus();
                     }
                 }).blur(function() {
-                    was_enabled = enabled;
+                    old_enabled = enabled;
                     self.disable();
                 });
                 self.click(function(e) {
                     if (!self.enabled()) {
                         self.focus();
+                    } else if (isTouch()) {
+                        // keep focusing silently so textarea get focus
+                        self.focus(true, true);
                     }
                 }).mousedown(function(e) {
                     if (e.which == 2) {
                         self.insert(getSelectedText());
                     }
                 });
-                // ------------------------------------------------
+                // -------------------------------------------------------------
                 // Run Login
                 if (settings.login) {
                     self.login(settings.login, true, initialize);
@@ -4584,6 +4821,27 @@
                         }
                     });
                 });
+                // -------------------------------------------------------------
+                // exec from hash
+                if (settings.historyState && location.hash) {
+                    try {
+                        hash_commands = $.parseJSON(location.hash.replace(/^#/, ''));
+                        $.each(hash_commands, function(i, spec) {
+                            var terminal = terminals.get()[spec[0]];
+                            try {
+                                terminal.exec(spec[2]);
+                            } catch(e) {
+                                var cmd = $.terminal.escape_brackets(command);
+                                var msg = "Error while exec with command " + cmd;
+                                terminal.error(msg).error(e.stack);
+                            }
+                        });
+                    } catch (e) {
+                        //invalid json - ignore
+                    }
+                }
+                change_hash = true; // exec can now change hash
+                // -------------------------------------------------------------
                 if ($.event.special.mousewheel) {
                     var shift = false;
                     $(document).bind('keydown.terminal', function(e) {
