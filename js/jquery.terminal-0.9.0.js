@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 01 Jun 2014 11:16:32 +0000
+ * Date: Sun, 01 Jun 2014 11:18:59 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -1869,22 +1869,6 @@
     function isTouch() {
         return ('ontouchstart' in window) || window.DocumentTouch &&
             document instanceof DocumentTouch;
-    }
-    // -------------------------------------------------------------------------
-    // taken from http://www.webistrate.com/javascript-set-cursor-position-of-
-    // textarea/
-    function setSelectionRange(input, selectionStart, selectionEnd) {
-        if (input.setSelectionRange) {
-            //input.focus();
-            input.setSelectionRange(selectionStart, selectionEnd);
-        }
-        else if (input.createTextRange) {
-            var range = input.createTextRange();
-            range.collapse(true);
-            range.moveEnd('character', selectionEnd);
-            range.moveStart('character', selectionStart);
-            range.select();
-        }
     }
     // -------------------------------------------------------------------------
     function processCommand(string, fn) {
