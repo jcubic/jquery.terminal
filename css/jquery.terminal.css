@@ -54,6 +54,7 @@
     resize: none;
     border: none;
     outline: none;
+    background: black; /* work only for desktop so we need to create a mask */
 }
 .terminal {
     padding: 10px;
