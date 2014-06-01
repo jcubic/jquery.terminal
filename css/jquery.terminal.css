@@ -30,17 +30,30 @@
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
     display: inline-block;
 }
-.cmd .clipboard {
+.cmd .mask, .cmd .clipboard {
     position: absolute;
     bottom: 0;
-    left: 0;
-    opacity: 0.01;
-    filter: alpha(opacity = 0.01);
-    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
-    width: 2px;
+    height: 16px;
+    left: -10px;
 }
-.cmd > .clipboard {
-    position: fixed;
+/* the only way I found to hide textarea on Android */
+.cmd .mask {
+    width: 10px;
+    background: black;
+    z-index: 100;
+}
+.cmd .clipboard {
+    /*
+       clip: rect(0,0,0,0);
+       opacity: 0.01;
+       filter: alpha(opacity = 0.01);
+       filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
+    */
+    width: 2px; /* textarea need to have width or it will not work on Android */
+    padding: 0;
+    resize: none;
+    border: none;
+    outline: none;
 }
 .terminal {
     padding: 10px;
@@ -51,6 +64,7 @@
     padding: 0;
     margin: 0;
     height: 1.3em;
+    position: relative;
     /*margin-top: 3px; */
 }
 .cmd .cursor.blink {
@@ -108,7 +122,8 @@
     float: left;
 }
 .terminal, .cmd {
-    font-family: FreeMono, monospace;
+    font-family: monospace;
+    /*font-family: FreeMono, monospace; this don't work on Android */
     color: #aaa;
     background-color: #000;
     font-size: 12px;

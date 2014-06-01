@@ -905,6 +905,9 @@
         self.addClass('cmd');
         self.append('<span class="prompt"></span><span></span>' +
                     '<span class="cursor">&nbsp;</span><span></span>');
+        if (isTouch()) {
+            self.append('<span class="mask"></mask>');
+        }
         var clip = $('<textarea/>').addClass('clipboard').appendTo(self);
         if (options.width) {
             self.width(options.width);
@@ -4811,6 +4814,12 @@
                     }).blur(function() {
                         old_enabled = enabled;
                         self.disable();
+                    });
+                } else {
+                    self.find('textarea').blur(function() {
+                        if (enabled) {
+                            self.focus(false);
+                        }
                     });
                 }
                 self.click(function(e) {
