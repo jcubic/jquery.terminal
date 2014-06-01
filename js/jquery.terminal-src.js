@@ -929,12 +929,18 @@
         var animation;
         function mobileFocus() {
             if (isTouch()) {
+                var foucs = clip.is(':focus');
                 if (enabled) {
-                    //$.terminal.active().echo('focus');
-                    clip.focus();
+                    if (!foucs) {
+                        //alert(new Error().stack);
+                        $.terminal.active().echo('focus');
+                        clip.focus();
+                    }
                 } else {
-                    //$.terminal.active().echo('blur');
-                    clip.blur();
+                    if (focus) {
+                        $.terminal.active().echo('blur');
+                        clip.blur();
+                    }
                 }
             }
         }
@@ -943,7 +949,13 @@
         // data but we put real command and position
         function fakeMobileEntry() {
             if (isTouch()) {
-                clip.val(command).caret(position);
+                // delay worked while experimenting
+                self.oneTime(10, function() {
+                    clip.val(command);
+                    self.oneTime(10, function() {
+                        clip.caret(position);
+                    });
+                });
             }
         }
         // terminal animation don't work on andorid because they animate
@@ -1286,7 +1298,8 @@
             });
         }
         var first_up_history = true;
-        //var prevent_keypress = false;
+        // prevent_keypress - hack for Android that was inserting characters on backspace
+        var prevent_keypress = false;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
@@ -1360,6 +1373,7 @@
                             self['delete'](-1);
                         }
                     }
+                    return true; // mobile fix
                 } else if (e.which === 67 && e.ctrlKey && e.shiftKey) {
                     // CTRL+SHIFT+C
                     selected_text = getSelectedText();
@@ -1543,8 +1557,10 @@
                         }
                     }
                 } else {
+                    prevent_keypress = false;
                     return true;
                 }
+                prevent_keypress = true;
                 return false;
             } /*else {
                 if ((e.altKey && e.which === 68) ||
@@ -1613,7 +1629,6 @@
                     }
                 }
                 redraw();
-                
                 fakeMobileEntry();
                 return removed;
             },
@@ -1739,6 +1754,7 @@
             enable: function() {
                 enabled = true;
                 animation(true);
+                $.terminal.active().echo('enable');
                 mobileFocus();
                 return self;
             },
@@ -1748,6 +1764,7 @@
             disable: function() {
                 enabled = false;
                 animation(false);
+                $.terminal.active().echo('disable');
                 mobileFocus();
                 return self;
             },
@@ -1776,6 +1793,9 @@
             var result;
             if (e.ctrlKey && e.which === 99) { // CTRL+C
                 return true;
+            }
+            if (prevent_keypress) {
+                return;
             }
             if (!reverse_search && $.isFunction(options.keypress)) {
                 result = options.keypress(e);
@@ -1852,7 +1872,6 @@
     }
     // -------------------------------------------------------------------------
     function isTouch() {
-        return true;
         return ('ontouchstart' in window) || window.DocumentTouch &&
             document instanceof DocumentTouch;
     }
@@ -3165,6 +3184,7 @@
         var NEW_LINE = 1;
         function draw_line(string, options) {
             // prevent exception in display exception
+            try {
                 var line_settings = $.extend({
                     raw: false,
                     finalize: $.noop
@@ -3203,7 +3223,6 @@
                     output_buffer.push(string);
                 }
                 output_buffer.push(line_settings.finalize);
-            try {
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
@@ -3299,7 +3318,7 @@
             }
             if (save_state[spec[1]]) { // state exists
                 terminal.import_view(save_state[spec[1]]);
-            } else if (spec[2] !== null) { // don't exec terminal init
+            } else if (spec.length != 2) { // not joinded terminals
                 // restore state
                 change_hash = false;
                 terminal.exec(spec[2]);
@@ -3311,6 +3330,21 @@
                 } else {
                     change_hash = true;
                 }
+            }
+            if (spec[3].length) {
+                restore_state(spec[3]);
+            }
+        }
+        // ---------------------------------------------------------------------
+        // :: Helper function
+        // ---------------------------------------------------------------------
+        function maybe_update_hash() {
+            if (change_hash) {
+                fire_hash_change = false;
+                location.hash = $.json_stringify(hash_commands);
+                setTimeout(function() {
+                    fire_hash_change = true;
+                }, 100);
             }
         }
         // ---------------------------------------------------------------------
@@ -3351,7 +3385,14 @@
             // executed
             if (first_command && settings.historyState) {
                 first_command = false;
-                self.save_state(null); // init state
+                self.save_state(null);
+                if (hash_commands.length) {
+                    console.log(hash_commands[hash_commands.length-1]);
+                    hash_commands[hash_commands.length-1][3].push([
+                        terminal_id,
+                        save_state.length-1
+                    ]);
+                }
                 /*
                 // join terminal sate to current history state of other terminal
                 if (save_state.length) {
@@ -3517,6 +3558,7 @@
             }
         }
         // ---------------------------------------------------------------------
+        var local_first_instance;
         function initialize() {
             prepare_top_interpreter();
             show_greetings();
@@ -3543,7 +3585,7 @@
                     }
                 }
             }
-            if (settings.historyState && first_instance) {
+            if (first_instance && settings.historyState) {
                 first_instance = false;
                 if ($.fn.hashchange) {
                     $(window).hashchange(function() {
@@ -3799,6 +3841,9 @@
             // TERMINAL METHODS
             // -----------------------------------------------------------------
             $.extend(self, $.omap({
+                id: function() {
+                    return terminal_id;
+                },
                 // -------------------------------------------------------------
                 // :: Clear the output
                 // -------------------------------------------------------------
@@ -3863,16 +3908,11 @@
                         var state = [
                             terminal_id,
                             save_state.length-1,
-                            command
+                            command,
+                            [] // clear other terminals
                         ];
                         hash_commands.push(state);
-                        if (change_hash) {
-                            fire_hash_change = false;
-                            location.hash = $.json_stringify(hash_commands);
-                            setTimeout(function() {
-                                fire_hash_change = true;
-                            }, 100);
-                        }
+                        maybe_update_hash();
                     }
                 },
                 // -------------------------------------------------------------
@@ -4096,49 +4136,51 @@
                 // ::  the events will be not fired. Used on init
                 // -------------------------------------------------------------
                 focus: function(toggle, silent) {
-                        if (terminals.length() === 1) {
-                            if (toggle === false) {
-                                try {
-                                    if (!silent && settings.onBlur(self) !== false ||
-                                        silent) {
-                                        self.disable();
-                                    }
-                                } catch (e) {
-                                    display_exception(e, 'onBlur');
-                                    throw e;
+                    if (terminals.length() === 1) {
+                        if (toggle === false) {
+                            try {
+                                if (!silent && settings.onBlur(self) !== false ||
+                                    silent) {
+                                    self.echo('[t] -> disable');
+                                    self.disable();
                                 }
-                            } else {
-                                try {
-                                    if (!silent && settings.onFocus(self) !== false ||
-                                        silent) {
-                                        self.enable();
-                                    }
-                                } catch (e) {
-                                    display_exception(e, 'onFocus');
-                                    throw e;
-                                }
+                            } catch (e) {
+                                display_exception(e, 'onBlur');
+                                throw e;
                             }
                         } else {
-                            if (toggle === false) {
-                                self.next();
-                            } else {
-                                var front = terminals.front();
-                                if (front != self) {
-                                    front.disable();
-                                    if (!silent) {
-                                        try {
-                                            settings.onTerminalChange(self);
-                                        } catch (e) {
-                                            display_exception(e, 'onTerminalChange');
-                                            throw e;
-                                        }
-                                    }
+                            try {
+                                if (!silent && settings.onFocus(self) !== false ||
+                                    silent) {
+                                    self.echo('[t] -> enable');
+                                    self.enable();
                                 }
-                                terminals.set(self);
-                                self.enable();
+                            } catch (e) {
+                                display_exception(e, 'onFocus');
+                                throw e;
                             }
                         }
-                    // why this delay
+                    } else {
+                        if (toggle === false) {
+                            self.next();
+                        } else {
+                            var front = terminals.front();
+                            if (front != self) {
+                                front.disable();
+                                if (!silent) {
+                                    try {
+                                        settings.onTerminalChange(self);
+                                    } catch (e) {
+                                        display_exception(e, 'onTerminalChange');
+                                        throw e;
+                                    }
+                                }
+                            }
+                            terminals.set(self);
+                            self.enable();
+                        }
+                    }
+                    // why this delay - it can't be use for mobile
                     self.oneTime(1, function() {
                     });
                     return self;
@@ -4147,13 +4189,16 @@
                 // :: Enable the terminal
                 // -------------------------------------------------------------
                 enable: function() {
-                    if (num_chars === undefined) {
-                        //enabling first time
-                        self.resize();
-                    }
-                    if (command_line) {
-                        command_line.enable();
-                        enabled = true;
+                    if (!enabled) {
+                        self.echo('[t] enable');
+                        if (num_chars === undefined) {
+                            //enabling first time
+                            self.resize();
+                        }
+                        if (command_line) {
+                            command_line.enable();
+                            enabled = true;
+                        }
                     }
                     return self;
                 },
@@ -4161,7 +4206,8 @@
                 // :: Disable the terminal
                 // -------------------------------------------------------------
                 disable: function() {
-                    if (command_line) {
+                    if (enabled && command_line) {
+                        self.echo('[t] disable');
                         enabled = false;
                         command_line.disable();
                     }
@@ -4290,6 +4336,7 @@
                         }
                         old_height = height;
                         old_width = width;
+                        scroll_to_bottom();
                     }
                     return self;
                 },
@@ -4735,6 +4782,7 @@
                 interpreters = new Stack($.extend({
                     name: settings.name,
                     prompt: settings.prompt,
+                    keypress: settings.keypress,
                     greetings: settings.greetings
                 }, interpreter));
                 // CREATE COMMAND LINE
@@ -4744,6 +4792,7 @@
                     historyFilter: settings.historyFilter,
                     historySize: settings.historySize,
                     width: '100%',
+                    enabled: enabled && !isTouch(),
                     keydown: key_down,
                     keypress: function(e) {
                         var result, i, top = interpreters.top();
@@ -4764,31 +4813,41 @@
                     },
                     commands: commands
                 });
-                if (enabled) {
+                // touch devices need touch event to get virtual keyboard
+                if (enabled && !isTouch()) {
                     self.focus(undefined, true);
                 } else {
+                    self.echo('[t] init');
                     self.disable();
                 }
                 $(document).bind('click.terminal', function(e) {
                     var sender = $(e.target);
                     if (!sender.closest('.terminal').hasClass('terminal') &&
                         settings.onBlur(self) !== false) {
+                        self.echo('[t] outside');
                         self.disable();
                     }
                 });
                 var old_enabled;
-                var $win = $(window).focus(function() {
-                    if (old_enabled) {
-                        self.focus();
-                    }
-                }).blur(function() {
-                    old_enabled = enabled;
-                    self.disable();
-                });
+                if (!isTouch()) {
+                    // work weird on mobile
+                    var $win = $(window).focus(function() {
+                        self.echo('[win] focus');
+                        if (old_enabled) {
+                            self.focus();
+                        }
+                    }).blur(function() {
+                        self.echo('[win] blur');
+                        old_enabled = enabled;
+                        self.disable();
+                    });
+                }
                 self.click(function(e) {
                     if (!self.enabled()) {
+                        self.echo('[click] focus');
                         self.focus();
                     } else if (isTouch()) {
+                        self.echo('silent focus');
                         // keep focusing silently so textarea get focus
                         self.focus(true, true);
                     }
@@ -4822,18 +4881,22 @@
                     });
                 });
                 // -------------------------------------------------------------
-                // exec from hash
+                // exec from hash called in each terminal instance
                 if (settings.historyState && location.hash) {
                     try {
                         hash_commands = $.parseJSON(location.hash.replace(/^#/, ''));
                         $.each(hash_commands, function(i, spec) {
                             var terminal = terminals.get()[spec[0]];
-                            try {
-                                terminal.exec(spec[2]);
-                            } catch(e) {
-                                var cmd = $.terminal.escape_brackets(command);
-                                var msg = "Error while exec with command " + cmd;
-                                terminal.error(msg).error(e.stack);
+                            // execute if belong to this terminal
+                            if (terminal_id == terminal.id()) {
+                                try {
+                                    terminal.exec(spec[2]);
+                                    // we do nothing with spec[3]
+                                } catch(e) {
+                                    var cmd = $.terminal.escape_brackets(command);
+                                    var msg = "Error while exec with command " + cmd;
+                                    terminal.error(msg).error(e.stack);
+                                }
                             }
                         });
                     } catch (e) {
