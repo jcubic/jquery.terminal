@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 01 Jun 2014 11:11:11 +0000
+ * Date: Sun, 01 Jun 2014 11:16:32 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -932,13 +932,10 @@
                 var foucs = clip.is(':focus');
                 if (enabled) {
                     if (!foucs) {
-                        //alert(new Error().stack);
-                        $.terminal.active().echo('focus');
                         clip.focus();
                     }
                 } else {
                     if (focus) {
-                        $.terminal.active().echo('blur');
                         clip.blur();
                     }
                 }
@@ -1754,7 +1751,6 @@
             enable: function() {
                 enabled = true;
                 animation(true);
-                $.terminal.active().echo('enable');
                 mobileFocus();
                 return self;
             },
@@ -1764,7 +1760,6 @@
             disable: function() {
                 enabled = false;
                 animation(false);
-                $.terminal.active().echo('disable');
                 mobileFocus();
                 return self;
             },
@@ -4141,7 +4136,6 @@
                             try {
                                 if (!silent && settings.onBlur(self) !== false ||
                                     silent) {
-                                    self.echo('[t] -> disable');
                                     self.disable();
                                 }
                             } catch (e) {
@@ -4152,7 +4146,6 @@
                             try {
                                 if (!silent && settings.onFocus(self) !== false ||
                                     silent) {
-                                    self.echo('[t] -> enable');
                                     self.enable();
                                 }
                             } catch (e) {
@@ -4190,7 +4183,6 @@
                 // -------------------------------------------------------------
                 enable: function() {
                     if (!enabled) {
-                        self.echo('[t] enable');
                         if (num_chars === undefined) {
                             //enabling first time
                             self.resize();
@@ -4207,7 +4199,6 @@
                 // -------------------------------------------------------------
                 disable: function() {
                     if (enabled && command_line) {
-                        self.echo('[t] disable');
                         enabled = false;
                         command_line.disable();
                     }
@@ -4817,14 +4808,12 @@
                 if (enabled && !isTouch()) {
                     self.focus(undefined, true);
                 } else {
-                    self.echo('[t] init');
                     self.disable();
                 }
                 $(document).bind('click.terminal', function(e) {
                     var sender = $(e.target);
                     if (!sender.closest('.terminal').hasClass('terminal') &&
                         settings.onBlur(self) !== false) {
-                        self.echo('[t] outside');
                         self.disable();
                     }
                 });
@@ -4832,22 +4821,18 @@
                 if (!isTouch()) {
                     // work weird on mobile
                     var $win = $(window).focus(function() {
-                        self.echo('[win] focus');
                         if (old_enabled) {
                             self.focus();
                         }
                     }).blur(function() {
-                        self.echo('[win] blur');
                         old_enabled = enabled;
                         self.disable();
                     });
                 }
                 self.click(function(e) {
                     if (!self.enabled()) {
-                        self.echo('[click] focus');
                         self.focus();
                     } else if (isTouch()) {
-                        self.echo('silent focus');
                         // keep focusing silently so textarea get focus
                         self.focus(true, true);
                     }
