@@ -4,11 +4,10 @@
           Fix space after complete and in ALT+D
           class .command in div created by echo command, and error class in error function
           Fix ASNI Formatting bug
-          Terminal Function execution from echo comand (server can now
-          control the terminal)
           Regex as History Filter
           exec return promise, exec with array of commands
-          auto resume/pause if return value is promise
+          auto resume/pause if user code return promise
+          Mobile (tested on Android)
 0.8.7     Fix processing command function
 0.8.6     One space after fully completed command
 0.8.5     All regex for formatting case insensitive
@@ -185,4 +184,4 @@
 0.2.2     fix down-arrow/open parentises issue in Opera and Chrome
 
 0.2.1     add support for paste from clipboard with CTRL+V (Copy to
-          clipboard is alway enabled on websites)
+          clipboard is always enabled on websites)
