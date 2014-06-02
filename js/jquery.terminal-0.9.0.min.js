@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Jun 2014 00:24:45 +0000
+ * Date: Mon, 02 Jun 2014 07:33:05 +0000
  *
  * TODO: exec function from echo
  *       custom formatter

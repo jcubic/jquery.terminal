@@ -3426,7 +3426,7 @@
                         // Call user interpreter function
                         var result = interpreter.interpreter(command, self);
                         if (result != undefined) {
-                            // new API - auto pause/resume when using promises
+                            // auto pause/resume when user return promises
                             self.pause();
                             return $.when(result).then(function(result) {
                                 // don't echo result if user echo something

@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Jun 2014 00:24:45 +0000
+ * Date: Mon, 02 Jun 2014 07:33:05 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -3426,7 +3426,7 @@
                         // Call user interpreter function
                         var result = interpreter.interpreter(command, self);
                         if (result != undefined) {
-                            // new API - auto pause/resume when using promises
+                            // auto pause/resume when user return promises
                             self.pause();
                             return $.when(result).then(function(result) {
                                 // don't echo result if user echo something
