@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 01 Jun 2014 12:23:07 +0000
+ * Date: Mon, 02 Jun 2014 00:24:45 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -61,10 +61,12 @@
  * local logout
  * Debug interpreters names in LocalStorage
  * onPositionChange event add to terminal
- * exec callback / promise
- * exec('asd').then(function() {
- *   // executed;
- * });
+ *
+ * TEST: login + promises/exec
+ *       json-rpc/object + promises
+ *
+ * NOTE: json-rpc don't need promises and delegate resume/pause because only
+ *       exec can call it and exec call interpreter that workd with resume/pause
  */
 
 (function(ctx) {
@@ -3177,6 +3179,7 @@
                 if (!line_settings.raw) {
                     string = $.terminal.encode(string);
                 }
+                // TODO: array of functions in default.formatters
                 string = $.terminal.overtyping(string);
                 string = $.terminal.from_ansi(string);
                 output_buffer.push(NEW_LINE);
@@ -3362,14 +3365,14 @@
         // :: exeptions from user code and displays them on the terminal
         // ---------------------------------------------------------------------
         var first_command = true;
-        function commands(command, silent, exec) {
+        function commands(command, silent, exec, deferred) {
             // first command store state of the terminal before the command get
             // executed
             if (first_command && settings.historyState) {
                 first_command = false;
                 self.save_state(null);
                 if (hash_commands.length) {
-                    console.log(hash_commands[hash_commands.length-1]);
+                    //console.log(hash_commands[hash_commands.length-1]);
                     hash_commands[hash_commands.length-1][3].push([
                         terminal_id,
                         save_state.length-1
@@ -3416,15 +3419,36 @@
                         self.pop();
                     }
                 } else {
-                    var position = lines.length-1;
                     if (command === 'clear' && settings.clear) {
                         self.clear();
                     } else {
-                        // Execute command from the interpreter
+                        var position = lines.length-1;
+                        // Call user interpreter function
                         var result = interpreter.interpreter(command, self);
+                        if (result != undefined) {
+                            // new API - auto pause/resume when using promises
+                            self.pause();
+                            return $.when(result).then(function(result) {
+                                // don't echo result if user echo something
+                                if (result && position === lines.length-1) {
+                                    display_object(result);
+                                }
+                                // resolve promise from exec. This will fire
+                                // code if used terminal::exec('command').then
+                                if (deferred) {
+                                    deferred.resolve();
+                                }
+                                self.resume();
+                            });
+                        }
+                        // this is old API
                         // if command call pause - wait until resume
                         if (paused) {
                             self.bind('resume.command', function() {
+                                // exec with resume/pause in user code
+                                if (deferred) {
+                                    deferred.resolve();
+                                }
                                 if ($.isFunction(settings.onAfterCommand)) {
                                     settings.onAfterCommand(self, command);
                                 }
@@ -3434,6 +3458,10 @@
                                 self.unbind('resume.command');
                             });
                         } else {
+                            // this should not happen
+                            if (deferred) {
+                                deferred.resolve();
+                            }
                             if ($.isFunction(settings.onAfterCommand)) {
                                 settings.onAfterCommand(self, command);
                             }
@@ -3441,6 +3469,9 @@
                                 self.save_state(command);
                             }
                         }
+                        /*
+                          //this was undocumented - it suppose to replace stuff
+                          // that was echo from current command
                         if (result !== undefined) {
                             // was lines after echo_command (by interpreter)
                             if (position === lines.length-1) {
@@ -3460,6 +3491,7 @@
                             }
                             self.resize();
                         }
+                        */
                     }
                 }
             } catch (e) {
@@ -3902,14 +3934,36 @@
                 // :: calls and have delays, if the second argument is set to
                 // :: true it will not echo executed command
                 // -------------------------------------------------------------
-                exec: function(command, silent) {
+                exec: function(command, silent, deferred) {
+                    var d;
+                    if ($.isArray(command)) {
+                        return $.when.apply($, $.map(command, function(command) {
+                            return self.exec(command, silent);
+                        }));
+                    }
                     // both commands executed here (resume will call Term::exec)
                     if (paused) {
-                        dalyed_commands.push([command, silent]);
+                        // delay command multiple time
+                        d = deferred || new $.Deferred();
+                        dalyed_commands.push([command, silent, d]);
+                        return d.promise();
                     } else {
-                        commands(command, silent, true);
+                        // commands may return promise from user code
+                        // it will resolve exec promise when user promise
+                        // is resolved
+                        var ret = commands(command, silent, true, deferred);
+                        if (!ret) {
+                            if (deferred) {
+                                deferred.resolve(self);
+                                return deferred.promise();
+                            } else {
+                                d = new $.Deferred();
+                                ret = d.promise();
+                                ret.resolve();
+                            }
+                        }
+                        return ret;
                     }
-                    return self;
                 },
                 // -------------------------------------------------------------
                 // :: Function changes the prompt of the command line to login
