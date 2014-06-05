@@ -3306,7 +3306,12 @@
             } else if (spec.length != 2) { // not joinded terminals
                 // restore state
                 change_hash = false;
-                terminal.exec(spec[2]);
+                if (spec[2]) {
+                    terminal.exec(spec[2]).then(function() {
+                        change_hash = true;
+                    });
+                }
+                /*
                 if (paused) {
                     terminal.bind('resume.hash', function() {
                         change_hash = true;
@@ -3315,10 +3320,11 @@
                 } else {
                     change_hash = true;
                 }
+                */
             }
-            if (spec[3].length) {
+            /*if (spec[3].length) {
                 restore_state(spec[3]);
-            }
+            }*/
         }
         // ---------------------------------------------------------------------
         // :: Helper function
@@ -3370,25 +3376,12 @@
             // executed
             if (first_command && settings.historyState) {
                 first_command = false;
-                self.save_state(null);
-                if (hash_commands.length) {
-                    //console.log(hash_commands[hash_commands.length-1]);
-                    hash_commands[hash_commands.length-1][3].push([
-                        terminal_id,
-                        save_state.length-1
-                    ]);
-                }
-                /*
-                // join terminal sate to current history state of other terminal
-                if (save_state.length) {
-                    var pos = history.state.position || save_state.length-1;
-                    save_state[pos].join.push({
-                        id: terminal_id,
-                        view: $.extend(self.export_view(), {focus: false})
-                    });
+                if (!save_state.length) {
+                    // first command in first terminal don't have hash
+                    self.save_state();
                 } else {
-                    save_state.push({view:self.export_view(), join:[]});
-                }*/
+                    self.save_state(null);
+                }
             }
             try {
                 // this callback can disable commands
@@ -3918,12 +3911,11 @@
                     if (!$.isArray(hash_commands)) {
                         hash_commands = [];
                     }
-                    if (command !== null) {
+                    if (command !== undefined) {
                         var state = [
                             terminal_id,
                             save_state.length-1,
-                            command,
-                            [] // clear other terminals
+                            command
                         ];
                         hash_commands.push(state);
                         maybe_update_hash();
@@ -3946,7 +3938,9 @@
                         // delay command multiple time
                         d = deferred || new $.Deferred();
                         dalyed_commands.push([command, silent, d]);
-                        return d.promise();
+                        if (d) {
+                            return d.promise();
+                        }
                     } else {
                         // commands may return promise from user code
                         // it will resolve exec promise when user promise
@@ -3957,9 +3951,14 @@
                                 deferred.resolve(self);
                                 return deferred.promise();
                             } else {
-                                d = new $.Deferred();
-                                ret = d.promise();
-                                ret.resolve();
+                                try {
+                                    d = new $.Deferred();
+                                    ret = d.promise();
+                                    d.resolve();
+                                } catch(e) {
+                                    self.exception(e);
+                                    throw e;
+                                }
                             }
                         }
                         return ret;
@@ -4914,28 +4913,36 @@
                 });
                 // -------------------------------------------------------------
                 // exec from hash called in each terminal instance
-                if (settings.historyState && location.hash) {
-                    try {
-                        hash_commands = $.parseJSON(location.hash.replace(/^#/, ''));
-                        $.each(hash_commands, function(i, spec) {
-                            var terminal = terminals.get()[spec[0]];
-                            // execute if belong to this terminal
-                            if (terminal_id == terminal.id()) {
-                                try {
-                                    terminal.exec(spec[2]);
-                                    // we do nothing with spec[3]
-                                } catch(e) {
-                                    var cmd = $.terminal.escape_brackets(command);
-                                    var msg = "Error while exec with command " + cmd;
-                                    terminal.error(msg).error(e.stack);
+                if (settings.historyState) {
+                    if (location.hash) {
+                        try {
+                            hash_commands = $.parseJSON(location.hash.replace(/^#/, ''));
+                            $.when.apply($, $.map(hash_commands, function(spec) {
+                                var terminal = terminals.get()[spec[0]];
+                                // execute if belong to this terminal
+                                if (terminal && terminal_id == terminal.id()) {
+                                    if (spec[2]) {
+                                        try {
+                                            return terminal.exec(spec[2]);
+                                        } catch(e) {
+                                            var cmd = $.terminal.escape_brackets(command);
+                                            var msg = "Error while exec with command " + cmd;
+                                            terminal.error(msg).exception(e);
+                                        }
+                                    }
                                 }
-                            }
-                        });
-                    } catch (e) {
-                        //invalid json - ignore
+                            })).then(function() {
+                                // can change hash when all exec get resloved
+                                change_hash = true;
+                            });
+                        } catch (e) {
+                            //invalid json - ignore
+                        }
+                    } else {
+                        change_hash = true;
                     }
                 }
-                change_hash = true; // exec can now change hash
+                //change_hash = true; // exec can now change hash
                 // -------------------------------------------------------------
                 if ($.event.special.mousewheel) {
                     var shift = false;
@@ -4960,7 +4967,7 @@
                         }
                     });
                 }
-            });
+            }); // make_interpreter
             self.data('terminal', self);
             return self;
         }
