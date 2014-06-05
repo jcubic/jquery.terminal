@@ -907,9 +907,9 @@
         self.addClass('cmd');
         self.append('<span class="prompt"></span><span></span>' +
                     '<span class="cursor">&nbsp;</span><span></span>');
-        if (isTouch()) {
-            self.append('<span class="mask"></mask>');
-        }
+        // on mobile the only way to hide textarea on desktop it's needed because
+        // textarea show up after focus
+        self.append('<span class="mask"></mask>');
         var clip = $('<textarea/>').addClass('clipboard').appendTo(self);
         if (options.width) {
             self.width(options.width);

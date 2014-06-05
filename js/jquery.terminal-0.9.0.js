@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 05 Jun 2014 21:41:43 +0000
+ * Date: Thu, 05 Jun 2014 21:57:36 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -907,9 +907,9 @@
         self.addClass('cmd');
         self.append('<span class="prompt"></span><span></span>' +
                     '<span class="cursor">&nbsp;</span><span></span>');
-        if (isTouch()) {
-            self.append('<span class="mask"></mask>');
-        }
+        // on mobile the only way to hide textarea on desktop it's needed because
+        // textarea show up after focus
+        self.append('<span class="mask"></mask>');
         var clip = $('<textarea/>').addClass('clipboard').appendTo(self);
         if (options.width) {
             self.width(options.width);
