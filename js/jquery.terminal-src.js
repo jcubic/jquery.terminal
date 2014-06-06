@@ -1080,32 +1080,31 @@
             function draw_cursor_line(string, position) {
                 var len = string.length;
                 if (position === len) {
-                    before.html($.terminal.encode(string, true));
+                    before.html($.terminal.encode(string));
                     cursor.html('&nbsp;');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
                     //fix for tilda in IE
-                    cursor.html($.terminal.encode(string.slice(0, 1), true));
+                    cursor.html($.terminal.encode(string.slice(0, 1)));
                     //cursor.html($.terminal.encode(string[0]));
-                    after.html($.terminal.encode(string.slice(1), true));
+                    after.html($.terminal.encode(string.slice(1)));
                 } else {
                     var before_str = string.slice(0, position);
-                    before.html($.terminal.encode(before_str, true));
+                    before.html($.terminal.encode(before_str));
                     //fix for tilda in IE
                     var c = string.slice(position, position + 1);
                     //cursor.html(string[position]);
-                    cursor.html($.terminal.encode(c, true));
+                    cursor.html($.terminal.encode(c));
                     if (position === string.length - 1) {
                         after.html('');
                     } else {
-                        after.html($.terminal.encode(string.slice(position + 1),
-                                                     true));
+                        after.html($.terminal.encode(string.slice(position + 1)));
                     }
                 }
             }
             function div(string) {
-                return '<div>' + $.terminal.encode(string, true) + '</div>';
+                return '<div>' + $.terminal.encode(string) + '</div>';
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -1222,11 +1221,11 @@
                             } else {
                                 // in the middle
                                 if (num_lines === 3) {
-                                    str = $.terminal.encode(array[0], true);
+                                    str = $.terminal.encode(array[0]);
                                     before.before('<div>' + str + '</div>');
                                     draw_cursor_line(array[1],
                                                      position-first_len-1);
-                                    str = $.terminal.encode(array[2], true);
+                                    str = $.terminal.encode(array[2]);
                                     after.after('<div class="clear">' + str +
                                                 '</div>');
                                 } else {
@@ -2025,8 +2024,8 @@
                                 // should never happen if used by terminal,
                                 // because it always calls $.terminal.encode
                                 // before this function
-                                throw "Unclosed html entity in line " + (i+1) +
-                                    ' at char ' + (j+1);
+                                throw new Error("Unclosed html entity in line " +
+                                                (i+1) + ' at char ' + (j+1));
                             }
                             j+=m[1].length-2; // because continue adds 1 to j
                             // if entity is at the end there is no next loop
@@ -2075,14 +2074,9 @@
         // ---------------------------------------------------------------------
         // :: Encode formating as html for insertion into DOM
         // ---------------------------------------------------------------------
-        encode: function(str, full) {
+        encode: function(str) {
             // don't escape entities
-            if (full) {
-                str = str.replace(/&(?![^=]+=)/g, '&amp;');
-            } else {
-                str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;|[^= "]+=[^=])/g,
-                                  '&amp;');
-            }
+            str = str.replace(/&(?!#[0-9]+|[a-zA-Z]+;)/g, '&amp;');
             return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
                       .replace(/ /g, '&nbsp;')
                       .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
@@ -2169,7 +2163,8 @@
                         // process urls
                         return string.replace(url_re, function(link) {
                             var comma = link.match(/\.$/);
-                            link = link.replace(/\.$/, '');
+                            console.log(link);
+                            link = link.replace(/\.$/, '');//.replace(/&amp;/g, '&');
                             var output = '<a target="_blank" ';
                             if (settings.linksNoReferer) {
                                 output += 'rel="noreferrer" ';
@@ -3182,6 +3177,7 @@
                 // TODO: array of functions in default.formatters
                 string = $.terminal.overtyping(string);
                 string = $.terminal.from_ansi(string);
+                console.log(string);
                 output_buffer.push(NEW_LINE);
                 if (!line_settings.raw && (string.length > num_chars ||
                                            string.match(/\n/))) {
@@ -3265,8 +3261,7 @@
         // :: Display prompt and last command
         // ---------------------------------------------------------------------
         function echo_command(command) {
-            command = $.terminal.escape_brackets($.terminal.encode(command,
-                                                                   true));
+            command = $.terminal.escape_brackets($.terminal.encode(command));
             var prompt = command_line.prompt();
             var mask = command_line.mask();
             switch(typeof mask) {

@@ -6,6 +6,7 @@
           class .command in div created by echo command, and error class in error function
           Fix ASNI Formatting bug
           Regex as History Filter
+          Fix encoding entites
           exec return promise, exec with array of commands
           auto resume/pause if user code return promise
           Mobile (tested on Android)
