@@ -88,5 +88,51 @@ describe('Terminal utils', function() {
         it('should convert url to links', function() {
             expect($.terminal.format(urls.join(' '))).toEqual(links);
         });
+        var emails = ['foo@bar.com', 'baz.quux@example.com'];
+        var email_links = emails.map(function(email) {
+            return '<a href="mailto:' + email + '">' + email + '</a>';
+        }).join(' ');
+        it('should convert emails to links', function() {
+            expect($.terminal.format(emails.join(' '))).toEqual(email_links);
+        });
+    });
+    describe('$.terminal.strip', function() {
+        var formatting = '-_-[[biugs;#fff;#000]Foo]-_-[[i;;;foo]Bar]-_-[[ous;;'+
+            ']Baz]-_-';
+        var result = '-_-Foo-_-Bar-_-Baz-_-';
+        it('should remove formatting', function() {
+            expect($.terminal.strip(formatting)).toEqual(result);
+        });
+    });
+    describe('$.terminal.split_equal', function() {
+        var text = ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
+            'scing elit. Nulla sed dolor nisl, in suscipit justo. Donec a enim',
+            ' et est porttitor semper at vitae augue. Proin at nulla at dui ma',
+            'ttis mattis. Nam a volutpat ante. Aliquam consequat dui eu sem co',
+            'nvallis ullamcorper. Nulla suscipit, massa vitae suscipit ornare,',
+            ' tellus] est [[b;;#f00]consequat nunc, quis blandit elit odio eu ',
+            'arcu. Nam a urna nec nisl varius sodales. Mauris iaculis tincidun',
+            't orci id commodo. Aliquam] non magna quis [[i;;]tortor malesuada',
+            ' aliquam] eget ut lacus. Nam ut vestibulum est. Praesent volutpat',
+            ' tellus in eros dapibus elementum. Nam laoreet risus non nulla mo',
+            'llis ac luctus [[ub;#fff;]felis dapibus. Pellentesque mattis elem',
+            'entum augue non sollicitudin. Nullam lobortis fermentum elit ac m',
+            'ollis. Nam ac varius risus. Cras faucibus euismod nulla, ac aucto',
+            'r diam rutrum sit amet. Nulla vel odio erat], ac mattis enim.'
+        ].join('');
+        it('should split text that into equal length chunks', function() {
+            var cols = [10, 40, 60, 400];
+            for (var i=cols.length; i--;) {
+                var lines = $.terminal.split_equal(text, cols[i]);
+                var success = true;
+                for (var j=0; j<lines.length; ++j) {
+                    if ($.terminal.strip(lines[j]).length > cols[i]) {
+                        success = false;
+                        break;
+                    }
+                }
+                expect(success).toEqual(true);
+            }
+        });
     });
 });

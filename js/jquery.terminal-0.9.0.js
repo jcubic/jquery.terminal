@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 09 Jun 2014 09:39:09 +0000
+ * Date: Mon, 09 Jun 2014 09:53:16 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -2164,7 +2164,6 @@
                         // process urls
                         return string.replace(url_re, function(link) {
                             var comma = link.match(/\.$/);
-                            console.log(link);
                             link = link.replace(/\.$/, '');//.replace(/&amp;/g, '&');
                             var output = '<a target="_blank" ';
                             if (settings.linksNoReferer) {
@@ -3178,7 +3177,6 @@
                 // TODO: array of functions in default.formatters
                 string = $.terminal.overtyping(string);
                 string = $.terminal.from_ansi(string);
-                console.log(string);
                 output_buffer.push(NEW_LINE);
                 if (!line_settings.raw && (string.length > num_chars ||
                                            string.match(/\n/))) {
