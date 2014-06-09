@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 09 Jun 2014 08:24:29 +0000
+ * Date: Mon, 09 Jun 2014 09:39:09 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -2170,7 +2170,7 @@
                             if (settings.linksNoReferer) {
                                 output += 'rel="noreferrer" ';
                             }
-                            output += ' href="' + link + '">' + link + '</a>' +
+                            output += 'href="' + link + '">' + link + '</a>' +
                                 (comma ? '.' : '');
                             return output;
                         }).replace(email_re, '<a href="mailto:$1">$1</a>');

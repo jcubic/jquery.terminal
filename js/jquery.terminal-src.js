@@ -2170,7 +2170,7 @@
                             if (settings.linksNoReferer) {
                                 output += 'rel="noreferrer" ';
                             }
-                            output += ' href="' + link + '">' + link + '</a>' +
+                            output += 'href="' + link + '">' + link + '</a>' +
                                 (comma ? '.' : '');
                             return output;
                         }).replace(email_re, '<a href="mailto:$1">$1</a>');
