@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 09 Jun 2014 10:02:32 +0000
+ * Date: Mon, 09 Jun 2014 17:37:41 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -2081,7 +2081,7 @@
         // ---------------------------------------------------------------------
         encode: function(str) {
             // don't escape entities
-            str = str.replace(/&(?!#[0-9]+|[a-zA-Z]+;)/g, '&amp;');
+            str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
             return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
                       .replace(/ /g, '&nbsp;')
                       .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');

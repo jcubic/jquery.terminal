@@ -2081,7 +2081,7 @@
         // ---------------------------------------------------------------------
         encode: function(str) {
             // don't escape entities
-            str = str.replace(/&(?!#[0-9]+|[a-zA-Z]+;)/g, '&amp;');
+            str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
             return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
                       .replace(/ /g, '&nbsp;')
                       .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');

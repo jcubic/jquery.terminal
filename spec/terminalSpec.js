@@ -9,7 +9,7 @@ describe('Terminal utils', function() {
                     '/^asd [x]/',
                     'str str',
                     '10',
-                    '1e10' 
+                    '1e10'
             ]);
         });
     });
@@ -21,7 +21,7 @@ describe('Terminal utils', function() {
                     /^asd [x]/,
                     'str str',
                     10,
-                    1e10 
+                    1e10
             ]);
         });
     });
@@ -36,7 +36,7 @@ describe('Terminal utils', function() {
                     '/^asd [x]/',
                     'str str',
                     '10',
-                    '1e10' 
+                    '1e10'
                 ],
                 rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10'
             });
@@ -53,7 +53,7 @@ describe('Terminal utils', function() {
                     /^asd [x]/,
                     'str str',
                     10,
-                    1e10 
+                    1e10
                 ],
                 rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10'
             });
@@ -68,10 +68,35 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.overtyping', function() {
+        var string = 'HELLO TERMINAL'.replace(/./g, function(chr) {
+            return chr == ' ' ? chr : chr + '\x08' + chr;
+        });
+        var result = '[[b;#fff;]HELLO] [[b;#fff;]TERMINAL]';
+        it('should convert to terminal formatting', function() {
+            expect($.terminal.overtyping(string)).toEqual(result);
+        });
     });
     describe('$.terminal.escape_brackets', function() {
+        var string = '[[jQuery]] [[Terminal]]';
+        var result = '&#91;&#91;jQuery&#93;&#93; &#91;&#91;Terminal&#93;&#93;';
+        it('should replace [ and ] with html entities', function() {
+            expect($.terminal.escape_brackets(string)).toEqual(result);
+        });
     });
     describe('$.terminal.encode', function() {
+        var tags = '<hello> </hello>\t<world> </world>';
+        var tags_result = '&lt;hello&gt;&nbsp;&lt;/hello&gt;&nbsp;&nbsp;&nbsp;'+
+            '&nbsp;&lt;world&gt;&nbsp;&lt;/world&gt;';
+        it('should convert < > space and tabs', function() {
+            expect($.terminal.encode(tags)).toEqual(tags_result);
+        });
+        var entites = '& & &amp; &64; &#61; &#91';
+        //'&amp;&nbsp;&amp;&nbsp;&amp;&nbsp;&amp;64;&nbsp;&#61;&nbsp;&#91'
+        var ent_result = '&amp;&nbsp;&amp;&nbsp;&amp;&nbsp;&amp;64;&nbsp;&#61;'+
+            '&nbsp;&amp;#91';
+        it('it should convert & but not when used with entities', function() {
+            expect($.terminal.encode(entites)).toEqual(ent_result);
+        });
     });
     describe('$.terminal.format_split', function() {
     });
