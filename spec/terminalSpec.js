@@ -67,6 +67,22 @@ describe('Terminal utils', function() {
                                    'Bar][[;#000;#AAA]Baz]');
         });
     });
+    describe('$.terminal.overtyping', function() {
+    });
+    describe('$.terminal.escape_brackets', function() {
+    });
+    describe('$.terminal.encode', function() {
+    });
+    describe('$.terminal.format_split', function() {
+    });
+    describe('$.terminal.is_formatting', function() {
+    });
+    describe('$.terminal.escape_regex', function() {
+    });
+    describe('$.terminal.have_formatting', function() {
+    });
+    describe('$.terminal.valid_color', function() {
+    });
     describe('$.terminal.format', function() {
         var format = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz]';
         it('should create html span tags with style and classes', function() {
