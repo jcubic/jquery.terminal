@@ -101,6 +101,30 @@ describe('Terminal utils', function() {
     describe('$.terminal.format_split', function() {
     });
     describe('$.terminal.is_formatting', function() {
+
+        it('should detect terminal formatting', function() {
+            var formattings = [
+                '[[;;]Te[xt]',
+                '[[;;]Te\\]xt]',
+                '[[;;]]',
+                '[[gui;;;class]Text]',
+                '[[b;#fff;]Text]',
+                '[[b;red;blue]Text]'];
+            var not_formattings = [
+                '[[;;]Text[',
+                '[[Text]]',
+                '[[Text[[',
+                '[[;]Text]',
+                'Text]',
+                '[[Text',
+                '[;;]Text]'];
+            formattings.forEach(function(formatting) {
+                expect($.terminal.is_formatting(formatting)).toEqual(true);
+            });
+            not_formattings.forEach(function(formatting) {
+                expect($.terminal.is_formatting(formatting)).toEqual(false);
+            });
+        });
     });
     describe('$.terminal.escape_regex', function() {
     });

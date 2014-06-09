@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 09 Jun 2014 17:37:41 +0000
+ * Date: Mon, 09 Jun 2014 17:53:45 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -1956,18 +1956,20 @@
         // :: Escape all special regex characters, so it can be use as regex to
         // :: match exact string that contain those characters
         // ---------------------------------------------------------------------
-        escape_regex: function(string) {
-            var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
-            return string.replace(special, '\\$1');
+        escape_regex: function(str) {
+            if (typeof str == 'string') {
+                var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
+                return str.replace(special, '\\$1');
+            }
         },
         // ---------------------------------------------------------------------
         // :: test if string contain formatting
         // ---------------------------------------------------------------------
         have_formatting: function(str) {
-            return str.match(format_re);
+            return typeof str == 'string' && !!str.match(format_re);
         },
         is_formatting: function(str) {
-            return str.match(format_full_re);
+            return typeof str == 'string' && !!str.match(format_full_re);
         },
         // ---------------------------------------------------------------------
         // :: return array of formatting and text between them
