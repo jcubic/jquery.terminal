@@ -45,17 +45,17 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 06 Jun 2014 05:34:48 +0000
+ * Date: Mon, 09 Jun 2014 08:24:29 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
- *       formatter: function(text, options) { // term, cols ??
+ *       formatter: $.terminal.defaults.formatters.concat([function(text, options) {
  *           // covert hex to chars
  *           text = text.replace(/0x[A-F]+/g, function(hex) {
  *              return String.fromCharCode(parseInt(hex, 16));
  *           });
- *           return $.terminal.defaults.formatter(text);
- *       }
+ *           return (text);
+ *       }])
  * option - argumentSplitter: function(rest) { return rest.split(/\s+/g); }
  * Wrap words mode - terminal.echo('asd', {wrapWords: true});
  * local logout

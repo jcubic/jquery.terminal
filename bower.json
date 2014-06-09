@@ -16,9 +16,10 @@
         "manifest"
     ],
     "dependencies": {
-        "jquery": "latest",
+        "jquery": "1.11.1"
     },
     "devDependencies": {
-        "<test-framework-name>": "<version>"
+        "jasmine": "latest",
+        "phantom": "latest"
     }
 }

@@ -49,13 +49,13 @@
  *
  * TODO: exec function from echo
  *       custom formatter
- *       formatter: function(text, options) { // term, cols ??
+ *       formatter: $.terminal.defaults.formatters.concat([function(text, options) {
  *           // covert hex to chars
  *           text = text.replace(/0x[A-F]+/g, function(hex) {
  *              return String.fromCharCode(parseInt(hex, 16));
  *           });
- *           return $.terminal.defaults.formatter(text);
- *       }
+ *           return (text);
+ *       }])
  * option - argumentSplitter: function(rest) { return rest.split(/\s+/g); }
  * Wrap words mode - terminal.echo('asd', {wrapWords: true});
  * local logout
