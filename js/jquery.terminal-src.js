@@ -3376,13 +3376,15 @@
         function commands(command, silent, exec, deferred) {
             // first command store state of the terminal before the command get
             // executed
-            if (first_command && settings.historyState) {
+            if (first_command) {
                 first_command = false;
-                if (!save_state.length) {
-                    // first command in first terminal don't have hash
-                    self.save_state();
-                } else {
-                    self.save_state(null);
+                if (settings.historyState) {
+                    if (!save_state.length) {
+                        // first command in first terminal don't have hash
+                        self.save_state();
+                    } else {
+                        self.save_state(null);
+                    }
                 }
             }
             try {
@@ -3489,6 +3491,18 @@
                         */
                     }
                 }
+                if (command == 'clear' || command == 'exit') {
+                    // this should not happen
+                    if (deferred) {
+                        deferred.resolve();
+                    }
+                    if ($.isFunction(settings.onAfterCommand)) {
+                        settings.onAfterCommand(self, command);
+                    }
+                    if (settings.historyState) {
+                        self.save_state(command);
+                    }
+                }
             } catch (e) {
                 display_exception(e, 'USER');
                 self.resume();
@@ -3583,7 +3597,7 @@
                     settings.onInit(self);
                 } catch (e) {
                     display_exception(e, 'OnInit');
-                    throw e;
+                    // throw e; // it will be catched by terminal
                 } finally {
                     onPause = $.noop;
                     if (!was_paused) {
@@ -3832,16 +3846,9 @@
             var onPause = $.noop;//used to indicate that user call pause onInit
             var old_width, old_height;
             var dalyed_commands = []; // used when exec commands while paused
-            var uniqe_defaults = {
-                name: self.selector,
-                historyStateTitleMapper: function(command) {
-                    var title = $('title').text();
-                    return title + ' [' + command + ']';
-                }
-            };
             var settings = $.extend({},
                                     $.terminal.defaults,
-                                    uniqe_defaults,
+                                    {name: self.selector},
                                     options || {});
             var strings = $.terminal.defaults.strings;
             var enabled = settings.enabled;
@@ -3905,7 +3912,7 @@
                     return self;
                 },
                 // -------------------------------------------------------------
-                // :: Store current terminal state using History API
+                // :: Store current terminal state
                 // -------------------------------------------------------------
                 save_state: function(command) {
                     //save_state.push({view:self.export_view(), join:[]});
@@ -4133,6 +4140,16 @@
                 // -------------------------------------------------------------
                 history: function() {
                     return command_line.history();
+                },
+                // -------------------------------------------------------------
+                // :: toggle recording of history state
+                // -------------------------------------------------------------
+                history_state: function(toggle) {
+                    // call after command if run from user command
+                    self.oneTime(1, function() {
+                        settings.historyState = toggle;
+                    });
+                    return self;
                 },
                 // -------------------------------------------------------------
                 // :: Switch to the next terminal
@@ -4433,28 +4450,31 @@
                 // :: output is printed (including resize and scrolling)
                 // :: If the line is a function it will be called for every
                 // :: redraw.
+                // :: it use $.when so you can echo a promise
                 // -------------------------------------------------------------
                 echo: function(string, options) {
-                    try {
-                        string = string || '';
-                        var settings = $.extend({
-                            flush: true,
-                            raw: false,
-                            finalize: $.noop
-                        }, options || {});
-                        output_buffer = [];
-                        draw_line(string, settings);
-                        lines.push([string, settings]);
-                        if (settings.flush) {
-                            self.flush();
+                    string = string || '';
+                    $.when(string).then(function(string) {
+                        try {
+                            var settings = $.extend({
+                                flush: true,
+                                raw: false,
+                                finalize: $.noop
+                            }, options || {});
+                            output_buffer = [];
+                            draw_line(string, settings);
+                            lines.push([string, settings]);
+                            if (settings.flush) {
+                                self.flush();
+                            }
+                            on_scrollbar_show_resize();
+                        } catch (e) {
+                            // if echo throw exception we can't use error to
+                            // display that exception
+                            alert('[Terminal.echo] ' + exception_message(e) +
+                                  '\n' + e.stack);
                         }
-                        on_scrollbar_show_resize();
-                    } catch (e) {
-                        // if echo throw exception we can't use error to display
-                        // that exception
-                        alert('[Terminal.echo] ' + exception_message(e) + '\n' +
-                              e.stack);
-                    }
+                    });
                     return self;
                 },
                 // -------------------------------------------------------------
@@ -4922,7 +4942,7 @@
                 });
                 // -------------------------------------------------------------
                 // exec from hash called in each terminal instance
-                if (settings.historyState) {
+                if (settings.execHash) {
                     if (location.hash) {
                         try {
                             hash_commands = $.parseJSON(location.hash.replace(/^#/, ''));
@@ -4950,6 +4970,8 @@
                     } else {
                         change_hash = true;
                     }
+                } else {
+                    change_hash = true; // if enabled later
                 }
                 //change_hash = true; // exec can now change hash
                 // -------------------------------------------------------------
