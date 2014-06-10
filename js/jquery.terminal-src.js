@@ -4551,7 +4551,13 @@
                 // :: works regardless of wherer settings.login is supplied
                 // -------------------------------------------------------------
                 set_token : function(token,local) {
-                    $.Storage.set(self.prefix_name(local) + '_token', token);
+                    var name = self.prefix_name(local) + '_token';
+                    if (typeof token == 'undefined') {
+                        $.Storage.remove(name, token);
+                    } else {
+                        $.Storage.set(name, token);
+                    }
+                    return self;
                 },
                 // -------------------------------------------------------------
                 // :: Function get the token either set by the login method or
@@ -4560,7 +4566,7 @@
                 get_token : function(local) {
                     return $.Storage.get(self.prefix_name(local) + '_token');
                 },
-                // -----------------------------------------------------------------------
+                // -------------------------------------------------------------
                 // :: Function return Login name entered by the user
                 // -------------------------------------------------------------
                 login_name: settings.login ? function(local) {

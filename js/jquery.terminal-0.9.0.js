@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 10 Jun 2014 16:47:41 +0000
+ * Date: Tue, 10 Jun 2014 17:00:08 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -4551,7 +4551,13 @@
                 // :: works regardless of wherer settings.login is supplied
                 // -------------------------------------------------------------
                 set_token : function(token,local) {
-                    $.Storage.set(self.prefix_name(local) + '_token', token);
+                    var name = self.prefix_name(local) + '_token';
+                    if (typeof token == 'undefined') {
+                        $.Storage.remove(name, token);
+                    } else {
+                        $.Storage.set(name, token);
+                    }
+                    return self;
                 },
                 // -------------------------------------------------------------
                 // :: Function get the token either set by the login method or
@@ -4560,7 +4566,7 @@
                 get_token : function(local) {
                     return $.Storage.get(self.prefix_name(local) + '_token');
                 },
-                // -----------------------------------------------------------------------
+                // -------------------------------------------------------------
                 // :: Function return Login name entered by the user
                 // -------------------------------------------------------------
                 login_name: settings.login ? function(local) {
