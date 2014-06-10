@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 10 Jun 2014 15:40:45 +0000
+ * Date: Tue, 10 Jun 2014 16:47:41 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -4367,6 +4367,7 @@
                         if ($.isFunction(settings.onResize)) {
                             settings.onResize(self);
                         }
+                        self.trigger('resize');
                         old_height = height;
                         old_width = width;
                         scroll_to_bottom();
