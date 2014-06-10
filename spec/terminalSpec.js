@@ -29,6 +29,7 @@ describe('Terminal utils', function() {
         it('Should split command', function() {
             var cmd = jQuery.terminal.splitCommand(command);
             expect(cmd).toEqual({
+                command: command,
                 name: 'test',
                 args: [
                     'foo bar',
@@ -46,6 +47,7 @@ describe('Terminal utils', function() {
         it('should split and parse command', function() {
             var cmd = jQuery.terminal.parseCommand(command);
             expect(cmd).toEqual({
+                command: command,
                 name: 'test',
                 args: [
                     'foo bar',

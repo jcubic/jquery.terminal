@@ -1879,12 +1879,14 @@
         var m = string.match(/^([^\s]+)\s*(.*)$/);
         if (m) {
             return {
+                command: string,
                 name: m[1],
                 args: fn(m[2]),
                 rest: m[2]
             }
         } else {
             return {
+                command: string,
                 name: '',
                 args: [],
                 rest: ''

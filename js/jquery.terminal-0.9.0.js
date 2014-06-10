@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 09 Jun 2014 17:53:45 +0000
+ * Date: Tue, 10 Jun 2014 15:40:45 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -1879,12 +1879,14 @@
         var m = string.match(/^([^\s]+)\s*(.*)$/);
         if (m) {
             return {
+                command: string,
                 name: m[1],
                 args: fn(m[2]),
                 rest: m[2]
             }
         } else {
             return {
+                command: string,
                 name: '',
                 args: [],
                 rest: ''
