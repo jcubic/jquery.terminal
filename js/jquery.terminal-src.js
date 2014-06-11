@@ -2166,6 +2166,8 @@
                             return '<span>' + text + '</span>';
                         }
                     }).join('');
+                } else {
+                    str = '<span>' + str + '</span>';
                 }
                 return $.map(str.split(/(<\/?span[^>]*>)/g), function(string) {
                     if (!string.match(/span/)) {
@@ -3191,7 +3193,7 @@
                     var array = $.terminal.split_equal(string, num_chars);
                     for (i = 0, len = array.length; i < len; ++i) {
                         if (array[i] === '' || array[i] === '\r') {
-                            output_buffer.push('&nbsp;');
+                            output_buffer.push('<span>&nbsp;</span>');
                         } else {
                             if (line_settings.raw) {
                                 output_buffer.push(array[i]);

@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 10 Jun 2014 19:38:23 +0000
+ * Date: Wed, 11 Jun 2014 15:34:49 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -2166,6 +2166,8 @@
                             return '<span>' + text + '</span>';
                         }
                     }).join('');
+                } else {
+                    str = '<span>' + str + '</span>';
                 }
                 return $.map(str.split(/(<\/?span[^>]*>)/g), function(string) {
                     if (!string.match(/span/)) {
@@ -3191,7 +3193,7 @@
                     var array = $.terminal.split_equal(string, num_chars);
                     for (i = 0, len = array.length; i < len; ++i) {
                         if (array[i] === '' || array[i] === '\r') {
-                            output_buffer.push('&nbsp;');
+                            output_buffer.push('<span>&nbsp;</span>');
                         } else {
                             if (line_settings.raw) {
                                 output_buffer.push(array[i]);
@@ -3491,8 +3493,8 @@
                         */
                     }
                 }
+                // do the same for clear and exit as for rest of commands
                 if (command == 'clear' || command == 'exit') {
-                    // this should not happen
                     if (deferred) {
                         deferred.resolve();
                     }
