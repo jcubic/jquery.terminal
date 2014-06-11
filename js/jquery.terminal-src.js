@@ -3491,8 +3491,8 @@
                         */
                     }
                 }
+                // do the same for clear and exit as for rest of commands
                 if (command == 'clear' || command == 'exit') {
-                    // this should not happen
                     if (deferred) {
                         deferred.resolve();
                     }
