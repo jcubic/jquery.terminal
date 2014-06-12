@@ -153,14 +153,16 @@ describe('Terminal utils', function() {
             return '<a target="_blank" href="' + href + '">' + href + '</a>';
         }).join(' ');
         it('should convert url to links', function() {
-            expect($.terminal.format(urls.join(' '))).toEqual(links);
+            expect($.terminal.format(urls.join(' '))).
+                toEqual('<span>' + links + '</span>');
         });
         var emails = ['foo@bar.com', 'baz.quux@example.com'];
         var email_links = emails.map(function(email) {
             return '<a href="mailto:' + email + '">' + email + '</a>';
         }).join(' ');
         it('should convert emails to links', function() {
-            expect($.terminal.format(emails.join(' '))).toEqual(email_links);
+            expect($.terminal.format(emails.join(' '))).
+                toEqual('<span>' + email_links + '</span>');
         });
     });
     describe('$.terminal.strip', function() {
