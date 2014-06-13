@@ -4369,27 +4369,35 @@
                 // :: Recalculate and redraw everything
                 // -------------------------------------------------------------
                 resize: function(width, height) {
-                    if (width && height) {
-                        self.width(width);
-                        self.height(height);
-                    }
-                    width = self.width();
-                    height = self.height();
-                    var new_num_chars = get_num_chars(self);
-                    var new_num_rows = get_num_rows(self);
-                    // only if number of chars changed
-                    if (new_num_chars !== num_chars ||
-                        new_num_rows !== num_rows) {
-                        num_chars = new_num_chars;
-                        num_rows = new_num_rows;
-                        redraw();
-                        if ($.isFunction(settings.onResize)) {
-                            settings.onResize(self);
+                    if (!self.is(':visible')) {
+                        // delay resize if terminal not visible
+                        self.stopTime('resize');
+                        self.oneTime(500, 'resize', function() {
+                            self.resize(width, height);
+                        });
+                    } else {
+                        if (width && height) {
+                            self.width(width);
+                            self.height(height);
                         }
-                        self.trigger('resize');
-                        old_height = height;
-                        old_width = width;
-                        scroll_to_bottom();
+                        width = self.width();
+                        height = self.height();
+                        var new_num_chars = get_num_chars(self);
+                        var new_num_rows = get_num_rows(self);
+                        // only if number of chars changed
+                        if (new_num_chars !== num_chars ||
+                            new_num_rows !== num_rows) {
+                            num_chars = new_num_chars;
+                            num_rows = new_num_rows;
+                            redraw();
+                            if ($.isFunction(settings.onResize)) {
+                                settings.onResize(self);
+                            }
+                            self.trigger('resize');
+                            old_height = height;
+                            old_width = width;
+                            scroll_to_bottom();
+                        }
                     }
                     return self;
                 },
@@ -4691,6 +4699,23 @@
                         }
                         // restore mask
                         self.set_mask(interpreters.top().mask);
+                    }
+                    return self;
+                },
+                // -------------------------------------------------------------
+                // :: Change terminal options at runtime
+                // -------------------------------------------------------------
+                options: function(object_or_name, value) {
+                    if (typeof value == 'undefined') {
+                        if (typeof object_or_name == 'string') {
+                            return settings[object_or_name];
+                        } else if (typeof object_or_name == 'object') {
+                            $.each(object_or_name, function(key, value) {
+                                settings[key] = value;
+                            });
+                        }
+                    } else {
+                        setting[object_or_name] = value;
                     }
                     return self;
                 },
