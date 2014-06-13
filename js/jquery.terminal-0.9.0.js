@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 13 Jun 2014 20:23:35 +0000
+ * Date: Fri, 13 Jun 2014 20:25:30 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -3982,8 +3982,6 @@
                 // :: if the user calls it with value that is truthy
                 // -------------------------------------------------------------
                 login: function(auth, infinite, success, error) {
-                    console.log('login');
-                    console.log((new Error()).stack);
                     if (in_login) {
                         throw new Error(sprintf(strings.notWhileLogin, 'login'));
                     }
@@ -4002,7 +4000,6 @@
                         command_line.history().disable();
                     }
                     in_login = true;
-                    console.log('before push');
                     return self.push(function(user) {
                         self.set_mask(settings.maskChar).push(function(pass) {
                             try {
@@ -4566,7 +4563,6 @@
                         self.pop();
                     } else {
                         while (interpreters.size() > 0) {
-                            console.log('logout pop ' + interpreters.size());
                             // pop will call global_logout that will call login
                             // and size will be > 0; this is workaround the problem
                             if (self.pop()) {
@@ -4709,7 +4705,6 @@
                         // restore mask
                         self.set_mask(interpreters.top().mask);
                     }
-                    console.log('pop end');
                     return self;
                 },
                 // -------------------------------------------------------------
