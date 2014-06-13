@@ -3975,6 +3975,9 @@
                         return ret;
                     }
                 },
+                autologin: function(user, token, silent) {
+                    self.trigger('terminal.autologin', [user, token, silent]);
+                },
                 // -------------------------------------------------------------
                 // :: Function changes the prompt of the command line to login
                 // :: with a password and calls the user login function with
@@ -4000,44 +4003,57 @@
                         command_line.history().disable();
                     }
                     in_login = true;
+                    function login_callback(user, token, silent, event) {
+                        if (token) {
+                            // when called using autologin it will have only two
+                            // interpeter on the stack (main and login)
+                            // we will pop n-1 interpreters because we don't want
+                            // to logout
+                            while (interpreters.size() > 1) {
+                                self.pop();
+                            }
+                            if (settings.history) {
+                                command_line.history().enable();
+                            }
+                            var name = self.prefix_name(true) + '_';
+                            $.Storage.set(name + 'token', token);
+                            $.Storage.set(name + 'login', user);
+                            in_login = false;
+                            if ($.isFunction(success)) {
+                                // will be used internaly since users know
+                                // when login success (they decide when
+                                // it happen by calling the callback -
+                                // this funtion)
+                                success();
+                            }
+                        } else {
+                            if (infinite) {
+                                if (!silent) {
+                                    self.error(strings.wrongPasswordTryAgain);
+                                }
+                                self.pop().set_mask(false);
+                            } else {
+                                in_login = false;
+                                if (!silent) {
+                                    self.error(strings.wrongPassword);
+                                }
+                                self.pop().pop();
+                            }
+                            // used only to call pop in push
+                            if ($.isFunction(error)) {
+                                error();
+                            }
+                        }
+                        self.off('terminal.autologin');
+                    }
+                    self.on('terminal.autologin', function(event, user, token, silent) {
+                        login_callback(user, token, silent);
+                    });
                     return self.push(function(user) {
                         self.set_mask(settings.maskChar).push(function(pass) {
                             try {
                                 auth.call(self, user, pass, function(token, silent) {
-                                    if (token) {
-                                        self.pop().pop();
-                                        if (settings.history) {
-                                            command_line.history().enable();
-                                        }
-                                        var name = self.prefix_name(true) + '_';
-                                        $.Storage.set(name + 'token', token);
-                                        $.Storage.set(name + 'login', user);
-                                        in_login = false;
-                                        if ($.isFunction(success)) {
-                                            // will be used internaly since users know
-                                            // when login success (they decide when
-                                            // it happen by calling the callback -
-                                            // this funtion)
-                                            success();
-                                        }
-                                    } else {
-                                        if (infinite) {
-                                            if (!silent) {
-                                                self.error(strings.wrongPasswordTryAgain);
-                                            }
-                                            self.pop().set_mask(false);
-                                        } else {
-                                            in_login = false;
-                                            if (!silent) {
-                                                self.error(strings.wrongPassword);
-                                            }
-                                            self.pop().pop();
-                                        }
-                                        // used only to call pop in push
-                                        if ($.isFunction(error)) {
-                                            error();
-                                        }
-                                    }
+                                    login_callback(user, token, silent);
                                 });
                             } catch(e) {
                                 display_exception(e, 'USER(authentication)');
@@ -4559,7 +4575,7 @@
                 logout: function(local) {
                     if (local) {
                         // TODO: is this enough to logout from current interpreter?
-                        // this will only work 
+                        // this will only work
                         self.pop();
                     } else {
                         while (interpreters.size() > 0) {
