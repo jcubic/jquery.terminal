@@ -2773,7 +2773,7 @@
             noTokenError: "Access denied (no token)",
             serverResponse: "Server reponse is",
             wrongGreetings: "Wrong value of greetings parameter",
-            notWhileLogin: "You can't call that function while in login",
+            notWhileLogin: "You can't call `%s' function while in login",
             loginIsNotAFunction: "Authenticate must be a function",
             canExitError: "You can't exit from main interpeter",
             invalidCompletion: "Invalid completion",
@@ -3527,7 +3527,7 @@
                     throw e;
                 }
             }
-            logout();
+            clear_loging_storage();
             if ($.isFunction(settings.onAfterLogout)) {
                 try {
                     settings.onAfterLogout(self);
@@ -3539,7 +3539,7 @@
             self.login(settings.login, true, initialize);
         }
         // ---------------------------------------------------------------------
-        function logout() {
+        function clear_loging_storage() {
             var name = self.prefix_name(true) + '_';
             $.Storage.remove(name + 'token');
             $.Storage.remove(name + 'login');
@@ -3884,7 +3884,7 @@
                 // -------------------------------------------------------------
                 export_view: function() {
                     if (in_login) {
-                        throw new Exception(strings.notWhileLogin);
+                        throw new Exception(sprintf(strings.notWhileLogin, 'export_view'));
                     }
                     return {
                         focus: enabled,
@@ -3900,7 +3900,7 @@
                 // -------------------------------------------------------------
                 import_view: function(view) {
                     if (in_login) {
-                        throw new Exception(strings.notWhileLogin);
+                        throw new Exception(sprintf(strings.notWhileLogin, 'import_view'));
                     }
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
@@ -3982,8 +3982,10 @@
                 // :: if the user calls it with value that is truthy
                 // -------------------------------------------------------------
                 login: function(auth, infinite, success, error) {
+                    console.log('login');
+                    console.log((new Error()).stack);
                     if (in_login) {
-                        throw new Error(strings.notWhileLogin);
+                        throw new Error(sprintf(strings.notWhileLogin, 'login'));
                     }
                     if (!$.isFunction(auth)) {
                         throw new Error(strings.loginIsNotAFunction);
@@ -4000,6 +4002,7 @@
                         command_line.history().disable();
                     }
                     in_login = true;
+                    console.log('before push');
                     return self.push(function(user) {
                         self.set_mask(settings.maskChar).push(function(pass) {
                             try {
@@ -4556,31 +4559,36 @@
                 // :: Exit all interpreters and logout. The function will throw
                 // :: exception if there is no login provided
                 // -------------------------------------------------------------
-                logout: settings.login ? function(local) {
+                logout: function(local) {
                     if (local) {
-                        // TODO: logout from current interpreter
+                        // TODO: is this enough to logout from current interpreter?
+                        // this will only work 
+                        self.pop();
                     } else {
                         while (interpreters.size() > 0) {
-                            self.pop();
+                            console.log('logout pop ' + interpreters.size());
+                            // pop will call global_logout that will call login
+                            // and size will be > 0; this is workaround the problem
+                            if (self.pop()) {
+                                break;
+                            }
                         }
                     }
                     return self;
-                } : function() {
-                    self.error(strings.loginFunctionMissing);
                 },
                 // -------------------------------------------------------------
                 // :: Function returns the token returned by callback function
                 // :: in login function. It does nothing (return undefined) if
                 // :: there is no login
                 // -------------------------------------------------------------
-                token: settings.login ? function(local) {
+                token: function(local) {
                     return $.Storage.get(self.prefix_name(local) + '_token');
-                } : $.noop,
+                },
                 // -------------------------------------------------------------
                 // :: Function sets the token to the supplied value. This function
                 // :: works regardless of wherer settings.login is supplied
                 // -------------------------------------------------------------
-                set_token : function(token,local) {
+                set_token: function(token, local) {
                     var name = self.prefix_name(local) + '_token';
                     if (typeof token == 'undefined') {
                         $.Storage.remove(name, token);
@@ -4593,15 +4601,15 @@
                 // :: Function get the token either set by the login method or
                 // :: by the set_token method.
                 // -------------------------------------------------------------
-                get_token : function(local) {
+                get_token: function(local) {
                     return $.Storage.get(self.prefix_name(local) + '_token');
                 },
                 // -------------------------------------------------------------
                 // :: Function return Login name entered by the user
                 // -------------------------------------------------------------
-                login_name: settings.login ? function(local) {
+                login_name: function(local) {
                     return $.Storage.get(self.prefix_name(local) + '_login');
-                } : $.noop,
+                },
                 // -------------------------------------------------------------
                 // :: Function returns the name of current interpreter
                 // -------------------------------------------------------------
@@ -4680,12 +4688,13 @@
                                     throw e;
                                 }
                             }
+                            return true;
                         } else {
                             self.error(strings.canExitError);
                         }
                     } else {
-                        if (token) {
-                            logout();
+                        if (self.token(true)) {
+                            clear_loging_storage();
                         }
                         var current = interpreters.pop();
                         prepare_top_interpreter();
@@ -4700,6 +4709,7 @@
                         // restore mask
                         self.set_mask(interpreters.top().mask);
                     }
+                    console.log('pop end');
                     return self;
                 },
                 // -------------------------------------------------------------
