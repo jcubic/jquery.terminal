@@ -1983,7 +1983,7 @@
         // :: split text into lines with equal length so each line can be
         // :: rendered separately (text formatting can be longer then a line).
         // ---------------------------------------------------------------------
-        split_equal: function(str, length) {
+        split_equal: function(str, length, words) {
             var formatting = false;
             var in_text = false;
             var braket = 0;
@@ -2050,7 +2050,19 @@
                             ++count;
                         }
                     }
+                    /*
+                    var after = line.substring(j, j+length);
+                    var after_count = after.replace(/&[^;]+;/g, 'x').length;
+                    var nbsp = line.substring(j-6, j) == '&nbsp;';
+                    // end of the line
+                    var m = after.match(/(&nbsp;)/);
+                    if (words && nbsp && result.length == 1) {
+                        console.log(after);
+                        console.log(after_count);
+                    }
+                    */
                     if (count === length || j === jlen-1) {
+                        //(words && nbsp && !after.match(/&nbsp;/))) {
                         var output = line.substring(first_index, j+1);
                         if (prev_format) {
                             output = prev_format + output;
@@ -3190,7 +3202,8 @@
                 output_buffer.push(NEW_LINE);
                 if (!line_settings.raw && (string.length > num_chars ||
                                            string.match(/\n/))) {
-                    var array = $.terminal.split_equal(string, num_chars);
+                    var words = line_settings.keepWords;
+                    var array = $.terminal.split_equal(string, num_chars, words);
                     for (i = 0, len = array.length; i < len; ++i) {
                         if (array[i] === '' || array[i] === '\r') {
                             output_buffer.push('<span></span>');
@@ -3706,17 +3719,17 @@
             } else {
                 completion = top.completion;
             }
-            // after text pasted into textarea in cmd plugin
-            self.oneTime(10, function() {
-                on_scrollbar_show_resize();
-            });
             if ($.isFunction(settings.keydown)) {
                 result = settings.keydown(e, self);
                 if (result !== undefined) {
                     return result;
                 }
             }
-            if (!self.paused()) {
+            if (!self.paused() && self.enabled()) {
+                // after text pasted into textarea in cmd plugin
+                self.oneTime(10, function() {
+                    on_scrollbar_show_resize();
+                });
                 if (e.which !== 9) { // not a TAB
                     tab_count = 0;
                 }
@@ -3975,8 +3988,13 @@
                         return ret;
                     }
                 },
+                // -------------------------------------------------------------
+                // :: bypass login function that wait untill you type user/pass
+                // :: it hide implementation detail
+                // -------------------------------------------------------------
                 autologin: function(user, token, silent) {
                     self.trigger('terminal.autologin', [user, token, silent]);
+                    return self;
                 },
                 // -------------------------------------------------------------
                 // :: Function changes the prompt of the command line to login
@@ -4385,7 +4403,7 @@
                 // :: Recalculate and redraw everything
                 // -------------------------------------------------------------
                 resize: function(width, height) {
-                    if (!self.is(':visible')) {
+                    if (false && !self.is(':visible')) {
                         // delay resize if terminal not visible
                         self.stopTime('resize');
                         self.oneTime(500, 'resize', function() {
@@ -4801,6 +4819,7 @@
             }, function(_, fun) {
                 // wrap all functions and display execptions
                 return function() {
+                    //console.log('terminal::' + _);
                     try {
                         return fun.apply(this, [].slice.apply(arguments));
                     } catch (e) {
@@ -4922,17 +4941,20 @@
                     commands: commands
                 });
                 // touch devices need touch event to get virtual keyboard
-                if (enabled && !isTouch()) {
+                if (enabled && self.is(':visible') && !isTouch()) {
                     self.focus(undefined, true);
                 } else {
                     self.disable();
                 }
-                $(document).bind('click.terminal', function(e) {
-                    var sender = $(e.target);
-                    if (!sender.closest('.terminal').hasClass('terminal') &&
-                        settings.onBlur(self) !== false) {
-                        self.disable();
-                    }
+                self.oneTime(100, function() {
+                    $(document).bind('click.terminal', function(e) {
+                        var sender = $(e.target);
+                        if (!sender.closest('.terminal').hasClass('terminal') &&
+                            self.enabled() &&
+                            settings.onBlur(self) !== false) {
+                            self.disable();
+                        }
+                    });
                 });
                 var old_enabled;
                 if (!isTouch()) {
