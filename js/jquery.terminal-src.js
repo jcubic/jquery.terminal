@@ -1908,6 +1908,7 @@
     var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/i;
     $.terminal = {
+        version: '{{VER}}',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2705,22 +2706,21 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '{{VER}}';
-    var version_set = !version.match(/^\{\{/);
+    var version_set = !$.terminal.version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2014 Jakub Jankiewicz <http://jcubic'+
         '.pl>';
-    var version_string = version_set ? ' version ' + version : ' ';
+    var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
+    var name_ver = 'jQuery Terminal Emulator' +
+        (version_set ? version_string : '');
     // -----------------------------------------------------------------------
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
         ['jQuery Terminal', '(c) 2011-2014 jcubic'],
-        ['jQuery Terminal Emulator' + (version_set ? ' v. ' + version : ''),
-         copyright.replace(/ *<.*>/, '')],
-        ['jQuery Terminal Emulator' + (version_set ? version_string : ''),
-         copyright.replace(/^Copyright /, '')],
+        [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
+        [name_ver, copyright.replace(/^Copyright /, '')],
         ['      _______                 ________                        __',
          '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
          ' __ / / // / // / _  / _/ // / / / _  / _/     / /  \\/ / _ \\/ /',
@@ -4321,7 +4321,7 @@
                 // :: Return the version number
                 // -------------------------------------------------------------
                 version: function() {
-                    return version;
+                    return $.terminal.version;
                 },
                 // -------------------------------------------------------------
                 // :: Return actual command line object (jquery object with cmd

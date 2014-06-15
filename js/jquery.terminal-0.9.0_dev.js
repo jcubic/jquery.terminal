@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.9.0
+ *           \/              /____/                              version 0.9.0_dev
  * http://terminal.jcubic.pl
  *
  * Copyright (c) 2011-2014 Jakub Jankiewicz <http://jcubic.pl>
@@ -45,7 +45,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 15 Jun 2014 14:04:20 +0000
+ * Date: Sun, 15 Jun 2014 15:52:15 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -1908,6 +1908,7 @@
     var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/i;
     $.terminal = {
+        version: '0.9.0_dev',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2705,22 +2706,21 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.9.0';
-    var version_set = !version.match(/^\{\{/);
+    var version_set = !$.terminal.version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2014 Jakub Jankiewicz <http://jcubic'+
         '.pl>';
-    var version_string = version_set ? ' version ' + version : ' ';
+    var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     //regex is for placing version string aligned to the right
     var reg = new RegExp(" {" + version_string.length + "}$");
+    var name_ver = 'jQuery Terminal Emulator' +
+        (version_set ? version_string : '');
     // -----------------------------------------------------------------------
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
         ['jQuery Terminal', '(c) 2011-2014 jcubic'],
-        ['jQuery Terminal Emulator' + (version_set ? ' v. ' + version : ''),
-         copyright.replace(/ *<.*>/, '')],
-        ['jQuery Terminal Emulator' + (version_set ? version_string : ''),
-         copyright.replace(/^Copyright /, '')],
+        [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
+        [name_ver, copyright.replace(/^Copyright /, '')],
         ['      _______                 ________                        __',
          '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
          ' __ / / // / // / _  / _/ // / / / _  / _/     / /  \\/ / _ \\/ /',
@@ -4321,7 +4321,7 @@
                 // :: Return the version number
                 // -------------------------------------------------------------
                 version: function() {
-                    return version;
+                    return $.terminal.version;
                 },
                 // -------------------------------------------------------------
                 // :: Return actual command line object (jquery object with cmd
