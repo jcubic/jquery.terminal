@@ -3436,7 +3436,7 @@
                     } else {
                         var position = lines.length-1;
                         // Call user interpreter function
-                        var result = interpreter.interpreter(command, self);
+                        var result = interpreter.interpreter.call(self, command, self);
                         if (result != undefined) {
                             // auto pause/resume when user return promises
                             self.pause();
