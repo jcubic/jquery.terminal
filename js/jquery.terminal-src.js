@@ -2578,13 +2578,13 @@
         },
         // ---------------------------------------------------------------------
         // :: Function that returns an object {name,args}. Arguments are parsed
-        // :: using the function parseArguments
+        // :: using the function parse_arguments
         // ---------------------------------------------------------------------
         parse_command: function(string) {
             return process_command(string, $.terminal.parse_arguments);
         },
         // ---------------------------------------------------------------------
-        // :: Same as parseCommand but arguments are parsed using splitArguments
+        // :: Same as parse_command but arguments are parsed using split_arguments
         // ---------------------------------------------------------------------
         split_command: function(string) {
             return process_command(string, $.terminal.split_arguments);
@@ -3422,7 +3422,7 @@
                     }
                 }
                 if (!ghost()) {
-                    prev_command = $.terminal.splitCommand(command).name;
+                    prev_command = $.terminal.split_command(command).name;
                     if (exec && $.isFunction(settings.historyFilter) &&
                         settings.historyFilter(command) ||
                         !settings.historyFilter) {
