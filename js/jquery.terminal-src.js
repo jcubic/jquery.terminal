@@ -215,19 +215,19 @@
         return result;
     };
     var Clone = {
-        cloneObject: function(object) {
+        clone_object: function(object) {
             var tmp = {};
             if (typeof object == 'object') {
                 if ($.isArray(object)) {
-                    return this.cloneArray(object);
+                    return this.clone_array(object);
                 } else if (object == null) {
                     return object;
                 } else {
                     for (var key in object) {
                         if ($.isArray(object[key])) {
-                            tmp[key] = this.cloneArray(object[key]);
+                            tmp[key] = this.clone_array(object[key]);
                         } else if (typeof object[key] == 'object') {
-                            tmp[key] = this.cloneObject(object[key]);
+                            tmp[key] = this.clone_object(object[key]);
                         } else {
                             tmp[key] = object[key];
                         }
@@ -236,14 +236,14 @@
             }
             return tmp;
         },
-        cloneArray: function(array) {
+        clone_array: function(array) {
             if (!$.isFunction(Array.prototype.map)) {
                 throw new Error("You'r browser don't support ES5 array map " +
                                 "use es5-shim");
             }
             return array.slice(0).map(function(item) {
                 if (typeof item == 'object') {
-                    return this.cloneObject(item);
+                    return this.clone_object(item);
                 } else {
                     return item;
                 }
@@ -251,7 +251,7 @@
         }
     };
     var clone = function(object) {
-        return Clone.cloneObject(object);
+        return Clone.clone_object(object);
     };
     // -----------------------------------------------------------------------
     // :: Storage plugin
@@ -503,7 +503,6 @@
     // -----------------------------------------------------------------------
     // :: CROSS BROWSER SPLIT
     // -----------------------------------------------------------------------
-
     (function(undef) {
 
         // prevent double include
@@ -932,8 +931,8 @@
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
-        function mobileFocus() {
-            if (isTouch()) {
+        function mobile_focus() {
+            if (is_touch()) {
                 var foucs = clip.is(':focus');
                 if (enabled) {
                     if (!foucs) {
@@ -949,8 +948,8 @@
         // on mobile you can't delete character if input is empty (event
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
-        function fakeMobileEntry() {
-            if (isTouch()) {
+        function fake_mobile_entry() {
+            if (is_touch()) {
                 // delay worked while experimenting
                 self.oneTime(10, function() {
                     clip.val(command);
@@ -962,7 +961,7 @@
         }
         // terminal animation don't work on andorid because they animate
         // 2 properties
-        if (false && (supportAnimations() && !isAndroid())) {
+        if (false && (support_animations() && !is_android())) {
             animation = function(toggle) {
                 if (toggle) {
                     cursor.addClass('blink');
@@ -1273,7 +1272,7 @@
         var draw_prompt = (function() {
             var prompt_node = self.find('.prompt');
             function set(prompt) {
-                prompt_len = skipFormattingCount(prompt);
+                prompt_len = skip_formatting_count(prompt);
                 prompt_node.html($.terminal.format($.terminal.encode(prompt)));
             }
             return function() {
@@ -1377,7 +1376,7 @@
                     return true; // mobile fix
                 } else if (e.which === 67 && e.ctrlKey && e.shiftKey) {
                     // CTRL+SHIFT+C
-                    selected_text = getSelectedText();
+                    selected_text = get_selected_text();
                 } else if (e.which === 86 && e.ctrlKey && e.shiftKey) {
                     if (selected_text !== '') {
                         self.insert(selected_text);
@@ -1573,7 +1572,7 @@
                 }
             } */
         }
-        function fireChangeCommand() {
+        function fire_change_command() {
             if ($.isFunction(options.onCommandChange)) {
                 options.onCommandChange(command);
             }
@@ -1618,7 +1617,7 @@
                         if (!stay) {
                             self.position(position+n);
                         } else {
-                            fireChangeCommand();
+                            fire_change_command();
                         }
                     }
                 } else {
@@ -1626,11 +1625,11 @@
                         removed = command.slice(position).slice(0, n);
                         command = command.slice(0, position) +
                             command.slice(position + n, command.length);
-                        fireChangeCommand();
+                        fire_change_command();
                     }
                 }
                 redraw();
-                fakeMobileEntry();
+                fake_mobile_entry();
                 return removed;
             },
             set: function(string, stay) {
@@ -1640,8 +1639,8 @@
                         self.position(command.length);
                     }
                     redraw();
-                    fakeMobileEntry();
-                    fireChangeCommand();
+                    fake_mobile_entry();
+                    fire_change_command();
                 }
                 return self;
             },
@@ -1657,10 +1656,10 @@
                 if (!stay) {
                     self.position(string.length, true);
                 } else {
-                    fakeMobileEntry();
+                    fake_mobile_entry();
                 }
                 redraw();
-                fireChangeCommand();
+                fire_change_command();
                 return self;
             },
             get: function() {
@@ -1721,7 +1720,7 @@
                         options.onPositionChange(position);
                     }
                     redraw();
-                    fakeMobileEntry();
+                    fake_mobile_entry();
                     return self;
                 } else {
                     return position;
@@ -1755,7 +1754,7 @@
             enable: function() {
                 enabled = true;
                 animation(true);
-                mobileFocus();
+                mobile_focus();
                 return self;
             },
             isenabled: function() {
@@ -1764,7 +1763,7 @@
             disable: function() {
                 enabled = false;
                 animation(false);
-                mobileFocus();
+                mobile_focus();
                 return self;
             },
             mask: function(new_mask) {
@@ -1832,18 +1831,18 @@
     // -------------------------------------------------------------------------
     // :: TOOLS
     // -------------------------------------------------------------------------
-    function skipFormattingCount(string) {
+    function skip_formatting_count(string) {
         // this will covert html entities to single characters
         return $('<div>' + $.terminal.strip(string) + '</div>').text().length;
     }
     // -------------------------------------------------------------------------
-    function formattingCount(string) {
-        return string.length - skipFormattingCount(string);
+    function formatting_count(string) {
+        return string.length - skip_formatting_count(string);
     }
     // -------------------------------------------------------------------------
     // taken from https://hacks.mozilla.org/2011/09/detecting-and-generating-
     // css-animations-in-javascript/
-    function supportAnimations() {
+    function support_animations() {
         var animation = false,
         animationstring = 'animation',
         keyframeprefix = '',
@@ -1866,16 +1865,16 @@
         return animation;
     }
     // -------------------------------------------------------------------------
-    function isAndroid() {
+    function is_android() {
         return navigator.userAgent.toLowerCase().indexOf("android") != -1;
     }
     // -------------------------------------------------------------------------
-    function isTouch() {
+    function is_touch() {
         return ('ontouchstart' in window) || window.DocumentTouch &&
             document instanceof DocumentTouch;
     }
     // -------------------------------------------------------------------------
-    function processCommand(string, fn) {
+    function process_command(string, fn) {
         var m = string.match(/^([^\s]+)\s*(.*)$/);
         if (m) {
             return {
@@ -2509,13 +2508,26 @@
                 return output.join(''); //.replace(/\[\[[^\]]+\]\]/g, '');
             };
         })(),
+        // 0.9.0 change all function names to kebab case
+        parseArguments: function(string) {
+            throw new Error("Use parse_arguments instead");
+        },
+        splitArguments: function(string) {
+            throw new Error("Use split_arguments instead");
+        },
+        parseCommand: function(string) {
+            throw new Error("Use parse_command instead");
+        },
+        splitCommand: function(string) {
+            throw new Error("Use split_command instead");
+        },
         // ---------------------------------------------------------------------
         // :: Function splits arguments and works with strings like
         // :: 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ a
         // :: it creates a regex and numbers and replaces escape characters in
         // :: double quotes
         // ---------------------------------------------------------------------
-        parseArguments: function(string) {
+        parse_arguments: function(string) {
             var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
             return $.map(string.match(command_re) || [], function(arg) {
                 if (arg[0] === "'" && arg[arg.length-1] === "'") {
@@ -2551,7 +2563,7 @@
         // :: Split arguments: it only strips single and double quotes and
         // :: escapes spaces
         // ---------------------------------------------------------------------
-        splitArguments: function(string) {
+        split_arguments: function(string) {
             return $.map(string.match(command_re) || [], function(arg) {
                 if (arg[0] === "'" && arg[arg.length-1] === "'") {
                     return arg.replace(/^'|'$/g, '');
@@ -2568,14 +2580,14 @@
         // :: Function that returns an object {name,args}. Arguments are parsed
         // :: using the function parseArguments
         // ---------------------------------------------------------------------
-        parseCommand: function(string) {
-            return processCommand(string, $.terminal.parseArguments);
+        parse_command: function(string) {
+            return process_command(string, $.terminal.parse_arguments);
         },
         // ---------------------------------------------------------------------
         // :: Same as parseCommand but arguments are parsed using splitArguments
         // ---------------------------------------------------------------------
-        splitCommand: function(string) {
-            return processCommand(string, $.terminal.splitArguments);
+        split_command: function(string) {
+            return process_command(string, $.terminal.split_arguments);
         }
     };
 
@@ -2685,7 +2697,7 @@
     // :: Get Selected Text (this is internal because it return text even if
     // :: it's outside of terminal, is used to paste text to the terminal)
     // -----------------------------------------------------------------------
-    function getSelectedText() {
+    function get_selected_text() {
         if (window.getSelection || document.getSelection) {
             var selection = (window.getSelection || document.getSelection)();
             if (selection.text) {
@@ -2816,11 +2828,11 @@
         // ---------------------------------------------------------------------
         function get_processed_command(command) {
             if ($.isFunction(settings.processArguments)) {
-                return processCommand(command, settings.processArguments);
+                return process_command(command, settings.processArguments);
             } else if (settings.processArguments) {
-                return $.terminal.parseCommand(command);
+                return $.terminal.parse_command(command);
             } else {
-                return $.terminal.splitCommand(command);
+                return $.terminal.split_command(command);
             }
         }
         // ---------------------------------------------------------------------
@@ -4919,7 +4931,7 @@
                     historyFilter: settings.historyFilter,
                     historySize: settings.historySize,
                     width: '100%',
-                    enabled: enabled && !isTouch(),
+                    enabled: enabled && !is_touch(),
                     keydown: key_down,
                     keypress: function(e) {
                         var result, i, top = interpreters.top();
@@ -4941,7 +4953,7 @@
                     commands: commands
                 });
                 // touch devices need touch event to get virtual keyboard
-                if (enabled && self.is(':visible') && !isTouch()) {
+                if (enabled && self.is(':visible') && !is_touch()) {
                     self.focus(undefined, true);
                 } else {
                     self.disable();
@@ -4957,7 +4969,7 @@
                     });
                 });
                 var old_enabled;
-                if (!isTouch()) {
+                if (!is_touch()) {
                     // work weird on mobile
                     var $win = $(window).focus(function() {
                         if (old_enabled) {
@@ -4977,13 +4989,13 @@
                 self.click(function(e) {
                     if (!self.enabled()) {
                         self.focus();
-                    } else if (isTouch()) {
+                    } else if (is_touch()) {
                         // keep focusing silently so textarea get focus
                         self.focus(true, true);
                     }
                 }).mousedown(function(e) {
                     if (e.which == 2) {
-                        self.insert(getSelectedText());
+                        self.insert(get_selected_text());
                     }
                 });
                 // -------------------------------------------------------------
