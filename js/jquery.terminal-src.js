@@ -2851,6 +2851,30 @@
                 self.echo(object);
             }
         }
+        // Display line code in the file if line numbers are present
+        function print_line(url_spec) {
+            var re = /(.*):([0-9]+):([0-9]+)$/;
+            // google chrome have line and column after filename
+            var m = url_spec.match(re);
+            if (m) {
+                // TODO: do we need to call pause/resume or return promise?
+                self.pause();
+                $.get(m[1], function(response) {
+                    var prefix = location.href.replace(/[^\/]+$/, '');
+                    var file = m[1].replace(prefix, '');
+                    self.echo('[[b;white;]' + file + ']');
+                    var code = response.split('\n');
+                    var n = +m[2]-1;
+                    self.echo(code.slice(n-2, n+3).map(function(line, i) {
+                        if (i == 2) {
+                            line = '[[;#f00;]' +
+                                $.terminal.escape_brackets(line) + ']';
+                        }
+                        return '[' + (n+i) + ']: ' + line;
+                    }).join('\n')).resume();
+                }, 'text');
+            }
+        }
         // ---------------------------------------------------------------------
         // :: Helper function
         // ---------------------------------------------------------------------
@@ -2865,7 +2889,7 @@
         // :: Create interpreter function from url string
         // ---------------------------------------------------------------------
         function make_basic_json_rpc(url) {
-            var service = function(method, params) {
+            var interpreter = function(method, params) {
                 self.pause();
                 $.jrpc(url, method, params, function(json) {
                     if (json.error) {
@@ -4997,6 +5021,9 @@
                     if (e.which == 2) {
                         self.insert(get_selected_text());
                     }
+                }).on('click', '.exception a', function(e) {
+                    e.preventDefault();
+                    print_line($(this).attr('href'));
                 });
                 // -------------------------------------------------------------
                 // Run Login
