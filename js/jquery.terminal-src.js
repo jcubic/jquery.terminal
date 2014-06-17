@@ -3690,6 +3690,12 @@
         // :: function complete the command
         // ---------------------------------------------------------------------
         function complete_helper(command, string, commands) {
+            if (settings.clear) {
+                commands.push('clear');
+            }
+            if (settings.exit) {
+                commands.push('exit');
+            }
             var test = command_line.get().substring(0, command_line.position());
             if (test !== command) {
                 // command line changed between TABS - ignore
