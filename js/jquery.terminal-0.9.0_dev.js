@@ -11,19 +11,18 @@
  *
  * This file is part of jQuery Terminal.
  *
- * jQuery Terminal is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * jQuery Terminal is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * jQuery Terminal is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Foobar; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Contains:
  *
@@ -45,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 16 Jun 2014 14:08:25 +0000
+ * Date: Tue, 17 Jun 2014 11:18:00 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -3690,6 +3689,12 @@
         // :: function complete the command
         // ---------------------------------------------------------------------
         function complete_helper(command, string, commands) {
+            if (settings.clear) {
+                commands.push('clear');
+            }
+            if (settings.exit) {
+                commands.push('exit');
+            }
             var test = command_line.get().substring(0, command_line.position());
             if (test !== command) {
                 // command line changed between TABS - ignore
