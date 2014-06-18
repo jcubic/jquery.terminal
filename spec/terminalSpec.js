@@ -1,9 +1,9 @@
 describe('Terminal utils', function() {
     var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
     var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10';
-    describe('$.terminal.splitArguments', function() {
+    describe('$.terminal.split_arguments', function() {
         it('should create array of arguments', function() {
-            expect($.terminal.splitArguments(args)).toEqual([
+            expect($.terminal.split_arguments(args)).toEqual([
                     'foo bar',
                     'baz',
                     '/^asd [x]/',
@@ -13,9 +13,9 @@ describe('Terminal utils', function() {
             ]);
         });
     });
-    describe('$.terminal.parseArguments', function() {
+    describe('$.terminal.parse_arguments', function() {
         it('should create array of arguments and convert types', function() {
-            expect($.terminal.parseArguments(args)).toEqual([
+            expect($.terminal.parse_arguments(args)).toEqual([
                     'foo bar',
                     'baz',
                     /^asd [x]/,
@@ -25,9 +25,9 @@ describe('Terminal utils', function() {
             ]);
         });
     });
-    describe('$.terminal.splitCommand', function() {
+    describe('$.terminal.split_command', function() {
         it('Should split command', function() {
-            var cmd = jQuery.terminal.splitCommand(command);
+            var cmd = jQuery.terminal.split_command(command);
             expect(cmd).toEqual({
                 command: command,
                 name: 'test',
@@ -43,9 +43,9 @@ describe('Terminal utils', function() {
             });
         });
     });
-    describe('$.terminal.parseCommand', function() {
+    describe('$.terminal.parse_command', function() {
         it('should split and parse command', function() {
-            var cmd = jQuery.terminal.parseCommand(command);
+            var cmd = jQuery.terminal.parse_command(command);
             expect(cmd).toEqual({
                 command: command,
                 name: 'test',

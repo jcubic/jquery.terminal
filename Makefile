@@ -5,7 +5,7 @@ CP=cp
 
 ALL: js/jquery.terminal-$(VERSION).js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js css/jquery.terminal-$(VERSION).css README.md www/Makefile terminal.jquery.json bower.json
 
-bower.json: bower.in
+bower.json: bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" bower.in > bower.json
 
 js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
