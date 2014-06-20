@@ -5027,9 +5027,13 @@
                         self.insert(get_selected_text());
                     }
                 }).delegate('.exception a', 'click', function(e) {
-                //on('click', '.exception a', function(e) {
-                    e.preventDefault();
-                    print_line($(this).attr('href'));
+                //.on('click', '.exception a', function(e) {
+                    // in new jquery .delegate just call .on
+                    var href = $(this).attr('href');
+                    if (href.match(/:[0-9]+$/)) { // display line if specified
+                        e.preventDefault();
+                        print_line(href);
+                    }
                 });
                 if (self.is(':visible')) {
                     num_chars = get_num_chars(self);
