@@ -12,7 +12,7 @@
  * This file is part of jQuery Terminal.
  *
  * jQuery Terminal is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -21,7 +21,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Contains:
@@ -5026,21 +5026,22 @@
                     if (e.which == 2) {
                         self.insert(get_selected_text());
                     }
-                }).on('click', '.exception a', function(e) {
+                }).delegate('.exception a', 'click', function(e) {
+                //on('click', '.exception a', function(e) {
                     e.preventDefault();
                     print_line($(this).attr('href'));
                 });
+                if (self.is(':visible')) {
+                    num_chars = get_num_chars(self);
+                    command_line.resize(num_chars);
+                    num_rows = get_num_rows(self);
+                }
                 // -------------------------------------------------------------
                 // Run Login
                 if (settings.login) {
                     self.login(settings.login, true, initialize);
                 } else {
                     initialize();
-                }
-                if (self.is(':visible')) {
-                    num_chars = get_num_chars(self);
-                    command_line.resize(num_chars);
-                    num_rows = get_num_rows(self);
                 }
                 self.oneTime(100, function() {
                     $win.bind('resize.terminal', function() {
