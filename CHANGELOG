@@ -10,6 +10,8 @@
           exec return promise, exec with array of commands
           auto resume/pause if user code return promise
           Mobile (tested on Android)
+          functions splitCommand, parseCommand, splitArguments, parseArguments changed to kebab case
+          and those functions from now on throw exception with a message to use that other function
 0.8.7     Fix processing command function
 0.8.6     One space after fully completed command
 0.8.5     All regex for formatting case insensitive
