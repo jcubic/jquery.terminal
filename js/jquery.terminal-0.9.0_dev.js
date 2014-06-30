@@ -12,7 +12,7 @@
  * This file is part of jQuery Terminal.
  *
  * jQuery Terminal is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -21,7 +21,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Contains:
@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 17 Jun 2014 11:18:00 +0000
+ * Date: Sat, 28 Jun 2014 06:34:37 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -1372,7 +1372,9 @@
                             self['delete'](-1);
                         }
                     }
-                    return true; // mobile fix
+                    if (is_touch()) {
+                        return true; // mobile fix
+                    }
                 } else if (e.which === 67 && e.ctrlKey && e.shiftKey) {
                     // CTRL+SHIFT+C
                     selected_text = get_selected_text();
@@ -5026,21 +5028,26 @@
                     if (e.which == 2) {
                         self.insert(get_selected_text());
                     }
-                }).on('click', '.exception a', function(e) {
-                    e.preventDefault();
-                    print_line($(this).attr('href'));
+                }).delegate('.exception a', 'click', function(e) {
+                //.on('click', '.exception a', function(e) {
+                    // in new jquery .delegate just call .on
+                    var href = $(this).attr('href');
+                    if (href.match(/:[0-9]+$/)) { // display line if specified
+                        e.preventDefault();
+                        print_line(href);
+                    }
                 });
+                if (self.is(':visible')) {
+                    num_chars = get_num_chars(self);
+                    command_line.resize(num_chars);
+                    num_rows = get_num_rows(self);
+                }
                 // -------------------------------------------------------------
                 // Run Login
                 if (settings.login) {
                     self.login(settings.login, true, initialize);
                 } else {
                     initialize();
-                }
-                if (self.is(':visible')) {
-                    num_chars = get_num_chars(self);
-                    command_line.resize(num_chars);
-                    num_rows = get_num_rows(self);
                 }
                 self.oneTime(100, function() {
                     $win.bind('resize.terminal', function() {
