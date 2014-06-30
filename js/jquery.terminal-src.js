@@ -2786,7 +2786,7 @@
             wrongPassword: "Wrong password!",
             ajaxAbortError: "Error while aborting ajax call!",
             wrongArity: "Wrong number of arguments. Function '%s' expect %s got"+
-                "%s!",
+                " %s!",
             commandNotFound: "Command '%s' Not Found!",
             oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescr"+
                 "ibe",
@@ -2918,11 +2918,11 @@
                 }
                 if (!settings.login || command.name === 'help') {
                     // allows to call help without a token
-                    service(command.name, command.args);
+                    interpreter(command.name, command.args);
                 } else {
                     var token = terminal.token();
                     if (token) {
-                        service(command.name, [token].concat(command.args));
+                        interpreter(command.name, [token].concat(command.args));
                     } else {
                         //should never happen
                         terminal.error('&#91;AUTH&#93; ' +
@@ -2935,7 +2935,7 @@
         // :: Create interpreter function from Object. If the value is object
         // :: it will create nested interpreters
         // ---------------------------------------------------------------------
-        function make_object_interpreter(object, arity, fallback) {
+        function make_object_interpreter(object, arity, login, fallback) {
             // function that maps commands to object methods
             // it keeps terminal context
             return function(user_command, terminal) {
@@ -2951,6 +2951,9 @@
                     self.error(e.toString());
                     return;
                     //throw e; // this will show stack in other try..catch
+                }
+                if (login) {
+                    command.args = [terminal.token(true)].contact(command.args);
                 }
                 var val = object[command.name];
                 var type = $.type(val);
@@ -2968,7 +2971,9 @@
                     var commands = [];
                     if (type === 'object') {
                         commands = Object.keys(val);
-                        val = make_object_interpreter(val, arity);
+                        val = make_object_interpreter(val,
+                                                      settings.arity,
+                                                      login);
                     }
                     terminal.push(val, {
                         prompt: command.name + '> ',
@@ -3036,7 +3041,7 @@
             });
         }
         // ---------------------------------------------------------------------
-        function make_interpreter(user_intrp, finalize) {
+        function make_interpreter(user_intrp, login, finalize) {
             finalize = finalize || $.noop;
             var type = $.type(user_intrp);
             var result = {};
@@ -3089,6 +3094,7 @@
                     finalize({
                         interpreter: make_object_interpreter(object,
                                                              false,
+                                                             login,
                                                              fn_interpreter),
                         completion: Object.keys(object)
                     });
@@ -3104,7 +3110,8 @@
                     make_json_rpc_object(user_intrp, function(object) {
                         if (object) {
                             result.interpreter = make_object_interpreter(object,
-                                                                         false);
+                                                                         false,
+                                                                         login);
                             result.completion = commands;
                         } else {
                             // no procs in system.describe
@@ -4714,10 +4721,10 @@
                     if (top) {
                         top.mask = command_line.mask();
                     }
-                    make_interpreter(interpreter, function(result) {
+                    make_interpreter(interpreter, options.login, function(ret) {
                         // result is object with interpreter and completion
                         // properties
-                        interpreters.push($.extend({}, result, options));
+                        interpreters.push($.extend({}, ret, options));
                         if (options.login) {
                             var type = $.type(options.login);
                             if (type == 'function') {
@@ -4946,13 +4953,13 @@
             terminals.append(self);
             var interpreters;
             var command_line;
-            make_interpreter(init_interpreter, function(interpreter) {
+            make_interpreter(init_interpreter, settings.login, function(itrp) {
                 interpreters = new Stack($.extend({
                     name: settings.name,
                     prompt: settings.prompt,
                     keypress: settings.keypress,
                     greetings: settings.greetings
-                }, interpreter));
+                }, itrp));
                 // CREATE COMMAND LINE
                 command_line = $('<div/>').appendTo(self).cmd({
                     prompt: settings.prompt,
