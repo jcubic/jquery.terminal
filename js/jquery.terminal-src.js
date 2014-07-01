@@ -1372,7 +1372,9 @@
                             self['delete'](-1);
                         }
                     }
-                    return true; // mobile fix
+                    if (is_touch()) {
+                        return true; // mobile fix
+                    }
                 } else if (e.which === 67 && e.ctrlKey && e.shiftKey) {
                     // CTRL+SHIFT+C
                     selected_text = get_selected_text();

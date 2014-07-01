@@ -44,7 +44,11 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
+<<<<<<< HEAD
  * Date: Mon, 30 Jun 2014 18:57:39 +0000
+=======
+ * Date: Sat, 28 Jun 2014 06:34:37 +0000
+>>>>>>> e0126123e76c291f77e1d6163d2e9b201a6a054d
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -1372,7 +1376,9 @@
                             self['delete'](-1);
                         }
                     }
-                    return true; // mobile fix
+                    if (is_touch()) {
+                        return true; // mobile fix
+                    }
                 } else if (e.which === 67 && e.ctrlKey && e.shiftKey) {
                     // CTRL+SHIFT+C
                     selected_text = get_selected_text();
