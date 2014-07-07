@@ -100,7 +100,7 @@
         color: #aaa;
   }
   50% {
-        background-color: #bbb; /* not #aaa because it's seem there is Google Chrome bug */
+        background-color: #bbb; /* not #aaa because it's seems there is Google Chrome bug */
         color: #000;
   }
 }

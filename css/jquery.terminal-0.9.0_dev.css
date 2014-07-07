@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Date: Tue, 17 Jun 2014 11:18:03 +0000
+ * Date: Tue, 01 Jul 2014 18:24:36 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -100,7 +100,7 @@
         color: #aaa;
   }
   50% {
-        background-color: #bbb; /* not #aaa because it's seem there is Google Chrome bug */
+        background-color: #bbb; /* not #aaa because it's seems there is Google Chrome bug */
         color: #000;
   }
 }
