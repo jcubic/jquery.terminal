@@ -44,11 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
-<<<<<<< HEAD
- * Date: Mon, 30 Jun 2014 18:57:39 +0000
-=======
- * Date: Sat, 28 Jun 2014 06:34:37 +0000
->>>>>>> e0126123e76c291f77e1d6163d2e9b201a6a054d
+ * Date: Mon, 07 Jul 2014 20:52:14 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -2771,6 +2767,7 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
+        processRPCResponse: null,
         Token: true,
         historyState: false,
         login: null,

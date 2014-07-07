@@ -2767,6 +2767,7 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
+        processRPCResponse: null,
         Token: true,
         historyState: false,
         login: null,
