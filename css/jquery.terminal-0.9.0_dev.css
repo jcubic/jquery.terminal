@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Date: Tue, 01 Jul 2014 18:24:36 +0000
+ * Date: Mon, 07 Jul 2014 21:58:17 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -37,7 +37,7 @@
     left: -10px;
 }
 /* fix double style of selecting text in terminal */
-.terminal-output span {
+.terminal-output span, .cmd span {
     -webkit-touch-callout: initial;
     -webkit-user-select: initial;
     -khtml-user-select: initial;
@@ -45,7 +45,7 @@
     -ms-user-select: initial;
     user-select: initial;
 }
-.terminal-output div {
+.terminal, .terminal-output, .terminal-output div {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;

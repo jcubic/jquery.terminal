@@ -37,7 +37,7 @@
     left: -10px;
 }
 /* fix double style of selecting text in terminal */
-.terminal-output span {
+.terminal-output span, .cmd span {
     -webkit-touch-callout: initial;
     -webkit-user-select: initial;
     -khtml-user-select: initial;
@@ -45,7 +45,7 @@
     -ms-user-select: initial;
     user-select: initial;
 }
-.terminal-output div {
+.terminal, .terminal-output, .terminal-output div {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
