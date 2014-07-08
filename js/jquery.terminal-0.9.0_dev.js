@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 07 Jul 2014 20:52:14 +0000
+ * Date: Tue, 08 Jul 2014 12:48:16 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -4576,10 +4576,10 @@
                 // :: echo red text
                 // -------------------------------------------------------------
                 error: function(message, finalize) {
-                    //quick hack to fix trailing back slash
+                    //quick hack to fix trailing backslash
                     var str = $.terminal.escape_brackets(message).
                         replace(/\\$/, '&#92;');
-                    return self.echo('[[;#f00;;error]' + str + ']', finalize);
+                    return self.echo('[[;;;error]' + str + ']', finalize);
                 },
                 // -------------------------------------------------------------
                 // :: Display Exception on terminal

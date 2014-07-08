@@ -76,6 +76,9 @@
     outline: none;
     background: black; /* work only for desktop so we need to create a mask */
 }
+.terminal .error {
+    color: #f00;
+}
 .terminal {
     padding: 10px;
     position: relative;

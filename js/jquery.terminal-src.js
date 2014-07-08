@@ -2166,7 +2166,10 @@
                                 } else {
                                     data = data_text.replace(/&#93;/g, ']');
                                 }
-                                var result = '<span style="' + style_str + '"';
+                                var result = '<span ';
+                                if (style_str !== '') {
+                                    result += 'style="' + style_str + '"';
+                                }
                                 if (_class !== '') {
                                     result += ' class="' + _class + '"';
                                 }
@@ -4576,10 +4579,10 @@
                 // :: echo red text
                 // -------------------------------------------------------------
                 error: function(message, finalize) {
-                    //quick hack to fix trailing back slash
+                    //quick hack to fix trailing backslash
                     var str = $.terminal.escape_brackets(message).
                         replace(/\\$/, '&#92;');
-                    return self.echo('[[;#f00;;error]' + str + ']', finalize);
+                    return self.echo('[[;;;error]' + str + ']', finalize);
                 },
                 // -------------------------------------------------------------
                 // :: Display Exception on terminal

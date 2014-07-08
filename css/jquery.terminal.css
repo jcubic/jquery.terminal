@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Date: Mon, 07 Jul 2014 21:58:17 +0000
+ * Date: Tue, 08 Jul 2014 12:48:18 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -75,6 +75,9 @@
     border: none;
     outline: none;
     background: black; /* work only for desktop so we need to create a mask */
+}
+.terminal .error {
+    color: #f00;
 }
 .terminal {
     padding: 10px;
