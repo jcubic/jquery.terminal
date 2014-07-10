@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 08 Jul 2014 12:48:16 +0000
+ * Date: Thu, 10 Jul 2014 11:49:24 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -2166,7 +2166,10 @@
                                 } else {
                                     data = data_text.replace(/&#93;/g, ']');
                                 }
-                                var result = '<span style="' + style_str + '"';
+                                var result = '<span ';
+                                if (style_str !== '') {
+                                    result += 'style="' + style_str + '"';
+                                }
                                 if (_class !== '') {
                                     result += ' class="' + _class + '"';
                                 }
@@ -2956,7 +2959,7 @@
                     //throw e; // this will show stack in other try..catch
                 }
                 if (login) {
-                    command.args = [terminal.token(true)].contact(command.args);
+                    command.args = [self.token(true)].concat(command.args);
                 }
                 var val = object[command.name];
                 var type = $.type(val);

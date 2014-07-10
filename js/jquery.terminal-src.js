@@ -2959,7 +2959,7 @@
                     //throw e; // this will show stack in other try..catch
                 }
                 if (login) {
-                    command.args = [terminal.token(true)].contact(command.args);
+                    command.args = [self.token(true)].concat(command.args);
                 }
                 var val = object[command.name];
                 var type = $.type(val);
