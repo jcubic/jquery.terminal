@@ -10,7 +10,7 @@ class Demo {
   static $login_documentation = "login to the server (return token)";
   public function login($user, $passwd) {
     if (strcmp($user, 'demo') == 0 && strcmp($passwd, 'demo') == 0) {
-      // If you need to handle more than one user you can create 
+      // If you need to handle more than one user you can create
       // new token and save it in database
       // UPDATE users SET token = '$token' WHERE name = '$user'
       return md5($user . ":" . $passwd);
@@ -41,7 +41,7 @@ class Demo {
     }
   }
   static $whoami_documentation = "return user information";
-  public function whoami() {
+  public function whoami($token) {
     return array("your User Agent" => $_SERVER["HTTP_USER_AGENT"],
                  "your IP" => $_SERVER['REMOTE_ADDR'],
                  "you acces this from" => $_SERVER["HTTP_REFERER"]);
