@@ -1,3 +1,4 @@
+0.8.8     Fix 2 json rpc bugs
 0.8.6     One space after fully completed command
 0.8.5     All regex for formatting case insensitive
 0.8.4     Fix redraw lines on import_view, fix calculating rows

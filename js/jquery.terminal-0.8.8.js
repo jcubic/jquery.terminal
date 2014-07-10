@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.8.7
+ *           \/              /____/                              version 0.8.8
  * http://terminal.jcubic.pl
  *
  * Licensed under GNU LGPL Version 3 license
@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 22 Mar 2014 13:32:26 +0000
+ * Date: Thu, 10 Jul 2014 16:30:27 +0000
  *
  */
 
@@ -2445,7 +2445,7 @@
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
-    var version = '0.8.7';
+    var version = '0.8.8';
     var version_set = !version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2013 Jakub Jankiewicz <http://jcubic.pl>';
     var version_string = version_set ? ' version ' + version : ' ';
@@ -2672,7 +2672,7 @@
             }
         }
         // -----------------------------------------------------------------------
-        function make_json_rpc_object(url, success) {
+        function make_json_rpc_object(url, auth, success) {
             $.jrpc(url, 'system.describe', [], function(ret) {
                 var commands = [];
                 if (ret.procs) {
@@ -2681,7 +2681,7 @@
                         interpreter_object[proc.name] = function() {
                             var args = Array.prototype.slice.call(arguments);
                             if (settings.checkArity && proc.params &&
-                                proc.params.length !== args.length) {
+                                proc.params.length !== (args.length + (auth ? 1 : 0))) {
                                 self.error("&#91;Arity&#93; " +
                                            sprintf(strings.wrongArity,
                                                    proc.name,
@@ -2689,6 +2689,9 @@
                                                    args.length));
                             } else {
                                 self.pause();
+                                if (auth) {
+                                    args = [self.token(true)].concat(args);
+                                }
                                 $.jrpc(url, proc.name, args, function(json) {
                                     if (json.error) {
                                         display_json_rpc_error(json.error);
@@ -2709,7 +2712,7 @@
             });
         }
         // -----------------------------------------------------------------------
-        function make_interpreter(user_interpreter, finalize) {
+        function make_interpreter(user_interpreter, auth, finalize) {
             finalize = finalize || $.noop;
             var type = $.type(user_interpreter);
             var result = {};
@@ -2735,7 +2738,7 @@
                                 }
                                 recur(rest, success);
                             } else {
-                                make_json_rpc_object(first, function(new_object) {
+                                make_json_rpc_object(first, auth, function(new_object) {
                                     // will ignore rpc in array that don't have system.describe
                                     if (new_object) {
                                         $.extend(object, new_object);
@@ -2773,8 +2776,9 @@
                     });
                 } else {
                     self.pause();
-                    make_json_rpc_object(user_interpreter, function(object) {
+                    make_json_rpc_object(user_interpreter, auth, function(object) {
                         if (object) {
+                            var commands = Object.keys(object);
                             result.interpreter = make_object_interpreter(object, false);
                             result.completion = function(term, string, callback) {
                                 callback(commands);
@@ -3519,7 +3523,7 @@
                 setInterpreter: function(user_interpreter, login) {
                     function overwrite_interpreter() {
                         self.pause();
-                        make_interpreter(user_interpreter, function(result) {
+                        make_interpreter(user_interpreter, login, function(result) {
                             self.resume();
                             var top = interpreters.top();
                             $.extend(top, result);
@@ -4021,7 +4025,7 @@
                     if (top) {
                         top.mask = command_line.mask();
                     }
-                    make_interpreter(interpreter, function(result) {
+                    make_interpreter(interpreter, options.login, function(result) {
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, result, options));
                         if (options.login) {
@@ -4215,6 +4219,7 @@
                     throw e;
                 }
             }
+            var auth = settings.login;
             // create json-rpc authentication function
             if (typeof init_interpreter === 'string' &&
                 (typeof settings.login === 'string' || settings.login)) {
@@ -4223,7 +4228,7 @@
             terminals.append(self);
             var interpreters;
             var command_line;
-            make_interpreter(init_interpreter, function(interpreter) {
+            make_interpreter(init_interpreter, auth, function(interpreter) {
                 interpreters = new Stack($.extend({
                     name: settings.name,
                     prompt: settings.prompt,
