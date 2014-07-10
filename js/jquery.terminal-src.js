@@ -2679,9 +2679,10 @@
                     var interpreter_object = {};
                     $.each(ret.procs, function(_, proc) {
                         interpreter_object[proc.name] = function() {
+                            var append = auth && proc.name != 'help';
                             var args = Array.prototype.slice.call(arguments);
                             if (settings.checkArity && proc.params &&
-                                proc.params.length !== (args.length + (auth ? 1 : 0))) {
+                                proc.params.length !== (args.length + (append ? 1 : 0))) {
                                 self.error("&#91;Arity&#93; " +
                                            sprintf(strings.wrongArity,
                                                    proc.name,
@@ -2689,7 +2690,7 @@
                                                    args.length));
                             } else {
                                 self.pause();
-                                if (auth) {
+                                if (append) {
                                     args = [self.token(true)].concat(args);
                                 }
                                 $.jrpc(url, proc.name, args, function(json) {
