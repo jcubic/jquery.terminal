@@ -2681,13 +2681,14 @@
                         interpreter_object[proc.name] = function() {
                             var append = auth && proc.name != 'help';
                             var args = Array.prototype.slice.call(arguments);
+                            var args_len = args.length + (append ? 1 : 0);
                             if (settings.checkArity && proc.params &&
-                                proc.params.length !== (args.length + (append ? 1 : 0))) {
+                                proc.params.length !== args_len) {
                                 self.error("&#91;Arity&#93; " +
                                            sprintf(strings.wrongArity,
                                                    proc.name,
                                                    proc.params.length,
-                                                   args.length));
+                                                   args_len));
                             } else {
                                 self.pause();
                                 if (append) {

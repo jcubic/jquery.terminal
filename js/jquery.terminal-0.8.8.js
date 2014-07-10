@@ -26,7 +26,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 10 Jul 2014 17:16:41 +0000
+ * Date: Thu, 10 Jul 2014 17:20:49 +0000
  *
  */
 
@@ -2681,13 +2681,14 @@
                         interpreter_object[proc.name] = function() {
                             var append = auth && proc.name != 'help';
                             var args = Array.prototype.slice.call(arguments);
+                            var args_len = args.length + (append ? 1 : 0);
                             if (settings.checkArity && proc.params &&
-                                proc.params.length !== (args.length + (append ? 1 : 0))) {
+                                proc.params.length !== args_len) {
                                 self.error("&#91;Arity&#93; " +
                                            sprintf(strings.wrongArity,
                                                    proc.name,
                                                    proc.params.length,
-                                                   args.length));
+                                                   args_len));
                             } else {
                                 self.pause();
                                 if (append) {
