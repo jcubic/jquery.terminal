@@ -2119,7 +2119,6 @@
                         if (text === '') {
                             return text;
                         } else if ($.terminal.is_formatting(text)) {
-                            // use substring for IE quirks mode - [0] don't work
                             return text.replace(format_parts_re, function(s,
                                                                     style,
                                                                     color,
@@ -2776,6 +2775,7 @@
         historyState: false,
         login: null,
         outputLimit: -1,
+        formatters: [$.terminal.overtyping, $.terminal.from_ansi],
         onAjaxError: null,
         onRPCError: null,
         completion: false,
@@ -3245,9 +3245,15 @@
                 if (!line_settings.raw) {
                     string = $.terminal.encode(string);
                 }
-                // TODO: array of functions in default.formatters
-                string = $.terminal.overtyping(string);
-                string = $.terminal.from_ansi(string);
+                // format using formatters that can be overwriten, default are
+                // $.terminal.overtyping and $.terminal.from_ansi
+                for (var i=0; i<$.terminal.defaults.formatters.length; ++i) {
+                    try {
+                        string = $.terminal.defaults.formatters[i](string);
+                    } catch(e) {
+                        display_exception(e, 'FORMATTING');
+                    }
+                }
                 output_buffer.push(NEW_LINE);
                 if (!line_settings.raw && (string.length > num_chars ||
                                            string.match(/\n/))) {
