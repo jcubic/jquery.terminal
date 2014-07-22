@@ -4958,9 +4958,16 @@
                 }
             }
             // create json-rpc authentication function
-            if (typeof init_interpreter === 'string' &&
+            var base_interpreter;
+            if (typeof init_interpreter == 'string') {
+                base_interpreter = init_interpreter;
+            } else if (init_interpreter instanceof Array &&
+                       typeof init_interpreter[0] == 'string') {
+                base_interpreter = init_interpreter[0];
+            }
+            if (base_interpreter &&
                 (typeof settings.login === 'string' || settings.login)) {
-                settings.login = make_json_rpc_login(init_interpreter,
+                settings.login = make_json_rpc_login(base_interpreter,
                                                      settings.login);
             }
             terminals.append(self);

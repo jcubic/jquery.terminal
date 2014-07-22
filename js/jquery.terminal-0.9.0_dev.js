@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 22 Jul 2014 09:22:39 +0000
+ * Date: Tue, 22 Jul 2014 09:45:23 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -4958,9 +4958,16 @@
                 }
             }
             // create json-rpc authentication function
-            if (typeof init_interpreter === 'string' &&
+            var base_interpreter;
+            if (typeof init_interpreter == 'string') {
+                base_interpreter = init_interpreter;
+            } else if (init_interpreter instanceof Array &&
+                       typeof init_interpreter[0] == 'string') {
+                base_interpreter = init_interpreter[0];
+            }
+            if (base_interpreter &&
                 (typeof settings.login === 'string' || settings.login)) {
-                settings.login = make_json_rpc_login(init_interpreter,
+                settings.login = make_json_rpc_login(base_interpreter,
                                                      settings.login);
             }
             terminals.append(self);
