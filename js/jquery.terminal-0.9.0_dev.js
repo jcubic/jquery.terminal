@@ -44,17 +44,9 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 22 Jul 2014 10:19:01 +0000
+ * Date: Tue, 22 Jul 2014 10:34:28 +0000
  *
- * TODO: exec function from echo
- *       custom formatter
- *       formatter: $.terminal.defaults.formatters.concat([function(text, options) {
- *           // covert hex to chars
- *           text = text.replace(/0x[A-F]+/g, function(hex) {
- *              return String.fromCharCode(parseInt(hex, 16));
- *           });
- *           return (text);
- *       }])
+ * TODO: exec function from echo, allow extend terminal object
  *
  * Wrap words mode - terminal.echo('asd', {wrapWords: true});
  * local logout ???
@@ -4696,6 +4688,9 @@
                 // :: by the set_token method.
                 // -------------------------------------------------------------
                 get_token: function(local) {
+                    if (settings.globalToken) {
+                        local = false;
+                    }
                     return $.Storage.get(self.prefix_name(local) + '_token');
                 },
                 // -------------------------------------------------------------
@@ -4885,7 +4880,7 @@
                 return function() {
                     //console.log('terminal::' + _);
                     try {
-                        return fun.apply(this, [].slice.apply(arguments));
+                        return fun.apply(self, [].slice.apply(arguments));
                     } catch (e) {
                         // exec catch by command (resume call exec)
                         if (_ !== 'exec' && _ !== 'resume') {

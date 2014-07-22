@@ -46,15 +46,7 @@
  *
  * Date: {{DATE}}
  *
- * TODO: exec function from echo
- *       custom formatter
- *       formatter: $.terminal.defaults.formatters.concat([function(text, options) {
- *           // covert hex to chars
- *           text = text.replace(/0x[A-F]+/g, function(hex) {
- *              return String.fromCharCode(parseInt(hex, 16));
- *           });
- *           return (text);
- *       }])
+ * TODO: exec function from echo, allow extend terminal object
  *
  * Wrap words mode - terminal.echo('asd', {wrapWords: true});
  * local logout ???
@@ -4696,6 +4688,9 @@
                 // :: by the set_token method.
                 // -------------------------------------------------------------
                 get_token: function(local) {
+                    if (settings.globalToken) {
+                        local = false;
+                    }
                     return $.Storage.get(self.prefix_name(local) + '_token');
                 },
                 // -------------------------------------------------------------
@@ -4885,7 +4880,7 @@
                 return function() {
                     //console.log('terminal::' + _);
                     try {
-                        return fun.apply(this, [].slice.apply(arguments));
+                        return fun.apply(self, [].slice.apply(arguments));
                     } catch (e) {
                         // exec catch by command (resume call exec)
                         if (_ !== 'exec' && _ !== 'resume') {
