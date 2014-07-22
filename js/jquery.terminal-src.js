@@ -55,11 +55,11 @@
  *           });
  *           return (text);
  *       }])
- * option - argumentSplitter: function(rest) { return rest.split(/\s+/g); }
+ *
  * Wrap words mode - terminal.echo('asd', {wrapWords: true});
- * local logout
+ * local logout ???
  * Debug interpreters names in LocalStorage
- * onPositionChange event add to terminal
+ * onPositionChange event add to terminal ???
  *
  * TEST: login + promises/exec
  *       json-rpc/object + promises
@@ -2115,9 +2115,10 @@
                 var splited = $.terminal.format_split(str);
                 if (splited && splited.length > 1) {
                     str = $.map(splited, function(text) {
+                        console.log(text);
                         if (text === '') {
                             return text;
-                        } else if (text.substring(0,1) === '[') {
+                        } else if ($.terminal.is_formatting(text)) {
                             // use substring for IE quirks mode - [0] don't work
                             return text.replace(format_parts_re, function(s,
                                                                     style,
