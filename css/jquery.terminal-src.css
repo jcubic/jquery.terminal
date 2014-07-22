@@ -179,14 +179,7 @@
     border-collapse: collapse;
 }
 .terminal td {
-    border-left: 1px solid #aaa;
-    border-bottom: 1px solid #aaa;
-}
-.terminal td:last-child {
-    border-right: 1px solid #aaa;
-}
-.terminal tr:first-child td {
-    border-top: 1px solid #aaa;
+    border: 1px solid #aaa;
 }
 .terminal h1::-moz-selection,
 .terminal h2::-moz-selection,

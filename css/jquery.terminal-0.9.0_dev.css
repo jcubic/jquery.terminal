@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Date: Tue, 22 Jul 2014 13:01:45 +0000
+ * Date: Tue, 22 Jul 2014 13:14:28 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -179,14 +179,7 @@
     border-collapse: collapse;
 }
 .terminal td {
-    border-left: 1px solid #aaa;
-    border-bottom: 1px solid #aaa;
-}
-.terminal td:last-child {
-    border-right: 1px solid #aaa;
-}
-.terminal tr:first-child td {
-    border-top: 1px solid #aaa;
+    border: 1px solid #aaa;
 }
 .terminal h1::-moz-selection,
 .terminal h2::-moz-selection,
