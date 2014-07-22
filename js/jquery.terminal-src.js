@@ -7,7 +7,7 @@
  *           \/              /____/                              version {{VER}}
  * http://terminal.jcubic.pl
  *
- * Copyright (c) 2011-2014 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2010-2014 Jakub Jankiewicz <http://jcubic.pl>
  *
  * This file is part of jQuery Terminal.
  *
@@ -46,7 +46,11 @@
  *
  * Date: {{DATE}}
  *
- * TODO: exec function from echo, allow extend terminal object
+ * TODO: exec function from echo
+ *
+ *   [{ options('raw', true) }]
+ *   <img src=""/>
+ *   [{ options('raw', false) }]
  *
  * Wrap words mode - terminal.echo('asd', {wrapWords: true});
  * local logout ???
@@ -4802,9 +4806,9 @@
                     return self;
                 },
                 // -------------------------------------------------------------
-                // :: Change terminal options at runtime
+                // :: Change terminal option(s) at runtime
                 // -------------------------------------------------------------
-                options: function(object_or_name, value) {
+                option: function(object_or_name, value) {
                     if (typeof value == 'undefined') {
                         if (typeof object_or_name == 'string') {
                             return settings[object_or_name];
