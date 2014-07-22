@@ -36,22 +36,12 @@
     height: 16px;
     left: -10px;
 }
-/* fix double style of selecting text in terminal */
-.terminal-output span, .cmd span {
-    -webkit-touch-callout: initial;
-    -webkit-user-select: initial;
-    -khtml-user-select: initial;
-    -moz-user-select: initial;
-    -ms-user-select: initial;
-    user-select: initial;
+
+.terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6, .terminal pre, .cmd {
+    margin: 0;
 }
-.terminal, .terminal-output, .terminal-output div {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+.terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
+    line-height: 1.2em;
 }
 /* the only way I found to hide textarea on Android */
 .cmd .mask {
@@ -86,7 +76,6 @@
 }
 .cmd {
     padding: 0;
-    margin: 0;
     height: 1.3em;
     position: relative;
     /*margin-top: 3px; */
@@ -168,12 +157,67 @@
     background-color: #aaa;
     color: #000;
 }
+/* fix double style of selecting text in terminal */
+.terminal-output span, .cmd span, .terminal td, .terminal pre,
+.terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
+    -webkit-touch-callout: initial;
+    -webkit-user-select: initial;
+    -khtml-user-select: initial;
+    -moz-user-select: initial;
+    -ms-user-select: initial;
+    user-select: initial;
+}
+.terminal, .terminal-output, .terminal-output div {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.terminal table {
+    border-collapse: collapse;
+}
+.terminal td {
+    border-left: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+}
+.terminal td:last-child {
+    border-right: 1px solid #aaa;
+}
+.terminal tr:first-child td {
+    border-top: 1px solid #aaa;
+}
+.terminal h1::-moz-selection,
+.terminal h2::-moz-selection,
+.terminal h3::-moz-selection,
+.terminal h4::-moz-selection,
+.terminal h5::-moz-selection,
+.terminal h6::-moz-selection,
+.terminal pre::-moz-selection,
+.terminal td::-moz-selection,
 .terminal .terminal-output div div::-moz-selection,
 .terminal .terminal-output div span::-moz-selection,
 .terminal .terminal-output div div a::-moz-selection {
     background-color: #aaa;
     color: #000;
 }
+/* this don't work in Chrome
+.terminal tr td::-moz-selection {
+    border-color: #000;
+}
+.terminal tr td::selection {
+    border-color: #000;
+}
+*/
+.terminal h1::selection,
+.terminal h2::selection,
+.terminal h3::selection,
+.terminal h4::selection,
+.terminal h5::selection,
+.terminal h6::selection,
+.terminal pre::selection,
+.terminal td::selection,
 .terminal .terminal-output div div::selection,
 .terminal .terminal-output div div a::selection,
 .terminal .terminal-output div span::selection,
