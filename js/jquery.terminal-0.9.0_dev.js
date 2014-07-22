@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 22 Jul 2014 09:50:07 +0000
+ * Date: Tue, 22 Jul 2014 10:19:01 +0000
  *
  * TODO: exec function from echo
  *       custom formatter
@@ -3242,9 +3242,6 @@
                 string = $.type(string) === "function" ? string() : string;
                 string = $.type(string) === "string" ? string : String(string);
                 var i, len;
-                if (!line_settings.raw) {
-                    string = $.terminal.encode(string);
-                }
                 // format using formatters that can be overwriten, default are
                 // $.terminal.overtyping and $.terminal.from_ansi
                 for (var i=0; i<$.terminal.defaults.formatters.length; ++i) {
@@ -3253,6 +3250,9 @@
                     } catch(e) {
                         display_exception(e, 'FORMATTING');
                     }
+                }
+                if (!line_settings.raw) {
+                    string = $.terminal.encode(string);
                 }
                 output_buffer.push(NEW_LINE);
                 if (!line_settings.raw && (string.length > num_chars ||
