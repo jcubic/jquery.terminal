@@ -2115,7 +2115,6 @@
                 var splited = $.terminal.format_split(str);
                 if (splited && splited.length > 1) {
                     str = $.map(splited, function(text) {
-                        console.log(text);
                         if (text === '') {
                             return text;
                         } else if ($.terminal.is_formatting(text)) {
@@ -2768,6 +2767,7 @@
         checkArity: true,
         exceptionHandler: null,
         cancelableAjax: true,
+        globalToken: false,
         processArguments: true,
         linksNoReferrer: false,
         processRPCResponse: null,
@@ -4673,6 +4673,9 @@
                 // :: there is no login
                 // -------------------------------------------------------------
                 token: function(local) {
+                    if (settings.globalToken) {
+                        local = false;
+                    }
                     return $.Storage.get(self.prefix_name(local) + '_token');
                 },
                 // -------------------------------------------------------------
