@@ -2757,6 +2757,7 @@
         historySize: 60,
         maskChar: '*',
         checkArity: true,
+        raw: false,
         exceptionHandler: null,
         cancelableAjax: true,
         globalToken: false,
@@ -3234,16 +3235,16 @@
                 string = $.type(string) === "function" ? string() : string;
                 string = $.type(string) === "string" ? string : String(string);
                 var i, len;
-                // format using formatters that can be overwriten, default are
-                // $.terminal.overtyping and $.terminal.from_ansi
-                for (var i=0; i<$.terminal.defaults.formatters.length; ++i) {
-                    try {
-                        string = $.terminal.defaults.formatters[i](string);
-                    } catch(e) {
-                        display_exception(e, 'FORMATTING');
-                    }
-                }
                 if (!line_settings.raw) {
+                    // format using formatters that can be overwriten, default are
+                    // $.terminal.overtyping and $.terminal.from_ansi
+                    for (var i=0; i<$.terminal.defaults.formatters.length; ++i) {
+                        try {
+                            string = $.terminal.defaults.formatters[i](string);
+                        } catch(e) {
+                            display_exception(e, 'FORMATTING');
+                        }
+                    }
                     string = $.terminal.encode(string);
                 }
                 output_buffer.push(NEW_LINE);
@@ -4553,15 +4554,15 @@
                     string = string || '';
                     $.when(string).then(function(string) {
                         try {
-                            var settings = $.extend({
+                            var locals = $.extend({
                                 flush: true,
-                                raw: false,
+                                raw: settings.raw,
                                 finalize: $.noop
                             }, options || {});
                             output_buffer = [];
-                            draw_line(string, settings);
-                            lines.push([string, settings]);
-                            if (settings.flush) {
+                            draw_line(string, locals);
+                            lines.push([string, locals]);
+                            if (locals.flush) {
                                 self.flush();
                             }
                             on_scrollbar_show_resize();
