@@ -4724,6 +4724,22 @@
                     return name;
                 },
                 // -------------------------------------------------------------
+                // :: wrapper for common use case
+                // -------------------------------------------------------------
+                read: function(message, callback) {
+                    var d = new $.Deferred();
+                    self.push(function(text) {
+                        self.pop();
+                        if ($.isFunction(callback)) {
+                            callback(text);
+                        }
+                        d.resolve(text);
+                    }, {
+                        prompt: message
+                    });
+                    return d.promise();
+                },
+                // -------------------------------------------------------------
                 // :: Push a new interenter on the Stack
                 // -------------------------------------------------------------
                 push: function(interpreter, options) {
