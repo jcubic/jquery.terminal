@@ -12,7 +12,6 @@
         "examples",
         "CHANGELOG",
         "README.in",
-        "Makefile",
         "manifest"
     ],
     "dependencies": {

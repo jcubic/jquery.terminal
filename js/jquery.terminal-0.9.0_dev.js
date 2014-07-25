@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 22 Jul 2014 12:28:39 +0000
+ * Date: Fri, 25 Jul 2014 10:26:53 +0000
  *
  * TODO: exec function from echo
  *
@@ -4722,6 +4722,22 @@
                         }).slice(1).join('_');
                     }
                     return name;
+                },
+                // -------------------------------------------------------------
+                // :: wrapper for common use case
+                // -------------------------------------------------------------
+                read: function(message, callback) {
+                    var d = new $.Deferred();
+                    self.push(function(text) {
+                        self.pop();
+                        if ($.isFunction(callback)) {
+                            callback(text);
+                        }
+                        d.resolve(text);
+                    }, {
+                        prompt: message
+                    });
+                    return d.promise();
                 },
                 // -------------------------------------------------------------
                 // :: Push a new interenter on the Stack
