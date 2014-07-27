@@ -32,6 +32,7 @@
 }
 .cmd .mask, .cmd .clipboard {
     position: absolute;
+    display: block;
     bottom: 0;
     height: 16px;
     left: -10px;
@@ -46,6 +47,7 @@
 /* the only way I found to hide textarea on Android */
 .cmd .mask {
     width: 10px;
+    height: 10px;
     background: black;
     z-index: 100;
 }
@@ -64,6 +66,7 @@
     padding: 0;
     resize: none;
     border: none;
+    z-index: 0;
     outline: none;
     background: black; /* work only for desktop so we need to create a mask */
 }
