@@ -52,6 +52,9 @@
     z-index: 100;
 }
 .cmd .clipboard {
+    /* this seems to work after all on Android */
+    left: -9999px;
+    clip: rect(1px,1px,1px,1px);
     /*
        clip: rect(0,0,0,0);
     */
