@@ -47,7 +47,7 @@
 /* the only way I found to hide textarea on Android */
 .cmd .mask {
     width: 10px;
-    height: 10px;
+    height: 11px;
     background: black;
     z-index: 100;
 }

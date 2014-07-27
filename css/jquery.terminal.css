@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Date: Sun, 27 Jul 2014 17:10:09 +0000
+ * Date: Sun, 27 Jul 2014 17:14:27 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -47,7 +47,7 @@
 /* the only way I found to hide textarea on Android */
 .cmd .mask {
     width: 10px;
-    height: 10px;
+    height: 11px;
     background: black;
     z-index: 100;
 }
