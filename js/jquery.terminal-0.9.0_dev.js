@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 27 Jul 2014 15:06:39 +0000
+ * Date: Sun, 27 Jul 2014 16:11:17 +0000
  *
  * TODO: exec function from echo
  *
@@ -904,7 +904,7 @@
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         self.append('<span class="mask"></mask>');
-        var clip = $('<textarea/>').addClass('clipboard').appendTo(self);
+        var clip = $('<textarea />').addClass('clipboard').appendTo(self);
         if (options.width) {
             self.width(options.width);
         }
@@ -1293,7 +1293,8 @@
             });
         }
         var first_up_history = true;
-        // prevent_keypress - hack for Android that was inserting characters on backspace
+        // prevent_keypress - hack for Android that was inserting characters on
+        // backspace
         var prevent_keypress = false;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
