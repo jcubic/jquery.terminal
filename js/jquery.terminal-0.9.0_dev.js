@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 27 Jul 2014 17:10:07 +0000
+ * Date: Sun, 27 Jul 2014 17:45:06 +0000
  *
  * TODO: exec function from echo
  *
@@ -927,7 +927,6 @@
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
-        var paste_supported = support_paste();
         function mobile_focus() {
             if (is_touch()) {
                 var foucs = clip.is(':focus');
@@ -1287,25 +1286,12 @@
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
         function paste() {
-            var clipboard, cmd;
-            if (paste_supported) {
-                var enabled = $('.cmd.enabled');
-                if (enabled.length) {
-                    clipboard = enabled.find('.clipboard');
-                    cmd = enabled.data('cmd');
-                }
-            } else {
-                clipboard = clip;
-                cmd = self;
-            }
-            if (clipboard && cmd) {
-                clipboard.val('').focus();
-                //wait until Browser insert text to textarea
-                cmd.oneTime(100, function() {
-                    cmd.insert(clipboard.val());
-                    clipboard.blur().val('');
-                });
-            }
+            clip.val('').focus();
+            //wait until Browser insert text to textarea
+            self.oneTime(1, function() {
+                self.insert(clip.val());
+                clip.blur().val('');
+            });
         }
         var first_up_history = true;
         // prevent_keypress - hack for Android that was inserting characters on
@@ -1497,9 +1483,7 @@
                     //END
                     self.position(command.length);
                 } else if (e.shiftKey && e.which == 45) { // Shift+Insert
-                    if (!paste_supported) {
-                        paste();
-                    }
+                    paste();
                     return true;
                 } else if (e.ctrlKey || e.metaKey) {
                     if (e.which === 192) { // CMD+` switch browser window on Mac
@@ -1549,10 +1533,8 @@
                             }
                         } else if (e.which === 86) {
                             //CTRL+V
-                            if (!paste_supported) {
-                                paste();
-                            }
-                            return true;
+                            paste();
+                            return;
                         } else if (e.which === 75) {
                             //CTRL+K
                             kill_text = self['delete'](command.length-position);
@@ -1843,10 +1825,6 @@
                 return result;
             }
         }).bind('keydown.cmd', keydown_event);
-        if (first_cmd && paste_supported) {
-            doc.bind('paste', paste);
-            first_cmd = false;
-        }
         // characters
         self.data('cmd', self);
         return self;
@@ -1862,14 +1840,6 @@
     // -------------------------------------------------------------------------
     function formatting_count(string) {
         return string.length - skip_formatting_count(string);
-    }
-    // -------------------------------------------------------------------------
-    // :: test of browser support paste event
-    // -------------------------------------------------------------------------
-    function support_paste() {
-        var i = $('<input/>');
-        i.attr('onpaste', 'return false;');
-        return typeof i[0].onpaste == 'function';
     }
     // -------------------------------------------------------------------------
     // taken from https://hacks.mozilla.org/2011/09/detecting-and-generating-

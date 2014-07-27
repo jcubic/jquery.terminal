@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Date: Sun, 27 Jul 2014 17:14:27 +0000
+ * Date: Sun, 27 Jul 2014 17:45:08 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -178,6 +178,17 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+/* firefox hack */
+@-moz-document url-prefix() {
+    .terminal, .terminal-output, .terminal-output div {
+        -webkit-touch-callout: initial;
+        -webkit-user-select: initial;
+        -khtml-user-select: initial;
+        -moz-user-select: initial;
+        -ms-user-select: initial;
+        user-select: initial;
+    }
 }
 .terminal table {
     border-collapse: collapse;
