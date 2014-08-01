@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 01 Aug 2014 16:43:20 +0000
+ * Date: Fri, 01 Aug 2014 16:44:22 +0000
  *
  * TODO: exec function from echo
  *
@@ -1306,7 +1306,7 @@
                     //wait until Browser insert text to textarea
                     cmd.oneTime(1, function() {
                         cmd.insert(clip.val());
-                        clip.blur().val('');
+                        clip.val('');
                         fake_mobile_entry();
                     });
                 }

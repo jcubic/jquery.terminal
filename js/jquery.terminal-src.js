@@ -1306,7 +1306,7 @@
                     //wait until Browser insert text to textarea
                     cmd.oneTime(1, function() {
                         cmd.insert(clip.val());
-                        clip.blur().val('');
+                        clip.val('');
                         fake_mobile_entry();
                     });
                 }
