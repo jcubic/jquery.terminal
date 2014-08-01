@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 01 Aug 2014 22:26:44 +0000
+ * Date: Fri, 01 Aug 2014 22:55:09 +0000
  *
  * TODO:
  *
@@ -1937,7 +1937,7 @@
     var command_re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])+\/[gimy]*|(\\ |[^ ])+|[\w-]+)/g;
     var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/i;
-    var format_exec_re = /(\[\{(?:[^}]|\\\})*\}\])/;
+    var format_exec_re = /(\[\[(?:[^\]]|\](?!\]))*\]\])/;
     $.terminal = {
         version: '0.9.0_dev',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
@@ -2131,8 +2131,14 @@
             // don't escape entities
             str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
             return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                      .replace(/ /g, '&nbsp;')
-                      .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                .replace(/ /g, '&nbsp;')
+                .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+        },
+        // ---------------------------------------------------------------------
+        // :: safe function that will render text as it is
+        // ---------------------------------------------------------------------
+        escape_formatting: function(string) {
+            return $.terminal.escape_brackets($.terminal.encode(string));
         },
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
@@ -3045,7 +3051,7 @@
                 if (string != '') {
                     $.each(string.split(format_exec_re), function(i, string) {
                         if (string.match(format_exec_re)) {
-                            string = string.replace(/^\[\{|\}\]$/g, '');
+                            string = string.replace(/^\[\[|\]\]$/g, '');
                             if (prev_command.command == string) {
                                 self.error('Recursive call detected, skip');
                             } else {
@@ -3114,7 +3120,7 @@
         // :: Display prompt and last command
         // ---------------------------------------------------------------------
         function echo_command(command) {
-            command = $.terminal.escape_brackets($.terminal.encode(command));
+            command = $.terminal.escape_formatting(command);
             var prompt = command_line.prompt();
             var mask = command_line.mask();
             switch(typeof mask) {
@@ -3252,6 +3258,9 @@
                 if (!silent) {
                     echo_command(command);
                 }
+                console.log('command:');
+                console.log(new Error().stack);
+                console.log(command);
                 if (settings.historyState) {
                     self.save_state(command);
                 }
