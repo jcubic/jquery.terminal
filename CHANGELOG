@@ -18,6 +18,7 @@
           to kebab case and those functions from now on throw exception with a message to
           use that other function
           new API method read (wrapper over push)
+          extended commands with syntax [{   }]
 0.8.7     Fix processing command function
 0.8.6     One space after fully completed command
 0.8.5     All regex for formatting case insensitive

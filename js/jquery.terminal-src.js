@@ -46,18 +46,12 @@
  *
  * Date: {{DATE}}
  *
- * TODO: exec function from echo
- *
- *   [{ options('raw', true) }]
- *   <img src=""/>
- *   [{ options('raw', false) }]
+ * TODO:
  *
  * Wrap words mode - terminal.echo('asd', {wrapWords: true});
  * local logout ???
  * Debug interpreters names in LocalStorage
  * onPositionChange event add to terminal ???
- *
- * paste event
  *
  * TEST: login + promises/exec
  *       json-rpc/object + promises
@@ -925,6 +919,7 @@
         var backup_prompt;
         var mask = options.mask || false;
         var command = '';
+        var last_command;
         // text from selection using CTRL+SHIFT+C (as in Xterm)
         var selected_text = '';
         var kill_text = ''; // text from command that kill part of the command
@@ -1911,7 +1906,7 @@
     }
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
-        var m = string.match(/^([^\s]+)\s*(.*)$/);
+        var m = string.match(/^\s*([^\s]+)\s*(.*)$/);
         if (m) {
             return {
                 command: string,
@@ -1942,6 +1937,7 @@
     var command_re = /('[^']*'|"(\\"|[^"])*"|\/(\\\/|[^\/])+\/[gimy]*|(\\ |[^ ])+|[\w-]+)/g;
     var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/i;
+    var format_exec_re = /(\[\{(?:[^}]|\\\})*\}\])/;
     $.terminal = {
         version: '{{VER}}',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
@@ -2339,6 +2335,16 @@
         // ---------------------------------------------------------------------
         split_command: function(string) {
             return process_command(string, $.terminal.split_arguments);
+        },
+        // ---------------------------------------------------------------------
+        // :: function executed for each text inside [{ .... }]
+        // ---------------------------------------------------------------------
+        process_extended_command: function(term, string) {
+            try {
+                term.exec(string, true);
+            } catch(e) {
+                // error is precess in exec
+            }
         }
     };
 
@@ -2981,7 +2987,50 @@
         // ---------------------------------------------------------------------
         var output_buffer = [];
         var NEW_LINE = 1;
-        function draw_line(string, options) {
+        function buffer_line(string, options) {
+            var formatters = $.terminal.defaults.formatters;
+            var i, len;
+            if (!options.raw) {
+                // format using user defined formatters
+                for (var i=0; i<formatters.length; ++i) {
+                    try {
+                        string = formatters[i](string);
+                    } catch(e) {
+                        display_exception(e, 'FORMATTING');
+                    }
+                }
+                string = $.terminal.encode(string);
+            }
+            output_buffer.push(NEW_LINE);
+            if (!options.raw && (string.length > num_chars ||
+                                       string.match(/\n/))) {
+                var words = options.keepWords;
+                var array = $.terminal.split_equal(string, num_chars, words);
+                for (i = 0, len = array.length; i < len; ++i) {
+                    if (array[i] === '' || array[i] === '\r') {
+                        output_buffer.push('<span></span>');
+                    } else {
+                        if (options.raw) {
+                            output_buffer.push(array[i]);
+                        } else {
+                            output_buffer.push($.terminal.format(array[i], {
+                                linksNoReferer: settings.linksNoReferer
+                            }));
+                        }
+                    }
+                }
+            } else {
+                if (!options.raw) {
+                    string = $.terminal.format(string, {
+                        linksNoReferer: settings.linksNoReferer
+                    });
+                }
+                output_buffer.push(string);
+            }
+            output_buffer.push(options.finalize);
+        }
+        // ---------------------------------------------------------------------
+        function process_line(string, options) {
             // prevent exception in display exception
             try {
                 var line_settings = $.extend({
@@ -2990,50 +3039,24 @@
                 }, options || {});
                 string = $.type(string) === "function" ? string() : string;
                 string = $.type(string) === "string" ? string : String(string);
-                var i, len;
-                if (!line_settings.raw) {
-                    // format using formatters that can be overwriten, default are
-                    // $.terminal.overtyping and $.terminal.from_ansi
-                    for (var i=0; i<$.terminal.defaults.formatters.length; ++i) {
-                        try {
-                            string = $.terminal.defaults.formatters[i](string);
-                        } catch(e) {
-                            display_exception(e, 'FORMATTING');
-                        }
-                    }
-                    string = $.terminal.encode(string);
-                }
-                output_buffer.push(NEW_LINE);
-                if (!line_settings.raw && (string.length > num_chars ||
-                                           string.match(/\n/))) {
-                    var words = line_settings.keepWords;
-                    var array = $.terminal.split_equal(string, num_chars, words);
-                    for (i = 0, len = array.length; i < len; ++i) {
-                        if (array[i] === '' || array[i] === '\r') {
-                            output_buffer.push('<span></span>');
-                        } else {
-                            if (line_settings.raw) {
-                                output_buffer.push(array[i]);
+                if (string != '') {
+                    $.each(string.split(format_exec_re), function(i, string) {
+                        if (string.match(format_exec_re)) {
+                            string = string.replace(/^\[\{|\}\]$/g, '');
+                            if (prev_command.command == string) {
+                                self.error('Recursive call detected, skip');
                             } else {
-                                output_buffer.push($.terminal.format(array[i], {
-                                    linksNoReferer: settings.linksNoReferer
-                                }));
+                                $.terminal.process_extended_command(self, string);
                             }
+                        } else if (string !== '') {
+                            buffer_line(string, line_settings);
                         }
-                    }
-                } else {
-                    if (!line_settings.raw) {
-                        string = $.terminal.format(string, {
-                            linksNoReferer: settings.linksNoReferer
-                        });
-                    }
-                    output_buffer.push(string);
+                    });
                 }
-                output_buffer.push(line_settings.finalize);
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
-                alert('[Internal Exception(draw_line)]:' + exception_message(e)
+                alert('[Internal Exception(process_line)]:' + exception_message(e)
                       + '\n' + e.stack);
             }
         }
@@ -3057,8 +3080,10 @@
                 lines_to_show = lines;
             }
             try {
+                console.log((new Error()).stack);
+                output_buffer = [];
                 $.each(lines_to_show, function(i, line) {
-                    draw_line.apply(null, line); // line is an array
+                    process_line.apply(null, line); // line is an array
                 });
                 command_line.before(detached_output); // reinsert output
                 self.flush();
@@ -3214,7 +3239,7 @@
                     }
                 }
                 if (!ghost()) {
-                    prev_command = $.terminal.split_command(command).name;
+                    prev_command = $.terminal.split_command(command);
                     if (exec && $.isFunction(settings.historyFilter) &&
                         settings.historyFilter(command) ||
                         !settings.historyFilter) {
@@ -4310,13 +4335,13 @@
                     string = string || '';
                     $.when(string).then(function(string) {
                         try {
+                            output_buffer = [];
                             var locals = $.extend({
                                 flush: true,
                                 raw: settings.raw,
                                 finalize: $.noop
                             }, options || {});
-                            output_buffer = [];
-                            draw_line(string, locals);
+                            process_line(string, locals);
                             lines.push([string, locals]);
                             if (locals.flush) {
                                 self.flush();
@@ -4496,7 +4521,7 @@
                 // -------------------------------------------------------------
                 push: function(interpreter, options) {
                     options = options || {};
-                    options.name = options.name || prev_command;
+                    options.name = options.name || prev_command.name;
                     if (options.prompt == undefined) {
                         options.prompt = options.name + ' ';
                     }
