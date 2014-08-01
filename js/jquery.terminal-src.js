@@ -1307,6 +1307,7 @@
                     cmd.oneTime(1, function() {
                         cmd.insert(clip.val());
                         clip.blur().val('');
+                        fake_mobile_entry();
                     });
                 }
             });
