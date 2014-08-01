@@ -44,20 +44,18 @@
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
     line-height: 1.2em;
 }
-/* the only way I found to hide textarea on Android */
+/*
 .cmd .mask {
     width: 10px;
     height: 11px;
     background: black;
     z-index: 100;
 }
+*/
 .cmd .clipboard {
     /* this seems to work after all on Android */
-    left: -9999px;
+    left: -99999px;
     clip: rect(1px,1px,1px,1px);
-    /*
-       clip: rect(0,0,0,0);
-    */
     /* on desktop textarea appear when paste */
     /*
     opacity: 0.01;
@@ -70,8 +68,8 @@
     resize: none;
     border: none;
     z-index: 0;
+    overflow: hidden;
     outline: none;
-    background: black; /* work only for desktop so we need to create a mask */
 }
 .terminal .error {
     color: #f00;

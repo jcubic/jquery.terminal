@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 27 Jul 2014 17:45:06 +0000
+ * Date: Fri, 01 Aug 2014 16:34:42 +0000
  *
  * TODO: exec function from echo
  *
@@ -56,6 +56,8 @@
  * local logout ???
  * Debug interpreters names in LocalStorage
  * onPositionChange event add to terminal ???
+ *
+ * paste event
  *
  * TEST: login + promises/exec
  *       json-rpc/object + promises
@@ -889,6 +891,12 @@
             }
         });
     }
+    // -----------------------------------------------------------------------
+    var is_paste_supported = (function() {
+        var el = document.createElement('div');
+        el.setAttribute('onpaste', 'return;');
+        return typeof el.onpaste == "function";
+    })();
     var first_cmd = true;
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
@@ -904,7 +912,7 @@
                     '<span class="cursor">&nbsp;</span><span></span>');
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
-        self.append('<span class="mask"></mask>');
+        //self.append('<span class="mask"></mask>');
         var clip = $('<textarea />').addClass('clipboard').appendTo(self);
         if (options.width) {
             self.width(options.width);
@@ -928,16 +936,15 @@
         var cursor = self.find('.cursor');
         var animation;
         function mobile_focus() {
-            if (is_touch()) {
+            // if (is_touch()) {
+            if (enabled) {
                 var foucs = clip.is(':focus');
-                if (enabled) {
-                    if (!foucs) {
-                        clip.focus();
-                    }
-                } else {
-                    if (focus) {
-                        clip.blur();
-                    }
+                if (!foucs) {
+                    clip.focus();
+                }
+            } else {
+                if (focus) {
+                    clip.blur();
                 }
             }
         }
@@ -945,19 +952,21 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         function fake_mobile_entry() {
-            if (is_touch()) {
-                // delay worked while experimenting
-                self.oneTime(10, function() {
-                    clip.val(command);
+            //if (true || is_touch()) {
+                if (command !== '') {
+                    // delay worked while experimenting
                     self.oneTime(10, function() {
-                        clip.caret(position);
+                        clip.val(command);
+                        self.oneTime(10, function() {
+                            clip.caret(position);
+                        });
                     });
-                });
-            }
+                }
+            //}
         }
         // terminal animation don't work on andorid because they animate
         // 2 properties
-        if (false && (support_animations() && !is_android())) {
+        if ((support_animations() && !is_android())) {
             animation = function(toggle) {
                 if (toggle) {
                     cursor.addClass('blink');
@@ -1286,17 +1295,27 @@
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
         function paste() {
-            clip.val('').focus();
-            //wait until Browser insert text to textarea
-            self.oneTime(1, function() {
-                self.insert(clip.val());
-                clip.blur().val('');
+            $('.cmd').each(function() {
+                var self = $(this);
+                var cmd = self.data('cmd');
+                if (cmd.isenabled()) {
+                    var clip = self.find('textarea');
+                    if (!clip.is(':focus')) {
+                        clip.focus();
+                    }
+                    //wait until Browser insert text to textarea
+                    cmd.oneTime(1, function() {
+                        cmd.insert(clip.val());
+                        clip.blur().val('');
+                    });
+                }
             });
         }
         var first_up_history = true;
         // prevent_keypress - hack for Android that was inserting characters on
         // backspace
         var prevent_keypress = false;
+        var no_keypress;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
@@ -1385,7 +1404,7 @@
                 } else if (e.which === 46) {
                     //DELETE
                     self['delete'](1);
-                    return true;
+                    return;
                 } else if (history && e.which === 38 ||
                            (e.which === 80 && e.ctrlKey)) {
                     //UP ARROW or CTRL+P
@@ -1476,31 +1495,34 @@
                         }
                     }
                 } else if (e.which === 123) { //F12 - Allow Firebug
-                    return true;
+                    return;
                 } else if (e.which === 36) { //HOME
                     self.position(0);
                 } else if (e.which === 35) {
                     //END
                     self.position(command.length);
                 } else if (e.shiftKey && e.which == 45) { // Shift+Insert
-                    paste();
-                    return true;
+                    clip.val(''); // so we get it before paste event
+                    if (!is_paste_supported) {
+                        paste();
+                    }
+                    return;
                 } else if (e.ctrlKey || e.metaKey) {
                     if (e.which === 192) { // CMD+` switch browser window on Mac
-                        return true;
+                        return;
                     }
                     if (e.metaKey) {
                         if(e.which === 82) { // CMD+r page reload in Chrome Mac
-                            return true;
+                            return;
                         } else if(e.which === 76) {
                             // CMD+l jump into Omnibox on Chrome Mac
-                            return true;
+                            return;
                         }
                     }
                     if (e.shiftKey) { // CTRL+SHIFT+??
                         if (e.which === 84) {
                             //CTRL+SHIFT+T open closed tab
-                            return true;
+                            return;
                         }
                     //} else if (e.altKey) { //ALT+CTRL+??
                     } else {
@@ -1526,14 +1548,17 @@
                         } else if (e.which === 88 || e.which === 67 ||
                                    e.which === 84) {
                             //CTRL+X CTRL+C CTRL+W CTRL+T
-                            return true;
+                            return;
                         } else if (e.which === 89) { // CTRL+Y
                             if (kill_text !== '') {
                                 self.insert(kill_text);
                             }
                         } else if (e.which === 86) {
+                            clip.val('');
                             //CTRL+V
-                            paste();
+                            if (!is_paste_supported) {
+                                paste();
+                            }
                             return;
                         } else if (e.which === 75) {
                             //CTRL+K
@@ -1557,11 +1582,13 @@
                     }
                 } else {
                     prevent_keypress = false;
-                    return true;
+                    no_keypress = true;
+                    return;
                 }
+                // this will prevent for instance backspace to go back one page
                 prevent_keypress = true;
                 return false;
-            } /*else {
+            } /*else { // if disabled
                 if ((e.altKey && e.which === 68) ||
                     (e.ctrlKey &&
                      $.inArray(e.which, [65, 66, 68, 69, 80, 78, 70]) > -1) ||
@@ -1791,8 +1818,9 @@
         var doc = $(document.documentElement || window);
         doc.bind('keypress.cmd', function(e) {
             var result;
+            no_keypress = false;
             if (e.ctrlKey && e.which === 99) { // CTRL+C
-                return true;
+                return;
             }
             if (prevent_keypress) {
                 return;
@@ -1824,7 +1852,12 @@
             } else {
                 return result;
             }
-        }).bind('keydown.cmd', keydown_event);
+        }).bind('keydown.cmd', keydown_event).bind('keyup.cmd', function() {
+            if (no_keypress) {
+                // Some Androids don't fire keypress - #39
+                self.set(clip.val());
+            }
+        }).bind('paste.cmd', paste);
         // characters
         self.data('cmd', self);
         return self;
