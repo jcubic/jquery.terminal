@@ -2341,7 +2341,10 @@
         // ---------------------------------------------------------------------
         process_extended_command: function(term, string) {
             try {
-                term.exec(string, true);
+                change_hash = false;
+                term.exec(string, true).then(function() {
+                    change_hash = true;
+                });
             } catch(e) {
                 // error is precess in exec
             }
@@ -3080,7 +3083,6 @@
                 lines_to_show = lines;
             }
             try {
-                console.log((new Error()).stack);
                 output_buffer = [];
                 $.each(lines_to_show, function(i, line) {
                     process_line.apply(null, line); // line is an array
@@ -3217,7 +3219,7 @@
         // :: exeptions from user code and displays them on the terminal
         // ---------------------------------------------------------------------
         var first_command = true;
-        function commands(command, silent, exec, deferred) {
+        function commands(command, silent, exec) {
             // first command store state of the terminal before the command get
             // executed
             if (first_command) {
@@ -3250,102 +3252,65 @@
                 if (!silent) {
                     echo_command(command);
                 }
-                if (command === 'exit' && settings.exit) {
-                    var count = interpreters.size();
+                if (settings.historyState) {
+                    self.save_state(command);
+                }
+                if (command.match(/^\s*(exit|clear)\s*$/)) {
+                    if (settings.exit && command.match(/^\s*exit\s*$/)) {
+                        var count = interpreters.size();
                         self.token();
-                    if (count == 1 && self.token() || count > 1) {
-                        if (!silent) {
-                            echo_command(command);
+                        if (count == 1 && self.token() || count > 1) {
+                            if (!silent) {
+                                echo_command(command);
+                            }
+                            self.pop();
                         }
-                        self.pop();
+                    } else if (settings.clear && command.match(/^\s*clear\s*$/)) {
+                        self.clear();
+                    }
+                    if ($.isFunction(settings.onAfterCommand)) {
+                        settings.onAfterCommand(self, command);
                     }
                 } else {
-                    if (command === 'clear' && settings.clear) {
-                        self.clear();
-                    } else {
-                        var position = lines.length-1;
-                        // Call user interpreter function
-                        var result = interpreter.interpreter.call(self, command, self);
-                        if (result != undefined) {
-                            // auto pause/resume when user return promises
-                            self.pause();
-                            return $.when(result).then(function(result) {
-                                // don't echo result if user echo something
-                                if (result && position === lines.length-1) {
-                                    display_object(result);
-                                }
-                                // resolve promise from exec. This will fire
-                                // code if used terminal::exec('command').then
-                                if (deferred) {
-                                    deferred.resolve();
-                                }
-                                self.resume();
-                            });
-                        }
+                    // new promise will be returnd to exec that will resolve his
+                    // returned promise
+                    var deferred = new $.Deferred();
+                    var position = lines.length-1;
+                    // Call user interpreter function
+                    var result = interpreter.interpreter.call(self, command, self);
+                    if (result != undefined) {
+                        // auto pause/resume when user return promises
+                        self.pause();
+                        return $.when(result).then(function(result) {
+                            // don't echo result if user echo something
+                            if (result && position === lines.length-1) {
+                                display_object(result);
+                            }
+                            if (deferred) {
+                                deferred.resolve();
+                            }
+                            self.resume();
+                        });
+                    } else if (paused) {
                         // this is old API
                         // if command call pause - wait until resume
-                        if (paused) {
-                            self.bind('resume.command', function() {
-                                // exec with resume/pause in user code
-                                if (deferred) {
-                                    deferred.resolve();
-                                }
-                                if ($.isFunction(settings.onAfterCommand)) {
-                                    settings.onAfterCommand(self, command);
-                                }
-                                if (settings.historyState) {
-                                    self.save_state(command);
-                                }
-                                self.unbind('resume.command');
-                            });
-                        } else {
-                            // this should not happen
+                        self.bind('resume.command', function() {
+                            // exec with resume/pause in user code
                             if (deferred) {
                                 deferred.resolve();
                             }
                             if ($.isFunction(settings.onAfterCommand)) {
                                 settings.onAfterCommand(self, command);
                             }
-                            if (settings.historyState) {
-                                self.save_state(command);
-                            }
-                        }
-                        /*
-                          //this was undocumented - it suppose to replace stuff
-                          // that was echo from current command
-                        if (result !== undefined) {
-                            // was lines after echo_command (by interpreter)
-                            if (position === lines.length-1) {
-                                lines.pop();
-                                if (result !== false) {
-                                    self.echo(result);
-                                }
-                            } else {
-                                if (result === false) {
-                                    lines = lines.slice(0, position).
-                                        concat(lines.slice(position+1));
-                                } else {
-                                    lines = lines.slice(0, position).
-                                        concat([result]).
-                                        concat(lines.slice(position+1));
-                                }
-                            }
-                            self.resize();
-                        }
-                        */
-                    }
-                }
-                // do the same for clear and exit as for rest of commands
-                if (command == 'clear' || command == 'exit') {
-                    if (deferred) {
+                            self.unbind('resume.command');
+                        });
+                    } else {
                         deferred.resolve();
+                        if ($.isFunction(settings.onAfterCommand)) {
+                            settings.onAfterCommand(self, command);
+                        }
                     }
-                    if ($.isFunction(settings.onAfterCommand)) {
-                        settings.onAfterCommand(self, command);
-                    }
-                    if (settings.historyState) {
-                        self.save_state(command);
-                    }
+                    return deferred.promise();
                 }
             } catch (e) {
                 display_exception(e, 'USER');
@@ -3804,7 +3769,16 @@
                         // commands may return promise from user code
                         // it will resolve exec promise when user promise
                         // is resolved
-                        var ret = commands(command, silent, true, deferred);
+                        var ret = commands(command, silent, true).then(function() {
+                            if (deferred) {
+                                deferred.resolve(self);
+                            }
+                        });
+                        if (deferred) {
+                            return deferred.promise();
+                        } else {
+                            return ret;
+                        }
                         if (!ret) {
                             if (deferred) {
                                 deferred.resolve(self);
@@ -4676,7 +4650,6 @@
             }, function(_, fun) {
                 // wrap all functions and display execptions
                 return function() {
-                    //console.log('terminal::' + _);
                     try {
                         return fun.apply(self, [].slice.apply(arguments));
                     } catch (e) {
@@ -4883,29 +4856,34 @@
                     });
                 });
                 // -------------------------------------------------------------
+                // :: helper
+                function exec_spec(spec) {
+                    var terminal = terminals.get()[spec[0]];
+                    // execute if belong to this terminal
+                    if (terminal && terminal_id == terminal.id()) {
+                        if (spec[2]) {
+                            try {
+                                return terminal.exec(spec[2]);
+                            } catch(e) {
+                                var cmd = $.terminal.escape_brackets(command);
+                                var msg = "Error while exec with command " + cmd;
+                                terminal.error(msg).exception(e);
+                            }
+                        }
+                    }
+                }
                 // exec from hash called in each terminal instance
                 if (settings.execHash) {
                     if (location.hash) {
                         try {
-                            hash_commands = $.parseJSON(location.hash.replace(/^#/, ''));
-                            $.when.apply($, $.map(hash_commands, function(spec) {
-                                var terminal = terminals.get()[spec[0]];
-                                // execute if belong to this terminal
-                                if (terminal && terminal_id == terminal.id()) {
-                                    if (spec[2]) {
-                                        try {
-                                            return terminal.exec(spec[2]);
-                                        } catch(e) {
-                                            var cmd = $.terminal.escape_brackets(command);
-                                            var msg = "Error while exec with command " + cmd;
-                                            terminal.error(msg).exception(e);
-                                        }
-                                    }
-                                }
-                            })).then(function() {
-                                // can change hash when all exec get resloved
-                                change_hash = true;
-                            });
+                            var hash = location.hash.replace(/^#/, '');
+                            // yes no var - global inside terminal
+                            hash_commands = $.parseJSON(hash);
+                            $.when.apply($, $.map(hash_commands, exec_spec)).
+                                then(function() {
+                                    // can change hash when all exec get resloved
+                                    change_hash = true;
+                                });
                         } catch (e) {
                             //invalid json - ignore
                         }
