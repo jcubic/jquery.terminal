@@ -2339,14 +2339,14 @@
         // ---------------------------------------------------------------------
         // :: function executed for each text inside [{ .... }]
         // ---------------------------------------------------------------------
-        process_extended_command: function(term, string) {
+        extended_command: function(term, string) {
             try {
                 change_hash = false;
                 term.exec(string, true).then(function() {
                     change_hash = true;
                 });
             } catch(e) {
-                // error is precess in exec
+                // error is process in exec
             }
         }
     };
@@ -3049,7 +3049,7 @@
                             if (prev_command.command == string) {
                                 self.error('Recursive call detected, skip');
                             } else {
-                                $.terminal.process_extended_command(self, string);
+                                $.terminal.extended_command(self, string);
                             }
                         } else if (string !== '') {
                             buffer_line(string, line_settings);
