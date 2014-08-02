@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 01 Aug 2014 22:55:09 +0000
+ * Date: Sat, 02 Aug 2014 15:35:44 +0000
  *
  * TODO:
  *
@@ -2577,7 +2577,8 @@
                 'selector!',
             invalidTerminalId: 'Invalid Terminal ID',
             login: "login",
-            password: "password"
+            password: "password",
+            recursiveCall: 'Recursive call detected, skip'
         }
     };
     // -------------------------------------------------------------------------
@@ -3039,23 +3040,28 @@
             output_buffer.push(options.finalize);
         }
         // ---------------------------------------------------------------------
-        function process_line(string, options) {
+        function process_line(line, options) {
             // prevent exception in display exception
             try {
                 var line_settings = $.extend({
+                    exec: true,
                     raw: false,
                     finalize: $.noop
                 }, options || {});
-                string = $.type(string) === "function" ? string() : string;
+                var string = $.type(line) === "function" ? line() : line;
                 string = $.type(string) === "string" ? string : String(string);
                 if (string != '') {
                     $.each(string.split(format_exec_re), function(i, string) {
                         if (string.match(format_exec_re)) {
-                            string = string.replace(/^\[\[|\]\]$/g, '');
-                            if (prev_command.command == string) {
-                                self.error('Recursive call detected, skip');
-                            } else {
-                                $.terminal.extended_command(self, string);
+                            // redraw should not execute commands and it have
+                            // and lines variable have all extended commands
+                            if (line_settings.exec) {
+                                string = string.replace(/^\[\[|\]\]$/g, '');
+                                if (prev_command && prev_command.command == string) {
+                                    self.error(strings.recursiveCall);
+                                } else {
+                                    $.terminal.extended_command(self, string);
+                                }
                             }
                         } else if (string !== '') {
                             buffer_line(string, line_settings);
@@ -3157,7 +3163,7 @@
             }
             if (save_state[spec[1]]) { // state exists
                 terminal.import_view(save_state[spec[1]]);
-            } else if (spec.length != 2) { // not joinded terminals
+            } else {
                 // restore state
                 change_hash = false;
                 if (spec[2]) {
@@ -3239,6 +3245,20 @@
                     }
                 }
             }
+            function after_exec() {
+                // variables defined later in commands
+                deferred.resolve();
+                if (!exec) {
+                    change_hash = true;
+                    if (settings.historyState) {
+                        self.save_state(command);
+                    }
+                    change_hash = saved_change_hash;
+                }
+                if ($.isFunction(settings.onAfterCommand)) {
+                    settings.onAfterCommand(self, command);
+                }
+            }
             try {
                 // this callback can disable commands
                 if ($.isFunction(settings.onBeforeCommand)) {
@@ -3246,8 +3266,10 @@
                         return;
                     }
                 }
-                if (!ghost()) {
+                if (!exec) {
                     prev_command = $.terminal.split_command(command);
+                }
+                if (!ghost()) {
                     if (exec && $.isFunction(settings.historyFilter) &&
                         settings.historyFilter(command) ||
                         !settings.historyFilter) {
@@ -3258,12 +3280,10 @@
                 if (!silent) {
                     echo_command(command);
                 }
-                console.log('command:');
-                console.log(new Error().stack);
-                console.log(command);
-                if (settings.historyState) {
-                    self.save_state(command);
-                }
+                // we need to save sate before commands is deleyd because
+                // execute_extended_command disable it and it can be exected
+                // after delay
+                var saved_change_hash = change_hash;
                 if (command.match(/^\s*(exit|clear)\s*$/)) {
                     if (settings.exit && command.match(/^\s*exit\s*$/)) {
                         var count = interpreters.size();
@@ -3295,9 +3315,7 @@
                             if (result && position === lines.length-1) {
                                 display_object(result);
                             }
-                            if (deferred) {
-                                deferred.resolve();
-                            }
+                            after_exec();
                             self.resume();
                         });
                     } else if (paused) {
@@ -3305,19 +3323,11 @@
                         // if command call pause - wait until resume
                         self.bind('resume.command', function() {
                             // exec with resume/pause in user code
-                            if (deferred) {
-                                deferred.resolve();
-                            }
-                            if ($.isFunction(settings.onAfterCommand)) {
-                                settings.onAfterCommand(self, command);
-                            }
+                            after_exec();
                             self.unbind('resume.command');
                         });
                     } else {
-                        deferred.resolve();
-                        if ($.isFunction(settings.onAfterCommand)) {
-                            settings.onAfterCommand(self, command);
-                        }
+                        after_exec();
                     }
                     return deferred.promise();
                 }
@@ -4325,7 +4335,11 @@
                                 finalize: $.noop
                             }, options || {});
                             process_line(string, locals);
-                            lines.push([string, locals]);
+                            // extended commands should be processed only once
+                            // in echo and not on redraw
+                            lines.push([string, $.extend(locals, {
+                                exec: false
+                            })]);
                             if (locals.flush) {
                                 self.flush();
                             }
@@ -4656,14 +4670,15 @@
                     }
                     return self;
                 }
-            }, function(_, fun) {
+            }, function(name, fun) {
                 // wrap all functions and display execptions
                 return function() {
+                    //console.log('terminal::' + name);
                     try {
                         return fun.apply(self, [].slice.apply(arguments));
                     } catch (e) {
                         // exec catch by command (resume call exec)
-                        if (_ !== 'exec' && _ !== 'resume') {
+                        if (name !== 'exec' && name !== 'resume') {
                             display_exception(e, 'TERMINAL');
                         }
                         throw e;
