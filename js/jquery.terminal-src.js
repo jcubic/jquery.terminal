@@ -52,12 +52,14 @@
  * local logout ???
  * Debug interpreters names in LocalStorage
  * onPositionChange event add to terminal ???
+ * different command line history for each login users (add login if present to
+ * localStorage key)
  *
  * TEST: login + promises/exec
  *       json-rpc/object + promises
  *
  * NOTE: json-rpc don't need promises and delegate resume/pause because only
- *       exec can call it and exec call interpreter that workd with resume/pause
+ *       exec can call it and exec call interpreter that work with resume/pause
  */
 
 (function(ctx) {
@@ -1048,16 +1050,6 @@
             num_chars = Math.floor(W / w);
         }
         // ---------------------------------------------------------------------
-        // :: Return string repeated n times
-        // ---------------------------------------------------------------------
-        function str_repeat(str, n) {
-            var result = '';
-            for (var i = n; i--;) {
-                result += str;
-            }
-            return result;
-        }
-        // ---------------------------------------------------------------------
         // :: Split String that fit into command line where first line need to
         // :: fit next to prompt (need to have less characters)
         // ---------------------------------------------------------------------
@@ -2018,7 +2010,6 @@
         split_equal: function(str, length, words) {
             var formatting = false;
             var in_text = false;
-            var braket = 0;
             var prev_format = '';
             var result = [];
             // add format text as 5th paramter to formatting it's used for
@@ -2113,7 +2104,8 @@
                                 output += ']';
                             } else if (output.match(format_last_re)) {
                                 var line_len = output.length;
-                                var f_len = line_len-last[last.length-1].length;
+                                // why this line ???
+                                //var f_len = line_len-last[last.length-1].length;
                                 output = output.replace(format_last_re, '');
                                 prev_format = last.match(format_begin_re)[1];
                             }
@@ -3716,7 +3708,7 @@
                 // -------------------------------------------------------------
                 export_view: function() {
                     if (in_login) {
-                        throw new Exception(sprintf(strings.notWhileLogin, 'export_view'));
+                        throw new Error(sprintf(strings.notWhileLogin, 'export_view'));
                     }
                     return {
                         focus: enabled,
@@ -3732,7 +3724,7 @@
                 // -------------------------------------------------------------
                 import_view: function(view) {
                     if (in_login) {
-                        throw new Exception(sprintf(strings.notWhileLogin, 'import_view'));
+                        throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
                     }
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
@@ -4518,7 +4510,10 @@
                 // -------------------------------------------------------------
                 push: function(interpreter, options) {
                     options = options || {};
-                    options.name = options.name || prev_command.name;
+                    if (!options.name && prev_command) {
+                        // push is called in login
+                        options.name = prev_command.name;
+                    }
                     if (options.prompt == undefined) {
                         options.prompt = options.name + ' ';
                     }
@@ -4608,7 +4603,7 @@
                             });
                         }
                     } else {
-                        setting[object_or_name] = value;
+                        settings[object_or_name] = value;
                     }
                     return self;
                 },
