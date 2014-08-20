@@ -2996,9 +2996,16 @@
                 // format using user defined formatters
                 for (var i=0; i<formatters.length; ++i) {
                     try {
-                        string = formatters[i](string);
+                        if (typeof formatters[i] == 'function') {
+                            var ret = formatters[i](string);
+                            if (typeof ret == 'string') {
+                                string = ret;
+                            }
+                        }
                     } catch(e) {
-                        display_exception(e, 'FORMATTING');
+                        //display_exception(e, 'FORMATTING');
+                        alert('formatting error at formatters[' + i + ']\n' +
+                              (e.stack ? e.stack : e));
                     }
                 }
                 string = $.terminal.encode(string);

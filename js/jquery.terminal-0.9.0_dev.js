@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 17 Aug 2014 19:10:04 +0000
+ * Date: Wed, 20 Aug 2014 12:36:11 +0000
  *
  * TODO:
  *
@@ -2996,9 +2996,16 @@
                 // format using user defined formatters
                 for (var i=0; i<formatters.length; ++i) {
                     try {
-                        string = formatters[i](string);
+                        if (typeof formatters[i] == 'function') {
+                            var ret = formatters[i](string);
+                            if (typeof ret == 'string') {
+                                string = ret;
+                            }
+                        }
                     } catch(e) {
-                        display_exception(e, 'FORMATTING');
+                        //display_exception(e, 'FORMATTING');
+                        alert('formatting error at formatters[' + i + ']\n' +
+                              (e.stack ? e.stack : e));
                     }
                 }
                 string = $.terminal.encode(string);
