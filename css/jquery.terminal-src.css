@@ -86,52 +86,59 @@
     position: relative;
     /*margin-top: 3px; */
 }
+.terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
+    background-color: #aaa;
+    color: #000;
+}
 .cmd .cursor.blink {
-    -webkit-animation: blink 1s infinite steps(1, start);
-       -moz-animation: blink 1s infinite steps(1, start);
-        -ms-animation: blink 1s infinite steps(1, start);
-            animation: blink 1s infinite steps(1, start);
+    -webkit-animation: terminal-blink 1s infinite steps(1, start);
+       -moz-animation: terminal-blink 1s infinite steps(1, start);
+        -ms-animation: terminal-blink 1s infinite steps(1, start);
+            animation: terminal-blink 1s infinite steps(1, start);
 }
-@keyframes blink {
+@-webkit-keyframes terminal-blink {
   0%, 100% {
-        background-color: #000;
-        color: #aaa;
+      background-color: #000;
+      color: #aaa;
   }
   50% {
-        background-color: #bbb; /* not #aaa because it's seems there is Google Chrome bug */
-        color: #000;
+      background-color: #bbb;
+      color: #000;
   }
 }
-@-webkit-keyframes blink {
+
+@-ms-keyframes terminal-blink {
   0%, 100% {
-        background-color: #000;
-        color: #aaa;
+      background-color: #000;
+      color: #aaa;
   }
   50% {
-        background-color: #bbb;
-        color: #000;
+      background-color: #bbb;
+      color: #000;
   }
 }
-@-ms-keyframes blink {
+
+@-moz-keyframes terminal-blink {
   0%, 100% {
-        background-color: #000;
-        color: #aaa;
+      background-color: #000;
+      color: #aaa;
   }
   50% {
-        background-color: #bbb;
-        color: #000;
+      background-color: #bbb;
+      color: #000;
   }
 }
-@-moz-keyframes blink {
+@keyframes terminal-blink {
   0%, 100% {
-        background-color: #000;
-        color: #aaa;
+      background-color: #000;
+      color: #aaa;
   }
   50% {
-        background-color: #bbb;
-        color: #000;
+      background-color: #bbb; /* not #aaa because it's seems there is Google Chrome bug */
+      color: #000;
   }
 }
+
 .terminal .terminal-output div div, .cmd .prompt {
     display: block;
     line-height: 14px;
@@ -158,10 +165,6 @@
 .cmd span {
     float: left;
     /*display: inline-block; */
-}
-.terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
-    background-color: #aaa;
-    color: #000;
 }
 /* fix double style of selecting text in terminal */
 .terminal-output span, .cmd span, .terminal td, .terminal pre,
