@@ -3850,10 +3850,12 @@
                     in_login = true;
                     function login_callback(user, token, silent, event) {
                         if (token) {
-                            // when called using autologin it will have only two
-                            // interpeter on the stack (main and login)
-                            // we will pop n-1 interpreters because we don't want
-                            // to logout
+                            // TODO: what about interpreter login ????
+
+                            // when called using autologin it will have only
+                            // two interpeter on the stack (main and login)
+                            // we will pop n-1 interpreters because we don't
+                            // want to logout
                             while (interpreters.size() > 1) {
                                 self.pop();
                             }
