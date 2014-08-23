@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 20 Aug 2014 12:36:11 +0000
+ * Date: Sat, 23 Aug 2014 09:36:01 +0000
  *
  * TODO:
  *
@@ -3075,7 +3075,7 @@
             }
         }
         // ---------------------------------------------------------------------
-        // Redraw all lines
+        // :: Redraw all lines
         // ---------------------------------------------------------------------
         function redraw() {
             command_line.resize(num_chars);
@@ -4273,9 +4273,16 @@
                             if (line === NEW_LINE) {
                                 wrapper = $('<div></div>');
                             } else if ($.isFunction(line)) {
+                                // this is finalize function from echo
                                 wrapper.appendTo(output);
                                 try {
                                     line(wrapper);
+                                    /* this don't work with resize
+                                      line(wrapper, function(user_finalize) {
+                                        // TODO:
+                                        //user_finalize need to be save in line object
+                                        user_finalize(wrapper);
+                                    });*/
                                 } catch (e) {
                                     display_exception(e, 'USER:echo(finalize)');
                                 }
@@ -4311,6 +4318,23 @@
                     } catch (e) {
                         alert('[Flush] ' + exception_message(e) + '\n' +
                               e.stack);
+                    }
+                    return self;
+                },
+                // -------------------------------------------------------------
+                // :: Update the output line - line number can be negative
+                // -------------------------------------------------------------
+                update: function(line, string) {
+                    if (line < 0) {
+                        line = lines.length + line; // yes +
+                    }
+                    if (!lines[line]) {
+                        self.error('Invalid line number ' + line);
+                    } else {
+                        lines[line][0] = string;
+                        // it would be hard to figure out which div need to be
+                        // updated so we update everything
+                        redraw();
                     }
                     return self;
                 },
