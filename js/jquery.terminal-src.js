@@ -4838,7 +4838,7 @@
                 self.oneTime(100, function() {
                     function disable(e) {
                         var sender = $(e.target);
-                        if (!sender.closest('.terminal').hasClass('terminal') &&
+                        if (!sender.closest('.terminal').length &&
                             self.enabled() &&
                             settings.onBlur(self) !== false) {
                             self.disable();

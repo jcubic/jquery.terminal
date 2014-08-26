@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 26 Aug 2014 20:43:31 +0000
+ * Date: Tue, 26 Aug 2014 20:55:39 +0000
  *
  * TODO:
  *
@@ -4838,7 +4838,7 @@
                 self.oneTime(100, function() {
                     function disable(e) {
                         var sender = $(e.target);
-                        if (!sender.closest('.terminal').hasClass('terminal') &&
+                        if (!sender.closest('.terminal').length &&
                             self.enabled() &&
                             settings.onBlur(self) !== false) {
                             self.disable();
