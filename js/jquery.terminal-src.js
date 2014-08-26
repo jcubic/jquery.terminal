@@ -4232,7 +4232,7 @@
                 // :: Recalculate and redraw everything
                 // -------------------------------------------------------------
                 resize: function(width, height) {
-                    if (false && !self.is(':visible')) {
+                    if (!self.is(':visible')) {
                         // delay resize if terminal not visible
                         self.stopTime('resize');
                         self.oneTime(500, 'resize', function() {
@@ -4836,14 +4836,16 @@
                     self.disable();
                 }
                 self.oneTime(100, function() {
-                    $(document).bind('click.terminal', function(e) {
+                    function disable(e) {
                         var sender = $(e.target);
                         if (!sender.closest('.terminal').hasClass('terminal') &&
                             self.enabled() &&
                             settings.onBlur(self) !== false) {
                             self.disable();
                         }
-                    });
+                    }
+                    $(document).bind('click.terminal', disable).
+                        bind('contextmenu.terminal', disable);
                 });
                 var old_enabled;
                 if (!is_touch()) {
