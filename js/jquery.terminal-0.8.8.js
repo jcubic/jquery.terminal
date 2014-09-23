@@ -819,7 +819,7 @@
         }
         // -----------------------------------------------------------------------
         // :: Search through command line history. If next is not defined or false
-        // :: it searches for the first item from the end. If true it search for 
+        // :: it searches for the first item from the end. If true it search for
         // :: the next item
         // -----------------------------------------------------------------------
         function reverse_history_search(next) {
@@ -3632,7 +3632,7 @@
                 },
                 // -----------------------------------------------------------------------
                 // :: Make the terminal in focus or blur depending on the first argument.
-                // :: If there is more then one terminal it will switch to next one, 
+                // :: If there is more then one terminal it will switch to next one,
                 // :: if the second argument is set to true the events will be not fired.
                 // :: Used on init
                 // -----------------------------------------------------------------------
@@ -3976,27 +3976,34 @@
                 // :: Exit all interpreters and logout. The function will throw exception
                 // :: if there is no login provided
                 // -----------------------------------------------------------------------
-                logout: settings.login ? function() {
-                    while (interpreters.size() > 1) {
-                        self.pop();
-                    }
-                    return self.pop();
-                } : function() {
-                    self.error(strings.loginFunctionMissing);
+                logout: function() {
+                    var proceed = settings.login ? function() {
+                        while (interpreters.size() > 1) {
+                            self.pop();
+                        }
+                        return self.pop();
+                    } : function() {
+                        self.error(strings.loginFunctionMissing);
+                    };
+                    proceed();
                 },
                 // -----------------------------------------------------------------------
                 // :: Function returns the token returned by callback function in login
                 // :: function. It does nothing (return undefined) if there is no login
                 // -----------------------------------------------------------------------
-                token: settings.login ? function(local) {
-                    return $.Storage.get(self.prefix_name(local) + '_token');
-                } : $.noop,
+                token: function(local) {
+                    return settings.login
+                        ? $.Storage.get(self.prefix_name(local) + '_token')
+                        : undefined;
+                },
                 // -----------------------------------------------------------------------
                 // :: Function return Login name entered by the user
                 // -----------------------------------------------------------------------
-                login_name: settings.login ? function(local) {
-                    return $.Storage.get(self.prefix_name(local) + '_login');
-                } : $.noop,
+                login_name: function(local) {
+                    return settings.login
+                        ? $.Storage.get(self.prefix_name(local) + '_login')
+                        : undefined;
+                },
                 // -----------------------------------------------------------------------
                 // :: Function returns the name of current interpreter
                 // -----------------------------------------------------------------------
