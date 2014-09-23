@@ -819,7 +819,7 @@
         }
         // -----------------------------------------------------------------------
         // :: Search through command line history. If next is not defined or false
-        // :: it searches for the first item from the end. If true it search for 
+        // :: it searches for the first item from the end. If true it search for
         // :: the next item
         // -----------------------------------------------------------------------
         function reverse_history_search(next) {
@@ -3632,7 +3632,7 @@
                 },
                 // -----------------------------------------------------------------------
                 // :: Make the terminal in focus or blur depending on the first argument.
-                // :: If there is more then one terminal it will switch to next one, 
+                // :: If there is more then one terminal it will switch to next one,
                 // :: if the second argument is set to true the events will be not fired.
                 // :: Used on init
                 // -----------------------------------------------------------------------
@@ -4097,6 +4097,16 @@
                 // -----------------------------------------------------------------------
                 level: function() {
                     return interpreters.size();
+                },
+                // -----------------------------------------------------------------------
+                // :: Option getter/setter
+                // -----------------------------------------------------------------------
+                option: function (name, value) {
+                    var getter = typeof value === "undefined";
+                    if (!getter) {
+                        settings[name] = value;
+                    }
+                    return getter ? settings[name] : self;
                 },
                 // -----------------------------------------------------------------------
                 // :: Reinitialize the terminal
