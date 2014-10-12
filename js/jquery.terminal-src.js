@@ -3160,6 +3160,8 @@
             if (!terminal) {
                 throw new Error(strings.invalidTerminalId);
             }
+            console.log('restore');
+            console.log(save_state);
             if (save_state[spec[1]]) { // state exists
                 terminal.import_view(save_state[spec[1]]);
             } else {
@@ -3246,14 +3248,14 @@
             }
             function after_exec() {
                 // variables defined later in commands
-                deferred.resolve();
                 if (!exec) {
                     change_hash = true;
                     if (settings.historyState) {
-                        self.save_state(command);
+                        self.save_state(command, false);
                     }
                     change_hash = saved_change_hash;
                 }
+                deferred.resolve();
                 if ($.isFunction(settings.onAfterCommand)) {
                     settings.onAfterCommand(self, command);
                 }
@@ -3321,6 +3323,8 @@
                         // this is old API
                         // if command call pause - wait until resume
                         self.bind('resume.command', function() {
+                            console.log('bind.resume');
+                            console.log(lines[lines.length-1][0]);
                             // exec with resume/pause in user code
                             after_exec();
                             self.unbind('resume.command');
@@ -3747,7 +3751,7 @@
                 // -------------------------------------------------------------
                 // :: Store current terminal state
                 // -------------------------------------------------------------
-                save_state: function(command) {
+                save_state: function(command, ignore_hash) {
                     //save_state.push({view:self.export_view(), join:[]});
                     save_state.push(self.export_view());
                     if (!$.isArray(hash_commands)) {
@@ -3759,8 +3763,11 @@
                             save_state.length-1,
                             command
                         ];
+                        console.log('save_state');
                         hash_commands.push(state);
-                        maybe_update_hash();
+                        if (!ignore_hash) {
+                            maybe_update_hash();
+                        }
                     }
                 },
                 // -------------------------------------------------------------
@@ -3789,7 +3796,7 @@
                         // is resolved
                         var ret = commands(command, silent, true).then(function() {
                             if (deferred) {
-                                deferred.resolve(self);
+                                deferred.resolve(self, 1);
                             }
                         });
                         if (deferred) {
@@ -3799,13 +3806,13 @@
                         }
                         if (!ret) {
                             if (deferred) {
-                                deferred.resolve(self);
+                                deferred.resolve(self, 2);
                                 return deferred.promise();
                             } else {
                                 try {
                                     d = new $.Deferred();
                                     ret = d.promise();
-                                    d.resolve();
+                                    d.resolve(self, 3);
                                 } catch(e) {
                                     self.exception(e);
                                     throw e;
@@ -3978,6 +3985,8 @@
                         command_line.visible();
                         var original = dalyed_commands;
                         dalyed_commands = [];
+                        console.log('...RESUME [' + original.length + ']');
+                        console.log(lines[lines.length-1][0]);
                         while (original.length) {
                             self.exec.apply(self, original.shift());
                         }
@@ -4917,7 +4926,10 @@
                     if (terminal && terminal_id == terminal.id()) {
                         if (spec[2]) {
                             try {
-                                return terminal.exec(spec[2]);
+                                return terminal.exec(spec[2]).then(function(term, i) {
+                                    console.log('then ' + i);
+                                    terminal.save_state(spec[2], true);
+                                });
                             } catch(e) {
                                 var cmd = $.terminal.escape_brackets(command);
                                 var msg = "Error while exec with command " + cmd;
