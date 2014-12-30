@@ -46,7 +46,7 @@
     // ---------------------------------------------------------------------
     // :: Html colors taken from ANSI formatting in Linux Terminal
     // ---------------------------------------------------------------------
-    $.terminal.ansi_colors: {
+    $.terminal.ansi_colors = {
         normal: {
             black: '#000',
             red: '#A00',
@@ -220,7 +220,7 @@
                 }
             }
             if (reverse) {
-                if (output_color && output_background) {
+                if (output_color || output_background) {
                     var tmp = output_background;
                     output_background = output_color;
                     output_color = tmp;
@@ -250,6 +250,10 @@
             return [styles.join(''), color, background];
         }
         return function(input) {
+            //merge multiple codes
+            input = input.replace(/((?:\x1B\[[0-9;]*[A-Za-z])*)/g, function(group) {
+                return group.replace(/m\x1B\[/g, ';');
+            });
             var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
             if (splitted.length == 1) {
                 return input;
@@ -279,6 +283,7 @@
                                 inside = false;
                                 prev_color = prev_background = '';
                             } else {
+                                console.log(code);
                                 // someone forget to close - move to next
                                 code[1] = code[1] || prev_color;
                                 code[2] = code[2] || prev_background;
@@ -316,6 +321,6 @@
             return output.join(''); //.replace(/\[\[[^\]]+\]\]/g, '');
         };
     })();
-    $.terminal.defaults.push($.terminal.overtyping);
-    $.terminal.defaults.push($.terminal.from_ansi);
+    $.terminal.defaults.formatters.push($.terminal.overtyping);
+    $.terminal.defaults.formatters.push($.terminal.from_ansi);
 })(jQuery);
