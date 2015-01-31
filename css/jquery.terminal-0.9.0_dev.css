@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Date: Wed, 20 Aug 2014 09:31:14 +0000
+ * Date: Sat, 31 Jan 2015 11:19:58 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -43,6 +43,10 @@
 }
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
     line-height: 1.2em;
+}
+.wrap {
+    word-wrap: break-word;
+    overflow: initial;
 }
 /*
 .cmd .mask {
@@ -167,7 +171,7 @@
     /*display: inline-block; */
 }
 /* fix double style of selecting text in terminal */
-.terminal-output span, .cmd span, .terminal td, .terminal pre,
+.terminal-output span, .cmd div, .cmd span, .terminal td, .terminal pre,
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
     -webkit-touch-callout: initial;
     -webkit-user-select: initial;
@@ -211,7 +215,10 @@
 .terminal td::-moz-selection,
 .terminal .terminal-output div div::-moz-selection,
 .terminal .terminal-output div span::-moz-selection,
-.terminal .terminal-output div div a::-moz-selection {
+.terminal .terminal-output div div a::-moz-selection,
+.cmd div::-moz-selection,
+.cmd > span::-moz-selection,
+.cmd .prompt span::-moz-selection {
     background-color: #aaa;
     color: #000;
 }
@@ -234,6 +241,7 @@
 .terminal .terminal-output div div::selection,
 .terminal .terminal-output div div a::selection,
 .terminal .terminal-output div span::selection,
+.cmd div::selection,
 .cmd > span::selection,
 .cmd .prompt span::selection {
     background-color: #aaa;

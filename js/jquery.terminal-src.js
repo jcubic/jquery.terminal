@@ -915,6 +915,7 @@
         }
         var num_chars; // calculated by draw_prompt
         var prompt_len;
+        var prompt_node = self.find('.prompt');
         var reverse_search = false;
         var rev_search_str = '';
         var reverse_search_position = null;
@@ -1046,7 +1047,7 @@
         // ---------------------------------------------------------------------
         function change_num_chars() {
             var W = self.width();
-            var w = cursor.innerWidth();
+            var w = cursor.width();
             num_chars = Math.floor(W / w);
         }
         // ---------------------------------------------------------------------
@@ -1262,10 +1263,9 @@
         // :: Draw prompt that can be a function or a string
         // ---------------------------------------------------------------------
         var draw_prompt = (function() {
-            var prompt_node = self.find('.prompt');
             function set(prompt) {
-                prompt_len = skip_formatting_count(prompt);
                 prompt_node.html($.terminal.format($.terminal.encode(prompt)));
+                prompt_len = prompt_node.text().length;
             }
             return function() {
                 switch (typeof prompt) {
@@ -2420,8 +2420,8 @@
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
     function char_size() {
-        var temp = $('<div class="terminal"><div class="cmd"><span>&nbsp;' +
-                     '</span></div></div>').appendTo('body');
+        var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
+                     'ss="cursor">&nbsp;</span></div></div>').appendTo('body');
         var span = temp.find('span');
         var result = {
             width: span.width(),
@@ -2434,8 +2434,19 @@
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        var width = char_size().width;
+        var temp = $('<div class="terminal wrap"><span class="cursor">' +
+                     '</span></div>').appendTo('body').css('padding', 0);
+        var span = temp.find('span');
+        var spaces = '';
+        // use more characters to get width of single character as a fraction
+        var max = 60;
+        for (var i=0;i<=max; ++i) {
+            spaces += '&nbsp;';
+        }
+        span.html(spaces);
+        var width = span.width()/max;
         var result = Math.floor(terminal.width() / width);
+        temp.remove();
         if (have_scrollbars(terminal)) {
             var SCROLLBAR_WIDTH = 20;
             // assume that scrollbars are 20px - in my Laptop with
@@ -3160,8 +3171,6 @@
             if (!terminal) {
                 throw new Error(strings.invalidTerminalId);
             }
-            console.log('restore');
-            console.log(save_state);
             if (save_state[spec[1]]) { // state exists
                 terminal.import_view(save_state[spec[1]]);
             } else {
@@ -3323,8 +3332,6 @@
                         // this is old API
                         // if command call pause - wait until resume
                         self.bind('resume.command', function() {
-                            console.log('bind.resume');
-                            console.log(lines[lines.length-1][0]);
                             // exec with resume/pause in user code
                             after_exec();
                             self.unbind('resume.command');
@@ -3763,7 +3770,6 @@
                             save_state.length-1,
                             command
                         ];
-                        console.log('save_state');
                         hash_commands.push(state);
                         if (!ignore_hash) {
                             maybe_update_hash();
@@ -3985,8 +3991,6 @@
                         command_line.visible();
                         var original = dalyed_commands;
                         dalyed_commands = [];
-                        console.log('...RESUME [' + original.length + ']');
-                        console.log(lines[lines.length-1][0]);
                         while (original.length) {
                             self.exec.apply(self, original.shift());
                         }
@@ -4710,7 +4714,6 @@
             }, function(name, fun) {
                 // wrap all functions and display execptions
                 return function() {
-                    //console.log('terminal::' + name);
                     try {
                         return fun.apply(self, [].slice.apply(arguments));
                     } catch (e) {
@@ -4927,7 +4930,6 @@
                         if (spec[2]) {
                             try {
                                 return terminal.exec(spec[2]).then(function(term, i) {
-                                    console.log('then ' + i);
                                     terminal.save_state(spec[2], true);
                                 });
                             } catch(e) {

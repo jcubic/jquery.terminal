@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 26 Aug 2014 20:55:39 +0000
+ * Date: Sat, 31 Jan 2015 11:19:56 +0000
  *
  * TODO:
  *
@@ -915,6 +915,7 @@
         }
         var num_chars; // calculated by draw_prompt
         var prompt_len;
+        var prompt_node = self.find('.prompt');
         var reverse_search = false;
         var rev_search_str = '';
         var reverse_search_position = null;
@@ -1046,7 +1047,7 @@
         // ---------------------------------------------------------------------
         function change_num_chars() {
             var W = self.width();
-            var w = cursor.innerWidth();
+            var w = cursor.width();
             num_chars = Math.floor(W / w);
         }
         // ---------------------------------------------------------------------
@@ -1262,10 +1263,9 @@
         // :: Draw prompt that can be a function or a string
         // ---------------------------------------------------------------------
         var draw_prompt = (function() {
-            var prompt_node = self.find('.prompt');
             function set(prompt) {
-                prompt_len = skip_formatting_count(prompt);
                 prompt_node.html($.terminal.format($.terminal.encode(prompt)));
+                prompt_len = prompt_node.text().length;
             }
             return function() {
                 switch (typeof prompt) {
@@ -2420,8 +2420,8 @@
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
     function char_size() {
-        var temp = $('<div class="terminal"><div class="cmd"><span>&nbsp;' +
-                     '</span></div></div>').appendTo('body');
+        var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
+                     'ss="cursor">&nbsp;</span></div></div>').appendTo('body');
         var span = temp.find('span');
         var result = {
             width: span.width(),
@@ -2434,8 +2434,19 @@
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        var width = char_size().width;
+        var temp = $('<div class="terminal wrap"><span class="cursor">' +
+                     '</span></div>').appendTo('body').css('padding', 0);
+        var span = temp.find('span');
+        var spaces = '';
+        // use more characters to get width of single character as a fraction
+        var max = 60;
+        for (var i=0;i<=max; ++i) {
+            spaces += '&nbsp;';
+        }
+        span.html(spaces);
+        var width = span.width()/max;
         var result = Math.floor(terminal.width() / width);
+        temp.remove();
         if (have_scrollbars(terminal)) {
             var SCROLLBAR_WIDTH = 20;
             // assume that scrollbars are 20px - in my Laptop with
@@ -3246,14 +3257,14 @@
             }
             function after_exec() {
                 // variables defined later in commands
-                deferred.resolve();
                 if (!exec) {
                     change_hash = true;
                     if (settings.historyState) {
-                        self.save_state(command);
+                        self.save_state(command, false);
                     }
                     change_hash = saved_change_hash;
                 }
+                deferred.resolve();
                 if ($.isFunction(settings.onAfterCommand)) {
                     settings.onAfterCommand(self, command);
                 }
@@ -3747,7 +3758,7 @@
                 // -------------------------------------------------------------
                 // :: Store current terminal state
                 // -------------------------------------------------------------
-                save_state: function(command) {
+                save_state: function(command, ignore_hash) {
                     //save_state.push({view:self.export_view(), join:[]});
                     save_state.push(self.export_view());
                     if (!$.isArray(hash_commands)) {
@@ -3760,7 +3771,9 @@
                             command
                         ];
                         hash_commands.push(state);
-                        maybe_update_hash();
+                        if (!ignore_hash) {
+                            maybe_update_hash();
+                        }
                     }
                 },
                 // -------------------------------------------------------------
@@ -3789,7 +3802,7 @@
                         // is resolved
                         var ret = commands(command, silent, true).then(function() {
                             if (deferred) {
-                                deferred.resolve(self);
+                                deferred.resolve(self, 1);
                             }
                         });
                         if (deferred) {
@@ -3799,13 +3812,13 @@
                         }
                         if (!ret) {
                             if (deferred) {
-                                deferred.resolve(self);
+                                deferred.resolve(self, 2);
                                 return deferred.promise();
                             } else {
                                 try {
                                     d = new $.Deferred();
                                     ret = d.promise();
-                                    d.resolve();
+                                    d.resolve(self, 3);
                                 } catch(e) {
                                     self.exception(e);
                                     throw e;
@@ -4701,7 +4714,6 @@
             }, function(name, fun) {
                 // wrap all functions and display execptions
                 return function() {
-                    //console.log('terminal::' + name);
                     try {
                         return fun.apply(self, [].slice.apply(arguments));
                     } catch (e) {
@@ -4917,7 +4929,9 @@
                     if (terminal && terminal_id == terminal.id()) {
                         if (spec[2]) {
                             try {
-                                return terminal.exec(spec[2]);
+                                return terminal.exec(spec[2]).then(function(term, i) {
+                                    terminal.save_state(spec[2], true);
+                                });
                             } catch(e) {
                                 var cmd = $.terminal.escape_brackets(command);
                                 var msg = "Error while exec with command " + cmd;
