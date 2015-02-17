@@ -1309,14 +1309,14 @@
         // ---------------------------------------------------------------------
         function keydown_event(e) {
             var result, pos, len;
-            if ($.isFunction(options.keydown)) {
-                result = options.keydown(e);
-                if (result !== undefined) {
-                    //prevent_keypress = true;
-                    return result;
-                }
-            }
             if (enabled) {
+                if ($.isFunction(options.keydown)) {
+                    result = options.keydown(e);
+                    if (result !== undefined) {
+                        //prevent_keypress = true;
+                        return result;
+                    }
+                }
                 if (e.which !== 38 &&
                     !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
@@ -3534,27 +3534,27 @@
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i, top = interpreters.top();
-            if ($.isFunction(top.keydown)) {
-                result = top.keydown(e, self);
-                if (result !== undefined) {
-                    return result;
-                }
-            }
-            var completion;
-            if ((settings.completion &&
-                 $.type(settings.completion) != 'boolean') &&
-                !top.completion) {
-                completion = settings.completion;
-            } else {
-                completion = top.completion;
-            }
-            if ($.isFunction(settings.keydown)) {
-                result = settings.keydown(e, self);
-                if (result !== undefined) {
-                    return result;
-                }
-            }
             if (!self.paused() && self.enabled()) {
+                if ($.isFunction(top.keydown)) {
+                    result = top.keydown(e, self);
+                    if (result !== undefined) {
+                        return result;
+                    }
+                }
+                var completion;
+                if ((settings.completion &&
+                     $.type(settings.completion) != 'boolean') &&
+                    !top.completion) {
+                    completion = settings.completion;
+                } else {
+                    completion = top.completion;
+                }
+                if ($.isFunction(settings.keydown)) {
+                    result = settings.keydown(e, self);
+                    if (result !== undefined) {
+                        return result;
+                    }
+                }
                 // after text pasted into textarea in cmd plugin
                 self.oneTime(10, function() {
                     on_scrollbar_show_resize();
