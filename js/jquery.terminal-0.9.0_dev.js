@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 12 Mar 2015 14:13:45 +0000
+ * Date: Thu, 12 Mar 2015 14:35:55 +0000
  *
  * TODO:
  *
@@ -1924,7 +1924,7 @@
     var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
     //var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     //var url_re = /\bhttps?:\/\/(?:(?!&[^;]+;)[^\s"'<>)])+\b/g;
-    var url_re = /\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>)])+\b/g;
+    var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>)])+\b)/g;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]* |$)|(\\ |[^ ])+|[\w-]+)/g;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
@@ -2196,9 +2196,13 @@
                                 }
                                 var result;
                                 if (style.indexOf('!') !== -1) {
-                                    result = '<a target="_blank" href="' + data + '" ';
-                                    if (settings.linksNoReferer) {
-                                        result += 'rel="noreferrer" ';
+                                    if (data.match(email_re)) {
+                                        result = '<a href="mailto:' + data + '" ';
+                                    } else {
+                                        result = '<a target="_blank" href="' + data + '" ';
+                                        if (settings.linksNoReferer) {
+                                            result += 'rel="noreferrer" ';
+                                        }
                                     }
                                 } else {
                                     result = '<span ';
@@ -2225,27 +2229,7 @@
                 } else {
                     str = '<span>' + str + '</span>';
                 }
-                splitted = str.split(/(<\/?(?:span|a)[^>]*>)/g);
-                var output = [];
-                for (var i=0; i<splitted.length; ++i) {
-                    if (!splitted[i].match(/^<\/?(span|a)/) &&
-                        (splitted[i-1] && !splitted[i-1].match(/^<a/))) {
-                        output[i] = splitted[i].replace(url_re, function(link) {
-                            var comma = link.match(/\.$/);
-                            link = link.replace(/\.$/, '');//.replace(/&amp;/g, '&');
-                            var output = '<a target="_blank" ';
-                            if (settings.linksNoReferer) {
-                                output += 'rel="noreferrer" ';
-                            }
-                            output += 'href="' + link + '">' + link + '</a>' +
-                                (comma ? '.' : '');
-                            return output;
-                        }).replace(email_re, '<a href="mailto:$1">$1</a>');
-                    } else {
-                        output[i] = splitted[i];
-                    }
-                }
-                return output.join('').replace(/<span><br\/?><\/span>/g, '<br/>');
+                 return str.replace(/<span><br\/?><\/span>/gi, '<br/>');
             } else {
                 return '';
             }
@@ -3016,6 +3000,9 @@
         var output_buffer = [];
         var NEW_LINE = 1;
         function buffer_line(string, options) {
+            // urls should always have formatting to keep url if split
+            string = string.replace(email_re, '[[!;;]$1]').
+                replace(url_re, '[[!;;]$1]');
             var formatters = $.terminal.defaults.formatters;
             var i, len;
             if (!options.raw) {
