@@ -2228,8 +2228,8 @@
                 splitted = str.split(/(<\/?(?:span|a)[^>]*>)/g);
                 var output = [];
                 for (var i=0; i<splitted.length; ++i) {
-                    if (!splitted[i].match(/<(span|a)/) &&
-                        (splitted[i-1] && !splitted[i-1].match('<a'))) {
+                    if (!splitted[i].match(/^<\/?(span|a)/) &&
+                        (splitted[i-1] && !splitted[i-1].match(/^<a/))) {
                         output[i] = splitted[i].replace(url_re, function(link) {
                             var comma = link.match(/\.$/);
                             link = link.replace(/\.$/, '');//.replace(/&amp;/g, '&');

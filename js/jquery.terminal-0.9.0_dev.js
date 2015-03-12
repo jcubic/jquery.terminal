@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 12 Mar 2015 14:11:53 +0000
+ * Date: Thu, 12 Mar 2015 14:13:45 +0000
  *
  * TODO:
  *
@@ -2228,8 +2228,8 @@
                 splitted = str.split(/(<\/?(?:span|a)[^>]*>)/g);
                 var output = [];
                 for (var i=0; i<splitted.length; ++i) {
-                    if (!splitted[i].match(/<(span|a)/) &&
-                        (splitted[i-1] && !splitted[i-1].match('<a'))) {
+                    if (!splitted[i].match(/^<\/?(span|a)/) &&
+                        (splitted[i-1] && !splitted[i-1].match(/^<a/))) {
                         output[i] = splitted[i].replace(url_re, function(link) {
                             var comma = link.match(/\.$/);
                             link = link.replace(/\.$/, '');//.replace(/&amp;/g, '&');
