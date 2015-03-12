@@ -1917,18 +1917,18 @@
     }
     ;
     // -------------------------------------------------------------------------
-    var format_split_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/i;
-    var format_parts_re = /\[\[([gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
-    var format_re = /\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
-    var format_full_re = /^\[\[([gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]$/gi;
+    var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/i;
+    var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
+    var format_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
+    var format_full_re = /^\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]$/gi;
     var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
     //var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     //var url_re = /\bhttps?:\/\/(?:(?!&[^;]+;)[^\s"'<>)])+\b/g;
     var url_re = /\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>)])+\b/g;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]* |$)|(\\ |[^ ])+|[\w-]+)/g;
-    var format_begin_re = /(\[\[[gbiuso]*;[^;]*;[^\]]*\])/i;
-    var format_last_re = /\[\[[gbiuso]*;[^;]*;[^\]]*\]?$/i;
+    var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
+    var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\](?!\]))*\]\])/;
     $.terminal = {
         version: '{{VER}}',
@@ -2141,9 +2141,9 @@
             }, options || {});
             if (typeof str === 'string') {
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
-                var splited = $.terminal.format_split(str);
-                if (splited && splited.length > 1) {
-                    str = $.map(splited, function(text) {
+                var splitted = $.terminal.format_split(str);
+                if (splitted && splitted.length > 1) {
+                    str = $.map(splitted, function(text) {
                         if (text === '') {
                             return text;
                         } else if ($.terminal.is_formatting(text)) {
@@ -2194,16 +2194,28 @@
                                 } else {
                                     data = data_text.replace(/&#93;/g, ']');
                                 }
-                                var result = '<span ';
+                                var result;
+                                if (style.indexOf('!') !== -1) {
+                                    result = '<a target="_blank" href="' + data + '" ';
+                                    if (settings.linksNoReferer) {
+                                        result += 'rel="noreferrer" ';
+                                    }
+                                } else {
+                                    result = '<span ';
+                                }
                                 if (style_str !== '') {
                                     result += 'style="' + style_str + '"';
                                 }
                                 if (_class !== '') {
                                     result += ' class="' + _class + '"';
                                 }
-                                result += ' data-text="' +
-                                    data.replace('"', '&quote;') + '">' +
-                                    text + '</span>';
+                                if (style.indexOf('!') !== -1) {
+                                    result += '>' + text + '</a>';
+                                } else {
+                                    result += ' data-text="' +
+                                        data.replace('"', '&quote;') + '">' +
+                                        text + '</span>';
+                                }
                                 return result;
                             });
                         } else {
@@ -2213,10 +2225,12 @@
                 } else {
                     str = '<span>' + str + '</span>';
                 }
-                return $.map(str.split(/(<\/?span[^>]*>)/g), function(string) {
-                    if (!string.match(/span/)) {
-                        // process urls
-                        return string.replace(url_re, function(link) {
+                splitted = str.split(/(<\/?(?:span|a)[^>]*>)/g);
+                var output = [];
+                for (var i=0; i<splitted.length; ++i) {
+                    if (!splitted[i].match(/<(span|a)/) &&
+                        (splitted[i-1] && !splitted[i-1].match('<a'))) {
+                        output[i] = splitted[i].replace(url_re, function(link) {
                             var comma = link.match(/\.$/);
                             link = link.replace(/\.$/, '');//.replace(/&amp;/g, '&');
                             var output = '<a target="_blank" ';
@@ -2228,9 +2242,10 @@
                             return output;
                         }).replace(email_re, '<a href="mailto:$1">$1</a>');
                     } else {
-                        return string;
+                        output[i] = splitted[i];
                     }
-                }).join('').replace(/<span><br\/?><\/span>/g, '<br/>');
+                }
+                return output.join('').replace(/<span><br\/?><\/span>/g, '<br/>');
             } else {
                 return '';
             }
