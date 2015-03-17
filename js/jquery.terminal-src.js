@@ -2510,18 +2510,18 @@
             wrongPasswordTryAgain: "Wrong password try again!",
             wrongPassword: "Wrong password!",
             ajaxAbortError: "Error while aborting ajax call!",
-            wrongArity: "Wrong number of arguments. Function '%s' expect %s got %s!",
+            wrongArity: "Wrong number of arguments. Function '%s' expects %s got %s!",
             commandNotFound: "Command '%s' Not Found!",
             oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescribe",
-            oneInterpreterFunction: "You can't use more then one function (rpc with " +
-                "ignoreSystemDescribe is count as one)",
-            loginFunctionMissing: "You don't have login function",
+            oneInterpreterFunction: "You can't use more than one function (rpc with " +
+                "ignoreSystemDescribe counts as one)",
+            loginFunctionMissing: "You didn't specify a login function",
             noTokenError: "Access denied (no token)",
-            serverResponse: "Server reponse is",
+            serverResponse: "Server responded",
             wrongGreetings: "Wrong value of greetings parameter",
             notWhileLogin: "You can't call that function while in login",
             loginIsNotAFunction: "Authenticate must be a function",
-            canExitError: "You can't exit from main interpeter",
+            canExitError: "You can't exit from main interpreter",
             invalidCompletion: "Invalid completion",
             login: "login",
             password: "password"
@@ -3345,7 +3345,7 @@
                 throw 'Sorry, but terminal said that "' + self.selector +
                     '" is not valid selector!';
             }
-            //var names = []; // stack if interpeter names
+            //var names = []; // stack if interpreter names
             var scroll_object;
             var prev_command; // used for name on the terminal if not defined
             var loged_in = false;
