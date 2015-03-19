@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 12 Mar 2015 14:35:55 +0000
+ * Date: Thu, 19 Mar 2015 17:40:54 +0000
  *
  * TODO:
  *
@@ -1926,7 +1926,7 @@
     //var url_re = /\bhttps?:\/\/(?:(?!&[^;]+;)[^\s"'<>)])+\b/g;
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>)])+\b)/g;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
-    var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]* |$)|(\\ |[^ ])+|[\w-]+)/g;
+    var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]*)(:? |$)|(\\ |[^ ])+|[\w-]+)/g;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\](?!\]))*\]\])/;
@@ -2274,6 +2274,7 @@
         parse_arguments: function(string) {
             var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
             return $.map(string.match(command_re) || [], function(arg) {
+                arg = arg.replace(/\s+$/, ''); // fix trailing space in regex
                 if (arg[0] === "'" && arg[arg.length-1] === "'") {
                     return arg.replace(/^'|'$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
@@ -2309,11 +2310,12 @@
         // ---------------------------------------------------------------------
         split_arguments: function(string) {
             return $.map(string.match(command_re) || [], function(arg) {
+                arg = arg.replace(/\s+$/, ''); // fix trailing space in regex
                 if (arg[0] === "'" && arg[arg.length-1] === "'") {
                     return arg.replace(/^'|'$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
                     return arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
-                } else if (arg[0] === '/' && arg[arg.length-1] == '/') {
+                } else if (arg.match(/\/.*\/[gimy]*$/)) {
                     return arg;
                 } else {
                     return arg.replace(/\\ /g, ' ');
@@ -2558,20 +2560,20 @@
             wrongPasswordTryAgain: "Wrong password try again!",
             wrongPassword: "Wrong password!",
             ajaxAbortError: "Error while aborting ajax call!",
-            wrongArity: "Wrong number of arguments. Function '%s' expect %s got"+
+            wrongArity: "Wrong number of arguments. Function '%s' expects %s got"+
                 " %s!",
             commandNotFound: "Command '%s' Not Found!",
             oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescr"+
                 "ibe",
-            oneInterpreterFunction: "You can't use more then one function (rpc"+
-                "with ignoreSystemDescribe is count as one)",
-            loginFunctionMissing: "You don't have login function",
+            oneInterpreterFunction: "You can't use more than one function (rpc"+
+                "with ignoreSystemDescribe counts as one)",
+            loginFunctionMissing: "You didn't specify a login function",
             noTokenError: "Access denied (no token)",
-            serverResponse: "Server reponse is",
+            serverResponse: "Server responded",
             wrongGreetings: "Wrong value of greetings parameter",
             notWhileLogin: "You can't call `%s' function while in login",
             loginIsNotAFunction: "Authenticate must be a function",
-            canExitError: "You can't exit from main interpeter",
+            canExitError: "You can't exit from main interpreter",
             invalidCompletion: "Invalid completion",
             hashChangeMissing: "You need to include hashchange jquery plugin " +
                 "for history to work",
