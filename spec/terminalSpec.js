@@ -147,23 +147,6 @@ describe('Terminal utils', function() {
                                    'le="text-decoration:underline line-through'+
                                    ' overline;" data-text="Baz">Baz</span>');
         });
-        var urls = ['http://terminal.jcubic.pl/examples.php',
-                    'https://www.google.com/?q=jquery%20terminal'];
-        var links = urls.map(function(href) {
-            return '<a target="_blank" href="' + href + '">' + href + '</a>';
-        }).join(' ');
-        it('should convert url to links', function() {
-            expect($.terminal.format(urls.join(' '))).
-                toEqual('<span>' + links + '</span>');
-        });
-        var emails = ['foo@bar.com', 'baz.quux@example.com'];
-        var email_links = emails.map(function(email) {
-            return '<a href="mailto:' + email + '">' + email + '</a>';
-        }).join(' ');
-        it('should convert emails to links', function() {
-            expect($.terminal.format(emails.join(' '))).
-                toEqual('<span>' + email_links + '</span>');
-        });
     });
     describe('$.terminal.strip', function() {
         var formatting = '-_-[[biugs;#fff;#000]Foo]-_-[[i;;;foo]Bar]-_-[[ous;;'+
