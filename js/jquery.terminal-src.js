@@ -3138,18 +3138,19 @@
         // :: Display prompt and last command
         // ---------------------------------------------------------------------
         function echo_command(command) {
-            command = $.terminal.escape_formatting(command);
             var prompt = command_line.prompt();
             var mask = command_line.mask();
-            switch(typeof mask) {
-            case 'string':
-                command = command.replace(/./g, mask);
-                break;
-            case 'boolean':
-                if (mask) {
+            if (mask) {
+                switch(typeof mask) {
+                case 'string':
+                    command = command.replace(/./g, mask);
+                    break;
+                case 'boolean':
                     command = command.replace(/./g, settings.maskChar);
+                    break;
                 }
-                break;
+            } else {
+                command = $.terminal.escape_formatting(command);
             }
             var options = {
                 finalize: function(div) {
