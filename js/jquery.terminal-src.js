@@ -3297,13 +3297,13 @@
                 // execute_extended_command disable it and it can be exected
                 // after delay
                 var saved_change_hash = change_hash;
-                if (command.match(/^\s*(exit|clear)\s*$/)) {
-                    if (settings.exit && command.match(/^\s*exit\s*$/)) {
+                if (command.match(/^\s*(exit|clear)\s*$/i)) {
+                    if (settings.exit && command.match(/^\s*exit\s*$/i)) {
                         var count = interpreters.size();
                         if (count == 1 && self.token() || count > 1) {
                             self.pop();
                         }
-                    } else if (settings.clear && command.match(/^\s*clear\s*$/)) {
+                    } else if (settings.clear && command.match(/^\s*clear\s*$/i)) {
                         self.clear();
                     }
                     if ($.isFunction(settings.onAfterCommand)) {
