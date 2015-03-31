@@ -3301,9 +3301,6 @@
                     if (settings.exit && command.match(/^\s*exit\s*$/)) {
                         var count = interpreters.size();
                         if (count == 1 && self.token() || count > 1) {
-                            if (!silent) {
-                                echo_command(command);
-                            }
                             self.pop();
                         }
                     } else if (settings.clear && command.match(/^\s*clear\s*$/)) {
