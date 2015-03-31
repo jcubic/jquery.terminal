@@ -1924,7 +1924,7 @@
     var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
     //var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     //var url_re = /\bhttps?:\/\/(?:(?!&[^;]+;)[^\s"'<>)])+\b/g;
-    var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>)])+\b)/gi;
+    var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\]\[)])+\b)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]*)(?=:? |$)|(\\ |[^ ])+|[\w-]+)/gi;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
@@ -4430,7 +4430,11 @@
                         });
                     }
                     if (e.stack) {
-                        self.error(e.stack, {
+                        self.echo(e.stack.split(/\n/g).map(function(trace) {
+                            return '[[;;;error]' + trace.replace(url_re, function(url) {
+                                return ']' + url + '[[;;;error]';
+                            }) + ']';
+                        }).join('\n'), {
                             finalize: function(div) {
                                 div.addClass('exception stack-trace');
                             }
