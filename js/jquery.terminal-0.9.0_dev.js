@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 20 Mar 2015 08:42:34 +0000
+ * Date: Tue, 31 Mar 2015 10:04:24 +0000
  *
  * TODO:
  *
@@ -3299,7 +3299,6 @@
                 if (command.match(/^\s*(exit|clear)\s*$/)) {
                     if (settings.exit && command.match(/^\s*exit\s*$/)) {
                         var count = interpreters.size();
-                        self.token();
                         if (count == 1 && self.token() || count > 1) {
                             if (!silent) {
                                 echo_command(command);

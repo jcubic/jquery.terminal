@@ -3299,7 +3299,6 @@
                 if (command.match(/^\s*(exit|clear)\s*$/)) {
                     if (settings.exit && command.match(/^\s*exit\s*$/)) {
                         var count = interpreters.size();
-                        self.token();
                         if (count == 1 && self.token() || count > 1) {
                             if (!silent) {
                                 echo_command(command);
