@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 31 Mar 2015 12:22:48 +0000
+ * Date: Wed, 01 Apr 2015 19:30:21 +0000
  *
  * TODO:
  *
@@ -1258,7 +1258,6 @@
                 }
             };
         })(self);
-        var last_command;
         // ---------------------------------------------------------------------
         // :: Draw prompt that can be a function or a string
         // ---------------------------------------------------------------------
@@ -1619,7 +1618,7 @@
             },
             'delete': function(n, stay) {
                 var removed;
-                if (n == 0) {
+                if (n === 0) {
                     return self;
                 } else if (n < 0) {
                     if (position > 0) {
@@ -1905,17 +1904,16 @@
                 name: m[1],
                 args: fn(m[2]),
                 rest: m[2]
-            }
+            };
         } else {
             return {
                 command: string,
                 name: '',
                 args: [],
                 rest: ''
-            }
+            };
         }
     }
-    ;
     // -------------------------------------------------------------------------
     var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/i;
     var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
@@ -3007,7 +3005,7 @@
             var i, len;
             if (!options.raw) {
                 // format using user defined formatters
-                for (var i=0; i<formatters.length; ++i) {
+                for (i=0; i<formatters.length; ++i) {
                     try {
                         if (typeof formatters[i] == 'function') {
                             var ret = formatters[i](string);
@@ -3062,7 +3060,7 @@
                 }, options || {});
                 var string = $.type(line) === "function" ? line() : line;
                 string = $.type(string) === "string" ? string : String(string);
-                if (string != '') {
+                if (string !== '') {
                     $.each(string.split(format_exec_re), function(i, string) {
                         if (string.match(format_exec_re)) {
                             // redraw should not execute commands and it have
@@ -3083,8 +3081,8 @@
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
-                alert('[Internal Exception(process_line)]:' + exception_message(e)
-                      + '\n' + e.stack);
+                alert('[Internal Exception(process_line)]:' +
+                      exception_message(e) + '\n' + e.stack);
             }
         }
         // ---------------------------------------------------------------------
@@ -3316,7 +3314,7 @@
                     var position = lines.length-1;
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
-                    if (result != undefined) {
+                    if (result !== undefined) {
                         // auto pause/resume when user return promises
                         self.pause();
                         return $.when(result).then(function(result) {
@@ -4563,7 +4561,7 @@
                         // push is called in login
                         options.name = prev_command.name;
                     }
-                    if (options.prompt == undefined) {
+                    if (options.prompt === undefined) {
                         options.prompt = options.name + ' ';
                     }
                     //names.push(options.name);
