@@ -7,7 +7,7 @@
  *           \/              /____/                              version {{VER}}
  * http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2014 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2010-2015 Jakub Jankiewicz <http://jcubic.pl>
  *
  * This file is part of jQuery Terminal.
  *
@@ -2771,8 +2771,8 @@
                 settings.onAjaxError.call(self, xhr, status, error);
             } else if (status !== 'abort') {
                 self.error('&#91;AJAX&#93; ' + status + ' - ' +
-                           strings.serverResponse +
-                           ': \n' + xhr.responseText);
+                           strings.serverResponse + ': \n' +
+                           $.terminal.escape_brackets(xhr.responseText));
             }
         }
         // ---------------------------------------------------------------------
@@ -3975,6 +3975,9 @@
                         paused = true;
                         self.disable();
                         command_line.hidden();
+                        if ($.isFunction(settings.onPause)) {
+                            settings.onPause();
+                        }
                     }
                     return self;
                 },
@@ -3993,6 +3996,9 @@
                         }
                         self.trigger('resume');
                         scroll_to_bottom();
+                        if ($.isFunction(settings.onResume)) {
+                            settings.onResume();
+                        }
                     }
                     return self;
                 },
