@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 07 Apr 2015 09:41:13 +0000
+ * Date: Tue, 07 Apr 2015 09:45:44 +0000
  *
  * TODO:
  *
@@ -3700,6 +3700,9 @@
             $.extend(self, $.omap({
                 id: function() {
                     return terminal_id;
+                },
+                greetings: function() {
+                    show_greetings();
                 },
                 // -------------------------------------------------------------
                 // :: Clear the output
