@@ -2535,7 +2535,8 @@
         processArguments: true,
         linksNoReferrer: false,
         processRPCResponse: null,
-        Token: true,
+        Token: true, // where this came from?
+        convertLinks: true,
         historyState: false,
         login: null,
         outputLimit: -1,
@@ -2999,8 +3000,10 @@
         var NEW_LINE = 1;
         function buffer_line(string, options) {
             // urls should always have formatting to keep url if split
-            string = string.replace(email_re, '[[!;;]$1]').
-                replace(url_re, '[[!;;]$1]');
+            if (settings.convertLinks) {
+                string = string.replace(email_re, '[[!;;]$1]').
+                    replace(url_re, '[[!;;]$1]');
+            }
             var formatters = $.terminal.defaults.formatters;
             var i, len;
             if (!options.raw) {

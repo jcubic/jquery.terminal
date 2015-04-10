@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 07 Apr 2015 09:45:44 +0000
+ * Date: Fri, 10 Apr 2015 10:53:29 +0000
  *
  * TODO:
  *
@@ -2535,7 +2535,8 @@
         processArguments: true,
         linksNoReferrer: false,
         processRPCResponse: null,
-        Token: true,
+        Token: true, // where this came from?
+        convertLinks: true,
         historyState: false,
         login: null,
         outputLimit: -1,
@@ -2999,8 +3000,10 @@
         var NEW_LINE = 1;
         function buffer_line(string, options) {
             // urls should always have formatting to keep url if split
-            string = string.replace(email_re, '[[!;;]$1]').
-                replace(url_re, '[[!;;]$1]');
+            if (settings.convertLinks) {
+                string = string.replace(email_re, '[[!;;]$1]').
+                    replace(url_re, '[[!;;]$1]');
+            }
             var formatters = $.terminal.defaults.formatters;
             var i, len;
             if (!options.raw) {
