@@ -3706,6 +3706,7 @@
                 },
                 greetings: function() {
                     show_greetings();
+                    return self;
                 },
                 // -------------------------------------------------------------
                 // :: Clear the output

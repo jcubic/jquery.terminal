@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 10 Apr 2015 10:53:29 +0000
+ * Date: Fri, 10 Apr 2015 11:12:55 +0000
  *
  * TODO:
  *
@@ -3706,6 +3706,7 @@
                 },
                 greetings: function() {
                     show_greetings();
+                    return self;
                 },
                 // -------------------------------------------------------------
                 // :: Clear the output
