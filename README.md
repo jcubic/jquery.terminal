@@ -50,8 +50,8 @@ users. It can also be used to debug your application.
 
 ### Example of usage (javascript interpreter)
 
-This is code that use low level, that give you full control of the comands,
-just pass anything that user type into a function.
+This is code that uses low level, giving you full control of the comands,
+just pass anything that user types into a function.
 
 ```javascript
 jQuery(function($, undefined) {
