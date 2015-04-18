@@ -212,14 +212,14 @@
                         reverse = true;
                         break;
                     default:
-                        
-                        if (color_list[num]) {
-                            output_color = color_list[num];
+                        if (!process_8bit) {
+                            if (color_list[num]) {
+                                output_color = color_list[num];
+                            }
+                            if (background_list[num]) {
+                                output_background = background_list[num];
+                            }
                         }
-                        if (background_list[num]) {
-                            output_background = background_list[num];
-                        }
-                        
                     }
                 }
             }
