@@ -175,48 +175,52 @@
             var palette = $.terminal.ansi_colors.palette;
             for(var i in controls) {
                 num = parseInt(controls[i], 10);
-                switch(num) {
-                case 1:
-                    styles.push('b');
-                    bold = true;
-                    faited = false;
-                    break;
-                case 4:
-                    styles.push('u');
-                    break;
-                case 3:
-                    styles.push('i');
-                    break;
-                case 5:
-                    process_8bit = true;
-                    break;
-                case 38:
-                    _8bit_color = true;
-                    break;
-                case 48:
-                    _8bit_background = true;
-                    break;
-                case 2:
-                    faited = true;
-                    bold = false;
-                    break;
-                case 7:
-                    reverse = true;
-                    break;
-                default:
-                    if (_8bit_color && process_8bit && palette[num-1]) {
+                if (process_8bit) {
+                    if (_8bit_color && palette[num-1]) {
                         output_color = palette[num-1];
-                    } else if (color_list[num]) {
-                        output_color = color_list[num];
                     }
-                    if (_8bit_background && process_8bit && palette[num-1]) {
+                    if (_8bit_background && palette[num-1]) {
                         output_background = palette[num-1];
-                    } else if (background_list[num]) {
-                        output_background = background_list[num];
                     }
-                }
-                if (num !== 5) {
-                    process_8bit = false;
+                } else {
+                    switch(num) {
+                    case 1:
+                        styles.push('b');
+                        bold = true;
+                        faited = false;
+                        break;
+                    case 4:
+                        styles.push('u');
+                        break;
+                    case 3:
+                        styles.push('i');
+                        break;
+                    case 5:
+                        process_8bit = true;
+                        break;
+                    case 38:
+                        _8bit_color = true;
+                        break;
+                    case 48:
+                        _8bit_background = true;
+                        break;
+                    case 2:
+                        faited = true;
+                        bold = false;
+                        break;
+                    case 7:
+                        reverse = true;
+                        break;
+                    default:
+                        
+                        if (color_list[num]) {
+                            output_color = color_list[num];
+                        }
+                        if (background_list[num]) {
+                            output_background = background_list[num];
+                        }
+                        
+                    }
                 }
             }
             if (reverse) {
