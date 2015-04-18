@@ -283,7 +283,6 @@
                                 inside = false;
                                 prev_color = prev_background = '';
                             } else {
-                                console.log(code);
                                 // someone forget to close - move to next
                                 code[1] = code[1] || prev_color;
                                 code[2] = code[2] || prev_background;
