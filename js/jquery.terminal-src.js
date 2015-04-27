@@ -62,6 +62,7 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 
+/* jshint ignore:start */
 (function(ctx) {
     var sprintf = function() {
         if (!sprintf.cache.hasOwnProperty(arguments[0])) {
@@ -194,7 +195,7 @@
     ctx.sprintf = sprintf;
     ctx.vsprintf = vsprintf;
 })(typeof exports != "undefined" ? exports : window);
-
+/* jshint ignore:end */
 (function($, undefined) {
     "use strict";
     // -----------------------------------------------------------------------
@@ -213,7 +214,7 @@
             if (typeof object == 'object') {
                 if ($.isArray(object)) {
                     return this.clone_array(object);
-                } else if (object == null) {
+                } else if (object === null) {
                     return object;
                 } else {
                     for (var key in object) {
@@ -246,6 +247,7 @@
     var clone = function(object) {
         return Clone.clone_object(object);
     };
+    /* jshint ignore:start */
     // -----------------------------------------------------------------------
     // :: Storage plugin
     // -----------------------------------------------------------------------
@@ -479,6 +481,7 @@
             }
         }
     });
+    /* jshint ignore:end */
 
     if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
         jQuery(window).one('unload', function() {
@@ -496,6 +499,7 @@
     // -----------------------------------------------------------------------
     // :: CROSS BROWSER SPLIT
     // -----------------------------------------------------------------------
+    /* jshint ignore:start */
     (function(undef) {
 
         // prevent double include
@@ -654,6 +658,7 @@
             target.focus();
         return pos;
     };
+    /* jshint ignore:end */
     // -----------------------------------------------------------------------
     // :: Split string to array of strings with the same length
     // -----------------------------------------------------------------------
@@ -1332,6 +1337,7 @@
                     }
                     redraw();
                     // finish reverse search and execute normal event handler
+                    /* jshint validthis:true */
                     keydown_event.call(this, e);
                 } else if (e.altKey) {
                     // Chrome on Windows sets ctrlKey and altKey for alt
