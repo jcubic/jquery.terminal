@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 10 Apr 2015 11:15:38 +0000
+ * Date: Mon, 27 Apr 2015 08:51:34 +0000
  *
  * TODO:
  *
@@ -3141,17 +3141,17 @@
         function echo_command(command) {
             var prompt = command_line.prompt();
             var mask = command_line.mask();
-            if (mask) {
-                switch(typeof mask) {
-                case 'string':
-                    command = command.replace(/./g, mask);
-                    break;
-                case 'boolean':
+            switch (typeof mask) {
+            case 'string':
+                command = command.replace(/./g, mask);
+                break;
+            case 'boolean':
+                if (mask) {
                     command = command.replace(/./g, settings.maskChar);
-                    break;
+                } else {
+                    command = $.terminal.escape_formatting(command);
                 }
-            } else {
-                command = $.terminal.escape_formatting(command);
+                break;
             }
             var options = {
                 finalize: function(div) {

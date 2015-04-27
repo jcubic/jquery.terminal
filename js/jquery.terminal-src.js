@@ -3141,17 +3141,17 @@
         function echo_command(command) {
             var prompt = command_line.prompt();
             var mask = command_line.mask();
-            if (mask) {
-                switch(typeof mask) {
-                case 'string':
-                    command = command.replace(/./g, mask);
-                    break;
-                case 'boolean':
+            switch (typeof mask) {
+            case 'string':
+                command = command.replace(/./g, mask);
+                break;
+            case 'boolean':
+                if (mask) {
                     command = command.replace(/./g, settings.maskChar);
-                    break;
+                } else {
+                    command = $.terminal.escape_formatting(command);
                 }
-            } else {
-                command = $.terminal.escape_formatting(command);
+                break;
             }
             var options = {
                 finalize: function(div) {
