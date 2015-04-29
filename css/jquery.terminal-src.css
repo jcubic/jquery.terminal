@@ -171,8 +171,9 @@
     /*display: inline-block; */
 }
 /* fix double style of selecting text in terminal */
-.terminal-output span, .cmd div, .cmd span, .terminal td, .terminal pre,
-.terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
+.terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal td,
+.terminal pre, .terminal h1, .terminal h2, .terminal h3, .terminal h4,
+.terminal h5, .terminal h6 {
     -webkit-touch-callout: initial;
     -webkit-user-select: initial;
     -khtml-user-select: initial;
