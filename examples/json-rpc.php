@@ -112,12 +112,12 @@ function handle_json_rpc($object) {
   if ($encoding != 'UTF-8') {
     $input = iconv($encoding, 'UTF-8', $input);
   }
-  $input = json_decode($input);
+  $json = json_decode($input);
   header('Content-Type: text/plain');
 
   // handle Errors
-  if (!$input) {
-    if ($GLOBALS['HTTP_RAW_POST_DATA'] == "") {
+  if (!$json) {
+    if ($input == "") {
       echo response(null, 0, array("code"=> -32700,
 				   "message"=>"Parse Error: no data"));
     } else {
