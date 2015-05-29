@@ -481,7 +481,6 @@
             }
         }
     });
-    /* jshint ignore:end */
 
     if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
         jQuery(window).one('unload', function() {
@@ -499,7 +498,6 @@
     // -----------------------------------------------------------------------
     // :: CROSS BROWSER SPLIT
     // -----------------------------------------------------------------------
-    /* jshint ignore:start */
     (function(undef) {
 
         // prevent double include
