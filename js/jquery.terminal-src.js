@@ -1986,7 +1986,7 @@
         // ---------------------------------------------------------------------
         escape_regex: function(str) {
             if (typeof str == 'string') {
-                var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
+                var special = /([-\^$\[\]()+{}?*.|])/g;
                 return str.replace(special, '\\$1');
             }
         },
