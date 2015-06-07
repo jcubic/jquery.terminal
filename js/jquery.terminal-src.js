@@ -953,17 +953,15 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         function fake_mobile_entry() {
-            //if (true || is_touch()) {
-                if (command !== '') {
-                    // delay worked while experimenting
+            if (is_touch()) {
+                // delay worked while experimenting
+                self.oneTime(10, function() {
+                    clip.val(command);
                     self.oneTime(10, function() {
-                        clip.val(command);
-                        self.oneTime(10, function() {
-                            clip.caret(position);
-                        });
+                        clip.caret(position);
                     });
-                }
-            //}
+                });
+            }
         }
         // terminal animation don't work on andorid because they animate
         // 2 properties
@@ -4710,7 +4708,7 @@
                     output.remove();
                     $(document).unbind('.terminal');
                     $(window).unbind('.terminal');
-                    self.unbind('click, mousewheel');
+                    self.unbind('click mousewheel');
                     self.removeData('terminal').removeClass('terminal');
                     if (settings.width) {
                         self.css('width', '');
@@ -4900,7 +4898,9 @@
                     }
                 }).mousedown(function(e) {
                     if (e.which == 2) {
-                        self.insert(get_selected_text());
+                        var selected = get_selected_text();
+                        console.log(JSON.stringify(selected));
+                        self.insert(selected);
                     }
                 }).delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {

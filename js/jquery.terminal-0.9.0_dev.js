@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 27 Apr 2015 13:35:54 +0000
+ * Date: Sun, 07 Jun 2015 09:16:38 +0000
  *
  * TODO:
  *
@@ -481,7 +481,6 @@
             }
         }
     });
-    /* jshint ignore:end */
 
     if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
         jQuery(window).one('unload', function() {
@@ -499,7 +498,6 @@
     // -----------------------------------------------------------------------
     // :: CROSS BROWSER SPLIT
     // -----------------------------------------------------------------------
-    /* jshint ignore:start */
     (function(undef) {
 
         // prevent double include
@@ -955,17 +953,15 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         function fake_mobile_entry() {
-            //if (true || is_touch()) {
-                if (command !== '') {
-                    // delay worked while experimenting
+            if (is_touch()) {
+                // delay worked while experimenting
+                self.oneTime(10, function() {
+                    clip.val(command);
                     self.oneTime(10, function() {
-                        clip.val(command);
-                        self.oneTime(10, function() {
-                            clip.caret(position);
-                        });
+                        clip.caret(position);
                     });
-                }
-            //}
+                });
+            }
         }
         // terminal animation don't work on andorid because they animate
         // 2 properties
@@ -1988,7 +1984,7 @@
         // ---------------------------------------------------------------------
         escape_regex: function(str) {
             if (typeof str == 'string') {
-                var special = /([\^\$\[\]\(\)\+\*\.\|])/g;
+                var special = /([-\^$\[\]()+{}?*.|])/g;
                 return str.replace(special, '\\$1');
             }
         },
@@ -4712,7 +4708,7 @@
                     output.remove();
                     $(document).unbind('.terminal');
                     $(window).unbind('.terminal');
-                    self.unbind('click, mousewheel');
+                    self.unbind('click mousewheel');
                     self.removeData('terminal').removeClass('terminal');
                     if (settings.width) {
                         self.css('width', '');
@@ -4902,7 +4898,9 @@
                     }
                 }).mousedown(function(e) {
                     if (e.which == 2) {
-                        self.insert(get_selected_text());
+                        var selected = get_selected_text();
+                        console.log(JSON.stringify(selected));
+                        self.insert(selected);
                     }
                 }).delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
