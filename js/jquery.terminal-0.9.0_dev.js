@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 07 Jun 2015 09:16:38 +0000
+ * Date: Wed, 17 Jun 2015 09:42:23 +0000
  *
  * TODO:
  *
@@ -697,7 +697,7 @@
                 return data.length;
             },
             remove: function(index) {
-                data.splice(index, 0);
+                data.splice(index, 1);
             },
             set: function(item) {
                 for (var i = data.length; i--;) {

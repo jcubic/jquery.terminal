@@ -697,7 +697,7 @@
                 return data.length;
             },
             remove: function(index) {
-                data.splice(index, 0);
+                data.splice(index, 1);
             },
             set: function(item) {
                 for (var i = data.length; i--;) {
