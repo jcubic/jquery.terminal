@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 17 Jun 2015 09:42:23 +0000
+ * Date: Wed, 05 Aug 2015 17:30:38 +0000
  *
  * TODO:
  *
@@ -1841,8 +1841,8 @@
             } else {
                 return result;
             }
-        }).bind('keydown.cmd', keydown_event).bind('keyup.cmd', function() {
-            if (no_keypress) {
+        }).bind('keydown.cmd', keydown_event).bind('keyup.cmd', function(e) {
+            if (no_keypress && e.which !== 16) { // not on shift #209
                 // Some Androids don't fire keypress - #39
                 self.set(clip.val());
             }

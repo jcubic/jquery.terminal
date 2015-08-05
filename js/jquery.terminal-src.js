@@ -1841,8 +1841,8 @@
             } else {
                 return result;
             }
-        }).bind('keydown.cmd', keydown_event).bind('keyup.cmd', function() {
-            if (no_keypress) {
+        }).bind('keydown.cmd', keydown_event).bind('keyup.cmd', function(e) {
+            if (no_keypress && e.which !== 16) { // not on shift #209
                 // Some Androids don't fire keypress - #39
                 self.set(clip.val());
             }
