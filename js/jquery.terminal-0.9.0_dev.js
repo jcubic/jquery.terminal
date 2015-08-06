@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 05 Aug 2015 17:30:38 +0000
+ * Date: Thu, 06 Aug 2015 12:24:17 +0000
  *
  * TODO:
  *
@@ -1797,7 +1797,11 @@
         // :: INIT
         // ---------------------------------------------------------------------
         self.name(options.name || options.prompt || '');
-        prompt = options.prompt || '> ';
+        if (typeof options.prompt == 'string') {
+            prompt = options.prompt;
+        } else {
+            prompt = '> ';
+        }
         draw_prompt();
         if (options.enabled === undefined || options.enabled === true) {
             self.enable();
@@ -1842,9 +1846,12 @@
                 return result;
             }
         }).bind('keydown.cmd', keydown_event).bind('keyup.cmd', function(e) {
-            if (no_keypress && e.which !== 16) { // not on shift #209
+            if (no_keypress) {
                 // Some Androids don't fire keypress - #39
-                self.set(clip.val());
+                var val = clip.val();
+                if (val) {  // #209
+                    self.set(val);
+                }
             }
         }).bind('paste.cmd', paste);
         // characters
