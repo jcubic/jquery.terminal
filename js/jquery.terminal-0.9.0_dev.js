@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 06 Aug 2015 12:24:17 +0000
+ * Date: Thu, 06 Aug 2015 12:27:14 +0000
  *
  * TODO:
  *
@@ -1849,7 +1849,7 @@
             if (no_keypress) {
                 // Some Androids don't fire keypress - #39
                 var val = clip.val();
-                if (val) {  // #209
+                if (val || e.which == 8) {  // #209 ; 8 - backspace
                     self.set(val);
                 }
             }

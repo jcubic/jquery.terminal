@@ -1849,7 +1849,7 @@
             if (no_keypress) {
                 // Some Androids don't fire keypress - #39
                 var val = clip.val();
-                if (val) {  // #209
+                if (val || e.which == 8) {  // #209 ; 8 - backspace
                     self.set(val);
                 }
             }
