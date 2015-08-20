@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 06 Aug 2015 12:27:14 +0000
+ * Date: Thu, 20 Aug 2015 16:54:45 +0000
  *
  * TODO:
  *
@@ -720,7 +720,7 @@
     // :: STACK DATA STRUCTURE
     // -----------------------------------------------------------------------
     function Stack(init) {
-        var data = init ? [init] : [];
+        var data = init instanceof Array ? init : init ? [init] : [];
         $.extend(this, {
             map: function(fn) {
                 return $.map(data, fn);
@@ -743,6 +743,9 @@
             },
             top: function() {
                 return data.length > 0 ? data[data.length - 1] : null;
+            },
+            clone: function() {
+                return new Stack(data.slice(0));
             }
         });
     }
@@ -3743,7 +3746,8 @@
                         prompt: self.get_prompt(),
                         command: self.get_command(),
                         position: command_line.position(),
-                        lines: clone(lines)
+                        lines: clone(lines),
+                        interpreters: interpreters.clone()
                     };
                 },
                 // -------------------------------------------------------------
@@ -3761,6 +3765,7 @@
                         self.focus();
                     }
                     lines = clone(view.lines);
+                    interpreters = view.interpreters;
                     redraw();
                     return self;
                 },
