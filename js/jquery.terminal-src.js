@@ -1828,13 +1828,15 @@
             if (result === undefined || result) {
                 if (enabled) {
                     if ($.inArray(e.which, [38, 13, 0, 8]) > -1 &&
-                        e.keyCode !== 123 && // for F12 which === 0
                         //!(e.which === 40 && e.shiftKey ||
                         !(e.which === 38 && e.shiftKey)) {
+                        if (e.keyCode == 123) { // for F12 which == 0
+                            return;
+                        }
                         return false;
                     } else if (!e.ctrlKey && !(e.altKey && e.which === 100) ||
                                e.altKey) { // ALT+D
-                        // TODO: this should be in one statement
+                            // TODO: this should be in one statement
                         if (reverse_search) {
                             rev_search_str += String.fromCharCode(e.which);
                             reverse_history_search();
