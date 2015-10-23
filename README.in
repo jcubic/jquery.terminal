@@ -18,10 +18,10 @@ users. It can also be used to debug your application.
 
 ### Features:
 
-* You can create interpreter for your JSON-RPC service with one line
+* You can create an interpreter for your JSON-RPC service with one line
   of code (just use url as first argument).
 
-* Support for authentication (you can provide function when user enter
+* Support for authentication (you can provide functions when users enter
   login and password or if you use JSON-RPC it can automatically call
   login function on the server and pass token to all functions)
 
@@ -30,28 +30,28 @@ users. It can also be used to debug your application.
   when user type command)
 
 * Command Tree - you can use nested objects. Each command will invoke a
-  function, if the value is an object it will create new interpreter and
-  use function from that object as commands. You can use as much nested
+  function, if the value is an object it will create a new interpreter and
+  use the function from that object as commands. You can use as many nested
   object/commands as you like. If the value is a string it will create
   JSON-RPC service.
 
-* Support for command line history it use Local Storage if posible
+* Support for command line history, it uses Local Storage if possible
 
 * Support for tab completion
 
-* Include keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
+* Includes keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
 
 * Multiply terminals on one page (every terminal can have different
   command, it's own authentication function and it's own command history)
 
-* It catch all exceptions and display error messages in terminal
+* It catches all exceptions and displays error messages in the terminal
   (you can see errors in your javascript and php code in terminal if they
-  are in interpreter function)
+  are in the interpreter function)
 
 ### Example of usage (javascript interpreter)
 
-This is code that use low level, that give you full control of the comands,
-just pass anything that user type into a function.
+This is code that uses low level, that gives you full control of the commands,
+just pass anything that the user types into a function.
 
 ```javascript
 jQuery(function($, undefined) {
@@ -71,9 +71,9 @@ jQuery(function($, undefined) {
 });
 ```
 
-Here is higher level, using object as interpreter, By default terminal will
-parse command that user type and replace number like strings with real numbers
-regex with regexes nad process escape characters in double quoted strings.
+Here is a higher level call, using an object as an interpreter, By default the terminal will
+parse commands that a user types and replace number like strings with real numbers
+regex with regexes and process escape characters in double quoted strings.
 Command foo will execute json-rpc from foo.php file.
 
 ```javascript
@@ -95,7 +95,7 @@ jQuery(function($, undefined) {
 });
 ```
 
-You can create JSON-RPC interpreter with authentication with just one line:
+You can create JSON-RPC interpreter with authentication in just one line:
 
 ```javascript
 $('#term_demo').terminal('service.php', {login: true});
