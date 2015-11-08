@@ -6,11 +6,11 @@ if (function_exists('xdebug_disable')) {
     xdebug_disable();
 }
 
-@mysql_connect('localhost', 'user', 'password');
-@mysql_select_db('database_name');
+$link = new mysqli('localhost', 'user', 'password', 'db_name');
 
 class MysqlDemo {
   public function query($query) {
+    global $link;
     if (preg_match("/create|drop/", $query)) {
       throw new Exception("Sorry you are not allowed to execute '" . 
                           $query . "'");
@@ -20,12 +20,12 @@ class MysqlDemo {
                           "' you are only allowed to select, insert, delete " .
                           "or update 'test' table");
     }
-    if ($res = mysql_query($query)) {
+    if ($res = $link->query($query)) {
       if ($res === true) {
         return true;
       }
-      if (mysql_num_rows($res) > 0) {
-        while ($row = mysql_fetch_row($res)) {
+      if ($res->num_rows > 0) {
+        while ($row = $res->fetch_array(MYSQLI_NUM)) {
           $result[] = $row;
         }
         return $result;
