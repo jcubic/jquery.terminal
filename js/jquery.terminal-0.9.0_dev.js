@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 26 Aug 2015 12:32:49 +0000
+ * Date: Tue, 24 Nov 2015 16:46:23 +0000
  *
  * TODO:
  *
@@ -2448,23 +2448,21 @@
         var temp = $('<div class="terminal wrap"><span class="cursor">' +
                      '</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
-        var spaces = '';
         // use more characters to get width of single character as a fraction
         var max = 60;
+        var spaces = '';
         for (var i=0;i<=max; ++i) {
             spaces += '&nbsp;';
         }
         span.html(spaces);
         var width = span.width()/max;
-        var result = Math.floor(terminal.width() / width);
+        span.html('');
+        do {
+            span.append('M');
+            span[0].normalize();
+        } while (span[0].getClientRects().length === 1);
+        var result = span.text().length-1;
         temp.remove();
-        if (have_scrollbars(terminal)) {
-            var SCROLLBAR_WIDTH = 20;
-            // assume that scrollbars are 20px - in my Laptop with
-            // Linux/Chrome they are 16px
-            var margins = terminal.innerWidth() - terminal.width();
-            result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
-        }
         return result;
     }
     // -----------------------------------------------------------------------
@@ -2493,7 +2491,11 @@
     // :: check if div have scrollbars (need to have overflow auto or always)
     // -----------------------------------------------------------------------
     function have_scrollbars(div) {
-        return div.get(0).scrollHeight > div.innerHeight();
+        if (div.is('body')) {
+            return $("body").height() > $(window).height();
+        } else {
+            return div.get(0).scrollHeight > div.innerHeight();
+        }
     }
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
