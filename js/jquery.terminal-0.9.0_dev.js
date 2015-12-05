@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 24 Nov 2015 17:00:51 +0000
+ * Date: Sat, 05 Dec 2015 22:15:56 +0000
  *
  * TODO:
  *
@@ -2264,18 +2264,18 @@
         active: function() {
             return terminals.front();
         },
-        // 0.9.0 change all function names to kebab case
+        // keep old as backward compatible
         parseArguments: function(string) {
-            throw new Error("Use parse_arguments instead");
+            return $.terminal.parse_arguments(string);
         },
         splitArguments: function(string) {
-            throw new Error("Use split_arguments instead");
+            return $.terminal.split_arguments(string);
         },
         parseCommand: function(string) {
-            throw new Error("Use parse_command instead");
+            return $.terminal.parse_command(string);
         },
         splitCommand: function(string) {
-            throw new Error("Use split_command instead");
+            return $.terminal.split_command(string);
         },
         // ---------------------------------------------------------------------
         // :: Function splits arguments and works with strings like
