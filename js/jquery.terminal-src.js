@@ -2502,7 +2502,7 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2014 Jakub Jankiewicz <http://jcubic'+
+    var copyright = 'Copyright (c) 2011-2015 Jakub Jankiewicz <http://jcubic'+
         '.pl>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     //regex is for placing version string aligned to the right
@@ -2513,7 +2513,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2014 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2015 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         ['      _______                 ________                        __',
