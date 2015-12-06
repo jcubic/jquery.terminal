@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 05 Dec 2015 22:15:56 +0000
+ * Date: Sun, 06 Dec 2015 12:31:39 +0000
  *
  * TODO:
  *
@@ -1595,7 +1595,6 @@
                 options.onCommandChange(command);
             }
         }
-        var history_list = []; // TODO: check if needed
         // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------

@@ -1595,7 +1595,6 @@
                 options.onCommandChange(command);
             }
         }
-        var history_list = []; // TODO: check if needed
         // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
