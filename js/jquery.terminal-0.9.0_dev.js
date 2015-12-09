@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 06 Dec 2015 14:15:35 +0000
+ * Date: Wed, 09 Dec 2015 17:21:58 +0000
  *
  * TODO:
  *
@@ -665,6 +665,8 @@
         var len = str.length;
         if (len < length) {
             return [str];
+        } else if (length < 0) {
+            throw new Error('str_parts: length can\'t be negative');
         }
         for (var i = 0; i < len; i += length) {
             result.push(str.substring(i, i + length));

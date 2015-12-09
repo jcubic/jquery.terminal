@@ -665,6 +665,8 @@
         var len = str.length;
         if (len < length) {
             return [str];
+        } else if (length < 0) {
+            throw new Error('str_parts: length can\'t be negative');
         }
         for (var i = 0; i < len; i += length) {
             result.push(str.substring(i, i + length));
