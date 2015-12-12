@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 12 Dec 2015 15:58:20 +0000
+ * Date: Sat, 12 Dec 2015 16:24:08 +0000
  *
  * TODO:
  *
@@ -3317,7 +3317,10 @@
                 // execute_extended_command disable it and it can be exected
                 // after delay
                 var saved_change_hash = change_hash;
-                if (command.match(/^\s*(exit|clear)\s*$/i) && !in_login) {
+                if (command.match(/^\s*login\s*$/i) && settings.login &&
+                    interpreters.size() == 1) {
+                    self.logout();
+                } else if (command.match(/^\s*(exit|clear)\s*$/i) && !in_login) {
                     if (settings.exit && command.match(/^\s*exit\s*$/i)) {
                         var count = interpreters.size();
                         if (count == 1 && self.token() || count > 1) {
