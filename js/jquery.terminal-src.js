@@ -3317,7 +3317,7 @@
                 // execute_extended_command disable it and it can be exected
                 // after delay
                 var saved_change_hash = change_hash;
-                if (command.match(/^\s*(exit|clear)\s*$/i)) {
+                if (command.match(/^\s*(exit|clear)\s*$/i) && !in_login) {
                     if (settings.exit && command.match(/^\s*exit\s*$/i)) {
                         var count = interpreters.size();
                         if (count == 1 && self.token() || count > 1) {
