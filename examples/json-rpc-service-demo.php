@@ -1,6 +1,6 @@
 <?php
 
-require('json-rpc/json-rpc.php');
+require('json-rpc.php');
 
 if (function_exists('xdebug_disable')) {
     xdebug_disable();
