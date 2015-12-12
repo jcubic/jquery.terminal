@@ -44,9 +44,10 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 12 Dec 2015 17:25:01 +0000
- *
- * TODO:
+ * Date: Sat, 12 Dec 2015 17:45:30 +0000
+ */
+
+/* TODO:
  *
  * Wrap words mode - terminal.echo('asd', {wrapWords: true});
  * local logout ???

@@ -45,8 +45,9 @@
  * licensed under 3 clause BSD license
  *
  * Date: {{DATE}}
- *
- * TODO:
+ */
+
+/* TODO:
  *
  * Wrap words mode - terminal.echo('asd', {wrapWords: true});
  * local logout ???

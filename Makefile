@@ -15,10 +15,7 @@ js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js
 
 js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal-$(VERSION).js
-	$(COMPRESS) -o js/tmp.min.js js/jquery.terminal-$(VERSION).js
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" copy > copy.tmp
-	$(CAT) copy.tmp js/tmp.min.js > js/jquery.terminal-$(VERSION).min.js
-	$(RM) js/tmp.min.js copy.tmp
+	$(COMPRESS) -o js/jquery.terminal-$(VERSION).min.js --comments -- js/jquery.terminal-$(VERSION).js
 
 js/jquery.terminal-min.js: js/jquery.terminal-$(VERSION).min.js
 	$(CP) js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js

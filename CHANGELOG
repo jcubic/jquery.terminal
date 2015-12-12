@@ -15,8 +15,7 @@
           auto resume/pause if user code return promise
           Mobile (tested on Android) - users report that it don't work - need testing
           functions splitCommand, parseCommand, splitArguments, parseArguments changed
-          to kebab case and those functions from now on throw exception with a message to
-          use that other function
+          to kebab case, but the old functions are kept for backward compatibility
           new API method read (wrapper over push), autologin and update
           extended commands with syntax [{   }]
 0.8.8     Fix 2 json rpc bugs
