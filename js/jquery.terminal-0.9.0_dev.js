@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 12 Dec 2015 16:24:08 +0000
+ * Date: Sat, 12 Dec 2015 16:52:13 +0000
  *
  * TODO:
  *
@@ -2745,7 +2745,13 @@
                     //throw e; // this will show stack in other try..catch
                 }
                 if (login) {
-                    command.args = [self.token(true)].concat(command.args);
+                    var token = self.token(true);
+                    if (token) {
+                        command.args = [token].concat(command.args);
+                    } else {
+                        terminal.error('&#91;AUTH&#93; ' + strings.noTokenError);
+                        return;
+                    }
                 }
                 var val = object[command.name];
                 var type = $.type(val);

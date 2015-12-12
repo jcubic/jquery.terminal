@@ -2745,7 +2745,13 @@
                     //throw e; // this will show stack in other try..catch
                 }
                 if (login) {
-                    command.args = [self.token(true)].concat(command.args);
+                    var token = self.token(true);
+                    if (token) {
+                        command.args = [token].concat(command.args);
+                    } else {
+                        terminal.error('&#91;AUTH&#93; ' + strings.noTokenError);
+                        return;
+                    }
                 }
                 var val = object[command.name];
                 var type = $.type(val);
