@@ -667,7 +667,7 @@
         if (len < length) {
             return [str];
         } else if (length < 0) {
-            throw new Error('str_parts: length can\'t be negative');
+            throw new Error('str_parts: length can\'t be negative'); // '
         }
         for (var i = 0; i < len; i += length) {
             result.push(str.substring(i, i + length));
@@ -3729,7 +3729,7 @@
                                     {name: self.selector},
                                     options || {});
             var strings = $.terminal.defaults.strings;
-            var enabled = settings.enabled;
+            var enabled = settings.enabled, frozen;
             var paused = false;
             // -----------------------------------------------------------------
             // TERMINAL METHODS
@@ -4158,10 +4158,28 @@
                     return self;
                 },
                 // -------------------------------------------------------------
+                // :: Disable/Enable terminal that can be enabled by click
+                // -------------------------------------------------------------
+                freeze: function(freeze) {
+                    if (freeze) {
+                        self.disable();
+                        frozen = true;
+                    } else {
+                        frozen = false;
+                        self.enable();
+                    }
+                },
+                // -------------------------------------------------------------
+                // :: check if terminal is frozen
+                // -------------------------------------------------------------
+                frozen: function() {
+                    return frozen;
+                },
+                // -------------------------------------------------------------
                 // :: Enable the terminal
                 // -------------------------------------------------------------
                 enable: function() {
-                    if (!enabled) {
+                    if (!enabled && !frozen) {
                         if (num_chars === undefined) {
                             //enabling first time
                             self.resize();
@@ -4177,7 +4195,7 @@
                 // :: Disable the terminal
                 // -------------------------------------------------------------
                 disable: function() {
-                    if (enabled && command_line) {
+                    if (enabled && command_line && !frozen) {
                         enabled = false;
                         command_line.disable();
                     }

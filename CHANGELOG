@@ -1,3 +1,5 @@
+0.9.1     freeze and frozen API methods that disable/enable terminal that can't be enabled
+          by click
 0.9.0     use url hash to store terminal session
           fix export/import
           Focus/Blur on Window focus/blur
