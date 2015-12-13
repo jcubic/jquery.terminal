@@ -1,0 +1,11 @@
+.*
+*~
+bower.*
+package.in
+Makefile
+manifest
+README.in
+terminal.jquery.json
+SpecRunner.html
+spec
+examples
