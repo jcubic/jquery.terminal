@@ -1400,7 +1400,7 @@
                     //DELETE
                     self['delete'](1);
                     return;
-                } else if (history && e.which === 38 ||
+                } else if (history && (e.which === 38 && !e.ctrlKey) ||
                            (e.which === 80 && e.ctrlKey)) {
                     //UP ARROW or CTRL+P
                     if (first_up_history) {
@@ -1410,7 +1410,7 @@
                         self.set(history.previous());
                     }
                     first_up_history = false;
-                } else if (history && e.which === 40 ||
+                } else if (history && (e.which === 40 && !e.ctrlKey) ||
                            (e.which === 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
                     self.set(history.end() ? last_command : history.next());

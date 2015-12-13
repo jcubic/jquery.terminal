@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 13 Dec 2015 11:52:41 +0000
+ * Date: Sun, 13 Dec 2015 15:12:12 +0000
  */
 
 /* TODO:
@@ -1400,7 +1400,7 @@
                     //DELETE
                     self['delete'](1);
                     return;
-                } else if (history && e.which === 38 ||
+                } else if (history && (e.which === 38 && !e.ctrlKey) ||
                            (e.which === 80 && e.ctrlKey)) {
                     //UP ARROW or CTRL+P
                     if (first_up_history) {
@@ -1410,7 +1410,7 @@
                         self.set(history.previous());
                     }
                     first_up_history = false;
-                } else if (history && e.which === 40 ||
+                } else if (history && (e.which === 40 && !e.ctrlKey) ||
                            (e.which === 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
                     self.set(history.end() ? last_command : history.next());
