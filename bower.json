@@ -12,6 +12,7 @@
         "examples",
         "CHANGELOG",
         "README.in",
+        "bower.in",
         "Makefile",
         "manifest"
     ],

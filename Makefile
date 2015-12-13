@@ -6,10 +6,13 @@ RM=rm
 CAT=cat
 DATE=`date -uR`
 
-ALL: js/jquery.terminal-$(VERSION).js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json
+ALL: js/jquery.terminal-$(VERSION).js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
 
 bower.json: bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" bower.in > bower.json
+
+package.json: package.in .$(VERSION)
+	$(SED) -e "s/{{VER}}/$(VERSION)/g" package.in > package.json
 
 js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js

@@ -48,6 +48,29 @@ users. It can also be used to debug your application.
   (you can see errors in your javascript and php code in terminal if they
   are in the interpreter function)
 
+### Instalation
+You can install jQuery Terminal from bower:
+
+```
+bower install jquery.terminal
+```
+
+or npm:
+
+```
+npm install --save jquery.terminal
+```
+
+Include js/jquery.terminal-{{VER}}.min.js and css/jquery.terminal-{{VER}}.css
+You can also include js/jquery.mousewheel-min.js
+
+```html
+<script src="js/jquery.terminal-{{VER}}.min.js"></script>
+<script src="js/jquery.mousewheel-min.js"></script>
+<link href="css/jquery.terminal-{{VER}}.css" rel="stylesheet"/>
+```
+And you're good to go.
+
 ### Example of usage (javascript interpreter)
 
 This is code that uses low level, that gives you full control of the commands,
@@ -67,7 +90,8 @@ jQuery(function($, undefined) {
         name: 'js_demo',
         height: 200,
         width: 450,
-        prompt: 'js> '});
+        prompt: 'js> '
+    });
 });
 ```
 
@@ -91,7 +115,8 @@ jQuery(function($, undefined) {
     }, {
         height: 200,
         width: 450,
-        prompt: 'demo> '});
+        prompt: 'demo> '
+    });
 });
 ```
 

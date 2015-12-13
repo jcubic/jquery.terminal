@@ -1,0 +1,22 @@
+{
+  "name": "jquery.terminal",
+  "version": "0.9.1",
+  "description": "jQuery Terminal Emulator is a plugin for creating command line interpreters in your applications.",
+  "main": "js/jquery.terminal-0.9.1.js",
+  "keywords": [
+    "terminal",
+    "emulator",
+    "prompt",
+    "console",
+    "keyboard",
+    "type",
+    "rpc",
+    "input",
+    "ui"
+  ],
+  "author": "Jakub Jankiewicz <jcubic@onet.pl> (http://jakub.jankiewi.cz)",
+  "license": "LGPL-3.0",
+  "dependencies": {
+    "jquery": "^2.1.4"
+  }
+}
