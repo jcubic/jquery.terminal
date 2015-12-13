@@ -1860,7 +1860,10 @@
                     self.set(val);
                 }
             }
-        }).bind('paste.cmd', paste);
+        })
+        if (is_paste_supported) {
+            doc.bind('paste.cmd', paste);
+        }
         // characters
         self.data('cmd', self);
         return self;
@@ -4950,12 +4953,6 @@
                         // keep focusing silently so textarea get focus
                         self.focus(true, true);
                     }
-                }).mousedown(function(e) {
-                    if (e.which == 2) {
-                        var selected = get_selected_text();
-                        console.log(JSON.stringify(selected));
-                        self.insert(selected);
-                    }
                 }).delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                     // in new jquery .delegate just call .on
@@ -4965,6 +4962,15 @@
                         print_line(href);
                     }
                 });
+                if (!navigator.platform.match(/linux/i)) {
+                    // on linux system paste work with middle mouse button
+                    self.mousedown(function(e) {
+                        if (e.which == 2) {
+                            var selected = get_selected_text();
+                            self.insert(selected);
+                        }
+                    });
+                }
                 if (self.is(':visible')) {
                     num_chars = get_num_chars(self);
                     command_line.resize(num_chars);
