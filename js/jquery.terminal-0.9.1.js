@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 13 Dec 2015 15:12:12 +0000
+ * Date: Wed, 16 Dec 2015 19:58:49 +0000
  */
 
 /* TODO:
@@ -4332,7 +4332,6 @@
                             if ($.isFunction(settings.onResize)) {
                                 settings.onResize(self);
                             }
-                            self.trigger('resize');
                             old_height = height;
                             old_width = width;
                             scroll_to_bottom();

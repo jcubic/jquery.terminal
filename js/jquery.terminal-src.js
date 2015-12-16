@@ -4332,7 +4332,6 @@
                             if ($.isFunction(settings.onResize)) {
                                 settings.onResize(self);
                             }
-                            self.trigger('resize');
                             old_height = height;
                             old_width = width;
                             scroll_to_bottom();
