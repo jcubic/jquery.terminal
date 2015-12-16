@@ -1400,7 +1400,7 @@
                     //DELETE
                     self['delete'](1);
                     return;
-                } else if (history && e.which === 38 ||
+                } else if (history && (e.which === 38 && !e.ctrlKey) ||
                            (e.which === 80 && e.ctrlKey)) {
                     //UP ARROW or CTRL+P
                     if (first_up_history) {
@@ -1410,7 +1410,7 @@
                         self.set(history.previous());
                     }
                     first_up_history = false;
-                } else if (history && e.which === 40 ||
+                } else if (history && (e.which === 40 && !e.ctrlKey) ||
                            (e.which === 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
                     self.set(history.end() ? last_command : history.next());
@@ -1860,7 +1860,10 @@
                     self.set(val);
                 }
             }
-        }).bind('paste.cmd', paste);
+        })
+        if (is_paste_supported) {
+            doc.bind('paste.cmd', paste);
+        }
         // characters
         self.data('cmd', self);
         return self;
@@ -4329,7 +4332,6 @@
                             if ($.isFunction(settings.onResize)) {
                                 settings.onResize(self);
                             }
-                            self.trigger('resize');
                             old_height = height;
                             old_width = width;
                             scroll_to_bottom();
@@ -4950,12 +4952,6 @@
                         // keep focusing silently so textarea get focus
                         self.focus(true, true);
                     }
-                }).mousedown(function(e) {
-                    if (e.which == 2) {
-                        var selected = get_selected_text();
-                        console.log(JSON.stringify(selected));
-                        self.insert(selected);
-                    }
                 }).delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                     // in new jquery .delegate just call .on
@@ -4965,6 +4961,15 @@
                         print_line(href);
                     }
                 });
+                if (!navigator.platform.match(/linux/i)) {
+                    // on linux system paste work with middle mouse button
+                    self.mousedown(function(e) {
+                        if (e.which == 2) {
+                            var selected = get_selected_text();
+                            self.insert(selected);
+                        }
+                    });
+                }
                 if (self.is(':visible')) {
                     num_chars = get_num_chars(self);
                     command_line.resize(num_chars);
