@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 16 Dec 2015 20:02:44 +0000
+ * Date: Sun, 20 Dec 2015 11:04:24 +0000
  */
 
 /* TODO:
@@ -3967,7 +3967,9 @@
                 // -------------------------------------------------------------
                 // :: User defined settings and defaults as well
                 // -------------------------------------------------------------
-                settings: settings,
+                settings: function() {
+                    return settings;
+                },
                 // -------------------------------------------------------------
                 // :: Return commands function from top interpreter
                 // -------------------------------------------------------------
