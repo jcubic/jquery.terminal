@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 20 Dec 2015 11:04:24 +0000
+ * Date: Mon, 21 Dec 2015 17:11:42 +0000
  */
 
 /* TODO:
@@ -1916,13 +1916,16 @@
     }
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
-        var m = string.match(/^\s*([^\s]+)\s*(.*)$/);
-        if (m) {
+        var array = fn(string);
+        if (array.length) {
+            var name = array.shift();
+            var regex = new RegExp('^' + $.terminal.escape_regex(name));
+            var rest = string.replace(regex, '').trim();
             return {
                 command: string,
-                name: m[1],
-                args: fn(m[2]),
-                rest: m[2]
+                name: name,
+                args: array,
+                rest: rest
             };
         } else {
             return {
@@ -2342,7 +2345,16 @@
         // :: using the function parse_arguments
         // ---------------------------------------------------------------------
         parse_command: function(string) {
-            return process_command(string, $.terminal.parse_arguments);
+            var array = $.terminal.parse_arguments(string);
+            var name = array.shift();
+            var regex = new RegExp('^' + $.terminal.escape_regex(name));
+            var rest = string.replace(regex, '').trim();
+            return {
+                command: string,
+                name: name,
+                args: array,
+                rest: rest
+            };
         },
         // ---------------------------------------------------------------------
         // :: Same as parse_command but arguments are parsed using split_arguments

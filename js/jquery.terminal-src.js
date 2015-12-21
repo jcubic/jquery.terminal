@@ -1916,13 +1916,16 @@
     }
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
-        var m = string.match(/^\s*([^\s]+)\s*(.*)$/);
-        if (m) {
+        var array = fn(string);
+        if (array.length) {
+            var name = array.shift();
+            var regex = new RegExp('^' + $.terminal.escape_regex(name));
+            var rest = string.replace(regex, '').trim();
             return {
                 command: string,
-                name: m[1],
-                args: fn(m[2]),
-                rest: m[2]
+                name: name,
+                args: array,
+                rest: rest
             };
         } else {
             return {
@@ -2001,7 +2004,7 @@
         // ---------------------------------------------------------------------
         escape_regex: function(str) {
             if (typeof str == 'string') {
-                var special = /([-\^$\[\]()+{}?*.|])/g;
+                var special = /([-\\\^$\[\]()+{}?*.|])/g;
                 return str.replace(special, '\\$1');
             }
         },
