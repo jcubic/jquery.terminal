@@ -3765,9 +3765,6 @@
                 // :: restore the state
                 // -------------------------------------------------------------
                 export_view: function() {
-                    if (in_login) {
-                        throw new Error(sprintf(strings.notWhileLogin, 'export_view'));
-                    }
                     return {
                         focus: enabled,
                         mask: command_line.mask(),

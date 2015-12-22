@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 21 Dec 2015 17:11:42 +0000
+ * Date: Tue, 22 Dec 2015 16:17:03 +0000
  */
 
 /* TODO:
@@ -2004,7 +2004,7 @@
         // ---------------------------------------------------------------------
         escape_regex: function(str) {
             if (typeof str == 'string') {
-                var special = /([-\^$\[\]()+{}?*.|])/g;
+                var special = /([-\\\^$\[\]()+{}?*.|])/g;
                 return str.replace(special, '\\$1');
             }
         },
@@ -2345,16 +2345,7 @@
         // :: using the function parse_arguments
         // ---------------------------------------------------------------------
         parse_command: function(string) {
-            var array = $.terminal.parse_arguments(string);
-            var name = array.shift();
-            var regex = new RegExp('^' + $.terminal.escape_regex(name));
-            var rest = string.replace(regex, '').trim();
-            return {
-                command: string,
-                name: name,
-                args: array,
-                rest: rest
-            };
+            return process_command(string, $.terminal.parse_arguments);
         },
         // ---------------------------------------------------------------------
         // :: Same as parse_command but arguments are parsed using split_arguments
@@ -3774,9 +3765,6 @@
                 // :: restore the state
                 // -------------------------------------------------------------
                 export_view: function() {
-                    if (in_login) {
-                        throw new Error(sprintf(strings.notWhileLogin, 'export_view'));
-                    }
                     return {
                         focus: enabled,
                         mask: command_line.mask(),
