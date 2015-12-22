@@ -3101,22 +3101,26 @@
                 var string = $.type(line) === "function" ? line() : line;
                 string = $.type(string) === "string" ? string : String(string);
                 if (string !== '') {
-                    $.each(string.split(format_exec_re), function(i, string) {
-                        if (string.match(format_exec_re)) {
+                    if (line_settings.exec) {
+                        string = $.map(string.split(format_exec_re), function(string) {
+                            if (string.match(format_exec_re)) {
                             // redraw should not execute commands and it have
                             // and lines variable have all extended commands
-                            if (line_settings.exec) {
                                 string = string.replace(/^\[\[|\]\]$/g, '');
                                 if (prev_command && prev_command.command == string) {
                                     self.error(strings.recursiveCall);
                                 } else {
                                     $.terminal.extended_command(self, string);
                                 }
+                                return '';
+                            } else {
+                                return string;
                             }
-                        } else if (string !== '') {
-                            buffer_line(string, line_settings);
-                        }
-                    });
+                        }).join('');
+                        buffer_line(string, line_settings);
+                    } else {
+                        buffer_line(string, line_settings);
+                    }
                 }
             } catch (e) {
                 output_buffer = [];
