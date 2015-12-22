@@ -3117,7 +3117,10 @@
                                 return string;
                             }
                         }).join('');
-                        buffer_line(string, line_settings);
+                        if (string !== '') {
+                            // string can be empty after removing extended commands
+                            buffer_line(string, line_settings);
+                        }
                     } else {
                         buffer_line(string, line_settings);
                     }

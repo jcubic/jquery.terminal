@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 22 Dec 2015 18:55:36 +0000
+ * Date: Tue, 22 Dec 2015 19:00:14 +0000
  */
 
 /* TODO:
@@ -3117,7 +3117,10 @@
                                 return string;
                             }
                         }).join('');
-                        buffer_line(string, line_settings);
+                        if (string !== '') {
+                            // string can be empty after removing extended commands
+                            buffer_line(string, line_settings);
+                        }
                     } else {
                         buffer_line(string, line_settings);
                     }
