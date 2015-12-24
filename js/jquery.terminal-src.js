@@ -4077,7 +4077,15 @@
                 // :: toggle recording of history state
                 // -------------------------------------------------------------
                 history_state: function(toggle) {
-                    settings.historyState = toggle;
+                    if (toggle) {
+                        // if set to true and if set from user command we need
+                        // not to include the command
+                        self.oneTime(1, function() {
+                            settings.historyState = true;
+                        });
+                    } else {
+                        settings.historyState = false;
+                    }
                     return self;
                 },
                 // -------------------------------------------------------------

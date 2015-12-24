@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 24 Dec 2015 19:57:28 +0000
+ * Date: Thu, 24 Dec 2015 20:02:40 +0000
  */
 
 /* TODO:
@@ -4077,7 +4077,15 @@
                 // :: toggle recording of history state
                 // -------------------------------------------------------------
                 history_state: function(toggle) {
-                    settings.historyState = toggle;
+                    if (toggle) {
+                        // if set to true and if set from user command we need
+                        // not to include the command
+                        self.oneTime(1, function() {
+                            settings.historyState = true;
+                        });
+                    } else {
+                        settings.historyState = false;
+                    }
                     return self;
                 },
                 // -------------------------------------------------------------
