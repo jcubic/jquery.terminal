@@ -1916,13 +1916,16 @@
     }
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
-        var m = string.match(/^\s*([^\s]+)\s*(.*)$/);
-        if (m) {
+        var array = fn(string);
+        if (array.length) {
+            var name = array.shift();
+            var regex = new RegExp('^' + $.terminal.escape_regex(name));
+            var rest = string.replace(regex, '').trim();
             return {
                 command: string,
-                name: m[1],
-                args: fn(m[2]),
-                rest: m[2]
+                name: name,
+                args: array,
+                rest: rest
             };
         } else {
             return {
@@ -2001,7 +2004,7 @@
         // ---------------------------------------------------------------------
         escape_regex: function(str) {
             if (typeof str == 'string') {
-                var special = /([-\^$\[\]()+{}?*.|])/g;
+                var special = /([-\\\^$\[\]()+{}?*.|])/g;
                 return str.replace(special, '\\$1');
             }
         },
@@ -3098,22 +3101,29 @@
                 var string = $.type(line) === "function" ? line() : line;
                 string = $.type(string) === "string" ? string : String(string);
                 if (string !== '') {
-                    $.each(string.split(format_exec_re), function(i, string) {
-                        if (string.match(format_exec_re)) {
+                    if (line_settings.exec) {
+                        string = $.map(string.split(format_exec_re), function(string) {
+                            if (string.match(format_exec_re)) {
                             // redraw should not execute commands and it have
                             // and lines variable have all extended commands
-                            if (line_settings.exec) {
                                 string = string.replace(/^\[\[|\]\]$/g, '');
                                 if (prev_command && prev_command.command == string) {
                                     self.error(strings.recursiveCall);
                                 } else {
                                     $.terminal.extended_command(self, string);
                                 }
+                                return '';
+                            } else {
+                                return string;
                             }
-                        } else if (string !== '') {
+                        }).join('');
+                        if (string !== '') {
+                            // string can be empty after removing extended commands
                             buffer_line(string, line_settings);
                         }
-                    });
+                    } else {
+                        buffer_line(string, line_settings);
+                    }
                 }
             } catch (e) {
                 output_buffer = [];
@@ -3762,9 +3772,6 @@
                 // :: restore the state
                 // -------------------------------------------------------------
                 export_view: function() {
-                    if (in_login) {
-                        throw new Error(sprintf(strings.notWhileLogin, 'export_view'));
-                    }
                     return {
                         focus: enabled,
                         mask: command_line.mask(),
@@ -3967,7 +3974,9 @@
                 // -------------------------------------------------------------
                 // :: User defined settings and defaults as well
                 // -------------------------------------------------------------
-                settings: settings,
+                settings: function() {
+                    return settings;
+                },
                 // -------------------------------------------------------------
                 // :: Return commands function from top interpreter
                 // -------------------------------------------------------------
@@ -4068,10 +4077,15 @@
                 // :: toggle recording of history state
                 // -------------------------------------------------------------
                 history_state: function(toggle) {
-                    // call after command if run from user command
-                    self.oneTime(1, function() {
-                        settings.historyState = toggle;
-                    });
+                    if (toggle) {
+                        // if set to true and if set from user command we need
+                        // not to include the command
+                        self.oneTime(1, function() {
+                            settings.historyState = true;
+                        });
+                    } else {
+                        settings.historyState = false;
+                    }
                     return self;
                 },
                 // -------------------------------------------------------------
