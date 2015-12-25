@@ -4784,6 +4784,8 @@
                     if (settings.height) {
                         self.css('height', '');
                     }
+                    $(window).off('blur', blur_terminal).
+                        off('focus', focus_terminal);
                     terminals.remove(terminal_id);
                     if (!terminals.length()) {
                         // last terminal
@@ -4888,6 +4890,16 @@
             var interpreters;
             var command_line;
 
+            var old_enabled;
+            function focus_terminal() {
+                if (old_enabled) {
+                    self.focus();
+                }
+            }
+            function blur_terminal() {
+                old_enabled = enabled;
+                self.disable();
+            }
             make_interpreter(init_interpreter, settings.login, function(itrp) {
                 interpreters = new Stack($.extend({
                     name: settings.name,
@@ -4941,19 +4953,12 @@
                     $(document).bind('click.terminal', disable).
                         bind('contextmenu.terminal', disable);
                 });
-                var old_enabled;
                 if (!is_touch()) {
                     // work weird on mobile
-                    var $win = $(window).focus(function() {
-                        if (old_enabled) {
-                            self.focus();
-                        }
-                    }).blur(function() {
-                        old_enabled = enabled;
-                        self.disable();
-                    });
+                    var $win = $(window).on('focus', focus_terminal).
+                        on('blur', blur_terminal);
                 } else {
-                    self.find('textarea').blur(function() {
+                    self.find('textarea').on('blur.terminal', function() {
                         if (enabled) {
                             self.focus(false);
                         }

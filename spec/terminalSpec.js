@@ -188,3 +188,66 @@ describe('Terminal utils', function() {
         });
     });
 });
+function support_animations() {
+    var animation = false,
+    animationstring = 'animation',
+    keyframeprefix = '',
+    domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
+    pfx  = '',
+    elm = document.createElement('div');
+    if (elm.style.animationName) { animation = true; }
+    if (animation === false) {
+        for (var i = 0; i < domPrefixes.length; i++) {
+            var name = domPrefixes[i] + 'AnimationName';
+            if (elm.style[ name ] !== undefined) {
+                pfx = domPrefixes[i];
+                animationstring = pfx + 'Animation';
+                keyframeprefix = '-' + pfx.toLowerCase() + '-';
+                animation = true;
+                break;
+            }
+        }
+    }
+    return animation;
+}
+$(function() {
+    describe('Terminal plugin', function() {
+        describe('terminal create / terminal destroy', function() {
+            var term = $('<div id="term"></div>').appendTo('body').terminal();
+            it('should create terminal', function() {
+                expect(term.length).toBe(1);
+            });
+            it('should have proper elements', function() {
+                expect(term.hasClass('terminal')).toBe(true);
+                expect(term.find('.terminal-output').length).toBe(1);
+                expect(term.find('.cmd').length).toBe(1);
+                var prompt = term.find('.prompt');
+                expect(prompt.length).toBe(1);
+                expect(prompt.is('span')).toBe(true);
+                expect(prompt.children().length).toBe(1);
+                var cursor = term.find('.cursor');
+                expect(cursor.length).toBe(1);
+                expect(cursor.is('span')).toBe(true);
+                expect(cursor.prev().is('span')).toBe(true);
+                expect(cursor.next().is('span')).toBe(true);
+                if (support_animations()) {
+                    expect(cursor.hasClass('blink')).toBe(true);
+                }
+                expect(term.find('.clipboard').length).toBe(1);
+            });
+            it('should have signature', function() {
+                var sig = term.find('.terminal-output div div').map(function() { return $(this).text(); }).get().join('\n');
+                expect(term.signature().replace(/ /g, '\xA0')).toEqual(sig);
+            });
+            it('should have default prompt', function() {
+                var prompt = term.find('.prompt');
+                expect(prompt.html()).toEqual("<span>&gt;&nbsp;</span>");
+                expect(prompt.text()).toEqual('>\xA0');
+            });
+            it('should destroy terminal', function() {
+                term.destroy();
+                expect(term.children().length).toBe(0);
+            });
+        });
+    });
+});
