@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 25 Dec 2015 20:07:22 +0000
+ * Date: Fri, 25 Dec 2015 20:12:47 +0000
  */
 
 /* TODO:
@@ -4785,9 +4785,6 @@
                 // :: when you refresh the browser
                 // -------------------------------------------------------------
                 destroy: function() {
-                    console.log(terminals.get().map(function(item) {
-                        return item.html();
-                    }));
                     command_line.destroy().remove();
                     output.remove();
                     $(document).unbind('.terminal');
@@ -4803,9 +4800,6 @@
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
                     terminals.remove(terminal_id);
-                    console.log(terminals.get().map(function(item) {
-                        return item.html();
-                    }));
                     if (!terminals.length()) {
                         // last terminal
                         $(window).off('popstate', restore_history_state);

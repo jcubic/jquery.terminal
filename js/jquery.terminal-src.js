@@ -4785,9 +4785,6 @@
                 // :: when you refresh the browser
                 // -------------------------------------------------------------
                 destroy: function() {
-                    console.log(terminals.get().map(function(item) {
-                        return item.html();
-                    }));
                     command_line.destroy().remove();
                     output.remove();
                     $(document).unbind('.terminal');
@@ -4803,9 +4800,6 @@
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
                     terminals.remove(terminal_id);
-                    console.log(terminals.get().map(function(item) {
-                        return item.html();
-                    }));
                     if (!terminals.length()) {
                         // last terminal
                         $(window).off('popstate', restore_history_state);

@@ -294,6 +294,9 @@ $(function() {
                 enter_text('foo');
                 enter_key();
                 expect(interpreter.foo).toHaveBeenCalled();
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.hasClass('command')).toBe(true);
+                expect(last_div.children().html()).toEqual('<span>&gt;&nbsp;foo</span>');
             });
         });
     });
