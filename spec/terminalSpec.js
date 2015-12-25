@@ -210,10 +210,25 @@ function support_animations() {
     }
     return animation;
 }
+function enter_text(text) {
+    var e;
+    var $root = $(document.documentElement || window);
+    for (var i=0; i<text.length; ++i) {
+        e = $.Event("keypress");
+        e.which = text.charCodeAt(i);
+        $root.trigger(e);
+    }
+}
+function enter_key() {
+    var e = $.Event("keydown");
+    e.ctrlKey = false;
+    e.which = e.keyCode = 13;
+    $(document.documentElement || window).trigger(e);
+}
 $(function() {
     describe('Terminal plugin', function() {
-        describe('terminal create / terminal destroy', function() {
-            var term = $('<div id="term"></div>').appendTo('body').terminal();
+        describe('terminal create', function() {
+            var term = $('<div></div>').appendTo('body').terminal();
             it('should create terminal', function() {
                 expect(term.length).toBe(1);
             });
@@ -230,6 +245,7 @@ $(function() {
                 expect(cursor.is('span')).toBe(true);
                 expect(cursor.prev().is('span')).toBe(true);
                 expect(cursor.next().is('span')).toBe(true);
+                term.focus(true);
                 if (support_animations()) {
                     expect(cursor.hasClass('blink')).toBe(true);
                 }
@@ -247,6 +263,37 @@ $(function() {
             it('should destroy terminal', function() {
                 term.destroy();
                 expect(term.children().length).toBe(0);
+                term.remove();
+            });
+        });
+        describe('exec', function() {
+            var interpreter = {
+                foo: function() {
+                }
+            };
+            
+            var term = $('<div></div>').appendTo('body').terminal(interpreter);
+            
+            it('should execute function', function() {
+                spyOn(interpreter, 'foo').and.callThrough();
+                term.exec('foo').then(function() {
+                    expect(interpreter.foo).toHaveBeenCalled();
+                    term.destroy().remove();
+                });
+            });
+        });
+        describe('enter text', function() {
+            var interpreter = {
+                foo: function() {
+                }
+            };
+            var term = $('<div></div>').appendTo('body').terminal(interpreter);
+            it('text should appear', function() {
+                term.focus(true);
+                spyOn(interpreter, 'foo').and.callThrough();
+                enter_text('foo');
+                enter_key();
+                expect(interpreter.foo).toHaveBeenCalled();
             });
         });
     });

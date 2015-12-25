@@ -693,14 +693,18 @@
                     } else {
                         ++pos;
                     }
-                    return data[pos];
+                    if (data[pos]) {
+                        return data[pos];
+                    } else {
+                        this.rotate();
+                    }
                 }
             },
             length: function() {
                 return data.length;
             },
             remove: function(index) {
-                data.splice(index, 1);
+                delete data[index];
             },
             set: function(item) {
                 for (var i = data.length; i--;) {
@@ -712,7 +716,11 @@
                 this.append(item);
             },
             front: function() {
-                return data[pos];
+                var index = pos;
+                while(!data[index]) {
+                    index++;
+                }
+                return data[index];
             },
             append: function(item) {
                 data.push(item);
@@ -1694,7 +1702,9 @@
                 }
             },
             destroy: function() {
-                $(document.documentElement || window).unbind('.cmd');
+                doc.unbind('keypress.cmd', keypress_event);
+                doc.unbind('keydown.cmd', keydown_event);
+                doc.unbind('keyup.cmd', keyup_event);
                 self.stopTime('blink', blink);
                 self.find('.cursor').next().remove().end().prev().remove().
                     end().remove();
@@ -1814,7 +1824,7 @@
         // Keystrokes
         var object;
         var doc = $(document.documentElement || window);
-        doc.bind('keypress.cmd', function(e) {
+        function keypress_event(e) {
             var result;
             no_keypress = false;
             if (e.ctrlKey && e.which === 99) { // CTRL+C
@@ -1852,7 +1862,8 @@
             } else {
                 return result;
             }
-        }).bind('keydown.cmd', keydown_event).bind('keyup.cmd', function(e) {
+        }
+        function keyup_event(e) {
             if (no_keypress) {
                 // Some Androids don't fire keypress - #39
                 var val = clip.val();
@@ -1860,7 +1871,9 @@
                     self.set(val);
                 }
             }
-        })
+        }
+        doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
+            bind('keyup.cmd', keyup_event);
         if (is_paste_supported) {
             doc.bind('paste.cmd', paste);
         }
@@ -2612,7 +2625,7 @@
     // :: All terminal globals
     // -------------------------------------------------------------------------
     var requests = []; // for canceling on CTRL+D
-    var terminals = new Cycle(); // list of terminals global in this scope
+    var terminals = window.terminals = new Cycle(); // list of terminals global in this scope
     // state for all terminals, terminals can't have own array fo state because
     // there is only one popstate event
     var save_state = []; // hold objects returned by export_view by history API
@@ -4772,6 +4785,9 @@
                 // :: when you refresh the browser
                 // -------------------------------------------------------------
                 destroy: function() {
+                    console.log(terminals.get().map(function(item) {
+                        return item.html();
+                    }));
                     command_line.destroy().remove();
                     output.remove();
                     $(document).unbind('.terminal');
@@ -4787,6 +4803,9 @@
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
                     terminals.remove(terminal_id);
+                    console.log(terminals.get().map(function(item) {
+                        return item.html();
+                    }));
                     if (!terminals.length()) {
                         // last terminal
                         $(window).off('popstate', restore_history_state);
