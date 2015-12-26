@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 25 Dec 2015 20:12:47 +0000
+ * Date: Sat, 26 Dec 2015 13:36:10 +0000
  */
 
 /* TODO:
@@ -2514,7 +2514,10 @@
     // :: check if div have scrollbars (need to have overflow auto or always)
     // -----------------------------------------------------------------------
     function have_scrollbars(div) {
-        if (div.is('body')) {
+        if (div.css('overflow') == 'scroll' ||
+            div.css('overflow-y') == 'scroll') {
+            return true;
+        } else if (div.is('body')) {
             return $("body").height() > $(window).height();
         } else {
             return div.get(0).scrollHeight > div.innerHeight();
@@ -4071,14 +4074,14 @@
                 // :: the terminal
                 // -------------------------------------------------------------
                 cols: function() {
-                    return num_chars;
+                    return get_num_chars(self);
                 },
                 // -------------------------------------------------------------
                 // :: Return the number of lines that fit into the height of the
                 // :: terminal
                 // -------------------------------------------------------------
                 rows: function() {
-                    return num_rows;
+                    return get_num_rows(self);
                 },
                 // -------------------------------------------------------------
                 // :: Return the History object
@@ -4470,6 +4473,7 @@
                             if (locals.flush) {
                                 self.flush();
                             }
+                            num_rows = get_num_rows(self);
                             on_scrollbar_show_resize();
                         } catch (e) {
                             // if echo throw exception we can't use error to

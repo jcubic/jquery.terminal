@@ -227,7 +227,7 @@ function enter_key() {
 }
 $(function() {
     describe('Terminal plugin', function() {
-        describe('terminal create', function() {
+        describe('terminal create / terminal destroy', function() {
             var term = $('<div></div>').appendTo('body').terminal();
             it('should create terminal', function() {
                 expect(term.length).toBe(1);
@@ -288,7 +288,7 @@ $(function() {
                 }
             };
             var term = $('<div></div>').appendTo('body').terminal(interpreter);
-            it('text should appear', function() {
+            it('text should appear and interpreter function should be called', function() {
                 term.focus(true);
                 spyOn(interpreter, 'foo').and.callThrough();
                 enter_text('foo');
@@ -297,6 +297,52 @@ $(function() {
                 var last_div = term.find('.terminal-output > div:last-child');
                 expect(last_div.hasClass('command')).toBe(true);
                 expect(last_div.children().html()).toEqual('<span>&gt;&nbsp;foo</span>');
+                term.destroy().remove();
+            });
+        });
+        describe('prompt', function() {
+            var term = $('<div></div>').appendTo('body').terminal($.noop, {
+                prompt: '>>> '
+            });
+            it('should return prompt', function() {
+                expect(term.get_prompt()).toEqual('>>> ');
+                expect(term.find('.prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            });
+            it('should set prompt', function() {
+                term.set_prompt('||| ');
+                expect(term.get_prompt()).toEqual('||| ');
+                expect(term.find('.prompt').html()).toEqual('<span>|||&nbsp;</span>');
+                function prompt(callback) {
+                    callback('>>> ');
+                }
+                term.set_prompt(prompt);
+                expect(term.get_prompt()).toEqual(prompt);
+                expect(term.find('.prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            });
+            it('should format prompt', function() {
+                var prompt = '<span style="font-weight:bold;text-decoration:underline;color:#fff;" data-text=">>>">&gt;&gt;&gt;</span><span>&nbsp;</span>';
+                term.set_prompt('[[ub;#fff;]>>>] ');
+                expect(term.find('.prompt').html()).toEqual(prompt);
+                term.set_prompt(function(callback) {
+                    callback('[[ub;#fff;]>>>] ');
+                });
+                expect(term.find('.prompt').html()).toEqual(prompt);
+                term.destroy().remove();
+            });
+        });
+        describe('line wrapping', function() {
+            var term = $('<div></div>').appendTo('body').terminal().css('overflow-y', 'scroll');
+            var string = '';
+            term.resize();
+            console.log(term.cols());
+            for (var i=term.cols(); i--;) {
+                term.insert('M');
+            }
+            it('text should have 2 lines', function() {
+                var cmd = term.find('.cmd');
+                var line = cmd.find('.prompt').next();
+                expect(line.is('div')).toBe(true);
+                expect(line.text().length).toBe(term.cols()-2);
             });
         });
     });
