@@ -2076,6 +2076,7 @@
                 for (var j=0, jlen=line.length; j<jlen; ++j) {
                     if (line[j] === '[' && line[j+1] === '[') {
                         formatting = true;
+                        in_text = false;
                     } else if (formatting && line[j] === ']') {
                         if (in_text) {
                             formatting = false;
@@ -2111,7 +2112,8 @@
                         return line.substring(j-6, j) == '&nbsp;' ||
                             line.substring(j-1, j) == ' ';
                     }
-                    if (is_space() && ((formatting && in_text) || !formatting)) {
+                    if (is_space() && ((formatting && in_text) || !formatting ||
+                                       (line[j] === '[' && line[j+1] === '['))) {
                         space = j;
                     }
                     if ((count === length || j === jlen-1) &&
