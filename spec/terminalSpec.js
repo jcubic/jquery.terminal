@@ -331,18 +331,27 @@ $(function() {
             });
         });
         describe('line wrapping', function() {
-            var term = $('<div></div>').appendTo('body').terminal().css('overflow-y', 'scroll');
+            var term = $('<div></div>').appendTo('body').css('overflow-y', 'scroll').terminal();
             var string = '';
-            term.resize();
-            console.log(term.cols());
             for (var i=term.cols(); i--;) {
                 term.insert('M');
             }
+            var cmd = term.cmd();
+            var line = cmd.find('.prompt').next();
             it('text should have 2 lines', function() {
-                var cmd = term.find('.cmd');
-                var line = cmd.find('.prompt').next();
                 expect(line.is('div')).toBe(true);
                 expect(line.text().length).toBe(term.cols()-2);
+            });
+            it('cmd plugin moving cursor', function() {
+                cmd.position(-8, true);
+                var before = cmd.find('.prompt').next();
+                var cursor = cmd.find('.cursor');
+                var after = cursor.next();
+                expect(before.is('span')).toBe(true);
+                expect(before.text().length).toBe(term.cols()-8);
+                expect(after.next().text().length).toBe(2);
+                expect(after.text().length).toBe(5);
+                expect(cursor.text()).toBe('M');
             });
         });
     });
