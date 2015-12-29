@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 29 Dec 2015 17:22:25 +0000
+ * Date: Tue, 29 Dec 2015 18:37:41 +0000
  */
 
 /* TODO:
@@ -3844,8 +3844,8 @@
                         save_state.length-1,
                         command
                     ];
-                    hash_commands.push(state);
                     if (!ignore_hash) {
+                        hash_commands.push(state);
                         maybe_update_hash();
                     }
                 }

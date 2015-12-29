@@ -3844,8 +3844,8 @@
                         save_state.length-1,
                         command
                     ];
-                    hash_commands.push(state);
                     if (!ignore_hash) {
+                        hash_commands.push(state);
                         maybe_update_hash();
                     }
                 }
