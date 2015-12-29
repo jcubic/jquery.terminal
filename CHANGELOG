@@ -1,3 +1,4 @@
+0.10.0    keepWords option to echo and words parameter in split_equal
 0.9.3     Change settings to method
           Fix process_commands and escape_regex
           Fix login from hash
