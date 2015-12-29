@@ -2112,7 +2112,8 @@
                         return line.substring(j-6, j) == '&nbsp;' ||
                             line.substring(j-1, j) == ' ';
                     }
-                    if (is_space() && ((formatting && in_text) || !formatting)) {
+                    if (is_space() && ((formatting && in_text) || !formatting ||
+                                      (line[j] === '[' && line[j+1] === '['))) {
                         space = j;
                     }
                     if ((count === length || j === jlen-1) &&

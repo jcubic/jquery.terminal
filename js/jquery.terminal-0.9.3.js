@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 29 Dec 2015 16:54:45 +0000
+ * Date: Tue, 29 Dec 2015 17:22:25 +0000
  */
 
 /* TODO:
@@ -2112,7 +2112,8 @@
                         return line.substring(j-6, j) == '&nbsp;' ||
                             line.substring(j-1, j) == ' ';
                     }
-                    if (is_space() && ((formatting && in_text) || !formatting)) {
+                    if (is_space() && ((formatting && in_text) || !formatting ||
+                                      (line[j] === '[' && line[j+1] === '['))) {
                         space = j;
                     }
                     if ((count === length || j === jlen-1) &&
