@@ -225,6 +225,13 @@ function enter_key() {
     e.which = e.keyCode = 13;
     $(document.documentElement || window).trigger(e);
 }
+function shortcut(ctrl, alt, which) {
+    var e = $.Event("keydown");
+    e.ctrlKey = ctrl;
+    e.altKey = alt;
+    e.which = e.keyCode = which;
+    $(document.documentElement || window).trigger(e);
+}
 $(function() {
     describe('Terminal plugin', function() {
         describe('terminal create / terminal destroy', function() {
@@ -330,8 +337,8 @@ $(function() {
                 term.destroy().remove();
             });
         });
-        describe('line wrapping', function() {
-            var term = $('<div></div>').appendTo('body').css('overflow-y', 'scroll').terminal();
+        describe('cmd plugin', function() {
+            var term = $('<div></div>').appendTo('body').css('overflow-y', 'scroll').terminal($.noop, {name: 'cmd'});
             var string = '';
             for (var i=term.cols(); i--;) {
                 term.insert('M');
@@ -352,6 +359,76 @@ $(function() {
                 expect(after.next().text().length).toBe(2);
                 expect(after.text().length).toBe(5);
                 expect(cursor.text()).toBe('M');
+            });
+            it('should remove characters', function() {
+                cmd['delete'](-10);
+                var before = cmd.find('.prompt').next();
+                var cursor = cmd.find('.cursor');
+                var after = cursor.next();
+                expect(before.text().length).toEqual(term.cols()-8-10);
+                cmd['delete'](8);
+                expect(cursor.text()).toEqual('\xA0');
+                expect(after.text().length).toEqual(0);
+            });
+            var history = cmd.history()
+            it('should have one entry in history', function() {
+                term.set_command('something').focus(true);
+                enter_key();
+                expect(history.data()).toEqual(['something']);
+            });
+            it('should not add item to history if history is disabled', function() {
+                history.disable();
+                term.set_command('something else');
+                enter_key();
+                expect(history.data()).toEqual(['something']);
+                history.enable();
+            });
+            it('should remove commands from history', function() {
+                spyOn(history, 'purge').and.callThrough();
+                cmd.purge();
+                expect(history.purge).toHaveBeenCalled();
+                expect(history.data()).toEqual([]);
+            });
+            it('should have name', function() {
+                expect(cmd.name()).toEqual('cmd_4');
+            });
+            it('should return command', function() {
+                cmd.set('foo');
+                expect(cmd.get()).toEqual('foo');
+            });
+            it('should not move position', function() {
+                var pos = cmd.position();
+                cmd.insert('bar', true);
+                expect(cmd.position()).toEqual(pos);
+            });
+            it('should return $.noop for commands', function() {
+                expect($.terminal.active().commands()).toEqual($.noop);
+            });
+            it('should set position', function() {
+                cmd.position(0);
+                expect(cmd.position()).toEqual(0);
+            });
+            it('should set and remove mask', function() {
+                cmd.mask('•');
+                cmd.position(6);
+                var before = cmd.find('.prompt').next();
+                expect(before.text()).toEqual('••••••');
+                expect(cmd.get()).toEqual('foobar');
+                cmd.mask(false);
+                expect(before.text()).toEqual('foobar');
+            });
+            it('should execute functions on shortcuts', function() {
+                spyOn(cmd, 'position').and.callThrough();
+                shortcut(true, false, 65); // CTRL+A
+                expect(cmd.position).toHaveBeenCalled();
+                spyOn(cmd, 'delete').and.callThrough();
+                shortcut(true, false, 75); // CTRL+K
+                expect(cmd['delete']).toHaveBeenCalled();
+                spyOn(cmd, 'insert').and.callThrough();
+                shortcut(true, false, 89); // CTRL+Y
+                expect(cmd.insert).toHaveBeenCalled();
+                shortcut(true, false, 85); // CTRL+U
+                expect(cmd.kill_text()).toEqual('foobar');
             });
         });
     });
