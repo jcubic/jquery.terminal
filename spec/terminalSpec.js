@@ -1,4 +1,5 @@
 if (typeof window === 'undefined') {
+    var node = true;
     var jsdom = require("jsdom");
     global.document = jsdom.jsdom();
     global.window = global.document.parentWindow;
@@ -562,10 +563,9 @@ function tests_on_ready() {
         });
     });
 }
-if (typeof window == 'undefined') {
+if (node) {
     tests_on_ready();
 } else {
     $(tests_on_ready);
 }
-//*/
 
