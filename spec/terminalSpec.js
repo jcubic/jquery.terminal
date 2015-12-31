@@ -1,3 +1,8 @@
+if (typeof exports === 'object') {
+    var jsdom = require("jsdom").jsdom;
+    global.window = jsdom().parentWindow;
+    global.jQuery = global.$ = require("jquery")(window);
+}
 describe('Terminal utils', function() {
     var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
     var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -477,7 +482,8 @@ $(function() {
                 expect(cmd.get()).toEqual('foo bar');
                 shortcut(true, false, false, 71); // CTRL+G
                 expect(cmd.get()).toEqual('foo bar baz');
-                //cmd.purge();
+                cmd.purge();
+                term.destroy();
             });
         });
     });
