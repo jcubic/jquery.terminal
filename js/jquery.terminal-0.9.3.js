@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 29 Dec 2015 18:37:41 +0000
+ * Date: Thu, 31 Dec 2015 18:47:03 +0000
  */
 
 /* TODO:
@@ -1422,8 +1422,7 @@
                            (e.which === 78 && e.ctrlKey)) {
                     //DOWN ARROW or CTRL+N
                     self.set(history.end() ? last_command : history.next());
-                } else if (e.which === 37 ||
-                           (e.which === 66 && e.ctrlKey)) {
+                } else if (e.which === 37 || (e.which === 66 && e.ctrlKey)) {
                     //CTRL+LEFT ARROW or CTRL+B
                     if (e.ctrlKey && e.which !== 66) {
                         len = position - 1;
@@ -1497,12 +1496,11 @@
                             self.position(1, true);
                         }
                     }
-                } else if (e.which === 123) { //F12 - Allow Firebug
+                } else if (e.which === 123) { // F12 - Allow Firebug
                     return;
-                } else if (e.which === 36) { //HOME
+                } else if (e.which === 36) { // HOME
                     self.position(0);
-                } else if (e.which === 35) {
-                    //END
+                } else if (e.which === 35) { // END
                     self.position(command.length);
                 } else if (e.shiftKey && e.which == 45) { // Shift+Insert
                     clip.val(''); // so we get it before paste event
@@ -1589,8 +1587,8 @@
                     return;
                 }
                 // this will prevent for instance backspace to go back one page
-                prevent_keypress = true;
-                return false;
+                //prevent_keypress = true;
+                e.preventDefault();
             } /*else { // if disabled
                 if ((e.altKey && e.which === 68) ||
                     (e.ctrlKey &&
@@ -1848,7 +1846,6 @@
                         return false;
                     } else if (!e.ctrlKey && !(e.altKey && e.which === 100) ||
                                e.altKey) { // ALT+D
-                            // TODO: this should be in one statement
                         if (reverse_search) {
                             rev_search_str += String.fromCharCode(e.which);
                             reverse_history_search();
