@@ -215,22 +215,22 @@ function enter_text(text) {
     var $root = $(document.documentElement || window);
     for (var i=0; i<text.length; ++i) {
         e = $.Event("keypress");
-        e.which = text.charCodeAt(i);
+        e.which = e.keyCode = text.charCodeAt(i);
+        e.ctrlKey = false;
+        e.altKey = false;
         $root.trigger(e);
     }
 }
-function enter_key() {
-    var e = $.Event("keydown");
-    e.ctrlKey = false;
-    e.which = e.keyCode = 13;
-    $(document.documentElement || window).trigger(e);
-}
-function shortcut(ctrl, alt, which) {
+function shortcut(ctrl, alt, shift, which) {
     var e = $.Event("keydown");
     e.ctrlKey = ctrl;
     e.altKey = alt;
+    e.shiftKey = shift;
     e.which = e.keyCode = which;
     $(document.documentElement || window).trigger(e);
+}
+function enter_key() {
+    shortcut(false, false, false, 13);
 }
 $(function() {
     describe('Terminal plugin', function() {
@@ -372,6 +372,7 @@ $(function() {
             });
             var history = cmd.history()
             it('should have one entry in history', function() {
+                cmd.purge();
                 term.set_command('something').focus(true);
                 enter_key();
                 expect(history.data()).toEqual(['something']);
@@ -381,7 +382,6 @@ $(function() {
                 term.set_command('something else');
                 enter_key();
                 expect(history.data()).toEqual(['something']);
-                history.enable();
             });
             it('should remove commands from history', function() {
                 spyOn(history, 'purge').and.callThrough();
@@ -419,16 +419,65 @@ $(function() {
             });
             it('should execute functions on shortcuts', function() {
                 spyOn(cmd, 'position').and.callThrough();
-                shortcut(true, false, 65); // CTRL+A
+                shortcut(true, false, false, 65); // CTRL+A
                 expect(cmd.position).toHaveBeenCalled();
                 spyOn(cmd, 'delete').and.callThrough();
-                shortcut(true, false, 75); // CTRL+K
+                shortcut(true, false, false, 75); // CTRL+K
                 expect(cmd['delete']).toHaveBeenCalled();
                 spyOn(cmd, 'insert').and.callThrough();
-                shortcut(true, false, 89); // CTRL+Y
+                shortcut(true, false, false, 89); // CTRL+Y
                 expect(cmd.insert).toHaveBeenCalled();
-                shortcut(true, false, 85); // CTRL+U
+                shortcut(true, false, false, 85); // CTRL+U
                 expect(cmd.kill_text()).toEqual('foobar');
+                shortcut(true, false, true, 13);
+                expect(cmd.find('.prompt').next().text()).toEqual('\xA0');
+                expect(cmd.get()).toEqual('\n');
+                cmd.set('');
+                shortcut(false, false, false, 9); // TAB
+                expect(cmd.get()).toEqual('\t');
+                history.enable();
+                cmd.set('foo bar');
+                enter_key();
+                shortcut(false, false, false, 38); // UP ARROW
+                expect(cmd.get()).toEqual('foo bar');
+                shortcut(false, false, false, 40); // DOWN ARROW
+                expect(cmd.get()).toEqual('');
+                cmd.insert('hello');
+                shortcut(false, false, false, 38);
+                shortcut(false, false, false, 40);
+                expect(cmd.get()).toEqual('hello');
+                shortcut(true, false, false, 80); // CTRL+P
+                expect(cmd.get()).toEqual('foo bar');
+                shortcut(true, false, false, 78); // CTRL+N
+                expect(cmd.get()).toEqual('hello');
+                cmd.set('foo bar baz');
+                shortcut(false, false, false, 37); // LEFT ARROW
+                expect(cmd.position()).toEqual(10);
+                shortcut(true, false, false, 37); // moving by words
+                expect(cmd.position()).toEqual(8);
+                shortcut(true, false, false, 37);
+                expect(cmd.position()).toEqual(4);
+                shortcut(true, false, false, 37);
+                expect(cmd.position()).toEqual(0);
+                shortcut(false, false, false, 39); // RIGHT ARROW
+                expect(cmd.position()).toEqual(1);
+                shortcut(true, false, false, 39);
+                expect(cmd.position()).toEqual(3);
+                shortcut(true, false, false, 39);
+                expect(cmd.position()).toEqual(7);
+                shortcut(true, false, false, 39);
+                expect(cmd.position()).toEqual(11);
+                shortcut(false, false, false, 36); // HOME
+                expect(cmd.position()).toEqual(0);
+                shortcut(false, false, false, 35); // END
+                expect(cmd.position()).toEqual(cmd.get().length);
+                shortcut(true, false, false, 82); // CTRL+R
+                expect(cmd.prompt()).toEqual("(reverse-i-search)`': ");
+                enter_text('foo');
+                expect(cmd.get()).toEqual('foo bar');
+                shortcut(true, false, false, 71); // CTRL+G
+                expect(cmd.get()).toEqual('foo bar baz');
+                //cmd.purge();
             });
         });
     });
