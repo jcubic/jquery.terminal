@@ -1,7 +1,12 @@
 if (typeof window === 'undefined') {
-    var jsdom = require("jsdom").jsdom;
-    global.window = jsdom().parentWindow;
-    global.jQuery = global.$ = require("jquery")(window);
+    var jsdom = require("jsdom");
+    global.document = jsdom.jsdom();
+    global.window = global.document.parentWindow;
+    var navigator = {userAgent: "node-js", platform: "Linux i686"};
+    global.window.navigator = global.navigator = navigator;
+    global.jQuery = global.$ = require("jquery");
+    require('../js/jquery.terminal-src');
+    require('../js/unix_formatting');
 }
 describe('Terminal utils', function() {
     var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -134,10 +139,43 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.escape_regex', function() {
+        it('should escape regex special characters', function() {
+            var safe = "\\\\\\^\\*\\+\\?\\.\\$\\[\\]\\{\\}\\(\\)";
+            expect($.terminal.escape_regex('\\^*+?.$[]{}()')).toEqual(safe);
+        });
     });
     describe('$.terminal.have_formatting', function() {
+        var formattings = [
+            'some text [[;;]Te[xt] and formatting',
+            'some text [[;;]Te\\]xt] and formatting',
+            'some text [[;;]] and formatting',
+            'some text [[gui;;;class]Text] and formatting',
+            'some text [[b;#fff;]Text] and formatting',
+            'some text [[b;red;blue]Text] and formatting'];
+        var not_formattings = [
+            'some text [[;;]Text[ and formatting',
+            'some text [[Text]] and formatting',
+            'some text [[Text[[ and formatting',
+            'some text [[;]Text] and formatting',
+            'some text Text] and formatting',
+            'some text [[Text and formatting',
+            'some text [;;]Text] and formatting'];
+        it('should detect terminal formatting', function() {
+            formattings.forEach(function(formatting) {
+                expect($.terminal.have_formatting(formatting)).toEqual(true);
+            });
+            not_formattings.forEach(function(formatting) {
+                expect($.terminal.have_formatting(formatting)).toEqual(false);
+            });
+        });
     });
     describe('$.terminal.valid_color', function() {
+        it('should mark hex color as valid', function() {
+            var valid_colors = ['#fff', '#fab', '#ffaacc', 'red', 'blue'];
+            valid_colors.forEach(function(color) {
+                expect($.terminal.valid_color(color)).toBe(true);
+            });
+        });
     });
     describe('$.terminal.format', function() {
         var format = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz]';
@@ -237,7 +275,8 @@ function shortcut(ctrl, alt, shift, which) {
 function enter_key() {
     shortcut(false, false, false, 13);
 }
-$(function() {
+
+function tests_on_ready() {
     describe('Terminal plugin', function() {
         describe('terminal create / terminal destroy', function() {
             var term = $('<div></div>').appendTo('body').terminal();
@@ -287,7 +326,12 @@ $(function() {
             var term = $('<div></div>').appendTo('body').terminal(interpreter);
             
             it('should execute function', function() {
-                spyOn(interpreter, 'foo').and.callThrough();
+                var spy = spyOn(interpreter, 'foo');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
                 term.exec('foo').then(function() {
                     expect(interpreter.foo).toHaveBeenCalled();
                     term.destroy().remove();
@@ -302,7 +346,12 @@ $(function() {
             var term = $('<div></div>').appendTo('body').terminal(interpreter);
             it('text should appear and interpreter function should be called', function() {
                 term.focus(true);
-                spyOn(interpreter, 'foo').and.callThrough();
+                var spy = spyOn(interpreter, 'foo');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
                 enter_text('foo');
                 enter_key();
                 expect(interpreter.foo).toHaveBeenCalled();
@@ -343,7 +392,11 @@ $(function() {
             });
         });
         describe('cmd plugin', function() {
-            var term = $('<div></div>').appendTo('body').css('overflow-y', 'scroll').terminal($.noop, {name: 'cmd'});
+            var term = $('<div></div>').appendTo('body').css('overflow-y', 'scroll').terminal($.noop, {
+                name: 'cmd',
+                numChars: 150,
+                numRows: 20
+            });
             var string = '';
             for (var i=term.cols(); i--;) {
                 term.insert('M');
@@ -389,7 +442,12 @@ $(function() {
                 expect(history.data()).toEqual(['something']);
             });
             it('should remove commands from history', function() {
-                spyOn(history, 'purge').and.callThrough();
+                var spy = spyOn(history, 'purge');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
                 cmd.purge();
                 expect(history.purge).toHaveBeenCalled();
                 expect(history.data()).toEqual([]);
@@ -423,13 +481,29 @@ $(function() {
                 expect(before.text()).toEqual('foobar');
             });
             it('should execute functions on shortcuts', function() {
-                spyOn(cmd, 'position').and.callThrough();
+                var spy;
+                spy = spyOn(cmd, 'position');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
                 shortcut(true, false, false, 65); // CTRL+A
                 expect(cmd.position).toHaveBeenCalled();
-                spyOn(cmd, 'delete').and.callThrough();
+                spy = spyOn(cmd, 'delete');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
                 shortcut(true, false, false, 75); // CTRL+K
                 expect(cmd['delete']).toHaveBeenCalled();
-                spyOn(cmd, 'insert').and.callThrough();
+                spy = spyOn(cmd, 'insert');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
                 shortcut(true, false, false, 89); // CTRL+Y
                 expect(cmd.insert).toHaveBeenCalled();
                 shortcut(true, false, false, 85); // CTRL+U
@@ -487,4 +561,11 @@ $(function() {
             });
         });
     });
-});
+}
+if (typeof window == 'undefined') {
+    tests_on_ready();
+} else {
+    $(tests_on_ready);
+}
+//*/
+

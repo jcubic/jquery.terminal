@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 31 Dec 2015 18:47:03 +0000
+ * Date: Thu, 31 Dec 2015 22:23:07 +0000
  */
 
 /* TODO:
@@ -952,9 +952,9 @@
         var animation;
         function mobile_focus() {
             // if (is_touch()) {
+            var focus = clip.is(':focus');
             if (enabled) {
-                var foucs = clip.is(':focus');
-                if (!foucs) {
+                if (!focus) {
                     clip.focus();
                 }
             } else {
@@ -1950,6 +1950,7 @@
     var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/i;
     var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
     var format_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
+    var format_exist_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]/gi;
     var format_full_re = /^\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]$/gi;
     var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
     //var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
@@ -2022,7 +2023,7 @@
         // :: test if string contain formatting
         // ---------------------------------------------------------------------
         have_formatting: function(str) {
-            return typeof str == 'string' && !!str.match(format_re);
+            return typeof str == 'string' && !!str.match(format_exist_re);
         },
         is_formatting: function(str) {
             return typeof str == 'string' && !!str.match(format_full_re);
@@ -2061,6 +2062,10 @@
                     text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n') + ']' +
                     text + ']';
             }).split(/\n/g);
+            function is_space() {
+                return line.substring(j-6, j) == '&nbsp;' ||
+                    line.substring(j-1, j) == ' ';
+            }
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');
@@ -2104,10 +2109,6 @@
                         } else {
                             ++count;
                         }
-                    }
-                    function is_space() {
-                        return line.substring(j-6, j) == '&nbsp;' ||
-                            line.substring(j-1, j) == ' ';
                     }
                     if (is_space() && ((formatting && in_text) || !formatting ||
                                       (line[j] === '[' && line[j+1] === '['))) {
@@ -4083,14 +4084,14 @@
             // :: the terminal
             // -------------------------------------------------------------
             cols: function() {
-                return get_num_chars(self);
+                return settings.numChars?settings.numChars:get_num_chars(self);
             },
             // -------------------------------------------------------------
             // :: Return the number of lines that fit into the height of the
             // :: terminal
             // -------------------------------------------------------------
             rows: function() {
-                return get_num_rows(self);
+                return settings.numRows?settings.numRows:get_num_rows(self);
             },
             // -------------------------------------------------------------
             // :: Return the History object
@@ -4360,8 +4361,8 @@
                     }
                     width = self.width();
                     height = self.height();
-                    var new_num_chars = get_num_chars(self);
-                    var new_num_rows = get_num_rows(self);
+                    var new_num_chars = self.cols();
+                    var new_num_rows = self.rows();
                     // only if number of chars changed
                     if (new_num_chars !== num_chars ||
                         new_num_rows !== num_rows) {
@@ -5017,7 +5018,7 @@
                 });
             }
             if (self.is(':visible')) {
-                num_chars = get_num_chars(self);
+                num_chars = self.cols();
                 command_line.resize(num_chars);
                 num_rows = get_num_rows(self);
             }
@@ -5110,3 +5111,19 @@
         return self;
     }; //terminal plugin
 })(jQuery);
+/*
+(function(global) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        module.exports = global.jQuery ? {
+                terminal: $.terminal
+            } : function(w) {
+                if (!w.jQuery) {
+                    throw new Error("jQuery Terminal require jQuery");
+                }
+                return {
+                    terminal: $.terminal
+                }
+            };
+    }
+}(typeof window !== "undefined" ? window : this);
+*/

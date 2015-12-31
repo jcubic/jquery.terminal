@@ -42,4 +42,4 @@ www/Makefile: www/Makefile.in Makefile
 	test -d www && $(SED) -e "s/{{VERSION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 test:
-	echo "Need to be impleted"
+	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose --junitreport --color --forceexit spec
