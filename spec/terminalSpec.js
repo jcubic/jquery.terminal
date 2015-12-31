@@ -1,4 +1,4 @@
-if (typeof exports === 'object') {
+if (typeof window === 'undefined') {
     var jsdom = require("jsdom").jsdom;
     global.window = jsdom().parentWindow;
     global.jQuery = global.$ = require("jquery")(window);
