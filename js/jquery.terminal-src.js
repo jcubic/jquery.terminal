@@ -5066,7 +5066,7 @@
                     try {
                         var hash = location.hash.replace(/^#/, '');
                         // yes no var - global inside terminal
-                        hash_commands = $.parseJSON(hash);
+                        hash_commands = $.parseJSON(decodeURIComponent(hash));
                         $.when.apply($, $.map(hash_commands, exec_spec)).
                             then(function() {
                                 // can change hash when all exec get resloved

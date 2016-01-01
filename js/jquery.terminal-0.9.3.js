@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 01 Jan 2016 15:43:28 +0000
+ * Date: Fri, 01 Jan 2016 22:10:31 +0000
  */
 
 /* TODO:
@@ -5066,7 +5066,7 @@
                     try {
                         var hash = location.hash.replace(/^#/, '');
                         // yes no var - global inside terminal
-                        hash_commands = $.parseJSON(hash);
+                        hash_commands = $.parseJSON(decodeURIComponent(hash));
                         $.when.apply($, $.map(hash_commands, exec_spec)).
                             then(function() {
                                 // can change hash when all exec get resloved
