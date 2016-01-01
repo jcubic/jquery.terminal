@@ -3132,7 +3132,6 @@
                             if (string.match(format_exec_re)) {
                                 // redraw should not execute commands and it have
                                 // and lines variable have all extended commands
-                                console.log(string);
                                 string = string.replace(/^\[\[|\]\]$/g, '');
                                 if (prev_command && prev_command.command == string) {
                                     self.error(strings.recursiveCall);
