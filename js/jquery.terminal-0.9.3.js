@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 31 Dec 2015 22:23:07 +0000
+ * Date: Fri, 01 Jan 2016 15:41:37 +0000
  */
 
 /* TODO:
@@ -1960,7 +1960,7 @@
     var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]*)(?=:? |$)|(\\ |[^ ])+|[\w-]+)/gi;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
-    var format_exec_re = /(\[\[(?:[^\]]|\](?!\]))*\]\])/;
+    var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
         version: '0.9.3',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
@@ -3130,8 +3130,9 @@
                     if (line_settings.exec) {
                         string = $.map(string.split(format_exec_re), function(string) {
                             if (string.match(format_exec_re)) {
-                            // redraw should not execute commands and it have
-                            // and lines variable have all extended commands
+                                // redraw should not execute commands and it have
+                                // and lines variable have all extended commands
+                                console.log(string);
                                 string = string.replace(/^\[\[|\]\]$/g, '');
                                 if (prev_command && prev_command.command == string) {
                                     self.error(strings.recursiveCall);
