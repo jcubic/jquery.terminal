@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 01 Jan 2016 22:10:31 +0000
+ * Date: Sat, 02 Jan 2016 10:24:46 +0000
  */
 
 /* TODO:
@@ -3390,6 +3390,11 @@
                     var position = lines.length-1;
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
+                    if (exec) {
+                        // exec execute this function wihout the help of cmd plugin
+                        // that add command to history on enter
+                        command_line.history().append(command);
+                    }
                     if (result !== undefined) {
                         // auto pause/resume when user return promises
                         self.pause();
