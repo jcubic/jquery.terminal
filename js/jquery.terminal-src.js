@@ -1037,13 +1037,12 @@
             }
             if (rev_search_str.length > 0) {
                 for (var j=rev_search_str.length; j>0; j--) {
-                    save_string = rev_search_str.substring(0, j).
-                        replace(/([.*+{}\[\]?])/g, '\\$1');
+                    save_string = $.terminal.escape_regex(rev_search_str.substring(0, j));
                     regex = new RegExp(save_string);
                     for (var i=len; i--;) {
                         if (regex.test(history_data[i])) {
                             reverse_search_position = history_data.length - i;
-                            self.position(0);
+                            self.position(history_data[i].indexOf(save_string));
                             self.set(history_data[i], true);
                             redraw();
                             if (rev_search_str.length !== j) {
