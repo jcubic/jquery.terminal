@@ -2119,7 +2119,7 @@
                         var output;
                         var after = line.substring(space, j+length+1);
                         var text = $('<span>' + after + '</span>').text();
-                        var can_break = text.match(/\s/);
+                        var can_break = !!text.match(/\s/) || j+length+1 > jlen;
                         if (words && space != -1 && j !== jlen-1 && can_break) {
                             output = line.substring(first_index, space);
                             j = space-1;

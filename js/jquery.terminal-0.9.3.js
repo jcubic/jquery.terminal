@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 02 Jan 2016 10:24:46 +0000
+ * Date: Sat, 02 Jan 2016 13:45:41 +0000
  */
 
 /* TODO:
@@ -2119,7 +2119,7 @@
                         var output;
                         var after = line.substring(space, j+length+1);
                         var text = $('<span>' + after + '</span>').text();
-                        var can_break = text.match(/\s/);
+                        var can_break = !!text.match(/\s/) || j+length+1 > jlen;
                         if (words && space != -1 && j !== jlen-1 && can_break) {
                             output = line.substring(first_index, space);
                             j = space-1;
