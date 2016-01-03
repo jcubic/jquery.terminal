@@ -926,7 +926,7 @@
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
-        var clip = $('<textarea />').addClass('clipboard').appendTo(self);
+        var clip = $('<textarea/>').addClass('clipboard').appendTo(self);
         if (options.width) {
             self.width(options.width);
         }
@@ -955,7 +955,9 @@
             var focus = clip.is(':focus');
             if (enabled) {
                 if (!focus) {
-                    clip.focus();
+                    self.oneTime(100, function() {
+                        clip.focus();
+                    });
                 }
             } else {
                 if (focus) {
@@ -1294,23 +1296,32 @@
         // ---------------------------------------------------------------------
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
-        function paste() {
-            $('.cmd').each(function() {
-                var self = $(this);
-                var cmd = self.data('cmd');
-                if (cmd.isenabled()) {
-                    var clip = self.find('textarea');
-                    if (!clip.is(':focus')) {
-                        clip.focus();
-                    }
+        function paste(e) {
+            e = e.originalEvent;
+            if (self.isenabled()) {
+                var clip = self.find('textarea');
+                if (!clip.is(':focus')) {
+                    clip.focus();
+                }
+                var text;
+                if (window.clipboardData && window.clipboardData.getData) { // IE
+                    text = window.clipboardData.getData('Text');
+                } else if (e.clipboardData && e.clipboardData.getData) {
+                    text = e.clipboardData.getData('text/plain');
+                } else {
                     //wait until Browser insert text to textarea
                     cmd.oneTime(100, function() {
-                        cmd.insert(clip.val());
+                        self.insert(clip.val());
                         clip.val('');
                         fake_mobile_entry();
                     });
                 }
-            });
+                if (text) {
+                    self.insert(text);
+                    clip.val('');
+                    fake_mobile_entry();
+                }
+            }
         }
         var first_up_history = true;
         // prevent_keypress - hack for Android that was inserting characters on
@@ -5003,6 +5014,8 @@
                     // keep focusing silently so textarea get focus
                     self.focus(true, true);
                 }
+                // this will ensure that textarea has focus
+                command_line.enable();
             }).delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on
