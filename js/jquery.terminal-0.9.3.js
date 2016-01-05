@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 03 Jan 2016 12:58:45 +0000
+ * Date: Tue, 05 Jan 2016 21:18:57 +0000
  */
 
 /* TODO:
@@ -955,7 +955,8 @@
             var focus = clip.is(':focus');
             if (enabled) {
                 if (!focus) {
-                    self.oneTime(100, function() {
+                    clip.focus();
+                    self.oneTime(10, function() {
                         clip.focus();
                     });
                 }
@@ -3632,7 +3633,7 @@
                 var completion;
                 if ((settings.completion &&
                      $.type(settings.completion) != 'boolean') &&
-                    !top.completion) {
+                    top.completion === undefined) {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
@@ -5001,11 +5002,12 @@
                 var $win = $(window).on('focus', focus_terminal).
                     on('blur', blur_terminal);
             } else {
+                /*
                 self.find('textarea').on('blur.terminal', function() {
                     if (enabled) {
                         self.focus(false);
                     }
-                });
+                });*/
             }
             self.click(function(e) {
                 if (!self.enabled()) {

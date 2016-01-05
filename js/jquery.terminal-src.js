@@ -955,7 +955,8 @@
             var focus = clip.is(':focus');
             if (enabled) {
                 if (!focus) {
-                    self.oneTime(100, function() {
+                    clip.focus();
+                    self.oneTime(10, function() {
                         clip.focus();
                     });
                 }
@@ -3632,7 +3633,7 @@
                 var completion;
                 if ((settings.completion &&
                      $.type(settings.completion) != 'boolean') &&
-                    !top.completion) {
+                    top.completion === undefined) {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
@@ -5001,11 +5002,12 @@
                 var $win = $(window).on('focus', focus_terminal).
                     on('blur', blur_terminal);
             } else {
+                /*
                 self.find('textarea').on('blur.terminal', function() {
                     if (enabled) {
                         self.focus(false);
                     }
-                });
+                });*/
             }
             self.click(function(e) {
                 if (!self.enabled()) {

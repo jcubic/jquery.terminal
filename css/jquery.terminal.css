@@ -34,7 +34,9 @@
     position: absolute;
     display: block;
     bottom: 0;
-    height: 16px;
+    left: -10px;
+    width: 10px;
+    background-color: black;
     left: -10px;
 }
 
@@ -66,7 +68,7 @@
     filter: alpha(opacity = 0.01);
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
     */
-    width: 10px; /* textarea need to have width or it will not work on Android */
+    width: 10px; /* textarea need to have width and height or it will not work on Android */
     height: 10px;
     padding: 0;
     resize: none;
