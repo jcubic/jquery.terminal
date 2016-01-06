@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 05 Jan 2016 21:18:57 +0000
+ * Date: Wed, 06 Jan 2016 12:48:53 +0000
  */
 
 /* TODO:
@@ -5130,19 +5130,3 @@
         return self;
     }; //terminal plugin
 })(jQuery);
-/*
-(function(global) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        module.exports = global.jQuery ? {
-                terminal: $.terminal
-            } : function(w) {
-                if (!w.jQuery) {
-                    throw new Error("jQuery Terminal require jQuery");
-                }
-                return {
-                    terminal: $.terminal
-                }
-            };
-    }
-}(typeof window !== "undefined" ? window : this);
-*/

@@ -5130,19 +5130,3 @@
         return self;
     }; //terminal plugin
 })(jQuery);
-/*
-(function(global) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        module.exports = global.jQuery ? {
-                terminal: $.terminal
-            } : function(w) {
-                if (!w.jQuery) {
-                    throw new Error("jQuery Terminal require jQuery");
-                }
-                return {
-                    terminal: $.terminal
-                }
-            };
-    }
-}(typeof window !== "undefined" ? window : this);
-*/
