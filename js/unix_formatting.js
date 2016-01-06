@@ -7,7 +7,7 @@
  *           \/              /____/
  * http://terminal.jcubic.pl
  *
- * Copyright (c) 2014 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2014-2016 Jakub Jankiewicz <http://jcubic.pl>
  *
  * This is example of how to create custom formatter for jQuery Terminal
  *

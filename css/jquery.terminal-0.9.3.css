@@ -7,7 +7,7 @@
  *           \/              /____/                              version 0.9.3
  * http://terminal.jcubic.pl
  *
- * Copyright (c) 2011-2014 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2011-2016 Jakub Jankiewicz <http://jcubic.pl>
  *
  * This file is part of jQuery Terminal.
  *
@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Date: Thu, 24 Dec 2015 20:12:53 +0000
+ * Date: Wed, 06 Jan 2016 17:21:24 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{

@@ -7,7 +7,7 @@
  *           \/              /____/                              version {{VER}}
  * http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2015 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2010-2016 Jakub Jankiewicz <http://jcubic.pl>
  *
  * This file is part of jQuery Terminal.
  *

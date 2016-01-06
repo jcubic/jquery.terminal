@@ -7,7 +7,7 @@
  *           \/              /____/                              version 0.9.3
  * http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2015 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2010-2016 Jakub Jankiewicz <http://jcubic.pl>
  *
  * This file is part of jQuery Terminal.
  *
@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 06 Jan 2016 12:48:53 +0000
+ * Date: Wed, 06 Jan 2016 17:21:19 +0000
  */
 
 /* TODO:

@@ -136,4 +136,4 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 
 Licensed under [GNU LGPL Version 3 license](http://www.gnu.org/licenses/lgpl.html)
 
-Copyright (c) 2011-2015 [Jakub Jankiewicz](http://jcubic.pl)
+Copyright (c) 2011-2016 [Jakub Jankiewicz](http://jcubic.pl)
