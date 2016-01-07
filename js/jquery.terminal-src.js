@@ -951,18 +951,19 @@
         var cursor = self.find('.cursor');
         var animation;
         function mobile_focus() {
-            // if (is_touch()) {
-            var focus = clip.is(':focus');
-            if (enabled) {
-                if (!focus) {
-                    clip.focus();
-                    self.oneTime(10, function() {
+            if (is_touch()) {
+                var focus = clip.is(':focus');
+                if (enabled) {
+                    if (!focus) {
                         clip.focus();
-                    });
-                }
-            } else {
-                if (focus) {
-                    clip.blur();
+                        self.oneTime(10, function() {
+                            clip.focus();
+                        });
+                    }
+                } else {
+                    if (focus) {
+                        clip.blur();
+                    }
                 }
             }
         }
