@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 07 Jan 2016 16:19:03 +0000
+ * Date: Thu, 07 Jan 2016 19:44:24 +0000
  */
 
 /* TODO:
@@ -1519,6 +1519,7 @@
                     if (!is_paste_supported) {
                         paste();
                     }
+                    clip.focus();
                     return;
                 } else if (e.ctrlKey || e.metaKey) {
                     if (e.which === 192) { // CMD+` switch browser window on Mac
@@ -1571,6 +1572,8 @@
                             //CTRL+V
                             if (!is_paste_supported) {
                                 paste();
+                            } else {
+                                clip.focus();
                             }
                             return;
                         } else if (e.which === 75) {

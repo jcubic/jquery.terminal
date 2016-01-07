@@ -1519,6 +1519,7 @@
                     if (!is_paste_supported) {
                         paste();
                     }
+                    clip.focus();
                     return;
                 } else if (e.ctrlKey || e.metaKey) {
                     if (e.which === 192) { // CMD+` switch browser window on Mac
@@ -1571,6 +1572,8 @@
                             //CTRL+V
                             if (!is_paste_supported) {
                                 paste();
+                            } else {
+                                clip.focus();
                             }
                             return;
                         } else if (e.which === 75) {
