@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 07 Jan 2016 19:44:24 +0000
+ * Date: Fri, 08 Jan 2016 16:27:35 +0000
  */
 
 /* TODO:
@@ -3144,7 +3144,8 @@
                 if (string !== '') {
                     if (line_settings.exec) {
                         string = $.map(string.split(format_exec_re), function(string) {
-                            if (string.match(format_exec_re)) {
+                            if (string.match(format_exec_re) &&
+                                !$.terminal.is_formatting(string)) {
                                 // redraw should not execute commands and it have
                                 // and lines variable have all extended commands
                                 string = string.replace(/^\[\[|\]\]$/g, '');
