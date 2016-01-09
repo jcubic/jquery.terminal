@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 08 Jan 2016 16:27:35 +0000
+ * Date: Sat, 09 Jan 2016 21:34:01 +0000
  */
 
 /* TODO:
@@ -2896,7 +2896,6 @@
             finalize = finalize || $.noop;
             var type = $.type(user_intrp);
             var result = {};
-            var commands;
             var rpc_count = 0; // only one rpc can be use for array
             var fn_interpreter;
             if (type === 'array') {
@@ -2963,14 +2962,14 @@
                             result.interpreter = make_object_interpreter(object,
                                                                          false,
                                                                          login);
-                            result.completion = commands;
+                            result.completion = Object.keys(object);
                         } else {
                             // no procs in system.describe
                             result.interpreter = make_basic_json_rpc(user_intrp);
                             result.completion = settings.completion;
                         }
-                        self.resume();
                         finalize(result);
+                        self.resume();
                     });
                 }
             } else if (type === 'object') {
@@ -2980,7 +2979,7 @@
                     completion: Object.keys(user_intrp)
                 });
             } else {
-                // allow $('<div/>).terminal();
+                // allow $('<div/>').terminal();
                 if (type === 'undefined') {
                     user_intrp = $.noop;
                 } else if (type !== 'function') {
@@ -3953,16 +3952,12 @@
                 if (settings.history) {
                     command_line.history().disable();
                 }
+                // so we know how many times call pop
+                var level = interpreters.size();
                 in_login = true;
                 function login_callback(user, token, silent, event) {
                     if (token) {
-                        // TODO: what about interpreter login ????
-
-                        // when called using autologin it will have only
-                        // two interpeter on the stack (main and login)
-                        // we will pop n-1 interpreters because we don't
-                        // want to logout
-                        while (interpreters.size() > 1) {
+                        while (interpreters.size() > level) {
                             self.pop();
                         }
                         if (settings.history) {
@@ -4697,7 +4692,7 @@
                 if (top) {
                     top.mask = command_line.mask();
                 }
-                make_interpreter(interpreter, options.login, function(ret) {
+                make_interpreter(interpreter, !!options.login, function(ret) {
                     // result is object with interpreter and completion
                     // properties
                     interpreters.push($.extend({}, ret, options));

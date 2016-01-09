@@ -1,4 +1,13 @@
 0.10.0    keepWords option to echo and words parameter in split_equal
+          Fix login for nested intepreters
+          Fix destroy of cmd plugin
+          Fix saving commands in hash
+          Allow to disable completion in nested interpreter
+          Change position of cursor in reverse history search
+          Fix pasting in Firefox
+          Exec is adding command to history
+          Fix execHash on FireFox
+          Testsing terminal and cmd plugin + call from command line
 0.9.3     Change settings to method
           Fix process_commands and escape_regex
           Fix login from hash
