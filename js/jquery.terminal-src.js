@@ -3002,13 +3002,13 @@
                        method,
                        [user, passwd],
                        function(response) {
-                           self.resume();
                            if (!response.error && response.result) {
                                callback(response.result);
                            } else {
                                // null will trigger message that login fail
                                callback(null);
                            }
+                           self.resume();
                        }, ajax_error);
             };
             //default name is login so you can pass true
@@ -3379,13 +3379,17 @@
                 if (!silent) {
                     echo_command(command);
                 }
+                // new promise will be returnd to exec that will resolve his
+                // returned promise
+                var deferred = new $.Deferred();
                 // we need to save sate before commands is deleyd because
                 // execute_extended_command disable it and it can be exected
                 // after delay
                 var saved_change_hash = change_hash;
-                if (command.match(/^\s*login\s*$/i) && settings.login &&
-                    interpreters.size() == 1) {
+                if (command.match(/^\s*login\s*$/i) && self.token(true)) {
                     self.logout();
+                    after_exec();
+                    return deferred.promise();
                 } else if (command.match(/^\s*(exit|clear)\s*$/i) && !in_login) {
                     if (settings.exit && command.match(/^\s*exit\s*$/i)) {
                         var count = interpreters.size();
@@ -3398,10 +3402,9 @@
                     if ($.isFunction(settings.onAfterCommand)) {
                         settings.onAfterCommand(self, command);
                     }
+                    after_exec();
+                    return deferred.promise();
                 } else {
-                    // new promise will be returnd to exec that will resolve his
-                    // returned promise
-                    var deferred = new $.Deferred();
                     var position = lines.length-1;
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
@@ -3953,11 +3956,11 @@
                     command_line.history().disable();
                 }
                 // so we know how many times call pop
-                var level = interpreters.size();
+                var level = self.level();
                 in_login = true;
                 function login_callback(user, token, silent, event) {
                     if (token) {
-                        while (interpreters.size() > level) {
+                        while (self.level() > level) {
                             self.pop();
                         }
                         if (settings.history) {
@@ -4004,13 +4007,15 @@
                                 login_callback(user, token, silent);
                             });
                         } catch(e) {
-                            display_exception(e, 'USER(authentication)');
+                            display_exception(e, 'AUTH');
                         }
                     }, {
-                        prompt: strings.password + ': '
+                        prompt: strings.password + ': ',
+                        name: 'password'
                     });
                 }, {
-                    prompt: strings.login + ': '
+                    prompt: strings.login + ': ',
+                    name: 'login'
                 });
             },
             // -------------------------------------------------------------
