@@ -10,6 +10,7 @@
           Testsing terminal and cmd plugin + call from command line
           Fix exec for nested login rpc command
           Fix exec for build in commands
+          Fix local logout and login command
 0.9.3     Change settings to method
           Fix process_commands and escape_regex
           Fix login from hash
