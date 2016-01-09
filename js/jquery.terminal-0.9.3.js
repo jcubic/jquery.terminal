@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 09 Jan 2016 22:24:34 +0000
+ * Date: Sat, 09 Jan 2016 23:02:25 +0000
  */
 
 /* TODO:
@@ -3387,13 +3387,20 @@
                 // after delay
                 var saved_change_hash = change_hash;
                 if (command.match(/^\s*login\s*$/i) && self.token(true)) {
-                    self.logout();
+                    if (self.level() > 1) {
+                        self.logout(true);
+                    } else {
+                        self.logout();
+                    }
                     after_exec();
                     return deferred.promise();
                 } else if (command.match(/^\s*(exit|clear)\s*$/i) && !in_login) {
                     if (settings.exit && command.match(/^\s*exit\s*$/i)) {
-                        var count = interpreters.size();
-                        if (count == 1 && self.token() || count > 1) {
+                        var level = self.level();
+                        if (level == 1 && self.get_token() || level > 1) {
+                            if (self.get_token(true)) {
+                                self.set_token(undefined, true);
+                            }
                             self.pop();
                         }
                     } else if (settings.clear && command.match(/^\s*clear\s*$/i)) {
@@ -3781,6 +3788,7 @@
         var num_rows; // number of lines that fit without scrollbar
         var command_list = []; // for tab completion
         var url;
+        var logins = new Stack(); // stack of logins
         var in_login = false;//some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;//used to indicate that user call pause onInit
@@ -3938,6 +3946,7 @@
             // :: if the user calls it with value that is truthy
             // -------------------------------------------------------------
             login: function(auth, infinite, success, error) {
+                logins.push([].slice.call(arguments));
                 if (in_login) {
                     throw new Error(sprintf(strings.notWhileLogin, 'login'));
                 }
@@ -4036,7 +4045,7 @@
             setInterpreter: function(user_intrp, login) {
                 function overwrite_interpreter() {
                     self.pause();
-                    make_interpreter(user_intrp, function(result) {
+                    make_interpreter(user_intrp, !!login, function(result) {
                         self.resume();
                         var top = interpreters.top();
                         $.extend(top, result);
@@ -4591,9 +4600,9 @@
             // -------------------------------------------------------------
             logout: function(local) {
                 if (local) {
-                    // TODO: is this enough to logout from current interpreter?
-                    // this will only work
-                    self.pop();
+                    var login = logins.pop();
+                    self.set_token(undefined, true);
+                    self.login.apply(self, login);
                 } else {
                     while (interpreters.size() > 0) {
                         // pop will call global_logout that will call login
