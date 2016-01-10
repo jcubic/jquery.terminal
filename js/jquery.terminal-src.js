@@ -2063,7 +2063,7 @@
             var array = str.replace(format_re, function(_, format, text) {
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
-                if (semicolons == 4) {
+                if (semicolons >= 4) {
                     return _;
                 } else if (semicolons == 2) {
                     semicolons = ';;';
@@ -2075,9 +2075,9 @@
                 // return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting so we need to escape
                 // those using html entity equvalent
-                return '[[' + format + semicolons +
-                    text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n') + ']' +
-                    text + ']';
+                var safe = text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n').
+                    replace(/&nbsp;/g, ' ');
+                return '[[' + format + semicolons + safe + ']' + text + ']';
             }).split(/\n/g);
             function is_space() {
                 return line.substring(j-6, j) == '&nbsp;' ||
