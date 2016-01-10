@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 09 Jan 2016 23:02:25 +0000
+ * Date: Sun, 10 Jan 2016 20:50:47 +0000
  */
 
 /* TODO:
@@ -2063,7 +2063,9 @@
             var array = str.replace(format_re, function(_, format, text) {
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
-                if (semicolons == 2) {
+                if (semicolons == 4) {
+                    return _;
+                } else if (semicolons == 2) {
                     semicolons = ';;';
                 } else if (semicolons == 3) {
                     semicolons = ';';

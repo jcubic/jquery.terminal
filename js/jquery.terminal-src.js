@@ -2063,7 +2063,9 @@
             var array = str.replace(format_re, function(_, format, text) {
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
-                if (semicolons == 2) {
+                if (semicolons == 4) {
+                    return _;
+                } else if (semicolons == 2) {
                     semicolons = ';;';
                 } else if (semicolons == 3) {
                     semicolons = ';';
