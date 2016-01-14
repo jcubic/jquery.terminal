@@ -2199,6 +2199,7 @@
             var settings = $.extend({}, {
                 linksNoReferrer: false
             }, options || {});
+            console.log(settings.linksNoReferrer);
             if (typeof str === 'string') {
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splitted = $.terminal.format_split(str);
@@ -3115,7 +3116,7 @@
                             output_buffer.push(array[i]);
                         } else {
                             output_buffer.push($.terminal.format(array[i], {
-                                linksNoReferer: settings.linksNoReferer
+                                linksNoReferrer: settings.linksNoReferrer
                             }));
                         }
                     }
@@ -3123,7 +3124,7 @@
             } else {
                 if (!options.raw) {
                     string = $.terminal.format(string, {
-                        linksNoReferer: settings.linksNoReferer
+                        linksNoReferrer: settings.linksNoReferrer
                     });
                 }
                 output_buffer.push(string);
