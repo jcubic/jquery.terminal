@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 10 Jan 2016 21:13:13 +0000
+ * Date: Thu, 14 Jan 2016 19:31:59 +0000
  */
 
 /* TODO:
@@ -2260,7 +2260,7 @@
                                         result = '<a href="mailto:' + data + '" ';
                                     } else {
                                         result = '<a target="_blank" href="' + data + '" ';
-                                        if (settings.linksNoReferer) {
+                                        if (settings.linksNoReferrer) {
                                             result += 'rel="noreferrer" ';
                                         }
                                     }

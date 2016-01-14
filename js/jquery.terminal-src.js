@@ -2260,7 +2260,7 @@
                                         result = '<a href="mailto:' + data + '" ';
                                     } else {
                                         result = '<a target="_blank" href="' + data + '" ';
-                                        if (settings.linksNoReferer) {
+                                        if (settings.linksNoReferrer) {
                                             result += 'rel="noreferrer" ';
                                         }
                                     }
