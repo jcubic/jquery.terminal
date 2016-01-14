@@ -2199,7 +2199,6 @@
             var settings = $.extend({}, {
                 linksNoReferrer: false
             }, options || {});
-            console.log(settings.linksNoReferrer);
             if (typeof str === 'string') {
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splitted = $.terminal.format_split(str);
