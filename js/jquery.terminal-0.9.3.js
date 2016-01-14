@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 14 Jan 2016 19:31:59 +0000
+ * Date: Thu, 14 Jan 2016 20:00:32 +0000
  */
 
 /* TODO:
@@ -2600,7 +2600,6 @@
         raw: false,
         exceptionHandler: null,
         cancelableAjax: true,
-        globalToken: false,
         processArguments: true,
         linksNoReferrer: false,
         processRPCResponse: null,
@@ -4622,9 +4621,6 @@
             // :: there is no login
             // -------------------------------------------------------------
             token: function(local) {
-                if (settings.globalToken) {
-                    local = false;
-                }
                 return $.Storage.get(self.prefix_name(local) + '_token');
             },
             // -------------------------------------------------------------
@@ -4645,9 +4641,6 @@
             // :: by the set_token method.
             // -------------------------------------------------------------
             get_token: function(local) {
-                if (settings.globalToken) {
-                    local = false;
-                }
                 return $.Storage.get(self.prefix_name(local) + '_token');
             },
             // -------------------------------------------------------------

@@ -2600,7 +2600,6 @@
         raw: false,
         exceptionHandler: null,
         cancelableAjax: true,
-        globalToken: false,
         processArguments: true,
         linksNoReferrer: false,
         processRPCResponse: null,
@@ -4622,9 +4621,6 @@
             // :: there is no login
             // -------------------------------------------------------------
             token: function(local) {
-                if (settings.globalToken) {
-                    local = false;
-                }
                 return $.Storage.get(self.prefix_name(local) + '_token');
             },
             // -------------------------------------------------------------
@@ -4645,9 +4641,6 @@
             // :: by the set_token method.
             // -------------------------------------------------------------
             get_token: function(local) {
-                if (settings.globalToken) {
-                    local = false;
-                }
                 return $.Storage.get(self.prefix_name(local) + '_token');
             },
             // -------------------------------------------------------------
