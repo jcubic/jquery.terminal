@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 14 Jan 2016 20:12:53 +0000
+ * Date: Thu, 14 Jan 2016 20:31:36 +0000
  */
 
 /* TODO:
@@ -2199,7 +2199,6 @@
             var settings = $.extend({}, {
                 linksNoReferrer: false
             }, options || {});
-            console.log(settings.linksNoReferrer);
             if (typeof str === 'string') {
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splitted = $.terminal.format_split(str);
