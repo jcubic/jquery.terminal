@@ -138,7 +138,7 @@
             36: 'cyan',
             37: 'white',
 
-            39: 'white' // default color
+            39: 'inherit' // default color
         };
         var background_list = {
             40: 'black',
@@ -150,7 +150,7 @@
             46: 'cyan',
             47: 'white',
 
-            49: 'black' // default background
+            49: 'transparent' // default background
         };
         function format_ansi(code) {
             var controls = code.split(';');
@@ -168,7 +168,7 @@
             for(var i in controls) {
                 if (controls.hasOwnProperty(i)) {
                     num = parseInt(controls[i], 10);
-                    if (controls.indexOf('5') != -1 && (_8bit_background || _8bit_color)) {
+                    if (process_8bit && (_8bit_background || _8bit_color)) {
                         if (_8bit_color && palette[num]) {
                             output_color = palette[num];
                         }
@@ -235,17 +235,7 @@
             } else {
                 colors = backgrounds = $.terminal.ansi_colors.normal;
             }
-            if (_8bit_background) {
-                background = output_background;
-            } else {
-                background = backgrounds[output_background];
-            }
-            if (_8bit_color) {
-                color = output_color;
-            } else {
-                color = colors[output_color];
-            }
-            return [styles.join(''), color, background];
+            return [styles.join(''), output_color, output_background];
         }
         return function(input) {
             //merge multiple codes
