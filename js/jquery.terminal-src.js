@@ -2092,7 +2092,13 @@
                 var first_index = 0;
                 var count = 0;
                 var space = -1;
+                var break_index = 0;
                 for (var j=0, jlen=line.length; j<jlen; ++j) {
+                    break_index++;
+                    if (break_index > 1000) {
+                        console.log('break_index > 1000');
+                        break;
+                    }
                     if (line[j] === '[' && line[j+1] === '[') {
                         formatting = true;
                         in_text = false;
@@ -2134,19 +2140,21 @@
                     if ((count === length || j === jlen-1) &&
                         ((formatting && in_text) || !formatting)) {
                         var output;
-                        var after = line.substring(space, j+length+1);
-                        var text = $('<span>' + after + '</span>').text();
-                        var can_break = !!text.match(/\s/) || j+length+1 > jlen;
+                        var text = $.terminal.strip(line.substring(space));
+                        text = $('<span>' + text + '</span>').text();
+                        var text_len = text.length;
+                        text = text.substring(0, j+length+1);
+                        var can_break = !!text.match(/\s/) || j+length+1 > text_len;
                         if (words && space != -1 && j !== jlen-1 && can_break) {
                             output = line.substring(first_index, space);
                             j = space-1;
-                            space = -1;
                         } else {
                             output = line.substring(first_index, j+1);
                         }
                         if (words) {
                             output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
                         }
+                        space = -1;
                         first_index = j+1;
                         count = 0;
                         if (prev_format) {
