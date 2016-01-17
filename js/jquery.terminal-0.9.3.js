@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 17 Jan 2016 09:07:46 +0000
+ * Date: Sun, 17 Jan 2016 09:39:35 +0000
  */
 
 /* TODO:
@@ -2092,13 +2092,7 @@
                 var first_index = 0;
                 var count = 0;
                 var space = -1;
-                var break_index = 0;
                 for (var j=0, jlen=line.length; j<jlen; ++j) {
-                    break_index++;
-                    if (break_index > 1000) {
-                        console.log('break_index > 1000');
-                        break;
-                    }
                     if (line[j] === '[' && line[j+1] === '[') {
                         formatting = true;
                         in_text = false;
