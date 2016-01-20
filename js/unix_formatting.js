@@ -235,7 +235,17 @@
             } else {
                 colors = backgrounds = $.terminal.ansi_colors.normal;
             }
-            return [styles.join(''), output_color, output_background];
+            if (_8bit_color) {
+                color = output_color;
+            } else {
+                color = colors[output_color];
+            }
+            if (_8bit_background) {
+                background = output_background;
+            } else {
+                background = backgrounds[output_background];
+            }
+            return [styles.join(''), color, background];
         }
         return function(input) {
             //merge multiple codes
