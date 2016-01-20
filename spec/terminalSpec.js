@@ -561,6 +561,124 @@ function tests_on_ready() {
                 term.destroy();
             });
         });
+        function JSONRPCMock(url, object) {
+            var ajax = $.ajax;
+            var system = {
+                'sdversion': '1.0',
+                'name': 'DemoService',
+                'address': url,
+                // md5('JSONRPCMock')
+                'id': 'urn:md5:e1a975ac782ce4ed0a504ceb909abf44',
+                'procs': []
+            };
+            for (var key in object) {
+                var proc = {
+                    name: key
+                };
+                if ($.isFunction(object[key])) {
+                    var re = /function[^\(]+\(([^\)]+)\)/;
+                    var m = object[key].toString().match(re);
+                    if (m) {
+                        proc.params = m[1].split(/\s*,\s*/);
+                    }
+                }
+                system.procs.push(proc);
+            }
+            $.ajax = function(obj) {
+                if (obj.url == url) {
+                    var defer = $.Deferred();
+                    try {
+                        var req = JSON.parse(obj.data);
+                        var resp;
+                        if (req.method == 'system.describe') {
+                            resp = system;
+                        } else {
+                            var error = null;
+                            var ret = null
+                            try {
+                                ret = object[req.method].apply(null, req.params);
+                            } catch (e) {
+                                error = {message: e.message};
+                            }
+                            resp = {
+                                id: req.id,
+                                jsonrpc: '1.1',
+                                result: ret,
+                                error: error
+                            };
+                        }
+                        resp = JSON.stringify(resp);
+                        if ($.isFunction(obj.success)) {
+                            obj.success(resp, 'OK', {
+                                getResponseHeader: function(header) {
+                                    if (header == 'Content-Type') {
+                                        return 'application/json';
+                                    }
+                                }
+                            });
+                        }
+                        defer.resolve(resp);
+                    } catch (e) {
+                        throw new Error(e.message);
+                    }
+                    return defer.promise();
+                } else {
+                    return ajax.apply($, arguments);
+                }
+            }
+        }
+        var object = {
+            echo: function(token, str) {
+                return str;
+            },
+            login: function(user, password) {
+                if (user == 'demo' && password == 'demo') {
+                    return 'TOKEN';
+                } else {
+                    return null;
+                }
+            }
+        };
+        JSONRPCMock('/test', object);
+        describe('JSON-RPC', function() {
+            var term = $('<div></div>').appendTo('body').terminal('/test', {
+                login: true
+            });
+            it('should call login', function() {
+                term.focus();
+                var spy = spyOn(object, 'login');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.insert('test');
+                enter_key();
+                term.insert('test');
+                enter_key();
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.text()).toEqual('Wrong password try again!');
+                expect(object.login).toHaveBeenCalledWith('test', 'test');
+                term.insert('demo');
+                enter_key();
+                term.insert('demo');
+                enter_key();
+                expect(object.login).toHaveBeenCalledWith('demo', 'demo');
+            });
+            it('should call a function', function() {
+                term.focus();
+                var spy = spyOn(object, 'echo');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.insert('echo hello');
+                enter_key();
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(object.echo).toHaveBeenCalledWith('TOKEN', 'hello');
+            });
+        });
     });
 }
 if (node) {
