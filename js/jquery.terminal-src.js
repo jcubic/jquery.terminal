@@ -195,7 +195,7 @@
      */
     ctx.sprintf = sprintf;
     ctx.vsprintf = vsprintf;
-})(typeof exports != "undefined" ? exports : window);
+})(typeof global != "undefined" ? global : window);
 /* jshint ignore:end */
 (function($, undefined) {
     "use strict";
@@ -2860,9 +2860,8 @@
                     var interpreter_object = {};
                     $.each(ret.procs, function(_, proc) {
                         interpreter_object[proc.name] = function() {
-                            var append = auth && proc.name != 'help';
                             var args = Array.prototype.slice.call(arguments);
-                            var args_len = args.length + (append ? 1 : 0);
+                            var args_len = args.length;
                             if (settings.checkArity && proc.params &&
                                 proc.params.length !== args_len) {
                                 self.error("&#91;Arity&#93; " +
@@ -2872,9 +2871,10 @@
                                                    args_len));
                             } else {
                                 self.pause();
+                                /*
                                 if (append) {
                                     args = [self.token(true)].concat(args);
-                                }
+                                }*/
                                 $.jrpc(url, proc.name, args, function(json) {
                                     if (json.error) {
                                         display_json_rpc_error(json.error);
