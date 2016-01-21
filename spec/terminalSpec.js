@@ -675,7 +675,6 @@ function tests_on_ready() {
                 }
                 term.insert('echo hello');
                 enter_key();
-                var last_div = term.find('.terminal-output > div:last-child');
                 expect(object.echo).toHaveBeenCalledWith('TOKEN', 'hello');
             });
         });

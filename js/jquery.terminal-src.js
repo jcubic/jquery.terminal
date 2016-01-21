@@ -2795,6 +2795,7 @@
                     return;
                     //throw e; // this will show stack in other try..catch
                 }
+                /*
                 if (login) {
                     var token = self.token(true);
                     if (token) {
@@ -2803,7 +2804,7 @@
                         terminal.error('&#91;AUTH&#93; ' + strings.noTokenError);
                         return;
                     }
-                }
+                }*/
                 var val = object[command.name];
                 var type = $.type(val);
                 if (type === 'function') {
@@ -2853,15 +2854,16 @@
             }
         }
         // ---------------------------------------------------------------------
-        function make_json_rpc_object(url, success) {
+        function make_json_rpc_object(url, auth, success) {
             $.jrpc(url, 'system.describe', [], function(ret) {
                 var commands = [];
                 if (ret.procs) {
                     var interpreter_object = {};
                     $.each(ret.procs, function(_, proc) {
                         interpreter_object[proc.name] = function() {
+                            var append = auth && proc.name != 'help';
                             var args = Array.prototype.slice.call(arguments);
-                            var args_len = args.length;
+                            var args_len = args.length + (append ? 1 : 0);
                             if (settings.checkArity && proc.params &&
                                 proc.params.length !== args_len) {
                                 self.error("&#91;Arity&#93; " +
@@ -2871,10 +2873,15 @@
                                                    args_len));
                             } else {
                                 self.pause();
-                                /*
                                 if (append) {
-                                    args = [self.token(true)].concat(args);
-                                }*/
+                                    var token = self.token(true);
+                                    if (token) {
+                                        args = [token].concat(args);
+                                    } else {
+                                        self.error('&#91;AUTH&#93; ' +
+                                                   strings.noTokenError);
+                                    }
+                                }
                                 $.jrpc(url, proc.name, args, function(json) {
                                     if (json.error) {
                                         display_json_rpc_error(json.error);
@@ -2920,7 +2927,7 @@
                                 }
                                 recur(rest, success);
                             } else {
-                                make_json_rpc_object(first, function(new_obj) {
+                                make_json_rpc_object(first, login, function(new_obj) {
                                     // will ignore rpc in array that don't have
                                     // system.describe
                                     if (new_obj) {
@@ -2960,7 +2967,7 @@
                     });
                 } else {
                     self.pause();
-                    make_json_rpc_object(user_intrp, function(object) {
+                    make_json_rpc_object(user_intrp, settings.login, function(object) {
                         if (object) {
                             result.interpreter = make_object_interpreter(object,
                                                                          false,
