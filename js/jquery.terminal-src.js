@@ -1974,6 +1974,7 @@
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]*)(?=:? |$)|(\\ |[^ ])+|[\w-]+)/gi;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
+    var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
@@ -2093,7 +2094,7 @@
                 var count = 0;
                 var space = -1;
                 for (var j=0, jlen=line.length; j<jlen; ++j) {
-                    if (line[j] === '[' && line[j+1] === '[') {
+                    if (line.substring(j).match(format_start_re)) {
                         formatting = true;
                         in_text = false;
                     } else if (formatting && line[j] === ']') {
@@ -2146,7 +2147,7 @@
                             output = line.substring(first_index, j+1);
                         }
                         if (words) {
-                            output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
+                            output = output.replace(/(&nbsp;|\s)+$/g, '');
                         }
                         space = -1;
                         first_index = j+1;
