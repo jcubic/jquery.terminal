@@ -3662,12 +3662,6 @@
                 } else {
                     completion = top.completion;
                 }
-                if ($.isFunction(settings.keydown)) {
-                    result = settings.keydown(e, self);
-                    if (result !== undefined) {
-                        return result;
-                    }
-                }
                 // after text pasted into textarea in cmd plugin
                 self.oneTime(10, function() {
                     on_scrollbar_show_resize();
@@ -4962,12 +4956,14 @@
             old_enabled = enabled;
             self.disable();
         }
-        make_interpreter(init_interpreter, settings.login, function(itrp) {
+        make_interpreter(init_interpreter, !!settings.login, function(itrp) {
             interpreters = new Stack($.extend({
                 name: settings.name,
                 prompt: settings.prompt,
                 keypress: settings.keypress,
-                greetings: settings.greetings
+                keydown: settings.keydown,
+                greetings: settings.greetings,
+                mousewheel: settings.mousewheel
             }, itrp));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(self).cmd({
@@ -5134,6 +5130,13 @@
                 });
                 self.mousewheel(function(event, delta) {
                     if (!shift) {
+                        var interpreter = interpreters.top();
+                        if ($.isFunction(interpreter.mousewheel)) {
+                            var ret = interpreter.mousewheel(event, delta);
+                            if (ret === false) {
+                                return;
+                            }
+                        }
                         if (delta > 0) {
                             self.scroll(-40);
                         } else {
