@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 22 Jan 2016 18:58:12 +0000
+ * Date: Sun, 24 Jan 2016 10:09:28 +0000
  */
 
 /* TODO:
@@ -2557,7 +2557,7 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2015 Jakub Jankiewicz <http://jcubic'+
+    var copyright = 'Copyright (c) 2011-2016 Jakub Jankiewicz <http://jcubic'+
         '.pl>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     //regex is for placing version string aligned to the right
@@ -2568,7 +2568,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2015 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2016 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         ['      _______                 ________                        __',
