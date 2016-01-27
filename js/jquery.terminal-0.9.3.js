@@ -44,7 +44,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 27 Jan 2016 20:06:17 +0000
+ * Date: Wed, 27 Jan 2016 20:14:44 +0000
  */
 
 /* TODO:
@@ -2731,7 +2731,7 @@
         // ---------------------------------------------------------------------
         // :: Create interpreter function from url string
         // ---------------------------------------------------------------------
-        function make_basic_json_rpc(url) {
+        function make_basic_json_rpc(url, auth) {
             var interpreter = function(method, params) {
                 self.pause();
                 $.jrpc(url, method, params, function(json) {
@@ -2760,7 +2760,7 @@
                     return;
                     //throw e; // this will show stack in other try..catch
                 }
-                if (!settings.login || command.name === 'help') {
+                if (!auth || command.name === 'help') {
                     // allows to call help without a token
                     interpreter(command.name, command.args);
                 } else {
@@ -2922,7 +2922,7 @@
                             self.pause();
                             if (settings.ignoreSystemDescribe) {
                                 if (rpc_count === 1) {
-                                    fn_interpreter = make_basic_json_rpc(first);
+                                    fn_interpreter = make_basic_json_rpc(first, login);
                                 } else {
                                     self.error(strings.oneRPCWithIgnore);
                                 }
@@ -2963,7 +2963,7 @@
             } else if (type === 'string') {
                 if (settings.ignoreSystemDescribe) {
                     finalize({
-                        interpreter: make_basic_json_rpc(user_intrp),
+                        interpreter: make_basic_json_rpc(user_intrp, login),
                         completion: settings.completion
                     });
                 } else {
@@ -2976,7 +2976,7 @@
                             result.completion = Object.keys(object);
                         } else {
                             // no procs in system.describe
-                            result.interpreter = make_basic_json_rpc(user_intrp);
+                            result.interpreter = make_basic_json_rpc(user_intrp, login);
                             result.completion = settings.completion;
                         }
                         finalize(result);
