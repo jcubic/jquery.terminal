@@ -4404,8 +4404,9 @@
                         num_chars = new_num_chars;
                         num_rows = new_num_rows;
                         redraw();
-                        if ($.isFunction(settings.onResize)) {
-                            settings.onResize(self);
+                        var top = interpreters.top();
+                        if ($.isFunction(top.resize)) {
+                            top.resize(self);
                         }
                         old_height = height;
                         old_width = width;
@@ -4963,6 +4964,7 @@
                 prompt: settings.prompt,
                 keypress: settings.keypress,
                 keydown: settings.keydown,
+                resize: settings.onResize,
                 greetings: settings.greetings,
                 mousewheel: settings.mousewheel
             }, itrp));
