@@ -12,6 +12,7 @@
           Fix exec for build in commands
           Fix local logout and login command
           mousewheel and resize options for interpreter
+          use MIT license
 0.9.3     Change settings to method
           Fix process_commands and escape_regex
           Fix login from hash
