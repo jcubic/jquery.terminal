@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 27 Jan 2016 21:01:15 +0000
+ * Date: Wed, 27 Jan 2016 23:07:15 +0000
  */
 
 /* TODO:
@@ -1738,7 +1738,7 @@
                         typeof user_prompt === 'function') {
                         prompt = user_prompt;
                     } else {
-                        throw 'prompt must be a function or string';
+                        throw new Error('prompt must be a function or string');
                     }
                     draw_prompt();
                     // we could check if command is longer then numchars-new

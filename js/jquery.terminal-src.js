@@ -1738,7 +1738,7 @@
                         typeof user_prompt === 'function') {
                         prompt = user_prompt;
                     } else {
-                        throw 'prompt must be a function or string';
+                        throw new Error('prompt must be a function or string');
                     }
                     draw_prompt();
                     // we could check if command is longer then numchars-new
