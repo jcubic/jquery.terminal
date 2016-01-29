@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 27 Jan 2016 23:07:15 +0000
+ * Date: Fri, 29 Jan 2016 16:23:15 +0000
  */
 
 /* TODO:
@@ -2147,12 +2147,13 @@
                         var can_break = !!text.match(/\s/) || j+length+1 > text_len;
                         if (words && space != -1 && j !== jlen-1 && can_break) {
                             output = line.substring(first_index, space);
-                            j = space-1;
+                            j = space-2;
                         } else {
                             output = line.substring(first_index, j+1);
                         }
                         if (words) {
-                            output = output.replace(/(&nbsp;|\s)+$/g, '');
+                            // single left over space at the begining and spaces at the end
+                            output = output.replace(/^(&nbsp;|\s)|(&nbsp;|\s)+$/g, '');
                         }
                         space = -1;
                         first_index = j+1;
