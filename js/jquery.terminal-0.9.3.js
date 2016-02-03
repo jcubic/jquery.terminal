@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 03 Feb 2016 16:41:31 +0000
+ * Date: Wed, 03 Feb 2016 16:44:51 +0000
  */
 
 /* TODO:
@@ -4413,6 +4413,8 @@
                         var top = interpreters.top();
                         if ($.isFunction(top.resize)) {
                             top.resize(self);
+                        } else if ($.isFunction(settings.onResize)) {
+                            settings.onResize(self);
                         }
                         old_height = height;
                         old_width = width;

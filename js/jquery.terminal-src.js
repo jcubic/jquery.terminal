@@ -4413,6 +4413,8 @@
                         var top = interpreters.top();
                         if ($.isFunction(top.resize)) {
                             top.resize(self);
+                        } else if ($.isFunction(settings.onResize)) {
+                            settings.onResize(self);
                         }
                         old_height = height;
                         old_width = width;
