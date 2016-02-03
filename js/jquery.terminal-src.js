@@ -4965,6 +4965,10 @@
             self.disable();
         }
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
+            if (typeof settings.completion != 'boolean') {
+                //overwrite interpreter completion by global setting #224
+                itrp.completion = settings.completion;
+            }
             interpreters = new Stack($.extend({
                 name: settings.name,
                 prompt: settings.prompt,
