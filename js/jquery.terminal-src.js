@@ -2147,7 +2147,7 @@
                         var can_break = !!text.match(/\s/) || j+length+1 > text_len;
                         if (words && space != -1 && j !== jlen-1 && can_break) {
                             output = line.substring(first_index, space);
-                            j = space-2;
+                            j = space-1;
                         } else {
                             output = line.substring(first_index, j+1);
                         }

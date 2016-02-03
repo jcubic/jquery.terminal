@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 29 Jan 2016 16:23:15 +0000
+ * Date: Wed, 03 Feb 2016 16:21:56 +0000
  */
 
 /* TODO:
@@ -2147,7 +2147,7 @@
                         var can_break = !!text.match(/\s/) || j+length+1 > text_len;
                         if (words && space != -1 && j !== jlen-1 && can_break) {
                             output = line.substring(first_index, space);
-                            j = space-2;
+                            j = space-1;
                         } else {
                             output = line.substring(first_index, j+1);
                         }
