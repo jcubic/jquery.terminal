@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 03 Feb 2016 16:44:51 +0000
+ * Date: Wed, 03 Feb 2016 20:05:39 +0000
  */
 
 /* TODO:
@@ -4967,7 +4967,7 @@
             self.disable();
         }
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
-            if (typeof settings.completion != 'boolean') {
+            if (settings.completion && typeof settings.completion != 'boolean') {
                 //overwrite interpreter completion by global setting #224
                 itrp.completion = settings.completion;
             }
