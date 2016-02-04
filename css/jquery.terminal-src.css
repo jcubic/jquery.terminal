@@ -49,10 +49,6 @@
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
     line-height: 1.2em;
 }
-.wrap {
-    word-wrap: break-word;
-    overflow: initial;
-}
 /*
 .cmd .mask {
     width: 10px;

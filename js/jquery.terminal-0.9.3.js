@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 04 Feb 2016 17:05:49 +0000
+ * Date: Thu, 04 Feb 2016 17:34:57 +0000
  */
 
 /* TODO:
@@ -2501,7 +2501,7 @@
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        var temp = $('<div class="terminal wrap"><span class="cursor">' +
+        var temp = $('<div class="terminal"><span class="cursor">' +
                      '</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
         // use more characters to get width of single character as a fraction

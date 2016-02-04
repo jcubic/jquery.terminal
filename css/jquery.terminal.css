@@ -29,7 +29,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Date: Wed, 27 Jan 2016 21:01:17 +0000
+ * Date: Thu, 04 Feb 2016 17:35:00 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -48,10 +48,6 @@
 }
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
     line-height: 1.2em;
-}
-.wrap {
-    word-wrap: break-word;
-    overflow: initial;
 }
 /*
 .cmd .mask {
