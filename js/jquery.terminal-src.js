@@ -2502,7 +2502,7 @@
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        var temp = $('<div class="terminal wrap"><span class="cursor">' +
+        var temp = $('<div class="terminal"><span class="cursor">' +
                      '</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
         // use more characters to get width of single character as a fraction
