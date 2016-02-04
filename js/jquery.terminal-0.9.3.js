@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 03 Feb 2016 20:05:39 +0000
+ * Date: Thu, 04 Feb 2016 17:05:49 +0000
  */
 
 /* TODO:
@@ -2152,8 +2152,7 @@
                             output = line.substring(first_index, j+1);
                         }
                         if (words) {
-                            // single left over space at the begining and spaces at the end
-                            output = output.replace(/^(&nbsp;|\s)|(&nbsp;|\s)+$/g, '');
+                            output = output.replace(/(&nbsp;|\s)+$/g, '');
                         }
                         space = -1;
                         first_index = j+1;
@@ -5147,10 +5146,12 @@
                     if (!shift) {
                         var interpreter = interpreters.top();
                         if ($.isFunction(interpreter.mousewheel)) {
-                            var ret = interpreter.mousewheel(event, delta);
+                            var ret = interpreter.mousewheel(event, delta, self);
                             if (ret === false) {
                                 return;
                             }
+                        } else if ($.isFunction(settings.mousewheel)) {
+                            settings.mousewheel(event, delta, self);
                         }
                         if (delta > 0) {
                             self.scroll(-40);
