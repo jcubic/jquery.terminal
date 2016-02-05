@@ -2744,7 +2744,7 @@
                         display_json_rpc_error(json.error);
                     } else {
                         if ($.isFunction(settings.processRPCResponse)) {
-                            settings.processRPCResponse.call(self, json.result);
+                            settings.processRPCResponse.call(self, json.result, self);
                         } else {
                             display_object(json.result);
                         }
