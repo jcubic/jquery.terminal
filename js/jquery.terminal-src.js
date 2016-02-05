@@ -2973,7 +2973,7 @@
                     });
                 } else {
                     self.pause();
-                    make_json_rpc_object(user_intrp, settings.login, function(object) {
+                    make_json_rpc_object(user_intrp, login, function(object) {
                         if (object) {
                             result.interpreter = make_object_interpreter(object,
                                                                          false,

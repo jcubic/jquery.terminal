@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 04 Feb 2016 17:34:57 +0000
+ * Date: Fri, 05 Feb 2016 12:20:55 +0000
  */
 
 /* TODO:
@@ -2973,7 +2973,7 @@
                     });
                 } else {
                     self.pause();
-                    make_json_rpc_object(user_intrp, settings.login, function(object) {
+                    make_json_rpc_object(user_intrp, login, function(object) {
                         if (object) {
                             result.interpreter = make_object_interpreter(object,
                                                                          false,
