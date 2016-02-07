@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 05 Feb 2016 18:03:12 +0000
+ * Date: Sun, 07 Feb 2016 09:44:00 +0000
  */
 
 /* TODO:
@@ -3659,6 +3659,11 @@
                     if (result !== undefined) {
                         return result;
                     }
+                } else if ($.isFunction(settings.keydown)) {
+                    result = settings.keydown(e, self);
+                    if (result !== undefined) {
+                        return result;
+                    }
                 }
                 var completion;
                 if ((settings.completion &&
@@ -4992,6 +4997,8 @@
                     var result, i, top = interpreters.top();
                     if ($.isFunction(top.keypress)) {
                         return top.keypress(e, self);
+                    } else if ($.isFunction(settings.keypress)) {
+                        return settings.keypress(e, self);
                     }
                 },
                 onCommandChange: function(command) {

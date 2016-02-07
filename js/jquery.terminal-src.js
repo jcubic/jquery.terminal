@@ -3659,6 +3659,11 @@
                     if (result !== undefined) {
                         return result;
                     }
+                } else if ($.isFunction(settings.keydown)) {
+                    result = settings.keydown(e, self);
+                    if (result !== undefined) {
+                        return result;
+                    }
                 }
                 var completion;
                 if ((settings.completion &&
@@ -4992,6 +4997,8 @@
                     var result, i, top = interpreters.top();
                     if ($.isFunction(top.keypress)) {
                         return top.keypress(e, self);
+                    } else if ($.isFunction(settings.keypress)) {
+                        return settings.keypress(e, self);
                     }
                 },
                 onCommandChange: function(command) {
