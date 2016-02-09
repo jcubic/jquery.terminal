@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 09 Feb 2016 18:56:08 +0000
+ * Date: Tue, 09 Feb 2016 19:26:59 +0000
  */
 
 /* TODO:
@@ -5133,6 +5133,12 @@
             } else {
                 change_hash = true; // if enabled later
             }
+            $(window).bind('hashchange', function() {
+                if (settings.execHash) {
+                    hash_commands = $.parseJSON(decodeURIComponent(hash));
+                    restore_state(hash_commands[hash_commands.length-1]);
+                }
+            });
             //change_hash = true; // exec can now change hash
             // -------------------------------------------------------------
             if ($.event.special.mousewheel) {
