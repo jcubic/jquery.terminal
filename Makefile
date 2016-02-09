@@ -45,3 +45,6 @@ test:
 	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose --junitreport --color --forceexit spec
 jshint:
 	jshint js/jquery.terminal-src.js
+	jshint js/dterm.js
+	jshint js/xml_formatting.js
+	jshint js/unix_formatting.js

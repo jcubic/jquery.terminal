@@ -30,13 +30,13 @@
         }
         return desc;
     };
-    $.fn.dterm = function(eval, options) {
+    $.fn.dterm = function(interpreter, options) {
         var op = $.extend_if_has({}, options, 
                                    ['greetings', 'prompt', 'onInit',
                                     'onExit', 'clear',
                                     'login', 'name', 'exit']);
         op.enabled = false;
-        var terminal = this.terminal(eval, op).css('overflow', 'hidden');
+        var terminal = this.terminal(interpreter, op).css('overflow', 'hidden');
         if (!options.title) {
             options.title = 'JQuery Terminal Emulator';
         }

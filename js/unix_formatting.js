@@ -281,7 +281,7 @@
                         }
                         if (inside) {
                             output.push(']');
-                            if (match[1] == '0' || match[1] == '') {
+                            if (match[1] === '0' || match[1] === '') {
                                 //just closing
                                 inside = false;
                                 prev_color = prev_background = '';
