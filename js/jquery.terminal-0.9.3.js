@@ -49,13 +49,11 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 07 Feb 2016 09:44:00 +0000
+ * Date: Tue, 09 Feb 2016 18:56:08 +0000
  */
 
 /* TODO:
  *
- * Wrap words mode - terminal.echo('asd', {wrapWords: true});
- * local logout ???
  * Debug interpreters names in LocalStorage
  * onPositionChange event add to terminal ???
  * different command line history for each login users (add login if present to

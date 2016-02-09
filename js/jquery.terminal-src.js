@@ -54,8 +54,6 @@
 
 /* TODO:
  *
- * Wrap words mode - terminal.echo('asd', {wrapWords: true});
- * local logout ???
  * Debug interpreters names in LocalStorage
  * onPositionChange event add to terminal ???
  * different command line history for each login users (add login if present to
