@@ -6,13 +6,14 @@
           Change position of cursor in reverse history search
           Fix pasting in Firefox
           Exec is adding command to history
-          Fix execHash on FireFox
+          Fix execHash in FireFox
           Testsing terminal and cmd plugin + call from command line
           Fix exec for nested login rpc command
           Fix exec for build in commands
           Fix local logout and login command
           mousewheel and resize options for interpreter
           use MIT license
+          Add hashchange event handler
 0.9.3     Change settings to method
           Fix process_commands and escape_regex
           Fix login from hash
