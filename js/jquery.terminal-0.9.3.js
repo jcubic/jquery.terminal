@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 10 Feb 2016 19:47:10 +0000
+ * Date: Wed, 10 Feb 2016 20:17:21 +0000
  */
 
 /* TODO:
@@ -2646,8 +2646,6 @@
             loginIsNotAFunction: "Authenticate must be a function",
             canExitError: "You can't exit from main interpreter",
             invalidCompletion: "Invalid completion",
-            hashChangeMissing: "You need to include hashchange jquery plugin " +
-                "for history to work",
             invalidSelector: 'Sorry, but terminal said that "%s" is not valid '+
                 'selector!',
             invalidTerminalId: 'Invalid Terminal ID',
@@ -3563,30 +3561,31 @@
                     }
                 }
             }
+            function hashchange() {
+                if (fire_hash_change) {
+                    try {
+                        if (location.hash) {
+                            var hash = location.hash.replace(/^#/, '');
+                            hash_commands = $.parseJSON(hash);
+                        } else {
+                            hash_commands = [];
+                        }
+                        if (hash_commands.length) {
+                            restore_state(hash_commands[hash_commands.length-1]);
+                        } else if (save_state[0]) {
+                            self.import_view(save_state[0]);
+                        }
+                    } catch(e) {
+                        display_exception(e, 'TERMINAL');
+                    }
+                }
+            }
             if (first_instance && settings.historyState) {
                 first_instance = false;
                 if ($.fn.hashchange) {
-                    $(window).hashchange(function() {
-                        if (fire_hash_change) {
-                            try {
-                                if (location.hash) {
-                                    var hash = location.hash.replace(/^#/, '');
-                                    hash_commands = $.parseJSON(hash);
-                                } else {
-                                    hash_commands = [];
-                                }
-                                if (hash_commands.length) {
-                                    restore_state(hash_commands[hash_commands.length-1]);
-                                } else if (save_state[0]) {
-                                    self.import_view(save_state[0]);
-                                }
-                            } catch(e) {
-                                display_exception(e, 'TERMINAL');
-                            }
-                        }
-                    });
+                    $(window).hashchange(hashchange);
                 } else {
-                    self.error(strings.hashChangeMissing);
+                    $(window).bind('hashchange', hashchange);
                 }
             }
         }
@@ -3877,13 +3876,6 @@
             save_state: function(command, ignore_hash) {
                 //save_state.push({view:self.export_view(), join:[]});
                 save_state.push(self.export_view());
-                console.log(save_state.length-1);
-                var state = save_state[save_state.length-1];
-                console.log(state.lines.map(function(obj) {
-                    return typeof obj[0] == 'function' ? obj[0]() : obj[0];
-                }));
-                console.log(state.prompt);
-                //console.log(lines);
                 if (!$.isArray(hash_commands)) {
                     hash_commands = [];
                 }
@@ -3893,7 +3885,6 @@
                         save_state.length-1,
                         command
                     ];
-                    console.log(state);
                     if (!ignore_hash) {
                         hash_commands.push(state);
                         maybe_update_hash();
@@ -5136,12 +5127,6 @@
                                 change_hash = true;
                             }
                         })();
-                        /*
-                        $.when.apply($, $.map(hash_commands, exec_spec)).
-                            then(function() {
-                                // can change hash when all exec get resloved
-                                change_hash = true;
-                            });*/
                     } catch (e) {
                         //invalid json - ignore
                     }

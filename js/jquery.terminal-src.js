@@ -2646,8 +2646,6 @@
             loginIsNotAFunction: "Authenticate must be a function",
             canExitError: "You can't exit from main interpreter",
             invalidCompletion: "Invalid completion",
-            hashChangeMissing: "You need to include hashchange jquery plugin " +
-                "for history to work",
             invalidSelector: 'Sorry, but terminal said that "%s" is not valid '+
                 'selector!',
             invalidTerminalId: 'Invalid Terminal ID',
@@ -3563,30 +3561,31 @@
                     }
                 }
             }
+            function hashchange() {
+                if (fire_hash_change) {
+                    try {
+                        if (location.hash) {
+                            var hash = location.hash.replace(/^#/, '');
+                            hash_commands = $.parseJSON(hash);
+                        } else {
+                            hash_commands = [];
+                        }
+                        if (hash_commands.length) {
+                            restore_state(hash_commands[hash_commands.length-1]);
+                        } else if (save_state[0]) {
+                            self.import_view(save_state[0]);
+                        }
+                    } catch(e) {
+                        display_exception(e, 'TERMINAL');
+                    }
+                }
+            }
             if (first_instance && settings.historyState) {
                 first_instance = false;
                 if ($.fn.hashchange) {
-                    $(window).hashchange(function() {
-                        if (fire_hash_change) {
-                            try {
-                                if (location.hash) {
-                                    var hash = location.hash.replace(/^#/, '');
-                                    hash_commands = $.parseJSON(hash);
-                                } else {
-                                    hash_commands = [];
-                                }
-                                if (hash_commands.length) {
-                                    restore_state(hash_commands[hash_commands.length-1]);
-                                } else if (save_state[0]) {
-                                    self.import_view(save_state[0]);
-                                }
-                            } catch(e) {
-                                display_exception(e, 'TERMINAL');
-                            }
-                        }
-                    });
+                    $(window).hashchange(hashchange);
                 } else {
-                    self.error(strings.hashChangeMissing);
+                    $(window).bind('hashchange', hashchange);
                 }
             }
         }
@@ -5119,11 +5118,15 @@
                         var hash = location.hash.replace(/^#/, '');
                         // yes no var - global inside terminal
                         hash_commands = $.parseJSON(decodeURIComponent(hash));
-                        $.when.apply($, $.map(hash_commands, exec_spec)).
-                            then(function() {
-                                // can change hash when all exec get resloved
+                        var i = 0;
+                        (function recur() {
+                            var spec = hash_commands[i++];
+                            if (spec) {
+                                exec_spec(spec).then(recur);
+                            } else {
                                 change_hash = true;
-                            });
+                            }
+                        })();
                     } catch (e) {
                         //invalid json - ignore
                     }
