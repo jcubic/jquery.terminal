@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 09 Feb 2016 19:26:59 +0000
+ * Date: Wed, 10 Feb 2016 19:47:10 +0000
  */
 
 /* TODO:
@@ -3877,6 +3877,13 @@
             save_state: function(command, ignore_hash) {
                 //save_state.push({view:self.export_view(), join:[]});
                 save_state.push(self.export_view());
+                console.log(save_state.length-1);
+                var state = save_state[save_state.length-1];
+                console.log(state.lines.map(function(obj) {
+                    return typeof obj[0] == 'function' ? obj[0]() : obj[0];
+                }));
+                console.log(state.prompt);
+                //console.log(lines);
                 if (!$.isArray(hash_commands)) {
                     hash_commands = [];
                 }
@@ -3886,6 +3893,7 @@
                         save_state.length-1,
                         command
                     ];
+                    console.log(state);
                     if (!ignore_hash) {
                         hash_commands.push(state);
                         maybe_update_hash();
@@ -3923,7 +3931,7 @@
                     });
                     if (deferred) {
                         return deferred.promise();
-                    } else {
+                    } else if (ret) {
                         return ret;
                     }
                     if (!ret) {
@@ -5119,11 +5127,21 @@
                         var hash = location.hash.replace(/^#/, '');
                         // yes no var - global inside terminal
                         hash_commands = $.parseJSON(decodeURIComponent(hash));
+                        var i = 0;
+                        (function recur() {
+                            var spec = hash_commands[i++];
+                            if (spec) {
+                                exec_spec(spec).then(recur);
+                            } else {
+                                change_hash = true;
+                            }
+                        })();
+                        /*
                         $.when.apply($, $.map(hash_commands, exec_spec)).
                             then(function() {
                                 // can change hash when all exec get resloved
                                 change_hash = true;
-                            });
+                            });*/
                     } catch (e) {
                         //invalid json - ignore
                     }
@@ -5133,12 +5151,6 @@
             } else {
                 change_hash = true; // if enabled later
             }
-            $(window).bind('hashchange', function() {
-                if (settings.execHash) {
-                    hash_commands = $.parseJSON(decodeURIComponent(hash));
-                    restore_state(hash_commands[hash_commands.length-1]);
-                }
-            });
             //change_hash = true; // exec can now change hash
             // -------------------------------------------------------------
             if ($.event.special.mousewheel) {

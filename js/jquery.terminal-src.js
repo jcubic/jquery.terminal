@@ -3923,7 +3923,7 @@
                     });
                     if (deferred) {
                         return deferred.promise();
-                    } else {
+                    } else if (ret) {
                         return ret;
                     }
                     if (!ret) {
@@ -5133,12 +5133,6 @@
             } else {
                 change_hash = true; // if enabled later
             }
-            $(window).bind('hashchange', function() {
-                if (settings.execHash) {
-                    hash_commands = $.parseJSON(decodeURIComponent(hash));
-                    restore_state(hash_commands[hash_commands.length-1]);
-                }
-            });
             //change_hash = true; // exec can now change hash
             // -------------------------------------------------------------
             if ($.event.special.mousewheel) {
