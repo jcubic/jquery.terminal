@@ -3446,10 +3446,10 @@
                     } else if (paused) {
                         // this is old API
                         // if command call pause - wait until resume
-                        self.bind('resume.command', function() {
+                        self.bind('resume.command', function resume() {
                             // exec with resume/pause in user code
                             after_exec();
-                            self.unbind('resume.command');
+                            self.unbind('resume.command', resume);
                         });
                     } else {
                         after_exec();
@@ -3879,16 +3879,14 @@
                 if (!$.isArray(hash_commands)) {
                     hash_commands = [];
                 }
-                if (command !== undefined) {
+                if (command !== undefined && !ignore_hash) {
                     var state = [
                         terminal_id,
                         save_state.length-1,
                         command
                     ];
-                    if (!ignore_hash) {
-                        hash_commands.push(state);
-                        maybe_update_hash();
-                    }
+                    hash_commands.push(state);
+                    maybe_update_hash();
                 }
             },
             // -------------------------------------------------------------
@@ -4673,12 +4671,15 @@
             // :: Function return prefix name for login/token
             // -------------------------------------------------------------
             prefix_name: function(local) {
-                var name = (settings.name ? settings.name + '_' : '') +
+                var name = (settings.name ? settings.name + '_': '') +
                     terminal_id;
                 if (local && interpreters.size() > 1) {
-                    name += '_' + interpreters.map(function(intrp) {
+                    var local_name = interpreters.map(function(intrp) {
                         return intrp.name;
                     }).slice(1).join('_');
+                    if (local_name) {
+                        name += '_' + local_name;
+                    }
                 }
                 return name;
             },
@@ -4715,6 +4716,7 @@
                 if (top) {
                     top.mask = command_line.mask();
                 }
+                self.pause();
                 make_interpreter(interpreter, !!options.login, function(ret) {
                     // result is object with interpreter and completion
                     // properties
@@ -4738,6 +4740,7 @@
                     } else {
                         prepare_top_interpreter();
                     }
+                    self.resume();
                 });
                 return self;
             },
@@ -5126,7 +5129,7 @@
                             } else {
                                 change_hash = true;
                             }
-                        })();
+                        })();//*/
                     } catch (e) {
                         //invalid json - ignore
                     }

@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 10 Feb 2016 20:17:21 +0000
+ * Date: Thu, 11 Feb 2016 17:11:23 +0000
  */
 
 /* TODO:
@@ -3446,10 +3446,10 @@
                     } else if (paused) {
                         // this is old API
                         // if command call pause - wait until resume
-                        self.bind('resume.command', function() {
+                        self.bind('resume.command', function resume() {
                             // exec with resume/pause in user code
                             after_exec();
-                            self.unbind('resume.command');
+                            self.unbind('resume.command', resume);
                         });
                     } else {
                         after_exec();
@@ -3879,16 +3879,14 @@
                 if (!$.isArray(hash_commands)) {
                     hash_commands = [];
                 }
-                if (command !== undefined) {
+                if (command !== undefined && !ignore_hash) {
                     var state = [
                         terminal_id,
                         save_state.length-1,
                         command
                     ];
-                    if (!ignore_hash) {
-                        hash_commands.push(state);
-                        maybe_update_hash();
-                    }
+                    hash_commands.push(state);
+                    maybe_update_hash();
                 }
             },
             // -------------------------------------------------------------
@@ -4673,12 +4671,15 @@
             // :: Function return prefix name for login/token
             // -------------------------------------------------------------
             prefix_name: function(local) {
-                var name = (settings.name ? settings.name + '_' : '') +
+                var name = (settings.name ? settings.name + '_': '') +
                     terminal_id;
                 if (local && interpreters.size() > 1) {
-                    name += '_' + interpreters.map(function(intrp) {
+                    var local_name = interpreters.map(function(intrp) {
                         return intrp.name;
                     }).slice(1).join('_');
+                    if (local_name) {
+                        name += '_' + local_name;
+                    }
                 }
                 return name;
             },
@@ -4715,6 +4716,7 @@
                 if (top) {
                     top.mask = command_line.mask();
                 }
+                self.pause();
                 make_interpreter(interpreter, !!options.login, function(ret) {
                     // result is object with interpreter and completion
                     // properties
@@ -4738,6 +4740,7 @@
                     } else {
                         prepare_top_interpreter();
                     }
+                    self.resume();
                 });
                 return self;
             },
@@ -5118,6 +5121,10 @@
                         var hash = location.hash.replace(/^#/, '');
                         // yes no var - global inside terminal
                         hash_commands = $.parseJSON(decodeURIComponent(hash));
+                        /*$.when.apply($, $.map(hash_commands, exec_spec)).
+                            then(function() {
+                                change_hash = true;
+                            });//*/
                         var i = 0;
                         (function recur() {
                             var spec = hash_commands[i++];
@@ -5126,7 +5133,7 @@
                             } else {
                                 change_hash = true;
                             }
-                        })();
+                        })();//*/
                     } catch (e) {
                         //invalid json - ignore
                     }
