@@ -49,7 +49,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 11 Feb 2016 17:11:23 +0000
+ * Date: Fri, 12 Feb 2016 08:14:29 +0000
  */
 
 /* TODO:
@@ -5121,10 +5121,6 @@
                         var hash = location.hash.replace(/^#/, '');
                         // yes no var - global inside terminal
                         hash_commands = $.parseJSON(decodeURIComponent(hash));
-                        /*$.when.apply($, $.map(hash_commands, exec_spec)).
-                            then(function() {
-                                change_hash = true;
-                            });//*/
                         var i = 0;
                         (function recur() {
                             var spec = hash_commands[i++];

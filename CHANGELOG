@@ -9,11 +9,11 @@
           Fix execHash in FireFox
           Testsing terminal and cmd plugin + call from command line
           Fix exec for nested login rpc command
+          Fix exec from hash if commands use pause/resume
           Fix exec for build in commands
           Fix local logout and login command
           mousewheel and resize options for interpreter
           use MIT license
-          Add hashchange event handler
 0.9.3     Change settings to method
           Fix process_commands and escape_regex
           Fix login from hash
