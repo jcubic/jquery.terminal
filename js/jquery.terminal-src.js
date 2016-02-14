@@ -911,7 +911,7 @@
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
-        var clip = $('<textarea/>').addClass('clipboard').appendTo(self);
+        var clip = $('<textarea />').addClass('clipboard').appendTo(self);
         if (options.width) {
             self.width(options.width);
         }
@@ -1286,28 +1286,15 @@
         function paste(e) {
             e = e.originalEvent;
             if (self.isenabled()) {
-                var clip = self.find('textarea');
                 if (!clip.is(':focus')) {
                     clip.focus();
                 }
-                var text;
-                if (window.clipboardData && window.clipboardData.getData) { // IE
-                    text = window.clipboardData.getData('Text');
-                } else if (e.clipboardData && e.clipboardData.getData) {
-                    text = e.clipboardData.getData('text/plain');
-                } else {
-                    //wait until Browser insert text to textarea
-                    cmd.oneTime(100, function() {
-                        self.insert(clip.val());
-                        clip.val('');
-                        fake_mobile_entry();
-                    });
-                }
-                if (text) {
-                    self.insert(text);
+                //wait until Browser insert text to textarea
+                cmd.oneTime(100, function() {
+                    self.insert(clip.val());
                     clip.val('');
                     fake_mobile_entry();
-                }
+                });
             }
         }
         var first_up_history = true;
@@ -1552,27 +1539,16 @@
                             if (kill_text !== '') {
                                 self.insert(kill_text);
                             }
-                        } else if (e.which === 86) {
+                        } else if (e.which === 86) { // CTRL+V
                             clip.val('');
-                            //CTRL+V
                             if (!is_paste_supported) {
                                 paste();
                             } else {
                                 clip.focus();
                             }
                             return;
-                        } else if (e.which === 75) {
-                            //CTRL+K
+                        } else if (e.which === 75) { // CTRL+K
                             kill_text = self['delete'](command.length-position);
-                            /*
-                            if (position === 0) {
-                                kill_text = command;
-                                self.set('');
-                            } else if (position !== command.length) {
-                                kill_text = command.slice(position);
-                                self.set(command.slice(0, position));
-                            }
-                            */
                         } else if (e.which === 85) { // CTRL+U
                             if (command !== '' && position !== 0) {
                                 kill_text = self['delete'](-position);
@@ -1589,15 +1565,7 @@
                 // this will prevent for instance backspace to go back one page
                 //prevent_keypress = true;
                 e.preventDefault();
-            } /*else { // if disabled
-                if ((e.altKey && e.which === 68) ||
-                    (e.ctrlKey &&
-                     $.inArray(e.which, [65, 66, 68, 69, 80, 78, 70]) > -1) ||
-                    // 68 === D
-                    [35, 36, 37, 38, 39, 40].has(e.which)) {
-                    return false;
-                }
-            } */
+            }
         }
         function fire_change_command() {
             if ($.isFunction(options.onCommandChange)) {
@@ -1703,6 +1671,7 @@
                 doc.unbind('keypress.cmd', keypress_event);
                 doc.unbind('keydown.cmd', keydown_event);
                 doc.unbind('keyup.cmd', keyup_event);
+                doc.unbind('paste.cmd', paste);
                 self.stopTime('blink', blink);
                 self.find('.cursor').next().remove().end().prev().remove().
                     end().remove();
