@@ -1286,15 +1286,28 @@
         function paste(e) {
             e = e.originalEvent;
             if (self.isenabled()) {
+                var clip = self.find('textarea');
                 if (!clip.is(':focus')) {
                     clip.focus();
                 }
-                //wait until Browser insert text to textarea
-                cmd.oneTime(100, function() {
-                    self.insert(clip.val());
+                var text;
+                if (window.clipboardData && window.clipboardData.getData) { // IE
+                    text = window.clipboardData.getData('Text');
+                } else if (e.clipboardData && e.clipboardData.getData) {
+                    text = e.clipboardData.getData('text/plain');
+                } else {
+                    //wait until Browser insert text to textarea
+                    cmd.oneTime(100, function() {
+                        self.insert(clip.val());
+                        clip.val('');
+                        fake_mobile_entry();
+                    });
+                }
+                if (text) {
+                    self.insert(text);
                     clip.val('');
                     fake_mobile_entry();
-                });
+                }
             }
         }
         var first_up_history = true;
@@ -1557,7 +1570,7 @@
                             return false;
                         }
                     }
-                } else {
+1                } else {
                     prevent_keypress = false;
                     no_keypress = true;
                     return;
