@@ -516,12 +516,12 @@
                 separator2 = new RegExp("^" + separator.source + "$(?!\\s)", flags);
             }
             /* Values for `limit`, per the spec:
-         * If undefined: 4294967295 // Math.pow(2, 32) - 1
-         * If 0, Infinity, or NaN: 0
-         * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
-         * If negative number: 4294967296 - Math.floor(Math.abs(limit))
-         * If other: Type-convert, then use the above rules
-         */
+             * If undefined: 4294967295 // Math.pow(2, 32) - 1
+             * If 0, Infinity, or NaN: 0
+             * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
+             * If negative number: 4294967296 - Math.floor(Math.abs(limit))
+             * If other: Type-convert, then use the above rules
+             */
             // ? Math.pow(2, 32) - 1 : ToUint32(limit)
             limit = limit === undef ? -1 >>> 0 : limit >>> 0;
             while (match = separator.exec(str)) {
@@ -936,7 +936,7 @@
         var cursor = self.find('.cursor');
         var animation;
         function mobile_focus() {
-            if (is_touch()) {
+            if (is_touch) {
                 var focus = clip.is(':focus');
                 if (enabled) {
                     if (!focus) {
@@ -956,7 +956,7 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         function fake_mobile_entry() {
-            if (is_touch()) {
+            if (is_touch) {
                 // delay worked while experimenting
                 self.oneTime(10, function() {
                     clip.val(command);
@@ -968,7 +968,7 @@
         }
         // terminal animation don't work on andorid because they animate
         // 2 properties
-        if ((support_animations() && !is_android())) {
+        if ((support_animations && !is_android)) {
             animation = function(toggle) {
                 if (toggle) {
                     cursor.addClass('blink');
@@ -1389,7 +1389,7 @@
                             self['delete'](-1);
                         }
                     }
-                    if (is_touch()) {
+                    if (is_touch) {
                         return true; // mobile fix
                     }
                 } else if (e.which === 67 && e.ctrlKey && e.shiftKey) {
@@ -1893,7 +1893,7 @@
     // -------------------------------------------------------------------------
     // taken from https://hacks.mozilla.org/2011/09/detecting-and-generating-
     // css-animations-in-javascript/
-    function support_animations() {
+    var support_animations = (function() {
         var animation = false,
         animationstring = 'animation',
         keyframeprefix = '',
@@ -1914,16 +1914,14 @@
             }
         }
         return animation;
-    }
+    })();
     // -------------------------------------------------------------------------
-    function is_android() {
-        return navigator.userAgent.toLowerCase().indexOf("android") != -1;
-    }
+    var is_android = navigator.userAgent.toLowerCase().indexOf("android") != -1;
     // -------------------------------------------------------------------------
-    function is_touch() {
+    var is_touch = (function() {
         return ('ontouchstart' in window) || window.DocumentTouch &&
             document instanceof DocumentTouch;
-    }
+    })();
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
         var array = fn(string);
@@ -4973,7 +4971,7 @@
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
                 width: '100%',
-                enabled: enabled && !is_touch(),
+                enabled: enabled && !is_touch,
                 keydown: key_down,
                 keypress: function(e) {
                     var result, i, top = interpreters.top();
@@ -4997,7 +4995,7 @@
                 commands: commands
             });
             // touch devices need touch event to get virtual keyboard
-            if (enabled && self.is(':visible') && !is_touch()) {
+            if (enabled && self.is(':visible') && !is_touch) {
                 self.focus(undefined, true);
             } else {
                 self.disable();
@@ -5014,7 +5012,7 @@
                 $(document).bind('click.terminal', disable).
                     bind('contextmenu.terminal', disable);
             });
-            if (!is_touch()) {
+            if (!is_touch) {
                 // work weird on mobile
                 var $win = $(window).on('focus', focus_terminal).
                     on('blur', blur_terminal);
@@ -5029,7 +5027,7 @@
             self.click(function(e) {
                 if (!self.enabled()) {
                     self.focus();
-                } else if (is_touch()) {
+                } else if (is_touch) {
                     // keep focusing silently so textarea get focus
                     self.focus(true, true);
                 }
