@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 14 Feb 2016 16:56:28 +0000
+ * Date: Mon, 22 Feb 2016 16:28:26 +0000
  */
 
 /* TODO:
@@ -1503,8 +1503,9 @@
                     clip.val(''); // so we get it before paste event
                     if (!is_paste_supported) {
                         paste();
+                    } else {
+                        clip.focus();
                     }
-                    clip.focus();
                     return;
                 } else if (e.ctrlKey || e.metaKey) {
                     if (e.which === 192) { // CMD+` switch browser window on Mac
@@ -4052,8 +4053,8 @@
                 onPause();
                 if (!paused && command_line) {
                     paused = true;
-                    self.disable();
                     command_line.hidden();
+                    command_line.disable();
                     if ($.isFunction(settings.onPause)) {
                         settings.onPause();
                     }
@@ -4066,8 +4067,8 @@
             resume: function() {
                 if (paused && command_line) {
                     paused = false;
-                    self.enable();
                     command_line.visible();
+                    command_line.enable();
                     var original = dalyed_commands;
                     dalyed_commands = [];
                     while (original.length) {
