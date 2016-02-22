@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 22 Feb 2016 16:29:54 +0000
+ * Date: Mon, 22 Feb 2016 16:43:07 +0000
  */
 
 /* TODO:
@@ -4069,9 +4069,11 @@
                     command_line.enable().visible();
                     var original = dalyed_commands;
                     dalyed_commands = [];
-                    while (original.length) {
-                        self.exec.apply(self, original.shift());
-                    }
+                    (function recur() {
+                        if (original.length) {
+                            self.exec.apply(self, original.shift()).then(recur);
+                        }
+                    })();
                     self.trigger('resume');
                     scroll_to_bottom();
                     if ($.isFunction(settings.onResume)) {
@@ -4677,6 +4679,7 @@
                 if (top) {
                     top.mask = command_line.mask();
                 }
+                var was_paused = paused;
                 self.pause();
                 make_interpreter(interpreter, !!options.login, function(ret) {
                     // result is object with interpreter and completion
@@ -4701,7 +4704,9 @@
                     } else {
                         prepare_top_interpreter();
                     }
-                    self.resume();
+                    if (!was_paused) {
+                        self.resume();
+                    }
                 });
                 return self;
             },
