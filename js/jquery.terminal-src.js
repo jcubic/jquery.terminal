@@ -4053,8 +4053,7 @@
                 onPause();
                 if (!paused && command_line) {
                     paused = true;
-                    command_line.hidden();
-                    command_line.disable();
+                    command_line.disable().hidden();
                     if ($.isFunction(settings.onPause)) {
                         settings.onPause();
                     }
@@ -4067,8 +4066,7 @@
             resume: function() {
                 if (paused && command_line) {
                     paused = false;
-                    command_line.visible();
-                    command_line.enable();
+                    command_line.enable().visible();
                     var original = dalyed_commands;
                     dalyed_commands = [];
                     while (original.length) {

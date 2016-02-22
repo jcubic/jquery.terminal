@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 22 Feb 2016 16:28:26 +0000
+ * Date: Mon, 22 Feb 2016 16:29:54 +0000
  */
 
 /* TODO:
@@ -4053,8 +4053,7 @@
                 onPause();
                 if (!paused && command_line) {
                     paused = true;
-                    command_line.hidden();
-                    command_line.disable();
+                    command_line.disable().hidden();
                     if ($.isFunction(settings.onPause)) {
                         settings.onPause();
                     }
@@ -4067,8 +4066,7 @@
             resume: function() {
                 if (paused && command_line) {
                     paused = false;
-                    command_line.visible();
-                    command_line.enable();
+                    command_line.enable().visible();
                     var original = dalyed_commands;
                     dalyed_commands = [];
                     while (original.length) {
