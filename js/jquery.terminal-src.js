@@ -1684,8 +1684,8 @@
             destroy: function() {
                 doc.unbind('keypress.cmd', keypress_event);
                 doc.unbind('keydown.cmd', keydown_event);
-                doc.unbind('keyup.cmd', keyup_event);
                 doc.unbind('paste.cmd', paste);
+                doc.unbind('input.cmd', input);
                 self.stopTime('blink', blink);
                 self.find('.cursor').next().remove().end().prev().remove().
                     end().remove();
@@ -1843,8 +1843,9 @@
                 return result;
             }
         }
-        function keyup_event(e) {
+        function input(e) {
             if (no_keypress) {
+                $.terminal.active().echo('not keypress');
                 // Some Androids don't fire keypress - #39
                 var val = clip.val();
                 if (val || e.which == 8) {  // #209 ; 8 - backspace
@@ -1853,7 +1854,7 @@
             }
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
-            bind('keyup.cmd', keyup_event);
+            bind('input.cmd', input);
         if (is_paste_supported) {
             doc.bind('paste.cmd', paste);
         }
