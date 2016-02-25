@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 25 Feb 2016 18:25:26 +0000
+ * Date: Thu, 25 Feb 2016 18:26:38 +0000
  */
 
 /* TODO:
@@ -1845,7 +1845,6 @@
         }
         function input(e) {
             if (no_keypress) {
-                $.terminal.active().echo('not keypress');
                 // Some Androids don't fire keypress - #39
                 var val = clip.val();
                 if (val || e.which == 8) {  // #209 ; 8 - backspace
