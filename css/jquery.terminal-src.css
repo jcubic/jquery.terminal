@@ -18,14 +18,6 @@
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
     display: inline-block;
 }
-.cmd .mask, .cmd .clipboard {
-    position: absolute;
-    display: block;
-    bottom: 0;
-    height: 16px;
-    left: -10px;
-}
-
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6, .terminal pre, .cmd {
     margin: 0;
 }
@@ -41,8 +33,11 @@
 }
 */
 .cmd .clipboard {
+    position: absolute;
+    height: 16px;
+    left: -6px;
     /* this seems to work after all on Android */
-    left: -99999px;
+    /*left: -99999px;
     clip: rect(1px,1px,1px,1px);
     /* on desktop textarea appear when paste */
     /*
@@ -50,14 +45,15 @@
     filter: alpha(opacity = 0.01);
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
     */
-    width: 10px; /* textarea need to have width or it will not work on Android */
-    height: 10px;
+    width: 5px; /* textarea need to have width or it will not work on Android */
+    background: transparent;
+    border: none;
+    color: transparent;
+    outline: none;
     padding: 0;
     resize: none;
-    border: none;
     z-index: 0;
     overflow: hidden;
-    outline: none;
 }
 .terminal .error {
     color: #f00;
