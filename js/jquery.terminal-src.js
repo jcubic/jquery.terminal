@@ -1571,7 +1571,7 @@
                             return false;
                         }
                     }
-1                } else {
+                } else {
                     prevent_keypress = false;
                     no_keypress = true;
                     return;
@@ -4856,7 +4856,7 @@
                 }
             };
         })();
-        
+
 
         // -----------------------------------------------------------------
         // INIT CODE

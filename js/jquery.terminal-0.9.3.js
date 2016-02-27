@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 25 Feb 2016 18:26:38 +0000
+ * Date: Sat, 27 Feb 2016 13:41:01 +0000
  */
 
 /* TODO:
@@ -1571,7 +1571,7 @@
                             return false;
                         }
                     }
-1                } else {
+                } else {
                     prevent_keypress = false;
                     no_keypress = true;
                     return;
@@ -4856,7 +4856,7 @@
                 }
             };
         })();
-        
+
 
         // -----------------------------------------------------------------
         // INIT CODE
