@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: 
+ * Date: Mon, 29 Feb 2016 17:45:07 +0000
  */
 
 /* TODO:
