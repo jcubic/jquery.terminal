@@ -233,12 +233,24 @@
     var clone = function(object) {
         return Clone.clone_object(object);
     };
+
+    var hasLS = function () {
+      var testKey = 'test', storage = window.localStorage;
+      try {
+        storage.setItem(testKey, '1');
+        storage.removeItem(testKey);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    };
+
     /* jshint ignore:start */
     // -----------------------------------------------------------------------
     // :: Storage plugin
     // -----------------------------------------------------------------------
     // Private data
-    var isLS = typeof window.localStorage !== 'undefined';
+    var isLS = hasLS();
     // Private functions
     function wls(n, v) {
         var c;
