@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 29 Feb 2016 17:45:07 +0000
+ * Date: Thu, 03 Mar 2016 16:25:20 +0000
  */
 
 /* TODO:
@@ -3848,9 +3848,13 @@
             // -------------------------------------------------------------
             // :: Store current terminal state
             // -------------------------------------------------------------
-            save_state: function(command, ignore_hash) {
+            save_state: function(command, ignore_hash, index) {
                 //save_state.push({view:self.export_view(), join:[]});
-                save_state.push(self.export_view());
+                if (typeof index != 'undefined') {
+                    save_state[index] = self.export_view();
+                } else {
+                    save_state.push(self.export_view());
+                }
                 if (!$.isArray(hash_commands)) {
                     hash_commands = [];
                 }
@@ -5082,7 +5086,7 @@
                     if (spec[2]) {
                         try {
                             return terminal.exec(spec[2]).then(function(term, i) {
-                                terminal.save_state(spec[2], true);
+                                terminal.save_state(spec[2], true, spec[1]);
                             });
                         } catch(e) {
                             var cmd = $.terminal.escape_brackets(command);
