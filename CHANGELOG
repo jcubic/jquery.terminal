@@ -11,6 +11,7 @@
           Fix exec for nested login rpc command
           Fix exec from hash if commands use pause/resume
           Fix exec for build in commands
+          Fix various exec from hash issues
           Fix local logout and login command
           mousewheel and resize options for interpreter
           use MIT license
