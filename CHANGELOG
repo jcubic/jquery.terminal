@@ -11,10 +11,11 @@
           Fix exec for nested login rpc command
           Fix exec from hash if commands use pause/resume
           Fix exec for build in commands
-          Fix various exec from hash issues
+          Fix other various exec from hash issues
           Fix local logout and login command
           mousewheel and resize options for interpreter
           use MIT license
+          onExport and onImport events
 0.9.3     Change settings to method
           Fix process_commands and escape_regex
           Fix login from hash

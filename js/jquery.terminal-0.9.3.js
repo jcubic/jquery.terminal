@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 03 Mar 2016 16:25:20 +0000
+ * Date: Sun, 06 Mar 2016 20:18:03 +0000
  */
 
 /* TODO:
@@ -3317,12 +3317,15 @@
         // :: exeptions from user code and displays them on the terminal
         // ---------------------------------------------------------------------
         var first_command = true;
+        var last_command;
         function commands(command, silent, exec) {
+            last_command = command;
             // first command store state of the terminal before the command get
             // executed
             if (first_command) {
                 first_command = false;
-                if (settings.historyState) {
+                // execHash need first empty command too
+                if (settings.historyState || settings.execHash) {
                     if (!save_state.length) {
                         // first command in first terminal don't have hash
                         self.save_state();
@@ -3379,8 +3382,10 @@
                     } else {
                         self.logout();
                     }
+                    if ($.isFunction(settings.onAfterCommand)) {
+                        settings.onAfterCommand(self, command);
+                    }
                     after_exec();
-                    return deferred.promise();
                 } else if (command.match(/^\s*(exit|clear)\s*$/i) && !in_login) {
                     if (settings.exit && command.match(/^\s*exit\s*$/i)) {
                         var level = self.level();
@@ -3397,7 +3402,6 @@
                         settings.onAfterCommand(self, command);
                     }
                     after_exec();
-                    return deferred.promise();
                 } else {
                     var position = lines.length-1;
                     // Call user interpreter function
@@ -3429,8 +3433,8 @@
                     } else {
                         after_exec();
                     }
-                    return deferred.promise();
                 }
+                return deferred.promise();
             } catch (e) {
                 display_exception(e, 'USER');
                 self.resume();
@@ -3537,7 +3541,7 @@
                 }
             }
             function hashchange() {
-                if (fire_hash_change) {
+                if (fire_hash_change && settings.execHash) {
                     try {
                         if (location.hash) {
                             var hash = location.hash.replace(/^#/, '');
@@ -3555,7 +3559,7 @@
                     }
                 }
             }
-            if (first_instance && settings.historyState) {
+            if (first_instance) {
                 first_instance = false;
                 if ($.fn.hashchange) {
                     $(window).hashchange(hashchange);
@@ -3780,7 +3784,7 @@
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;//used to indicate that user call pause onInit
         var old_width, old_height;
-        var dalyed_commands = []; // used when exec commands while paused
+        var delayed_commands = []; // used when exec commands while paused
         var settings = $.extend({},
                                 $.terminal.defaults,
                                 {name: self.selector},
@@ -3816,7 +3820,7 @@
             // :: restore the state
             // -------------------------------------------------------------
             export_view: function() {
-                return {
+                return $.extend({}, {
                     focus: enabled,
                     mask: command_line.mask(),
                     prompt: self.get_prompt(),
@@ -3824,7 +3828,7 @@
                     position: command_line.position(),
                     lines: clone(lines),
                     interpreters: interpreters.clone()
-                };
+                }, $.isFunction(settings.onExport) ? settings.onExport() : {});
             },
             // -------------------------------------------------------------
             // :: Restore the state of the previous exported view
@@ -3832,6 +3836,9 @@
             import_view: function(view) {
                 if (in_login) {
                     throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
+                }
+                if ($.isFunction(settings.onImport)) {
+                    settings.onImport(view);
                 }
                 self.set_prompt(view.prompt);
                 self.set_command(view.command);
@@ -3884,10 +3891,8 @@
                 if (paused) {
                     // delay command multiple time
                     d = deferred || new $.Deferred();
-                    dalyed_commands.push([command, silent, d]);
-                    if (d) {
-                        return d.promise();
-                    }
+                    delayed_commands.push([command, silent, d]);
+                    return d.promise();
                 } else {
                     // commands may return promise from user code
                     // it will resolve exec promise when user promise
@@ -4083,14 +4088,19 @@
                 if (paused && command_line) {
                     paused = false;
                     command_line.enable().visible();
-                    var original = dalyed_commands;
-                    dalyed_commands = [];
+                    var original = delayed_commands;
+                    var trigger = !delayed_commands.length;
+                    delayed_commands = [];
                     (function recur() {
                         if (original.length) {
                             self.exec.apply(self, original.shift()).then(recur);
+                        } else {
+                            self.trigger('resume');
                         }
                     })();
-                    self.trigger('resume');
+                    if (trigger) {
+                        self.trigger('resume');
+                    }
                     scroll_to_bottom();
                     if ($.isFunction(settings.onResume)) {
                         settings.onResume();
@@ -4127,6 +4137,11 @@
                     // not to include the command
                     self.oneTime(1, function() {
                         settings.historyState = true;
+                        if (!save_state.length) {
+                            self.save_state();
+                        } else {
+                            self.save_state(null);
+                        }
                     });
                 } else {
                     settings.historyState = false;
@@ -5088,7 +5103,7 @@
                             return terminal.exec(spec[2]).then(function(term, i) {
                                 terminal.save_state(spec[2], true, spec[1]);
                             });
-                        } catch(e) {
+                        } catch (e) {
                             var cmd = $.terminal.escape_brackets(command);
                             var msg = "Error while exec with command " + cmd;
                             terminal.error(msg).exception(e);
