@@ -3325,7 +3325,7 @@
             if (first_command) {
                 first_command = false;
                 // execHash need first empty command too
-                if (settings.historyState || settings.execHash) {
+                if (settings.historyState) {
                     if (!save_state.length) {
                         // first command in first terminal don't have hash
                         self.save_state();

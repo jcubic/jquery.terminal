@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 06 Mar 2016 20:18:03 +0000
+ * Date: Tue, 08 Mar 2016 18:14:32 +0000
  */
 
 /* TODO:
@@ -3325,7 +3325,7 @@
             if (first_command) {
                 first_command = false;
                 // execHash need first empty command too
-                if (settings.historyState || settings.execHash) {
+                if (settings.historyState) {
                     if (!save_state.length) {
                         // first command in first terminal don't have hash
                         self.save_state();
