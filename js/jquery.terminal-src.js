@@ -3382,9 +3382,6 @@
                     } else {
                         self.logout();
                     }
-                    if ($.isFunction(settings.onAfterCommand)) {
-                        settings.onAfterCommand(self, command);
-                    }
                     after_exec();
                 } else if (command.match(/^\s*(exit|clear)\s*$/i) && !in_login) {
                     if (settings.exit && command.match(/^\s*exit\s*$/i)) {
@@ -3397,9 +3394,6 @@
                         }
                     } else if (settings.clear && command.match(/^\s*clear\s*$/i)) {
                         self.clear();
-                    }
-                    if ($.isFunction(settings.onAfterCommand)) {
-                        settings.onAfterCommand(self, command);
                     }
                     after_exec();
                 } else {
