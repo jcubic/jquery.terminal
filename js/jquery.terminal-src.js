@@ -3318,8 +3318,10 @@
         // ---------------------------------------------------------------------
         var first_command = true;
         var last_command;
+        var resume_callbacks = [];
+        var resume_event_bound = false;
         function commands(command, silent, exec) {
-            last_command = command;
+            last_command = command; // for debug
             // first command store state of the terminal before the command get
             // executed
             if (first_command) {
@@ -3359,9 +3361,11 @@
                     prev_command = $.terminal.split_command(command);
                 }
                 if (!ghost()) {
+                    // exec execute this function wihout the help of cmd plugin
+                    // that add command to history on enter
                     if (exec && $.isFunction(settings.historyFilter) &&
                         settings.historyFilter(command) ||
-                        !settings.historyFilter) {
+                        command.match(settings.historyFilter)) {
                         command_line.history().append(command);
                     }
                 }
@@ -3369,11 +3373,11 @@
                 if (!silent) {
                     echo_command(command);
                 }
-                // new promise will be returnd to exec that will resolve his
+                // new promise will be returned to exec that will resolve his
                 // returned promise
                 var deferred = new $.Deferred();
                 // we need to save sate before commands is deleyd because
-                // execute_extended_command disable it and it can be exected
+                // execute_extended_command disable it and it can be executed
                 // after delay
                 var saved_change_hash = change_hash;
                 if (command.match(/^\s*login\s*$/i) && self.token(true)) {
@@ -3400,11 +3404,6 @@
                     var position = lines.length-1;
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
-                    if (exec) {
-                        // exec execute this function wihout the help of cmd plugin
-                        // that add command to history on enter
-                        command_line.history().append(command);
-                    }
                     if (result !== undefined) {
                         // auto pause/resume when user return promises
                         self.pause();
@@ -3417,12 +3416,10 @@
                             self.resume();
                         });
                     } else if (paused) {
-                        // this is old API
-                        // if command call pause - wait until resume
-                        self.bind('resume.command', function resume() {
+                        var old_command = command;
+                        resume_callbacks.push(function() {
                             // exec with resume/pause in user code
                             after_exec();
-                            self.unbind('resume.command', resume);
                         });
                     } else {
                         after_exec();
@@ -3875,49 +3872,25 @@
             // :: true it will not echo executed command
             // -------------------------------------------------------------
             exec: function(command, silent, deferred) {
-                var d;
                 if ($.isArray(command)) {
                     return $.when.apply($, $.map(command, function(command) {
                         return self.exec(command, silent);
                     }));
                 }
                 // both commands executed here (resume will call Term::exec)
+                var d = deferred || new $.Deferred();
                 if (paused) {
                     // delay command multiple time
-                    d = deferred || new $.Deferred();
                     delayed_commands.push([command, silent, d]);
-                    return d.promise();
                 } else {
                     // commands may return promise from user code
                     // it will resolve exec promise when user promise
                     // is resolved
-                    var ret = commands(command, silent, true).then(function() {
-                        if (deferred) {
-                            deferred.resolve(self, 1);
-                        }
+                    commands(command, silent, true).then(function() {
+                        d.resolve(self);
                     });
-                    if (deferred) {
-                        return deferred.promise();
-                    } else if (ret) {
-                        return ret;
-                    }
-                    if (!ret) {
-                        if (deferred) {
-                            deferred.resolve(self, 2);
-                            return deferred.promise();
-                        } else {
-                            try {
-                                d = new $.Deferred();
-                                ret = d.promise();
-                                d.resolve(self, 3);
-                            } catch(e) {
-                                self.exception(e);
-                                throw e;
-                            }
-                        }
-                    }
-                    return ret;
                 }
+                return d.promise();
             },
             // -------------------------------------------------------------
             // :: bypass login function that wait untill you type user/pass
@@ -4083,22 +4056,22 @@
                     paused = false;
                     command_line.enable().visible();
                     var original = delayed_commands;
-                    var trigger = !delayed_commands.length;
                     delayed_commands = [];
                     (function recur() {
                         if (original.length) {
                             self.exec.apply(self, original.shift()).then(recur);
                         } else {
                             self.trigger('resume');
+                            var fn = resume_callbacks.shift();
+                            if (fn) {
+                                fn();
+                            }
+                            scroll_to_bottom();
+                            if ($.isFunction(settings.onResume)) {
+                                settings.onResume();
+                            }
                         }
                     })();
-                    if (trigger) {
-                        self.trigger('resume');
-                    }
-                    scroll_to_bottom();
-                    if ($.isFunction(settings.onResume)) {
-                        settings.onResume();
-                    }
                 }
                 return self;
             },
@@ -4133,7 +4106,7 @@
                         settings.historyState = true;
                         if (!save_state.length) {
                             self.save_state();
-                        } else {
+                        } else if (terminals.length() > 1) {
                             self.save_state(null);
                         }
                     });
@@ -5094,9 +5067,20 @@
                 if (terminal && terminal_id == terminal.id()) {
                     if (spec[2]) {
                         try {
-                            return terminal.exec(spec[2]).then(function(term, i) {
-                                terminal.save_state(spec[2], true, spec[1]);
-                            });
+                            if (paused) {
+                                var defer = $.Deferred();
+                                resume_callbacks.push(function() {
+                                    return terminal.exec(spec[2]).then(function(term, i) {
+                                        terminal.save_state(spec[2], true, spec[1]);
+                                        defer.resolve();
+                                    });
+                                });
+                                return defer.promise();
+                            } else {
+                                return terminal.exec(spec[2]).then(function(term, i) {
+                                    terminal.save_state(spec[2], true, spec[1]);
+                                });
+                            }
                         } catch (e) {
                             var cmd = $.terminal.escape_brackets(command);
                             var msg = "Error while exec with command " + cmd;
