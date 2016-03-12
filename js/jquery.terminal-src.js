@@ -4003,7 +4003,15 @@
             // -------------------------------------------------------------
             // :: Low Level method that overwrites interpreter
             // -------------------------------------------------------------
-            setInterpreter: function(user_intrp, login) {
+            setInterpreter: function() {
+                if (window.console && console.warn) {
+                    console.warn('This function is deprecated, use set_inte'+
+                                 'rpreter insead!');
+                }
+                self.set_interpreter.apply(self, arguments);
+            },
+            // -------------------------------------------------------------
+            set_interpreter: function(user_intrp, login) {
                 function overwrite_interpreter() {
                     self.pause();
                     make_interpreter(user_intrp, !!login, function(result) {

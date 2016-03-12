@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 09 Mar 2016 15:43:45 +0000
+ * Date: Sat, 12 Mar 2016 11:29:41 +0000
  */
 
 /* TODO:
@@ -4003,7 +4003,15 @@
             // -------------------------------------------------------------
             // :: Low Level method that overwrites interpreter
             // -------------------------------------------------------------
-            setInterpreter: function(user_intrp, login) {
+            setInterpreter: function() {
+                if (window.console && console.warn) {
+                    console.warn('This function is deprecated, use set_inte'+
+                                 'rpreter insead!');
+                }
+                self.set_interpreter.apply(self, arguments);
+            },
+            // -------------------------------------------------------------
+            set_interpreter: function(user_intrp, login) {
                 function overwrite_interpreter() {
                     self.pause();
                     make_interpreter(user_intrp, !!login, function(result) {
