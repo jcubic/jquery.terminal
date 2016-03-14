@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 12 Mar 2016 11:29:41 +0000
+ * Date: Mon, 14 Mar 2016 08:25:21 +0000
  */
 
 /* TODO:
@@ -3795,7 +3795,6 @@
             // -------------------------------------------------------------
             clear: function() {
                 output.html('');
-                command_line.set('');
                 lines = [];
                 try {
                     settings.onClear(self);

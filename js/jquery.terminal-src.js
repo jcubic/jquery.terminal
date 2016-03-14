@@ -3795,7 +3795,6 @@
             // -------------------------------------------------------------
             clear: function() {
                 output.html('');
-                command_line.set('');
                 lines = [];
                 try {
                     settings.onClear(self);
