@@ -3536,7 +3536,7 @@
                     try {
                         if (location.hash) {
                             var hash = location.hash.replace(/^#/, '');
-                            hash_commands = $.parseJSON(hash);
+                            hash_commands = $.parseJSON(decodeURIComponent(hash));
                         } else {
                             hash_commands = [];
                         }
@@ -4204,8 +4204,10 @@
                     }
                 }
                 // why this delay - it can't be use for mobile
+                /*
                 self.oneTime(1, function() {
                 });
+                */
                 return self;
             },
             // -------------------------------------------------------------

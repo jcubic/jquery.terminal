@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 20 Mar 2016 12:29:17 +0000
+ * Date: Sun, 20 Mar 2016 12:41:36 +0000
  */
 
 /* TODO:
@@ -3536,7 +3536,7 @@
                     try {
                         if (location.hash) {
                             var hash = location.hash.replace(/^#/, '');
-                            hash_commands = $.parseJSON(hash);
+                            hash_commands = $.parseJSON(decodeURIComponent(hash));
                         } else {
                             hash_commands = [];
                         }
@@ -4204,8 +4204,10 @@
                     }
                 }
                 // why this delay - it can't be use for mobile
+                /*
                 self.oneTime(1, function() {
                 });
+                */
                 return self;
             },
             // -------------------------------------------------------------
