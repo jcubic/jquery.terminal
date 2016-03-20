@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 14 Mar 2016 08:25:21 +0000
+ * Date: Sun, 20 Mar 2016 12:29:17 +0000
  */
 
 /* TODO:
@@ -4512,7 +4512,8 @@
             error: function(message, finalize) {
                 //quick hack to fix trailing backslash
                 var str = $.terminal.escape_brackets(message).
-                    replace(/\\$/, '&#92;');
+                    replace(/\\$/, '&#92;').
+                    replace(url_re, ']$1[[;;;error]');
                 return self.echo('[[;;;error]' + str + ']', finalize);
             },
             // -------------------------------------------------------------

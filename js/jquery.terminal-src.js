@@ -4512,7 +4512,8 @@
             error: function(message, finalize) {
                 //quick hack to fix trailing backslash
                 var str = $.terminal.escape_brackets(message).
-                    replace(/\\$/, '&#92;');
+                    replace(/\\$/, '&#92;').
+                    replace(url_re, ']$1[[;;;error]');
                 return self.echo('[[;;;error]' + str + ']', finalize);
             },
             // -------------------------------------------------------------
