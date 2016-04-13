@@ -3563,7 +3563,6 @@
         // :: function complete the command
         // ---------------------------------------------------------------------
         function complete_helper(command, string, commands) {
-            console.log(commands);
             if (settings.clear && $.inArray('clear', commands) == -1) {
                 commands.push('clear');
             }

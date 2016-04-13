@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 13 Apr 2016 17:59:27 +0000
+ * Date: Wed, 13 Apr 2016 18:25:57 +0000
  */
 
 /* TODO:
@@ -3563,7 +3563,6 @@
         // :: function complete the command
         // ---------------------------------------------------------------------
         function complete_helper(command, string, commands) {
-            console.log(commands);
             if (settings.clear && $.inArray('clear', commands) == -1) {
                 commands.push('clear');
             }
