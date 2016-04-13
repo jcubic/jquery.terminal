@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 20 Mar 2016 12:41:36 +0000
+ * Date: Wed, 13 Apr 2016 17:59:27 +0000
  */
 
 /* TODO:
@@ -3563,10 +3563,11 @@
         // :: function complete the command
         // ---------------------------------------------------------------------
         function complete_helper(command, string, commands) {
-            if (settings.clear) {
+            console.log(commands);
+            if (settings.clear && $.inArray('clear', commands) == -1) {
                 commands.push('clear');
             }
-            if (settings.exit) {
+            if (settings.exit && $.inArray('exit', commands) == -1) {
                 commands.push('exit');
             }
             var test = command_line.get().substring(0, command_line.position());
@@ -3586,7 +3587,7 @@
             } else if (matched.length > 1) {
                 if (tab_count >= 2) {
                     echo_command(command);
-                    self.echo(matched.join('\t'));
+                    self.echo(matched.reverse().join('\t'), {keepWords: true});
                     tab_count = 0;
                 } else {
                     var found = false;
