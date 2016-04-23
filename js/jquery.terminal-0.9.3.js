@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 23 Apr 2016 16:48:36 +0000
+ * Date: Sat, 23 Apr 2016 16:57:03 +0000
  */
 
 /* TODO:
@@ -3247,15 +3247,17 @@
             if (!terminal) {
                 throw new Error(strings.invalidTerminalId);
             }
-            if (save_state[spec[1]]) { // state exists
-                terminal.import_view(save_state[spec[1]]);
+            var command_idx = spec[1];
+            if (save_state[command_idx]) { // state exists
+                terminal.import_view(save_state[command_idx]);
             } else {
                 // restore state
                 change_hash = false;
-                if (spec[2]) {
-                    terminal.exec(spec[2]).then(function() {
+                var command = spec[2];
+                if (command) {
+                    terminal.exec(command).then(function() {
                         change_hash = true;
-                        save_state[spec[1]] = terminal.export_view();
+                        save_state[command_idx] = terminal.export_view();
                     });
                 }
                 /*
