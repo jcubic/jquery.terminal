@@ -3255,6 +3255,7 @@
                 if (spec[2]) {
                     terminal.exec(spec[2]).then(function() {
                         change_hash = true;
+                        save_state[spec[1]] = terminal.export_view();
                     });
                 }
                 /*

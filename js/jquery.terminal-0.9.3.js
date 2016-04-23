@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 13 Apr 2016 18:25:57 +0000
+ * Date: Sat, 23 Apr 2016 16:48:36 +0000
  */
 
 /* TODO:
@@ -3255,6 +3255,7 @@
                 if (spec[2]) {
                     terminal.exec(spec[2]).then(function() {
                         change_hash = true;
+                        save_state[spec[1]] = terminal.export_view();
                     });
                 }
                 /*
