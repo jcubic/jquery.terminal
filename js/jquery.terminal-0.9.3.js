@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 23 Apr 2016 16:57:03 +0000
+ * Date: Sat, 23 Apr 2016 17:00:35 +0000
  */
 
 /* TODO:
@@ -3260,16 +3260,6 @@
                         save_state[command_idx] = terminal.export_view();
                     });
                 }
-                /*
-                if (paused) {
-                    terminal.bind('resume.hash', function() {
-                        change_hash = true;
-                        terminal.unbind('resume.hash');
-                    });
-                } else {
-                    change_hash = true;
-                }
-                */
             }
             /*if (spec[3].length) {
                 restore_state(spec[3]);
@@ -3285,34 +3275,6 @@
                 setTimeout(function() {
                     fire_hash_change = true;
                 }, 100);
-            }
-        }
-        // ---------------------------------------------------------------------
-        // :: Restore state using previously save state, this function is used
-        // :: as event handler for popstate
-        // ---------------------------------------------------------------------
-        function restore_history_state() {
-            try {
-                if (save_state.length) {
-                    var state, terminal;
-                    if (history.state === null) {
-                        state = save_state[0];
-                        terminal = terminals.get()[0];
-                    } else {
-                        state = save_state[history.state.pos];
-                        terminal = terminals.get()[history.state.id];
-                    }
-                    terminal.import_view(state.view);
-                    if (state.join.length) {
-                        $.each(state.join, function(_, state) {
-                            var terminal = terminals.get()[state.id];
-                            terminal.import_view(state.view);
-                        });
-                    }
-                }
-            } catch(e) {
-                // display execetion on first terminal
-                display_exception(e, 'TERMINAL');
             }
         }
         // ---------------------------------------------------------------------
@@ -4834,10 +4796,6 @@
                 $(window).off('blur', blur_terminal).
                     off('focus', focus_terminal);
                 terminals.remove(terminal_id);
-                if (!terminals.length()) {
-                    // last terminal
-                    $(window).off('popstate', restore_history_state);
-                }
                 return self;
             }
         }, function(name, fun) {
