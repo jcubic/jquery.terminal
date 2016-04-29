@@ -12,8 +12,8 @@
         "url": "http://jcubic.pl"
     },
     "licenses": [{
-        "type": "LGPLv3",
-        "url": "http://www.gnu.org/licenses/lgpl.html"
+        "type": "MIT",
+        "url": "http://opensource.org/licenses/MIT"
     }],
     "homepage": "http://terminal.jcubic.pl/",
     "bugs": "https://github.com/jcubic/jquery.terminal/issues",

@@ -7,7 +7,7 @@
         "css/jquery.terminal.css"
     ],
     "description": "jQuery Terminal Emulator is a plugin for creating command line interpreters in your applications.",
-    "license": "LGPL-3.0",
+    "license": "MIT",
     "ignore": [
         "examples",
         "CHANGELOG",

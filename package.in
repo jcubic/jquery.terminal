@@ -15,7 +15,7 @@
     "ui"
   ],
   "author": "Jakub Jankiewicz <jcubic@onet.pl> (http://jakub.jankiewi.cz)",
-  "license": "LGPL-3.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/jcubic/jquery.terminal.git"
@@ -26,5 +26,9 @@
   "homepage": "http://terminal.jcubic.pl",
   "dependencies": {
     "jquery": "^2.1.4"
+  },
+  "devDependencies": {
+    "jasmine-node": "^1.14.5",
+    "jsdom": "^3.1.2"
   }
 }

@@ -134,6 +134,6 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
 
 
-Licensed under [GNU LGPL Version 3 license](http://www.gnu.org/licenses/lgpl.html)
+Licensed under [MIT](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2011-2015 [Jakub Jankiewicz](http://jcubic.pl)
+Copyright (c) 2011-2016 [Jakub Jankiewicz](http://jcubic.pl)

@@ -38,8 +38,13 @@ README.md: README.in .$(VERSION)
 terminal.jquery.json: manifest .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json
 
-www/Makefile: www/Makefile.in Makefile
+www/Makefile: www/Makefile.in Makefile .$(VERSION)
 	test -d www && $(SED) -e "s/{{VERSION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 test:
-	echo "Need to be impleted"
+	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose --junitreport --color --forceexit spec
+jshint:
+	jshint js/jquery.terminal-src.js
+	jshint js/dterm.js
+	jshint js/xml_formatting.js
+	jshint js/unix_formatting.js

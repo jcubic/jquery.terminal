@@ -1,6 +1,8 @@
 *~
 .[0-9/]*
 components
+\#*\#
+.\#*
 www
 test
 bower_components

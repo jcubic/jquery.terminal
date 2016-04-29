@@ -7,22 +7,10 @@
  *           \/              /____/                              version {{VER}}
  * http://terminal.jcubic.pl
  *
- * Copyright (c) 2011-2014 Jakub Jankiewicz <http://jcubic.pl>
- *
  * This file is part of jQuery Terminal.
  *
- * jQuery Terminal is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (c) 2011-2016 Jakub Jankiewicz <http://jcubic.pl>
+ * Released under the MIT license
  *
  * Date: {{DATE}}
  */
@@ -30,23 +18,11 @@
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
     display: inline-block;
 }
-.cmd .mask, .cmd .clipboard {
-    position: absolute;
-    display: block;
-    bottom: 0;
-    height: 16px;
-    left: -10px;
-}
-
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6, .terminal pre, .cmd {
     margin: 0;
 }
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
     line-height: 1.2em;
-}
-.wrap {
-    word-wrap: break-word;
-    overflow: initial;
 }
 /*
 .cmd .mask {
@@ -57,8 +33,11 @@
 }
 */
 .cmd .clipboard {
+    position: absolute;
+    height: 16px;
+    left: -6px;
     /* this seems to work after all on Android */
-    left: -99999px;
+    /*left: -99999px;
     clip: rect(1px,1px,1px,1px);
     /* on desktop textarea appear when paste */
     /*
@@ -66,14 +45,15 @@
     filter: alpha(opacity = 0.01);
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
     */
-    width: 10px; /* textarea need to have width or it will not work on Android */
-    height: 10px;
+    width: 5px; /* textarea need to have width or it will not work on Android */
+    background: transparent;
+    border: none;
+    color: transparent;
+    outline: none;
     padding: 0;
     resize: none;
-    border: none;
     z-index: 0;
     overflow: hidden;
-    outline: none;
 }
 .terminal .error {
     color: #f00;
