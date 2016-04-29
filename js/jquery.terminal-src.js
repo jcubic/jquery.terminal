@@ -2183,94 +2183,90 @@
             if (typeof str === 'string') {
                 //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splitted = $.terminal.format_split(str);
-                if (splitted && splitted.length > 1) {
-                    str = $.map(splitted, function(text) {
-                        if (text === '') {
-                            return text;
-                        } else if ($.terminal.is_formatting(text)) {
-                            return text.replace(format_parts_re, function(s,
-                                                                    style,
-                                                                    color,
-                                                                    background,
-                                                                    _class,
-                                                                    data_text,
-                                                                    text) {
-                                if (text === '') {
-                                    return ''; //'<span>&nbsp;</span>';
+                str = $.map(splitted, function(text) {
+                    if (text === '') {
+                        return text;
+                    } else if ($.terminal.is_formatting(text)) {
+                        return text.replace(format_parts_re, function(s,
+                                                                      style,
+                                                                      color,
+                                                                      background,
+                                                                      _class,
+                                                                      data_text,
+                                                                      text) {
+                            if (text === '') {
+                                return ''; //'<span>&nbsp;</span>';
+                            }
+                            text = text.replace(/\\]/g, ']');
+                            var style_str = '';
+                            if (style.indexOf('b') !== -1) {
+                                style_str += 'font-weight:bold;';
+                            }
+                            var text_decoration = [];
+                            if (style.indexOf('u') !== -1) {
+                                text_decoration.push('underline');
+                            }
+                            if (style.indexOf('s') !== -1) {
+                                text_decoration.push('line-through');
+                            }
+                            if (style.indexOf('o') !== -1) {
+                                text_decoration.push('overline');
+                            }
+                            if (text_decoration.length) {
+                                style_str += 'text-decoration:' +
+                                    text_decoration.join(' ') + ';';
+                            }
+                            if (style.indexOf('i') !== -1) {
+                                style_str += 'font-style:italic;';
+                            }
+                            if ($.terminal.valid_color(color)) {
+                                style_str += 'color:' + color + ';';
+                                if (style.indexOf('g') !== -1) {
+                                    style_str += 'text-shadow:0 0 5px ' + color + ';';
                                 }
-                                text = text.replace(/\\]/g, ']');
-                                var style_str = '';
-                                if (style.indexOf('b') !== -1) {
-                                    style_str += 'font-weight:bold;';
-                                }
-                                var text_decoration = [];
-                                if (style.indexOf('u') !== -1) {
-                                    text_decoration.push('underline');
-                                }
-                                if (style.indexOf('s') !== -1) {
-                                    text_decoration.push('line-through');
-                                }
-                                if (style.indexOf('o') !== -1) {
-                                    text_decoration.push('overline');
-                                }
-                                if (text_decoration.length) {
-                                    style_str += 'text-decoration:' +
-                                        text_decoration.join(' ') + ';';
-                                }
-                                if (style.indexOf('i') !== -1) {
-                                    style_str += 'font-style:italic;';
-                                }
-                                if ($.terminal.valid_color(color)) {
-                                    style_str += 'color:' + color + ';';
-                                    if (style.indexOf('g') !== -1) {
-                                        style_str += 'text-shadow:0 0 5px ' + color + ';';
+                            }
+                            if ($.terminal.valid_color(background)) {
+                                style_str += 'background-color:' + background;
+                            }
+                            var data;
+                            if (data_text === '') {
+                                data = text;
+                            } else {
+                                data = data_text.replace(/&#93;/g, ']');
+                            }
+                            var result;
+                            if (style.indexOf('!') !== -1) {
+                                if (data.match(email_re)) {
+                                    result = '<a href="mailto:' + data + '" ';
+                                } else {
+                                    result = '<a target="_blank" href="' + data + '" ';
+                                    if (settings.linksNoReferrer) {
+                                        result += 'rel="noreferrer" ';
                                     }
                                 }
-                                if ($.terminal.valid_color(background)) {
-                                    style_str += 'background-color:' + background;
-                                }
-                                var data;
-                                if (data_text === '') {
-                                    data = text;
-                                } else {
-                                    data = data_text.replace(/&#93;/g, ']');
-                                }
-                                var result;
-                                if (style.indexOf('!') !== -1) {
-                                    if (data.match(email_re)) {
-                                        result = '<a href="mailto:' + data + '" ';
-                                    } else {
-                                        result = '<a target="_blank" href="' + data + '" ';
-                                        if (settings.linksNoReferrer) {
-                                            result += 'rel="noreferrer" ';
-                                        }
-                                    }
-                                } else {
-                                    result = '<span ';
-                                }
-                                if (style_str !== '') {
-                                    result += 'style="' + style_str + '"';
-                                }
-                                if (_class !== '') {
-                                    result += ' class="' + _class + '"';
-                                }
-                                if (style.indexOf('!') !== -1) {
-                                    result += '>' + text + '</a>';
-                                } else {
-                                    result += ' data-text="' +
-                                        data.replace('"', '&quote;') + '">' +
-                                        text + '</span>';
-                                }
-                                return result;
-                            });
-                        } else {
-                            return '<span>' + text + '</span>';
-                        }
-                    }).join('');
-                } else {
-                    str = '<span>' + str + '</span>';
-                }
-                return str.replace(/<span><br\/?><\/span>/gi, '<br/>');
+                            } else {
+                                result = '<span ';
+                            }
+                            if (style_str !== '') {
+                                result += 'style="' + style_str + '"';
+                            }
+                            if (_class !== '') {
+                                result += ' class="' + _class + '"';
+                            }
+                            if (style.indexOf('!') !== -1) {
+                                result += '>' + text + '</a>';
+                            } else {
+                                result += ' data-text="' +
+                                    data.replace('"', '&quote;') + '">' +
+                                    text + '</span>';
+                            }
+                            return result;
+                        });
+                    } else {
+                        return '<span>' + text.replace(/\\\]/g, ']') + '</span>';
+                    }
+                }).join('');
+                return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');
             } else {
                 return '';
             }
