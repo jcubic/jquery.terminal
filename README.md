@@ -4,7 +4,7 @@
   __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-           \/              /____/                              version 0.10.2
+           \/              /____/                              version 0.10.3
 ```
 http://terminal.jcubic.pl
 
@@ -61,13 +61,13 @@ or npm:
 npm install --save jquery.terminal
 ```
 
-Include js/jquery.terminal-0.10.2.min.js and css/jquery.terminal-0.10.2.css
+Include js/jquery.terminal-0.10.3.min.js and css/jquery.terminal-0.10.3.css
 You can also include js/jquery.mousewheel-min.js
 
 ```html
-<script src="js/jquery.terminal-0.10.2.min.js"></script>
+<script src="js/jquery.terminal-0.10.3.min.js"></script>
 <script src="js/jquery.mousewheel-min.js"></script>
-<link href="css/jquery.terminal-0.10.2.css" rel="stylesheet"/>
+<link href="css/jquery.terminal-0.10.3.css" rel="stylesheet"/>
 ```
 And you're good to go.
 
