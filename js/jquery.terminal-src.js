@@ -1949,6 +1949,7 @@
     //var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     //var url_re = /\bhttps?:\/\/(?:(?!&[^;]+;)[^\s"'<>)])+\b/g;
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\]\[)])+\b)/gi;
+    var url_nf_re = /\b(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)\b(?![^[\]]*])/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]*)(?=:? |$)|(\\ |[^ ])+|[\w-]+)/gi;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
@@ -3062,7 +3063,7 @@
             // urls should always have formatting to keep url if split
             if (settings.convertLinks) {
                 string = string.replace(email_re, '[[!;;]$1]').
-                    replace(url_re, '[[!;;]$1]');
+                    replace(url_nf_re, '[[!;;]$1]');
             }
             var formatters = $.terminal.defaults.formatters;
             var i, len;
