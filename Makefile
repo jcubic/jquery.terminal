@@ -44,8 +44,8 @@ README.md: README.in .$(VERSION)
 terminal.jquery.json: manifest .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json
 
-www/Makefile: www/Makefile.in Makefile .$(VERSION)
-	test -d www && $(SED) -e "s/0.10.4/$(VERSION)/g" www/Makefile.in > www/Makefile || true
+www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
+	test -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 test:
 	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose --junitreport --color --forceexit spec
