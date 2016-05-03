@@ -6,7 +6,7 @@ RM=rm
 CAT=cat
 DATE=`date -uR`
 
-ALL: js/jquery.terminal-$(VERSION).js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal-min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
+ALL: js/jquery.terminal-$(VERSION).js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
 
 bower.json: bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" bower.in > bower.json
@@ -20,17 +20,17 @@ js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
 js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal-$(VERSION).js
 	$(COMPRESS) -o js/jquery.terminal-$(VERSION).min.js --comments -- js/jquery.terminal-$(VERSION).js
 
-js/jquery.terminal-min.js: js/jquery.terminal-$(VERSION).min.js
-	$(CP) js/jquery.terminal-$(VERSION).min.js js/jquery.terminal-min.js
+js/jquery.terminal.min.js: js/jquery.terminal-$(VERSION).min.js
+	$(CP) js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js
 
 css/jquery.terminal-$(VERSION).css: css/jquery.terminal-src.css .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css
 
 css/jquery.terminal.css: css/jquery.terminal-$(VERSION).css .$(VERSION)
-	cp css/jquery.terminal-$(VERSION).css css/jquery.terminal.css
+	$(CP) css/jquery.terminal-$(VERSION).css css/jquery.terminal.css
 
-css/jquery.terminal-min.css: css/jquery.terminal-$(VERSION).min.css
-	$(CP) css/jquery.terminal-$(VERSION).min.css css/jquery.terminal-min.css
+css/jquery.terminal.min.css: css/jquery.terminal-$(VERSION).min.css
+	$(CP) css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css
 
 css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 	java -jar bin/yuicompressor-2.4.8.jar css/jquery.terminal-$(VERSION).css -o css/jquery.terminal-$(VERSION).min.css
