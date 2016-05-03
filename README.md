@@ -69,6 +69,14 @@ You can also include js/jquery.mousewheel-min.js
 <script src="js/jquery.mousewheel-min.js"></script>
 <link href="css/jquery.terminal-0.10.4.css" rel="stylesheet"/>
 ```
+
+You can also grab the files from CDN:
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.10.4/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.10.4/css/jquery.terminal.min.css" rel="stylesheet"/>
+```
+
 And you're good to go.
 
 ### Example of usage (javascript interpreter)
