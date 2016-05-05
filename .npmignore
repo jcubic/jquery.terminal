@@ -2,7 +2,7 @@
 *~
 bower.*
 package.in
-Makefile
+Makefile*
 manifest
 README.in
 terminal.jquery.json
