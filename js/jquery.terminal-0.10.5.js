@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 03 May 2016 14:15:03 +0000
+ * Date: Thu, 05 May 2016 13:51:40 +0000
  */
 
 /* TODO:
@@ -713,11 +713,13 @@
                 this.append(item);
             },
             front: function() {
-                var index = pos;
-                while(!data[index]) {
-                    index++;
+                if (data.length) {
+                    var index = pos;
+                    while(!data[index]) {
+                        index++;
+                    }
+                    return data[index];
                 }
-                return data[index];
             },
             append: function(item) {
                 data.push(item);
@@ -1957,7 +1959,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.10.4',
+        version: '0.10.5',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
