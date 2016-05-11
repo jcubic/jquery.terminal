@@ -1,3 +1,4 @@
+0.10.6    fix overwriting of exit and clear commands
 0.10.5    Prevent infinite loop in terminal::active when no terminal
 0.10.4    change -min to .min in minfied versions of files
 0.10.3    Make npm happy about version
