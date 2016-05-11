@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 05 May 2016 13:51:40 +0000
+ * Date: Wed, 11 May 2016 14:08:18 +0000
  */
 
 /* TODO:
@@ -1959,7 +1959,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.10.5',
+        version: '0.10.6',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -3344,25 +3344,26 @@
                 // execute_extended_command disable it and it can be executed
                 // after delay
                 var saved_change_hash = change_hash;
-                if (command.match(/^\s*login\s*$/i) && self.token(true)) {
+                if (command.match(/^\s*login\s*$/) && self.token(true)) {
                     if (self.level() > 1) {
                         self.logout(true);
                     } else {
                         self.logout();
                     }
                     after_exec();
-                } else if (command.match(/^\s*(exit|clear)\s*$/i) && !in_login) {
-                    if (settings.exit && command.match(/^\s*exit\s*$/i)) {
-                        var level = self.level();
-                        if (level == 1 && self.get_token() || level > 1) {
-                            if (self.get_token(true)) {
-                                self.set_token(undefined, true);
-                            }
-                            self.pop();
+                } else if (settings.exit && command.match(/^\s*exit\s*$/) &&
+                           !in_login) {
+                    var level = self.level();
+                    if (level == 1 && self.get_token() || level > 1) {
+                        if (self.get_token(true)) {
+                            self.set_token(undefined, true);
                         }
-                    } else if (settings.clear && command.match(/^\s*clear\s*$/i)) {
-                        self.clear();
+                        self.pop();
                     }
+                    after_exec();
+                } else if (settings.clear && command.match(/^\s*clear\s*$/) &&
+                           !in_login) {
+                    self.clear();
                     after_exec();
                 } else {
                     var position = lines.length-1;
