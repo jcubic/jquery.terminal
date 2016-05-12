@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 12 May 2016 12:37:52 +0000
+ * Date: Thu, 12 May 2016 16:54:24 +0000
  */
 
 /* TODO:
@@ -2892,7 +2892,6 @@
                         var first = interpreters[0];
                         var rest = interpreters.slice(1);
                         var type = $.type(first);
-                        console.log(first);
                         if (type === 'string') {
                             rpc_count++;
                             self.pause();

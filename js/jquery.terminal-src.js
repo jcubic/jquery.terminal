@@ -2892,7 +2892,6 @@
                         var first = interpreters[0];
                         var rest = interpreters.slice(1);
                         var type = $.type(first);
-                        console.log(first);
                         if (type === 'string') {
                             rpc_count++;
                             self.pause();
