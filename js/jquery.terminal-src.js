@@ -2892,6 +2892,7 @@
                         var first = interpreters[0];
                         var rest = interpreters.slice(1);
                         var type = $.type(first);
+                        console.log(first);
                         if (type === 'string') {
                             rpc_count++;
                             self.pause();
@@ -2919,6 +2920,7 @@
                             } else {
                                 fn_interpreter = first;
                             }
+                            recur(rest, success);
                         } else if (type === 'object') {
                             $.extend(object, first);
                             recur(rest, success);

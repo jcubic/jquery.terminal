@@ -1,3 +1,4 @@
+0.10.7    fix if interpreter is an array and have function
 0.10.6    fix overwriting of exit and clear commands
 0.10.5    Prevent infinite loop in terminal::active when no terminal
 0.10.4    change -min to .min in minfied versions of files
