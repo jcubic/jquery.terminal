@@ -2962,7 +2962,7 @@
             } else if (type === 'object') {
                 finalize({
                     interpreter: make_object_interpreter(user_intrp,
-                                                        settings.checkArity),
+                                                         settings.checkArity),
                     completion: Object.keys(user_intrp)
                 });
             } else {

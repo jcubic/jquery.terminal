@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.10.7
+ *           \/              /____/                              version 0.10.8
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 12 May 2016 16:54:24 +0000
+ * Date: Tue, 17 May 2016 09:01:51 +0000
  */
 
 /* TODO:
@@ -1959,7 +1959,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.10.7',
+        version: '0.10.8',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2962,7 +2962,7 @@
             } else if (type === 'object') {
                 finalize({
                     interpreter: make_object_interpreter(user_intrp,
-                                                        settings.checkArity),
+                                                         settings.checkArity),
                     completion: Object.keys(user_intrp)
                 });
             } else {

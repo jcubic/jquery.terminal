@@ -1,4 +1,4 @@
-VERSION=0.10.7
+VERSION=0.10.8
 COMPRESS=uglifyjs
 SED=sed
 CP=cp
@@ -21,7 +21,7 @@ js/jquery.terminal.js: js/jquery.terminal-$(VERSION).js
 	$(CP) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js
 
 js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal-$(VERSION).js
-	$(COMPRESS) -o js/jquery.terminal-$(VERSION).min.js --comments -- js/jquery.terminal-$(VERSION).js
+	$(COMPRESS) -o js/jquery.terminal-$(VERSION).min.js --comments --mangle -- js/jquery.terminal-$(VERSION).js
 
 js/jquery.terminal.min.js: js/jquery.terminal-$(VERSION).min.js
 	$(CP) js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js
