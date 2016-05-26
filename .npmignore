@@ -2,10 +2,15 @@
 *~
 bower.*
 package.in
-Makefile
+Makefile*
 manifest
 README.in
 terminal.jquery.json
 SpecRunner.html
 spec
 examples
+bin
+css/jquery.terminal-src.css
+js/jquery.terminal-src.js
+js/jquery-1.7.1.min.js
+version

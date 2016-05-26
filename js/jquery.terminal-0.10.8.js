@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version {{VER}
+ *           \/              /____/                              version 0.10.8
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 29 Apr 2016 13:02:03 +0000
+ * Date: Tue, 17 May 2016 09:01:51 +0000
  */
 
 /* TODO:
@@ -713,11 +713,13 @@
                 this.append(item);
             },
             front: function() {
-                var index = pos;
-                while(!data[index]) {
-                    index++;
+                if (data.length) {
+                    var index = pos;
+                    while(!data[index]) {
+                        index++;
+                    }
+                    return data[index];
                 }
-                return data[index];
             },
             append: function(item) {
                 data.push(item);
@@ -1949,6 +1951,7 @@
     //var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
     //var url_re = /\bhttps?:\/\/(?:(?!&[^;]+;)[^\s"'<>)])+\b/g;
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\]\[)])+\b)/gi;
+    var url_nf_re = /\b(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)\b(?![^[\]]*])/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]*)(?=:? |$)|(\\ |[^ ])+|[\w-]+)/gi;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
@@ -1956,7 +1959,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.9.3',
+        version: '0.10.8',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2916,6 +2919,7 @@
                             } else {
                                 fn_interpreter = first;
                             }
+                            recur(rest, success);
                         } else if (type === 'object') {
                             $.extend(object, first);
                             recur(rest, success);
@@ -2958,7 +2962,7 @@
             } else if (type === 'object') {
                 finalize({
                     interpreter: make_object_interpreter(user_intrp,
-                                                        settings.checkArity),
+                                                         settings.checkArity),
                     completion: Object.keys(user_intrp)
                 });
             } else {
@@ -3062,7 +3066,7 @@
             // urls should always have formatting to keep url if split
             if (settings.convertLinks) {
                 string = string.replace(email_re, '[[!;;]$1]').
-                    replace(url_re, '[[!;;]$1]');
+                    replace(url_nf_re, '[[!;;]$1]');
             }
             var formatters = $.terminal.defaults.formatters;
             var i, len;
@@ -3341,25 +3345,26 @@
                 // execute_extended_command disable it and it can be executed
                 // after delay
                 var saved_change_hash = change_hash;
-                if (command.match(/^\s*login\s*$/i) && self.token(true)) {
+                if (command.match(/^\s*login\s*$/) && self.token(true)) {
                     if (self.level() > 1) {
                         self.logout(true);
                     } else {
                         self.logout();
                     }
                     after_exec();
-                } else if (command.match(/^\s*(exit|clear)\s*$/i) && !in_login) {
-                    if (settings.exit && command.match(/^\s*exit\s*$/i)) {
-                        var level = self.level();
-                        if (level == 1 && self.get_token() || level > 1) {
-                            if (self.get_token(true)) {
-                                self.set_token(undefined, true);
-                            }
-                            self.pop();
+                } else if (settings.exit && command.match(/^\s*exit\s*$/) &&
+                           !in_login) {
+                    var level = self.level();
+                    if (level == 1 && self.get_token() || level > 1) {
+                        if (self.get_token(true)) {
+                            self.set_token(undefined, true);
                         }
-                    } else if (settings.clear && command.match(/^\s*clear\s*$/i)) {
-                        self.clear();
+                        self.pop();
                     }
+                    after_exec();
+                } else if (settings.clear && command.match(/^\s*clear\s*$/) &&
+                           !in_login) {
+                    self.clear();
                     after_exec();
                 } else {
                     var position = lines.length-1;
