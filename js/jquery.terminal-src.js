@@ -769,52 +769,52 @@
         level = level === undefined ? 1 : level;
         var type = typeof object;
         switch (type) {
-        case 'function':
-            result += object;
-            break;
-        case 'boolean':
-            result += object ? 'true' : 'false';
-            break;
-        case 'object':
-            if (object === null) {
-                result += 'null';
-            } else if (object instanceof Array) {
-                result += '[';
-                var len = object.length;
-                for (i = 0; i < len - 1; ++i) {
-                    result += $.json_stringify(object[i], level + 1);
+            case 'function':
+                result += object;
+                break;
+            case 'boolean':
+                result += object ? 'true' : 'false';
+                break;
+            case 'object':
+                if (object === null) {
+                    result += 'null';
+                } else if (object instanceof Array) {
+                    result += '[';
+                    var len = object.length;
+                    for (i = 0; i < len - 1; ++i) {
+                        result += $.json_stringify(object[i], level + 1);
+                    }
+                    result += $.json_stringify(object[len - 1], level + 1) + ']';
+                } else {
+                    result += '{';
+                    for (var property in object) {
+                        if (object.hasOwnProperty(property)) {
+                            result += '"' + property + '":' +
+                                $.json_stringify(object[property], level + 1);
+                        }
+                    }
+                    result += '}';
                 }
-                result += $.json_stringify(object[len - 1], level + 1) + ']';
-            } else {
-                result += '{';
-                for (var property in object) {
-                    if (object.hasOwnProperty(property)) {
-                        result += '"' + property + '":' +
-                            $.json_stringify(object[property], level + 1);
+                break;
+            case 'string':
+                var str = object;
+                var repl = {
+                    '\\\\': '\\\\',
+                    '"': '\\"',
+                    '/': '\\/',
+                    '\\n': '\\n',
+                    '\\r': '\\r',
+                    '\\t': '\\t'};
+                for (i in repl) {
+                    if (repl.hasOwnProperty(i)) {
+                        str = str.replace(new RegExp(i, 'g'), repl[i]);
                     }
                 }
-                result += '}';
-            }
-            break;
-        case 'string':
-            var str = object;
-            var repl = {
-                '\\\\': '\\\\',
-                '"': '\\"',
-                '/': '\\/',
-                '\\n': '\\n',
-                '\\r': '\\r',
-                '\\t': '\\t'};
-            for (i in repl) {
-                if (repl.hasOwnProperty(i)) {
-                    str = str.replace(new RegExp(i, 'g'), repl[i]);
-                }
-            }
-            result += '"' + str + '"';
-            break;
-        case 'number':
-            result += String(object);
-            break;
+                result += '"' + str + '"';
+                break;
+            case 'number':
+                result += String(object);
+                break;
         }
         result += (level > 1 ? ',' : '');
         // quick hacks below
@@ -1142,11 +1142,12 @@
                 var string;
                 var str; // max 80 line helper
                 switch(typeof mask) {
-                case 'boolean':
-                    string = mask ? command.replace(/./g, '*') : command;
-                    break;
-                case 'string':
-                    string = command.replace(/./g, mask);
+                    case 'boolean':
+                        string = mask ? command.replace(/./g, '*') : command;
+                        break;
+                    case 'string':
+                        string = command.replace(/./g, mask);
+                        break;
                 }
                 var i, first_len;
                 self.find('div').remove();
@@ -1286,12 +1287,12 @@
             }
             return function() {
                 switch (typeof prompt) {
-                case 'string':
-                    set(prompt);
-                    break;
-                case 'function':
-                    prompt(set);
-                    break;
+                    case 'string':
+                        set(prompt);
+                        break;
+                    case 'function':
+                        prompt(set);
+                        break;
                 }
             };
         })();
@@ -3215,16 +3216,16 @@
             var prompt = command_line.prompt();
             var mask = command_line.mask();
             switch (typeof mask) {
-            case 'string':
-                command = command.replace(/./g, mask);
-                break;
-            case 'boolean':
-                if (mask) {
-                    command = command.replace(/./g, settings.maskChar);
-                } else {
-                    command = $.terminal.escape_formatting(command);
-                }
-                break;
+                case 'string':
+                    command = command.replace(/./g, mask);
+                    break;
+                case 'boolean':
+                    if (mask) {
+                        command = command.replace(/./g, settings.maskChar);
+                    } else {
+                        command = $.terminal.escape_formatting(command);
+                    }
+                    break;
             }
             var options = {
                 finalize: function(div) {
@@ -3553,7 +3554,8 @@
             } else if (matched.length > 1) {
                 if (tab_count >= 2) {
                     echo_command(command);
-                    self.echo(matched.reverse().join('\t'), {keepWords: true});
+                    var text = matched.reverse().join('\t');
+                    self.echo($.terminal.escape_brackets(text), {keepWords: true});
                     tab_count = 0;
                 } else {
                     var found = false;
@@ -3656,17 +3658,17 @@
                         }
                     }
                     switch ($.type(completion)) {
-                    case 'function':
-                        completion(self, string, function(commands) {
-                            complete_helper(command, string, commands);
-                        });
-                        break;
-                    case 'array':
-                        complete_helper(command, string, completion);
-                        break;
-                    default:
-                        // terminal will not catch this because it's an event
-                        throw new Error(strings.invalidCompletion);
+                        case 'function':
+                            completion(self, string, function(commands) {
+                                complete_helper(command, string, commands);
+                            });
+                            break;
+                        case 'array':
+                            complete_helper(command, string, completion);
+                            break;
+                        default:
+                            // terminal will not catch this because it's an event
+                            throw new Error(strings.invalidCompletion);
                     }
                     return false;
                 } else if (e.which === 86 && e.ctrlKey) { // CTRL+V
