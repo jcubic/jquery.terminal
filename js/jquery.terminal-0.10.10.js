@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.10.9
+ *           \/              /____/                              version 0.10.10
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,11 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
+<<<<<<< HEAD:js/jquery.terminal-0.10.9.js
  * Date: Fri, 27 May 2016 17:39:44 +0000
+=======
+ * Date: Thu, 02 Jun 2016 12:51:37 +0000
+>>>>>>> devel:js/jquery.terminal-0.10.10.js
  */
 
 /* TODO:
@@ -769,52 +773,52 @@
         level = level === undefined ? 1 : level;
         var type = typeof object;
         switch (type) {
-        case 'function':
-            result += object;
-            break;
-        case 'boolean':
-            result += object ? 'true' : 'false';
-            break;
-        case 'object':
-            if (object === null) {
-                result += 'null';
-            } else if (object instanceof Array) {
-                result += '[';
-                var len = object.length;
-                for (i = 0; i < len - 1; ++i) {
-                    result += $.json_stringify(object[i], level + 1);
+            case 'function':
+                result += object;
+                break;
+            case 'boolean':
+                result += object ? 'true' : 'false';
+                break;
+            case 'object':
+                if (object === null) {
+                    result += 'null';
+                } else if (object instanceof Array) {
+                    result += '[';
+                    var len = object.length;
+                    for (i = 0; i < len - 1; ++i) {
+                        result += $.json_stringify(object[i], level + 1);
+                    }
+                    result += $.json_stringify(object[len - 1], level + 1) + ']';
+                } else {
+                    result += '{';
+                    for (var property in object) {
+                        if (object.hasOwnProperty(property)) {
+                            result += '"' + property + '":' +
+                                $.json_stringify(object[property], level + 1);
+                        }
+                    }
+                    result += '}';
                 }
-                result += $.json_stringify(object[len - 1], level + 1) + ']';
-            } else {
-                result += '{';
-                for (var property in object) {
-                    if (object.hasOwnProperty(property)) {
-                        result += '"' + property + '":' +
-                            $.json_stringify(object[property], level + 1);
+                break;
+            case 'string':
+                var str = object;
+                var repl = {
+                    '\\\\': '\\\\',
+                    '"': '\\"',
+                    '/': '\\/',
+                    '\\n': '\\n',
+                    '\\r': '\\r',
+                    '\\t': '\\t'};
+                for (i in repl) {
+                    if (repl.hasOwnProperty(i)) {
+                        str = str.replace(new RegExp(i, 'g'), repl[i]);
                     }
                 }
-                result += '}';
-            }
-            break;
-        case 'string':
-            var str = object;
-            var repl = {
-                '\\\\': '\\\\',
-                '"': '\\"',
-                '/': '\\/',
-                '\\n': '\\n',
-                '\\r': '\\r',
-                '\\t': '\\t'};
-            for (i in repl) {
-                if (repl.hasOwnProperty(i)) {
-                    str = str.replace(new RegExp(i, 'g'), repl[i]);
-                }
-            }
-            result += '"' + str + '"';
-            break;
-        case 'number':
-            result += String(object);
-            break;
+                result += '"' + str + '"';
+                break;
+            case 'number':
+                result += String(object);
+                break;
         }
         result += (level > 1 ? ',' : '');
         // quick hacks below
@@ -1142,11 +1146,12 @@
                 var string;
                 var str; // max 80 line helper
                 switch(typeof mask) {
-                case 'boolean':
-                    string = mask ? command.replace(/./g, '*') : command;
-                    break;
-                case 'string':
-                    string = command.replace(/./g, mask);
+                    case 'boolean':
+                        string = mask ? command.replace(/./g, '*') : command;
+                        break;
+                    case 'string':
+                        string = command.replace(/./g, mask);
+                        break;
                 }
                 var i, first_len;
                 self.find('div').remove();
@@ -1286,12 +1291,12 @@
             }
             return function() {
                 switch (typeof prompt) {
-                case 'string':
-                    set(prompt);
-                    break;
-                case 'function':
-                    prompt(set);
-                    break;
+                    case 'string':
+                        set(prompt);
+                        break;
+                    case 'function':
+                        prompt(set);
+                        break;
                 }
             };
         })();
@@ -1960,7 +1965,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.10.9',
+        version: '0.10.10',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -3215,16 +3220,16 @@
             var prompt = command_line.prompt();
             var mask = command_line.mask();
             switch (typeof mask) {
-            case 'string':
-                command = command.replace(/./g, mask);
-                break;
-            case 'boolean':
-                if (mask) {
-                    command = command.replace(/./g, settings.maskChar);
-                } else {
-                    command = $.terminal.escape_formatting(command);
-                }
-                break;
+                case 'string':
+                    command = command.replace(/./g, mask);
+                    break;
+                case 'boolean':
+                    if (mask) {
+                        command = command.replace(/./g, settings.maskChar);
+                    } else {
+                        command = $.terminal.escape_formatting(command);
+                    }
+                    break;
             }
             var options = {
                 finalize: function(div) {
@@ -3553,7 +3558,8 @@
             } else if (matched.length > 1) {
                 if (tab_count >= 2) {
                     echo_command(command);
-                    self.echo(matched.reverse().join('\t'), {keepWords: true});
+                    var text = matched.reverse().join('\t');
+                    self.echo($.terminal.escape_brackets(text), {keepWords: true});
                     tab_count = 0;
                 } else {
                     var found = false;
@@ -3656,17 +3662,17 @@
                         }
                     }
                     switch ($.type(completion)) {
-                    case 'function':
-                        completion(self, string, function(commands) {
-                            complete_helper(command, string, commands);
-                        });
-                        break;
-                    case 'array':
-                        complete_helper(command, string, completion);
-                        break;
-                    default:
-                        // terminal will not catch this because it's an event
-                        throw new Error(strings.invalidCompletion);
+                        case 'function':
+                            completion(self, string, function(commands) {
+                                complete_helper(command, string, commands);
+                            });
+                            break;
+                        case 'array':
+                            complete_helper(command, string, completion);
+                            break;
+                        default:
+                            // terminal will not catch this because it's an event
+                            throw new Error(strings.invalidCompletion);
                     }
                     return false;
                 } else if (e.which === 86 && e.ctrlKey) { // CTRL+V

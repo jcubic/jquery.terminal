@@ -4,7 +4,7 @@
   __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-           \/              /____/                              version 0.10.9
+           \/              /____/                              version 0.10.10
 ```
 http://terminal.jcubic.pl
 
@@ -61,20 +61,20 @@ or npm:
 npm install --save jquery.terminal
 ```
 
-Include js/jquery.terminal-0.10.9.min.js and css/jquery.terminal-0.10.9.css
+Include js/jquery.terminal-0.10.10.min.js and css/jquery.terminal-0.10.10.css
 You can also include js/jquery.mousewheel-min.js
 
 ```html
-<script src="js/jquery.terminal-0.10.9.min.js"></script>
+<script src="js/jquery.terminal-0.10.10.min.js"></script>
 <script src="js/jquery.mousewheel-min.js"></script>
-<link href="css/jquery.terminal-0.10.9.css" rel="stylesheet"/>
+<link href="css/jquery.terminal-0.10.10.css" rel="stylesheet"/>
 ```
 
 You can also grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.10.9/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.10.9/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.10.10/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.10.10/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 And you're good to go.
