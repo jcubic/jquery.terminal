@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.10.10
+ *           \/              /____/                              version 0.10.11
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,11 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
-<<<<<<< HEAD:js/jquery.terminal-0.10.9.js
- * Date: Fri, 27 May 2016 17:39:44 +0000
-=======
- * Date: Thu, 02 Jun 2016 12:51:37 +0000
->>>>>>> devel:js/jquery.terminal-0.10.10.js
+ * Date: Sun, 05 Jun 2016 20:11:00 +0000
  */
 
 /* TODO:
@@ -1965,7 +1961,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.10.10',
+        version: '0.10.11',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2804,7 +2800,7 @@
                     if (type === 'object') {
                         commands = Object.keys(val);
                         val = make_object_interpreter(val,
-                                                      settings.arity,
+                                                      arity,
                                                       login);
                     }
                     terminal.push(val, {
@@ -3942,7 +3938,7 @@
                 self.on('terminal.autologin', function(event, user, token, silent) {
                     login_callback(user, token, silent);
                 });
-                return self.push(function(user) {
+                self.push(function(user) {
                     self.set_mask(settings.maskChar).push(function(pass) {
                         try {
                             auth.call(self, user, pass, function(token, silent) {
@@ -3959,6 +3955,7 @@
                     prompt: strings.login + ': ',
                     name: 'login'
                 });
+                return self;
             },
             // -------------------------------------------------------------
             // :: User defined settings and defaults as well
@@ -4556,6 +4553,9 @@
             // :: exception if there is no login provided
             // -------------------------------------------------------------
             logout: function(local) {
+                if (in_login) {
+                    throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
+                }
                 if (local) {
                     var login = logins.pop();
                     self.set_token(undefined, true);

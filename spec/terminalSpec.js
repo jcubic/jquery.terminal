@@ -276,7 +276,10 @@ function shortcut(ctrl, alt, shift, which) {
 function enter_key() {
     shortcut(false, false, false, 13);
 }
-
+function enter(term, text) {
+    term.insert(text);
+    enter_key();
+}
 function tests_on_ready() {
     describe('Terminal plugin', function() {
         describe('terminal create / terminal destroy', function() {
@@ -323,9 +326,9 @@ function tests_on_ready() {
                 foo: function() {
                 }
             };
-            
+
             var term = $('<div></div>').appendTo('body').terminal(interpreter);
-            
+
             it('should execute function', function() {
                 var spy = spyOn(interpreter, 'foo');
                 if (spy.andCallThrough) {
@@ -645,6 +648,9 @@ function tests_on_ready() {
                 login: true
             });
             it('should call login', function() {
+                if (term.token()) {
+                    term.logout();
+                }
                 term.focus();
                 var spy = spyOn(object, 'login');
                 if (spy.andCallThrough) {
@@ -652,17 +658,13 @@ function tests_on_ready() {
                 } else {
                     spy.and.callThrough();
                 }
-                term.insert('test');
-                enter_key();
-                term.insert('test');
-                enter_key();
+                enter(term, 'test');
+                enter(term, 'test');
                 var last_div = term.find('.terminal-output > div:last-child');
                 expect(last_div.text()).toEqual('Wrong password try again!');
                 expect(object.login).toHaveBeenCalledWith('test', 'test');
-                term.insert('demo');
-                enter_key();
-                term.insert('demo');
-                enter_key();
+                enter(term, 'demo');
+                enter(term, 'demo');
                 expect(object.login).toHaveBeenCalledWith('demo', 'demo');
             });
             it('should call a function', function() {
@@ -673,9 +675,109 @@ function tests_on_ready() {
                 } else {
                     spy.and.callThrough();
                 }
-                term.insert('echo hello');
-                enter_key();
+                enter(term, 'echo hello');
                 expect(object.echo).toHaveBeenCalledWith('TOKEN', 'hello');
+                term.destroy();
+            });
+        });
+        describe('nested object interpreter', function() {
+            var interpereter = {
+                foo: {
+                    bar: {
+                        baz: function() {
+                        },
+                        add: function(a, b) {
+                            this.echo(a+b);
+                        },
+                        type: function(obj) {
+                            type.test(obj.constructor);
+                            this.echo(JSON.stringify([].slice.call(arguments)));
+                        }
+                    }
+                },
+                quux: '/test'
+            };
+            var type = {
+                test: function(obj) { }
+            };
+            var fallback = {
+                interpreter: function(command, term) { }
+            };
+            var term = $('<div></div>').appendTo('body').terminal(interpereter);
+            it('should created nested intepreter', function() {
+                term.focus();
+                var spy = spyOn(interpereter.foo.bar, 'baz');
+                enter(term, 'foo');
+                expect(term.get_prompt()).toEqual('foo> ');
+                enter(term, 'bar');
+                expect(term.get_prompt()).toEqual('bar> ');
+                enter(term, 'baz');
+                expect(interpereter.foo.bar.baz).toHaveBeenCalled();
+            });
+            it('should convert arguments', function() {
+                var spy = spyOn(type, 'test');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.insert('add 10 20');
+                enter_key();
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.text()).toEqual('30');
+                enter(term, 'type /foo/gi');
+                expect(type.test).toHaveBeenCalledWith(RegExp);
+                enter(term, 'type 10');
+                expect(type.test).toHaveBeenCalledWith(Number);
+            });
+            it('should show error on wrong arity', function() {
+                enter(term, 'type 10 20');
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.text()).toEqual("[Arity] Wrong number of arguments. Function 'type' expects 1 got 2!");
+                term.destroy();
+            });
+            it('should call fallback function', function() {
+                var spy = spyOn(fallback, 'interpreter');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term = $('<div></div>').appendTo('body').terminal([
+                    interpereter, fallback.interpreter
+                ], {
+                    checkArity: false
+                });
+                term.pop();
+                enter(term, 'baz');
+                expect(fallback.interpreter).toHaveBeenCalledWith('baz', term);
+            });
+            it('should not show error on wrong arity', function() {
+                // checkArity is false from last spec
+                var spy = spyOn(type, 'test');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.pop().pop();
+                enter(term, 'foo');
+                enter(term, 'bar');
+                enter(term, 'type 10 20');
+                expect(type.test).toHaveBeenCalled();
+            });
+            it('should call json-rpc', function() {
+                var spy = spyOn(object, 'echo');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.pop().pop();
+                enter(term, 'quux');
+                expect(term.get_prompt()).toEqual('quux> ');
+                enter(term, 'echo foo bar');
+                expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
             });
         });
     });
@@ -685,4 +787,3 @@ if (node) {
 } else {
     $(tests_on_ready);
 }
-

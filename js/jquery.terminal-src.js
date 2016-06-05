@@ -2800,7 +2800,7 @@
                     if (type === 'object') {
                         commands = Object.keys(val);
                         val = make_object_interpreter(val,
-                                                      settings.arity,
+                                                      arity,
                                                       login);
                     }
                     terminal.push(val, {
@@ -3938,7 +3938,7 @@
                 self.on('terminal.autologin', function(event, user, token, silent) {
                     login_callback(user, token, silent);
                 });
-                return self.push(function(user) {
+                self.push(function(user) {
                     self.set_mask(settings.maskChar).push(function(pass) {
                         try {
                             auth.call(self, user, pass, function(token, silent) {
@@ -3955,6 +3955,7 @@
                     prompt: strings.login + ': ',
                     name: 'login'
                 });
+                return self;
             },
             // -------------------------------------------------------------
             // :: User defined settings and defaults as well
@@ -4552,6 +4553,9 @@
             // :: exception if there is no login provided
             // -------------------------------------------------------------
             logout: function(local) {
+                if (in_login) {
+                    throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
+                }
                 if (local) {
                     var login = logins.pop();
                     self.set_token(undefined, true);
