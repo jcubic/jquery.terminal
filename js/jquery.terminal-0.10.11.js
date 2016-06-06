@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version {{VER}}
+ *           \/              /____/                              version 0.10.11
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: {{DATE}}
+ * Date: Sun, 05 Jun 2016 20:11:00 +0000
  */
 
 /* TODO:
@@ -716,16 +716,8 @@
             front: function() {
                 if (data.length) {
                     var index = pos;
-                    var restart = false;
-                    while (!data[index]) {
+                    while(!data[index]) {
                         index++;
-                        if (index > data.length) {
-                            if (restart) {
-                                break;
-                            }
-                            index = 0;
-                            restart = true;
-                        }
                     }
                     return data[index];
                 }
@@ -1969,7 +1961,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '{{VER}}',
+        version: '0.10.11',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',

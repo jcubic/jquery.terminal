@@ -276,7 +276,10 @@ function shortcut(ctrl, alt, shift, which) {
 function enter_key() {
     shortcut(false, false, false, 13);
 }
-
+function enter(term, text) {
+    term.insert(text);
+    enter_key();
+}
 function tests_on_ready() {
     describe('Terminal plugin', function() {
         describe('terminal create / terminal destroy', function() {
@@ -323,9 +326,9 @@ function tests_on_ready() {
                 foo: function() {
                 }
             };
-            
+
             var term = $('<div></div>').appendTo('body').terminal(interpreter);
-            
+
             it('should execute function', function() {
                 var spy = spyOn(interpreter, 'foo');
                 if (spy.andCallThrough) {
@@ -645,6 +648,9 @@ function tests_on_ready() {
                 login: true
             });
             it('should call login', function() {
+                if (term.token()) {
+                    term.logout();
+                }
                 term.focus();
                 var spy = spyOn(object, 'login');
                 if (spy.andCallThrough) {
@@ -652,17 +658,13 @@ function tests_on_ready() {
                 } else {
                     spy.and.callThrough();
                 }
-                term.insert('test');
-                enter_key();
-                term.insert('test');
-                enter_key();
+                enter(term, 'test');
+                enter(term, 'test');
                 var last_div = term.find('.terminal-output > div:last-child');
                 expect(last_div.text()).toEqual('Wrong password try again!');
                 expect(object.login).toHaveBeenCalledWith('test', 'test');
-                term.insert('demo');
-                enter_key();
-                term.insert('demo');
-                enter_key();
+                enter(term, 'demo');
+                enter(term, 'demo');
                 expect(object.login).toHaveBeenCalledWith('demo', 'demo');
             });
             it('should call a function', function() {
@@ -673,9 +675,258 @@ function tests_on_ready() {
                 } else {
                     spy.and.callThrough();
                 }
-                term.insert('echo hello');
-                enter_key();
+                enter(term, 'echo hello');
                 expect(object.echo).toHaveBeenCalledWith('TOKEN', 'hello');
+                term.destroy();
+            });
+        });
+        describe('nested object interpreter', function() {
+            var interpereter = {
+                foo: {
+                    bar: {
+                        baz: function() {
+                        },
+                        add: function(a, b) {
+                            this.echo(a+b);
+                        },
+                        type: function(obj) {
+                            type.test(obj.constructor);
+                            this.echo(JSON.stringify([].slice.call(arguments)));
+                        }
+                    }
+                },
+                quux: '/test'
+            };
+            var type = {
+                test: function(obj) { }
+            };
+            var fallback = {
+                interpreter: function(command, term) { }
+            };
+            var term = $('<div></div>').appendTo('body').terminal(interpereter);
+            it('should created nested intepreter', function() {
+                term.focus();
+                var spy = spyOn(interpereter.foo.bar, 'baz');
+                enter(term, 'foo');
+                expect(term.get_prompt()).toEqual('foo> ');
+                enter(term, 'bar');
+                expect(term.get_prompt()).toEqual('bar> ');
+                enter(term, 'baz');
+                expect(interpereter.foo.bar.baz).toHaveBeenCalled();
+            });
+            it('should convert arguments', function() {
+                var spy = spyOn(type, 'test');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.insert('add 10 20');
+                enter_key();
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.text()).toEqual('30');
+                enter(term, 'type /foo/gi');
+                expect(type.test).toHaveBeenCalledWith(RegExp);
+                enter(term, 'type 10');
+                expect(type.test).toHaveBeenCalledWith(Number);
+            });
+            it('should show error on wrong arity', function() {
+                enter(term, 'type 10 20');
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.text()).toEqual("[Arity] Wrong number of arguments. Function 'type' expects 1 got 2!");
+                term.destroy();
+            });
+            it('should call fallback function', function() {
+                var spy = spyOn(fallback, 'interpreter');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term = $('<div></div>').appendTo('body').terminal([
+                    interpereter, fallback.interpreter
+                ], {
+                    checkArity: false
+                });
+                enter(term, 'baz');
+                expect(fallback.interpreter).toHaveBeenCalledWith('baz', term);
+            });
+            it('should not show error on wrong arity', function() {
+                // checkArity is false from last spec
+                var spy = spyOn(type, 'test');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                enter(term, 'foo');
+                enter(term, 'bar');
+                enter(term, 'type 10 20');
+                expect(type.test).toHaveBeenCalled();
+            });
+            it('should call json-rpc', function() {
+                var spy = spyOn(object, 'echo');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.pop().pop();
+                enter(term, 'quux');
+                expect(term.get_prompt()).toEqual('quux> ');
+                enter(term, 'echo foo bar');
+                expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
+                term.destroy();
+                term = $('<div></div>').appendTo('body').terminal([
+                    interpereter, '/test', fallback.interpreter
+                ]);
+                term.focus();
+                enter(term, 'echo TOKEN world'); // we call echo without login
+                expect(object.echo).toHaveBeenCalledWith('TOKEN', 'world');
+                term.destroy();
+            });
+        });
+        describe('jQuery Terminal object', function() {
+            var test = {
+                test: function(term) {}
+            };
+            var term = $('<div></div>').appendTo('body').terminal([{
+                foo: function() {
+                    test.test(this);
+                }
+            }, function(cmd, term) {
+                test.test(term);
+            }]);
+            it('value returned by plugin should be the same as in intepreter', function() {
+                term.focus();
+                var spy = spyOn(test, 'test');
+                enter(term, 'foo');
+                expect(test.test).toHaveBeenCalledWith(term);
+                enter(term, 'bar');
+                expect(test.test).toHaveBeenCalledWith(term);
+                term.destroy();
+            });
+        });
+        describe('Completion', function() {
+            var term = $('<div></div>').appendTo('body').terminal($.noop, {
+                name: 'completion',
+                greetings: false,
+                completion: ['foo', 'bar', 'baz', 'lorem\\ ipsum']
+            });
+            it('should complete text for main intepreter', function() {
+                term.focus();
+                term.insert('f');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('foo');
+                term.set_command('');
+                term.insert('lorem\\ ');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('lorem\\ ipsum');
+            });
+            it('should complete text for nested intepreter', function() {
+                term.push($.noop, {
+                    completion: ['lorem', 'ipsum', 'dolor']
+                });
+                term.insert('l');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('lorem');
+                term.pop();
+            });
+            it('should complete when completion is a function with setTimeout', function() {
+                term.push($.noop, {
+                    completion: function(term, string, callback) {
+                        setTimeout(function() {
+                            callback(['one', 'two', 'tree']);
+                        }, 1000);
+                    }
+                });
+                term.set_command('');
+                term.insert('o');
+                shortcut(false, false, false, 9);
+                setTimeout(function() {
+                    expect(term.get_command()).toEqual('one');
+                }, 1400);
+                term.pop();
+            });
+            function completion(term, string, callback) {
+                var command = term.get_command();
+                var cmd = $.terminal.parse_command(command);
+                var re = new RegExp('^\\s*' + $.terminal.escape_regex(string));
+                if (command.match(re)) {
+                    callback(['foo', 'bar', 'baz', 'lorem\\ ipsum']);
+                } else if (cmd.name == 'foo') {
+                    callback(['one', 'two', 'tree']);
+                } else {
+                    callback(['four', 'five', 'six']);
+                }
+            }
+            it('should complete argument', function() {
+                console.log(completion);
+                term.push($.noop, {completion: completion});
+                term.set_command('');
+                term.insert('foo o');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('foo one');
+                term.pop();
+            });
+            it('should complete in the middle of the word', function() {
+                term.push($.noop, {completion: completion});
+                term.set_command('');
+                term.set_command('f one');
+                var cmd = term.cmd();
+                cmd.position(1);
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('foo one');
+                var command = 'lorem\\ ip';
+                term.set_command(command +' one');
+                cmd.position(command.length);
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('lorem\\ ipsum one');
+            });
+        });
+        describe('jQuery Terminal methods', function() {
+            var terminal_name = 'methods';
+            var greetings = 'Hello World!';
+            var completion = ['foo', 'bar', 'baz'];
+            var term = $('<div></div>').appendTo('body').terminal($.noop, {
+                name: terminal_name,
+                greetings: greetings,
+                completion: completion
+            });
+            it('should return id of the terminal', function() {
+                term.focus();
+                expect(term.id()).toEqual(9);
+            });
+            it('should clear the terminal', function() {
+                term.clear();
+                expect(term.find('.terminal-output').html()).toEqual('');
+            });
+            var exported_view;
+            it('should export view', function() {
+                enter(term, 'foo');
+                enter(term, 'bar');
+                var command = 'baz';
+                var prompt = '$ ';
+                var mask = '-';
+                term.insert(command);
+                term.set_prompt(prompt);
+                term.set_mask(mask);
+                exported_view = term.export_view();
+                expect(exported_view.prompt).toEqual(prompt);
+                expect(exported_view.position).toEqual(command.length);
+                expect(exported_view.focus).toEqual(true);
+                expect(exported_view.mask).toEqual(mask);
+                expect(exported_view.command).toEqual(command);
+                expect(exported_view.lines[0][0]).toEqual('> foo');
+                expect(exported_view.lines[1][0]).toEqual('> bar');
+                expect(exported_view.interpreters.size()).toEqual(1);
+                var top = exported_view.interpreters.top();
+                expect(top.interpreter).toEqual($.noop);
+                expect(top.name).toEqual(terminal_name);
+                expect(top.prompt).toEqual(prompt);
+                expect(top.prompt).toEqual(prompt);
+                expect(top.greetings).toEqual(greetings);
+                expect(top.completion).toEqual(completion);
             });
         });
     });
@@ -685,4 +936,3 @@ if (node) {
 } else {
     $(tests_on_ready);
 }
-
