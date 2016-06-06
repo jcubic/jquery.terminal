@@ -716,8 +716,16 @@
             front: function() {
                 if (data.length) {
                     var index = pos;
-                    while(!data[index]) {
+                    var restart = false;
+                    while (!data[index]) {
                         index++;
+                        if (index > data.length) {
+                            if (restart) {
+                                break;
+                            }
+                            index = 0;
+                            restart = true;
+                        }
                     }
                     return data[index];
                 }
