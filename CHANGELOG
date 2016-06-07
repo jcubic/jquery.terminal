@@ -1,3 +1,5 @@
+0.11.0    Fix default prompt for push
+          add word-wrap: break-word for cases when echo html that have long lines
 0.10.11   fix check arity for nested object; throw error when calling logout in login
 0.10.10   Escape brackets while echo completion strings
 0.10.9    fix issue with jQuery Timers when page included another jQuery after initialization
