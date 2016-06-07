@@ -3281,7 +3281,7 @@
         function maybe_update_hash() {
             if (change_hash) {
                 fire_hash_change = false;
-                location.hash = $.json_stringify(hash_commands);
+                location.hash = '#' + $.json_stringify(hash_commands);
                 setTimeout(function() {
                     fire_hash_change = true;
                 }, 100);
@@ -4661,7 +4661,7 @@
                     options.name = prev_command.name;
                 }
                 if (options.prompt === undefined) {
-                    options.prompt = options.name + ' ';
+                    options.prompt = (options.name || '>') + ' ';
                 }
                 //names.push(options.name);
                 var top = interpreters.top();

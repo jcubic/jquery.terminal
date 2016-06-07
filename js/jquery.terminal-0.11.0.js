@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 06 Jun 2016 21:45:44 +0000
+ * Date: Tue, 07 Jun 2016 14:04:33 +0000
  */
 
 /* TODO:
@@ -2808,7 +2808,7 @@
                     if (type === 'object') {
                         commands = Object.keys(val);
                         val = make_object_interpreter(val,
-                                                      settings.arity,
+                                                      arity,
                                                       login);
                     }
                     terminal.push(val, {
@@ -3281,7 +3281,7 @@
         function maybe_update_hash() {
             if (change_hash) {
                 fire_hash_change = false;
-                location.hash = $.json_stringify(hash_commands);
+                location.hash = '#' + $.json_stringify(hash_commands);
                 setTimeout(function() {
                     fire_hash_change = true;
                 }, 100);
@@ -3946,7 +3946,7 @@
                 self.on('terminal.autologin', function(event, user, token, silent) {
                     login_callback(user, token, silent);
                 });
-                return self.push(function(user) {
+                self.push(function(user) {
                     self.set_mask(settings.maskChar).push(function(pass) {
                         try {
                             auth.call(self, user, pass, function(token, silent) {
@@ -3963,6 +3963,7 @@
                     prompt: strings.login + ': ',
                     name: 'login'
                 });
+                return self;
             },
             // -------------------------------------------------------------
             // :: User defined settings and defaults as well
@@ -4560,6 +4561,9 @@
             // :: exception if there is no login provided
             // -------------------------------------------------------------
             logout: function(local) {
+                if (in_login) {
+                    throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
+                }
                 if (local) {
                     var login = logins.pop();
                     self.set_token(undefined, true);
@@ -4657,7 +4661,7 @@
                     options.name = prev_command.name;
                 }
                 if (options.prompt === undefined) {
-                    options.prompt = options.name + ' ';
+                    options.prompt = (options.name || '>') + ' ';
                 }
                 //names.push(options.name);
                 var top = interpreters.top();
