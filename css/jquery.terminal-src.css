@@ -143,6 +143,9 @@
     /*padding-top: 3px;*/
     min-height: 14px;
 }
+.terminal-output > div > div * {
+    word-wrap: break-word; /* when echo html */
+}
 .terminal .terminal-output div span {
     display: inline-block;
 }

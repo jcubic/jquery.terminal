@@ -4,11 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-<<<<<<< HEAD
  *           \/              /____/                              version 0.11.0
-=======
- *           \/              /____/                              version 0.10.11
->>>>>>> master
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -16,11 +12,7 @@
  * Copyright (c) 2011-2016 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
-<<<<<<< HEAD
- * Date: Mon, 06 Jun 2016 21:45:48 +0000
-=======
- * Date: Sun, 05 Jun 2016 20:11:03 +0000
->>>>>>> master
+ * Date: Tue, 07 Jun 2016 14:07:49 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -150,6 +142,9 @@
 .terminal-output > div {
     /*padding-top: 3px;*/
     min-height: 14px;
+}
+.terminal-output > div > div * {
+    word-wrap: break-word; /* when echo html */
 }
 .terminal .terminal-output div span {
     display: inline-block;
