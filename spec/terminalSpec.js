@@ -8,6 +8,7 @@ if (typeof window === 'undefined') {
     global.jQuery = global.$ = require("jquery");
     require('../js/jquery.terminal-src');
     require('../js/unix_formatting');
+    global.location = {};
 }
 describe('Terminal utils', function() {
     var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -832,8 +833,9 @@ function tests_on_ready() {
                 expect(term.get_command()).toEqual('lorem');
                 term.pop();
             });
-            it('should complete when completion is a function with setTimeout', function() {
-                term.push($.noop, {
+            it('should complete when completion is a function with setTimeout', function(done) {
+                var term = $('<div></div>').appendTo('body').terminal($.noop);
+                term.focus().push($.noop, {
                     completion: function(term, string, callback) {
                         setTimeout(function() {
                             callback(['one', 'two', 'tree']);
@@ -845,8 +847,9 @@ function tests_on_ready() {
                 shortcut(false, false, false, 9);
                 setTimeout(function() {
                     expect(term.get_command()).toEqual('one');
-                }, 1400);
-                term.pop();
+                    term.destroy();
+                    done();
+                }, 2000);
             });
             function completion(term, string, callback) {
                 var command = term.get_command();
@@ -861,8 +864,7 @@ function tests_on_ready() {
                 }
             }
             it('should complete argument', function() {
-                console.log(completion);
-                term.push($.noop, {completion: completion});
+                term.focus().push($.noop, {completion: completion});
                 term.set_command('');
                 term.insert('foo o');
                 shortcut(false, false, false, 9);
@@ -888,6 +890,11 @@ function tests_on_ready() {
             var terminal_name = 'methods';
             var greetings = 'Hello World!';
             var completion = ['foo', 'bar', 'baz'];
+            var exported_view;
+            var command = 'baz';
+            var prompt = '$ ';
+            var mask = '-';
+            var position;
             var term = $('<div></div>').appendTo('body').terminal($.noop, {
                 name: terminal_name,
                 greetings: greetings,
@@ -901,16 +908,13 @@ function tests_on_ready() {
                 term.clear();
                 expect(term.find('.terminal-output').html()).toEqual('');
             });
-            var exported_view;
             it('should export view', function() {
                 enter(term, 'foo');
                 enter(term, 'bar');
-                var command = 'baz';
-                var prompt = '$ ';
-                var mask = '-';
                 term.insert(command);
                 term.set_prompt(prompt);
                 term.set_mask(mask);
+                position = term.cmd().position();
                 exported_view = term.export_view();
                 expect(exported_view.prompt).toEqual(prompt);
                 expect(exported_view.position).toEqual(command.length);
@@ -927,6 +931,32 @@ function tests_on_ready() {
                 expect(top.prompt).toEqual(prompt);
                 expect(top.greetings).toEqual(greetings);
                 expect(top.completion).toEqual(completion);
+            });
+            it('should import view', function() {
+                term.clear().push($.noop).set_prompt('# ')
+                    .set_mask(false)
+                    .set_command('foo');
+                var cmd = term.cmd();
+                cmd.position(0);
+                term.import_view(exported_view);
+                expect(cmd.mask()).toEqual(mask);
+                expect(term.get_command()).toEqual(command);
+                expect(term.get_prompt()).toEqual(prompt);
+                expect(cmd.position()).toEqual(position);
+                var html = '<div class="command">'+
+                               '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
+                           '</div>'+
+                           '<div class="command">'+
+                               '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
+                           '</div>';
+                expect(term.find('.terminal-output').html()).toEqual(html);
+            });
+            it('should save commands in hash', function() {
+                location.hash = '';
+                term.save_state(); // initial state
+                term.save_state('foo');
+                term.save_state('bar');
+                expect(location.hash).toEqual('#[[9,1,"foo"],[9,2,"bar"]]');
             });
         });
     });

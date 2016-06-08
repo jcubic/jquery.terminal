@@ -4899,12 +4899,17 @@
         var base_interpreter;
         if (typeof init_interpreter == 'string') {
             base_interpreter = init_interpreter;
-        } else if (init_interpreter instanceof Array &&
-                   typeof init_interpreter[0] == 'string') {
-            base_interpreter = init_interpreter[0];
+        } else if (init_interpreter instanceof Array) {
+            // first JSON-RPC
+            for (var i=0, len=init_interpreter.length; i<len; ++i) {
+                if (typeof init_interpreter[i] == 'string') {
+                    base_interpreter = init_interpreter[i];
+                    break;
+                }
+            }
         }
         if (base_interpreter &&
-            (typeof settings.login === 'string' || settings.login)) {
+            (typeof settings.login === 'string' || settings.login === true)) {
             settings.login = make_json_rpc_login(base_interpreter,
                                                  settings.login);
         }
