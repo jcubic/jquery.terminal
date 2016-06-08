@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 07 Jun 2016 14:04:33 +0000
+ * Date: Wed, 08 Jun 2016 17:19:10 +0000
  */
 
 /* TODO:
@@ -2891,11 +2891,12 @@
         function make_interpreter(user_intrp, login, finalize) {
             finalize = finalize || $.noop;
             var type = $.type(user_intrp);
+            var object;
             var result = {};
             var rpc_count = 0; // only one rpc can be use for array
             var fn_interpreter;
             if (type === 'array') {
-                var object = {};
+                object = {};
                 // recur will be called when previous acync call is finished
                 (function recur(interpreters, success) {
                     if (interpreters.length) {
@@ -2948,10 +2949,13 @@
                 });
             } else if (type === 'string') {
                 if (settings.ignoreSystemDescribe) {
-                    finalize({
-                        interpreter: make_basic_json_rpc(user_intrp, login),
-                        completion: settings.completion
-                    });
+                    object = {
+                        interpreter: make_basic_json_rpc(user_intrp, login)
+                    };
+                    if ($.isArray(settings.completion)) {
+                        object.completion = settings.completion;
+                    }
+                    finalize(object);
                 } else {
                     self.pause();
                     make_json_rpc_object(user_intrp, login, function(object) {
@@ -2963,7 +2967,9 @@
                         } else {
                             // no procs in system.describe
                             result.interpreter = make_basic_json_rpc(user_intrp, login);
-                            result.completion = settings.completion;
+                            if ($.isArray(settings.completion)) {
+                                result.completion = settings.completion;
+                            }
                         }
                         finalize(result);
                         self.resume();
@@ -3596,7 +3602,7 @@
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
-            var result, i, top = interpreters.top();
+            var result, i, top = interpreters.top(), completion;
             if (!self.paused() && self.enabled()) {
                 if ($.isFunction(top.keydown)) {
                     result = top.keydown(e, self);
@@ -3609,7 +3615,6 @@
                         return result;
                     }
                 }
-                var completion;
                 if ((settings.completion &&
                      $.type(settings.completion) != 'boolean') &&
                     top.completion === undefined) {
@@ -3650,16 +3655,16 @@
                     // so we need to get the text before the cursor
                     var pos = command_line.position();
                     var command = command_line.get().substring(0, pos);
-                    var strings = command.split(' ');
+                    var cmd_strings = command.split(' ');
                     var string; // string before cursor that will be completed
                     if (strings.length == 1) {
-                        string = strings[0];
+                        string = cmd_strings[0];
                     } else {
-                        string = strings[strings.length-1];
-                        for (i=strings.length-1; i>0; i--) {
+                        string = cmd_strings[cmd_strings.length-1];
+                        for (i=cmd_strings.length-1; i>0; i--) {
                             // treat escape space as part of the string
-                            if (strings[i-1][strings[i-1].length-1] == '\\') {
-                                string = strings[i-1] + ' ' + string;
+                            if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
+                                string = cmd_strings[i-1] + ' ' + string;
                             } else {
                                 break;
                             }
@@ -4899,12 +4904,17 @@
         var base_interpreter;
         if (typeof init_interpreter == 'string') {
             base_interpreter = init_interpreter;
-        } else if (init_interpreter instanceof Array &&
-                   typeof init_interpreter[0] == 'string') {
-            base_interpreter = init_interpreter[0];
+        } else if (init_interpreter instanceof Array) {
+            // first JSON-RPC
+            for (var i=0, len=init_interpreter.length; i<len; ++i) {
+                if (typeof init_interpreter[i] == 'string') {
+                    base_interpreter = init_interpreter[i];
+                    break;
+                }
+            }
         }
         if (base_interpreter &&
-            (typeof settings.login === 'string' || settings.login)) {
+            (typeof settings.login === 'string' || settings.login === true)) {
             settings.login = make_json_rpc_login(base_interpreter,
                                                  settings.login);
         }
