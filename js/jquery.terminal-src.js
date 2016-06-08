@@ -2879,6 +2879,30 @@
                             }
                         };
                     });
+                    interpreter_object['help'] = function(fn) {
+                        if (typeof fn == 'undefined') {
+                            self.echo('Available commands: ' + ret.procs.map(function(proc) {
+                                return proc.name;
+                            }).join(', '));
+                        } else {
+                            var found = false;
+                            $.each(ret.procs, function(_, proc) {
+                                if (proc.name == fn) {
+                                    found = true;
+                                    var msg = '';
+                                    msg += '[[bu;#fff;]' + proc.name + ']';
+                                    if (proc.params) {
+                                        msg += ' ' + proc.params.join(' ');
+                                    }
+                                    if (proc.help) {
+                                        msg += '\n' + proc.help;
+                                    }
+                                    self.echo(msg);
+                                    return false;
+                                }
+                            });
+                        }
+                    };
                     success(interpreter_object);
                 } else {
                     success(null);
