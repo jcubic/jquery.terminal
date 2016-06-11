@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 11 Jun 2016 19:04:43 +0000
+ * Date: Sat, 11 Jun 2016 21:15:35 +0000
  */
 
 /* TODO:
@@ -3874,14 +3874,18 @@
             // :: true it will not echo executed command
             // -------------------------------------------------------------
             exec: function(command, silent, deferred) {
-                if ($.isArray(command)) {
-                    return $.when.apply($, $.map(command, function(command) {
-                        return self.exec(command, silent);
-                    }));
-                }
-                // both commands executed here (resume will call Term::exec)
                 var d = deferred || new $.Deferred();
-                if (paused) {
+                if ($.isArray(command)) {
+                    (function recur() {
+                        var cmd = command.shift();
+                        if (cmd) {
+                            self.exec(cmd, silent).then(recur);
+                        } else {
+                            d.resolve();
+                        }
+                    })();
+                } else if (paused) {
+                    // both commands executed here (resume will call Term::exec)
                     // delay command multiple time
                     delayed_commands.push([command, silent, d]);
                 } else {
@@ -4070,7 +4074,8 @@
                     delayed_commands = [];
                     (function recur() {
                         if (original.length) {
-                            self.exec.apply(self, original.shift()).then(recur);
+                            self.exec.apply(self, original.shift());
+                            recur();
                         } else {
                             self.trigger('resume');
                             var fn = resume_callbacks.shift();

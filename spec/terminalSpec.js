@@ -322,27 +322,6 @@ function tests_on_ready() {
                 term.remove();
             });
         });
-        describe('exec', function() {
-            var interpreter = {
-                foo: function() {
-                }
-            };
-
-            var term = $('<div></div>').appendTo('body').terminal(interpreter);
-
-            it('should execute function', function() {
-                var spy = spyOn(interpreter, 'foo');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
-                term.exec('foo').then(function() {
-                    expect(interpreter.foo).toHaveBeenCalled();
-                    term.destroy().remove();
-                });
-            });
-        });
         describe('enter text', function() {
             var interpreter = {
                 foo: function() {
@@ -458,7 +437,7 @@ function tests_on_ready() {
                 expect(history.data()).toEqual([]);
             });
             it('should have name', function() {
-                expect(cmd.name()).toEqual('cmd_4');
+                expect(cmd.name()).toEqual('cmd_3');
             });
             it('should return command', function() {
                 cmd.set('foo');
@@ -562,7 +541,7 @@ function tests_on_ready() {
                 shortcut(true, false, false, 71); // CTRL+G
                 expect(cmd.get()).toEqual('foo bar baz');
                 cmd.purge();
-                term.destroy();
+                term.destroy().remove();
             });
         });
         function JSONRPCMock(url, object, no_system_describe) {
@@ -697,13 +676,16 @@ function tests_on_ready() {
                 }
                 enter(term, 'echo hello');
                 expect(object.echo).toHaveBeenCalledWith(token, 'hello');
-                term.destroy();
+                term.destroy().remove();
             });
             describe('No system.describe', function() {
                 it('should call login rpc method', function() {
                     term = $('<div></div>').appendTo('body').terminal('/no_describe', {
                         login: true
                     });
+                    if (term.token()) {
+                        term.logout();
+                    }
                     var spy = spyOn(object, 'login');
                     if (spy.andCallThrough) {
                         spy.andCallThrough();
@@ -723,7 +705,7 @@ function tests_on_ready() {
                     }
                     enter(term, 'echo hello');
                     expect(object.echo).toHaveBeenCalledWith(token, 'hello');
-                    term.destroy();
+                    term.destroy().remove();
                 });
                 it('should call login function', function() {
                     var options = {
@@ -749,17 +731,27 @@ function tests_on_ready() {
                     }
                     term = $('<div></div>').appendTo('body').terminal('/no_describe',
                                                                       options);
+                    if (term.token()) {
+                        term.logout();
+                    }
                     enter(term, 'test');
                     enter(term, 'test');
                     expect(options.login).toHaveBeenCalled();
-                    expect(term.token()).toEqual(null);
+                    expect(term.token()).toBeFalsy();
                     enter(term, 'foo');
                     enter(term, 'bar');
                     expect(options.login).toHaveBeenCalled();
                     expect(term.token()).toEqual(token);
                     enter(term, 'echo hello');
                     expect(object.echo).toHaveBeenCalledWith(token, 'hello');
-                    term.destroy();
+                    term.destroy().remove();
+                });
+                it('should ignore system.describe method', function() {
+                    term = $('<div></div>').appendTo('body').terminal('/test', {
+                        ignoreSystemDescribe: true,
+                        completion: true
+                    });
+                    expect(term.export_view().interpreters.top().completion).toBeFalsy();
                 });
             });
         });
@@ -817,7 +809,7 @@ function tests_on_ready() {
                 enter(term, 'type 10 20');
                 var last_div = term.find('.terminal-output > div:last-child');
                 expect(last_div.text()).toEqual("[Arity] Wrong number of arguments. Function 'type' expects 1 got 2!");
-                term.destroy();
+                term.destroy().remove();
             });
             it('should call fallback function', function() {
                 var spy = spyOn(fallback, 'interpreter');
@@ -859,14 +851,14 @@ function tests_on_ready() {
                 expect(term.get_prompt()).toEqual('quux> ');
                 enter(term, 'echo foo bar');
                 expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
-                term.destroy();
+                term.destroy().remove();
                 term = $('<div></div>').appendTo('body').terminal([
                     interpereter, '/test', fallback.interpreter
                 ]);
                 term.focus();
                 enter(term, 'echo TOKEN world'); // we call echo without login
                 expect(object.echo).toHaveBeenCalledWith('TOKEN', 'world');
-                term.destroy();
+                term.destroy().remove();
             });
         });
         describe('jQuery Terminal object', function() {
@@ -887,7 +879,7 @@ function tests_on_ready() {
                 expect(test.test).toHaveBeenCalledWith(term);
                 enter(term, 'bar');
                 expect(test.test).toHaveBeenCalledWith(term);
-                term.destroy();
+                term.destroy().remove();
             });
         });
         describe('Completion', function() {
@@ -929,7 +921,7 @@ function tests_on_ready() {
                 shortcut(false, false, false, 9);
                 setTimeout(function() {
                     expect(term.get_command()).toEqual('one');
-                    term.destroy();
+                    term.destroy().remove();
                     done();
                 }, 2000);
             });
@@ -992,6 +984,17 @@ function tests_on_ready() {
                 term.insert('f');
                 shortcut(false, false, false, 9);
                 expect(term.get_command()).toEqual('f\t');
+                term.destroy().remove();
+            });
+            it('should insert tab when ignoreSystemDescribe', function() {
+                term = $('<div></div>').appendTo('body').terminal('/test', {
+                    ignoreSystemDescribe: true,
+                    completion: true
+                });
+                term.insert('f');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('f\t');
+                term.destroy().remove();
             });
         });
         describe('jQuery Terminal methods', function() {
@@ -1010,7 +1013,7 @@ function tests_on_ready() {
             });
             it('should return id of the terminal', function() {
                 term.focus();
-                expect(term.id()).toEqual(9);
+                expect(term.id()).toEqual(8);
             });
             it('should clear the terminal', function() {
                 term.clear();
@@ -1064,8 +1067,112 @@ function tests_on_ready() {
                 term.save_state(); // initial state
                 term.save_state('foo');
                 term.save_state('bar');
-                expect(location.hash).toEqual('#[[9,1,"foo"],[9,2,"bar"]]');
+                expect(location.hash).toEqual('#[[8,1,"foo"],[8,2,"bar"]]');
             });
+        });
+        describe('exec', function() {
+            var counter = 0;
+            var interpreter = {
+                foo: function() {
+                    this.pause();
+                    setTimeout(function() {
+                        this.echo('Hello ' + counter++).resume();
+                    }.bind(this), 200);
+                },
+                bar: function() {
+                    var d = $.Deferred();
+                    setTimeout(function() {
+                        d.resolve('Foo Bar');
+                    }, 1000);
+                    return d.promise();
+                },
+                baz: {
+                    quux: function() {
+                        this.echo('quux');
+                    }
+                }
+            };
+
+            var term = $('<div></div>').appendTo('body').terminal(interpreter);
+            term.focus();
+            it('should execute function', function(done) {
+                var spy = spyOn(interpreter, 'foo');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.exec('foo').then(function() {
+                    expect(interpreter.foo).toHaveBeenCalled();
+                    done();
+                });
+            });
+            it('should echo text when promise is resolved', function(done) {
+                term.exec('bar').then(function() {
+                    var last_div = term.find('.terminal-output > div:last-child');
+                    expect(last_div.text()).toEqual('Foo Bar');
+                    done();
+                });
+            });
+            it('should create nested interpreter', function(done) {
+                term.exec('baz').then(function() {
+                    expect(term.get_prompt()).toEqual('baz> ');
+                    term.exec('quux').then(function() {
+                        var last_div = term.find('.terminal-output > div:last-child');
+                        expect(last_div.text()).toEqual('quux');
+                        term.pop();
+                        done();
+                    });
+                });
+            });
+            var arr = []
+            for (i = 0; i<10; i++) {
+                arr.push('Hello ' + i);
+            }
+            var test_str = arr.join('\n');
+            function text_echoed() {
+                return term.find('.terminal-output > div:not(.command)')
+                    .map(function() {
+                        return $(this).text();
+                    }).get().join('\n')
+            }
+            it('should execute functions in order when using exec.then', function(done) {
+                term.clear();
+                counter = 0;
+                var i = 0;
+                (function recur() {
+                    if (i++ < 10) {
+                        term.exec('foo').then(recur);
+                    } else {
+                        expect(text_echoed()).toEqual(test_str);
+                        done();
+                    }
+                })();
+            }, 10000);
+            it('should execute function in order when used delayed commands', function(done) {
+                term.clear();
+                counter = 0;
+                var promises = [];
+                for (var i = 0; i<10; i++) {
+                    promises.push(term.exec('foo'));
+                }
+                $.when.apply($, promises).then(function() {
+                    expect(text_echoed()).toEqual(test_str);
+                    done();
+                });
+            }, 10000);
+            it('should execute array', function(done) {
+                term.clear();
+                counter = 0;
+                var array = [];
+                for (var i = 0; i<10; i++) {
+                    array.push('foo');
+                }
+                term.exec(array).then(function() {
+                    expect(text_echoed()).toEqual(test_str);
+                    done();
+                });
+            }, 10000);
         });
     });
 }
