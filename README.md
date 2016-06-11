@@ -84,6 +84,13 @@ or
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/0.11.0/jquery.terminal.min.css">
 ```
 
+or
+
+```html
+<script src="https://cdn.jsdelivr.net/jquery.terminal/0.10.11/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/0.10.11/jquery.terminal.min.css">
+```
+
 And you're good to go.
 
 ### Example of usage (javascript interpreter)
