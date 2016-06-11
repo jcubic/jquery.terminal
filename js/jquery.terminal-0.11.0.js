@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 08 Jun 2016 17:32:33 +0000
+ * Date: Sat, 11 Jun 2016 19:04:43 +0000
  */
 
 /* TODO:
@@ -2991,9 +2991,6 @@
                         } else {
                             // no procs in system.describe
                             result.interpreter = make_basic_json_rpc(user_intrp, login);
-                            if ($.isArray(settings.completion)) {
-                                result.completion = settings.completion;
-                            }
                         }
                         finalize(result);
                         self.resume();
@@ -4703,6 +4700,11 @@
                     // result is object with interpreter and completion
                     // properties
                     interpreters.push($.extend({}, ret, options));
+                    if ($.isArray(ret.completion) && options.completion === true) {
+                        interpreters.top().completion = ret.completion;
+                    } else if (!ret.completion && options.completion === true) {
+                        interpreters.top().completion = false;
+                    }
                     if (options.login) {
                         var type = $.type(options.login);
                         if (type == 'function') {

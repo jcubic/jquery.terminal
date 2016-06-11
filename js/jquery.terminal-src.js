@@ -2991,9 +2991,6 @@
                         } else {
                             // no procs in system.describe
                             result.interpreter = make_basic_json_rpc(user_intrp, login);
-                            if ($.isArray(settings.completion)) {
-                                result.completion = settings.completion;
-                            }
                         }
                         finalize(result);
                         self.resume();
@@ -4703,6 +4700,11 @@
                     // result is object with interpreter and completion
                     // properties
                     interpreters.push($.extend({}, ret, options));
+                    if ($.isArray(ret.completion) && options.completion === true) {
+                        interpreters.top().completion = ret.completion;
+                    } else if (!ret.completion && options.completion === true) {
+                        interpreters.top().completion = false;
+                    }
                     if (options.login) {
                         var type = $.type(options.login);
                         if (type == 'function') {

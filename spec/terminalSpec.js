@@ -565,7 +565,7 @@ function tests_on_ready() {
                 term.destroy();
             });
         });
-        function JSONRPCMock(url, object) {
+        function JSONRPCMock(url, object, no_system_describe) {
             var ajax = $.ajax;
             var system = {
                 'sdversion': '1.0',
@@ -595,7 +595,23 @@ function tests_on_ready() {
                         var req = JSON.parse(obj.data);
                         var resp;
                         if (req.method == 'system.describe') {
-                            resp = system;
+                            if (!no_system_describe) {
+                                resp = system;
+                            } else {
+                                var data = obj.data;
+                                if (typeof data == 'string') {
+                                    data = JSON.parse(data);
+                                }
+                                resp = {
+                                    "jsonrpc": "2.0",
+                                    "result": null,
+                                    "id": data.id,
+                                    "error": {
+                                        "code": -32601,
+                                        "message": "There is no system.describe method"
+                                    }
+                                };
+                            }
                         } else {
                             var error = null;
                             var ret = null
@@ -631,19 +647,21 @@ function tests_on_ready() {
                 }
             }
         }
+        var token = 'TOKEN';
         var object = {
             echo: function(token, str) {
                 return str;
             },
             login: function(user, password) {
                 if (user == 'demo' && password == 'demo') {
-                    return 'TOKEN';
+                    return token;
                 } else {
                     return null;
                 }
             }
         };
         JSONRPCMock('/test', object);
+        JSONRPCMock('/no_describe', object, true);
         describe('JSON-RPC', function() {
             var term = $('<div></div>').appendTo('body').terminal('/test', {
                 login: true
@@ -667,6 +685,7 @@ function tests_on_ready() {
                 enter(term, 'demo');
                 enter(term, 'demo');
                 expect(object.login).toHaveBeenCalledWith('demo', 'demo');
+                expect(term.token()).toEqual(token);
             });
             it('should call a function', function() {
                 term.focus();
@@ -677,8 +696,71 @@ function tests_on_ready() {
                     spy.and.callThrough();
                 }
                 enter(term, 'echo hello');
-                expect(object.echo).toHaveBeenCalledWith('TOKEN', 'hello');
+                expect(object.echo).toHaveBeenCalledWith(token, 'hello');
                 term.destroy();
+            });
+            describe('No system.describe', function() {
+                it('should call login rpc method', function() {
+                    term = $('<div></div>').appendTo('body').terminal('/no_describe', {
+                        login: true
+                    });
+                    var spy = spyOn(object, 'login');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    enter(term, 'demo');
+                    enter(term, 'demo');
+                    expect(object.login).toHaveBeenCalledWith('demo', 'demo');
+                });
+                it('should pass TOKEN to method', function() {
+                    var spy = spyOn(object, 'echo');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    enter(term, 'echo hello');
+                    expect(object.echo).toHaveBeenCalledWith(token, 'hello');
+                    term.destroy();
+                });
+                it('should call login function', function() {
+                    var options = {
+                        login: function(user, password, callback) {
+                            if (user == 'foo' && password == 'bar') {
+                                callback(token);
+                            } else {
+                                callback(null);
+                            }
+                        }
+                    };
+                    var spy = spyOn(options, 'login');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    spy = spyOn(object, 'echo');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    term = $('<div></div>').appendTo('body').terminal('/no_describe',
+                                                                      options);
+                    enter(term, 'test');
+                    enter(term, 'test');
+                    expect(options.login).toHaveBeenCalled();
+                    expect(term.token()).toEqual(null);
+                    enter(term, 'foo');
+                    enter(term, 'bar');
+                    expect(options.login).toHaveBeenCalled();
+                    expect(term.token()).toEqual(token);
+                    enter(term, 'echo hello');
+                    expect(object.echo).toHaveBeenCalledWith(token, 'hello');
+                    term.destroy();
+                });
             });
         });
         describe('nested object interpreter', function() {
@@ -873,7 +955,6 @@ function tests_on_ready() {
             });
             it('should complete in the middle of the word', function() {
                 term.push($.noop, {completion: completion});
-                term.set_command('');
                 term.set_command('f one');
                 var cmd = term.cmd();
                 cmd.position(1);
@@ -884,6 +965,33 @@ function tests_on_ready() {
                 cmd.position(command.length);
                 shortcut(false, false, false, 9);
                 expect(term.get_command()).toEqual('lorem\\ ipsum one');
+            });
+            it('should complete rpc method', function() {
+                term.push('/test', {
+                    completion: true
+                });
+                term.set_command('');
+                term.insert('ec');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('echo');
+            });
+            it('should complete command from array when used with JSON-RPC', function() {
+                term.push('/test', {
+                    completion: ['foo', 'bar', 'baz']
+                });
+                term.set_command('');
+                term.insert('f');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('foo');
+            });
+            it('should insert tab when used with RPC without system.describe', function() {
+                term.push('/no_describe', {
+                    completion: true
+                });
+                term.set_command('');
+                term.insert('f');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('f\t');
             });
         });
         describe('jQuery Terminal methods', function() {
