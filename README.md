@@ -77,6 +77,13 @@ You can also grab the files from CDN:
 <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.10.11/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
+or
+
+```html
+<script src="https://cdn.jsdelivr.net/jquery.terminal/0.10.11/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/0.10.11/jquery.terminal.min.css">
+```
+
 And you're good to go.
 
 ### Example of usage (javascript interpreter)
