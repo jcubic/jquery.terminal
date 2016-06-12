@@ -284,7 +284,7 @@ function enter(term, text) {
 function tests_on_ready() {
     describe('Terminal plugin', function() {
         describe('terminal create / terminal destroy', function() {
-            var term = $('<div></div>').appendTo('body').terminal();
+            var term = $('<div/>').appendTo('body').terminal();
             it('should create terminal', function() {
                 expect(term.length).toBe(1);
             });
@@ -322,14 +322,15 @@ function tests_on_ready() {
         });
         describe('cursor', function() {
             it('only one terminal should have blinking cursor', function() {
-                var term1 = $('<div></div>').appendTo('body').terminal($.noop);
+                var term1 = $('<div/>').appendTo('body').terminal($.noop);
                 term1.focus();
-                var term2 = $('<div></div>').appendTo('body').terminal($.noop);
+                var term2 = $('<div/>').appendTo('body').terminal($.noop);
                 term1.pause();
                 term2.focus();
                 term1.resume();
-                enter_text('hello');
                 expect($('.cursor.blink').length).toEqual(1);
+                term1.destroy().remove();
+                term2.destroy().remove();
             });
         });
         describe('enter text', function() {
@@ -337,7 +338,7 @@ function tests_on_ready() {
                 foo: function() {
                 }
             };
-            var term = $('<div></div>').appendTo('body').terminal(interpreter);
+            var term = $('<div/>').appendTo('body').terminal(interpreter);
             it('text should appear and interpreter function should be called', function() {
                 term.focus(true);
                 var spy = spyOn(interpreter, 'foo');
@@ -356,7 +357,7 @@ function tests_on_ready() {
             });
         });
         describe('prompt', function() {
-            var term = $('<div></div>').appendTo('body').terminal($.noop, {
+            var term = $('<div/>').appendTo('body').terminal($.noop, {
                 prompt: '>>> '
             });
             it('should return prompt', function() {
@@ -386,7 +387,7 @@ function tests_on_ready() {
             });
         });
         describe('cmd plugin', function() {
-            var term = $('<div></div>').appendTo('body').css('overflow-y', 'scroll').terminal($.noop, {
+            var term = $('<div/>').appendTo('body').css('overflow-y', 'scroll').terminal($.noop, {
                 name: 'cmd',
                 numChars: 150,
                 numRows: 20
@@ -652,7 +653,7 @@ function tests_on_ready() {
         JSONRPCMock('/test', object);
         JSONRPCMock('/no_describe', object, true);
         describe('JSON-RPC', function() {
-            var term = $('<div></div>').appendTo('body').terminal('/test', {
+            var term = $('<div/>').appendTo('body').terminal('/test', {
                 login: true
             });
             it('should call login', function() {
@@ -690,7 +691,7 @@ function tests_on_ready() {
             });
             describe('No system.describe', function() {
                 it('should call login rpc method', function() {
-                    term = $('<div></div>').appendTo('body').terminal('/no_describe', {
+                    term = $('<div/>').appendTo('body').terminal('/no_describe', {
                         login: true
                     });
                     if (term.token()) {
@@ -739,7 +740,7 @@ function tests_on_ready() {
                     } else {
                         spy.and.callThrough();
                     }
-                    term = $('<div></div>').appendTo('body').terminal('/no_describe',
+                    term = $('<div/>').appendTo('body').terminal('/no_describe',
                                                                       options);
                     if (term.token()) {
                         term.logout();
@@ -757,7 +758,7 @@ function tests_on_ready() {
                     term.destroy().remove();
                 });
                 it('should ignore system.describe method', function() {
-                    term = $('<div></div>').appendTo('body').terminal('/test', {
+                    term = $('<div/>').appendTo('body').terminal('/test', {
                         ignoreSystemDescribe: true,
                         completion: true
                     });
@@ -788,7 +789,7 @@ function tests_on_ready() {
             var fallback = {
                 interpreter: function(command, term) { }
             };
-            var term = $('<div></div>').appendTo('body').terminal(interpereter);
+            var term = $('<div/>').appendTo('body').terminal(interpereter);
             it('should created nested intepreter', function() {
                 term.focus();
                 var spy = spyOn(interpereter.foo.bar, 'baz');
@@ -828,7 +829,7 @@ function tests_on_ready() {
                 } else {
                     spy.and.callThrough();
                 }
-                term = $('<div></div>').appendTo('body').terminal([
+                term = $('<div/>').appendTo('body').terminal([
                     interpereter, fallback.interpreter
                 ], {
                     checkArity: false
@@ -862,7 +863,7 @@ function tests_on_ready() {
                 enter(term, 'echo foo bar');
                 expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
                 term.destroy().remove();
-                term = $('<div></div>').appendTo('body').terminal([
+                term = $('<div/>').appendTo('body').terminal([
                     interpereter, '/test', fallback.interpreter
                 ]);
                 term.focus();
@@ -875,7 +876,7 @@ function tests_on_ready() {
             var test = {
                 test: function(term) {}
             };
-            var term = $('<div></div>').appendTo('body').terminal([{
+            var term = $('<div/>').appendTo('body').terminal([{
                 foo: function() {
                     test.test(this);
                 }
@@ -893,7 +894,7 @@ function tests_on_ready() {
             });
         });
         describe('Completion', function() {
-            var term = $('<div></div>').appendTo('body').terminal($.noop, {
+            var term = $('<div/>').appendTo('body').terminal($.noop, {
                 name: 'completion',
                 greetings: false,
                 completion: ['foo', 'bar', 'baz', 'lorem\\ ipsum']
@@ -918,7 +919,7 @@ function tests_on_ready() {
                 term.pop();
             });
             it('should complete when completion is a function with setTimeout', function(done) {
-                var term = $('<div></div>').appendTo('body').terminal($.noop);
+                var term = $('<div/>').appendTo('body').terminal($.noop);
                 term.focus().push($.noop, {
                     completion: function(term, string, callback) {
                         setTimeout(function() {
@@ -997,7 +998,7 @@ function tests_on_ready() {
                 term.destroy().remove();
             });
             it('should insert tab when ignoreSystemDescribe', function() {
-                term = $('<div></div>').appendTo('body').terminal('/test', {
+                term = $('<div/>').appendTo('body').terminal('/test', {
                     ignoreSystemDescribe: true,
                     completion: true
                 });
@@ -1016,7 +1017,7 @@ function tests_on_ready() {
             var prompt = '$ ';
             var mask = '-';
             var position;
-            var term = $('<div></div>').appendTo('body').terminal($.noop, {
+            var term = $('<div/>').appendTo('body').terminal($.noop, {
                 name: terminal_name,
                 greetings: greetings,
                 completion: completion
@@ -1082,6 +1083,7 @@ function tests_on_ready() {
             });
         });
         describe('exec', function() {
+            return;
             var counter = 0;
             var interpreter = {
                 foo: function() {
@@ -1104,7 +1106,7 @@ function tests_on_ready() {
                 }
             };
 
-            var term = $('<div></div>').appendTo('body').terminal(interpreter);
+            var term = $('<div/>').appendTo('body').terminal(interpreter);
             term.focus();
             it('should execute function', function(done) {
                 var spy = spyOn(interpreter, 'foo');
@@ -1185,6 +1187,115 @@ function tests_on_ready() {
                     done();
                 });
             }, 10000);
+        });
+        describe('autologin', function() {
+            var token = 'TOKEN';
+            var options = {
+                greetings: 'You have been logged in',
+                login: function(user, password, callback) {
+                    if (user == 'demo' && password == 'demo') {
+                        callback(token);
+                    } else {
+                        callback(null);
+                    }
+                }
+            }
+            var term = $('<div/>').appendTo('body').terminal($.noop, options);
+            it('should log in', function() {
+                var spy = spyOn(options, 'login');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.autologin('user', token);
+                expect(options.login).not.toHaveBeenCalled();
+                expect(term.token()).toEqual(token);
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.text()).toEqual('You have been logged in');
+                term.destroy().remove();
+            });
+        });
+        describe('login', function() {
+            var term = $('<div/>').appendTo('body').terminal($.noop, {
+                name: 'login_method',
+                greetings: 'You have been logged in'
+            });
+            var token = 'TOKEN';
+            var login = {
+                callback: function(user, password, callback) {
+                    if (user === 'foo' && password == 'bar') {
+                        callback(token);
+                    } else {
+                        callback(null);
+                    }
+                }
+            };
+            it('should not login', function() {
+                var spy = spyOn(login, 'callback');
+                if (spy.andCallThrough) {
+                    spy.andCallThrough();
+                } else {
+                    spy.and.callThrough();
+                }
+                term.focus().login(login.callback);
+                enter(term, 'foo');
+                enter(term, 'foo');
+                expect(login.callback).toHaveBeenCalled();
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.text()).toEqual('Wrong password!');
+                expect(term.get_prompt()).toEqual('> ');
+            });
+            it('should ask for login/password on wrong user/password', function() {
+                term.login(login.callback, true);
+                for(var i=0; i<10; i++) {
+                    enter(term, 'foo');
+                    expect(term.get_prompt()).toEqual('password: ');
+                    enter(term, 'foo');
+                    expect(term.get_prompt()).toEqual('login: ');
+                }
+                term.pop();
+            });
+            it('should login after first time', function() {
+                term.push($.noop, {prompt: '$$ '}).login(login.callback, true);
+                enter(term, 'foo');
+                enter(term, 'bar');
+                expect(term.token(true)).toEqual(token);
+                expect(term.get_prompt()).toEqual('$$ ');
+                // logout from inteprer will call login so we need to pop from login
+                // and then from intepreter that was pushed
+                term.logout(true).pop().pop();
+            });
+            it('should login after second time', function() {
+                term.push($.noop, {prompt: '>>> '}).login(login.callback, true);
+                enter(term, 'foo');
+                enter(term, 'foo');
+                expect(term.token(true)).toBeFalsy();
+                enter(term, 'foo');
+                enter(term, 'bar');
+                expect(term.token(true)).toEqual(token);
+                expect(term.get_prompt()).toEqual('>>> ');
+                term.logout(true).pop().pop();
+            });
+            it('should login to nested interpreter when using login option', function() {
+                term.push($.noop, {
+                    prompt: '$$$ ',
+                    name: 'option',
+                    login: login.callback,
+                    infiniteLogin: true
+                });
+                enter(term, 'foo');
+                enter(term, 'foo');
+                expect(term.token(true)).toBeFalsy();
+                enter(term, 'foo');
+                enter(term, 'bar');
+                console.log(term.find('.terminal-output > div').map(function() {
+                    return $(this).text();
+                }).get().join('\n'));
+                expect(term.token(true)).toEqual(token);
+                expect(term.get_prompt()).toEqual('$$$ ');
+                term.logout(true).pop().pop();
+            });
         });
     });
 }

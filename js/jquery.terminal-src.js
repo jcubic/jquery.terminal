@@ -4685,12 +4685,16 @@
             // -------------------------------------------------------------
             push: function(interpreter, options) {
                 options = options || {};
-                if (!options.name && prev_command) {
+                var defaults = {
+                    infiniteLogin: false
+                };
+                var settings = $.extend({}, defaults, options);
+                if (!settings.name && prev_command) {
                     // push is called in login
-                    options.name = prev_command.name;
+                    settings.name = prev_command.name;
                 }
-                if (options.prompt === undefined) {
-                    options.prompt = (options.name || '>') + ' ';
+                if (settings.prompt === undefined) {
+                    settings.prompt = (settings.name || '>') + ' ';
                 }
                 //names.push(options.name);
                 var top = interpreters.top();
@@ -4698,31 +4702,31 @@
                     top.mask = command_line.mask();
                 }
                 var was_paused = paused;
-                self.pause();
+                //self.pause();
                 make_interpreter(interpreter, !!options.login, function(ret) {
                     // result is object with interpreter and completion
                     // properties
-                    interpreters.push($.extend({}, ret, options));
-                    if ($.isArray(ret.completion) && options.completion === true) {
+                    interpreters.push($.extend({}, ret, settings));
+                    if ($.isArray(ret.completion) && settings.completion === true) {
                         interpreters.top().completion = ret.completion;
-                    } else if (!ret.completion && options.completion === true) {
+                    } else if (!ret.completion && settings.completion === true) {
                         interpreters.top().completion = false;
                     }
-                    if (options.login) {
-                        var type = $.type(options.login);
+                    if (settings.login) {
+                        var type = $.type(settings.login);
                         if (type == 'function') {
                             // self.pop on error
-                            self.login(options.login,
-                                       false,
+                            self.login(settings.login,
+                                       settings.infiniteLogin,
                                        prepare_top_interpreter,
-                                       self.pop);
+                                       settings.infiniteLogin ? $.noop : self.pop);
                         } else if ($.type(interpreter) == 'string' &&
                                    type == 'string' || type == 'boolean') {
                             self.login(make_json_rpc_login(interpreter,
-                                                           options.login),
-                                       false,
+                                                           settings.login),
+                                       settings.infiniteLogin,
                                        prepare_top_interpreter,
-                                       self.pop);
+                                       settings.infiniteLogin ? $.noop : self.pop);
                         }
                     } else {
                         prepare_top_interpreter();
@@ -4762,6 +4766,10 @@
                     }
                     var current = interpreters.pop();
                     prepare_top_interpreter();
+                    // we check in case if you don't pop from password interpreter
+                    if (in_login && self.get_prompt() != strings.login + ': ') {
+                        in_login = false;
+                    }
                     if ($.isFunction(current.onExit)) {
                         try {
                             current.onExit(self);
