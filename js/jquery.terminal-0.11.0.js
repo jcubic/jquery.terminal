@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 12 Jun 2016 12:12:07 +0000
+ * Date: Sun, 12 Jun 2016 12:38:54 +0000
  */
 
 /* TODO:
@@ -1004,12 +1004,12 @@
             animation = function(toggle) {
                 if (toggle && !animating) {
                     animating = true;
-                    cursor.addClass('inverted');
+                    cursor.addClass('inverted blink');
                     self.everyTime(500, 'blink', blink);
                 } else if (animating && !toggle) {
                     animating = false;
                     self.stopTime('blink', blink);
-                    cursor.removeClass('inverted');
+                    cursor.removeClass('inverted blink');
                 }
             };
         }
@@ -1902,11 +1902,11 @@
     // css-animations-in-javascript/
     var support_animations = (function() {
         var animation = false,
-        animationstring = 'animation',
-        keyframeprefix = '',
-        domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
-        pfx  = '',
-        elm = document.createElement('div');
+            animationstring = 'animation',
+            keyframeprefix = '',
+            domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
+            pfx  = '',
+            elm = document.createElement('div');
         if (elm.style.animationName) { animation = true; }
         if (animation === false) {
             for (var i = 0; i < domPrefixes.length; i++) {
@@ -4069,7 +4069,9 @@
             resume: function() {
                 if (paused && command_line) {
                     paused = false;
-                    command_line.enable().visible();
+                    if (self.enabled()) {
+                        command_line.enable().visible();
+                    }
                     var original = delayed_commands;
                     delayed_commands = [];
                     for (var i = 0; i<original.length; ++i) {

@@ -233,13 +233,13 @@ describe('Terminal utils', function() {
         });
     });
 });
-function support_animations() {
+var support_animations = (function() {
     var animation = false,
-    animationstring = 'animation',
-    keyframeprefix = '',
-    domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
-    pfx  = '',
-    elm = document.createElement('div');
+        animationstring = 'animation',
+        keyframeprefix = '',
+        domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
+        pfx  = '',
+        elm = document.createElement('div');
     if (elm.style.animationName) { animation = true; }
     if (animation === false) {
         for (var i = 0; i < domPrefixes.length; i++) {
@@ -254,7 +254,7 @@ function support_animations() {
         }
     }
     return animation;
-}
+})();
 function enter_text(text) {
     var e;
     var $root = $(document.documentElement || window);
@@ -302,9 +302,7 @@ function tests_on_ready() {
                 expect(cursor.prev().is('span')).toBe(true);
                 expect(cursor.next().is('span')).toBe(true);
                 term.focus(true);
-                if (support_animations()) {
-                    expect(cursor.hasClass('blink')).toBe(true);
-                }
+                expect(cursor.hasClass('blink')).toBe(true);
                 expect(term.find('.clipboard').length).toBe(1);
             });
             it('should have signature', function() {
@@ -320,6 +318,18 @@ function tests_on_ready() {
                 term.destroy();
                 expect(term.children().length).toBe(0);
                 term.remove();
+            });
+        });
+        describe('cursor', function() {
+            it('only one terminal should have blinking cursor', function() {
+                var term1 = $('<div></div>').appendTo('body').terminal($.noop);
+                term1.focus();
+                var term2 = $('<div></div>').appendTo('body').terminal($.noop);
+                term1.pause();
+                term2.focus();
+                term1.resume();
+                enter_text('hello');
+                expect($('.cursor.blink').length).toEqual(1);
             });
         });
         describe('enter text', function() {
@@ -1068,6 +1078,7 @@ function tests_on_ready() {
                 term.save_state('foo');
                 term.save_state('bar');
                 expect(location.hash).toEqual('#[[8,1,"foo"],[8,2,"bar"]]');
+                term.destroy().remove();
             });
         });
         describe('exec', function() {
@@ -1170,6 +1181,7 @@ function tests_on_ready() {
                 }
                 term.exec(array).then(function() {
                     expect(text_echoed()).toEqual(test_str);
+                    term.destroy().remove();
                     done();
                 });
             }, 10000);
