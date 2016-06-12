@@ -4072,22 +4072,18 @@
                     command_line.enable().visible();
                     var original = delayed_commands;
                     delayed_commands = [];
-                    (function recur() {
-                        if (original.length) {
-                            self.exec.apply(self, original.shift());
-                            recur();
-                        } else {
-                            self.trigger('resume');
-                            var fn = resume_callbacks.shift();
-                            if (fn) {
-                                fn();
-                            }
-                            scroll_to_bottom();
-                            if ($.isFunction(settings.onResume)) {
-                                settings.onResume();
-                            }
-                        }
-                    })();
+                    for (var i = 0; i<original.length; ++i) {
+                        self.exec.apply(self, original[i]);
+                    }
+                    self.trigger('resume');
+                    var fn = resume_callbacks.shift();
+                    if (fn) {
+                        fn();
+                    }
+                    scroll_to_bottom();
+                    if ($.isFunction(settings.onResume)) {
+                        settings.onResume();
+                    }
                 }
                 return self;
             },
