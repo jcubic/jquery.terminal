@@ -1289,9 +1289,6 @@ function tests_on_ready() {
                 expect(term.token(true)).toBeFalsy();
                 enter(term, 'foo');
                 enter(term, 'bar');
-                console.log(term.find('.terminal-output > div').map(function() {
-                    return $(this).text();
-                }).get().join('\n'));
                 expect(term.token(true)).toEqual(token);
                 expect(term.get_prompt()).toEqual('$$$ ');
                 term.logout(true).pop().pop();

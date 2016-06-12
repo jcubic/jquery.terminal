@@ -52,6 +52,10 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 
 test:
 	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose --junitreport --color --forceexit spec
+
+cover:
+	node_modules/istanbul/lib/cli.js cover node_modules/jasmine/bin/jasmine.js
+
 jshint:
 	jshint js/jquery.terminal-src.js
 	jshint js/dterm.js
