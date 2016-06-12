@@ -6,7 +6,7 @@ RM=rm
 CAT=cat
 DATE=`date -uR`
 
-ALL: js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
+ALL: .$(VERSION) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
 
 bower.json: bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" bower.in > bower.json
@@ -41,7 +41,7 @@ css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 README.md: README.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" < README.in > README.md
 
-.$(VERSION):
+.$(VERSION): Makefile
 	touch .$(VERSION)
 
 terminal.jquery.json: manifest .$(VERSION)
@@ -61,3 +61,6 @@ jshint:
 	jshint js/dterm.js
 	jshint js/xml_formatting.js
 	jshint js/unix_formatting.js
+
+install:
+	npm install
