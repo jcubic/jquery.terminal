@@ -4069,7 +4069,7 @@
             resume: function() {
                 if (paused && command_line) {
                     paused = false;
-                    if (self.enabled()) {
+                    if (terminals.front() == self) {
                         command_line.enable().visible();
                     }
                     var original = delayed_commands;

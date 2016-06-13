@@ -25,9 +25,9 @@
             var striped = full.replace(/_x08|\x08_|_\u0008|\u0008_/g, '');
             return '[[u;;]' + striped + ']';
         }).replace(/((?:.\x08.)+)/g, function(full, g) {
-            return '[[b;#fff;]' + full.replace(/(.)(?:\x08|\u0008)(.)/g,
-                                               function(full, g1, g2) {
-                                                   return g2;
+            return '[[b;#fff;]' + full.replace(/(.)(?:\x08|\u0008)\1/g,
+                                               function(full, g) {
+                                                   return g;
                                                }) + ']';
         });
     };

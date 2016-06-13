@@ -1081,217 +1081,260 @@ function tests_on_ready() {
                 expect(location.hash).toEqual('#[[8,1,"foo"],[8,2,"bar"]]');
                 term.destroy().remove();
             });
-        });
-        describe('exec', function() {
-            return;
-            var counter = 0;
-            var interpreter = {
-                foo: function() {
-                    this.pause();
-                    setTimeout(function() {
-                        this.echo('Hello ' + counter++).resume();
-                    }.bind(this), 200);
-                },
-                bar: function() {
-                    var d = $.Deferred();
-                    setTimeout(function() {
-                        d.resolve('Foo Bar');
-                    }, 1000);
-                    return d.promise();
-                },
-                baz: {
-                    quux: function() {
-                        this.echo('quux');
+            describe('exec', function() {
+                var counter = 0;
+                var interpreter = {
+                    foo: function() {
+                        this.pause();
+                        setTimeout(function() {
+                            this.echo('Hello ' + counter++).resume();
+                        }.bind(this), 200);
+                    },
+                    bar: function() {
+                        var d = $.Deferred();
+                        setTimeout(function() {
+                            d.resolve('Foo Bar');
+                        }, 1000);
+                        return d.promise();
+                    },
+                    baz: {
+                        quux: function() {
+                            this.echo('quux');
+                        }
                     }
-                }
-            };
+                };
 
-            var term = $('<div/>').appendTo('body').terminal(interpreter);
-            term.focus();
-            it('should execute function', function(done) {
-                var spy = spyOn(interpreter, 'foo');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
-                term.exec('foo').then(function() {
-                    expect(interpreter.foo).toHaveBeenCalled();
-                    done();
-                });
-            });
-            it('should echo text when promise is resolved', function(done) {
-                term.exec('bar').then(function() {
-                    var last_div = term.find('.terminal-output > div:last-child');
-                    expect(last_div.text()).toEqual('Foo Bar');
-                    done();
-                });
-            });
-            it('should create nested interpreter', function(done) {
-                term.exec('baz').then(function() {
-                    expect(term.get_prompt()).toEqual('baz> ');
-                    term.exec('quux').then(function() {
-                        var last_div = term.find('.terminal-output > div:last-child');
-                        expect(last_div.text()).toEqual('quux');
-                        term.pop();
+                var term = $('<div/>').appendTo('body').terminal(interpreter);
+                term.focus();
+                it('should execute function', function(done) {
+                    var spy = spyOn(interpreter, 'foo');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    term.exec('foo').then(function() {
+                        expect(interpreter.foo).toHaveBeenCalled();
                         done();
                     });
                 });
-            });
-            var arr = []
-            for (i = 0; i<10; i++) {
-                arr.push('Hello ' + i);
-            }
-            var test_str = arr.join('\n');
-            function text_echoed() {
-                return term.find('.terminal-output > div:not(.command)')
-                    .map(function() {
-                        return $(this).text();
-                    }).get().join('\n')
-            }
-            it('should execute functions in order when using exec.then', function(done) {
-                term.clear();
-                counter = 0;
-                var i = 0;
-                (function recur() {
-                    if (i++ < 10) {
-                        term.exec('foo').then(recur);
-                    } else {
+                it('should echo text when promise is resolved', function(done) {
+                    term.exec('bar').then(function() {
+                        var last_div = term.find('.terminal-output > div:last-child');
+                        expect(last_div.text()).toEqual('Foo Bar');
+                        done();
+                    });
+                });
+                it('should create nested interpreter', function(done) {
+                    term.exec('baz').then(function() {
+                        expect(term.get_prompt()).toEqual('baz> ');
+                        term.exec('quux').then(function() {
+                            var last_div = term.find('.terminal-output > div:last-child');
+                            expect(last_div.text()).toEqual('quux');
+                            term.pop();
+                            done();
+                        });
+                    });
+                });
+                var arr = []
+                for (i = 0; i<10; i++) {
+                    arr.push('Hello ' + i);
+                }
+                var test_str = arr.join('\n');
+                function text_echoed() {
+                    return term.find('.terminal-output > div:not(.command)')
+                        .map(function() {
+                            return $(this).text();
+                        }).get().join('\n')
+                }
+                it('should execute functions in order when using exec.then', function(done) {
+                    term.clear();
+                    counter = 0;
+                    var i = 0;
+                    (function recur() {
+                        if (i++ < 10) {
+                            term.exec('foo').then(recur);
+                        } else {
+                            expect(text_echoed()).toEqual(test_str);
+                            done();
+                        }
+                    })();
+                }, 10000);
+                it('should execute function in order when used delayed commands', function(done) {
+                    term.clear();
+                    counter = 0;
+                    var promises = [];
+                    for (var i = 0; i<10; i++) {
+                        promises.push(term.exec('foo'));
+                    }
+                    $.when.apply($, promises).then(function() {
                         expect(text_echoed()).toEqual(test_str);
                         done();
+                    });
+                }, 10000);
+                it('should execute array', function(done) {
+                    term.clear();
+                    counter = 0;
+                    var array = [];
+                    for (var i = 0; i<10; i++) {
+                        array.push('foo');
                     }
-                })();
-            }, 10000);
-            it('should execute function in order when used delayed commands', function(done) {
-                term.clear();
-                counter = 0;
-                var promises = [];
-                for (var i = 0; i<10; i++) {
-                    promises.push(term.exec('foo'));
+                    term.exec(array).then(function() {
+                        expect(text_echoed()).toEqual(test_str);
+                        term.destroy().remove();
+                        done();
+                    });
+                }, 10000);
+            });
+            describe('autologin', function() {
+                var token = 'TOKEN';
+                var options = {
+                    greetings: 'You have been logged in',
+                    login: function(user, password, callback) {
+                        if (user == 'demo' && password == 'demo') {
+                            callback(token);
+                        } else {
+                            callback(null);
+                        }
+                    }
                 }
-                $.when.apply($, promises).then(function() {
-                    expect(text_echoed()).toEqual(test_str);
-                    done();
-                });
-            }, 10000);
-            it('should execute array', function(done) {
-                term.clear();
-                counter = 0;
-                var array = [];
-                for (var i = 0; i<10; i++) {
-                    array.push('foo');
-                }
-                term.exec(array).then(function() {
-                    expect(text_echoed()).toEqual(test_str);
+                var term = $('<div/>').appendTo('body').terminal($.noop, options);
+                it('should log in', function() {
+                    var spy = spyOn(options, 'login');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    term.autologin('user', token);
+                    expect(options.login).not.toHaveBeenCalled();
+                    expect(term.token()).toEqual(token);
+                    var last_div = term.find('.terminal-output > div:last-child');
+                    expect(last_div.text()).toEqual('You have been logged in');
                     term.destroy().remove();
-                    done();
                 });
-            }, 10000);
-        });
-        describe('autologin', function() {
-            var token = 'TOKEN';
-            var options = {
-                greetings: 'You have been logged in',
-                login: function(user, password, callback) {
-                    if (user == 'demo' && password == 'demo') {
-                        callback(token);
-                    } else {
-                        callback(null);
-                    }
-                }
-            }
-            var term = $('<div/>').appendTo('body').terminal($.noop, options);
-            it('should log in', function() {
-                var spy = spyOn(options, 'login');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
-                term.autologin('user', token);
-                expect(options.login).not.toHaveBeenCalled();
-                expect(term.token()).toEqual(token);
-                var last_div = term.find('.terminal-output > div:last-child');
-                expect(last_div.text()).toEqual('You have been logged in');
-                term.destroy().remove();
             });
-        });
-        describe('login', function() {
-            var term = $('<div/>').appendTo('body').terminal($.noop, {
-                name: 'login_method',
-                greetings: 'You have been logged in'
-            });
-            var token = 'TOKEN';
-            var login = {
-                callback: function(user, password, callback) {
-                    if (user === 'foo' && password == 'bar') {
-                        callback(token);
-                    } else {
-                        callback(null);
-                    }
-                }
-            };
-            it('should not login', function() {
-                var spy = spyOn(login, 'callback');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
-                term.focus().login(login.callback);
-                enter(term, 'foo');
-                enter(term, 'foo');
-                expect(login.callback).toHaveBeenCalled();
-                var last_div = term.find('.terminal-output > div:last-child');
-                expect(last_div.text()).toEqual('Wrong password!');
-                expect(term.get_prompt()).toEqual('> ');
-            });
-            it('should ask for login/password on wrong user/password', function() {
-                term.login(login.callback, true);
-                for(var i=0; i<10; i++) {
-                    enter(term, 'foo');
-                    expect(term.get_prompt()).toEqual('password: ');
-                    enter(term, 'foo');
-                    expect(term.get_prompt()).toEqual('login: ');
-                }
-                term.pop();
-            });
-            it('should login after first time', function() {
-                term.push($.noop, {prompt: '$$ '}).login(login.callback, true);
-                enter(term, 'foo');
-                enter(term, 'bar');
-                expect(term.token(true)).toEqual(token);
-                expect(term.get_prompt()).toEqual('$$ ');
-                // logout from inteprer will call login so we need to pop from login
-                // and then from intepreter that was pushed
-                term.logout(true).pop().pop();
-            });
-            it('should login after second time', function() {
-                term.push($.noop, {prompt: '>>> '}).login(login.callback, true);
-                enter(term, 'foo');
-                enter(term, 'foo');
-                expect(term.token(true)).toBeFalsy();
-                enter(term, 'foo');
-                enter(term, 'bar');
-                expect(term.token(true)).toEqual(token);
-                expect(term.get_prompt()).toEqual('>>> ');
-                term.logout(true).pop().pop();
-            });
-            it('should login to nested interpreter when using login option', function() {
-                term.push($.noop, {
-                    prompt: '$$$ ',
-                    name: 'option',
-                    login: login.callback,
-                    infiniteLogin: true
+            describe('login', function() {
+                var term = $('<div/>').appendTo('body').terminal($.noop, {
+                    name: 'login_method',
+                    greetings: 'You have been logged in'
                 });
-                enter(term, 'foo');
-                enter(term, 'foo');
-                expect(term.token(true)).toBeFalsy();
-                enter(term, 'foo');
-                enter(term, 'bar');
-                expect(term.token(true)).toEqual(token);
-                expect(term.get_prompt()).toEqual('$$$ ');
-                term.logout(true).pop().pop();
+                var token = 'TOKEN';
+                var login = {
+                    callback: function(user, password, callback) {
+                        if (user === 'foo' && password == 'bar') {
+                            callback(token);
+                        } else {
+                            callback(null);
+                        }
+                    }
+                };
+                it('should not login', function() {
+                    var spy = spyOn(login, 'callback');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    term.focus().login(login.callback);
+                    enter(term, 'foo');
+                    enter(term, 'foo');
+                    expect(login.callback).toHaveBeenCalled();
+                    var last_div = term.find('.terminal-output > div:last-child');
+                    expect(last_div.text()).toEqual('Wrong password!');
+                    expect(term.get_prompt()).toEqual('> ');
+                });
+                it('should ask for login/password on wrong user/password', function() {
+                    term.login(login.callback, true);
+                    for(var i=0; i<10; i++) {
+                        enter(term, 'foo');
+                        expect(term.get_prompt()).toEqual('password: ');
+                        enter(term, 'foo');
+                        expect(term.get_prompt()).toEqual('login: ');
+                    }
+                    term.pop();
+                });
+                it('should login after first time', function() {
+                    term.push($.noop, {prompt: '$$ '}).login(login.callback, true);
+                    enter(term, 'foo');
+                    enter(term, 'bar');
+                    expect(term.token(true)).toEqual(token);
+                    expect(term.get_prompt()).toEqual('$$ ');
+                    // logout from inteprer will call login so we need to pop from login
+                    // and then from intepreter that was pushed
+                    term.logout(true).pop().pop();
+                });
+                it('should login after second time', function() {
+                    term.push($.noop, {prompt: '>>> '}).login(login.callback, true);
+                    enter(term, 'foo');
+                    enter(term, 'foo');
+                    expect(term.token(true)).toBeFalsy();
+                    enter(term, 'foo');
+                    enter(term, 'bar');
+                    expect(term.token(true)).toEqual(token);
+                    expect(term.get_prompt()).toEqual('>>> ');
+                    term.logout(true).pop().pop();
+                });
+                it('should login to nested interpreter when using login option', function() {
+                    term.push($.noop, {
+                        prompt: '$$$ ',
+                        name: 'option',
+                        login: login.callback,
+                        infiniteLogin: true
+                    });
+                    enter(term, 'foo');
+                    enter(term, 'foo');
+                    expect(term.token(true)).toBeFalsy();
+                    enter(term, 'foo');
+                    enter(term, 'bar');
+                    expect(term.token(true)).toEqual(token);
+                    expect(term.get_prompt()).toEqual('$$$ ');
+                    term.destroy().remove();
+                });
+            });
+            describe('settings', function() {
+                var term = $('<div/>').appendTo('body').terminal();
+                it('should return settings even when option is not defined', function() {
+                    var settings = term.settings();
+                    expect($.isPlainObject(settings)).toEqual(true);
+                    term.destroy().remove();
+                    for (var key in settings) {
+                        // name is selector if not defined
+                        if (settings.hasOwnProperty(key) && key !== 'name') {
+                            expect($.terminal.defaults[key]).toEqual(settings[key]);
+                        }
+                    }
+                });
+            });
+            describe('commands', function() {
+                function interpreter(command, term) {}
+                it('should return function', function() {
+                    var term = $('<div/>').appendTo('body').terminal(interpreter);
+                    expect(term.commands()).toEqual(interpreter);
+                    term.push('/test');
+                    expect($.isFunction(term.commands())).toEqual(true);
+                    term.destroy().remove();
+                });
+            });
+            describe('setInterpreter', function() {
+                it('should call set_interpreter with warning', function() {
+                    var term = $('<div/>').appendTo('body').terminal();
+                    var spy = spyOn(term, 'set_interpreter');
+                    var warn = console.warn;
+                    console.warn = $.noop;
+                    var spy = spyOn(console, 'warn');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    term.setInterpreter($.noop);
+                    expect(term.set_interpreter).toHaveBeenCalledWith($.noop);
+                    var warning = 'This function is deprecated, use set_interpreter insead!';
+                    expect(console.warn).toHaveBeenCalledWith(warning);
+                    console.warn = warn;
+                    term.destroy().remove();
+                });
             });
         });
     });

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 12 Jun 2016 17:52:58 +0000
+ * Date: Mon, 13 Jun 2016 14:37:27 +0000
  */
 
 /* TODO:
@@ -4069,7 +4069,7 @@
             resume: function() {
                 if (paused && command_line) {
                     paused = false;
-                    if (self.enabled()) {
+                    if (terminals.front() == self) {
                         command_line.enable().visible();
                     }
                     var original = delayed_commands;
