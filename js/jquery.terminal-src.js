@@ -3774,6 +3774,7 @@
         var command_list = []; // for tab completion
         var url;
         var logins = new Stack(); // stack of logins
+        var init_deferr = $.Deferred();
         var in_login = false;//some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;//used to indicate that user call pause onInit
@@ -3813,6 +3814,14 @@
             // :: restore the state
             // -------------------------------------------------------------
             export_view: function() {
+                var user_export = {};
+                if ($.isFunction(settings.onExport)) {
+                    try {
+                        user_export = settings.onExport();
+                    } catch(e) {
+                        display_exception(e, 'onExport');
+                    }
+                }
                 return $.extend({}, {
                     focus: enabled,
                     mask: command_line.mask(),
@@ -3821,7 +3830,7 @@
                     position: command_line.position(),
                     lines: clone(lines),
                     interpreters: interpreters.clone()
-                }, $.isFunction(settings.onExport) ? settings.onExport() : {});
+                }, user_export);
             },
             // -------------------------------------------------------------
             // :: Restore the state of the previous exported view
@@ -3831,18 +3840,24 @@
                     throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
                 }
                 if ($.isFunction(settings.onImport)) {
-                    settings.onImport(view);
+                    try {
+                        settings.onImport(view);
+                    } catch(e) {
+                        display_exception(e, 'onImport');
+                    }
                 }
-                self.set_prompt(view.prompt);
-                self.set_command(view.command);
-                command_line.position(view.position);
-                command_line.mask(view.mask);
-                if (view.focus) {
-                    self.focus();
-                }
-                lines = clone(view.lines);
-                interpreters = view.interpreters;
-                redraw();
+                init_deferr.then(function() {
+                    self.set_prompt(view.prompt);
+                    self.set_command(view.command);
+                    command_line.position(view.position);
+                    command_line.mask(view.mask);
+                    if (view.focus) {
+                        self.focus();
+                    }
+                    lines = clone(view.lines);
+                    interpreters = view.interpreters;
+                    redraw();
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -3875,27 +3890,29 @@
             // -------------------------------------------------------------
             exec: function(command, silent, deferred) {
                 var d = deferred || new $.Deferred();
-                if ($.isArray(command)) {
-                    (function recur() {
-                        var cmd = command.shift();
-                        if (cmd) {
-                            self.exec(cmd, silent).then(recur);
-                        } else {
-                            d.resolve();
-                        }
-                    })();
-                } else if (paused) {
-                    // both commands executed here (resume will call Term::exec)
-                    // delay command multiple time
-                    delayed_commands.push([command, silent, d]);
-                } else {
-                    // commands may return promise from user code
-                    // it will resolve exec promise when user promise
-                    // is resolved
-                    commands(command, silent, true).then(function() {
-                        d.resolve(self);
-                    });
-                }
+                init_deferr.then(function() {
+                    if ($.isArray(command)) {
+                        (function recur() {
+                            var cmd = command.shift();
+                            if (cmd) {
+                                self.exec(cmd, silent).then(recur);
+                            } else {
+                                d.resolve();
+                            }
+                        })();
+                    } else if (paused) {
+                        // both commands executed here (resume will call Term::exec)
+                        // delay command multiple time
+                        delayed_commands.push([command, silent, d]);
+                    } else {
+                        // commands may return promise from user code
+                        // it will resolve exec promise when user promise
+                        // is resolved
+                        commands(command, silent, true).then(function() {
+                            d.resolve(self);
+                        });
+                    }
+                });
                 return d.promise();
             },
             // -------------------------------------------------------------
@@ -4055,11 +4072,13 @@
             pause: function() {
                 onPause();
                 if (!paused && command_line) {
-                    paused = true;
-                    command_line.disable().hidden();
-                    if ($.isFunction(settings.onPause)) {
-                        settings.onPause();
-                    }
+                    init_deferr.then(function() {
+                        paused = true;
+                        command_line.disable().hidden();
+                        if ($.isFunction(settings.onPause)) {
+                            settings.onPause();
+                        }
+                    });
                 }
                 return self;
             },
@@ -4068,24 +4087,26 @@
             // -------------------------------------------------------------
             resume: function() {
                 if (paused && command_line) {
-                    paused = false;
-                    if (terminals.front() == self) {
-                        command_line.enable().visible();
-                    }
-                    var original = delayed_commands;
-                    delayed_commands = [];
-                    for (var i = 0; i<original.length; ++i) {
-                        self.exec.apply(self, original[i]);
-                    }
-                    self.trigger('resume');
-                    var fn = resume_callbacks.shift();
-                    if (fn) {
-                        fn();
-                    }
-                    scroll_to_bottom();
-                    if ($.isFunction(settings.onResume)) {
-                        settings.onResume();
-                    }
+                    init_deferr.then(function() {
+                        paused = false;
+                        if (terminals.front() == self) {
+                            command_line.enable().visible();
+                        }
+                        var original = delayed_commands;
+                        delayed_commands = [];
+                        for (var i = 0; i<original.length; ++i) {
+                            self.exec.apply(self, original[i]);
+                        }
+                        self.trigger('resume');
+                        var fn = resume_callbacks.shift();
+                        if (fn) {
+                            fn();
+                        }
+                        scroll_to_bottom();
+                        if ($.isFunction(settings.onResume)) {
+                            settings.onResume();
+                        }
+                    });
                 }
                 return self;
             },
@@ -4168,48 +4189,50 @@
             // ::  the events will be not fired. Used on init
             // -------------------------------------------------------------
             focus: function(toggle, silent) {
-                if (terminals.length() === 1) {
-                    if (toggle === false) {
-                        try {
-                            if (!silent && settings.onBlur(self) !== false ||
-                                silent) {
-                                self.disable();
+                init_deferr.then(function() {
+                    if (terminals.length() === 1) {
+                        if (toggle === false) {
+                            try {
+                                if (!silent && settings.onBlur(self) !== false ||
+                                    silent) {
+                                    self.disable();
+                                }
+                            } catch (e) {
+                                display_exception(e, 'onBlur');
+                                throw e;
                             }
-                        } catch (e) {
-                            display_exception(e, 'onBlur');
-                            throw e;
+                        } else {
+                            try {
+                                if (!silent && settings.onFocus(self) !== false ||
+                                    silent) {
+                                    self.enable();
+                                }
+                            } catch (e) {
+                                display_exception(e, 'onFocus');
+                                throw e;
+                            }
                         }
                     } else {
-                        try {
-                            if (!silent && settings.onFocus(self) !== false ||
-                                silent) {
-                                self.enable();
-                            }
-                        } catch (e) {
-                            display_exception(e, 'onFocus');
-                            throw e;
-                        }
-                    }
-                } else {
-                    if (toggle === false) {
-                        self.next();
-                    } else {
-                        var front = terminals.front();
-                        if (front != self) {
-                            front.disable();
-                            if (!silent) {
-                                try {
-                                    settings.onTerminalChange(self);
-                                } catch (e) {
-                                    display_exception(e, 'onTerminalChange');
-                                    throw e;
+                        if (toggle === false) {
+                            self.next();
+                        } else {
+                            var front = terminals.front();
+                            if (front != self) {
+                                front.disable();
+                                if (!silent) {
+                                    try {
+                                        settings.onTerminalChange(self);
+                                    } catch (e) {
+                                        display_exception(e, 'onTerminalChange');
+                                        throw e;
+                                    }
                                 }
                             }
+                            terminals.set(self);
+                            self.enable();
                         }
-                        terminals.set(self);
-                        self.enable();
                     }
-                }
+                });
                 // why this delay - it can't be use for mobile
                 /*
                 self.oneTime(1, function() {
@@ -4221,13 +4244,15 @@
             // :: Disable/Enable terminal that can be enabled by click
             // -------------------------------------------------------------
             freeze: function(freeze) {
-                if (freeze) {
-                    self.disable();
-                    frozen = true;
-                } else {
-                    frozen = false;
-                    self.enable();
-                }
+                init_deferr.then(function() {
+                    if (freeze) {
+                        self.disable();
+                        frozen = true;
+                    } else {
+                        frozen = false;
+                        self.enable();
+                    }
+                });
             },
             // -------------------------------------------------------------
             // :: check if terminal is frozen
@@ -4245,8 +4270,10 @@
                         self.resize();
                     }
                     if (command_line) {
-                        command_line.enable();
-                        enabled = true;
+                        init_deferr.then(function() {
+                            command_line.enable();
+                            enabled = true;
+                        });
                     }
                 }
                 return self;
@@ -4256,8 +4283,10 @@
             // -------------------------------------------------------------
             disable: function() {
                 if (enabled && command_line && !frozen) {
-                    enabled = false;
-                    command_line.disable();
+                    init_deferr.then(function() {
+                        enabled = false;
+                        command_line.disable();
+                    });
                 }
                 return self;
             },
@@ -4302,7 +4331,9 @@
             // :: Change the command line to the new one
             // -------------------------------------------------------------
             set_command: function(command) {
-                command_line.set(command);
+                init_deferr.then(function() {
+                    command_line.set(command);
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -4310,7 +4341,9 @@
             // -------------------------------------------------------------
             insert: function(string) {
                 if (typeof string === 'string') {
-                    command_line.insert(string);
+                    init_deferr.then(function() {
+                        command_line.insert(string);
+                    });
                     return self;
                 } else {
                     throw "insert function argument is not a string";
@@ -4320,16 +4353,18 @@
             // :: Set the prompt of the command line
             // -------------------------------------------------------------
             set_prompt: function(prompt) {
-                if (validate('prompt', prompt)) {
-                    if ($.isFunction(prompt)) {
-                        command_line.prompt(function(callback) {
-                            prompt(callback, self);
-                        });
-                    } else {
-                        command_line.prompt(prompt);
+                init_deferr.then(function() {
+                    if (validate('prompt', prompt)) {
+                        if ($.isFunction(prompt)) {
+                            command_line.prompt(function(callback) {
+                                prompt(callback, self);
+                            });
+                        } else {
+                            command_line.prompt(prompt);
+                        }
+                        interpreters.top().prompt = prompt;
                     }
-                    interpreters.top().prompt = prompt;
-                }
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -4346,7 +4381,9 @@
             // :: strings longer then one)
             // -------------------------------------------------------------
             set_mask: function(mask) {
-                command_line.mask(mask === true ? settings.maskChar : mask);
+                init_deferr.then(function() {
+                    command_line.mask(mask === true ? settings.maskChar : mask);
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -4462,17 +4499,19 @@
             // :: Update the output line - line number can be negative
             // -------------------------------------------------------------
             update: function(line, string) {
-                if (line < 0) {
-                    line = lines.length + line; // yes +
-                }
-                if (!lines[line]) {
-                    self.error('Invalid line number ' + line);
-                } else {
-                    lines[line][0] = string;
-                    // it would be hard to figure out which div need to be
-                    // updated so we update everything
-                    redraw();
-                }
+                init_deferr.then(function() {
+                    if (line < 0) {
+                        line = lines.length + line; // yes +
+                    }
+                    if (!lines[line]) {
+                        self.error('Invalid line number ' + line);
+                    } else {
+                        lines[line][0] = string;
+                        // it would be hard to figure out which div need to be
+                        // updated so we update everything
+                        redraw();
+                    }
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -4496,8 +4535,8 @@
                             keepWords: false
                         }, options || {});
                         process_line(string, locals);
-                        // extended commands should be processed only once
-                        // in echo and not on redraw
+                        // extended commands should be processed only
+                        // once in echo and not on redraw
                         lines.push([string, $.extend(locals, {
                             exec: false
                         })]);
@@ -4593,19 +4632,21 @@
                 if (in_login) {
                     throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
                 }
-                if (local) {
-                    var login = logins.pop();
-                    self.set_token(undefined, true);
-                    self.login.apply(self, login);
-                } else {
-                    while (interpreters.size() > 0) {
-                        // pop will call global_logout that will call login
-                        // and size will be > 0; this is workaround the problem
-                        if (self.pop()) {
-                            break;
+                init_deferr.then(function() {
+                    if (local) {
+                        var login = logins.pop();
+                        self.set_token(undefined, true);
+                        self.login.apply(self, login);
+                    } else {
+                        while (interpreters.size() > 0) {
+                            // pop will call global_logout that will call login
+                            // and size will be > 0; this is workaround the problem
+                            if (self.pop()) {
+                                break;
+                            }
                         }
                     }
-                }
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -4684,56 +4725,58 @@
             // :: Push a new interenter on the Stack
             // -------------------------------------------------------------
             push: function(interpreter, options) {
-                options = options || {};
-                var defaults = {
-                    infiniteLogin: false
-                };
-                var settings = $.extend({}, defaults, options);
-                if (!settings.name && prev_command) {
-                    // push is called in login
-                    settings.name = prev_command.name;
-                }
-                if (settings.prompt === undefined) {
-                    settings.prompt = (settings.name || '>') + ' ';
-                }
-                //names.push(options.name);
-                var top = interpreters.top();
-                if (top) {
-                    top.mask = command_line.mask();
-                }
-                var was_paused = paused;
-                //self.pause();
-                make_interpreter(interpreter, !!options.login, function(ret) {
-                    // result is object with interpreter and completion
-                    // properties
-                    interpreters.push($.extend({}, ret, settings));
-                    if ($.isArray(ret.completion) && settings.completion === true) {
-                        interpreters.top().completion = ret.completion;
-                    } else if (!ret.completion && settings.completion === true) {
-                        interpreters.top().completion = false;
+                init_deferr.then(function() {
+                    options = options || {};
+                    var defaults = {
+                        infiniteLogin: false
+                    };
+                    var settings = $.extend({}, defaults, options);
+                    if (!settings.name && prev_command) {
+                        // push is called in login
+                        settings.name = prev_command.name;
                     }
-                    if (settings.login) {
-                        var type = $.type(settings.login);
-                        if (type == 'function') {
-                            // self.pop on error
-                            self.login(settings.login,
-                                       settings.infiniteLogin,
-                                       prepare_top_interpreter,
-                                       settings.infiniteLogin ? $.noop : self.pop);
-                        } else if ($.type(interpreter) == 'string' &&
-                                   type == 'string' || type == 'boolean') {
-                            self.login(make_json_rpc_login(interpreter,
-                                                           settings.login),
-                                       settings.infiniteLogin,
-                                       prepare_top_interpreter,
-                                       settings.infiniteLogin ? $.noop : self.pop);
+                    if (settings.prompt === undefined) {
+                        settings.prompt = (settings.name || '>') + ' ';
+                    }
+                    //names.push(options.name);
+                    var top = interpreters.top();
+                    if (top) {
+                        top.mask = command_line.mask();
+                    }
+                    var was_paused = paused;
+                    //self.pause();
+                    make_interpreter(interpreter, !!options.login, function(ret) {
+                        // result is object with interpreter and completion
+                        // properties
+                        interpreters.push($.extend({}, ret, settings));
+                        if ($.isArray(ret.completion) && settings.completion === true) {
+                            interpreters.top().completion = ret.completion;
+                        } else if (!ret.completion && settings.completion === true) {
+                            interpreters.top().completion = false;
                         }
-                    } else {
-                        prepare_top_interpreter();
-                    }
-                    if (!was_paused) {
-                        self.resume();
-                    }
+                        if (settings.login) {
+                            var type = $.type(settings.login);
+                            if (type == 'function') {
+                                // self.pop on error
+                                self.login(settings.login,
+                                           settings.infiniteLogin,
+                                           prepare_top_interpreter,
+                                           settings.infiniteLogin ? $.noop : self.pop);
+                            } else if ($.type(interpreter) == 'string' &&
+                                       type == 'string' || type == 'boolean') {
+                                self.login(make_json_rpc_login(interpreter,
+                                                               settings.login),
+                                           settings.infiniteLogin,
+                                           prepare_top_interpreter,
+                                           settings.infiniteLogin ? $.noop : self.pop);
+                            }
+                        } else {
+                            prepare_top_interpreter();
+                        }
+                        if (!was_paused) {
+                            self.resume();
+                        }
+                    });
                 });
                 return self;
             },
@@ -4810,11 +4853,13 @@
             // :: Reinitialize the terminal
             // -------------------------------------------------------------
             reset: function() {
-                self.clear();
-                while(interpreters.size() > 1) {
-                    interpreters.pop();
-                }
-                initialize();
+                init_deferr.then(function() {
+                    self.clear();
+                    while(interpreters.size() > 1) {
+                        interpreters.pop();
+                    }
+                    initialize();
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -4822,15 +4867,17 @@
             // :: logout you until you refresh the browser
             // -------------------------------------------------------------
             purge: function() {
-                var prefix = self.prefix_name() + '_';
-                var names = $.Storage.get(prefix + 'interpreters');
-                $.each($.parseJSON(names), function(_, name) {
-                    $.Storage.remove(name + '_commands');
-                    $.Storage.remove(name + '_token');
-                    $.Storage.remove(name + '_login');
+                init_deferr.then(function() {
+                    var prefix = self.prefix_name() + '_';
+                    var names = $.Storage.get(prefix + 'interpreters');
+                    $.each($.parseJSON(names), function(_, name) {
+                        $.Storage.remove(name + '_commands');
+                        $.Storage.remove(name + '_token');
+                        $.Storage.remove(name + '_login');
+                    });
+                    command_line.purge();
+                    $.Storage.remove(prefix + 'interpreters');
                 });
-                command_line.purge();
-                $.Storage.remove(prefix + 'interpreters');
                 return self;
             },
             // -------------------------------------------------------------
@@ -4839,21 +4886,23 @@
             // :: when you refresh the browser
             // -------------------------------------------------------------
             destroy: function() {
-                command_line.destroy().remove();
-                output.remove();
-                $(document).unbind('.terminal');
-                $(window).unbind('.terminal');
-                self.unbind('click mousewheel');
-                self.removeData('terminal').removeClass('terminal');
-                if (settings.width) {
-                    self.css('width', '');
-                }
-                if (settings.height) {
-                    self.css('height', '');
-                }
-                $(window).off('blur', blur_terminal).
-                    off('focus', focus_terminal);
-                terminals.remove(terminal_id);
+                init_deferr.then(function() {
+                    command_line.destroy().remove();
+                    output.remove();
+                    $(document).unbind('.terminal');
+                    $(window).unbind('.terminal');
+                    self.unbind('click mousewheel');
+                    self.removeData('terminal').removeClass('terminal');
+                    if (settings.width) {
+                        self.css('width', '');
+                    }
+                    if (settings.height) {
+                        self.css('height', '');
+                    }
+                    $(window).off('blur', blur_terminal).
+                        off('focus', focus_terminal);
+                    terminals.remove(terminal_id);
+                });
                 return self;
             }
         }, function(name, fun) {
@@ -5182,6 +5231,7 @@
                     }
                 });
             }
+            init_deferr.resolve();
         }); // make_interpreter
         self.data('terminal', self);
         return self;
