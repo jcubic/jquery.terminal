@@ -278,8 +278,10 @@ function enter_key() {
     shortcut(false, false, false, 13);
 }
 function enter(term, text) {
-    term.insert(text);
+    var active = $.terminal.active();
+    term.insert(text).focus();
     enter_key();
+    active.focus();
 }
 function tests_on_ready() {
     describe('Terminal plugin', function() {
@@ -555,7 +557,12 @@ function tests_on_ready() {
                 term.destroy().remove();
             });
         });
-        function JSONRPCMock(url, object, no_system_describe) {
+        function JSONRPCMock(url, object, options) {
+            var defaults = {
+                no_system_describe: false,
+                async: false
+            };
+            var settings = $.extend({}, defaults, options);
             var ajax = $.ajax;
             var system = {
                 'sdversion': '1.0',
@@ -585,7 +592,7 @@ function tests_on_ready() {
                         var req = JSON.parse(obj.data);
                         var resp;
                         if (req.method == 'system.describe') {
-                            if (!no_system_describe) {
+                            if (!settings.no_system_describe) {
                                 resp = system;
                             } else {
                                 var data = obj.data;
@@ -617,8 +624,8 @@ function tests_on_ready() {
                                 error: error
                             };
                         }
-                        setTimeout(function() {
-                            resp = JSON.stringify(resp);
+                        resp = JSON.stringify(resp);
+                        function done() {
                             if ($.isFunction(obj.success)) {
                                 obj.success(resp, 'OK', {
                                     getResponseHeader: function(header) {
@@ -629,7 +636,12 @@ function tests_on_ready() {
                                 });
                             }
                             defer.resolve(resp);
-                        }, 100);
+                        }
+                        if (settings.async) {
+                            setTimeout(done, 100);
+                        } else {
+                            done();
+                        }
                     } catch (e) {
                         throw new Error(e.message);
                     }
@@ -653,7 +665,8 @@ function tests_on_ready() {
             }
         };
         JSONRPCMock('/test', object);
-        JSONRPCMock('/no_describe', object, true);
+        JSONRPCMock('/no_describe', object, {no_system_describe: true});
+        JSONRPCMock('/async', object, {async: true});
         describe('JSON-RPC', function() {
             var term = $('<div/>').appendTo('body').terminal('/test', {
                 login: true
@@ -853,26 +866,18 @@ function tests_on_ready() {
                 expect(type.test).toHaveBeenCalled();
             });
             it('should call json-rpc', function() {
-                if (jasmine.Clock) {
-                    jasmine.Clock.useMock();
-                } else {
-                    jasmine.clock().install();
-                }
                 var spy = spyOn(object, 'echo');
                 if (spy.andCallThrough) {
                     spy.andCallThrough();
                 } else {
                     spy.and.callThrough();
                 }
-                term.pop().pop();
+                term.pop().pop().focus();
                 enter(term, 'quux');
                 expect(term.get_prompt()).toEqual('quux> ');
+                // for unknown reason cmd have visibility set to hidden
+                term.cmd().enable().visible();
                 enter(term, 'echo foo bar');
-                if (jasmine.Clock) {
-                    jasmine.Clock.tick(200);
-                } else {
-                    jasmine.clock().tick(200);
-                }
                 expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
                 term.destroy().remove();
                 term = $('<div/>').appendTo('body').terminal([
@@ -880,13 +885,8 @@ function tests_on_ready() {
                 ]);
                 term.focus();
                 enter(term, 'echo TOKEN world'); // we call echo without login
-                if (jasmine.Clock) {
-                    jasmine.Clock.tick(200);
-                } else {
-                    jasmine.clock().tick(200);
-                }
-                expect(object.echo).toHaveBeenCalledWith('TOKEN', 'world');
-                //term.destroy().remove();
+                expect(spy).toHaveBeenCalledWith('TOKEN', 'world');
+                term.destroy().remove();
             });
         });
         describe('jQuery Terminal object', function() {
@@ -988,38 +988,37 @@ function tests_on_ready() {
             });
             it('should complete rpc method', function(done) {
                 term.push('/test', {
-                    completion: true
+                    completion: true,
+                    prompt:'??? '
                 });
+                term.set_command('').resume().focus();
+                term.insert('ec');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('echo');
                 setTimeout(function() {
-                    term.set_command('');
-                    term.insert('ec');
-                    shortcut(false, false, false, 9);
-                    expect(term.get_command()).toEqual('echo');
                     done();
                 }, 200);
             });
-            it('should complete command from array when used with JSON-RPC', function(done) {
+            it('should complete command from array when used with JSON-RPC', function() {
                 term.push('/test', {
                     completion: ['foo', 'bar', 'baz']
                 });
-                setTimeout(function() {
-                    term.set_command('');
-                    term.insert('f');
-                    shortcut(false, false, false, 9);
-                    expect(term.get_command()).toEqual('foo');
-                    done();
-                }, 200);
+                term.focus().resume().set_command('');
+                term.insert('f');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('foo');
             });
             it('should insert tab when RPC used without system.describe', function(done) {
                 term.push('/no_describe', {
                     completion: true
                 });
+                term.echo('completion');
                 setTimeout(function() {
-                    term.set_command('');
+                    term.focus().set_command('').cmd().enable().visible();
                     term.insert('f');
                     shortcut(false, false, false, 9);
                     expect(term.get_command()).toEqual('f\t');
-                    term.destroy().remove();
+                    //term.destroy().remove();
                     done();
                 }, 200);
             });
@@ -1292,6 +1291,9 @@ function tests_on_ready() {
                 });
                 it('should login after second time', function() {
                     term.push($.noop, {prompt: '>>> '}).login(login.callback, true);
+                    if (term.token(true)) {
+                        term.logout(true);
+                    }
                     enter(term, 'foo');
                     enter(term, 'foo');
                     expect(term.token(true)).toBeFalsy();
@@ -1308,6 +1310,9 @@ function tests_on_ready() {
                         login: login.callback,
                         infiniteLogin: true
                     });
+                    if (term.token(true)) {
+                        term.logout(true);
+                    }
                     enter(term, 'foo');
                     enter(term, 'foo');
                     expect(term.token(true)).toBeFalsy();

@@ -2872,7 +2872,13 @@
                                     if (json.error) {
                                         display_json_rpc_error(json.error);
                                     } else {
-                                        display_object(json.result);
+                                        if ($.isFunction(settings.processRPCResponse)) {
+                                            settings.processRPCResponse.call(self,
+                                                                             json.result,
+                                                                             self);
+                                        } else {
+                                            display_object(json.result);
+                                        }
                                     }
                                     self.resume();
                                 }, ajax_error);
@@ -4090,8 +4096,9 @@
                     init_deferr.then(function() {
                         paused = false;
                         if (terminals.front() == self) {
-                            command_line.enable().visible();
+                            command_line.enable();
                         }
+                        command_line.visible();
                         var original = delayed_commands;
                         delayed_commands = [];
                         for (var i = 0; i<original.length; ++i) {
