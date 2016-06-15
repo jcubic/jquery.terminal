@@ -781,6 +781,7 @@ function tests_on_ready() {
                         completion: true
                     });
                     expect(term.export_view().interpreters.top().completion).toBeFalsy();
+                    term.destroy().remove();
                 });
             });
         });
@@ -1011,13 +1012,12 @@ function tests_on_ready() {
                 term.push('/no_describe', {
                     completion: true
                 });
-                term.echo('completion');
                 setTimeout(function() {
                     term.focus().set_command('').cmd().enable().visible();
                     term.insert('f');
                     shortcut(false, false, false, 9);
                     expect(term.get_command()).toEqual('f\t');
-                    //term.destroy().remove();
+                    term.destroy().remove();
                     done();
                 }, 200);
             });
@@ -1105,7 +1105,7 @@ function tests_on_ready() {
                 expect(location.hash).toEqual('#[[8,1,"foo"],[8,2,"bar"]]');
                 term.destroy().remove();
             });
-            xdescribe('exec', function() {
+            describe('exec', function() {
                 var counter = 0;
                 var interpreter = {
                     foo: function() {
@@ -1169,7 +1169,7 @@ function tests_on_ready() {
                     return term.find('.terminal-output > div:not(.command)')
                         .map(function() {
                             return $(this).text();
-                        }).get().join('\n')
+                        }).get().join('\n');
                 }
                 it('should execute functions in order when using exec.then', function(done) {
                     term.clear();
@@ -1205,12 +1205,12 @@ function tests_on_ready() {
                     }
                     term.exec(array).then(function() {
                         expect(text_echoed()).toEqual(test_str);
-                        term.destroy().remove();
+                        //term.destroy().remove();
                         done();
                     });
                 }, 10000);
             });
-            describe('methods after creating async rpc with system.desrcibe', function() {
+            describe('methods after creating async rpc with system.describe', function() {
                 it('should call methods', function(done) {
                     var spy = spyOn(object, 'echo');
                     if (spy.andCallThrough) {
@@ -1418,6 +1418,9 @@ function tests_on_ready() {
                     }
                     term.set_prompt('$ ');
                     term.set_interpreter('/async', true).focus();
+                    if (term.token(true)) {
+                        term.logout(true);
+                    }
                     enter(term, 'demo');
                     enter(term, 'demo');
                     setTimeout(function() {
@@ -1426,10 +1429,10 @@ function tests_on_ready() {
                         enter(term, 'echo foo');
                         setTimeout(function() {
                             expect(spy_echo).toHaveBeenCalledWith(token, 'foo');
-                            term.destroy().remove();
+                            //term.destroy().remove();
                             done();
-                        }, 400);
-                    }, 400);
+                        }, 1000);
+                    }, 1000);
                 });
             });
             describe('greetings', function() {
@@ -1460,6 +1463,14 @@ function tests_on_ready() {
                     setTimeout(function() {
                         last_div = term.find('.terminal-output > div:last-child');
                         expect(last_div.text()).toEqual(greetings.string.replace(/ /g, ' '));
+                        term.settings().greetings = undefined;
+                        term.clear().greetings();
+                        last_div = term.find('.terminal-output > div:last-child');
+                        var text = last_div.find('div').map(function() {
+                            return $(this).text();
+                        }).get().join('\n');
+                        expect(text).toEqual(term.signature().replace(/ /g, ' '));
+                        term.destroy();
                         done();
                     }, 400);
                 });
