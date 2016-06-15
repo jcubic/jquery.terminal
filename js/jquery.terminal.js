@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 15 Jun 2016 18:27:01 +0000
+ * Date: Wed, 15 Jun 2016 19:08:26 +0000
  */
 
 /* TODO:
@@ -3896,7 +3896,7 @@
             // -------------------------------------------------------------
             exec: function(command, silent, deferred) {
                 var d = deferred || new $.Deferred();
-                init_deferr.then(function() {
+                function process() {
                     if ($.isArray(command)) {
                         (function recur() {
                             var cmd = command.shift();
@@ -3918,7 +3918,14 @@
                             d.resolve(self);
                         });
                     }
-                });
+                }
+                // while testing it didn't executed last exec when using this
+                // for resolved deferred
+                if (init_deferr.state() != 'resolved') {
+                    init_deferr.then(process);
+                } else {
+                    process();
+                }
                 return d.promise();
             },
             // -------------------------------------------------------------
@@ -4094,27 +4101,25 @@
             // -------------------------------------------------------------
             resume: function() {
                 if (paused && command_line) {
-                    init_deferr.then(function() {
-                        paused = false;
-                        if (terminals.front() == self) {
-                            command_line.enable();
-                        }
-                        command_line.visible();
-                        var original = delayed_commands;
-                        delayed_commands = [];
-                        for (var i = 0; i<original.length; ++i) {
-                            self.exec.apply(self, original[i]);
-                        }
-                        self.trigger('resume');
-                        var fn = resume_callbacks.shift();
-                        if (fn) {
-                            fn();
-                        }
-                        scroll_to_bottom();
-                        if ($.isFunction(settings.onResume)) {
-                            settings.onResume();
-                        }
-                    });
+                    paused = false;
+                    if (terminals.front() == self) {
+                        command_line.enable();
+                    }
+                    command_line.visible();
+                    var original = delayed_commands;
+                    delayed_commands = [];
+                    for (var i = 0; i < original.length; ++i) {
+                        self.exec.apply(self, original[i]);
+                    }
+                    self.trigger('resume');
+                    var fn = resume_callbacks.shift();
+                    if (fn) {
+                        fn();
+                    }
+                    scroll_to_bottom();
+                    if ($.isFunction(settings.onResume)) {
+                        settings.onResume();
+                    }
                 }
                 return self;
             },
