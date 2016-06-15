@@ -4038,7 +4038,7 @@
                     console.warn('This function is deprecated, use set_inte'+
                                  'rpreter insead!');
                 }
-                self.set_interpreter.apply(self, arguments);
+                return self.set_interpreter.apply(self, arguments);
             },
             // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
@@ -4058,6 +4058,7 @@
                 } else {
                     overwrite_interpreter();
                 }
+                return self;
             },
             // -------------------------------------------------------------
             // :: Show user greetings or terminal signature

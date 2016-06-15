@@ -656,6 +656,9 @@ function tests_on_ready() {
             echo: function(token, str) {
                 return str;
             },
+            foo: function(token, obj) {
+                return obj;
+            },
             login: function(user, password) {
                 if (user == 'demo' && password == 'demo') {
                     return token;
@@ -986,18 +989,14 @@ function tests_on_ready() {
                 shortcut(false, false, false, 9);
                 expect(term.get_command()).toEqual('lorem\\ ipsum one');
             });
-            it('should complete rpc method', function(done) {
+            it('should complete rpc method', function() {
                 term.push('/test', {
-                    completion: true,
-                    prompt:'??? '
+                    completion: true
                 });
                 term.set_command('').resume().focus();
                 term.insert('ec');
                 shortcut(false, false, false, 9);
                 expect(term.get_command()).toEqual('echo');
-                setTimeout(function() {
-                    done();
-                }, 200);
             });
             it('should complete command from array when used with JSON-RPC', function() {
                 term.push('/test', {
@@ -1211,6 +1210,25 @@ function tests_on_ready() {
                     });
                 }, 10000);
             });
+            describe('methods after creating async rpc with system.desrcibe', function() {
+                it('should call methods', function(done) {
+                    var spy = spyOn(object, 'echo');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    var term = $('<div/>').terminal('/async');
+                    term.exec('echo foo bar');
+                    term.insert('foo');
+                    setTimeout(function() {
+                        expect(spy).toHaveBeenCalledWith('foo', 'bar');
+                        expect(term.get_command()).toEqual('foo');
+                        term.destroy().remove();
+                        done();
+                    }, 800);
+                });
+            });
             describe('autologin', function() {
                 var token = 'TOKEN';
                 var options = {
@@ -1285,7 +1303,7 @@ function tests_on_ready() {
                     enter(term, 'bar');
                     expect(term.token(true)).toEqual(token);
                     expect(term.get_prompt()).toEqual('$$ ');
-                    // logout from inteprer will call login so we need to pop from login
+                    // logout from interpreter, will call login so we need to pop from login
                     // and then from intepreter that was pushed
                     term.logout(true).pop().pop();
                 });
@@ -1365,6 +1383,85 @@ function tests_on_ready() {
                     expect(console.warn).toHaveBeenCalledWith(warning);
                     console.warn = warn;
                     term.destroy().remove();
+                });
+            });
+            describe('set_interpreter', function() {
+                var term = $('<div/>').appendTo('body').terminal($.noop);
+                it('should change intepreter', function() {
+                    var test = {
+                        interpreter: function(command, term) {}
+                    };
+                    var spy = spyOn(test, 'interpreter');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    expect(term.commands()).toEqual($.noop);
+                    term.set_interpreter(test.interpreter);
+                    expect(term.commands()).toEqual(test.interpreter);
+                    term.exec('foo');
+                    expect(test.interpreter).toHaveBeenCalledWith('foo', term);
+                });
+                it('should create async JSON-RPC with login', function(done) {
+                    var spy_echo = spyOn(object, 'echo');
+                    if (spy_echo.andCallThrough) {
+                        spy_echo.andCallThrough();
+                    } else {
+                        spy_echo.and.callThrough();
+                    }
+                    var spy_login = spyOn(object, 'login');
+                    if (spy_login.andCallThrough) {
+                        spy_login.andCallThrough();
+                    } else {
+                        spy_login.and.callThrough();
+                    }
+                    term.set_prompt('$ ');
+                    term.set_interpreter('/async', true).focus();
+                    enter(term, 'demo');
+                    enter(term, 'demo');
+                    setTimeout(function() {
+                        expect(term.get_prompt()).toEqual('$ ');
+                        expect(spy_login).toHaveBeenCalledWith('demo', 'demo');
+                        enter(term, 'echo foo');
+                        setTimeout(function() {
+                            expect(spy_echo).toHaveBeenCalledWith(token, 'foo');
+                            term.destroy().remove();
+                            done();
+                        }, 400);
+                    }, 400);
+                });
+            });
+            describe('greetings', function() {
+                it('should show greetings', function(done) {
+                    var greetings = {
+                        fn: function(callback) {
+                            setTimeout(function() {
+                                callback(greetings.string);
+                            }, 200);
+                        },
+                        string: 'Hello World!'
+                    };
+                    var spy = spyOn(greetings, 'fn');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    var term = $('<div/>').terminal($.noop, {
+                        greetings: greetings.string
+                    });
+                    term.clear().greetings();
+                    var last_div = term.find('.terminal-output > div:last-child');
+                    expect(last_div.text()).toEqual(greetings.string.replace(/ /g, ' '));
+                    term.settings().greetings = greetings.fn;
+                    term.clear().greetings();
+                    expect(greetings.fn).toHaveBeenCalled();
+                    setTimeout(function() {
+                        last_div = term.find('.terminal-output > div:last-child');
+                        expect(last_div.text()).toEqual(greetings.string.replace(/ /g, ' '));
+                        done();
+                    }, 400);
                 });
             });
         });

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 14 Jun 2016 14:01:46 +0000
+ * Date: Wed, 15 Jun 2016 18:27:01 +0000
  */
 
 /* TODO:
@@ -4038,7 +4038,7 @@
                     console.warn('This function is deprecated, use set_inte'+
                                  'rpreter insead!');
                 }
-                self.set_interpreter.apply(self, arguments);
+                return self.set_interpreter.apply(self, arguments);
             },
             // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
@@ -4058,6 +4058,7 @@
                 } else {
                     overwrite_interpreter();
                 }
+                return self;
             },
             // -------------------------------------------------------------
             // :: Show user greetings or terminal signature
