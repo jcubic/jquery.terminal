@@ -1205,7 +1205,7 @@ function tests_on_ready() {
                     }
                     term.exec(array).then(function() {
                         expect(text_echoed()).toEqual(test_str);
-                        //term.destroy().remove();
+                        term.destroy().remove();
                         done();
                     });
                 }, 10000);

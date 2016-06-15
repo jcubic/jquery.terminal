@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 15 Jun 2016 19:08:26 +0000
+ * Date: Wed, 15 Jun 2016 19:21:27 +0000
  */
 
 /* TODO:
@@ -2711,6 +2711,18 @@
                 settings.onRPCError.call(self, error);
             } else {
                 self.error('&#91;RPC&#93; ' + error.message);
+                if (error.error && error.error.message) {
+                    error = error.error;
+                    // more detailed error message
+                    var msg = '\t' + error.message;
+                    if (error.file) {
+                        msg += ' in file "' + error.file.replace(/.*\//, '') + '"';
+                    }
+                    if (error.at) {
+                        msg += ' at line ' + error.at;
+                    }
+                    self.error(msg);
+                }
             }
         }
         // ---------------------------------------------------------------------
