@@ -560,7 +560,8 @@ function tests_on_ready() {
         function JSONRPCMock(url, object, options) {
             var defaults = {
                 no_system_describe: false,
-                async: false
+                async: false,
+                error: $.noop
             };
             var settings = $.extend({}, defaults, options);
             var ajax = $.ajax;
@@ -652,12 +653,16 @@ function tests_on_ready() {
             }
         }
         var token = 'TOKEN';
+        var exception = 'Some Exception';
         var object = {
             echo: function(token, str) {
                 return str;
             },
             foo: function(token, obj) {
                 return obj;
+            },
+            exception: function(token) {
+                throw new Error(exception);
             },
             login: function(user, password) {
                 if (user == 'demo' && password == 'demo') {
@@ -890,6 +895,11 @@ function tests_on_ready() {
                 term.focus();
                 enter(term, 'echo TOKEN world'); // we call echo without login
                 expect(spy).toHaveBeenCalledWith('TOKEN', 'world');
+            });
+            it('should show error', function() {
+                enter(term, 'exception TOKEN');
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.text().replace(/ /g, ' ')).toEqual('[RPC] ' +exception);
                 term.destroy().remove();
             });
         });
