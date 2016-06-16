@@ -1,4 +1,4 @@
-VERSION=0.10.11
+VERSION=0.10.12
 COMPRESS=uglifyjs
 SED=sed
 CP=cp
@@ -6,7 +6,8 @@ RM=rm
 CAT=cat
 DATE=`date -uR`
 
-ALL: js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
+
+ALL: Makefile .$(VERSION) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
 
 bower.json: bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" bower.in > bower.json
@@ -37,12 +38,16 @@ css/jquery.terminal.min.css: css/jquery.terminal-$(VERSION).min.css
 
 css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 	java -jar bin/yuicompressor-2.4.8.jar css/jquery.terminal-$(VERSION).css -o css/jquery.terminal-$(VERSION).min.css
+	sed -i -e 's/0,100%/0%,100%/g' css/jquery.terminal-$(VERSION).min.css
 
 README.md: README.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" < README.in > README.md
 
 .$(VERSION):
 	touch .$(VERSION)
+
+Makefile: Makefile.in
+	sed -e "s/{{VER""SION}}/"$(VERSION)"/" Makefile.in > Makefile
 
 terminal.jquery.json: manifest .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json
