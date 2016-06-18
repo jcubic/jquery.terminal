@@ -7,3 +7,5 @@ www
 test
 bower_components
 node_modules
+coverage
+reports
