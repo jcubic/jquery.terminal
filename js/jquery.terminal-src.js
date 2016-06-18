@@ -3908,7 +3908,7 @@
             // -------------------------------------------------------------
             exec: function(command, silent, deferred) {
                 var d = deferred || new $.Deferred();
-                function process() {
+                function run() {
                     if ($.isArray(command)) {
                         (function recur() {
                             var cmd = command.shift();
@@ -3934,9 +3934,9 @@
                 // while testing it didn't executed last exec when using this
                 // for resolved deferred
                 if (init_deferr.state() != 'resolved') {
-                    init_deferr.then(process);
+                    init_deferr.then(run);
                 } else {
-                    process();
+                    run();
                 }
                 return d.promise();
             },
@@ -4112,7 +4112,7 @@
             // :: Resume the previously paused terminal
             // -------------------------------------------------------------
             resume: function() {
-                if (paused && command_line) {
+                function run() {
                     paused = false;
                     if (terminals.front() == self) {
                         command_line.enable();
@@ -4131,6 +4131,13 @@
                     scroll_to_bottom();
                     if ($.isFunction(settings.onResume)) {
                         settings.onResume();
+                    }
+                }
+                if (paused && command_line) {
+                    if (init_deferr.state() != 'resolved') {
+                        init_deferr.then(run);
+                    } else {
+                        run();
                     }
                 }
                 return self;
