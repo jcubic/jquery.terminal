@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 19 Jun 2016 18:43:23 +0000
+ * Date: Sun, 19 Jun 2016 20:14:51 +0000
  */
 
 /* TODO:
@@ -3826,7 +3826,6 @@
                     settings.onClear(self);
                 } catch (e) {
                     display_exception(e, 'onClear');
-                    throw e;
                 }
                 self.attr({ scrollTop: 0});
                 return self;
@@ -4222,7 +4221,7 @@
             // :: Make the terminal in focus or blur depending on the first
             // :: argument. If there is more then one terminal it will
             // :: switch to next one, if the second argument is set to true
-            // ::  the events will be not fired. Used on init
+            // :: the events will be not fired. Used on init
             // -------------------------------------------------------------
             focus: function(toggle, silent) {
                 init_deferr.then(function() {
@@ -4305,12 +4304,10 @@
                         //enabling first time
                         self.resize();
                     }
-                    if (command_line) {
-                        init_deferr.then(function() {
-                            command_line.enable();
-                            enabled = true;
-                        });
-                    }
+                    init_deferr.then(function() {
+                        command_line.enable();
+                        enabled = true;
+                    });
                 }
                 return self;
             },
@@ -4318,7 +4315,7 @@
             // :: Disable the terminal
             // -------------------------------------------------------------
             disable: function() {
-                if (enabled && command_line && !frozen) {
+                if (enabled && !frozen) {
                     init_deferr.then(function() {
                         enabled = false;
                         command_line.disable();

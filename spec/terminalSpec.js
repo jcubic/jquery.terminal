@@ -1115,7 +1115,7 @@ function tests_on_ready() {
                 expect(location.hash).toEqual('#[[8,1,"foo"],[8,2,"bar"]]');
                 term.destroy().remove();
             });
-            xdescribe('exec', function() {
+            describe('exec', function() {
                 var counter = 0;
                 var interpreter = {
                     foo: function() {
@@ -1540,8 +1540,8 @@ function tests_on_ready() {
                 });
                 it('should start recording commands', function(done) {
                     location.hash = '';
-                    var hash = '#[[8,1,"foo"],[8,2,"bar"],[16,3,null],[16,4,"foo"],'+
-                        '[16,5,"bar"]]';
+                    var hash = '#[[8,1,"foo"],[8,2,"bar"],[17,3,null],[17,4,"foo"],'+
+                        '[17,5,"bar"]]';
                     term.history_state(true).focus();
                     // historyState option is turn on after 1 miliseconds to prevent
                     // command, that's enabled the history, to be included in hash
@@ -1563,6 +1563,71 @@ function tests_on_ready() {
                     term1.focus();
                     term1.next();
                     expect($.terminal.active()).toBe(term2);
+                    term1.destroy();
+                    term2.destroy();
+                });
+            });
+            describe('focus', function() {
+                var term1 = $('<div/>').terminal();
+                var term2 = $('<div/>').terminal();
+                it('should focus on first terminal', function() {
+                    term1.focus();
+                    expect($.terminal.active()).toBe(term1);
+                });
+                it('should focus on second terminal', function() {
+                    term1.focus(false);
+                    expect($.terminal.active()).toBe(term2);
+                    term1.destroy();
+                    term2.destroy();
+                });
+            });
+            describe('freeze/frozen', function() {
+                var term = $('<div/>').appendTo('body').terminal();
+                it('should accept input', function() {
+                    term.focus();
+                    enter_text('foo');
+                    expect(term.frozen()).toBeFalsy();
+                    expect(term.get_command()).toEqual('foo');
+                });
+                it('should be frozen', function() {
+                    term.set_command('');
+                    term.freeze(true);
+                    expect(term.frozen()).toBeTruthy();
+                    enter_text('bar');
+                    expect(term.get_command()).toEqual('');
+                });
+                it('should not enable terminal', function() {
+                    expect(term.enabled()).toBeFalsy();
+                    term.enable();
+                    expect(term.enabled()).toBeFalsy();
+                });
+                it('should accpet input again', function() {
+                    term.freeze(false);
+                    expect(term.frozen()).toBeFalsy();
+                    enter_text('baz');
+                    expect(term.get_command()).toEqual('baz');
+                    term.destroy();
+                });
+            });
+            describe('enable/disable/enabled', function() {
+                var term = $('<div/>').appendTo('body').terminal();
+                it('terminal should be enabled', function() {
+                    term.focus();
+                    expect(term.enabled()).toBeTruthy();
+                });
+                it('should disable terminal', function() {
+                    term.disable();
+                    expect(term.enabled()).toBeFalsy();
+                });
+                it('should disable command line plugin', function() {
+                    expect(term.cmd().isenabled()).toBeFalsy();
+                });
+                it('should enable terminal', function() {
+                    term.enable();
+                    expect(term.enabled()).toBeTruthy();
+                });
+                it('should enable command line plugin', function() {
+                    expect(term.cmd().isenabled()).toBeTruthy();
                 });
             });
         });
