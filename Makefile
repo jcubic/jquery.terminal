@@ -6,6 +6,7 @@ RM=rm
 CAT=cat
 DATE=`date -uR`
 
+
 ALL: Makefile .$(VERSION) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
 
 bower.json: bower.in .$(VERSION)
@@ -65,6 +66,7 @@ jshint:
 	jshint js/dterm.js
 	jshint js/xml_formatting.js
 	jshint js/unix_formatting.js
+	jshint spec/terminalSpec.js
 
 install:
 	npm install

@@ -425,7 +425,7 @@ function tests_on_ready() {
                 expect(cursor.text()).toEqual('\xA0');
                 expect(after.text().length).toEqual(0);
             });
-            var history = cmd.history()
+            var history = cmd.history();
             it('should have one entry in history', function() {
                 cmd.purge();
                 term.set_command('something').focus(true);
@@ -587,6 +587,18 @@ function tests_on_ready() {
                 system.procs.push(proc);
             }
             $.ajax = function(obj) {
+                function done() {
+                    if ($.isFunction(obj.success)) {
+                        obj.success(resp, 'OK', {
+                            getResponseHeader: function(header) {
+                                if (header == 'Content-Type') {
+                                    return 'application/json';
+                                }
+                            }
+                        });
+                    }
+                    defer.resolve(resp);
+                }
                 if (obj.url == url) {
                     var defer = $.Deferred();
                     try {
@@ -612,7 +624,7 @@ function tests_on_ready() {
                             }
                         } else {
                             var error = null;
-                            var ret = null
+                            var ret = null;
                             try {
                                 ret = object[req.method].apply(null, req.params);
                             } catch (e) {
@@ -626,18 +638,6 @@ function tests_on_ready() {
                             };
                         }
                         resp = JSON.stringify(resp);
-                        function done() {
-                            if ($.isFunction(obj.success)) {
-                                obj.success(resp, 'OK', {
-                                    getResponseHeader: function(header) {
-                                        if (header == 'Content-Type') {
-                                            return 'application/json';
-                                        }
-                                    }
-                                });
-                            }
-                            defer.resolve(resp);
-                        }
                         if (settings.async) {
                             setTimeout(done, 100);
                         } else {
@@ -650,7 +650,7 @@ function tests_on_ready() {
                 } else {
                     return ajax.apply($, arguments);
                 }
-            }
+            };
         }
         var token = 'TOKEN';
         var exception = 'Some Exception';
@@ -1170,7 +1170,7 @@ function tests_on_ready() {
                         });
                     });
                 });
-                var arr = []
+                var arr = [];
                 for (i = 0; i<10; i++) {
                     arr.push('Hello ' + i);
                 }
@@ -1194,7 +1194,7 @@ function tests_on_ready() {
                         }
                     })();
                 }, 10000);
-                it('should execute function in order when used delayed commands', function(done) {
+                it('should execute functions in order when used delayed commands', function(done) {
                     term.clear();
                     counter = 0;
                     var promises = [];
@@ -1250,7 +1250,7 @@ function tests_on_ready() {
                             callback(null);
                         }
                     }
-                }
+                };
                 var term = $('<div/>').appendTo('body').terminal($.noop, options);
                 it('should log in', function() {
                     var spy = spyOn(options, 'login');
@@ -1378,15 +1378,10 @@ function tests_on_ready() {
             describe('setInterpreter', function() {
                 it('should call set_interpreter with warning', function() {
                     var term = $('<div/>').appendTo('body').terminal();
-                    var spy = spyOn(term, 'set_interpreter');
+                    spyOn(term, 'set_interpreter');
                     var warn = console.warn;
                     console.warn = $.noop;
-                    var spy = spyOn(console, 'warn');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spyOn(console, 'warn');
                     term.setInterpreter($.noop);
                     expect(term.set_interpreter).toHaveBeenCalledWith($.noop);
                     var warning = 'This function is deprecated, use set_interpreter insead!';
@@ -1480,11 +1475,61 @@ function tests_on_ready() {
                             return $(this).text();
                         }).get().join('\n');
                         expect(text).toEqual(term.signature().replace(/ /g, ' '));
-                        term.destroy();
+                        term.destroy().remove();
                         done();
                     }, 400);
                 });
             });
+            describe('pause/paused/resume', function() {
+                var term = $('<div/>').appendTo('body').terminal();
+                it('should return true on init', function() {
+                    expect(term.paused()).toBeFalsy();
+                });
+                it('should return true when paused', function() {
+                    term.pause();
+                    expect(term.paused()).toBeTruthy();
+                });
+                it('should return false when called resume', function() {
+                    term.resume();
+                    expect(term.paused()).toBeFalsy();
+                });
+            });
+            describe('cols/rows', function() {
+                var numChars = 100;
+                var numRows = 25;
+                var term = $('<div/>').terminal($.noop, {
+                    numChars: numChars,
+                    numRows: numRows
+                });
+                it('should return number of cols', function() {
+                    expect(term.cols()).toEqual(numChars);
+                });
+                it('should return number of rows', function() {
+                    expect(term.rows()).toEqual(numRows);
+                    term.destroy().remove();
+                });
+            });
+            describe('history', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    name: 'history'
+                });
+                var history;
+                it('should return history object', function() {
+                    history = term.history();
+                    expect(history).toEqual(jasmine.any(Object));
+                });
+                it('should have entered commands', function() {
+                    history.clear();
+                    term.focus();
+                    enter(term, 'foo');
+                    enter(term, 'bar');
+                    enter(term, 'baz');
+                    expect(history.data()).toEqual(['foo', 'bar', 'baz']);
+                });
+            });
+        });
+        describe('jQuery Terminal options', function() {
+            
         });
     });
 }

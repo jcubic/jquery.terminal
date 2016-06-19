@@ -66,6 +66,7 @@ jshint:
 	jshint js/dterm.js
 	jshint js/xml_formatting.js
 	jshint js/unix_formatting.js
+	jshint spec/terminalSpec.js
 
 install:
 	npm install

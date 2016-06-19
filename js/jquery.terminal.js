@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 18 Jun 2016 12:04:40 +0000
+ * Date: Sun, 19 Jun 2016 09:16:47 +0000
  */
 
 /* TODO:
@@ -683,6 +683,9 @@
                 return data;
             },
             rotate: function() {
+                if (!data.filter(Boolean).length) {
+                    return;
+                }
                 if (data.length === 1) {
                     return data[0];
                 } else {
@@ -694,7 +697,7 @@
                     if (data[pos]) {
                         return data[pos];
                     } else {
-                        this.rotate();
+                        return this.rotate();
                     }
                 }
             },
@@ -2642,7 +2645,7 @@
     // :: All terminal globals
     // -------------------------------------------------------------------------
     var requests = []; // for canceling on CTRL+D
-    var terminals = window.terminals = new Cycle(); // list of terminals global in this scope
+    var terminals = new Cycle(); // list of terminals global in this scope
     // state for all terminals, terminals can't have own array fo state because
     // there is only one popstate event
     var save_state = []; // hold objects returned by export_view by history API
@@ -2897,7 +2900,7 @@
                             }
                         };
                     });
-                    interpreter_object['help'] = function(fn) {
+                    interpreter_object.help = function(fn) {
                         if (typeof fn == 'undefined') {
                             self.echo('Available commands: ' + ret.procs.map(function(proc) {
                                 return proc.name;
