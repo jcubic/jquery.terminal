@@ -8,7 +8,7 @@ if (typeof window === 'undefined') {
     global.jQuery = global.$ = require("jquery");
     require('../js/jquery.terminal-src');
     require('../js/unix_formatting');
-    global.location = {};
+    global.location = {hash: ''};
 }
 describe('Terminal utils', function() {
     var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -1115,7 +1115,7 @@ function tests_on_ready() {
                 expect(location.hash).toEqual('#[[8,1,"foo"],[8,2,"bar"]]');
                 term.destroy().remove();
             });
-            describe('exec', function() {
+            xdescribe('exec', function() {
                 var counter = 0;
                 var interpreter = {
                     foo: function() {
@@ -1434,7 +1434,7 @@ function tests_on_ready() {
                         enter(term, 'echo foo');
                         setTimeout(function() {
                             expect(spy_echo).toHaveBeenCalledWith(token, 'foo');
-                            //term.destroy().remove();
+                            term.destroy().remove();
                             done();
                         }, 1000);
                     }, 1000);
@@ -1492,12 +1492,13 @@ function tests_on_ready() {
                 it('should return false when called resume', function() {
                     term.resume();
                     expect(term.paused()).toBeFalsy();
+                    term.destroy().remove();
                 });
             });
             describe('cols/rows', function() {
                 var numChars = 100;
                 var numRows = 25;
-                var term = $('<div/>').terminal($.noop, {
+                var term = $('<div/>').appendTo('body').terminal($.noop, {
                     numChars: numChars,
                     numRows: numRows
                 });
@@ -1510,7 +1511,7 @@ function tests_on_ready() {
                 });
             });
             describe('history', function() {
-                var term = $('<div/>').terminal($.noop, {
+                var term = $('<div/>').appendTo('body').terminal($.noop, {
                     name: 'history'
                 });
                 var history;
@@ -1525,6 +1526,43 @@ function tests_on_ready() {
                     enter(term, 'bar');
                     enter(term, 'baz');
                     expect(history.data()).toEqual(['foo', 'bar', 'baz']);
+                    term.destroy().remove();
+                });
+            });
+            describe('history_state', function() {
+                var term = $('<div/>').appendTo('body').terminal($.noop);
+                term.echo('history_state');
+                it('should not record commands', function() {
+                    var hash = location.hash;
+                    term.focus();
+                    enter(term, 'foo');
+                    expect(location.hash).toEqual(hash);
+                });
+                it('should start recording commands', function(done) {
+                    location.hash = '';
+                    var hash = '#[[8,1,"foo"],[8,2,"bar"],[16,3,null],[16,4,"foo"],'+
+                        '[16,5,"bar"]]';
+                    term.history_state(true).focus();
+                    // historyState option is turn on after 1 miliseconds to prevent
+                    // command, that's enabled the history, to be included in hash
+                    setTimeout(function() {
+                        enter(term, 'foo');
+                        enter(term, 'bar');
+                        setTimeout(function() {
+                            expect(location.hash).toEqual(hash);
+                            term.destroy().remove();
+                            done();
+                        }, 400);
+                    }, 10);
+                });
+            });
+            describe('next', function() {
+                var term1 = $('<div/>').terminal();
+                var term2 = $('<div/>').terminal();
+                it('should swith to next terminal', function() {
+                    term1.focus();
+                    term1.next();
+                    expect($.terminal.active()).toBe(term2);
                 });
             });
         });

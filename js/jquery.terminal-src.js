@@ -2454,8 +2454,8 @@
             //timeout: 1,
             type: 'POST'});
     };
-
     // -----------------------------------------------------------------------
+    /*
     function is_scrolled_into_view(elem) {
         var docViewTop = $(window).scrollTop();
         var docViewBottom = docViewTop + $(window).height();
@@ -2465,6 +2465,7 @@
 
         return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
     }
+    */
     // -----------------------------------------------------------------------
     // :: Create fake terminal to calcualte the dimention of one character
     // :: this will make terminal work if terminal div is not added to the
@@ -4195,26 +4196,26 @@
                     var offsetTop = self.offset().top;
                     var height = self.height();
                     var scrollTop = self.scrollTop();
-                    if (!is_scrolled_into_view(self)) {
+                    /*if (!is_scrolled_into_view(self)) {
                         self.enable();
                         $('html,body').animate({
                             scrollTop: offsetTop-50
                         }, 500);
                         return self;
                     } else {
-                        terminals.front().disable();
-                        var next = terminals.rotate().enable();
-                        // 100 provides buffer in viewport
-                        var x = next.offset().top - 50;
-                        $('html,body').animate({scrollTop: x}, 500);
-                        try {
-                            settings.onTerminalChange(next);
-                        } catch (e) {
-                            display_exception(e, 'onTerminalChange');
-                            throw e;
-                        }
-                        return next;
+                    */
+                    terminals.front().disable();
+                    var next = terminals.rotate().enable();
+                    // 100 provides buffer in viewport
+                    var x = next.offset().top - 50;
+                    $('html,body').animate({scrollTop: x}, 500);
+                    try {
+                        settings.onTerminalChange(next);
+                    } catch (e) {
+                        display_exception(e, 'onTerminalChange');
+                        throw e;
                     }
+                    return next;
                 }
             },
             // -------------------------------------------------------------
