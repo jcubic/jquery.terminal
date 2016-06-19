@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 19 Jun 2016 20:14:51 +0000
+ * Date: Sun, 19 Jun 2016 20:21:51 +0000
  */
 
 /* TODO:
@@ -3470,7 +3470,6 @@
                     }
                 } catch (e) {
                     display_exception(e, 'onBeforeLogout');
-                    throw e;
                 }
             }
             clear_loging_storage();
@@ -3479,7 +3478,6 @@
                     settings.onAfterLogout(self);
                 } catch (e) {
                     display_exception(e, 'onAfterlogout');
-                    throw e;
                 }
             }
             self.login(settings.login, true, initialize);
@@ -4212,7 +4210,6 @@
                         settings.onTerminalChange(next);
                     } catch (e) {
                         display_exception(e, 'onTerminalChange');
-                        throw e;
                     }
                     return next;
                 }
@@ -4234,7 +4231,6 @@
                                 }
                             } catch (e) {
                                 display_exception(e, 'onBlur');
-                                throw e;
                             }
                         } else {
                             try {
@@ -4244,7 +4240,6 @@
                                 }
                             } catch (e) {
                                 display_exception(e, 'onFocus');
-                                throw e;
                             }
                         }
                     } else {
@@ -4259,7 +4254,6 @@
                                         settings.onTerminalChange(self);
                                     } catch (e) {
                                         display_exception(e, 'onTerminalChange');
-                                        throw e;
                                     }
                                 }
                             }
@@ -4829,7 +4823,6 @@
                                 settings.onExit(self);
                             } catch (e) {
                                 display_exception(e, 'onExit');
-                                throw e;
                             }
                         }
                         return true;
@@ -4851,7 +4844,6 @@
                             current.onExit(self);
                         } catch (e) {
                             display_exception(e, 'onExit');
-                            throw e;
                         }
                     }
                     // restore mask
