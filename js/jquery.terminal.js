@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 19 Jun 2016 20:21:51 +0000
+ * Date: Sun, 19 Jun 2016 20:25:39 +0000
  */
 
 /* TODO:
@@ -4619,7 +4619,8 @@
                     });
                 }
                 if (e.stack) {
-                    self.echo(e.stack.split(/\n/g).map(function(trace) {
+                    var stack = $.terminal.escape_brackets(e.stack);
+                    self.echo(stack.split(/\n/g).map(function(trace) {
                         return '[[;;;error]' + trace.replace(url_re, function(url) {
                             return ']' + url + '[[;;;error]';
                         }) + ']';

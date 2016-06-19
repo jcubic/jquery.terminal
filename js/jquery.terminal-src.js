@@ -4619,7 +4619,8 @@
                     });
                 }
                 if (e.stack) {
-                    self.echo(e.stack.split(/\n/g).map(function(trace) {
+                    var stack = $.terminal.escape_brackets(e.stack);
+                    self.echo(stack.split(/\n/g).map(function(trace) {
                         return '[[;;;error]' + trace.replace(url_re, function(url) {
                             return ']' + url + '[[;;;error]';
                         }) + ']';
