@@ -1540,8 +1540,9 @@ function tests_on_ready() {
                 });
                 it('should start recording commands', function(done) {
                     location.hash = '';
-                    var hash = '#[[8,1,"foo"],[8,2,"bar"],[16,3,null],[16,4,"foo"],'+
-                        '[16,5,"bar"]]';
+                    var id = term.id();
+                    var hash = '#[[8,1,"foo"],[8,2,"bar"],['+id+',3,null],['+id+',4,"foo"],'+
+                        '['+id+',5,"bar"]]';
                     term.history_state(true).focus();
                     // historyState option is turn on after 1 miliseconds to prevent
                     // command, that's enabled the history, to be included in hash
