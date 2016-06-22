@@ -1540,8 +1540,8 @@ function tests_on_ready() {
                 });
                 it('should start recording commands', function(done) {
                     location.hash = '';
-                    var hash = '#[[8,1,"foo"],[8,2,"bar"],[17,3,null],[17,4,"foo"],'+
-                        '[17,5,"bar"]]';
+                    var hash = '#[[8,1,"foo"],[8,2,"bar"],[16,3,null],[16,4,"foo"],'+
+                        '[16,5,"bar"]]';
                     term.history_state(true).focus();
                     // historyState option is turn on after 1 miliseconds to prevent
                     // command, that's enabled the history, to be included in hash
@@ -1628,6 +1628,37 @@ function tests_on_ready() {
                 });
                 it('should enable command line plugin', function() {
                     expect(term.cmd().isenabled()).toBeTruthy();
+                    term.destroy().remove();
+                });
+            });
+            describe('signature', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    numChars: 14
+                });
+                function max_length() {
+                    var lines = term.signature().split('\n');
+                    return Math.max.apply(null, lines.map(function(line) {
+                        return line.length;
+                    }));
+                }
+                it('should return empty string', function() {
+                    expect(term.signature()).toEqual('');
+                });
+                it('should return proper max length of signature', function() {
+                    var numbers = {20: 20, 36: 30, 60: 49, 70: 64, 100: 75};
+                    Object.keys(numbers).forEach(function(numChars) {
+                        var length = numbers[numChars];
+                        term.option('numChars', numChars);
+                        expect(max_length()).toEqual(length);
+                    });
+                    term.destroy();
+                });
+            });
+            describe('version', function() {
+                var term = $('<div/>').terminal();
+                it('should return version', function() {
+                    expect(term.version()).toEqual($.terminal.version);
+                    term.destroy();
                 });
             });
         });
