@@ -3807,6 +3807,7 @@
         var strings = $.terminal.defaults.strings;
         var enabled = settings.enabled, frozen;
         var paused = false;
+        var autologin = true; // set to false of onBeforeLogin return false
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
@@ -3963,11 +3964,18 @@
                 if (!$.isFunction(auth)) {
                     throw new Error(strings.loginIsNotAFunction);
                 }
-                if (self.token(true) && self.login_name(true)) {
-                    if ($.isFunction(success)) {
-                        success();
+                in_login = true;
+                if (self.token() && self.level() == 1 && !autologin) {
+                    in_login = false; // logout will call login
+                    self.logout(true);
+                } else {
+                    if (self.token(true) && self.login_name(true)) {
+                        in_login = false;
+                        if ($.isFunction(success)) {
+                            success();
+                        }
+                        return self;
                     }
-                    return self;
                 }
                 var user = null;
                 // don't store login data in history
@@ -3976,7 +3984,6 @@
                 }
                 // so we know how many times call pop
                 var level = self.level();
-                in_login = true;
                 function login_callback(user, token, silent, event) {
                     if (token) {
                         while (self.level() > level) {
@@ -4658,7 +4665,7 @@
             // -------------------------------------------------------------
             logout: function(local) {
                 if (in_login) {
-                    throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
+                    throw new Error(sprintf(strings.notWhileLogin, 'logout'));
                 }
                 init_deferr.then(function() {
                     if (local) {
@@ -5005,7 +5012,9 @@
         // before login event
         if (settings.login && $.isFunction(settings.onBeforeLogin)) {
             try {
-                settings.onBeforeLogin(self);
+                if (settings.onBeforeLogin(self) === false) {
+                    autologin = false;
+                }
             } catch (e) {
                 display_exception(e, 'onBeforeLogin');
                 throw e;
