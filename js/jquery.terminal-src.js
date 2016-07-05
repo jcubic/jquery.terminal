@@ -5053,7 +5053,8 @@
             self.disable();
         }
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
-            if (settings.completion && typeof settings.completion != 'boolean') {
+            if (settings.completion && typeof settings.completion != 'boolean' ||
+                !settings.completion) {
                 //overwrite interpreter completion by global setting #224
                 itrp.completion = settings.completion;
             }
