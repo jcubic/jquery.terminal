@@ -1041,6 +1041,13 @@ function tests_on_ready() {
                 expect(term.get_command()).toEqual('f\t');
                 term.destroy().remove();
             });
+            it('should not complete by default for json-rpc', function() {
+                term = $('<div/>').appendTo('body').terminal('/test');
+                term.focus();
+                term.insert('ec');
+                shortcut(false, false, false, 9);
+                expect(term.get_command()).toEqual('ec\t');
+            });
         });
         describe('jQuery Terminal methods', function() {
             var terminal_name = 'methods';
