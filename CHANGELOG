@@ -10,7 +10,8 @@
           fix exec after init when used with JSON-RPC with system.describe
           make set_interpreter return terminal object
           logout when onBeforeLogin return false
-0.10.11   fix check arity for nested object; throw error when calling logout in lqqogin
+0.10.12   Fix css animation of blinking in minified file
+0.10.11   fix check arity for nested object; throw error when calling logout in login
 0.10.10   Escape brackets while echo completion strings
 0.10.9    fix issue with jQuery Timers when page included another jQuery after initialization
 0.10.8    add mangle option to uglifyjs
