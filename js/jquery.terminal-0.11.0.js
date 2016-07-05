@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 05 Jul 2016 17:46:07 +0000
+ * Date: Tue, 05 Jul 2016 20:29:26 +0000
  */
 
 /* TODO:
@@ -2901,11 +2901,11 @@
                             }
                         };
                     });
-                    interpreter_object.help = function(fn) {
+                    interpreter_object.help = interpreter_object.help || function(fn) {
                         if (typeof fn == 'undefined') {
                             self.echo('Available commands: ' + ret.procs.map(function(proc) {
                                 return proc.name;
-                            }).join(', '));
+                            }).join(', ') + ', help');
                         } else {
                             var found = false;
                             $.each(ret.procs, function(_, proc) {
@@ -2923,6 +2923,16 @@
                                     return false;
                                 }
                             });
+                            if (!found) {
+                                if (fn == 'help') {
+                                    self.echo('[[bu;#fff;]help] [method]\ndisplay help ' +
+                                              'for the method or list of methods if not'+
+                                              ' specified');
+                                } else {
+                                    var msg = 'Method `' + fn.toString() + '\' not found ';//'
+                                    self.error(msg);
+                                }
+                            }
                         }
                     };
                     success(interpreter_object);
