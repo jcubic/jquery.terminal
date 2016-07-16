@@ -48,7 +48,7 @@ users. It can also be used to debug your application.
   (you can see errors in your javascript and php code in terminal if they
   are in the interpreter function)
 
-### Instalation
+### Installation
 You can install jQuery Terminal from bower:
 
 ```
