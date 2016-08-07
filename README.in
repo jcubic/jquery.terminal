@@ -149,7 +149,7 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 If you want to run tests from browser you need to run
 
 ```
-bower install
+bower install --dev
 ```
 
 and open SpecRunner.html file in the browser
