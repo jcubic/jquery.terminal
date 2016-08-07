@@ -17,7 +17,7 @@
         "manifest"
     ],
     "dependencies": {
-        "jquery": "latest"
+        "jquery": "~2"
     },
     "devDependencies": {
         "jasmine": "latest"
