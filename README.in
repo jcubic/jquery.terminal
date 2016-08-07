@@ -144,6 +144,30 @@ $('#term_demo').terminal('service.php', {login: true});
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [full documentation](http://terminal.jcubic.pl/api_reference.php).
 
+### Test
+
+If you want to run tests from browser you need to run
+
+```
+bower install
+```
+
+and open SpecRunner.html file in the browser
+
+
+To run tests from command line you need to run this commands:
+
+```
+npm install
+make test
+```
+
+you can also run test covarage using
+
+```
+make cover
+```
+
 ### Live Chat
 
 [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
