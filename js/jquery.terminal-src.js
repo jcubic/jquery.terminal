@@ -2203,6 +2203,11 @@
                     if (text === '') {
                         return text;
                     } else if ($.terminal.is_formatting(text)) {
+                        // fix &nbsp; inside formatting because encode is called
+                        // before format
+                        text = text.replace(/\[\[[^\]]+\]/, function(text) {
+                            return text.replace(/&nbsp;/g, ' ');
+                        });
                         return text.replace(format_parts_re, function(s,
                                                                       style,
                                                                       color,
