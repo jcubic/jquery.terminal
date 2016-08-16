@@ -2266,10 +2266,10 @@
                                     }
                                 }
                             } else {
-                                result = '<span ';
+                                result = '<span';
                             }
                             if (style_str !== '') {
-                                result += 'style="' + style_str + '"';
+                                result += ' style="' + style_str + '"';
                             }
                             if (_class !== '') {
                                 result += ' class="' + _class + '"';
