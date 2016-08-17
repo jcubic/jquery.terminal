@@ -2571,7 +2571,7 @@
          '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
          ' __ / / // / // / _  / _/ // / / / _  / _/     / /  \\/ / _ \\/ /',
          '/  / / // / // / ___/ // // / / / ___/ // / / / / /\\  / // / /__',
-         '\\___/____ \\\\__/____/_/ \\__ / /_/____/_//_/ /_/ /_/  \\/\\__\\_\\___/',
+         '\\___/____ \\\\__/____/_/ \\__ / /_/____/_//_/_/_/ /_/  \\/\\__\\_\\___/',
          '         \\/          /____/                                   '.replace(reg, ' ') +
          version_string,
          copyright],
@@ -5130,9 +5130,10 @@
                 $(document).bind('click.terminal', disable).
                     bind('contextmenu.terminal', disable);
             });
+            var $win = $(window);
             if (!is_touch) {
                 // work weird on mobile
-                var $win = $(window).on('focus', focus_terminal).
+                $win.on('focus', focus_terminal).
                     on('blur', blur_terminal);
             } else {
                 /*
