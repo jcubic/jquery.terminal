@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 17 Aug 2016 12:05:29 +0000
+ * Date: Fri, 19 Aug 2016 20:33:54 +0000
  */
 
 /* TODO:
@@ -937,7 +937,10 @@
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
-        var clip = $('<textarea />').addClass('clipboard').appendTo(self);
+        var clip = $('<textarea>').addClass('clipboard').appendTo(self);
+        // is it needed?
+        var contentEditable = $('<div contentEditable></div>')
+        $(document.body).append(contentEditable);
         if (options.width) {
             self.width(options.width);
         }
@@ -1580,12 +1583,16 @@
                             if (kill_text !== '') {
                                 self.insert(kill_text);
                             }
-                        } else if (e.which === 86) { // CTRL+V
+                        } else if (e.which === 86 || e.which === 118) { // CTRL+V
                             clip.val('');
                             if (!is_paste_supported) {
                                 paste();
                             } else {
                                 clip.focus();
+                                clip.on('input', function input() {
+                                    paste();
+                                    clip.off('input', input);
+                                });
                             }
                             return;
                         } else if (e.which === 75) { // CTRL+K
@@ -1835,7 +1842,8 @@
         function keypress_event(e) {
             var result;
             no_keypress = false;
-            if (e.ctrlKey && e.which === 99) { // CTRL+C
+            if ((e.ctrlKey || e.metaKey) && ([99, 118, 86].indexOf(e.which) !== -1)) {
+                // CTRL+C or CTRL+V
                 return;
             }
             if (prevent_keypress) {
@@ -2492,7 +2500,7 @@
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        var temp = $('<div class="terminal"><span class="cursor">' +
+        var temp = $('<div class="terminal wrap"><span class="cursor">' +
                      '</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
         // use more characters to get width of single character as a fraction
@@ -3740,7 +3748,8 @@
                             throw new Error(strings.invalidCompletion);
                     }
                     return false;
-                } else if (e.which === 86 && e.ctrlKey) { // CTRL+V
+                } else if ((e.which === 118 || e.which === 86) &&
+                           (e.ctrlKey || e.metaKey)) { // CTRL+V
                     self.oneTime(1, function() {
                         scroll_to_bottom();
                     });
@@ -5130,9 +5139,10 @@
                 $(document).bind('click.terminal', disable).
                     bind('contextmenu.terminal', disable);
             });
+            var $win = $(window);
             if (!is_touch) {
                 // work weird on mobile
-                var $win = $(window).on('focus', focus_terminal).
+                $win.on('focus', focus_terminal).
                     on('blur', blur_terminal);
             } else {
                 /*
