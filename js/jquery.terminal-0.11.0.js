@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 19 Aug 2016 20:33:54 +0000
+ * Date: Sun, 28 Aug 2016 14:04:28 +0000
  */
 
 /* TODO:
@@ -965,19 +965,18 @@
         var cursor = self.find('.cursor');
         var animation;
         function mobile_focus() {
-            if (is_touch) {
-                var focus = clip.is(':focus');
-                if (enabled) {
-                    if (!focus) {
+            //if (is_touch) {
+            var focus = clip.is(':focus');
+            if (enabled) {
+                if (!focus) {
+                    clip.focus();
+                    self.oneTime(10, function() {
                         clip.focus();
-                        self.oneTime(10, function() {
-                            clip.focus();
-                        });
-                    }
-                } else {
-                    if (focus) {
-                        clip.blur();
-                    }
+                    });
+                }
+            } else {
+                if (focus) {
+                    clip.blur();
                 }
             }
         }
