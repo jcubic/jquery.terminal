@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 28 Aug 2016 14:04:28 +0000
+ * Date: Sun, 28 Aug 2016 14:16:10 +0000
  */
 
 /* TODO:
@@ -4563,13 +4563,24 @@
                     if (!lines[line]) {
                         self.error('Invalid line number ' + line);
                     } else {
-                        lines[line][0] = string;
+                        if (string == null) {
+                            lines.splice(line, 1);
+                        } else {
+                            lines[line][0] = string;
+                        }
                         // it would be hard to figure out which div need to be
                         // updated so we update everything
                         redraw();
                     }
                 });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: return index of last line in case when you need to update
+            // :: after something is echo on the terminal
+            // -------------------------------------------------------------
+            last_index: function() {
+                return lines.length-1;
             },
             // -------------------------------------------------------------
             // :: Print data to the terminal output. It can have two options
