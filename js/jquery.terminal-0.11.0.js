@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 28 Aug 2016 14:16:10 +0000
+ * Date: Thu, 01 Sep 2016 19:43:19 +0000
  */
 
 /* TODO:
@@ -1078,7 +1078,7 @@
         // ---------------------------------------------------------------------
         function change_num_chars() {
             var W = self.width();
-            var w = cursor.width();
+            var w = cursor[0].getBoundingClientRect().width;
             num_chars = Math.floor(W / w);
         }
         // ---------------------------------------------------------------------
@@ -1313,7 +1313,6 @@
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
         function paste(e) {
-            e = e.originalEvent;
             if (self.isenabled()) {
                 var clip = self.find('textarea');
                 if (!clip.is(':focus')) {
@@ -1531,7 +1530,7 @@
                 } else if (e.shiftKey && e.which == 45) { // Shift+Insert
                     clip.val(''); // so we get it before paste event
                     if (!is_paste_supported) {
-                        paste();
+                        paste(e);
                     } else {
                         clip.focus();
                     }
@@ -1585,11 +1584,11 @@
                         } else if (e.which === 86 || e.which === 118) { // CTRL+V
                             clip.val('');
                             if (!is_paste_supported) {
-                                paste();
+                                paste(e);
                             } else {
                                 clip.focus();
-                                clip.on('input', function input() {
-                                    paste();
+                                clip.on('input', function input(e) {
+                                    paste(e);
                                     clip.off('input', input);
                                 });
                             }
@@ -2500,16 +2499,9 @@
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
         var temp = $('<div class="terminal wrap"><span class="cursor">' +
-                     '</span></div>').appendTo('body').css('padding', 0);
+                     '&nbsp;</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
-        // use more characters to get width of single character as a fraction
-        var max = 60;
-        var spaces = '';
-        for (var i=0;i<=max; ++i) {
-            spaces += '&nbsp;';
-        }
-        span.html(spaces);
-        var width = span.width()/max;
+        var width = span[0].getBoundingClientRect().width;
         var result = Math.floor(terminal.width() / width);
         temp.remove();
         if (have_scrollbars(terminal)) {
@@ -5162,15 +5154,33 @@
                     }
                 });*/
             }
+            // detect mouse drag
+            (function() {
+                var isDragging = false;
+                self.mousedown(function() {
+                    $(window).mousemove(function() {
+                        isDragging = true;
+                        $(window).unbind('mousemove');
+                    });
+                }).mouseup(function() {
+                    var wasDragging = isDragging;
+                    isDragging = false;
+                    $(window).unbind('mousemove');
+                    if (!wasDragging) {
+                        console.log('click');
+                        if (!self.enabled()) {
+                            self.focus();
+                        } else if (is_touch) {
+                            // keep focusing silently so textarea get focus
+                            self.focus(true, true);
+                        }
+                        command_line.enable();
+                    }
+                });
+            })();
             self.click(function(e) {
-                if (!self.enabled()) {
-                    self.focus();
-                } else if (is_touch) {
-                    // keep focusing silently so textarea get focus
-                    self.focus(true, true);
-                }
                 // this will ensure that textarea has focus
-                command_line.enable();
+                //command_line.enable();
             }).delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on

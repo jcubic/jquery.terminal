@@ -13,6 +13,7 @@
           fix backspace in Vivaldi browser by keeping focus in textarea for all browsers
           new API method last_index
           alow to remove the line by passing null as replacement to update function
+          fix number of characters per line
 0.10.12   fix css animation of blinking in minified file
 0.10.11   fix check arity for nested object; throw error when calling logout in login
 0.10.10   Escape brackets while echo completion strings
