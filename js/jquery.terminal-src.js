@@ -5167,7 +5167,6 @@
                     isDragging = false;
                     $(window).unbind('mousemove');
                     if (!wasDragging) {
-                        console.log('click');
                         if (!self.enabled()) {
                             self.focus();
                         } else if (is_touch) {

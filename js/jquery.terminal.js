@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 01 Sep 2016 19:43:19 +0000
+ * Date: Thu, 01 Sep 2016 19:46:35 +0000
  */
 
 /* TODO:
@@ -5167,7 +5167,6 @@
                     isDragging = false;
                     $(window).unbind('mousemove');
                     if (!wasDragging) {
-                        console.log('click');
                         if (!self.enabled()) {
                             self.focus();
                         } else if (is_touch) {
