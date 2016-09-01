@@ -964,6 +964,7 @@
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
+        var paste_count = 0;
         function mobile_focus() {
             //if (is_touch) {
             var focus = clip.is(':focus');
@@ -1313,6 +1314,10 @@
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
         function paste(e) {
+            if (paste_count++ > 0) {
+                return;
+            }
+            e = e.originalEvent;
             if (self.isenabled()) {
                 var clip = self.find('textarea');
                 if (!clip.is(':focus')) {
@@ -1325,7 +1330,7 @@
                     text = e.clipboardData.getData('text/plain');
                 } else {
                     //wait until Browser insert text to textarea
-                    cmd.oneTime(100, function() {
+                    self.oneTime(100, function() {
                         self.insert(clip.val());
                         clip.val('');
                         fake_mobile_entry();
@@ -1529,6 +1534,7 @@
                     self.position(command.length);
                 } else if (e.shiftKey && e.which == 45) { // Shift+Insert
                     clip.val(''); // so we get it before paste event
+                    paste_count = 0;
                     if (!is_paste_supported) {
                         paste(e);
                     } else {
@@ -1583,6 +1589,7 @@
                             }
                         } else if (e.which === 86 || e.which === 118) { // CTRL+V
                             clip.val('');
+                            paste_count = 0;
                             if (!is_paste_supported) {
                                 paste(e);
                             } else {
