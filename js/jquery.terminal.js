@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 02 Sep 2016 16:24:24 +0000
+ * Date: Fri, 02 Sep 2016 17:04:33 +0000
  */
 
 /* TODO:
@@ -938,7 +938,7 @@
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
         var clip = $('<textarea>').addClass('clipboard').appendTo(self);
-        // is it needed?
+        // we don't need this but leave it as a comment just in case
         //var contentEditable = $('<div contentEditable></div>')
         //$(document.body).append(contentEditable);
         if (options.width) {

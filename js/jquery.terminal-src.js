@@ -938,7 +938,7 @@
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
         var clip = $('<textarea>').addClass('clipboard').appendTo(self);
-        // is it needed?
+        // we don't need this but leave it as a comment just in case
         //var contentEditable = $('<div contentEditable></div>')
         //$(document.body).append(contentEditable);
         if (options.width) {
