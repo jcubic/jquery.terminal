@@ -30,8 +30,9 @@
         }
         return desc;
     };
+    var defaults = Object.keys($.terminal.defaults).concat(['greetings']);
     $.fn.dterm = function(interpreter, options) {
-        var op = $.extend_if_has({}, options, Object.keys($.terminal.defaults));
+        var op = $.extend_if_has({}, options, defaults);
         op.enabled = false;
         var terminal = this.terminal(interpreter, op).css('overflow', 'hidden');
         if (!options.title) {

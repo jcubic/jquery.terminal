@@ -43,7 +43,7 @@ css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 README.md: README.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" < README.in > README.md
 
-.$(VERSION):
+.$(VERSION): Makefile
 	touch .$(VERSION)
 
 Makefile: Makefile.in
@@ -57,8 +57,16 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 
 test:
 	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose --junitreport --color --forceexit spec
+
+cover:
+	node_modules/istanbul/lib/cli.js cover node_modules/jasmine/bin/jasmine.js
+
 jshint:
 	jshint js/jquery.terminal-src.js
 	jshint js/dterm.js
 	jshint js/xml_formatting.js
 	jshint js/unix_formatting.js
+	jshint spec/terminalSpec.js
+
+install:
+	npm install

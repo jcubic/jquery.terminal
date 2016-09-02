@@ -25,9 +25,9 @@
             var striped = full.replace(/_x08|\x08_|_\u0008|\u0008_/g, '');
             return '[[u;;]' + striped + ']';
         }).replace(/((?:.\x08.)+)/g, function(full, g) {
-            return '[[b;#fff;]' + full.replace(/(.)(?:\x08|\u0008)(.)/g,
-                                               function(full, g1, g2) {
-                                                   return g2;
+            return '[[b;#fff;]' + full.replace(/(.)(?:\x08|\u0008)\1/g,
+                                               function(full, g) {
+                                                   return g;
                                                }) + ']';
         });
     };
@@ -252,7 +252,7 @@
             //skip closing at the begining
             if (splitted.length > 3) {
                 var str = splitted.slice(0,3).join('');
-                if (str == '[0m' || str == '[m') {
+                if (str.match(/^\[0*m$/)) {
                     splitted = splitted.slice(3);
                 }
             }
@@ -263,12 +263,12 @@
                 if (match) {
                     switch (match[2]) {
                     case 'm':
-                        if (match[1] !== '0') {
+                        if (+match[1] !== 0) {
                             code = format_ansi(match[1]);
                         }
                         if (inside) {
                             output.push(']');
-                            if (match[1] === '0' || match[1] === '') {
+                            if (+match[1] === 0) {
                                 //just closing
                                 inside = false;
                                 prev_color = prev_background = '';
@@ -286,7 +286,7 @@
                                 }
                             }
                         } else {
-                            if (match[1] != '0') {
+                            if (+match[1] !== 0) {
                                 inside = true;
                                 code[1] = code[1] || prev_color;
                                 code[2] = code[2] || prev_background;

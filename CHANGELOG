@@ -1,4 +1,21 @@
-0.10.12   Fix css animation of blinking in minified file
+0.11.0    fix default prompt for push
+          add word-wrap: break-word for cases when echo html that have long lines
+          fix login function as setting when used with JSON-RPC
+          add help command to JSON-RPC when there is system.describe
+          fix exec array and delayed commands (when you exec and don't wait for promise
+          to resolve)
+          fix double cursor in terminals when calling resume on disabled terminal
+          fix calling login after pop from login
+          add infiniteLogin option to push
+          fix exec after init when used with JSON-RPC with system.describe
+          make set_interpreter return terminal object
+          logout when onBeforeLogin return false
+          fix backspace in Vivaldi browser by keeping focus in textarea for all browsers
+          new API method last_index
+          alow to remove the line by passing null as replacement to update function
+          fix number of characters per line
+          fix paste on MacOSX
+0.10.12   fix css animation of blinking in minified file
 0.10.11   fix check arity for nested object; throw error when calling logout in login
 0.10.10   Escape brackets while echo completion strings
 0.10.9    fix issue with jQuery Timers when page included another jQuery after initialization
@@ -9,33 +26,33 @@
 0.10.4    change -min to .min in minfied versions of files
 0.10.3    Make npm happy about version
 0.10.2    Add minified css file
-0.10.1    Fix url regex for formatting
+0.10.1    fix url regex for formatting
 0.10.0    keepWords option to echo and words parameter in split_equal
-          Fix login for nested intepreters
-          Fix destroy of cmd plugin
-          Fix saving commands in hash
+          fix login for nested intepreters
+          fix destroy of cmd plugin
+          fix saving commands in hash
           Allow to disable completion in nested interpreter
           Change position of cursor in reverse history search
-          Fix pasting in Firefox
+          fix pasting in Firefox
           Exec is adding command to history
-          Fix execHash in FireFox
+          fix execHash in FireFox
           Testsing terminal and cmd plugin + call from command line
-          Fix exec for nested login rpc command
-          Fix exec from hash if commands use pause/resume
-          Fix exec for build in commands
-          Fix other various exec from hash issues
-          Fix local logout and login command
+          fix exec for nested login rpc command
+          fix exec from hash if commands use pause/resume
+          fix exec for build in commands
+          fix other various exec from hash issues
+          fix local logout and login command
           mousewheel and resize options for interpreter
           use MIT license
           onExport and onImport events
 0.9.3     Change settings to method
-          Fix process_commands and escape_regex
-          Fix login from hash
-          Fix raw echo
+          fix process_commands and escape_regex
+          fix login from hash
+          fix raw echo
           Don't print empty string after removing extended commands strings
-          Fix history_state method
+          fix history_state method
 0.9.2     Don't change command line history if ctrl key is pressed
-          Fix middle mouse copy on linux
+          fix middle mouse copy on linux
           fix resize issue
 0.9.1     freeze and frozen API methods that disable/enable terminal that can't be enabled
           by click
@@ -43,14 +60,14 @@
           fix export/import
           Focus/Blur on Window focus/blur
           Allow to change mask char for passwords
-          Fix space after completed command and in ALT+D
+          fix space after completed command and in ALT+D
           class .command in div created by echo command, and error class in error function
           CSS selection is now one solid color, also support h1..h6 tables and pre tags
-          Fix ANSI Formatting bug
+          fix ANSI Formatting bug
           Regex as History Filter
           Custom Formatters
           raw and globalToken options
-          Fix encoding entites
+          fix encoding entites
           Allow to echo jQuery promise
           exec return promise, exec with array of commands
           auto resume/pause if user code return promise
@@ -59,16 +76,16 @@
           to kebab case, but the old functions are kept for backward compatibility
           new API method read (wrapper over push), autologin and update
           extended commands with syntax [{   }]
-0.8.8     Fix 2 json rpc bugs
-0.8.7     Fix processing command function
+0.8.8     fix 2 json rpc bugs
+0.8.7     fix processing command function
 0.8.6     One space after fully completed command
 0.8.5     All regex for formatting case insensitive
-0.8.4     Fix redraw lines on import_view, fix calculating rows
-0.8.3     Fix completion in nested interpreters, login option in push
-          Remove pause/resume from login, Fix parsing RegExes
-          Fix display text with more then limit lines in one echo
+0.8.4     fix redraw lines on import_view, fix calculating rows
+0.8.3     fix completion in nested interpreters, login option in push
+          Remove pause/resume from login, fix parsing RegExes
+          fix display text with more then limit lines in one echo
 0.8.2     add Terminal::exception function
-0.8.1     Fix login/logout
+0.8.1     fix login/logout
 0.8.0     CTRL+L Clear terminal
           Shift+Enter insert newline
           Remove tabcompletion option (now completion can be true, array or function)
@@ -78,52 +95,52 @@
           Handle invalid JSON-RPC
           CSS style for standalone cmd plugin
           using CSS3 Animation for blinking if supported
-          Fix [0m
+          fix [0m
           Better error handling (all messages are in $.terminal.defaults.strings)
           Named colors for terminal formatting
           expose settings and login function
           more tools in $.terminal
           paste kill text with CTRL+Y
           paste text from selection using middle mouse button
-          Fix login, history and exec
+          fix login, history and exec
           Disable few things when in login function
           All Strings are in $.terminal.defaults.strings
           more functions in $.terminal object
-0.7.12    Fix terminal when start as invisible, rest property to parseCommand
-0.7.11    Fix last history command
-0.7.10    Fix reverse search
+0.7.12    fix terminal when start as invisible, rest property to parseCommand
+0.7.11    fix last history command
+0.7.10    fix reverse search
 0.7.9     Don't show version when use source file
 0.7.8     Allow to call $.terminal.active() in prompt
-0.7.7     Fix long line wrap on Init, don't call termina::resize on init
-0.7.6     Fix small errors and typos
-0.7.5     Fix flush, add option linksNoReferer
-0.7.4     Fix interpreter when there is not system.describe in JSON-RPC
+0.7.7     fix long line wrap on Init, don't call termina::resize on init
+0.7.6     fix small errors and typos
+0.7.5     fix flush, add option linksNoReferer
+0.7.4     fix interpreter when there is not system.describe in JSON-RPC
           Add method flush and fix refresh
 0.7.3     Add ANSI 256 (8bit) formatting from Xterm
-          Fix Regexes
+          fix Regexes
           Add ntroff formatting support (output from man)
-0.7.2     Fix purge, json-rpc, history. Improve json-rpc and add Check Arity
+0.7.2     fix purge, json-rpc, history. Improve json-rpc and add Check Arity
 0.7.1     Add tests
           terminal without eval
-          Fix issue with umpersand (unenclosed entinity) in multiline
+          fix issue with umpersand (unenclosed entinity) in multiline
 0.7.0     Add outputLimit, add method destroy
           add utilities parseArguments, splitArguments, parseCommand and splitCommand
           to $.terminal
           Allow to overwrite, by user, parsing commands in object as eval
           Make cmd chainable
-          Fix command line (interepters) names for localStorage use
-          Fix Login/Token LocalStorage names
+          fix command line (interepters) names for localStorage use
+          fix Login/Token LocalStorage names
           add method purge (that clear localStorage)
           Convert escaped hex and octals in double quoted strings as chars
-          Fix Tilda on Windows
+          fix Tilda on Windows
           More ANSI codes
           Complete common string on TAB
-          Fix cancel ajax on CTRL+D when paused
+          fix cancel ajax on CTRL+D when paused
 0.6.5     Finalize and raw options in echo
-0.6.4     Fix regexes, CMD+`, CMD+R, CMD+L on Mac, fix Resize if terminal is
+0.6.4     fix regexes, CMD+`, CMD+R, CMD+L on Mac, fix Resize if terminal is
           hidden, fix wrap ANSI formatting
-0.6.3     Fix arguments in automatic JSON-RPC
-0.6.2     Fix arguments in object as eval, new option processArguments
+0.6.3     fix arguments in automatic JSON-RPC
+0.6.2     fix arguments in object as eval, new option processArguments
 0.6.1     fix first echo (like greetings)
 0.6       fix formatting with links and emails and long lines
           history is a list with command as last element
@@ -146,7 +163,7 @@
 0.5       Tab completion work with callback function
           Push command allow for objects
           Add CTRL+G to cancel Reverse Search
-0.4.23    Fix Style
+0.4.23    fix Style
 0.4.22
 0.4.21    Small fixes
 0.4.20    Add exec, greetings, onClear, onBlur, onFocus, onTerminalChange
@@ -230,7 +247,7 @@
 
 0.2.3     fix for "(#$%.{" characters on Opera/Chrome, add cursor move
           with CTRL+P, CTRL+N, CTRL+F, CTRL+B which also work in Chrome.
-          Fix Arrow Keys on Chrome (for cursor move and command line
+          fix Arrow Keys on Chrome (for cursor move and command line
           history). Change License to LGPL3.
 
 0.2.2     fix down-arrow/open parentises issue in Opera and Chrome
