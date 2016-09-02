@@ -939,8 +939,8 @@
         //self.append('<span class="mask"></mask>');
         var clip = $('<textarea>').addClass('clipboard').appendTo(self);
         // is it needed?
-        var contentEditable = $('<div contentEditable></div>')
-        $(document.body).append(contentEditable);
+        //var contentEditable = $('<div contentEditable></div>')
+        //$(document.body).append(contentEditable);
         if (options.width) {
             self.width(options.width);
         }
@@ -1317,7 +1317,9 @@
             if (paste_count++ > 0) {
                 return;
             }
-            e = e.originalEvent;
+            if (e.originalEvent) {
+                e = e.originalEvent;
+            }
             if (self.isenabled()) {
                 var clip = self.find('textarea');
                 if (!clip.is(':focus')) {

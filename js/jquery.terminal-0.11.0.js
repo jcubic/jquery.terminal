@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 01 Sep 2016 19:55:13 +0000
+ * Date: Fri, 02 Sep 2016 16:24:24 +0000
  */
 
 /* TODO:
@@ -939,8 +939,8 @@
         //self.append('<span class="mask"></mask>');
         var clip = $('<textarea>').addClass('clipboard').appendTo(self);
         // is it needed?
-        var contentEditable = $('<div contentEditable></div>')
-        $(document.body).append(contentEditable);
+        //var contentEditable = $('<div contentEditable></div>')
+        //$(document.body).append(contentEditable);
         if (options.width) {
             self.width(options.width);
         }
@@ -1317,7 +1317,9 @@
             if (paste_count++ > 0) {
                 return;
             }
-            e = e.originalEvent;
+            if (e.originalEvent) {
+                e = e.originalEvent;
+            }
             if (self.isenabled()) {
                 var clip = self.find('textarea');
                 if (!clip.is(':focus')) {
