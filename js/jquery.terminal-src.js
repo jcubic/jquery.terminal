@@ -3413,9 +3413,9 @@
                 if (!ghost()) {
                     // exec execute this function wihout the help of cmd plugin
                     // that add command to history on enter
-                    if (exec && $.isFunction(settings.historyFilter) &&
-                        settings.historyFilter(command) ||
-                        command.match(settings.historyFilter)) {
+                    if (exec && ($.isFunction(settings.historyFilter) &&
+                                 settings.historyFilter(command) ||
+                                 command.match(settings.historyFilter))) {
                         command_line.history().append(command);
                     }
                 }
@@ -4972,7 +4972,7 @@
                     output.remove();
                     $(document).unbind('.terminal');
                     $(window).unbind('.terminal');
-                    self.unbind('click mousewheel');
+                    self.unbind('click mousewheel mousedown mouseup');
                     self.removeData('terminal').removeClass('terminal');
                     if (settings.width) {
                         self.css('width', '');
@@ -5178,31 +5178,31 @@
             }
             // detect mouse drag
             (function() {
+                var count = 0;
                 var isDragging = false;
                 self.mousedown(function() {
                     $(window).mousemove(function() {
                         isDragging = true;
+                        count = 0;
                         $(window).unbind('mousemove');
                     });
                 }).mouseup(function() {
                     var wasDragging = isDragging;
                     isDragging = false;
                     $(window).unbind('mousemove');
-                    if (!wasDragging) {
+                    if (!wasDragging && count++ == 1) {
                         if (!self.enabled()) {
                             self.focus();
                         } else if (is_touch) {
                             // keep focusing silently so textarea get focus
                             self.focus(true, true);
                         }
+                        // this will ensure that textarea has focus
                         command_line.enable();
                     }
                 });
             })();
-            self.click(function(e) {
-                // this will ensure that textarea has focus
-                //command_line.enable();
-            }).delegate('.exception a', 'click', function(e) {
+            self.delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on
                 var href = $(this).attr('href');

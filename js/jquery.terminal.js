@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.1
+ *           \/              /____/                              version 0.11.2
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 04 Sep 2016 16:51:20 +0000
+ * Date: Sun, 04 Sep 2016 18:19:18 +0000
  */
 
 /* TODO:
@@ -1990,7 +1990,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.1',
+        version: '0.11.2',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -3413,9 +3413,9 @@
                 if (!ghost()) {
                     // exec execute this function wihout the help of cmd plugin
                     // that add command to history on enter
-                    if (exec && $.isFunction(settings.historyFilter) &&
-                        settings.historyFilter(command) ||
-                        command.match(settings.historyFilter)) {
+                    if (exec && ($.isFunction(settings.historyFilter) &&
+                                 settings.historyFilter(command) ||
+                                 command.match(settings.historyFilter))) {
                         command_line.history().append(command);
                     }
                 }
@@ -4972,7 +4972,7 @@
                     output.remove();
                     $(document).unbind('.terminal');
                     $(window).unbind('.terminal');
-                    self.unbind('click mousewheel');
+                    self.unbind('click mousewheel mousedown mouseup');
                     self.removeData('terminal').removeClass('terminal');
                     if (settings.width) {
                         self.css('width', '');
@@ -5178,31 +5178,31 @@
             }
             // detect mouse drag
             (function() {
+                var count = 0;
                 var isDragging = false;
                 self.mousedown(function() {
                     $(window).mousemove(function() {
                         isDragging = true;
+                        count = 0;
                         $(window).unbind('mousemove');
                     });
                 }).mouseup(function() {
                     var wasDragging = isDragging;
                     isDragging = false;
                     $(window).unbind('mousemove');
-                    if (!wasDragging) {
+                    if (!wasDragging && count++ == 1) {
                         if (!self.enabled()) {
                             self.focus();
                         } else if (is_touch) {
                             // keep focusing silently so textarea get focus
                             self.focus(true, true);
                         }
+                        // this will ensure that textarea has focus
                         command_line.enable();
                     }
                 });
             })();
-            self.click(function(e) {
-                // this will ensure that textarea has focus
-                //command_line.enable();
-            }).delegate('.exception a', 'click', function(e) {
+            self.delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on
                 var href = $(this).attr('href');
