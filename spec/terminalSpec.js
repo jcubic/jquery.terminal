@@ -8,7 +8,7 @@ if (typeof window === 'undefined') {
     global.jQuery = global.$ = require("jquery");
     require('../js/jquery.terminal-src');
     require('../js/unix_formatting');
-    global.location = {hash: ''};
+    global.location = global.window.location = {hash: ''};
 }
 describe('Terminal utils', function() {
     var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -1123,6 +1123,7 @@ function tests_on_ready() {
                 term.destroy().remove();
             });
             describe('exec', function() {
+                /*
                 var counter = 0;
                 var interpreter = {
                     foo: function() {
@@ -1226,6 +1227,82 @@ function tests_on_ready() {
                         done();
                     });
                 }, 10000);
+                //*/
+                it('should login from exec array', function(done) {
+                    var test = {
+                        test: function() {
+                        }
+                    };
+                    var token = 'TOKEN';
+                    var options = {
+                        login: function(user, password, callback) {
+                            if (user == 'foo' && password == 'bar') {
+                                callback(token);
+                            } else {
+                                callback(null);
+                            }
+                        },
+                        name: 'exec_login_array',
+                        greetings: false
+                    };
+                    spyOn(test, 'test');
+                    var spy = spyOn(options, 'login');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    var term = $('<div/>').terminal({
+                        echo: function(arg) {
+                            test.test(arg);
+                        }
+                    }, options);
+                    var array = ['foo', 'bar', 'echo foo'];
+                    term.exec(array).then(function() {
+                        expect(options.login).toHaveBeenCalled();
+                        expect(test.test).toHaveBeenCalledWith('foo');
+                        term.destroy().remove();
+                        done();
+                    });
+                });
+                it('should login from hash', function(done) {
+                    var test = {
+                        test: function() {
+                        }
+                    };
+                    var token = 'TOKEN';
+                    var options = {
+                        login: function(user, password, callback) {
+                            if (user == 'foo' && password == 'bar') {
+                                callback(token);
+                            } else {
+                                callback(null);
+                            }
+                        },
+                        name: 'exec_login_array',
+                        execHash: true,
+                        greetings: 'exec'
+                    };
+                    location.hash = '#[[36,1,"foo"],[36,2,"bar"],[36,3,"echo foo"]]';
+                    spyOn(test, 'test');
+                    var spy = spyOn(options, 'login');
+                    if (spy.andCallThrough) {
+                        spy.andCallThrough();
+                    } else {
+                        spy.and.callThrough();
+                    }
+                    var term = $('<div/>').terminal({
+                        echo: function(arg) {
+                            test.test(arg);
+                        }
+                    }, options);
+                    setTimeout(function() {
+                        expect(options.login).toHaveBeenCalled();
+                        expect(test.test).toHaveBeenCalledWith('foo');
+                        term.destroy().remove();
+                        done();
+                    }, 500);
+                }, 1000);
             });
             describe('methods after creating async rpc with system.describe', function() {
                 it('should call methods', function(done) {
@@ -1547,9 +1624,9 @@ function tests_on_ready() {
                 });
                 it('should start recording commands', function(done) {
                     location.hash = '';
+                    term.clear_history_state();
                     var id = term.id();
-                    var hash = '#[[8,1,"foo"],[8,2,"bar"],['+id+',3,null],['+id+',4,"foo"],'+
-                        '['+id+',5,"bar"]]';
+                    var hash = '#[['+id+',1,"foo"],['+id+',2,"bar"]]';
                     term.history_state(true).focus();
                     // historyState option is turn on after 1 miliseconds to prevent
                     // command, that's enabled the history, to be included in hash

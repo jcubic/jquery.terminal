@@ -744,6 +744,9 @@
     function Stack(init) {
         var data = init instanceof Array ? init : init ? [init] : [];
         $.extend(this, {
+            data: function() {
+                return data;
+            },
             map: function(fn) {
                 return $.map(data, fn);
             },
@@ -3454,7 +3457,7 @@
                     var result = interpreter.interpreter.call(self, command, self);
                     if (result !== undefined) {
                         // auto pause/resume when user return promises
-                        self.pause();
+                        self.pause(true);
                         return $.when(result).then(function(result) {
                             // don't echo result if user echo something
                             if (result && position === lines.length-1) {
@@ -3801,7 +3804,7 @@
         if (self.length === 0) {
             throw sprintf($.terminal.defaults.strings.invalidSelector, self.selector);
         }
-        //var names = []; // stack if interpeter names
+        //var names = []; // stack if interpreter names
         var scroll_object;
         var prev_command; // used for name on the terminal if not defined
         var loged_in = false;
@@ -4127,12 +4130,15 @@
             // -------------------------------------------------------------
             // :: Pause the terminal, it should be used for ajax calls
             // -------------------------------------------------------------
-            pause: function() {
+            pause: function(visible) {
                 onPause();
                 if (!paused && command_line) {
                     init_deferr.then(function() {
                         paused = true;
-                        command_line.disable().hidden();
+                        command_line.disable();
+                        if (!visible) {
+                            command_line.hidden();
+                        }
                         if ($.isFunction(settings.onPause)) {
                             settings.onPause();
                         }
@@ -4213,6 +4219,13 @@
                     settings.historyState = false;
                 }
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: clear the history state
+            // -------------------------------------------------------------
+            clear_history_state: function() {
+                hash_commands = [];
+                save_state = [];
             },
             // -------------------------------------------------------------
             // :: Switch to the next terminal
@@ -5264,22 +5277,25 @@
             // exec from hash called in each terminal instance
             if (settings.execHash) {
                 if (location.hash) {
-                    try {
-                        var hash = location.hash.replace(/^#/, '');
-                        // yes no var - global inside terminal
-                        hash_commands = $.parseJSON(decodeURIComponent(hash));
-                        var i = 0;
-                        (function recur() {
-                            var spec = hash_commands[i++];
-                            if (spec) {
-                                exec_spec(spec).then(recur);
-                            } else {
-                                change_hash = true;
-                            }
-                        })();//*/
-                    } catch (e) {
-                        //invalid json - ignore
-                    }
+                    // wait until login is initialized
+                    setTimeout(function() {
+                        try {
+                            var hash = location.hash.replace(/^#/, '');
+                            // yes no var - local inside terminal
+                            hash_commands = $.parseJSON(decodeURIComponent(hash));
+                            var i = 0;
+                            (function recur() {
+                                var spec = hash_commands[i++];
+                                if (spec) {
+                                    exec_spec(spec).then(recur);
+                                } else {
+                                    change_hash = true;
+                                }
+                            })();//*/
+                        } catch (e) {
+                            //invalid json - ignore
+                        }
+                    });
                 } else {
                     change_hash = true;
                 }

@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.0
+ *           \/              /____/                              version 0.11.1
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 02 Sep 2016 17:06:32 +0000
+ * Date: Sun, 04 Sep 2016 16:51:20 +0000
  */
 
 /* TODO:
@@ -744,6 +744,9 @@
     function Stack(init) {
         var data = init instanceof Array ? init : init ? [init] : [];
         $.extend(this, {
+            data: function() {
+                return data;
+            },
             map: function(fn) {
                 return $.map(data, fn);
             },
@@ -1987,7 +1990,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.0',
+        version: '0.11.1',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -3454,7 +3457,7 @@
                     var result = interpreter.interpreter.call(self, command, self);
                     if (result !== undefined) {
                         // auto pause/resume when user return promises
-                        self.pause();
+                        self.pause(true);
                         return $.when(result).then(function(result) {
                             // don't echo result if user echo something
                             if (result && position === lines.length-1) {
@@ -3801,7 +3804,7 @@
         if (self.length === 0) {
             throw sprintf($.terminal.defaults.strings.invalidSelector, self.selector);
         }
-        //var names = []; // stack if interpeter names
+        //var names = []; // stack if interpreter names
         var scroll_object;
         var prev_command; // used for name on the terminal if not defined
         var loged_in = false;
@@ -4127,12 +4130,15 @@
             // -------------------------------------------------------------
             // :: Pause the terminal, it should be used for ajax calls
             // -------------------------------------------------------------
-            pause: function() {
+            pause: function(visible) {
                 onPause();
                 if (!paused && command_line) {
                     init_deferr.then(function() {
                         paused = true;
-                        command_line.disable().hidden();
+                        command_line.disable();
+                        if (!visible) {
+                            command_line.hidden();
+                        }
                         if ($.isFunction(settings.onPause)) {
                             settings.onPause();
                         }
@@ -4213,6 +4219,13 @@
                     settings.historyState = false;
                 }
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: clear the history state
+            // -------------------------------------------------------------
+            clear_history_state: function() {
+                hash_commands = [];
+                save_state = [];
             },
             // -------------------------------------------------------------
             // :: Switch to the next terminal
@@ -5264,22 +5277,25 @@
             // exec from hash called in each terminal instance
             if (settings.execHash) {
                 if (location.hash) {
-                    try {
-                        var hash = location.hash.replace(/^#/, '');
-                        // yes no var - global inside terminal
-                        hash_commands = $.parseJSON(decodeURIComponent(hash));
-                        var i = 0;
-                        (function recur() {
-                            var spec = hash_commands[i++];
-                            if (spec) {
-                                exec_spec(spec).then(recur);
-                            } else {
-                                change_hash = true;
-                            }
-                        })();//*/
-                    } catch (e) {
-                        //invalid json - ignore
-                    }
+                    // wait until login is initialized
+                    setTimeout(function() {
+                        try {
+                            var hash = location.hash.replace(/^#/, '');
+                            // yes no var - local inside terminal
+                            hash_commands = $.parseJSON(decodeURIComponent(hash));
+                            var i = 0;
+                            (function recur() {
+                                var spec = hash_commands[i++];
+                                if (spec) {
+                                    exec_spec(spec).then(recur);
+                                } else {
+                                    change_hash = true;
+                                }
+                            })();//*/
+                        } catch (e) {
+                            //invalid json - ignore
+                        }
+                    });
                 } else {
                     change_hash = true;
                 }
