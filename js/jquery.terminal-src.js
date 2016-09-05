@@ -1328,24 +1328,12 @@
                 if (!clip.is(':focus')) {
                     clip.focus();
                 }
-                var text;
-                if (window.clipboardData && window.clipboardData.getData) { // IE
-                    text = window.clipboardData.getData('Text');
-                } else if (e.clipboardData && e.clipboardData.getData) {
-                    text = e.clipboardData.getData('text/plain');
-                } else {
-                    //wait until Browser insert text to textarea
-                    self.oneTime(100, function() {
-                        self.insert(clip.val());
-                        clip.val('');
-                        fake_mobile_entry();
-                    });
-                }
-                if (text) {
-                    self.insert(text);
+                //wait until Browser insert text to textarea
+                self.oneTime(100, function() {
+                    self.insert(clip.val());
                     clip.val('');
                     fake_mobile_entry();
-                }
+                });
             }
         }
         var first_up_history = true;
@@ -1899,9 +1887,6 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
-        if (is_paste_supported) {
-            doc.bind('paste.cmd', paste);
-        }
         // characters
         self.data('cmd', self);
         return self;
@@ -2616,6 +2601,7 @@
         Token: true, // where this came from?
         convertLinks: true,
         historyState: false,
+        echoCommand: true,
         login: null,
         outputLimit: -1,
         formatters: [],
@@ -3420,7 +3406,7 @@
                     }
                 }
                 var interpreter = interpreters.top();
-                if (!silent) {
+                if (!silent && settings.echoCommand) {
                     echo_command(command);
                 }
                 // new promise will be returned to exec that will resolve his

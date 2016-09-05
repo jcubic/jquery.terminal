@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.2
+ *           \/              /____/                              version 0.11.3
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 04 Sep 2016 18:19:18 +0000
+ * Date: Mon, 05 Sep 2016 18:44:13 +0000
  */
 
 /* TODO:
@@ -1328,24 +1328,12 @@
                 if (!clip.is(':focus')) {
                     clip.focus();
                 }
-                var text;
-                if (window.clipboardData && window.clipboardData.getData) { // IE
-                    text = window.clipboardData.getData('Text');
-                } else if (e.clipboardData && e.clipboardData.getData) {
-                    text = e.clipboardData.getData('text/plain');
-                } else {
-                    //wait until Browser insert text to textarea
-                    self.oneTime(100, function() {
-                        self.insert(clip.val());
-                        clip.val('');
-                        fake_mobile_entry();
-                    });
-                }
-                if (text) {
-                    self.insert(text);
+                //wait until Browser insert text to textarea
+                self.oneTime(100, function() {
+                    self.insert(clip.val());
                     clip.val('');
                     fake_mobile_entry();
-                }
+                });
             }
         }
         var first_up_history = true;
@@ -1899,9 +1887,6 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
-        if (is_paste_supported) {
-            doc.bind('paste.cmd', paste);
-        }
         // characters
         self.data('cmd', self);
         return self;
@@ -1990,7 +1975,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.2',
+        version: '0.11.3',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2616,6 +2601,7 @@
         Token: true, // where this came from?
         convertLinks: true,
         historyState: false,
+        echoCommand: true,
         login: null,
         outputLimit: -1,
         formatters: [],
@@ -3420,7 +3406,7 @@
                     }
                 }
                 var interpreter = interpreters.top();
-                if (!silent) {
+                if (!silent && settings.echoCommand) {
                     echo_command(command);
                 }
                 // new promise will be returned to exec that will resolve his
