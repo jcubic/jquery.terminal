@@ -3670,7 +3670,7 @@
                 }
                 if ((settings.completion &&
                      $.type(settings.completion) != 'boolean') &&
-                    top.completion === undefined) {
+                    (top.completion === undefined || top.completion == 'settings')) {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
@@ -5090,7 +5090,7 @@
             if (settings.completion && typeof settings.completion != 'boolean' ||
                 !settings.completion) {
                 //overwrite interpreter completion by global setting #224
-                itrp.completion = settings.completion;
+                itrp.completion = 'settings';
             }
             interpreters = new Stack($.extend({
                 name: settings.name,

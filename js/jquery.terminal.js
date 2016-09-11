@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.3
+ *           \/              /____/                              version 0.11.4
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 05 Sep 2016 18:44:13 +0000
+ * Date: Sun, 11 Sep 2016 09:26:30 +0000
  */
 
 /* TODO:
@@ -1975,7 +1975,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.3',
+        version: '0.11.4',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -3670,7 +3670,7 @@
                 }
                 if ((settings.completion &&
                      $.type(settings.completion) != 'boolean') &&
-                    top.completion === undefined) {
+                    (top.completion === undefined || top.completion == 'settings')) {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
@@ -5090,7 +5090,7 @@
             if (settings.completion && typeof settings.completion != 'boolean' ||
                 !settings.completion) {
                 //overwrite interpreter completion by global setting #224
-                itrp.completion = settings.completion;
+                itrp.completion = 'settings';
             }
             interpreters = new Stack($.extend({
                 name: settings.name,
