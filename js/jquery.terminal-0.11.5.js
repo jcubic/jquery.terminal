@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.4
+ *           \/              /____/                              version 0.11.5
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 11 Sep 2016 09:31:59 +0000
+ * Date: Sun, 11 Sep 2016 10:16:02 +0000
  */
 
 /* TODO:
@@ -1975,7 +1975,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.4',
+        version: '0.11.5',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -5181,15 +5181,21 @@
                     if (!wasDragging && count++ == 1) {
                         if (!self.enabled()) {
                             self.focus();
-                        } else if (is_touch) {
-                            // keep focusing silently so textarea get focus
-                            self.focus(true, true);
+                            command_line.enable();
                         }
-                        // this will ensure that textarea has focus
-                        command_line.enable();
                     }
                 });
             })();
+            if (is_touch) {
+                self.click(function() {
+                    if (!self.enabled()) {
+                        self.focus();
+                        command_line.enable();
+                    } else {
+                        self.focus(false);
+                    }
+                });
+            }
             self.delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on
