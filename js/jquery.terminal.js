@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 11 Sep 2016 09:26:30 +0000
+ * Date: Sun, 11 Sep 2016 09:31:59 +0000
  */
 
 /* TODO:
@@ -5089,7 +5089,9 @@
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
             if (settings.completion && typeof settings.completion != 'boolean' ||
                 !settings.completion) {
-                //overwrite interpreter completion by global setting #224
+                // overwrite interpreter completion by global setting #224
+                // we use string to indicate that it need to be taken from settings
+                // so we are able to change it using option API method
                 itrp.completion = 'settings';
             }
             interpreters = new Stack($.extend({

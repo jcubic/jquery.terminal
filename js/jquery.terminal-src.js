@@ -5089,7 +5089,9 @@
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
             if (settings.completion && typeof settings.completion != 'boolean' ||
                 !settings.completion) {
-                //overwrite interpreter completion by global setting #224
+                // overwrite interpreter completion by global setting #224
+                // we use string to indicate that it need to be taken from settings
+                // so we are able to change it using option API method
                 itrp.completion = 'settings';
             }
             interpreters = new Stack($.extend({
