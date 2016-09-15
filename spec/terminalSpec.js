@@ -1093,7 +1093,7 @@ function tests_on_ready() {
                 expect(top.prompt).toEqual(prompt);
                 expect(top.prompt).toEqual(prompt);
                 expect(top.greetings).toEqual(greetings);
-                expect(top.completion).toEqual(completion);
+                expect(top.completion).toEqual('settings');
             });
             it('should import view', function() {
                 term.clear().push($.noop).set_prompt('# ')
@@ -1283,7 +1283,12 @@ function tests_on_ready() {
                         execHash: true,
                         greetings: 'exec'
                     };
-                    location.hash = '#[[36,1,"foo"],[36,2,"bar"],[36,3,"echo foo"]]';
+                    var next_id = $.terminal.last_id() + 1;
+                    location.hash = '#' + JSON.stringify([
+                        [next_id,1,"foo"],
+                        [next_id,2,"bar"],
+                        [next_id,3,"echo foo"]
+                    ]);
                     spyOn(test, 'test');
                     var spy = spyOn(options, 'login');
                     if (spy.andCallThrough) {
@@ -1299,7 +1304,7 @@ function tests_on_ready() {
                     setTimeout(function() {
                         expect(options.login).toHaveBeenCalled();
                         expect(test.test).toHaveBeenCalledWith('foo');
-                        term.destroy().remove();
+                        term.logout().destroy().remove();
                         done();
                     }, 500);
                 }, 1000);
@@ -1746,9 +1751,20 @@ function tests_on_ready() {
                     term.destroy();
                 });
             });
+            // missing methods after version
+            describe('flush', function() {
+                var term = $('<div/>').terminal($.noop, {greetings: false});
+                it('should echo stuff that was called with flush false', function() {
+                    term.echo('foo', {flush: false});
+                    term.echo('bar', {flush: false});
+                    term.echo('baz', {flush: false});
+                    term.flush();
+                    expect(term.get_output()).toEqual('foo\nbar\nbaz');
+                });
+            });
         });
         describe('jQuery Terminal options', function() {
-            
+
         });
     });
 }
