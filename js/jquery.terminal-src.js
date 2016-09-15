@@ -2313,6 +2313,13 @@
         active: function() {
             return terminals.front();
         },
+        // implmentation detail id is always length of terminals Cycle
+        last_id: function() {
+            var len = terminals.length();
+            if (len) {
+                return len - 1;
+            }
+        },
         // keep old as backward compatible
         parseArguments: function(string) {
             return $.terminal.parse_arguments(string);
@@ -2656,6 +2663,7 @@
     var change_hash = false; // don't change hash on Init
     var fire_hash_change = true;
     var first_instance = true; // used by history state
+    var last_id;
     $.fn.terminal = function(init_interpreter, options) {
         // ---------------------------------------------------------------------
         // :: helper function
@@ -3668,12 +3676,15 @@
                         return result;
                     }
                 }
-                if ((settings.completion &&
-                     $.type(settings.completion) != 'boolean') &&
-                    (top.completion === undefined || top.completion == 'settings')) {
+                if (settings.completion &&
+                    $.type(settings.completion) != 'boolean' &&
+                    top.completion === undefined) {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
+                }
+                if (completion == 'settings') {
+                    completion = settings.completion;
                 }
                 // after text pasted into textarea in cmd plugin
                 self.oneTime(10, function() {
@@ -4595,13 +4606,15 @@
                 string = string || '';
                 $.when(string).then(function(string) {
                     try {
-                        output_buffer = [];
                         var locals = $.extend({
                             flush: true,
                             raw: settings.raw,
                             finalize: $.noop,
                             keepWords: false
                         }, options || {});
+                        if (locals.flush) {
+                            output_buffer = [];
+                        }
                         process_line(string, locals);
                         // extended commands should be processed only
                         // once in echo and not on redraw
