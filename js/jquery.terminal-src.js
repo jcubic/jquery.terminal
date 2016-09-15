@@ -4606,13 +4606,15 @@
                 string = string || '';
                 $.when(string).then(function(string) {
                     try {
-                        output_buffer = [];
                         var locals = $.extend({
                             flush: true,
                             raw: settings.raw,
                             finalize: $.noop,
                             keepWords: false
                         }, options || {});
+                        if (locals.flush) {
+                            output_buffer = [];
+                        }
                         process_line(string, locals);
                         // extended commands should be processed only
                         // once in echo and not on redraw

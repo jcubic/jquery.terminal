@@ -1759,7 +1759,7 @@ function tests_on_ready() {
                     term.echo('bar', {flush: false});
                     term.echo('baz', {flush: false});
                     term.flush();
-                    expect(term.get_output()).toEqual('foo\nbar\nbaz');
+                    expect(term.find('.terminal-output').text()).toEqual('foobarbaz');
                 });
             });
         });
