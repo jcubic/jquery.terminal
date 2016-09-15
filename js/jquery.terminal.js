@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.5
+ *           \/              /____/                              version 0.11.6
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 11 Sep 2016 10:16:02 +0000
+ * Date: Thu, 15 Sep 2016 20:19:15 +0000
  */
 
 /* TODO:
@@ -1975,7 +1975,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.5',
+        version: '0.11.6',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2312,6 +2312,13 @@
         // ---------------------------------------------------------------------
         active: function() {
             return terminals.front();
+        },
+        // implmentation detail id is always length of terminals Cycle
+        last_id: function() {
+            var len = terminals.length();
+            if (len) {
+                return len - 1;
+            }
         },
         // keep old as backward compatible
         parseArguments: function(string) {
@@ -2656,6 +2663,7 @@
     var change_hash = false; // don't change hash on Init
     var fire_hash_change = true;
     var first_instance = true; // used by history state
+    var last_id;
     $.fn.terminal = function(init_interpreter, options) {
         // ---------------------------------------------------------------------
         // :: helper function
@@ -3668,12 +3676,15 @@
                         return result;
                     }
                 }
-                if ((settings.completion &&
-                     $.type(settings.completion) != 'boolean') &&
-                    (top.completion === undefined || top.completion == 'settings')) {
+                if (settings.completion &&
+                    $.type(settings.completion) != 'boolean' &&
+                    top.completion === undefined) {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
+                }
+                if (completion == 'settings') {
+                    completion = settings.completion;
                 }
                 // after text pasted into textarea in cmd plugin
                 self.oneTime(10, function() {
@@ -4595,13 +4606,15 @@
                 string = string || '';
                 $.when(string).then(function(string) {
                     try {
-                        output_buffer = [];
                         var locals = $.extend({
                             flush: true,
                             raw: settings.raw,
                             finalize: $.noop,
                             keepWords: false
                         }, options || {});
+                        if (locals.flush) {
+                            output_buffer = [];
+                        }
                         process_line(string, locals);
                         // extended commands should be processed only
                         // once in echo and not on redraw
