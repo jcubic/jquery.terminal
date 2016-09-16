@@ -1,3 +1,5 @@
+0.11.6    fix flush new API method $.terminal.last_id
+0.11.5    fix focus on Android
 0.11.4    allow to change completion using option API method
 0.11.3    add echoCommand option
 0.11.2    allow to select text using double click

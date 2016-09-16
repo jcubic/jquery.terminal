@@ -5194,15 +5194,21 @@
                     if (!wasDragging && count++ == 1) {
                         if (!self.enabled()) {
                             self.focus();
-                        } else if (is_touch) {
-                            // keep focusing silently so textarea get focus
-                            self.focus(true, true);
+                            command_line.enable();
                         }
-                        // this will ensure that textarea has focus
-                        command_line.enable();
                     }
                 });
             })();
+            if (is_touch) {
+                self.click(function() {
+                    if (!self.enabled()) {
+                        self.focus();
+                        command_line.enable();
+                    } else {
+                        self.focus(false);
+                    }
+                });
+            }
             self.delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on
