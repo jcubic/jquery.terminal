@@ -4574,7 +4574,7 @@
                     if (!lines[line]) {
                         self.error('Invalid line number ' + line);
                     } else {
-                        if (string == null) {
+                        if (string === null) {
                             lines.splice(line, 1);
                         } else {
                             lines[line][0] = string;
