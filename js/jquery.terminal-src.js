@@ -872,7 +872,7 @@
                 pos = data.length-1;
             },
             last: function() {
-                return data[length-1];
+                return data[data.length-1];
             },
             end: function() {
                 return pos === data.length-1;
