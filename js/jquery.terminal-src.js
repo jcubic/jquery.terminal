@@ -4540,7 +4540,7 @@
                             settings.outputLimit;
                         var $lines = output.find('div div');
                         if ($lines.length > limit) {
-                            var max = lines.length-limit+1;
+                            var max = $lines.length-limit+1;
                             var for_remove = $lines.slice(0, max);
                             // you can't get parent if you remove the
                             // element so we first get the parent
