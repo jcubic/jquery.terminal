@@ -2609,6 +2609,7 @@
         convertLinks: true,
         historyState: false,
         echoCommand: true,
+        scrollOnEcho: true,
         login: null,
         outputLimit: -1,
         formatters: [],
@@ -4555,7 +4556,11 @@
                             });
                         }
                     }
-                    scroll_to_bottom();
+                    num_rows = get_num_rows(self);
+                    on_scrollbar_show_resize();
+                    if (settings.scrollOnEcho) {
+                        scroll_to_bottom();
+                    }
                     output_buffer = [];
                 } catch (e) {
                     alert('[Flush] ' + exception_message(e) + '\n' +
@@ -4624,8 +4629,6 @@
                         if (locals.flush) {
                             self.flush();
                         }
-                        num_rows = get_num_rows(self);
-                        on_scrollbar_show_resize();
                     } catch (e) {
                         // if echo throw exception we can't use error to
                         // display that exception

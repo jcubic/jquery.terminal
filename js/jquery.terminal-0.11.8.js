@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.7
+ *           \/              /____/                              version 0.11.8
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 18 Sep 2016 10:44:22 +0000
+ * Date: Thu, 22 Sep 2016 08:55:22 +0000
  */
 
 /* TODO:
@@ -1975,7 +1975,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.7',
+        version: '0.11.8',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2609,6 +2609,7 @@
         convertLinks: true,
         historyState: false,
         echoCommand: true,
+        scrollOnEcho: true,
         login: null,
         outputLimit: -1,
         formatters: [],
@@ -4555,7 +4556,11 @@
                             });
                         }
                     }
-                    scroll_to_bottom();
+                    num_rows = get_num_rows(self);
+                    on_scrollbar_show_resize();
+                    if (settings.scrollOnEcho) {
+                        scroll_to_bottom();
+                    }
                     output_buffer = [];
                 } catch (e) {
                     alert('[Flush] ' + exception_message(e) + '\n' +
@@ -4624,8 +4629,6 @@
                         if (locals.flush) {
                             self.flush();
                         }
-                        num_rows = get_num_rows(self);
-                        on_scrollbar_show_resize();
                     } catch (e) {
                         // if echo throw exception we can't use error to
                         // display that exception
