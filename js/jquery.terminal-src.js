@@ -2610,7 +2610,6 @@
         historyState: false,
         echoCommand: true,
         scrollOnEcho: true,
-		readOnly: false,
         login: null,
         outputLimit: -1,
         formatters: [],
@@ -4365,30 +4364,7 @@
             // -------------------------------------------------------------
             enabled: function() {
                 return enabled;
-            },			
-			// -------------------------------------------------------------
-            // :: get the read-only mode
-            // -------------------------------------------------------------
-			get_readOnly: function() {				
-                return settings.readOnly;
-			},	
-            // -------------------------------------------------------------
-            // :: set the read-only mode
-            // -------------------------------------------------------------
-			set_readOnly: function(value) {
-				if(settings.readOnly != value) {				
-					init_deferr.then(function() {					
-						if(value) {
-							self.disable();
-						}
-						else {
-							self.enable();
-						}
-						settings.readOnly = value;
-					});				
-				}
-                return self;
-			},	
+            },
             // -------------------------------------------------------------
             // :: Return the terminal signature depending on the size of the terminal
             // -------------------------------------------------------------
@@ -5219,8 +5195,8 @@
                     isDragging = false;
                     $(window).unbind('mousemove');
                     if (!wasDragging && ++count == 1) {
-                        count = 0;
-                        if (!settings.readOnly && !self.enabled()) {
+                        count = 0; 
+                        if (!self.enabled() && !frozen) {
                             self.focus();
                             command_line.enable();
                         }
@@ -5229,7 +5205,7 @@
             })();
             if (is_touch) {
                 self.click(function() {
-                    if (!settings.readOnly && !self.enabled()) {
+                    if (!self.enabled() && !frozen) {
                         self.focus();
                         command_line.enable();
                     } else {
