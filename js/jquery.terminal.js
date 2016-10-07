@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.10
+ *           \/              /____/                              version 0.11.11
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 29 Sep 2016 10:36:55 +0000
+ * Date: Fri, 07 Oct 2016 11:47:55 +0000
  */
 
 /* TODO:
@@ -2610,6 +2610,7 @@
         historyState: false,
         echoCommand: true,
         scrollOnEcho: true,
+		readOnly: false,
         login: null,
         outputLimit: -1,
         formatters: [],
@@ -4365,6 +4366,29 @@
             enabled: function() {
                 return enabled;
             },
+			// -------------------------------------------------------------
+            // :: get the read-only mode
+            // -------------------------------------------------------------
+			get_readOnly: function() {				
+                return settings.readOnly;
+			},	
+            // -------------------------------------------------------------
+            // :: set the read-only mode
+            // -------------------------------------------------------------
+			set_readOnly: function(value) {
+				if(settings.readOnly != value) {				
+					init_deferr.then(function() {					
+						if(value) {
+							self.disable();
+						}
+						else {
+							self.enable();
+						}
+						settings.readOnly = value;
+					});				
+				}
+                return self;
+			},	
             // -------------------------------------------------------------
             // :: Return the terminal signature depending on the size of the terminal
             // -------------------------------------------------------------
@@ -5196,7 +5220,7 @@
                     $(window).unbind('mousemove');
                     if (!wasDragging && ++count == 1) {
                         count = 0;
-                        if (!self.enabled()) {
+                        if (!settings.readOnly && !self.enabled()) {
                             self.focus();
                             command_line.enable();
                         }
@@ -5205,7 +5229,7 @@
             })();
             if (is_touch) {
                 self.click(function() {
-                    if (!self.enabled()) {
+                    if (!settings.readOnly && !self.enabled()) {
                         self.focus();
                         command_line.enable();
                     } else {
