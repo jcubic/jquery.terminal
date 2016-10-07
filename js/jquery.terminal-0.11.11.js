@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.10
+ *           \/              /____/                              version 0.11.11
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 29 Sep 2016 10:36:55 +0000
+ * Date: Fri, 07 Oct 2016 15:43:15 +0000
  */
 
 /* TODO:
@@ -5196,7 +5196,7 @@
                     $(window).unbind('mousemove');
                     if (!wasDragging && ++count == 1) {
                         count = 0;
-                        if (!self.enabled()) {
+                        if (!self.enabled() && !frozen) {
                             self.focus();
                             command_line.enable();
                         }
@@ -5205,7 +5205,7 @@
             })();
             if (is_touch) {
                 self.click(function() {
-                    if (!self.enabled()) {
+                    if (!self.enabled() && !frozen) {
                         self.focus();
                         command_line.enable();
                     } else {

@@ -5196,7 +5196,7 @@
                     $(window).unbind('mousemove');
                     if (!wasDragging && ++count == 1) {
                         count = 0;
-                        if (!self.enabled()) {
+                        if (!self.enabled() && !frozen) {
                             self.focus();
                             command_line.enable();
                         }
@@ -5205,7 +5205,7 @@
             })();
             if (is_touch) {
                 self.click(function() {
-                    if (!self.enabled()) {
+                    if (!self.enabled() && !frozen) {
                         self.focus();
                         command_line.enable();
                     } else {
