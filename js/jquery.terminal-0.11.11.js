@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 07 Oct 2016 14:12:55 +0000
+ * Date: Fri, 07 Oct 2016 15:43:15 +0000
  */
 
 /* TODO:
@@ -5196,7 +5196,7 @@
                     $(window).unbind('mousemove');
                     if (!wasDragging && ++count == 1) {
                         count = 0;
-						if (!self.enabled() && !frozen) {
+                        if (!self.enabled() && !frozen) {
                             self.focus();
                             command_line.enable();
                         }

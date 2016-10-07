@@ -5195,7 +5195,7 @@
                     isDragging = false;
                     $(window).unbind('mousemove');
                     if (!wasDragging && ++count == 1) {
-                        count = 0; 
+                        count = 0;
                         if (!self.enabled() && !frozen) {
                             self.focus();
                             command_line.enable();
