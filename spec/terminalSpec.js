@@ -9,6 +9,14 @@ if (typeof window === 'undefined') {
     require('../js/jquery.terminal-src');
     require('../js/unix_formatting');
     global.location = global.window.location = {hash: ''};
+    global.window.Element.prototype.getBoundingClientRect = function() {
+        var self = $(this);
+        return {width: self.width(), height: self.height()};
+    };
+    global.window.Element.prototype.getClientRects = function() {
+        var self = $(this);
+        return [{width: self.width(), height: self.height()}];
+    };
 }
 describe('Terminal utils', function() {
     var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -1123,7 +1131,6 @@ function tests_on_ready() {
                 term.destroy().remove();
             });
             describe('exec', function() {
-                /*
                 var counter = 0;
                 var interpreter = {
                     foo: function() {
@@ -1629,13 +1636,16 @@ function tests_on_ready() {
                 });
                 it('should start recording commands', function(done) {
                     location.hash = '';
-                    term.clear_history_state();
+                    term.clear_history_state().clear();
                     var id = term.id();
+                    window.id = id;
                     var hash = '#[['+id+',1,"foo"],['+id+',2,"bar"]]';
-                    term.history_state(true).focus();
+                    term.history_state(true);
                     // historyState option is turn on after 1 miliseconds to prevent
                     // command, that's enabled the history, to be included in hash
                     setTimeout(function() {
+                        term.focus();
+                        //delete window.commands;
                         enter(term, 'foo');
                         enter(term, 'bar');
                         setTimeout(function() {
@@ -1643,7 +1653,7 @@ function tests_on_ready() {
                             term.destroy().remove();
                             done();
                         }, 400);
-                    }, 10);
+                    }, 100);
                 });
             });
             describe('next', function() {

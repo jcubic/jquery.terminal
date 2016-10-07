@@ -4224,6 +4224,7 @@
             clear_history_state: function() {
                 hash_commands = [];
                 save_state = [];
+                return self;
             },
             // -------------------------------------------------------------
             // :: Switch to the next terminal
