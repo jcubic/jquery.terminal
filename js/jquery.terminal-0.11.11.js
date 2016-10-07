@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 07 Oct 2016 15:43:15 +0000
+ * Date: Fri, 07 Oct 2016 19:34:39 +0000
  */
 
 /* TODO:
@@ -1975,7 +1975,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.10',
+        version: '0.11.11',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -4224,6 +4224,7 @@
             clear_history_state: function() {
                 hash_commands = [];
                 save_state = [];
+                return self;
             },
             // -------------------------------------------------------------
             // :: Switch to the next terminal
