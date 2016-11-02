@@ -1,3 +1,4 @@
+0.11.12   fix focus on mobile
 0.11.11   fix do not enable the terminal on click if it's frozen
 0.11.10   fix focus on click
 0.11.9    fix outputLimit option

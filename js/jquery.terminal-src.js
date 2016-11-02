@@ -3830,7 +3830,7 @@
                                 {name: self.selector},
                                 options || {});
         var strings = $.terminal.defaults.strings;
-        var enabled = settings.enabled, frozen;
+        var enabled = settings.enabled, frozen = false;
         var paused = false;
         var autologin = true; // set to false of onBeforeLogin return false
         // -----------------------------------------------------------------
@@ -5181,29 +5181,6 @@
                     }
                 });*/
             }
-            // detect mouse drag
-            (function() {
-                var count = 0;
-                var isDragging = false;
-                self.mousedown(function() {
-                    $(window).mousemove(function() {
-                        isDragging = true;
-                        count = 0;
-                        $(window).unbind('mousemove');
-                    });
-                }).mouseup(function() {
-                    var wasDragging = isDragging;
-                    isDragging = false;
-                    $(window).unbind('mousemove');
-                    if (!wasDragging && ++count == 1) {
-                        count = 0;
-                        if (!self.enabled() && !frozen) {
-                            self.focus();
-                            command_line.enable();
-                        }
-                    }
-                });
-            })();
             if (is_touch) {
                 self.click(function() {
                     if (!self.enabled() && !frozen) {
@@ -5213,7 +5190,31 @@
                         self.focus(false);
                     }
                 });
-            }
+            } else {
+				// detect mouse drag
+				(function() {
+					var count = 0;
+					var isDragging = false;
+					self.mousedown(function() {
+						$(window).mousemove(function() {
+							isDragging = true;
+							count = 0;
+							$(window).unbind('mousemove');
+						});
+					}).mouseup(function() {
+						var wasDragging = isDragging;
+						isDragging = false;
+						$(window).unbind('mousemove');
+						if (!wasDragging && ++count == 1) {
+							count = 0;
+							if (!self.enabled() && !frozen) {
+								self.focus();
+								command_line.enable();
+							}
+						}
+					});
+				})();
+			}
             self.delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on
