@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.12
+ *           \/              /____/                              version 0.11.13
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 02 Nov 2016 20:34:33 +0000
+ * Date: Sat, 05 Nov 2016 10:26:29 +0000
  */
 
 /* TODO:
@@ -842,15 +842,20 @@
     // -------------------------------------------------------------------------
     // :: HISTORY CLASS
     // -------------------------------------------------------------------------
-    function History(name, size) {
+    function History(name, size, memory) {
         var enabled = true;
         var storage_key = '';
         if (typeof name === 'string' && name !== '') {
             storage_key = name + '_';
         }
         storage_key += 'commands';
-        var data = $.Storage.get(storage_key);
-        data = data ? $.parseJSON(data) : [];
+        var data;
+        if (memory) {
+            data = [];
+        } else {
+            data = $.Storage.get(storage_key);
+            data = data ? $.parseJSON(data) : [];
+        }
         var pos = data.length-1;
         $.extend(this, {
             append: function(item) {
@@ -861,7 +866,9 @@
                             data = data.slice(-size);
                         }
                         pos = data.length-1;
-                        $.Storage.set(storage_key, $.json_stringify(data));
+                        if (!memory) {
+                            $.Storage.set(storage_key, $.json_stringify(data));
+                        }
                     }
                 }
             },
@@ -911,7 +918,9 @@
                 enabled = true;
             },
             purge: function() {
-                $.Storage.remove(storage_key);
+                if (!memory) {
+                    $.Storage.remove(storage_key);
+                }
             },
             disable: function() {
                 enabled = false;
@@ -1626,7 +1635,7 @@
                 if (string !== undefined) {
                     name = string;
                     var enabled = history && history.enabled() || !history;
-                    history = new History(string, historySize);
+                    history = new History(string, historySize, options.history == 'memory');
                     // disable new history if old was disabled
                     if (!enabled) {
                         history.disable();
@@ -1975,7 +1984,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.12',
+        version: '0.11.13',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2601,6 +2610,7 @@
         checkArity: true,
         raw: false,
         exceptionHandler: null,
+        memory: false,
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
@@ -2666,6 +2676,33 @@
     var first_instance = true; // used by history state
     var last_id;
     $.fn.terminal = function(init_interpreter, options) {
+		function StorageHelper(memory) {
+			console.log(memory);
+			if (memory) {
+				this.storage = {};
+			}
+			this.set = function(key, value) {
+				if (memory) {
+					this.storage[key] = value;
+				} else {
+					$.Storage.set(key, value);
+				}
+			};
+			this.get = function(key) {
+				if (memory) {
+					return this.storage[key];
+				} else {
+					$.Storage.get(key);
+				}
+			};
+			this.remove = function(key) {
+				if (memory) {
+					delete this.storage[key];
+				} else {
+					$.Storage.remove(key);
+				}
+			};
+		}
         // ---------------------------------------------------------------------
         // :: helper function
         // ---------------------------------------------------------------------
@@ -3506,15 +3543,15 @@
         // ---------------------------------------------------------------------
         function clear_loging_storage() {
             var name = self.prefix_name(true) + '_';
-            $.Storage.remove(name + 'token');
-            $.Storage.remove(name + 'login');
+            storage.remove(name + 'token');
+            storage.remove(name + 'login');
         }
         // ---------------------------------------------------------------------
         // :: Save the interpreter name for use with purge
         // ---------------------------------------------------------------------
         function maybe_append_name(interpreter_name) {
             var storage_key = self.prefix_name() + '_interpreters';
-            var names = $.Storage.get(storage_key);
+            var names = storage.get(storage_key);
             if (names) {
                 names = $.parseJSON(names);
             } else {
@@ -3522,7 +3559,7 @@
             }
             if ($.inArray(interpreter_name, names) == -1) {
                 names.push(interpreter_name);
-                $.Storage.set(storage_key, $.json_stringify(names));
+                storage.set(storage_key, $.json_stringify(names));
             }
         }
         // ---------------------------------------------------------------------
@@ -3829,7 +3866,8 @@
                                 $.terminal.defaults,
                                 {name: self.selector},
                                 options || {});
-        var strings = $.terminal.defaults.strings;
+        var storage = new StorageHelper(settings.memory);
+		var strings = $.terminal.defaults.strings;
         var enabled = settings.enabled, frozen = false;
         var paused = false;
         var autologin = true; // set to false of onBeforeLogin return false
@@ -4018,8 +4056,8 @@
                             command_line.history().enable();
                         }
                         var name = self.prefix_name(true) + '_';
-                        $.Storage.set(name + 'token', token);
-                        $.Storage.set(name + 'login', user);
+                        storage.set(name + 'token', token);
+                        storage.set(name + 'login', user);
                         in_login = false;
                         if ($.isFunction(success)) {
                             // will be used internaly since users know
@@ -4741,7 +4779,7 @@
             // :: there is no login
             // -------------------------------------------------------------
             token: function(local) {
-                return $.Storage.get(self.prefix_name(local) + '_token');
+                return storage.get(self.prefix_name(local) + '_token');
             },
             // -------------------------------------------------------------
             // :: Function sets the token to the supplied value. This function
@@ -4750,9 +4788,9 @@
             set_token: function(token, local) {
                 var name = self.prefix_name(local) + '_token';
                 if (typeof token == 'undefined') {
-                    $.Storage.remove(name, token);
+                    storage.remove(name, token);
                 } else {
-                    $.Storage.set(name, token);
+                    storage.set(name, token);
                 }
                 return self;
             },
@@ -4761,13 +4799,13 @@
             // :: by the set_token method.
             // -------------------------------------------------------------
             get_token: function(local) {
-                return $.Storage.get(self.prefix_name(local) + '_token');
+                return storage.get(self.prefix_name(local) + '_token');
             },
             // -------------------------------------------------------------
             // :: Function return Login name entered by the user
             // -------------------------------------------------------------
             login_name: function(local) {
-                return $.Storage.get(self.prefix_name(local) + '_login');
+                return storage.get(self.prefix_name(local) + '_login');
             },
             // -------------------------------------------------------------
             // :: Function returns the name of current interpreter
@@ -4953,14 +4991,14 @@
             purge: function() {
                 init_deferr.then(function() {
                     var prefix = self.prefix_name() + '_';
-                    var names = $.Storage.get(prefix + 'interpreters');
+                    var names = storage.get(prefix + 'interpreters');
                     $.each($.parseJSON(names), function(_, name) {
-                        $.Storage.remove(name + '_commands');
-                        $.Storage.remove(name + '_token');
-                        $.Storage.remove(name + '_login');
+                        storage.remove(name + '_commands');
+                        storage.remove(name + '_token');
+                        storage.remove(name + '_login');
                     });
                     command_line.purge();
-                    $.Storage.remove(prefix + 'interpreters');
+                    storage.remove(prefix + 'interpreters');
                 });
                 return self;
             },
@@ -5123,7 +5161,7 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(self).cmd({
                 prompt: settings.prompt,
-                history: settings.history,
+                history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
                 width: '100%',
@@ -5191,30 +5229,30 @@
                     }
                 });
             } else {
-				// detect mouse drag
-				(function() {
-					var count = 0;
-					var isDragging = false;
-					self.mousedown(function() {
-						$(window).mousemove(function() {
-							isDragging = true;
-							count = 0;
-							$(window).unbind('mousemove');
-						});
-					}).mouseup(function() {
-						var wasDragging = isDragging;
-						isDragging = false;
-						$(window).unbind('mousemove');
-						if (!wasDragging && ++count == 1) {
-							count = 0;
-							if (!self.enabled() && !frozen) {
-								self.focus();
-								command_line.enable();
-							}
-						}
-					});
-				})();
-			}
+                // detect mouse drag
+                (function() {
+                    var count = 0;
+                    var isDragging = false;
+                    self.mousedown(function() {
+                        $(window).mousemove(function() {
+                            isDragging = true;
+                            count = 0;
+                            $(window).unbind('mousemove');
+                        });
+                    }).mouseup(function() {
+                        var wasDragging = isDragging;
+                        isDragging = false;
+                        $(window).unbind('mousemove');
+                        if (!wasDragging && ++count == 1) {
+                            count = 0;
+                            if (!self.enabled() && !frozen) {
+                                self.focus();
+                                command_line.enable();
+                            }
+                        }
+                    });
+                })();
+            }
             self.delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on
