@@ -2676,33 +2676,32 @@
     var first_instance = true; // used by history state
     var last_id;
     $.fn.terminal = function(init_interpreter, options) {
-		function StorageHelper(memory) {
-			console.log(memory);
-			if (memory) {
-				this.storage = {};
-			}
-			this.set = function(key, value) {
-				if (memory) {
-					this.storage[key] = value;
-				} else {
-					$.Storage.set(key, value);
-				}
-			};
-			this.get = function(key) {
-				if (memory) {
-					return this.storage[key];
-				} else {
-					$.Storage.get(key);
-				}
-			};
-			this.remove = function(key) {
-				if (memory) {
-					delete this.storage[key];
-				} else {
-					$.Storage.remove(key);
-				}
-			};
-		}
+        function StorageHelper(memory) {
+            if (memory) {
+                this.storage = {};
+            }
+            this.set = function(key, value) {
+                if (memory) {
+                    this.storage[key] = value;
+                } else {
+                    $.Storage.set(key, value);
+                }
+            };
+            this.get = function(key) {
+                if (memory) {
+                    return this.storage[key];
+                } else {
+                    $.Storage.get(key);
+                }
+            };
+            this.remove = function(key) {
+                if (memory) {
+                    delete this.storage[key];
+                } else {
+                    $.Storage.remove(key);
+                }
+            };
+        }
         // ---------------------------------------------------------------------
         // :: helper function
         // ---------------------------------------------------------------------
@@ -3867,7 +3866,7 @@
                                 {name: self.selector},
                                 options || {});
         var storage = new StorageHelper(settings.memory);
-		var strings = $.terminal.defaults.strings;
+        var strings = $.terminal.defaults.strings;
         var enabled = settings.enabled, frozen = false;
         var paused = false;
         var autologin = true; // set to false of onBeforeLogin return false
