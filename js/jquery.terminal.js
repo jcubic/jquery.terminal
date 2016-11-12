@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.14
+ *           \/              /____/                              version 0.11.15
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 12 Nov 2016 11:00:07 +0000
+ * Date: Sat, 12 Nov 2016 11:14:30 +0000
  */
 
 /* TODO:
@@ -775,71 +775,6 @@
         });
     }
     // -------------------------------------------------------------------------
-    // :: Serialize object myself (biwascheme or prototype library do something
-    // :: wicked with JSON serialization for Arrays)
-    // -------------------------------------------------------------------------
-    $.json_stringify = function(object, level) {
-        var result = '', i;
-        level = level === undefined ? 1 : level;
-        var type = typeof object;
-        switch (type) {
-            case 'function':
-                result += object;
-                break;
-            case 'boolean':
-                result += object ? 'true' : 'false';
-                break;
-            case 'object':
-                if (object === null) {
-                    result += 'null';
-                } else if (object instanceof Array) {
-                    result += '[';
-                    var len = object.length;
-                    for (i = 0; i < len - 1; ++i) {
-                        result += $.json_stringify(object[i], level + 1);
-                    }
-                    result += $.json_stringify(object[len - 1], level + 1) + ']';
-                } else {
-                    result += '{';
-                    for (var property in object) {
-                        if (object.hasOwnProperty(property)) {
-                            result += '"' + property + '":' +
-                                $.json_stringify(object[property], level + 1);
-                        }
-                    }
-                    result += '}';
-                }
-                break;
-            case 'string':
-                var str = object;
-                var repl = {
-                    '\\\\': '\\\\',
-                    '"': '\\"',
-                    '/': '\\/',
-                    '\\n': '\\n',
-                    '\\r': '\\r',
-                    '\\t': '\\t'};
-                for (i in repl) {
-                    if (repl.hasOwnProperty(i)) {
-                        str = str.replace(new RegExp(i, 'g'), repl[i]);
-                    }
-                }
-                result += '"' + str + '"';
-                break;
-            case 'number':
-                result += String(object);
-                break;
-        }
-        result += (level > 1 ? ',' : '');
-        // quick hacks below
-        if (level === 1) {
-            // fix last comma
-            result = result.replace(/,([\]}])/g, '$1');
-        }
-        // fix comma before array or object
-        return result.replace(/([\[{]),/g, '$1');
-    };
-    // -------------------------------------------------------------------------
     // :: HISTORY CLASS
     // -------------------------------------------------------------------------
     function History(name, size, memory) {
@@ -867,7 +802,7 @@
                         }
                         pos = data.length-1;
                         if (!memory) {
-                            $.Storage.set(storage_key, $.json_stringify(data));
+                            $.Storage.set(storage_key, JSON.stringify(data));
                         }
                     }
                 }
@@ -1984,7 +1919,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.14',
+        version: '0.11.15',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2440,7 +2375,7 @@
     var ids = {}; // list of url based id of JSON-RPC
     $.jrpc = function(url, method, params, success, error) {
         ids[url] = ids[url] || 0;
-        var request = $.json_stringify({
+        var request = JSON.stringify({
            'jsonrpc': '2.0', 'method': method,
             'params': params, 'id': ++ids[url]});
         return $.ajax({
@@ -2722,10 +2657,10 @@
                 self.echo(object);
             } else if (object instanceof Array) {
                 self.echo($.map(object, function(object) {
-                    return $.json_stringify(object);
+                    return JSON.stringify(object);
                 }).join(' '));
             } else if (typeof object === 'object') {
-                self.echo($.json_stringify(object));
+                self.echo(JSON.stringify(object));
             } else {
                 self.echo(object);
             }
@@ -3387,7 +3322,7 @@
         function maybe_update_hash() {
             if (change_hash) {
                 fire_hash_change = false;
-                location.hash = '#' + $.json_stringify(hash_commands);
+                location.hash = '#' + JSON.stringify(hash_commands);
                 setTimeout(function() {
                     fire_hash_change = true;
                 }, 100);
@@ -3558,7 +3493,7 @@
             }
             if ($.inArray(interpreter_name, names) == -1) {
                 names.push(interpreter_name);
-                storage.set(storage_key, $.json_stringify(names));
+                storage.set(storage_key, JSON.stringify(names));
             }
         }
         // ---------------------------------------------------------------------
