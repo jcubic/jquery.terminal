@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.13
+ *           \/              /____/                              version 0.11.14
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 05 Nov 2016 10:39:09 +0000
+ * Date: Sat, 12 Nov 2016 11:00:07 +0000
  */
 
 /* TODO:
@@ -1984,7 +1984,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.13',
+        version: '0.11.14',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -5233,11 +5233,13 @@
                     var count = 0;
                     var isDragging = false;
                     self.mousedown(function() {
-                        $(window).mousemove(function() {
-                            isDragging = true;
-                            count = 0;
-                            $(window).unbind('mousemove');
-                        });
+						self.oneTime(1, function() {
+							$(window).mousemove(function() {
+								isDragging = true;
+								count = 0;
+								$(window).unbind('mousemove');
+							});
+						});
                     }).mouseup(function() {
                         var wasDragging = isDragging;
                         isDragging = false;

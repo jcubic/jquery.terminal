@@ -5233,11 +5233,13 @@
                     var count = 0;
                     var isDragging = false;
                     self.mousedown(function() {
-                        $(window).mousemove(function() {
-                            isDragging = true;
-                            count = 0;
-                            $(window).unbind('mousemove');
-                        });
+						self.oneTime(1, function() {
+							$(window).mousemove(function() {
+								isDragging = true;
+								count = 0;
+								$(window).unbind('mousemove');
+							});
+						});
                     }).mouseup(function() {
                         var wasDragging = isDragging;
                         isDragging = false;
