@@ -2542,7 +2542,7 @@
         enabled: true,
         historySize: 60,
         maskChar: '*',
-		wrap: true,
+        wrap: true,
         checkArity: true,
         raw: false,
         exceptionHandler: null,
@@ -3143,8 +3143,8 @@
             output_buffer.push(NEW_LINE);
             if (!options.raw && (string.length > num_chars ||
                                        string.match(/\n/)) &&
-				((settings.wrap === true && options.wrap === undefined) ||
-				  settings.wrap === false && options.wrap === true)) {
+                ((settings.wrap === true && options.wrap === undefined) ||
+                  settings.wrap === false && options.wrap === true)) {
                 var words = options.keepWords;
                 var array = $.terminal.split_equal(string, num_chars, words);
                 for (i = 0, len = array.length; i < len; ++i) {
@@ -5171,13 +5171,13 @@
                     var count = 0;
                     var isDragging = false;
                     self.mousedown(function() {
-						self.oneTime(1, function() {
-							$(window).mousemove(function() {
-								isDragging = true;
-								count = 0;
-								$(window).unbind('mousemove');
-							});
-						});
+                        self.oneTime(1, function() {
+                            $(window).mousemove(function() {
+                                isDragging = true;
+                                count = 0;
+                                $(window).unbind('mousemove');
+                            });
+                        });
                     }).mouseup(function() {
                         var wasDragging = isDragging;
                         isDragging = false;
