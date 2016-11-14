@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.16
+ *           \/              /____/                              version 0.11.17
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 14 Nov 2016 19:38:47 +0000
+ * Date: Mon, 14 Nov 2016 20:10:54 +0000
  */
 
 /* TODO:
@@ -1919,7 +1919,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.16',
+        version: '0.11.17',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2542,7 +2542,7 @@
         enabled: true,
         historySize: 60,
         maskChar: '*',
-		wrap: true,
+        wrap: true,
         checkArity: true,
         raw: false,
         exceptionHandler: null,
@@ -3143,8 +3143,8 @@
             output_buffer.push(NEW_LINE);
             if (!options.raw && (string.length > num_chars ||
                                        string.match(/\n/)) &&
-				((settings.wrap === true && options.wrap === undefined) ||
-				  settings.wrap === false && options.wrap === true)) {
+                ((settings.wrap === true && options.wrap === undefined) ||
+                  settings.wrap === false && options.wrap === true)) {
                 var words = options.keepWords;
                 var array = $.terminal.split_equal(string, num_chars, words);
                 for (i = 0, len = array.length; i < len; ++i) {
@@ -3160,14 +3160,16 @@
                         }
                     }
                 }
-            } else {
-                if (!options.raw) {
-                    string = $.terminal.format(string, {
-                        linksNoReferrer: settings.linksNoReferrer
-                    });
-                }
-                output_buffer.push(string);
-            }
+            } else if (!options.raw) {
+				string = $.terminal.format(string, {
+					linksNoReferrer: settings.linksNoReferrer
+				});
+				string.split(/\n/).forEach(function(string) {
+					output_buffer.push(string);
+				});
+			} else {
+				output_buffer.push(string);
+			}
             output_buffer.push(options.finalize);
         }
         // ---------------------------------------------------------------------
@@ -5171,13 +5173,13 @@
                     var count = 0;
                     var isDragging = false;
                     self.mousedown(function() {
-						self.oneTime(1, function() {
-							$(window).mousemove(function() {
-								isDragging = true;
-								count = 0;
-								$(window).unbind('mousemove');
-							});
-						});
+                        self.oneTime(1, function() {
+                            $(window).mousemove(function() {
+                                isDragging = true;
+                                count = 0;
+                                $(window).unbind('mousemove');
+                            });
+                        });
                     }).mouseup(function() {
                         var wasDragging = isDragging;
                         isDragging = false;
