@@ -2383,8 +2383,8 @@
             data: request,
             success: function(result, status, jqXHR) {
                 var content_type = jqXHR.getResponseHeader('Content-Type');
-                if (!content_type.match(/application\/json/)) {
-                    var msg = 'Response Content-Type is not application/json';
+                if (!content_type.match(/(application|text)\/json/)) {
+                    var msg = 'Response Content-Type is neither application/json nor text/json';
                     if (console && console.warn) {
                         console.warn(msg);
                     } else {

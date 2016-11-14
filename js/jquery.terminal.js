@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.15
+ *           \/              /____/                              version 0.11.16
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 12 Nov 2016 11:14:30 +0000
+ * Date: Mon, 14 Nov 2016 18:38:01 +0000
  */
 
 /* TODO:
@@ -1919,7 +1919,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.15',
+        version: '0.11.16',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2383,8 +2383,8 @@
             data: request,
             success: function(result, status, jqXHR) {
                 var content_type = jqXHR.getResponseHeader('Content-Type');
-                if (!content_type.match(/application\/json/)) {
-                    var msg = 'Response Content-Type is not application/json';
+                if (!content_type.match(/(application|text)\/json/)) {
+                    var msg = 'Response Content-Type is neither application/json nor text/json';
                     if (console && console.warn) {
                         console.warn(msg);
                     } else {

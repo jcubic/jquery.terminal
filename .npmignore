@@ -11,7 +11,7 @@ SpecRunner.html
 spec
 examples
 bin
-css/jquery.terminal-src.css
-js/jquery.terminal-src.js
+css/jquery.terminal-*.css
+js/jquery.terminal-*.js
 js/jquery-1.7.1.min.js
 version
