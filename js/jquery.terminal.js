@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 14 Nov 2016 18:38:01 +0000
+ * Date: Mon, 14 Nov 2016 19:38:47 +0000
  */
 
 /* TODO:
@@ -2542,6 +2542,7 @@
         enabled: true,
         historySize: 60,
         maskChar: '*',
+		wrap: true,
         checkArity: true,
         raw: false,
         exceptionHandler: null,
@@ -3141,7 +3142,9 @@
             }
             output_buffer.push(NEW_LINE);
             if (!options.raw && (string.length > num_chars ||
-                                       string.match(/\n/))) {
+                                       string.match(/\n/)) &&
+				((settings.wrap === true && options.wrap === undefined) ||
+				  settings.wrap === false && options.wrap === true)) {
                 var words = options.keepWords;
                 var array = $.terminal.split_equal(string, num_chars, words);
                 for (i = 0, len = array.length; i < len; ++i) {

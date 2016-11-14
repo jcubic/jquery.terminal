@@ -2542,6 +2542,7 @@
         enabled: true,
         historySize: 60,
         maskChar: '*',
+		wrap: true,
         checkArity: true,
         raw: false,
         exceptionHandler: null,
@@ -3141,7 +3142,9 @@
             }
             output_buffer.push(NEW_LINE);
             if (!options.raw && (string.length > num_chars ||
-                                       string.match(/\n/))) {
+                                       string.match(/\n/)) &&
+				((settings.wrap === true && options.wrap === undefined) ||
+				  settings.wrap === false && options.wrap === true)) {
                 var words = options.keepWords;
                 var array = $.terminal.split_equal(string, num_chars, words);
                 for (i = 0, len = array.length; i < len; ++i) {
