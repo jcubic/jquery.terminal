@@ -1,3 +1,6 @@
+0.11.16   add versioned files to npmignore
+          add global and echo option wrap to disable long line wrapping
+          don't send warning when mime for JSON-RPC is text/json
 0.11.15   replace json_stringify with JSON.stringify
 0.11.14   fix focus on desktop
 0.11.13   allow only memory storage with memory option set to true
