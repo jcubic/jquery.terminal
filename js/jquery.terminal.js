@@ -931,16 +931,14 @@
         // on mobile you can't delete character if input is empty (event
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
-        function fake_mobile_entry() {
-            if (is_touch) {
-                // delay worked while experimenting
-                self.oneTime(10, function() {
-                    clip.val(command);
-                    self.oneTime(10, function() {
-                        clip.caret(position);
-                    });
+        function fix_textarea() {
+            // delay worked while experimenting
+            self.oneTime(10, function () {
+                clip.val(command);
+                self.oneTime(10, function () {
+                    clip.caret(position);
                 });
-            }
+            });
         }
         // terminal animation don't work on andorid because they animate
         // 2 properties
@@ -1276,7 +1274,7 @@
                 self.oneTime(100, function() {
                     self.insert(clip.val());
                     clip.val('');
-                    fake_mobile_entry();
+                    fix_textarea();
                 });
             }
         }
@@ -1358,8 +1356,6 @@
                     } else {
                         if (command !== '' && position > 0) {
                             self['delete'](-1);
-                            var str = $('.clipboard').val();
-                            $('.clipboard').val(str.substring(0, str.length - 1));
                         }
                     }
                     if (is_touch) {
@@ -1616,7 +1612,7 @@
                     }
                 }
                 redraw();
-                fake_mobile_entry();
+                fix_textarea();
                 return removed;
             },
             set: function(string, stay) {
@@ -1626,7 +1622,7 @@
                         self.position(command.length);
                     }
                     redraw();
-                    fake_mobile_entry();
+                    fix_textarea();
                     fire_change_command();
                 }
                 return self;
@@ -1643,7 +1639,7 @@
                 if (!stay) {
                     self.position(string.length, true);
                 } else {
-                    fake_mobile_entry();
+                    fix_textarea();
                 }
                 redraw();
                 fire_change_command();
@@ -1710,7 +1706,7 @@
                         options.onPositionChange(position);
                     }
                     redraw();
-                    fake_mobile_entry();
+                    fix_textarea();
                     return self;
                 } else {
                     return position;
