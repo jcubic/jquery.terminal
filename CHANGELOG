@@ -1,3 +1,4 @@
+0.12.0    copy to system clipboard when copy to kill area
 0.11.18   fix input method
 0.11.17   fix echo when line is short and have newlines
 0.11.16   add versioned files to npmignore

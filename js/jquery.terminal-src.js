@@ -1501,6 +1501,7 @@
                             if (command !== '' && position !== 0) {
                                 var m = command.slice(0, position).match(/([^ ]+ *$)/);
                                 kill_text = self['delete'](-m[0].length);
+                                text_to_clipboard(self, kill_text);
                             }
                             return false;
                         } else if (e.which === 72) { // CTRL+H
@@ -1538,9 +1539,11 @@
                             return;
                         } else if (e.which === 75) { // CTRL+K
                             kill_text = self['delete'](command.length-position);
+                            text_to_clipboard(self, kill_text);
                         } else if (e.which === 85) { // CTRL+U
                             if (command !== '' && position !== 0) {
                                 kill_text = self['delete'](-position);
+                                text_to_clipboard(self, kill_text);
                             }
                         } else if (e.which === 17) { //CTRL+TAB switch tab
                             return false;
@@ -2481,6 +2484,32 @@
         } else if (document.selection) {
             return document.selection.createRange().text;
         }
+    }
+    // -----------------------------------------------------------------------
+    // :: try to copy given DOM element text to clipboard
+    // -----------------------------------------------------------------------
+    function text_to_clipboard(container, text) {
+        var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
+        container.append($div);
+        if (document.body.createTextRange) {
+            var range = document.body.createTextRange();
+            range.moveToElementText($div[0]);
+            range.select();
+        } else if (window.getSelection) {
+            var selection = window.getSelection();
+            if (selection.setBaseAndExtent) {
+                selection.setBaseAndExtent($div[0], 0, $div[0], 1);
+            } else if (document.createRange) {
+                var range = document.createRange();
+                range.selectNodeContents($div[0]);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+        try {
+            document.execCommand('copy'); 
+        } catch(e) {}
+        $div.remove();
     }
     // -----------------------------------------------------------------------
     // :: check if div have scrollbars (need to have overflow auto or always)
