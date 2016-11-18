@@ -1349,6 +1349,7 @@
                         if ($.isFunction(prompt)) {
                             draw_prompt();
                         }
+                        $('.clipboard').val('');
                     }
                 } else if (e.which === 8) { //backspace
                     if (reverse_search) {
