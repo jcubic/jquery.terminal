@@ -1358,7 +1358,7 @@
                     } else {
                         if (command !== '' && position > 0) {
                             self['delete'](-1);
-                            var str = $('.clipboard').val()
+                            var str = $('.clipboard').val();
                             $('.clipboard').val(str.substring(0, str.length - 1));
                         }
                     }
