@@ -3160,15 +3160,15 @@
                     }
                 }
             } else if (!options.raw) {
-				string = $.terminal.format(string, {
-					linksNoReferrer: settings.linksNoReferrer
-				});
-				string.split(/\n/).forEach(function(string) {
-					output_buffer.push(string);
-				});
-			} else {
-				output_buffer.push(string);
-			}
+                string = $.terminal.format(string, {
+                    linksNoReferrer: settings.linksNoReferrer
+                });
+                string.split(/\n/).forEach(function(string) {
+                    output_buffer.push(string);
+                });
+            } else {
+                output_buffer.push(string);
+            }
             output_buffer.push(options.finalize);
         }
         // ---------------------------------------------------------------------
