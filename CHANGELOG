@@ -1,3 +1,4 @@
+0.11.18   fix input method
 0.11.17   fix echo when line is short and have newlines
 0.11.16   add versioned files to npmignore
           add global and echo option wrap to disable long line wrapping
