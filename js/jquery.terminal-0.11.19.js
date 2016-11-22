@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.18
+ *           \/              /____/                              version 0.11.19
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 19 Nov 2016 11:24:59 +0000
+ * Date: Tue, 22 Nov 2016 11:04:26 +0000
  */
 
 /* TODO:
@@ -884,7 +884,10 @@
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
-        var clip = $('<textarea>').addClass('clipboard').appendTo(self);
+        var clip = $('<textarea>').attr({
+            autocapitalize: 'off',
+            spellcheck: 'false'
+        }).addClass('clipboard').appendTo(self);
         // we don't need this but leave it as a comment just in case
         //var contentEditable = $('<div contentEditable></div>')
         //$(document.body).append(contentEditable);
@@ -1918,7 +1921,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.18',
+        version: '0.11.19',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2626,7 +2629,7 @@
                 if (memory) {
                     return this.storage[key];
                 } else {
-                    $.Storage.get(key);
+                    return $.Storage.get(key);
                 }
             };
             this.remove = function(key) {
@@ -3160,15 +3163,15 @@
                     }
                 }
             } else if (!options.raw) {
-				string = $.terminal.format(string, {
-					linksNoReferrer: settings.linksNoReferrer
-				});
-				string.split(/\n/).forEach(function(string) {
-					output_buffer.push(string);
-				});
-			} else {
-				output_buffer.push(string);
-			}
+                string = $.terminal.format(string, {
+                    linksNoReferrer: settings.linksNoReferrer
+                });
+                string.split(/\n/).forEach(function(string) {
+                    output_buffer.push(string);
+                });
+            } else {
+                output_buffer.push(string);
+            }
             output_buffer.push(options.finalize);
         }
         // ---------------------------------------------------------------------

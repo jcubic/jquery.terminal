@@ -1,3 +1,5 @@
+0.11.19   fix getting data from local storage
+          remove spell check and auto capitalize from textarea
 0.11.18   fix input method
 0.11.17   fix echo when line is short and have newlines
 0.11.16   add versioned files to npmignore

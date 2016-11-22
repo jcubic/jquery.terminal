@@ -884,7 +884,10 @@
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
-        var clip = $('<textarea>').addClass('clipboard').appendTo(self);
+        var clip = $('<textarea>').attr({
+            autocapitalize: 'off',
+            spellcheck: 'false'
+        }).addClass('clipboard').appendTo(self);
         // we don't need this but leave it as a comment just in case
         //var contentEditable = $('<div contentEditable></div>')
         //$(document.body).append(contentEditable);
@@ -2626,7 +2629,7 @@
                 if (memory) {
                     return this.storage[key];
                 } else {
-                    $.Storage.get(key);
+                    return $.Storage.get(key);
                 }
             };
             this.remove = function(key) {
