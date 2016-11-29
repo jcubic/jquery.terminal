@@ -938,9 +938,11 @@
             // delay worked while experimenting
             self.oneTime(10, function () {
                 clip.val(command);
-                self.oneTime(10, function () {
-                    clip.caret(position);
-                });
+				if (enabled) {
+					self.oneTime(10, function () {
+						clip.caret(position);
+					});
+				}
             });
         }
         // terminal animation don't work on andorid because they animate
@@ -1743,6 +1745,7 @@
             enable: function() {
                 enabled = true;
                 self.addClass('enabled');
+				clip.caret(position);
                 animation(true);
                 mobile_focus();
                 return self;
