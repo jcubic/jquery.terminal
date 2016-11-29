@@ -1,3 +1,4 @@
+0.11.20   don't convert links to formatting when raw option is true
 0.11.19   fix getting data from local storage
           remove spell check and auto capitalize from textarea
 0.11.18   fix input method
