@@ -938,11 +938,11 @@
             // delay worked while experimenting
             self.oneTime(10, function () {
                 clip.val(command);
-				if (enabled) {
-					self.oneTime(10, function () {
-						clip.caret(position);
-					});
-				}
+                if (enabled) {
+                    self.oneTime(10, function () {
+                        clip.caret(position);
+                    });
+                }
             });
         }
         // terminal animation don't work on andorid because they animate
@@ -1745,7 +1745,7 @@
             enable: function() {
                 enabled = true;
                 self.addClass('enabled');
-				clip.caret(position);
+                clip.caret(position);
                 animation(true);
                 mobile_focus();
                 return self;
@@ -3799,7 +3799,7 @@
         var num_rows; // number of lines that fit without scrollbar
         var command_list = []; // for tab completion
         var url;
-		var bottom; // indicate if terminal was scrolled to bottom before echo command
+        var bottom; // indicate if terminal was scrolled to bottom before echo command
         var logins = new Stack(); // stack of logins
         var init_deferr = $.Deferred();
         var in_login = false;//some Methods should not be called when login
@@ -4494,7 +4494,7 @@
             // -------------------------------------------------------------
             flush: function() {
                 try {
-					var bottom = self.is_bottom();
+                    var bottom = self.is_bottom();
                     var wrapper;
                     // print all lines
                     $.each(output_buffer, function(i, line) {
@@ -4973,21 +4973,21 @@
                 });
                 return self;
             },
-			scroll_to_bottom: scroll_to_bottom,
-			is_bottom: function() {
-				var scroll_height, scroll_top, height;
-				if (self.is('body')) {
-					scroll_height = $(document).height();
-					scroll_top = $(window).scrollTop();
-					height = $(window).height();
-					return Math.floor(scroll_top + height) == scroll_height;
-				} else {
-					scroll_height = scroll_object[0].scrollHeight;
-					scroll_top = scroll_object.scrollTop();
-					height = scroll_object.outerHeight();
-					return Math.floor(scroll_height - scroll_top) == height;
-				}
-			}
+            scroll_to_bottom: scroll_to_bottom,
+            is_bottom: function() {
+                var scroll_height, scroll_top, height;
+                if (self.is('body')) {
+                    scroll_height = $(document).height();
+                    scroll_top = $(window).scrollTop();
+                    height = $(window).height();
+                    return Math.floor(scroll_top + height) == scroll_height;
+                } else {
+                    scroll_height = scroll_object[0].scrollHeight;
+                    scroll_top = scroll_object.scrollTop();
+                    height = scroll_object.outerHeight();
+                    return Math.floor(scroll_height - scroll_top) == height;
+                }
+            }
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
