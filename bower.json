@@ -1,6 +1,6 @@
 {
     "name": "jquery.terminal",
-    "version": "0.11.21",
+    "version": "0.11.22",
     "main": [
         "js/jquery.terminal.min.js",
         "js/jquery.mousewheel-min.js",
@@ -10,11 +10,16 @@
     "license": "MIT",
     "ignore": [
         "examples",
-        "CHANGELOG",
         "README.in",
         "bower.in",
         "Makefile",
-        "manifest"
+        "manifest",
+		".gitignore",
+		".npmignore",
+		"package.in",
+		"package.json",
+		"bin",
+		"version"
     ],
     "dependencies": {
         "jquery": "~2"
