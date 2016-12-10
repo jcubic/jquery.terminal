@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.22
+ *           \/              /____/                              version 0.11.23
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 09 Dec 2016 18:23:18 +0000
+ * Date: Sat, 10 Dec 2016 10:56:53 +0000
  */
 
 /* TODO:
@@ -938,11 +938,11 @@
             // delay worked while experimenting
             self.oneTime(10, function () {
                 clip.val(command);
-				if (enabled) {
-					self.oneTime(10, function () {
-						clip.caret(position);
-					});
-				}
+                if (enabled) {
+                    self.oneTime(10, function () {
+                        clip.caret(position);
+                    });
+                }
             });
         }
         // terminal animation don't work on andorid because they animate
@@ -1745,7 +1745,7 @@
             enable: function() {
                 enabled = true;
                 self.addClass('enabled');
-				clip.caret(position);
+                clip.caret(position);
                 animation(true);
                 mobile_focus();
                 return self;
@@ -1924,7 +1924,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.22',
+        version: '0.11.23',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2565,6 +2565,7 @@
         outputLimit: -1,
         formatters: [],
         onAjaxError: null,
+		scrollBottomOffset: 20,
         onRPCError: null,
         completion: false,
         historyFilter: null,
@@ -3799,7 +3800,7 @@
         var num_rows; // number of lines that fit without scrollbar
         var command_list = []; // for tab completion
         var url;
-		var bottom; // indicate if terminal was scrolled to bottom before echo command
+        var bottom; // indicate if terminal was scrolled to bottom before echo command
         var logins = new Stack(); // stack of logins
         var init_deferr = $.Deferred();
         var in_login = false;//some Methods should not be called when login
@@ -4494,7 +4495,7 @@
             // -------------------------------------------------------------
             flush: function() {
                 try {
-					var bottom = self.is_bottom();
+                    var bottom = self.is_bottom();
                     var wrapper;
                     // print all lines
                     $.each(output_buffer, function(i, line) {
@@ -4973,21 +4974,20 @@
                 });
                 return self;
             },
-			scroll_to_bottom: scroll_to_bottom,
-			is_bottom: function() {
-				var scroll_height, scroll_top, height;
-				if (self.is('body')) {
-					scroll_height = $(document).height();
-					scroll_top = $(window).scrollTop();
-					height = $(window).height();
-					return Math.floor(scroll_top + height) == scroll_height;
-				} else {
-					scroll_height = scroll_object[0].scrollHeight;
-					scroll_top = scroll_object.scrollTop();
-					height = scroll_object.outerHeight();
-					return Math.floor(scroll_height - scroll_top) == height;
-				}
-			}
+            scroll_to_bottom: scroll_to_bottom,
+            is_bottom: function() {
+                var scroll_height, scroll_top, height;
+                if (self.is('body')) {
+                    scroll_height = $(document).height();
+                    scroll_top = $(window).scrollTop();
+                    height = window.innerHeight;
+                } else {
+                    scroll_height = scroll_object[0].scrollHeight;
+                    scroll_top = scroll_object.scrollTop();
+                    height = scroll_object.outerHeight();
+                }
+				return scroll_top + height > scroll_height - settings.scrollBottomOffset;
+            }
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {

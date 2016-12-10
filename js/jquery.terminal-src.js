@@ -2565,6 +2565,7 @@
         outputLimit: -1,
         formatters: [],
         onAjaxError: null,
+		scrollBottomOffset: 20,
         onRPCError: null,
         completion: false,
         historyFilter: null,
@@ -4979,14 +4980,13 @@
                 if (self.is('body')) {
                     scroll_height = $(document).height();
                     scroll_top = $(window).scrollTop();
-                    height = $(window).height();
-                    return Math.floor(scroll_top + height) == scroll_height;
+                    height = window.innerHeight;
                 } else {
                     scroll_height = scroll_object[0].scrollHeight;
                     scroll_top = scroll_object.scrollTop();
                     height = scroll_object.outerHeight();
-                    return Math.floor(scroll_height - scroll_top) == height;
                 }
+				return scroll_top + height > scroll_height - settings.scrollBottomOffset;
             }
         }, function(name, fun) {
             // wrap all functions and display execptions
