@@ -170,6 +170,8 @@ you can also run test covarage using
 make cover
 ```
 
+### License
+
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
 Copyright (c) 2011-2016 [Jakub Jankiewicz](http://jcubic.pl)
