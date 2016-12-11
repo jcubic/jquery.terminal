@@ -940,7 +940,11 @@
                 clip.val(command);
                 if (enabled) {
                     self.oneTime(10, function () {
-                        clip.caret(position);
+						try {
+							clip.caret(position);
+						} catch(e) {
+							// firefox throw NS_ERROR_FAILURE ignore
+						}
                     });
                 }
             });
@@ -1748,7 +1752,11 @@
             enable: function() {
                 enabled = true;
                 self.addClass('enabled');
-                clip.caret(position);
+				try {
+					clip.caret(position);
+				} catch(e) {
+					// firefox throw NS_ERROR_FAILURE ignore
+				}
                 animation(true);
                 mobile_focus();
                 return self;
@@ -2458,15 +2466,17 @@
                      '&nbsp;</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
         var width = span[0].getBoundingClientRect().width;
-        var result = Math.floor(terminal.width() / width);
+        var result = Math.floor(terminal.width() / width) - 1;
         temp.remove();
+		/*
         if (have_scrollbars(terminal)) {
             var SCROLLBAR_WIDTH = 20;
             // assume that scrollbars are 20px - in my Laptop with
             // Linux/Chrome they are 16px
             var margins = terminal.innerWidth() - terminal.width();
-            result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
+            //result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
         }
+		*/
         return result;
     }
     // -----------------------------------------------------------------------
@@ -2525,7 +2535,7 @@
             div.css('overflow-y') == 'scroll') {
             return true;
         } else if (div.is('body')) {
-            return $("body").height() > $(window).height();
+            return $('body').height() > $(window).height();
         } else {
             return div.get(0).scrollHeight > div.innerHeight();
         }
