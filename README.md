@@ -4,9 +4,11 @@
   __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-           \/              /____/                              version 0.11.18
+           \/              /____/                              version 0.11.23
 ```
 http://terminal.jcubic.pl
+
+[![npm](https://img.shields.io/badge/npm-0.11.23-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-0.11.23-yellow.svg) [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
 
 ### Summary
 
@@ -61,27 +63,27 @@ or npm:
 npm install --save jquery.terminal
 ```
 
-Include js/jquery.terminal-0.11.18.min.js and css/jquery.terminal-0.11.18.css
+Include js/jquery.terminal-0.11.23.min.js and css/jquery.terminal-0.11.23.css
 You can also include js/jquery.mousewheel-min.js
 
 ```html
-<script src="js/jquery.terminal-0.11.18.min.js"></script>
+<script src="js/jquery.terminal-0.11.23.min.js"></script>
 <script src="js/jquery.mousewheel-min.js"></script>
-<link href="css/jquery.terminal-0.11.18.css" rel="stylesheet"/>
+<link href="css/jquery.terminal-0.11.23.css" rel="stylesheet"/>
 ```
 
 You can also grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.11.18/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.11.18/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.11.23/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.11.23/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/jquery.terminal/0.11.18/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/0.11.18/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/jquery.terminal/0.11.23/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/0.11.23/jquery.terminal.min.css">
 ```
 
 And you're good to go.
@@ -168,10 +170,7 @@ you can also run test covarage using
 make cover
 ```
 
-### Live Chat
-
-[![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
-
+### License
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 

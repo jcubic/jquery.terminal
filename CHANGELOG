@@ -1,4 +1,12 @@
 0.12.0    copy to system clipboard when copy to kill area
+          fix width calculation with scrollbar visible
+0.11.23   add scrollBottomOffset option
+0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
+          at the bottom, add new api methods is_bottom and scroll_to_bottom.
+0.11.21   don't scroll to terminal (using caret plugin) when it's disabled
+0.11.20   don't convert links to formatting when raw option is true
+0.11.19   fix getting data from local storage
+          remove spell check and auto capitalize from textarea
 0.11.18   fix input method
 0.11.17   fix echo when line is short and have newlines
 0.11.16   add versioned files to npmignore

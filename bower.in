@@ -10,11 +10,16 @@
     "license": "MIT",
     "ignore": [
         "examples",
-        "CHANGELOG",
         "README.in",
         "bower.in",
         "Makefile",
-        "manifest"
+        "manifest",
+		".gitignore",
+		".npmignore",
+		"package.in",
+		"package.json",
+		"bin",
+		"version"
     ],
     "dependencies": {
         "jquery": "~2"

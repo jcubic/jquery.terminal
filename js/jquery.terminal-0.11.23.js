@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.11.18
+ *           \/              /____/                              version 0.11.23
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 19 Nov 2016 11:28:46 +0000
+ * Date: Sun, 11 Dec 2016 17:01:03 +0000
  */
 
 /* TODO:
@@ -884,7 +884,10 @@
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
-        var clip = $('<textarea>').addClass('clipboard').appendTo(self);
+        var clip = $('<textarea>').attr({
+            autocapitalize: 'off',
+            spellcheck: 'false'
+        }).addClass('clipboard').appendTo(self);
         // we don't need this but leave it as a comment just in case
         //var contentEditable = $('<div contentEditable></div>')
         //$(document.body).append(contentEditable);
@@ -935,9 +938,11 @@
             // delay worked while experimenting
             self.oneTime(10, function () {
                 clip.val(command);
-                self.oneTime(10, function () {
-                    clip.caret(position);
-                });
+                if (enabled) {
+                    self.oneTime(10, function () {
+                        clip.caret(position);
+                    });
+                }
             });
         }
         // terminal animation don't work on andorid because they animate
@@ -1743,6 +1748,7 @@
             enable: function() {
                 enabled = true;
                 self.addClass('enabled');
+                clip.caret(position);
                 animation(true);
                 mobile_focus();
                 return self;
@@ -1921,7 +1927,7 @@
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.11.18',
+        version: '0.11.23',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2588,6 +2594,7 @@
         outputLimit: -1,
         formatters: [],
         onAjaxError: null,
+		scrollBottomOffset: 20,
         onRPCError: null,
         completion: false,
         historyFilter: null,
@@ -2655,7 +2662,7 @@
                 if (memory) {
                     return this.storage[key];
                 } else {
-                    $.Storage.get(key);
+                    return $.Storage.get(key);
                 }
             };
             this.remove = function(key) {
@@ -3144,7 +3151,7 @@
         var NEW_LINE = 1;
         function buffer_line(string, options) {
             // urls should always have formatting to keep url if split
-            if (settings.convertLinks) {
+            if (settings.convertLinks && !options.raw) {
                 string = string.replace(email_re, '[[!;;]$1]').
                     replace(url_nf_re, '[[!;;]$1]');
             }
@@ -3822,6 +3829,7 @@
         var num_rows; // number of lines that fit without scrollbar
         var command_list = []; // for tab completion
         var url;
+        var bottom; // indicate if terminal was scrolled to bottom before echo command
         var logins = new Stack(); // stack of logins
         var init_deferr = $.Deferred();
         var in_login = false;//some Methods should not be called when login
@@ -4516,6 +4524,7 @@
             // -------------------------------------------------------------
             flush: function() {
                 try {
+                    var bottom = self.is_bottom();
                     var wrapper;
                     // print all lines
                     $.each(output_buffer, function(i, line) {
@@ -4564,7 +4573,7 @@
                     }
                     num_rows = get_num_rows(self);
                     on_scrollbar_show_resize();
-                    if (settings.scrollOnEcho) {
+                    if (settings.scrollOnEcho || bottom) {
                         scroll_to_bottom();
                     }
                     output_buffer = [];
@@ -4993,6 +5002,20 @@
                     terminals.remove(terminal_id);
                 });
                 return self;
+            },
+            scroll_to_bottom: scroll_to_bottom,
+            is_bottom: function() {
+                var scroll_height, scroll_top, height;
+                if (self.is('body')) {
+                    scroll_height = $(document).height();
+                    scroll_top = $(window).scrollTop();
+                    height = window.innerHeight;
+                } else {
+                    scroll_height = scroll_object[0].scrollHeight;
+                    scroll_top = scroll_object.scrollTop();
+                    height = scroll_object.outerHeight();
+                }
+				return scroll_top + height > scroll_height - settings.scrollBottomOffset;
             }
         }, function(name, fun) {
             // wrap all functions and display execptions
