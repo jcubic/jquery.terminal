@@ -8,6 +8,12 @@
 ```
 http://terminal.jcubic.pl
 
+[![npm](https://img.shields.io/badge/npm-0.11.23-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-0.11.23-yellow.svg)
+
+
+
+
+
 ### Summary
 
 jQuery Terminal Emulator is a plugin for creating command line interpreters in
