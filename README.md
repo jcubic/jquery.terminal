@@ -8,11 +8,7 @@
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-0.11.23-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-0.11.23-yellow.svg)
-
-
-
-
+[![npm](https://img.shields.io/badge/npm-0.11.23-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-0.11.23-yellow.svg) [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
 
 ### Summary
 
@@ -173,11 +169,6 @@ you can also run test covarage using
 ```
 make cover
 ```
-
-### Live Chat
-
-[![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
-
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
