@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 11 Dec 2016 17:33:32 +0000
+ * Date: Thu, 15 Dec 2016 19:59:23 +0000
  */
 
 /* TODO:
@@ -4633,8 +4633,7 @@
             // :: it use $.when so you can echo a promise
             // -------------------------------------------------------------
             echo: function(string, options) {
-                string = string || '';
-                $.when(string).then(function(string) {
+				function echo(string) {
                     try {
                         var locals = $.extend({
                             flush: true,
@@ -4660,8 +4659,15 @@
                         alert('[Terminal.echo] ' + exception_message(e) +
                               '\n' + e.stack);
                     }
-                });
-                return self;
+                }
+                string = string || '';
+				var type = $.type(string);
+				if (type == 'function' || type == 'string') {
+					echo(string);
+				} else {
+					$.when(string).then(echo);
+				}
+				return self;
             },
             // -------------------------------------------------------------
             // :: echo red text

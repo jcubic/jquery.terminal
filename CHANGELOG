@@ -1,6 +1,7 @@
 0.12.0    copy to system clipboard when copy to kill area
           fix width calculation with scrollbar visible
-		  fix exception in Firefox throw by setSelectionRange in caret plugin
+          fix exception in Firefox throw by setSelectionRange in caret plugin
+          make echo sync when echo string or function (flush didn't work on codepen)
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.

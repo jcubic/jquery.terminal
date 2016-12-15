@@ -4633,8 +4633,7 @@
             // :: it use $.when so you can echo a promise
             // -------------------------------------------------------------
             echo: function(string, options) {
-                string = string || '';
-                $.when(string).then(function(string) {
+				function echo(string) {
                     try {
                         var locals = $.extend({
                             flush: true,
@@ -4660,8 +4659,15 @@
                         alert('[Terminal.echo] ' + exception_message(e) +
                               '\n' + e.stack);
                     }
-                });
-                return self;
+                }
+                string = string || '';
+				var type = $.type(string);
+				if (type == 'function' || type == 'string') {
+					echo(string);
+				} else {
+					$.when(string).then(echo);
+				}
+				return self;
             },
             // -------------------------------------------------------------
             // :: echo red text
