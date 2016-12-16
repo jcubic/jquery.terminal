@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 15 Dec 2016 19:59:23 +0000
+ * Date: Fri, 16 Dec 2016 19:23:02 +0000
  */
 
 /* TODO:
@@ -940,11 +940,11 @@
                 clip.val(command);
                 if (enabled) {
                     self.oneTime(10, function () {
-						try {
-							clip.caret(position);
-						} catch(e) {
-							// firefox throw NS_ERROR_FAILURE ignore
-						}
+                        try {
+                            clip.caret(position);
+                        } catch(e) {
+                            // firefox throw NS_ERROR_FAILURE ignore
+                        }
                     });
                 }
             });
@@ -1752,11 +1752,11 @@
             enable: function() {
                 enabled = true;
                 self.addClass('enabled');
-				try {
-					clip.caret(position);
-				} catch(e) {
-					// firefox throw NS_ERROR_FAILURE ignore
-				}
+                try {
+                    clip.caret(position);
+                } catch(e) {
+                    // firefox throw NS_ERROR_FAILURE ignore
+                }
                 animation(true);
                 mobile_focus();
                 return self;
@@ -2468,7 +2468,7 @@
         var width = span[0].getBoundingClientRect().width;
         var result = Math.floor(terminal.width() / width) - 1;
         temp.remove();
-		/*
+        /*
         if (have_scrollbars(terminal)) {
             var SCROLLBAR_WIDTH = 20;
             // assume that scrollbars are 20px - in my Laptop with
@@ -2476,7 +2476,7 @@
             var margins = terminal.innerWidth() - terminal.width();
             //result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
         }
-		*/
+        */
         return result;
     }
     // -----------------------------------------------------------------------
@@ -2604,7 +2604,7 @@
         outputLimit: -1,
         formatters: [],
         onAjaxError: null,
-		scrollBottomOffset: 20,
+        scrollBottomOffset: 20,
         onRPCError: null,
         completion: false,
         historyFilter: null,
@@ -4633,7 +4633,7 @@
             // :: it use $.when so you can echo a promise
             // -------------------------------------------------------------
             echo: function(string, options) {
-				function echo(string) {
+                function echo(string) {
                     try {
                         var locals = $.extend({
                             flush: true,
@@ -4661,13 +4661,13 @@
                     }
                 }
                 string = string || '';
-				var type = $.type(string);
-				if (type == 'function' || type == 'string') {
-					echo(string);
-				} else {
-					$.when(string).then(echo);
-				}
-				return self;
+                var type = $.type(string);
+                if (type == 'function' || type == 'string') {
+                    echo(string);
+                } else {
+                    $.when(string).then(echo);
+                }
+                return self;
             },
             // -------------------------------------------------------------
             // :: echo red text
@@ -5031,7 +5031,7 @@
                     scroll_top = scroll_object.scrollTop();
                     height = scroll_object.outerHeight();
                 }
-				return scroll_top + height > scroll_height - settings.scrollBottomOffset;
+                return scroll_top + height > scroll_height - settings.scrollBottomOffset;
             }
         }, function(name, fun) {
             // wrap all functions and display execptions
