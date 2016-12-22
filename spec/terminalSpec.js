@@ -1055,6 +1055,7 @@ function tests_on_ready() {
                 term.insert('ec');
                 shortcut(false, false, false, 9);
                 expect(term.get_command()).toEqual('ec\t');
+				term.destroy().remove();
             });
         });
         describe('jQuery Terminal methods', function() {
@@ -1137,13 +1138,13 @@ function tests_on_ready() {
                         this.pause();
                         setTimeout(function() {
                             this.echo('Hello ' + counter++).resume();
-                        }.bind(this), 200);
+                        }.bind(this), 100);
                     },
                     bar: function() {
                         var d = $.Deferred();
                         setTimeout(function() {
                             d.resolve('Foo Bar');
-                        }, 1000);
+                        }, 500);
                         return d.promise();
                     },
                     baz: {
@@ -1259,11 +1260,14 @@ function tests_on_ready() {
                     } else {
                         spy.and.callThrough();
                     }
-                    var term = $('<div/>').terminal({
+                    var term = $('<div/>').appendTo('body').terminal({
                         echo: function(arg) {
                             test.test(arg);
                         }
                     }, options);
+					if (term.token()) {
+						term.logout();
+					}
                     var array = ['foo', 'bar', 'echo foo'];
                     term.exec(array).then(function() {
                         expect(options.login).toHaveBeenCalled();
