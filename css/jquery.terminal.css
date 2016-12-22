@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2016 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 11 Dec 2016 17:01:05 +0000
+ * Date: Thu, 22 Dec 2016 16:17:12 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -123,7 +123,6 @@
       color: #000;
   }
 }
-
 .terminal .terminal-output div div, .cmd .prompt {
     display: block;
     line-height: 14px;
@@ -139,6 +138,58 @@
     background-color: #000;
     font-size: 12px;
     line-height: 14px;
+}
+@supports (--css: variables) {
+	.terminal, .cmd {
+		color: var(--color, #aaa);
+		background-color: var(--background, #000);
+	}
+	.terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
+		background-color: var(--color, #aaa);
+		color: var(--background, #000);
+	}
+	@-webkit-keyframes terminal-blink {
+	  0%, 100% {
+		  background-color: var(--background, #000);
+		  color: var(--color, #aaa);
+	  }
+	  50% {
+		  background-color: var(--color, #aaa);
+		  color: var(--background, #000);
+	  }
+	}
+
+	@-ms-keyframes terminal-blink {
+	  0%, 100% {
+		  background-color: var(--background, #000);
+		  color: var(--color, #aaa);
+	  }
+	  50% {
+		  background-color: var(--color, #aaa);
+		  color: var(--background, #000);
+	  }
+	}
+
+	@-moz-keyframes terminal-blink {
+	  0%, 100% {
+		  background-color: var(--background, #000);
+		  color: var(--color, #aaa);
+	  }
+	  50% {
+		  background-color: var(--color, #aaa);
+		  color: var(--background, #000);
+	  }
+	}
+	@keyframes terminal-blink {
+	  0%, 100% {
+		  background-color: var(--background, #000);
+		  color: var(--color, #aaa);
+	  }
+	  50% {
+		  background-color: var(--color, #aaa);
+		  color: var(--background, #000);
+	  }
+	}
 }
 .terminal-output > div {
     /*padding-top: 3px;*/
