@@ -140,56 +140,56 @@
     line-height: 14px;
 }
 @supports (--css: variables) {
-	.terminal, .cmd {
-		color: var(--color, #aaa);
-		background-color: var(--background, #000);
-	}
-	.terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
-		background-color: var(--color, #aaa);
-		color: var(--background, #000);
-	}
-	@-webkit-keyframes terminal-blink {
-	  0%, 100% {
-		  background-color: var(--background, #000);
-		  color: var(--color, #aaa);
-	  }
-	  50% {
-		  background-color: var(--color, #aaa);
-		  color: var(--background, #000);
-	  }
-	}
+    .terminal, .cmd {
+        color: var(--color, #aaa);
+        background-color: var(--background, #000);
+    }
+    .terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
+        background-color: var(--color, #aaa);
+        color: var(--background, #000);
+    }
+    @-webkit-keyframes terminal-blink {
+      0%, 100% {
+          background-color: var(--background, #000);
+          color: var(--color, #aaa);
+      }
+      50% {
+          background-color: var(--color, #aaa);
+          color: var(--background, #000);
+      }
+    }
 
-	@-ms-keyframes terminal-blink {
-	  0%, 100% {
-		  background-color: var(--background, #000);
-		  color: var(--color, #aaa);
-	  }
-	  50% {
-		  background-color: var(--color, #aaa);
-		  color: var(--background, #000);
-	  }
-	}
+    @-ms-keyframes terminal-blink {
+      0%, 100% {
+          background-color: var(--background, #000);
+          color: var(--color, #aaa);
+      }
+      50% {
+          background-color: var(--color, #aaa);
+          color: var(--background, #000);
+      }
+    }
 
-	@-moz-keyframes terminal-blink {
-	  0%, 100% {
-		  background-color: var(--background, #000);
-		  color: var(--color, #aaa);
-	  }
-	  50% {
-		  background-color: var(--color, #aaa);
-		  color: var(--background, #000);
-	  }
-	}
-	@keyframes terminal-blink {
-	  0%, 100% {
-		  background-color: var(--background, #000);
-		  color: var(--color, #aaa);
-	  }
-	  50% {
-		  background-color: var(--color, #aaa);
-		  color: var(--background, #000);
-	  }
-	}
+    @-moz-keyframes terminal-blink {
+      0%, 100% {
+          background-color: var(--background, #000);
+          color: var(--color, #aaa);
+      }
+      50% {
+          background-color: var(--color, #aaa);
+          color: var(--background, #000);
+      }
+    }
+    @keyframes terminal-blink {
+      0%, 100% {
+          background-color: var(--background, #000);
+          color: var(--color, #aaa);
+      }
+      50% {
+          background-color: var(--color, #aaa);
+          color: var(--background, #000);
+      }
+    }
 }
 .terminal-output > div {
     /*padding-top: 3px;*/
