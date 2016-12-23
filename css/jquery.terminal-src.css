@@ -165,12 +165,16 @@
 	  position: relative;
 	  top: 2px;
 	  line-height: 11px;
+	  border-left: none;
+	  margin: 0;
   }
   50% {
 	  border-bottom-color: #000;
 	  position: relative;
 	  top: 2px;
 	  line-height: 11px;
+	  border-left: none;
+	  margin: 0;
   }
 }
 @-ms-keyframes terminal-underline {
@@ -179,12 +183,16 @@
 	  position: relative;
 	  top: 2px;
 	  line-height: 11px;
+	  border-left: none;
+	  margin: 0;
   }
   50% {
 	  border-bottom-color: #000;
 	  position: relative;
 	  top: 2px;
 	  line-height: 11px;
+	  border-left: none;
+	  margin: 0;
   }
 }
 @-moz-keyframes terminal-underline {
@@ -193,12 +201,16 @@
 	  position: relative;
 	  top: 2px;
 	  line-height: 11px;
+	  border-left: none;
+	  margin: 0;
   }
   50% {
 	  border-bottom-color: #000;
 	  position: relative;
 	  top: 2px;
 	  line-height: 11px;
+	  border-left: none;
+	  margin: 0;
   }
 }
 @keyframes terminal-underline {
@@ -207,12 +219,16 @@
 	  position: relative;
 	  top: 2px;
 	  line-height: 11px;
+	  border-left: none;
+	  margin: 0;
   }
   50% {
 	  border-bottom-color: #000;
 	  position: relative;
 	  top: 2px;
 	  line-height: 11px;
+	  border-left: none;
+	  margin: 0;
   }
 }
 .terminal .terminal-output div div, .cmd .prompt {
@@ -327,12 +343,16 @@
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
+	      border-left: none;
+	      margin: 0;
 	  }
 	  50% {
 		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
+	      border-left: none;
+	      margin: 0;
 	  }
 	}
 	@-ms-keyframes terminal-underline {
@@ -341,12 +361,16 @@
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
+	      border-left: none;
+	      margin: 0;
 	  }
 	  50% {
 		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
+	      border-left: none;
+	      margin: 0;
 	  }
 	}
 	@-moz-keyframes terminal-underline {
@@ -355,12 +379,16 @@
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
+	      border-left: none;
+	      margin: 0;
 	  }
 	  50% {
 		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
+	      border-left: none;
+	      margin: 0;
 	  }
 	}
 	@keyframes terminal-underline {
@@ -369,12 +397,16 @@
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
+	      border-left: none;
+	      margin: 0;
 	  }
 	  50% {
 		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
+	      border-left: none;
+	      margin: 0;
 	  }
 	}
 }
