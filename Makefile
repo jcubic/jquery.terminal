@@ -1,10 +1,12 @@
 VERSION=0.11.23
+BRANCH=`git branch | grep -E '^\*' | cut -c 3-`
 COMPRESS=uglifyjs
 SED=sed
 CP=cp
 RM=rm
 CAT=cat
 DATE=`date -uR`
+GIT=git
 
 
 ALL: Makefile .$(VERSION) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
@@ -16,7 +18,7 @@ package.json: package.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" package.in > package.json
 
 js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js
+	$(GIT) branch | grep devel > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js
 
 js/jquery.terminal.js: js/jquery.terminal-$(VERSION).js
 	$(CP) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js
@@ -28,7 +30,7 @@ js/jquery.terminal.min.js: js/jquery.terminal-$(VERSION).min.js
 	$(CP) js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js
 
 css/jquery.terminal-$(VERSION).css: css/jquery.terminal-src.css .$(VERSION)
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css
+	$(GIT) branch | grep devel > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css
 
 css/jquery.terminal.css: css/jquery.terminal-$(VERSION).css .$(VERSION)
 	$(CP) css/jquery.terminal-$(VERSION).css css/jquery.terminal.css
