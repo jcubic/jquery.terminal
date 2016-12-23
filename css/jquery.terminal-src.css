@@ -71,7 +71,7 @@
     position: relative;
     /*margin-top: 3px; */
 }
-.terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
+.terminal .inverted, .cmd .inverted {
     background-color: #aaa;
     color: #000;
 }
@@ -236,7 +236,7 @@
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
-    .terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
+    .terminal .inverted, .cmd .inverted {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
     }
