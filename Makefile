@@ -1,5 +1,4 @@
 VERSION=0.11.23
-BRANCH=`git branch | grep -E '^\*' | cut -c 3-`
 COMPRESS=uglifyjs
 SED=sed
 CP=cp
