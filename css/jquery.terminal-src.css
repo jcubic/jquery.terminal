@@ -329,7 +329,7 @@
 		  line-height: 11px;
 	  }
 	  50% {
-		  border-bottom-color: var(--color, #000);
+		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
@@ -343,7 +343,7 @@
 		  line-height: 11px;
 	  }
 	  50% {
-		  border-bottom-color: var(--color, #000);
+		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
@@ -357,7 +357,7 @@
 		  line-height: 11px;
 	  }
 	  50% {
-		  border-bottom-color: var(--color, #000);
+		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
@@ -371,7 +371,7 @@
 		  line-height: 11px;
 	  }
 	  50% {
-		  border-bottom-color: var(--color, #000);
+		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;

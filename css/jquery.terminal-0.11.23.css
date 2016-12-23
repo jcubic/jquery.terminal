@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2016 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Fri, 23 Dec 2016 09:36:58 +0000
+ * Date: Fri, 23 Dec 2016 09:59:11 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -71,7 +71,7 @@
     position: relative;
     /*margin-top: 3px; */
 }
-.terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
+.terminal .inverted, .cmd .inverted {
     background-color: #aaa;
     color: #000;
 }
@@ -236,7 +236,7 @@
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
-    .terminal .inverted, .cmd .inverted, .cmd .cursor.blink {
+    .terminal .inverted, .cmd .inverted {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
     }
@@ -329,7 +329,7 @@
 		  line-height: 11px;
 	  }
 	  50% {
-		  border-bottom-color: var(--color, #000);
+		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
@@ -343,7 +343,7 @@
 		  line-height: 11px;
 	  }
 	  50% {
-		  border-bottom-color: var(--color, #000);
+		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
@@ -357,7 +357,7 @@
 		  line-height: 11px;
 	  }
 	  50% {
-		  border-bottom-color: var(--color, #000);
+		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
@@ -371,7 +371,7 @@
 		  line-height: 11px;
 	  }
 	  50% {
-		  border-bottom-color: var(--color, #000);
+		  border-bottom-color: var(--background, #000);
 		  position: relative;
   	      top: 2px;
 		  line-height: 11px;
