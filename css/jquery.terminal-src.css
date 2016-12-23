@@ -80,10 +80,10 @@
        -moz-animation: terminal-blink 1s infinite steps(1, start);
         -ms-animation: terminal-blink 1s infinite steps(1, start);
             animation: terminal-blink 1s infinite steps(1, start);
-	border-left: 1px solid transparent;
-	border-bottom: 3px solid transparent;
-	margin-left: -1px;
-	background-clip: content-box;
+    border-left: 1px solid transparent;
+    border-bottom: 3px solid transparent;
+    margin-left: -1px;
+    background-clip: content-box;
 }
 @-webkit-keyframes terminal-blink {
   0%, 100% {
@@ -129,106 +129,106 @@
 }
 @-webkit-keyframes terminal-bar {
   0%, 100% {
-	  border-left-color: #aaa;
+      border-left-color: #aaa;
   }
   50% {
-	  border-left-color: #000;
+      border-left-color: #000;
   }
 }
 @-ms-keyframes terminal-bar {
   0%, 100% {
-	  border-left-color: #aaa;
+      border-left-color: #aaa;
   }
   50% {
-	  border-left-color: #000;
+      border-left-color: #000;
   }
 }
 @-moz-keyframes terminal-bar {
   0%, 100% {
-	  border-left-color: #aaa;
+      border-left-color: #aaa;
   }
   50% {
-	  border-left-color: #000;
+      border-left-color: #000;
   }
 }
 @keyframes terminal-bar {
   0%, 100% {
-	  border-left-color: #aaa;
+      border-left-color: #aaa;
   }
   50% {
-	  border-left-color: #000;
+      border-left-color: #000;
   }
 }
 @-webkit-keyframes terminal-underline {
   0%, 100% {
-	  border-bottom-color: #aaa;
-	  position: relative;
-	  top: 2px;
-	  line-height: 11px;
-	  border-left: none;
-	  margin: 0;
+      border-bottom-color: #aaa;
+      position: relative;
+      top: 2px;
+      line-height: 11px;
+      border-left: none;
+      margin: 0;
   }
   50% {
-	  border-bottom-color: #000;
-	  position: relative;
-	  top: 2px;
-	  line-height: 11px;
-	  border-left: none;
-	  margin: 0;
+      border-bottom-color: #000;
+      position: relative;
+      top: 2px;
+      line-height: 11px;
+      border-left: none;
+      margin: 0;
   }
 }
 @-ms-keyframes terminal-underline {
   0%, 100% {
-	  border-bottom-color: #aaa;
-	  position: relative;
-	  top: 2px;
-	  line-height: 11px;
-	  border-left: none;
-	  margin: 0;
+      border-bottom-color: #aaa;
+      position: relative;
+      top: 2px;
+      line-height: 11px;
+      border-left: none;
+      margin: 0;
   }
   50% {
-	  border-bottom-color: #000;
-	  position: relative;
-	  top: 2px;
-	  line-height: 11px;
-	  border-left: none;
-	  margin: 0;
+      border-bottom-color: #000;
+      position: relative;
+      top: 2px;
+      line-height: 11px;
+      border-left: none;
+      margin: 0;
   }
 }
 @-moz-keyframes terminal-underline {
   0%, 100% {
-	  border-bottom-color: #aaa;
-	  position: relative;
-	  top: 2px;
-	  line-height: 11px;
-	  border-left: none;
-	  margin: 0;
+      border-bottom-color: #aaa;
+      position: relative;
+      top: 2px;
+      line-height: 11px;
+      border-left: none;
+      margin: 0;
   }
   50% {
-	  border-bottom-color: #000;
-	  position: relative;
-	  top: 2px;
-	  line-height: 11px;
-	  border-left: none;
-	  margin: 0;
+      border-bottom-color: #000;
+      position: relative;
+      top: 2px;
+      line-height: 11px;
+      border-left: none;
+      margin: 0;
   }
 }
 @keyframes terminal-underline {
   0%, 100% {
-	  border-bottom-color: #aaa;
-	  position: relative;
-	  top: 2px;
-	  line-height: 11px;
-	  border-left: none;
-	  margin: 0;
+      border-bottom-color: #aaa;
+      position: relative;
+      top: 2px;
+      line-height: 11px;
+      border-left: none;
+      margin: 0;
   }
   50% {
-	  border-bottom-color: #000;
-	  position: relative;
-	  top: 2px;
-	  line-height: 11px;
-	  border-left: none;
-	  margin: 0;
+      border-bottom-color: #000;
+      position: relative;
+      top: 2px;
+      line-height: 11px;
+      border-left: none;
+      margin: 0;
   }
 }
 .terminal .terminal-output div div, .cmd .prompt {
@@ -337,78 +337,78 @@
           border-left-color: var(--background, #000);
       }
     }
-	@-webkit-keyframes terminal-underline {
-	  0%, 100% {
-		  border-bottom-color: var(--color, #aaa);
-		  position: relative;
-  	      top: 2px;
-		  line-height: 11px;
-	      border-left: none;
-	      margin: 0;
-	  }
-	  50% {
-		  border-bottom-color: var(--background, #000);
-		  position: relative;
-  	      top: 2px;
-		  line-height: 11px;
-	      border-left: none;
-	      margin: 0;
-	  }
-	}
-	@-ms-keyframes terminal-underline {
-	  0%, 100% {
-		  border-bottom-color: var(--color, #aaa);
-		  position: relative;
-  	      top: 2px;
-		  line-height: 11px;
-	      border-left: none;
-	      margin: 0;
-	  }
-	  50% {
-		  border-bottom-color: var(--background, #000);
-		  position: relative;
-  	      top: 2px;
-		  line-height: 11px;
-	      border-left: none;
-	      margin: 0;
-	  }
-	}
-	@-moz-keyframes terminal-underline {
-	  0%, 100% {
-		  border-bottom-color: var(--color, #aaa);
-		  position: relative;
-  	      top: 2px;
-		  line-height: 11px;
-	      border-left: none;
-	      margin: 0;
-	  }
-	  50% {
-		  border-bottom-color: var(--background, #000);
-		  position: relative;
-  	      top: 2px;
-		  line-height: 11px;
-	      border-left: none;
-	      margin: 0;
-	  }
-	}
-	@keyframes terminal-underline {
-	  0%, 100% {
-		  border-bottom-color: var(--color, #aaa);
-		  position: relative;
-  	      top: 2px;
-		  line-height: 11px;
-	      border-left: none;
-	      margin: 0;
-	  }
-	  50% {
-		  border-bottom-color: var(--background, #000);
-		  position: relative;
-  	      top: 2px;
-		  line-height: 11px;
-	      border-left: none;
-	      margin: 0;
-	  }
-	}
+    @-webkit-keyframes terminal-underline {
+      0%, 100% {
+          border-bottom-color: var(--color, #aaa);
+          position: relative;
+          top: 2px;
+          line-height: 11px;
+          border-left: none;
+          margin: 0;
+      }
+      50% {
+          border-bottom-color: var(--background, #000);
+          position: relative;
+          top: 2px;
+          line-height: 11px;
+          border-left: none;
+          margin: 0;
+      }
+    }
+    @-ms-keyframes terminal-underline {
+      0%, 100% {
+          border-bottom-color: var(--color, #aaa);
+          position: relative;
+          top: 2px;
+          line-height: 11px;
+          border-left: none;
+          margin: 0;
+      }
+      50% {
+          border-bottom-color: var(--background, #000);
+          position: relative;
+          top: 2px;
+          line-height: 11px;
+          border-left: none;
+          margin: 0;
+      }
+    }
+    @-moz-keyframes terminal-underline {
+      0%, 100% {
+          border-bottom-color: var(--color, #aaa);
+          position: relative;
+          top: 2px;
+          line-height: 11px;
+          border-left: none;
+          margin: 0;
+      }
+      50% {
+          border-bottom-color: var(--background, #000);
+          position: relative;
+          top: 2px;
+          line-height: 11px;
+          border-left: none;
+          margin: 0;
+      }
+    }
+    @keyframes terminal-underline {
+      0%, 100% {
+          border-bottom-color: var(--color, #aaa);
+          position: relative;
+          top: 2px;
+          line-height: 11px;
+          border-left: none;
+          margin: 0;
+      }
+      50% {
+          border-bottom-color: var(--background, #000);
+          position: relative;
+          top: 2px;
+          line-height: 11px;
+          border-left: none;
+          margin: 0;
+      }
+    }
 }
 .terminal-output > div {
     /*padding-top: 3px;*/
