@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 23 Dec 2016 10:13:08 +0000
+ * Date: Fri, 23 Dec 2016 10:25:09 +0000
  */
 
 /* TODO:
@@ -2049,6 +2049,7 @@
                 var line = array[i];
                 var first_index = 0;
                 var count = 0;
+                var output;
                 var space = -1;
                 for (var j=0, jlen=line.length; j<jlen; ++j) {
                     if (line.substring(j).match(format_start_re)) {
@@ -2091,7 +2092,6 @@
                     }
                     if ((count === length || j === jlen-1) &&
                         ((formatting && in_text) || !formatting)) {
-                        var output;
                         var text = $.terminal.strip(line.substring(space));
                         text = $('<span>' + text + '</span>').text();
                         var text_len = text.length;
@@ -2506,9 +2506,10 @@
     // -----------------------------------------------------------------------
     function text_to_clipboard(container, text) {
         var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
+		var range;
         container.append($div);
         if (document.body.createTextRange) {
-            var range = document.body.createTextRange();
+            range = document.body.createTextRange();
             range.moveToElementText($div[0]);
             range.select();
         } else if (window.getSelection) {
@@ -2516,7 +2517,7 @@
             if (selection.setBaseAndExtent) {
                 selection.setBaseAndExtent($div[0], 0, $div[0], 1);
             } else if (document.createRange) {
-                var range = document.createRange();
+                range = document.createRange();
                 range.selectNodeContents($div[0]);
                 selection.removeAllRanges();
                 selection.addRange(range);
