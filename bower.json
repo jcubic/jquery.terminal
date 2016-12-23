@@ -25,6 +25,6 @@
         "jquery": "~2"
     },
     "devDependencies": {
-        "jasmine": "latest"
+        "jasmine": "~2.5.2"
     }
 }

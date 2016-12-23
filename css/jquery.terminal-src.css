@@ -80,6 +80,10 @@
        -moz-animation: terminal-blink 1s infinite steps(1, start);
         -ms-animation: terminal-blink 1s infinite steps(1, start);
             animation: terminal-blink 1s infinite steps(1, start);
+	border-left: 1px solid transparent;
+	border-bottom: 3px solid transparent;
+	margin-left: -1px;
+	background-clip: content-box;
 }
 @-webkit-keyframes terminal-blink {
   0%, 100% {
@@ -123,6 +127,94 @@
       color: #000;
   }
 }
+@-webkit-keyframes terminal-bar {
+  0%, 100% {
+	  border-left-color: #aaa;
+  }
+  50% {
+	  border-left-color: #000;
+  }
+}
+@-ms-keyframes terminal-bar {
+  0%, 100% {
+	  border-left-color: #aaa;
+  }
+  50% {
+	  border-left-color: #000;
+  }
+}
+@-moz-keyframes terminal-bar {
+  0%, 100% {
+	  border-left-color: #aaa;
+  }
+  50% {
+	  border-left-color: #000;
+  }
+}
+@keyframes terminal-bar {
+  0%, 100% {
+	  border-left-color: #aaa;
+  }
+  50% {
+	  border-left-color: #000;
+  }
+}
+@-webkit-keyframes terminal-underline {
+  0%, 100% {
+	  border-bottom-color: #aaa;
+	  position: relative;
+	  top: 2px;
+	  line-height: 11px;
+  }
+  50% {
+	  border-bottom-color: #000;
+	  position: relative;
+	  top: 2px;
+	  line-height: 11px;
+  }
+}
+@-ms-keyframes terminal-underline {
+  0%, 100% {
+	  border-bottom-color: #aaa;
+	  position: relative;
+	  top: 2px;
+	  line-height: 11px;
+  }
+  50% {
+	  border-bottom-color: #000;
+	  position: relative;
+	  top: 2px;
+	  line-height: 11px;
+  }
+}
+@-moz-keyframes terminal-underline {
+  0%, 100% {
+	  border-bottom-color: #aaa;
+	  position: relative;
+	  top: 2px;
+	  line-height: 11px;
+  }
+  50% {
+	  border-bottom-color: #000;
+	  position: relative;
+	  top: 2px;
+	  line-height: 11px;
+  }
+}
+@keyframes terminal-underline {
+  0%, 100% {
+	  border-bottom-color: #aaa;
+	  position: relative;
+	  top: 2px;
+	  line-height: 11px;
+  }
+  50% {
+	  border-bottom-color: #000;
+	  position: relative;
+	  top: 2px;
+	  line-height: 11px;
+  }
+}
 .terminal .terminal-output div div, .cmd .prompt {
     display: block;
     line-height: 14px;
@@ -148,6 +240,14 @@
         background-color: var(--color, #aaa);
         color: var(--background, #000);
     }
+    .cmd .cursor.blink {
+        -webkit-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
+           -moz-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
+            -ms-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
+                animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
+        color: var(--color);
+        background-color: var(--background);
+    }
     @-webkit-keyframes terminal-blink {
       0%, 100% {
           background-color: var(--background, #000);
@@ -168,17 +268,6 @@
           background-color: var(--color, #aaa);
           color: var(--background, #000);
       }
-    }
-    .cmd .cursor.blink {
-        -webkit-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
-           -moz-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
-            -ms-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
-                animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
-        color: var(--color);
-        border-left: 1px solid transparent;
-        background-color: var(--background);
-        margin-left: -1px;
-        background-clip: content-box;
     }
     @-moz-keyframes terminal-blink {
       0%, 100% {
@@ -232,6 +321,62 @@
           border-left-color: var(--background, #000);
       }
     }
+	@-webkit-keyframes terminal-underline {
+	  0%, 100% {
+		  border-bottom-color: var(--color, #aaa);
+		  position: relative;
+  	      top: 2px;
+		  line-height: 11px;
+	  }
+	  50% {
+		  border-bottom-color: var(--color, #000);
+		  position: relative;
+  	      top: 2px;
+		  line-height: 11px;
+	  }
+	}
+	@-ms-keyframes terminal-underline {
+	  0%, 100% {
+		  border-bottom-color: var(--color, #aaa);
+		  position: relative;
+  	      top: 2px;
+		  line-height: 11px;
+	  }
+	  50% {
+		  border-bottom-color: var(--color, #000);
+		  position: relative;
+  	      top: 2px;
+		  line-height: 11px;
+	  }
+	}
+	@-moz-keyframes terminal-underline {
+	  0%, 100% {
+		  border-bottom-color: var(--color, #aaa);
+		  position: relative;
+  	      top: 2px;
+		  line-height: 11px;
+	  }
+	  50% {
+		  border-bottom-color: var(--color, #000);
+		  position: relative;
+  	      top: 2px;
+		  line-height: 11px;
+	  }
+	}
+	@keyframes terminal-underline {
+	  0%, 100% {
+		  border-bottom-color: var(--color, #aaa);
+		  position: relative;
+  	      top: 2px;
+		  line-height: 11px;
+	  }
+	  50% {
+		  border-bottom-color: var(--color, #000);
+		  position: relative;
+  	      top: 2px;
+		  line-height: 11px;
+	  }
+	}
 }
 .terminal-output > div {
     /*padding-top: 3px;*/
