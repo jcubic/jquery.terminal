@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2016 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Fri, 23 Dec 2016 11:52:46 +0000
+ * Date: Sun, 25 Dec 2016 21:57:27 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -261,8 +261,8 @@
            -moz-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
             -ms-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
                 animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
-        color: var(--color);
-        background-color: var(--background);
+        color: var(--color, #aaa);
+        background-color: var(--background, #000);
     }
     @-webkit-keyframes terminal-blink {
       0%, 100% {
