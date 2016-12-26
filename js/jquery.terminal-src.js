@@ -1611,9 +1611,8 @@
                             command.slice(position, command.length);
                         if (!stay) {
                             self.position(position+n);
-                        } else {
-                            fire_change_command();
                         }
+						fire_change_command();
                     }
                 } else {
                     if (command !== '' && position < command.length) {

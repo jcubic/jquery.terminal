@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 25 Dec 2016 21:57:25 +0000
+ * Date: Mon, 26 Dec 2016 09:45:50 +0000
  */
 
 /* TODO:
@@ -1611,9 +1611,8 @@
                             command.slice(position, command.length);
                         if (!stay) {
                             self.position(position+n);
-                        } else {
-                            fire_change_command();
                         }
+						fire_change_command();
                     }
                 } else {
                     if (command !== '' && position < command.length) {
