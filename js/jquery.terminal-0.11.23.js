@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 26 Dec 2016 09:45:50 +0000
+ * Date: Mon, 26 Dec 2016 14:59:36 +0000
  */
 
 /* TODO:
@@ -1612,7 +1612,7 @@
                         if (!stay) {
                             self.position(position+n);
                         }
-						fire_change_command();
+                        fire_change_command();
                     }
                 } else {
                     if (command !== '' && position < command.length) {
@@ -2505,7 +2505,7 @@
     // -----------------------------------------------------------------------
     function text_to_clipboard(container, text) {
         var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
-		var range;
+        var range;
         container.append($div);
         if (document.body.createTextRange) {
             range = document.body.createTextRange();

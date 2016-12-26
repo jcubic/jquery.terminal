@@ -1612,7 +1612,7 @@
                         if (!stay) {
                             self.position(position+n);
                         }
-						fire_change_command();
+                        fire_change_command();
                     }
                 } else {
                     if (command !== '' && position < command.length) {
@@ -2505,7 +2505,7 @@
     // -----------------------------------------------------------------------
     function text_to_clipboard(container, text) {
         var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
-		var range;
+        var range;
         container.append($div);
         if (document.body.createTextRange) {
             range = document.body.createTextRange();
