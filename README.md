@@ -174,4 +174,4 @@ make cover
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
-Copyright (c) 2011-2016 [Jakub Jankiewicz](http://jcubic.pl)
+Copyright (c) 2011-2017 [Jakub Jankiewicz](http://jcubic.pl)

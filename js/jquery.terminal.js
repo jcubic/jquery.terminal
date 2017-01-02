@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2016 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2010-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
  * Contains:
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 26 Dec 2016 14:59:36 +0000
+ * Date: Mon, 02 Jan 2017 16:52:29 +0000
  */
 
 /* TODO:
@@ -2544,7 +2544,7 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2016 Jakub Jankiewicz <http://jcubic'+
+    var copyright = 'Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic'+
         '.pl>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     //regex is for placing version string aligned to the right
@@ -2555,7 +2555,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2016 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2017 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         ['      _______                 ________                        __',
