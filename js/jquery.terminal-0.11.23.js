@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Jan 2017 16:52:29 +0000
+ * Date: Wed, 04 Jan 2017 17:26:54 +0000
  */
 
 /* TODO:
@@ -804,6 +804,14 @@
                         if (!memory) {
                             $.Storage.set(storage_key, JSON.stringify(data));
                         }
+                    }
+                }
+            },
+            set: function(new_data) {
+                if (new_data instanceof Array) {
+                    data = new_data;
+                    if (!memory) {
+                        $.Storage.set(storage_key, JSON.stringify(data));
                     }
                 }
             },
@@ -2598,6 +2606,7 @@
         Token: true, // where this came from?
         convertLinks: true,
         historyState: false,
+        importHistory: false,
         echoCommand: true,
         scrollOnEcho: true,
         login: null,
@@ -3897,7 +3906,8 @@
                     command: self.get_command(),
                     position: command_line.position(),
                     lines: clone(lines),
-                    interpreters: interpreters.clone()
+                    interpreters: interpreters.clone(),
+                    history: command_line.history().data
                 }, user_export);
             },
             // -------------------------------------------------------------
@@ -3924,6 +3934,11 @@
                     }
                     lines = clone(view.lines);
                     interpreters = view.interpreters;
+                    setTimeout(function() {
+                        if (settings.importHistory) {
+                            command_line.history().set(view.history);
+                        }
+                    }, 0);
                     redraw();
                 });
                 return self;

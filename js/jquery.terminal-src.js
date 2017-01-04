@@ -807,6 +807,14 @@
                     }
                 }
             },
+            set: function(new_data) {
+                if (new_data instanceof Array) {
+                    data = new_data;
+                    if (!memory) {
+                        $.Storage.set(storage_key, JSON.stringify(data));
+                    }
+                }
+            },
             data: function() {
                 return data;
             },
@@ -2598,6 +2606,7 @@
         Token: true, // where this came from?
         convertLinks: true,
         historyState: false,
+        importHistory: false,
         echoCommand: true,
         scrollOnEcho: true,
         login: null,
@@ -3897,7 +3906,8 @@
                     command: self.get_command(),
                     position: command_line.position(),
                     lines: clone(lines),
-                    interpreters: interpreters.clone()
+                    interpreters: interpreters.clone(),
+                    history: command_line.history().data
                 }, user_export);
             },
             // -------------------------------------------------------------
@@ -3924,6 +3934,9 @@
                     }
                     lines = clone(view.lines);
                     interpreters = view.interpreters;
+                    if (settings.importHistory) {
+                        command_line.history().set(view.history);
+                    }
                     redraw();
                 });
                 return self;
