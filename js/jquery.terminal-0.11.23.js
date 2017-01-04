@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 04 Jan 2017 17:26:54 +0000
+ * Date: Wed, 04 Jan 2017 20:58:31 +0000
  */
 
 /* TODO:
@@ -666,7 +666,7 @@
             return [str];
         } else if (length < 0) {
             throw new Error('str_parts: length can\'t be negative'); // '
-        }
+         }
         for (var i = 0; i < len; i += length) {
             result.push(str.substring(i, i + length));
         }
@@ -3934,11 +3934,9 @@
                     }
                     lines = clone(view.lines);
                     interpreters = view.interpreters;
-                    setTimeout(function() {
-                        if (settings.importHistory) {
-                            command_line.history().set(view.history);
-                        }
-                    }, 0);
+                    if (settings.importHistory) {
+                        command_line.history().set(view.history);
+                    }
                     redraw();
                 });
                 return self;
@@ -5030,6 +5028,7 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
+                    iframe.remove();
                     terminals.remove(terminal_id);
                 });
                 return self;
@@ -5097,6 +5096,7 @@
         $(document).bind('ajaxSend.terminal', function(e, xhr, opt) {
             requests.push(xhr);
         });
+        var iframe = $('<iframe/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').appendTo(self);
         self.addClass('terminal');
         // keep focus in clipboard textarea in mobile
@@ -5117,8 +5117,6 @@
 
           });
         */
-        //$('<input type="text"/>').hide().focus().appendTo(self);
-
         // before login event
         if (settings.login && $.isFunction(settings.onBeforeLogin)) {
             try {
@@ -5306,17 +5304,21 @@
             } else {
                 initialize();
             }
-            self.oneTime(100, function() {
-                $win.bind('resize.terminal', function() {
-                    if (self.is(':visible')) {
-                        var width = self.width();
-                        var height = self.height();
-                        // prevent too many calculations in IE
-                        if (old_height !== height || old_width !== width) {
-                            self.resize();
-                        }
+            function resize() {
+                if (self.is(':visible')) {
+                    var width = self.width();
+                    var height = self.height();
+                    // prevent too many calculations in IE
+                    if (old_height !== height || old_width !== width) {
+                        self.resize();
                     }
-                });
+                }
+            }
+            self.oneTime(100, function() {
+                $win.bind('resize.terminal', resize);
+                // idea taken from https://github.com/developit/simple-element-resize-detector
+                //iframe.on('resize', resize);
+                iframe[0].contentWindow.onresize = resize;
             });
             // -------------------------------------------------------------
             // :: helper
