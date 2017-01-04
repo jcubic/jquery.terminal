@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 04 Jan 2017 20:58:31 +0000
+ * Date: Wed, 04 Jan 2017 21:16:48 +0000
  */
 
 /* TODO:
@@ -5315,9 +5315,7 @@
                 }
             }
             self.oneTime(100, function() {
-                $win.bind('resize.terminal', resize);
                 // idea taken from https://github.com/developit/simple-element-resize-detector
-                //iframe.on('resize', resize);
                 iframe[0].contentWindow.onresize = resize;
             });
             // -------------------------------------------------------------

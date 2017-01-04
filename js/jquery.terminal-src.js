@@ -5315,9 +5315,7 @@
                 }
             }
             self.oneTime(100, function() {
-                $win.bind('resize.terminal', resize);
                 // idea taken from https://github.com/developit/simple-element-resize-detector
-                //iframe.on('resize', resize);
                 iframe[0].contentWindow.onresize = resize;
             });
             // -------------------------------------------------------------
