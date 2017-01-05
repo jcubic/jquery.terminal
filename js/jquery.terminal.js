@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 04 Jan 2017 21:16:48 +0000
+ * Date: Thu, 05 Jan 2017 17:17:52 +0000
  */
 
 /* TODO:
@@ -1907,8 +1907,7 @@
         var array = fn(string);
         if (array.length) {
             var name = array.shift();
-            var regex = new RegExp('^' + $.terminal.escape_regex(name));
-            var rest = string.replace(regex, '').trim();
+            var rest = string.substring(name.length).trim();
             return {
                 command: string,
                 name: name,

@@ -1907,8 +1907,7 @@
         var array = fn(string);
         if (array.length) {
             var name = array.shift();
-            var regex = new RegExp('^' + $.terminal.escape_regex(name));
-            var rest = string.replace(regex, '').trim();
+            var rest = string.substring(name.length).trim();
             return {
                 command: string,
                 name: name,
