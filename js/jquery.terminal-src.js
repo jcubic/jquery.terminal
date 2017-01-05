@@ -2311,20 +2311,7 @@
                 if (arg[0] === "'" && arg[arg.length-1] === "'") {
                     return arg.replace(/^'|'$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
-                    arg = arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
-                    return arg.replace(/\\\\|\\t|\\n/g, function(string) {
-                        if (string[1] === 't') {
-                            return '\t';
-                        } else if (string[1] === 'n') {
-                            return '\n';
-                        } else {
-                            return '\\';
-                        }
-                    }).replace(/\\x([0-9a-f]+)/gi, function(_, hex) {
-                        return String.fromCharCode(parseInt(hex, 16));
-                    }).replace(/\\0([0-7]+)/g, function(_, oct) {
-                        return String.fromCharCode(parseInt(oct, 8));
-                    });
+                    return JSON.parse(arg);
                 } else if (arg.match(/^\/(\\\/|[^\/])+\/[gimy]*$/)) { // RegEx
                     var m = arg.match(/^\/([^\/]+)\/([^\/]*)$/);
                     return new RegExp(m[1], m[2]);

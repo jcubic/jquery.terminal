@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 05 Jan 2017 17:17:52 +0000
+ * Date: Thu, 05 Jan 2017 17:45:35 +0000
  */
 
 /* TODO:
@@ -2311,20 +2311,7 @@
                 if (arg[0] === "'" && arg[arg.length-1] === "'") {
                     return arg.replace(/^'|'$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
-                    arg = arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
-                    return arg.replace(/\\\\|\\t|\\n/g, function(string) {
-                        if (string[1] === 't') {
-                            return '\t';
-                        } else if (string[1] === 'n') {
-                            return '\n';
-                        } else {
-                            return '\\';
-                        }
-                    }).replace(/\\x([0-9a-f]+)/gi, function(_, hex) {
-                        return String.fromCharCode(parseInt(hex, 16));
-                    }).replace(/\\0([0-7]+)/g, function(_, oct) {
-                        return String.fromCharCode(parseInt(oct, 8));
-                    });
+                    return JSON.parse(arg);
                 } else if (arg.match(/^\/(\\\/|[^\/])+\/[gimy]*$/)) { // RegEx
                     var m = arg.match(/^\/([^\/]+)\/([^\/]*)$/);
                     return new RegExp(m[1], m[2]);
