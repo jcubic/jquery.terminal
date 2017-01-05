@@ -9,6 +9,7 @@
           recalcualate cols and rows on terminal resize
           Don't echo extended commands on resize
           use JSON.parse to process strings when parsing command line
+          request and response callbacks
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.
