@@ -6,7 +6,7 @@
           add bar and underline cursor animations a a way to enable it with single css variable
           fix onCommandChange callback on backspace
           always export history and import when importHistory option is true
-          recalcualate cols and rows on terminal resize
+          recalcualate cols and rows on terminal resize (not only window)
           Don't echo extended commands on resize
           use JSON.parse to process strings when parsing command line
           request and response callbacks
