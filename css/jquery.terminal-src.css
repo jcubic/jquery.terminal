@@ -249,6 +249,7 @@
     background-color: #000;
     font-size: 12px;
     line-height: 14px;
+    box-sizing: border-box;
 }
 @supports (--css: variables) {
     .terminal, .cmd {
