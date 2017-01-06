@@ -2645,9 +2645,9 @@
                 " %s!",
             commandNotFound: "Command '%s' Not Found!",
             oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescr"+
-                "ibe",
+                "ibe or rpc without system.describe",
             oneInterpreterFunction: "You can't use more than one function (rpc"+
-                "with ignoreSystemDescribe counts as one)",
+                "without system.describe or with option ignoreSystemDescre counts as one)",
             loginFunctionMissing: "You didn't specify a login function",
             noTokenError: "Access denied (no token)",
             serverResponse: "Server responded",
@@ -3046,10 +3046,9 @@
                         var rest = interpreters.slice(1);
                         var type = $.type(first);
                         if (type === 'string') {
-                            rpc_count++;
                             self.pause();
                             if (settings.ignoreSystemDescribe) {
-                                if (rpc_count === 1) {
+                                if (++rpc_count === 1) {
                                     fn_interpreter = make_basic_json_rpc(first, login);
                                 } else {
                                     self.error(strings.oneRPCWithIgnore);
@@ -3057,10 +3056,14 @@
                                 recur(rest, success);
                             } else {
                                 make_json_rpc_object(first, login, function(new_obj) {
-                                    // will ignore rpc in array that don't have
-                                    // system.describe
                                     if (new_obj) {
                                         $.extend(object, new_obj);
+                                    } else {
+                                        if (++rpc_count === 1) {
+                                            fn_interpreter = make_basic_json_rpc(first, login);
+                                        } else {
+                                            self.error(strings.oneRPCWithIgnore);
+                                        }
                                     }
                                     self.resume();
                                     recur(rest, success);

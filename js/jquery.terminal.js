@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 05 Jan 2017 18:05:11 +0000
+ * Date: Fri, 06 Jan 2017 09:47:06 +0000
  */
 
 /* TODO:
@@ -2383,14 +2383,34 @@
     // -----------------------------------------------------------------------
     var ids = {}; // list of url based id of JSON-RPC
     $.jrpc = function(url, method, params, success, error) {
-        ids[url] = ids[url] || 0;
-        var request = JSON.stringify({
-           'jsonrpc': '2.0', 'method': method,
-            'params': params, 'id': ++ids[url]});
+        var options;
+        if ($.isPlainObject(url)) {
+            options = url;
+        } else {
+            options = {
+                url: url,
+                method: methd,
+                params: params,
+                success: success,
+                error: error
+            };
+        }
+        ids[options.url] = ids[options.url] || 0;
+        var request = {
+           'jsonrpc': '2.0',
+            'method': options.method,
+            'params': options.params,
+            'id': ++ids[options.url]
+        };
         return $.ajax({
-            url: url,
-            data: request,
-            success: function(result, status, jqXHR) {
+            url: options.url,
+            beforeSend: function(jxhr, settings) {
+                if ($.isFunction(options.request)) {
+                    options.request(jxhr, request);
+                }
+                settings.data = JSON.stringify(request);
+            },
+            success: function(response, status, jqXHR) {
                 var content_type = jqXHR.getResponseHeader('Content-Type');
                 if (!content_type.match(/(application|text)\/json/)) {
                     var msg = 'Response Content-Type is neither application/json nor text/json';
@@ -2402,25 +2422,29 @@
                 }
                 var json;
                 try {
-                    json = $.parseJSON(result);
+                    json = $.parseJSON(response);
                 } catch (e) {
-                    if (error) {
-                        error(jqXHR, 'Invalid JSON', e);
+                    if (options.error) {
+                        options.error(jqXHR, 'Invalid JSON', e);
                     } else {
                         throw new Error('Invalid JSON');
                     }
                     return;
                 }
+                if ($.isFunction(options.response)) {
+                    options.response(jqXHR, json);
+                }
                 // don't catch errors in success callback
-                success(json, status, jqXHR);
+                options.success(json, status, jqXHR);
             },
-            error: error,
+            error: options.error,
             contentType: 'application/json',
             dataType: 'text',
             async: true,
             cache: false,
             //timeout: 1,
-            type: 'POST'});
+            type: 'POST'
+        });
     };
     // -----------------------------------------------------------------------
     /*
@@ -2600,6 +2624,8 @@
         formatters: [],
         onAjaxError: null,
         scrollBottomOffset: 20,
+        request: $.noop,
+        response: $.noop,
         onRPCError: null,
         completion: false,
         historyFilter: null,
@@ -2619,9 +2645,9 @@
                 " %s!",
             commandNotFound: "Command '%s' Not Found!",
             oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescr"+
-                "ibe",
+                "ibe or rpc without system.describe",
             oneInterpreterFunction: "You can't use more than one function (rpc"+
-                "with ignoreSystemDescribe counts as one)",
+                "without system.describe or with option ignoreSystemDescre counts as one)",
             loginFunctionMissing: "You didn't specify a login function",
             noTokenError: "Access denied (no token)",
             serverResponse: "Server responded",
@@ -2758,18 +2784,30 @@
         function make_basic_json_rpc(url, auth) {
             var interpreter = function(method, params) {
                 self.pause();
-                $.jrpc(url, method, params, function(json) {
-                    if (json.error) {
-                        display_json_rpc_error(json.error);
-                    } else {
-                        if ($.isFunction(settings.processRPCResponse)) {
-                            settings.processRPCResponse.call(self, json.result, self);
+                $.jrpc({
+                    url: url,
+                    method: method,
+                    params: params,
+                    request: function(jxhr, request) {
+                        settings.request(jxhr, self, request);
+                    },
+                    response: function(jxhr, response) {
+                        settings.response(jxhr, self, response);
+                    },
+                    success: function(json) {
+                        if (json.error) {
+                            display_json_rpc_error(json.error);
                         } else {
-                            display_object(json.result);
+                            if ($.isFunction(settings.processRPCResponse)) {
+                                settings.processRPCResponse.call(self, json.result, self);
+                            } else {
+                                display_object(json.result);
+                            }
                         }
-                    }
-                    self.resume();
-                }, ajax_error);
+                        self.resume();
+                    },
+                    error: ajax_error
+                });
             };
             //this is the interpreter function
             return function(command, terminal) {
@@ -2880,7 +2918,7 @@
         }
         // ---------------------------------------------------------------------
         function make_json_rpc_object(url, auth, success) {
-            $.jrpc(url, 'system.describe', [], function(ret) {
+            function response(ret) {
                 var commands = [];
                 if (ret.procs) {
                     var interpreter_object = {};
@@ -2907,20 +2945,32 @@
                                                    strings.noTokenError);
                                     }
                                 }
-                                $.jrpc(url, proc.name, args, function(json) {
-                                    if (json.error) {
-                                        display_json_rpc_error(json.error);
-                                    } else {
-                                        if ($.isFunction(settings.processRPCResponse)) {
-                                            settings.processRPCResponse.call(self,
-                                                                             json.result,
-                                                                             self);
+                                $.jrpc({
+                                    url: url,
+                                    method: proc.name,
+                                    params: args,
+                                    request: function(jxhr, request) {
+                                        settings.request(jxhr, self, request);
+                                    },
+                                    response: function(jxhr, response) {
+                                        settings.response(jxhr, self, response);
+                                    },
+                                    success: function(json) {
+                                        if (json.error) {
+                                            display_json_rpc_error(json.error);
                                         } else {
-                                            display_object(json.result);
+                                            if ($.isFunction(settings.processRPCResponse)) {
+                                                settings.processRPCResponse.call(self,
+                                                                                 json.result,
+                                                                                 self);
+                                            } else {
+                                                display_object(json.result);
+                                            }
                                         }
-                                    }
-                                    self.resume();
-                                }, ajax_error);
+                                        self.resume();
+                                    },
+                                    error: ajax_error
+                                });
                             }
                         };
                     });
@@ -2962,8 +3012,21 @@
                 } else {
                     success(null);
                 }
-            }, function() {
-                success(null);
+            }
+            return $.jrpc({
+                url: url,
+                method: 'system.describe',
+                params: [],
+                success: response,
+                request: function(jxhr, request) {
+                    settings.request(jxhr, self, request);
+                },
+                response: function(jxhr, response) {
+                    settings.response(jxhr, self, response);
+                },
+                error: function() {
+                    success(null);
+                }
             });
         }
         // ---------------------------------------------------------------------
@@ -2983,10 +3046,9 @@
                         var rest = interpreters.slice(1);
                         var type = $.type(first);
                         if (type === 'string') {
-                            rpc_count++;
                             self.pause();
                             if (settings.ignoreSystemDescribe) {
-                                if (rpc_count === 1) {
+                                if (++rpc_count === 1) {
                                     fn_interpreter = make_basic_json_rpc(first, login);
                                 } else {
                                     self.error(strings.oneRPCWithIgnore);
@@ -2994,10 +3056,14 @@
                                 recur(rest, success);
                             } else {
                                 make_json_rpc_object(first, login, function(new_obj) {
-                                    // will ignore rpc in array that don't have
-                                    // system.describe
                                     if (new_obj) {
                                         $.extend(object, new_obj);
+                                    } else {
+                                        if (++rpc_count === 1) {
+                                            fn_interpreter = make_basic_json_rpc(first, login);
+                                        } else {
+                                            self.error(strings.oneRPCWithIgnore);
+                                        }
                                     }
                                     self.resume();
                                     recur(rest, success);
@@ -3077,18 +3143,27 @@
             var method = $.type(login) === 'boolean' ? 'login' : login;
             return function(user, passwd, callback, term) {
                 self.pause();
-                $.jrpc(url,
-                       method,
-                       [user, passwd],
-                       function(response) {
-                           if (!response.error && response.result) {
-                               callback(response.result);
-                           } else {
-                               // null will trigger message that login fail
-                               callback(null);
-                           }
-                           self.resume();
-                       }, ajax_error);
+                $.jrpc({
+                    url: url,
+                    method: method,
+                    params: [user, passwd],
+                    request: function(jxhr, request) {
+                        settings.request(jxhr, self, request);
+                    },
+                    response: function(jxhr, response) {
+                        settings.response(jxhr, self, response);
+                    },
+                    success: function(response) {
+                        if (!response.error && response.result) {
+                            callback(response.result);
+                        } else {
+                            // null will trigger message that login fail
+                            callback(null);
+                        }
+                        self.resume();
+                    },
+                    error: ajax_error
+                });
             };
             //default name is login so you can pass true
         }
