@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 06 Jan 2017 11:04:33 +0000
+ * Date: Fri, 06 Jan 2017 13:01:41 +0000
  */
 
 /* TODO:
@@ -5403,9 +5403,14 @@
             }
             self.oneTime(100, function() {
                 // idea taken from https://github.com/developit/simple-element-resize-detector
-                iframe.on('load', function() {
+                function bind() {
                     iframe[0].contentWindow.onresize = resize;
-                });
+                }
+                if (iframe.is(':visible')) {
+                    bind();
+                } else {
+                    iframe.on('load', bind);
+                }
             });
             // -------------------------------------------------------------
             // :: helper

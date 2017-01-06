@@ -5403,9 +5403,14 @@
             }
             self.oneTime(100, function() {
                 // idea taken from https://github.com/developit/simple-element-resize-detector
-                iframe.on('load', function() {
+                function bind() {
                     iframe[0].contentWindow.onresize = resize;
-                });
+                }
+                if (iframe.is(':visible')) {
+                    bind();
+                } else {
+                    iframe.on('load', bind);
+                }
             });
             // -------------------------------------------------------------
             // :: helper
