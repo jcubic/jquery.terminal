@@ -2311,7 +2311,7 @@
                 if (arg[0] === "'" && arg[arg.length-1] === "'") {
                     return arg.replace(/^'|'$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
-                    return JSON.parse(arg);
+                    return $.parseJSON(arg);
                 } else if (arg.match(/^\/(\\\/|[^\/])+\/[gimy]*$/)) { // RegEx
                     var m = arg.match(/^\/([^\/]+)\/([^\/]*)$/);
                     return new RegExp(m[1], m[2]);
@@ -2818,7 +2818,7 @@
                     command = get_processed_command(command);
                 } catch(e) {
                     // exception can be thrown on invalid regex
-                    terminal.error(e.toString());
+                    display_exception(e, "TERMINAL (get_processed_command)");
                     return;
                     //throw e; // this will show stack in other try..catch
                 }
@@ -2854,7 +2854,11 @@
                     command = get_processed_command(user_command);
                 } catch(e) {
                     // exception can be thrown on invalid regex
-                    self.error(e.toString());
+                    if ($.isFunction(settings.exception)) {
+                        settings.exception(e, self);
+                    } else {
+                        self.error(e.toString());
+                    }
                     return;
                     //throw e; // this will show stack in other try..catch
                 }
@@ -3184,7 +3188,7 @@
         // ---------------------------------------------------------------------
         function display_exception(e, label) {
             if ($.isFunction(settings.exceptionHandler)) {
-                settings.exceptionHandler.call(self, e);
+                settings.exceptionHandler.call(self, e, label);
             } else {
                 self.exception(e, label);
             }
@@ -3249,8 +3253,12 @@
                         }
                     } catch(e) {
                         //display_exception(e, 'FORMATTING');
-                        alert('formatting error at formatters[' + i + ']\n' +
-                              (e.stack ? e.stack : e));
+                         if ($.isFunction(settings.exceptionHandler)) {
+                             settings.exceptionHandler.call(self, e, "FORMATTERS");
+                         } else {
+                             alert('formatting error at formatters[' + i + ']\n' +
+                                   (e.stack ? e.stack : e));
+                         }
                     }
                 }
                 string = $.terminal.encode(string);
@@ -3325,8 +3333,12 @@
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
-                alert('[Internal Exception(process_line)]:' +
-                      exception_message(e) + '\n' + e.stack);
+                if ($.isFunction(settings.exceptionHandler)) {
+                    settings.exceptionHandler.call(self, e, "TERMINAL");
+                } else {
+                    alert('[Internal Exception(process_line)]:' +
+                          exception_message(e) + '\n' + e.stack);
+                }
             }
         }
         // ---------------------------------------------------------------------
@@ -3356,7 +3368,11 @@
                 command_line.before(detached_output); // reinsert output
                 self.flush();
             } catch(e) {
-                alert('Exception in redraw\n' + e.stack);
+                if ($.isFunction(settings.exceptionHandler)) {
+                    settings.exceptionHandler.call(self, e, "TERMINAL (redraw)");
+                } else {
+                    alert('Exception in redraw\n' + e.stack);
+                }
             }
         }
         // ---------------------------------------------------------------------
@@ -3864,7 +3880,11 @@
                             try {
                                 r.abort();
                             } catch (error) {
-                                self.error(strings.ajaxAbortError);
+                                if ($.isFunction(settings.exceptionHandler)) {
+                                    settings.exceptionHandler.call(self, e, "AJAX ABORT");
+                                } else {
+                                    self.error(strings.ajaxAbortError);
+                                }
                             }
                         }
                     }
@@ -4660,8 +4680,12 @@
                     }
                     output_buffer = [];
                 } catch (e) {
-                    alert('[Flush] ' + exception_message(e) + '\n' +
-                          e.stack);
+                    if ($.isFunction(settings.exceptionHandler)) {
+                        settings.exceptionHandler.call(self, e, "TERMINAL (Flush)");
+                    } else {
+                        alert('[Flush] ' + exception_message(e) + '\n' +
+                              e.stack);
+                    }
                 }
                 return self;
             },
@@ -4728,8 +4752,12 @@
                     } catch (e) {
                         // if echo throw exception we can't use error to
                         // display that exception
-                        alert('[Terminal.echo] ' + exception_message(e) +
+                        if ($.isFunction(settings.exceptionHandler)) {
+                            settings.exceptionHandler.call(self, e, "TERMINAL (echo)");
+                        } else {
+                            alert('[Terminal.echo] ' + exception_message(e) +
                               '\n' + e.stack);
+                        }
                     }
                 }
                 string = string || '';
@@ -5375,7 +5403,9 @@
             }
             self.oneTime(100, function() {
                 // idea taken from https://github.com/developit/simple-element-resize-detector
-                iframe[0].contentWindow.onresize = resize;
+                iframe.on('load', function() {
+                    iframe[0].contentWindow.onresize = resize;
+                });
             });
             // -------------------------------------------------------------
             // :: helper
@@ -5400,9 +5430,14 @@
                                 });
                             }
                         } catch (e) {
-                            var cmd = $.terminal.escape_brackets(command);
-                            var msg = "Error while exec with command " + cmd;
-                            terminal.error(msg).exception(e);
+                            var settings = terminal.settings();
+                             if ($.isFunction(settings.exceptionHandler)) {
+                                 settings.exceptionHandler.call(self, e, "EXEC HASH");
+                             } else {
+                                 var cmd = $.terminal.escape_brackets(command);
+                                 var msg = "Error while exec with command " + cmd;
+                                 terminal.error(msg).exception(e);
+                             }
                         }
                     }
                 }

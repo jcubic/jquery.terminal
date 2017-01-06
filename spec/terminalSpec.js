@@ -610,6 +610,7 @@ function tests_on_ready() {
                 if (obj.url == url) {
                     var defer = $.Deferred();
                     try {
+                        obj.beforeSend({}, obj);
                         var req = JSON.parse(obj.data);
                         var resp;
                         if (req.method == 'system.describe') {
