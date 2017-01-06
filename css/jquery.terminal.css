@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Fri, 06 Jan 2017 09:47:07 +0000
+ * Date: Fri, 06 Jan 2017 11:38:06 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -84,6 +84,9 @@
     border-bottom: 3px solid transparent;
     margin-left: -1px;
     background-clip: content-box;
+}
+.bar.terminal .inverted, .bar.cmd .inverted {
+    border-left-color: #aaa;
 }
 @-webkit-keyframes terminal-blink {
   0%, 100% {
@@ -307,34 +310,34 @@
     }
     @-webkit-keyframes terminal-bar {
       0%, 100% {
-          border-left-color: var(--color, #aaa);
+          border-left-color: var(--background, #000);
       }
       50% {
-          border-left-color: var(--background, #000);
+          border-left-color: var(--color, #aaa);
       }
     }
     @-ms-keyframes terminal-bar {
       0%, 100% {
-          border-left-color: var(--color, #aaa);
+          border-left-color: var(--background, #000);
       }
       50% {
-          border-left-color: var(--background, #000);
+          border-left-color: var(--color, #aaa);
       }
     }
     @-moz-keyframes terminal-bar {
       0%, 100% {
-          border-left-color: var(--color, #aaa);
+          border-left-color: var(--background, #000);
       }
       50% {
-          border-left-color: var(--background, #000);
+          border-left-color: var(--color, #aaa);
       }
     }
     @keyframes terminal-bar {
       0%, 100% {
-          border-left-color: var(--color, #aaa);
+          border-left-color: var(--background, #000);
       }
       50% {
-          border-left-color: var(--background, #000);
+          border-left-color: var(--color, #aaa);
       }
     }
     @-webkit-keyframes terminal-underline {
@@ -357,7 +360,7 @@
     }
     @-ms-keyframes terminal-underline {
       0%, 100% {
-          border-bottom-color: var(--color, #aaa);
+          border-bottom-color: var(--background, #000);
           position: relative;
           top: 2px;
           line-height: 11px;
@@ -365,7 +368,7 @@
           margin: 0;
       }
       50% {
-          border-bottom-color: var(--background, #000);
+          border-bottom-color: var(--color, #aaa);
           position: relative;
           top: 2px;
           line-height: 11px;
@@ -375,7 +378,7 @@
     }
     @-moz-keyframes terminal-underline {
       0%, 100% {
-          border-bottom-color: var(--color, #aaa);
+          border-bottom-color: var(--background, #000);
           position: relative;
           top: 2px;
           line-height: 11px;
@@ -383,7 +386,7 @@
           margin: 0;
       }
       50% {
-          border-bottom-color: var(--background, #000);
+          border-bottom-color: var(--color, #aaa);
           position: relative;
           top: 2px;
           line-height: 11px;
@@ -393,7 +396,7 @@
     }
     @keyframes terminal-underline {
       0%, 100% {
-          border-bottom-color: var(--color, #aaa);
+          border-bottom-color: var(--background, #000);
           position: relative;
           top: 2px;
           line-height: 11px;
@@ -401,7 +404,7 @@
           margin: 0;
       }
       50% {
-          border-bottom-color: var(--background, #000);
+          border-bottom-color: var(--color, #aaa);
           position: relative;
           top: 2px;
           line-height: 11px;
