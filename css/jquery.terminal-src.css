@@ -255,6 +255,10 @@
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
+    .terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
+        font-size: calc(var(--size, 1) * 12px);
+        line-height: calc(var(--size, 1) * 14px);
+    }
     .terminal .inverted, .cmd .inverted {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
