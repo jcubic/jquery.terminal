@@ -172,8 +172,7 @@ make cover
 
 ### Contribution
 
-If you want to contribute make sure you modify js/jquery.terminal-src.js and css/jquery.terminal-src.css
-files and run `make`. To make it work you need to have installed java to run yuicompressor-2.4.8.jar and isntall uglifyjs:
+If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make`. To make it work you need to have installed java to run yuicompressor-2.4.8.jar and install uglifyjs:
 
 ```
 npm install -g uglifyjs
