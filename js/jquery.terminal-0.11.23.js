@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 07 Jan 2017 20:17:46 +0000
+ * Date: Sat, 07 Jan 2017 22:32:34 +0000
  */
 
 /* TODO:
@@ -3348,6 +3348,8 @@
         var resume_callbacks = [];
         var resume_event_bound = false;
         function commands(command, silent, exec) {
+            var args = [command,silent,exec].map(String).join(', ');
+            console.log('<<<<<<<<<<<< ' + terminal_id + ' commands(' + args + ')');
             last_command = command; // for debug
             // first command store state of the terminal before the command get
             // executed
@@ -3365,8 +3367,10 @@
             }
             function after_exec() {
                 // variables defined later in commands
+                console.log('<<<<<<<<<<<< after_exec ' + JSON.stringify(exec));
                 if (!exec) {
                     change_hash = true;
+                    console.log('<<<<<<<<<<<< settings.historyState ' + JSON.stringify(settings.historyState));
                     if (settings.historyState) {
                         self.save_state(command, false);
                     }
@@ -3433,6 +3437,7 @@
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
                     if (result !== undefined) {
+                        console.log(' <<<<<<<<<<<<<<< result !== undefined ',result !== undefined);
                         // auto pause/resume when user return promises
                         self.pause(true);
                         return $.when(result).then(function(result) {
@@ -4189,7 +4194,8 @@
                 if (toggle) {
                     // if set to true and if set from user command we need
                     // not to include the command
-                    self.oneTime(1, function() {
+                    setImmediate(function() {
+                        console.log('setImmediate');
                         settings.historyState = true;
                         if (!save_state.length) {
                             self.save_state();
@@ -4991,6 +4997,10 @@
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
+                var args = [].slice.call(arguments).map(function(arg) {
+                    return typeof arg == 'function' ? 'function' : JSON.stringify(arg);
+                }).join(', ');
+                console.log('!!!!!!!!!!!!!!!!!! ' + terminal_id + ' ' + name + '(' + args + ')');
                 try {
                     return fun.apply(self, [].slice.apply(arguments));
                 } catch (e) {

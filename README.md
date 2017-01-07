@@ -8,7 +8,7 @@
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-0.11.23-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-0.11.23-yellow.svg) [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal) [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master)](https://travis-ci.org/jcubic/jquery.terminal)
+[![npm](https://img.shields.io/badge/npm-0.11.23-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-0.11.23-yellow.svg) [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal) [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master)](https://travis-ci.org/jcubic/jquery.terminal) [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 
 ### Summary
 
@@ -168,6 +168,15 @@ you can also run test covarage using
 
 ```
 make cover
+```
+
+### Contribution
+
+If you want to contribute make sure you modify js/jquery.terminal-src.js and css/jquery.terminal-src.css
+files and run `make`. To make it work you need to have installed java to run yuicompressor-2.4.8.jar and isntall uglifyjs:
+
+```
+npm install -g uglifyjs
 ```
 
 ### License
