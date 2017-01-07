@@ -8,6 +8,4 @@ install:
 script:
   - make
   - make jshint
-  - make test
-after_script:
   - node_modules/istanbul/lib/cli.js cover node_modules/jasmine/bin/jasmine.js --captureExceptions spec/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
