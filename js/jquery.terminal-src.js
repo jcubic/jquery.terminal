@@ -4195,6 +4195,7 @@
                     // if set to true and if set from user command we need
                     // not to include the command
                     setImmediate(function() {
+                        console.log('setImmediate');
                         settings.historyState = true;
                         if (!save_state.length) {
                             self.save_state();
