@@ -31,6 +31,7 @@
     "jquery": "^2.1.4"
   },
   "devDependencies": {
+    "coveralls": "^2.11.15",
     "istanbul": "^0.4.3",
     "jasmine": "^2.4.1",
     "jasmine-node": "^1.14.5",
