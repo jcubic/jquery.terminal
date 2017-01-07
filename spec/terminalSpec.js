@@ -18,6 +18,9 @@ if (typeof window === 'undefined') {
         return [{width: self.width(), height: self.height()}];
     };
 }
+function nbsp(string) {
+    return string.replace(/ /g, '\xA0');
+}
 describe('Terminal utils', function() {
     var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
     var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -317,12 +320,12 @@ function tests_on_ready() {
             });
             it('should have signature', function() {
                 var sig = term.find('.terminal-output div div').map(function() { return $(this).text(); }).get().join('\n');
-                expect(term.signature().replace(/ /g, '\xA0')).toEqual(sig);
+                expect(nbsp(term.signature())).toEqual(sig);
             });
             it('should have default prompt', function() {
                 var prompt = term.find('.prompt');
                 expect(prompt.html()).toEqual("<span>&gt;&nbsp;</span>");
-                expect(prompt.text()).toEqual('>\xA0');
+                expect(prompt.text()).toEqual(nbsp('> '));
             });
             it('should destroy terminal', function() {
                 term.destroy();
@@ -1775,6 +1778,39 @@ function tests_on_ready() {
                     term.echo('baz', {flush: false});
                     term.flush();
                     expect(term.find('.terminal-output').text()).toEqual('foobarbaz');
+                });
+            });
+            describe('update', function() {
+                var term = $('<div/>').terminal($.noop, {greetings: false});
+                it('should update terminal output', function() {
+                    term.echo('Hello');
+                    term.update(0, 'Hello, World!');
+                    expect(term.find('.terminal-output').text()).toEqual(nbsp('Hello, World!'));
+                    term.clear();
+                    term.echo('Foo');
+                    term.echo('Bar');
+                    term.update(-1, 'Baz');
+                    expect(term.find('.terminal-output').text()).toEqual('FooBaz');
+                    term.update(-2, 'Lorem');
+                    term.update(1, 'Ipsum');
+                    expect(term.find('.terminal-output').text()).toEqual('LoremIpsum');
+                });
+            });
+            describe('last_index', function() {
+                var term = $('<div/>').terminal($.noop, {greetings: false});
+                it('should return proper index', function() {
+                    term.echo('Foo');
+                    term.echo('Bar');
+                    expect(term.last_index()).toEqual(1);
+                    function len() {
+                        return term.find('.terminal-output div div').length;
+                    }
+                    term.echo('Baz');
+                    term.echo('Quux');
+                    term.echo('Lorem');
+                    expect(term.last_index()).toEqual(term.find('.terminal-output div div').length-1);
+                    var last_line = term.find('.terminal-output > div:eq(' + term.last_index() + ') div');
+                    expect(last_line.text()).toEqual('Lorem');
                 });
             });
         });
