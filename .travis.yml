@@ -4,4 +4,6 @@ node_js:
 install:
   - npm install -g uglifyjs
   - npm install
-script: make
+script:
+  - make
+  - make test
