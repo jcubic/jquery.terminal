@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 07 Jan 2017 18:03:28 +0000
+ * Date: Sat, 07 Jan 2017 23:07:38 +0000
  */
 
 /* TODO:
@@ -4320,7 +4320,7 @@
                 if (toggle) {
                     // if set to true and if set from user command we need
                     // not to include the command
-                    self.oneTime(1, function() {
+                    setImmediate(function() {
                         settings.historyState = true;
                         if (!save_state.length) {
                             self.save_state();

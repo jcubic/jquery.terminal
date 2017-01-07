@@ -4320,7 +4320,7 @@
                 if (toggle) {
                     // if set to true and if set from user command we need
                     // not to include the command
-                    self.oneTime(1, function() {
+                    setImmediate(function() {
                         settings.historyState = true;
                         if (!save_state.length) {
                             self.save_state();
