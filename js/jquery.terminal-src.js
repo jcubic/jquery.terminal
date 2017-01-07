@@ -2038,6 +2038,7 @@
                 var line = array[i];
                 var first_index = 0;
                 var count = 0;
+                var output;
                 var space = -1;
                 for (var j=0, jlen=line.length; j<jlen; ++j) {
                     if (line.substring(j).match(format_start_re)) {
@@ -2080,7 +2081,6 @@
                     }
                     if ((count === length || j === jlen-1) &&
                         ((formatting && in_text) || !formatting)) {
-                        var output;
                         var text = $.terminal.strip(line.substring(space));
                         text = $('<span>' + text + '</span>').text();
                         var text_len = text.length;
@@ -3348,6 +3348,8 @@
         var resume_callbacks = [];
         var resume_event_bound = false;
         function commands(command, silent, exec) {
+            var args = [command,silent,exec].map(String).join(', ');
+            console.log('<<<<<<<<<<<< ' + terminal_id + ' commands(' + args + ')');
             last_command = command; // for debug
             // first command store state of the terminal before the command get
             // executed
@@ -4991,6 +4993,10 @@
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
+                var args = [].slice.call(arguments).map(function(arg) {
+                    return typeof arg == 'function' ? 'function' : JSON.stringify(arg);
+                }).join(', ');
+                console.log('!!!!!!!!!!!!!!!!!! ' + terminal_id + ' ' + name + '(' + args + ')');
                 try {
                     return fun.apply(self, [].slice.apply(arguments));
                 } catch (e) {

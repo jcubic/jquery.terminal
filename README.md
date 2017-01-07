@@ -8,7 +8,7 @@
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-0.11.23-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-0.11.23-yellow.svg) [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
+[![npm](https://img.shields.io/badge/npm-0.11.23-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-0.11.23-yellow.svg) [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal) [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master)](https://travis-ci.org/jcubic/jquery.terminal)
 
 ### Summary
 

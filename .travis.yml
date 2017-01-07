@@ -3,7 +3,9 @@ node_js:
   - "4.4.6"
 install:
   - npm install -g uglifyjs
+  - npm install -g jshint
   - npm install
 script:
   - make
+  - make jshint
   - make test

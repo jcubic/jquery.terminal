@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 07 Jan 2017 19:27:04 +0000
+ * Date: Sat, 07 Jan 2017 20:17:46 +0000
  */
 
 /* TODO:
@@ -2038,6 +2038,7 @@
                 var line = array[i];
                 var first_index = 0;
                 var count = 0;
+                var output;
                 var space = -1;
                 for (var j=0, jlen=line.length; j<jlen; ++j) {
                     if (line.substring(j).match(format_start_re)) {
@@ -2080,7 +2081,6 @@
                     }
                     if ((count === length || j === jlen-1) &&
                         ((formatting && in_text) || !formatting)) {
-                        var output;
                         var text = $.terminal.strip(line.substring(space));
                         text = $('<span>' + text + '</span>').text();
                         var text_len = text.length;

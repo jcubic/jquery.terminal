@@ -5,6 +5,7 @@ CP=cp
 RM=rm
 CAT=cat
 DATE=`date -uR`
+BRANCH=`git branch | grep '^*' | sed 's/* //'`
 
 
 ALL: Makefile .$(VERSION) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
@@ -41,7 +42,7 @@ css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 	sed -i -e 's/0,100%/0%,100%/g' css/jquery.terminal-$(VERSION).min.css
 
 README.md: README.in .$(VERSION)
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" < README.in > README.md
+	$(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH)/g" < README.in > README.md
 
 .$(VERSION): Makefile
 	touch .$(VERSION)
