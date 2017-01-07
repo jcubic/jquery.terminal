@@ -4196,14 +4196,15 @@
                 if (toggle) {
                     // if set to true and if set from user command we need
                     // not to include the command
-                    self.oneTime(1, function() {
+                    setTimeout(function() {
                         settings.historyState = true;
+                        console.log('oneTime ', settings.historyState);
                         if (!save_state.length) {
                             self.save_state();
                         } else if (terminals.length() > 1) {
                             self.save_state(null);
                         }
-                    });
+                    }, 0);
                 } else {
                     settings.historyState = false;
                 }
