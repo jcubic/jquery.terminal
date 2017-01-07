@@ -14,7 +14,7 @@
     "input",
     "ui"
   ],
-  "script": {
+  "scripts": {
     "test": "make test"
   },
   "author": "Jakub Jankiewicz <jcubic@onet.pl> (http://jcubic.pl)",
