@@ -1,3 +1,4 @@
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 if (typeof window === 'undefined') {
     var jsdom = require("jsdom");
     global.window = jsdom.jsdom().defaultView;
