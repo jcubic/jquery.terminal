@@ -68,7 +68,6 @@ function tests_on_ready() {
         describe('$.terminal.split_arguments', function() {
             it('should create array of arguments', function() {
                 expect($.terminal.split_arguments(args)).toEqual([
->>>>>>> master
                     'foo bar',
                     'baz',
                     '/^asd [x]/',
