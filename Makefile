@@ -17,7 +17,7 @@ package.json: package.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" package.in > package.json
 
 js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
-	$(GIT) branch | grep devel > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js
+	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js
 
 js/jquery.terminal.js: js/jquery.terminal-$(VERSION).js
 	$(CP) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js
@@ -42,7 +42,7 @@ css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 	sed -i -e 's/0,100%/0%,100%/g' css/jquery.terminal-$(VERSION).min.css
 
 README.md: README.in .$(VERSION)
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH)/g" < README.in > README.md
+	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{BRANCH}}/$(BRANCH)/g" < README.in > README.md || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH)/g" < README.in > README.md
 
 .$(VERSION): Makefile
 	touch .$(VERSION)
