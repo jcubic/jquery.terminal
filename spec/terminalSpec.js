@@ -1652,10 +1652,11 @@ function tests_on_ready() {
                         enter(term, 'foo');
                         enter(term, 'bar');
                         setTimeout(function() {
+                            expect(term.get_output()).toEqual('> foo\n> bar');
                             expect(location.hash).toEqual(hash);
                             term.destroy().remove();
                             done();
-                        }, 400);
+                        }, 0);
                     }, 100);
                 });
             });
