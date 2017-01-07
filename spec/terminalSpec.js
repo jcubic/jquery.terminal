@@ -22,6 +22,16 @@ if (typeof window === 'undefined') {
     $(tests_on_ready);
 }
 
+
+function spy(obj, method) {
+    var spy = spyOn(obj, method);
+    if (spy.andCallThrough) {
+        spy.andCallThrough();
+    } else {
+        spy.and.callThrough();
+    }
+    return spy;
+}
 function enter_text(text) {
     var e;
     var $root = $(document.documentElement || window);
@@ -355,12 +365,7 @@ function tests_on_ready() {
             var term = $('<div/>').appendTo('body').terminal(interpreter);
             it('text should appear and interpreter function should be called', function() {
                 term.focus(true);
-                var spy = spyOn(interpreter, 'foo');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(interpreter, 'foo');
                 enter_text('foo');
                 enter_key();
                 expect(interpreter.foo).toHaveBeenCalled();
@@ -451,12 +456,7 @@ function tests_on_ready() {
                 expect(history.data()).toEqual(['something']);
             });
             it('should remove commands from history', function() {
-                var spy = spyOn(history, 'purge');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(history, 'purge');
                 cmd.purge();
                 expect(history.purge).toHaveBeenCalled();
                 expect(history.data()).toEqual([]);
@@ -490,29 +490,13 @@ function tests_on_ready() {
                 expect(before.text()).toEqual('foobar');
             });
             it('should execute functions on shortcuts', function() {
-                var spy;
-                spy = spyOn(cmd, 'position');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(cmd, 'position');
                 shortcut(true, false, false, 65); // CTRL+A
                 expect(cmd.position).toHaveBeenCalled();
-                spy = spyOn(cmd, 'delete');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(cmd, 'delete');
                 shortcut(true, false, false, 75); // CTRL+K
                 expect(cmd['delete']).toHaveBeenCalled();
-                spy = spyOn(cmd, 'insert');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(cmd, 'insert');
                 shortcut(true, false, false, 89); // CTRL+Y
                 expect(cmd.insert).toHaveBeenCalled();
                 shortcut(true, false, false, 85); // CTRL+U
@@ -696,12 +680,7 @@ function tests_on_ready() {
                     term.logout();
                 }
                 term.focus();
-                var spy = spyOn(object, 'login');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(object, 'login');
                 enter(term, 'test');
                 enter(term, 'test');
                 var last_div = term.find('.terminal-output > div:last-child');
@@ -714,12 +693,7 @@ function tests_on_ready() {
             });
             it('should call a function', function() {
                 term.focus();
-                var spy = spyOn(object, 'echo');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(object, 'echo');
                 enter(term, 'echo hello');
                 expect(object.echo).toHaveBeenCalledWith(token, 'hello');
                 term.destroy().remove();
@@ -732,23 +706,13 @@ function tests_on_ready() {
                     if (term.token()) {
                         term.logout();
                     }
-                    var spy = spyOn(object, 'login');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(object, 'login');
                     enter(term, 'demo');
                     enter(term, 'demo');
                     expect(object.login).toHaveBeenCalledWith('demo', 'demo');
                 });
                 it('should pass TOKEN to method', function() {
-                    var spy = spyOn(object, 'echo');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(object, 'echo');
                     enter(term, 'echo hello');
                     expect(object.echo).toHaveBeenCalledWith(token, 'hello');
                     term.destroy().remove();
@@ -763,18 +727,8 @@ function tests_on_ready() {
                             }
                         }
                     };
-                    var spy = spyOn(options, 'login');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
-                    spy = spyOn(object, 'echo');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(options, 'login');
+                    spy(object, 'echo');
                     term = $('<div/>').appendTo('body').terminal('/no_describe',
                                                                       options);
                     if (term.token()) {
@@ -837,12 +791,7 @@ function tests_on_ready() {
                 expect(interpereter.foo.bar.baz).toHaveBeenCalled();
             });
             it('should convert arguments', function() {
-                var spy = spyOn(type, 'test');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(type, 'test');
                 term.insert('add 10 20');
                 enter_key();
                 var last_div = term.find('.terminal-output > div:last-child');
@@ -859,12 +808,7 @@ function tests_on_ready() {
                 term.destroy().remove();
             });
             it('should call fallback function', function() {
-                var spy = spyOn(fallback, 'interpreter');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(fallback, 'interpreter');
                 term = $('<div/>').appendTo('body').terminal([
                     interpereter, fallback.interpreter
                 ], {
@@ -875,24 +819,14 @@ function tests_on_ready() {
             });
             it('should not show error on wrong arity', function() {
                 // checkArity is false from last spec
-                var spy = spyOn(type, 'test');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(type, 'test');
                 enter(term, 'foo');
                 enter(term, 'bar');
                 enter(term, 'type 10 20');
                 expect(type.test).toHaveBeenCalled();
             });
             it('should call json-rpc', function() {
-                var spy = spyOn(object, 'echo');
-                if (spy.andCallThrough) {
-                    spy.andCallThrough();
-                } else {
-                    spy.and.callThrough();
-                }
+                spy(object, 'echo');
                 term.pop().pop().focus();
                 enter(term, 'quux');
                 expect(term.get_prompt()).toEqual('quux> ');
@@ -906,7 +840,7 @@ function tests_on_ready() {
                 ]);
                 term.focus();
                 enter(term, 'echo TOKEN world'); // we call echo without login
-                expect(spy).toHaveBeenCalledWith('TOKEN', 'world');
+                expect(object.echo).toHaveBeenCalledWith('TOKEN', 'world');
             });
             it('should show error', function() {
                 enter(term, 'exception TOKEN');
@@ -1160,12 +1094,7 @@ function tests_on_ready() {
                 var term = $('<div/>').appendTo('body').terminal(interpreter);
                 term.focus();
                 it('should execute function', function(done) {
-                    var spy = spyOn(interpreter, 'foo');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(interpreter, 'foo');
                     term.exec('foo').then(function() {
                         expect(interpreter.foo).toHaveBeenCalled();
                         done();
@@ -1256,13 +1185,8 @@ function tests_on_ready() {
                         name: 'exec_login_array',
                         greetings: false
                     };
-                    spyOn(test, 'test');
-                    var spy = spyOn(options, 'login');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(test, 'test');
+                    spy(options, 'login');
                     var term = $('<div/>').terminal({
                         echo: function(arg) {
                             test.test(arg);
@@ -1300,13 +1224,8 @@ function tests_on_ready() {
                         [next_id,2,"bar"],
                         [next_id,3,"echo foo"]
                     ]);
-                    spyOn(test, 'test');
-                    var spy = spyOn(options, 'login');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(test, 'test');
+                    spy(options, 'login');
                     var term = $('<div/>').terminal({
                         echo: function(arg) {
                             test.test(arg);
@@ -1322,17 +1241,12 @@ function tests_on_ready() {
             });
             describe('methods after creating async rpc with system.describe', function() {
                 it('should call methods', function(done) {
-                    var spy = spyOn(object, 'echo');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(object, 'echo');
                     var term = $('<div/>').terminal('/async');
                     term.exec('echo foo bar');
                     term.insert('foo');
                     setTimeout(function() {
-                        expect(spy).toHaveBeenCalledWith('foo', 'bar');
+                        expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
                         expect(term.get_command()).toEqual('foo');
                         term.destroy().remove();
                         done();
@@ -1353,12 +1267,7 @@ function tests_on_ready() {
                 };
                 var term = $('<div/>').appendTo('body').terminal($.noop, options);
                 it('should log in', function() {
-                    var spy = spyOn(options, 'login');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(options, 'login');
                     term.autologin('user', token);
                     expect(options.login).not.toHaveBeenCalled();
                     expect(term.token()).toEqual(token);
@@ -1383,12 +1292,7 @@ function tests_on_ready() {
                     }
                 };
                 it('should not login', function() {
-                    var spy = spyOn(login, 'callback');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(login, 'callback');
                     term.focus().login(login.callback);
                     enter(term, 'foo');
                     enter(term, 'foo');
@@ -1496,12 +1400,7 @@ function tests_on_ready() {
                     var test = {
                         interpreter: function(command, term) {}
                     };
-                    var spy = spyOn(test, 'interpreter');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(test, 'interpreter');
                     expect(term.commands()).toEqual($.noop);
                     term.set_interpreter(test.interpreter);
                     expect(term.commands()).toEqual(test.interpreter);
@@ -1509,18 +1408,8 @@ function tests_on_ready() {
                     expect(test.interpreter).toHaveBeenCalledWith('foo', term);
                 });
                 it('should create async JSON-RPC with login', function(done) {
-                    var spy_echo = spyOn(object, 'echo');
-                    if (spy_echo.andCallThrough) {
-                        spy_echo.andCallThrough();
-                    } else {
-                        spy_echo.and.callThrough();
-                    }
-                    var spy_login = spyOn(object, 'login');
-                    if (spy_login.andCallThrough) {
-                        spy_login.andCallThrough();
-                    } else {
-                        spy_login.and.callThrough();
-                    }
+                    spy(object, 'echo');
+                    spy(object, 'login');
                     term.set_prompt('$ ');
                     term.set_interpreter('/async', true).focus();
                     if (term.token(true)) {
@@ -1530,10 +1419,10 @@ function tests_on_ready() {
                     enter(term, 'demo');
                     setTimeout(function() {
                         expect(term.get_prompt()).toEqual('$ ');
-                        expect(spy_login).toHaveBeenCalledWith('demo', 'demo');
+                        expect(object.login).toHaveBeenCalledWith('demo', 'demo');
                         enter(term, 'echo foo');
                         setTimeout(function() {
-                            expect(spy_echo).toHaveBeenCalledWith(token, 'foo');
+                            expect(object.echo).toHaveBeenCalledWith(token, 'foo');
                             term.destroy().remove();
                             done();
                         }, 1000);
@@ -1550,12 +1439,7 @@ function tests_on_ready() {
                         },
                         string: 'Hello World!'
                     };
-                    var spy = spyOn(greetings, 'fn');
-                    if (spy.andCallThrough) {
-                        spy.andCallThrough();
-                    } else {
-                        spy.and.callThrough();
-                    }
+                    spy(greetings, 'fn');
                     var term = $('<div/>').terminal($.noop, {
                         greetings: greetings.string
                     });
