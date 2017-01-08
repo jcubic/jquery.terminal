@@ -4755,6 +4755,10 @@
                             keepWords: false
                         }, options || {});
                         if (locals.flush) {
+                            // flush buffer if there was no flush after previous echo
+                            if (output_buffer.length) {
+                                self.flush();
+                            }
                             output_buffer = [];
                         }
                         process_line(string, locals);

@@ -292,11 +292,13 @@ function tests_on_ready() {
             domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
             pfx  = '',
             elm = document.createElement('div');
-        if (elm.style.animationName) { animation = true; }
+        if (elm.style.animationName) {
+            animation = true;
+        }
         if (animation === false) {
             for (var i = 0; i < domPrefixes.length; i++) {
                 var name = domPrefixes[i] + 'AnimationName';
-                if (elm.style[ name ] !== undefined) {
+                if (typeof elm.style[name] !== 'undefined') {
                     pfx = domPrefixes[i];
                     animationstring = pfx + 'Animation';
                     keyframeprefix = '-' + pfx.toLowerCase() + '-';
@@ -847,7 +849,7 @@ function tests_on_ready() {
             it('should show error', function() {
                 enter(term, 'exception TOKEN');
                 var last_div = term.find('.terminal-output > div:last-child');
-                expect(last_div.text().replace(/ /g, ' ')).toEqual('[RPC] ' +exception);
+                expect(last_div.text()).toEqual(nbsp('[RPC] ' +exception));
                 term.destroy().remove();
             });
         });
@@ -895,7 +897,6 @@ function tests_on_ready() {
                 term.insert('l');
                 shortcut(false, false, false, 9);
                 expect(term.get_command()).toEqual('lorem');
-                term.pop();
             });
             it('should complete when completion is a function with setTimeout', function(done) {
                 var term = $('<div/>').appendTo('body').terminal($.noop);
@@ -995,6 +996,7 @@ function tests_on_ready() {
                 term.insert('ec');
                 shortcut(false, false, false, 9);
                 expect(term.get_command()).toEqual('ec\t');
+                console.log(term.id());
                 term.destroy().remove();
             });
         });
@@ -1078,13 +1080,13 @@ function tests_on_ready() {
                         this.pause();
                         setTimeout(function() {
                             this.echo('Hello ' + counter++).resume();
-                        }.bind(this), 100);
+                        }.bind(this), 50);
                     },
                     bar: function() {
                         var d = $.Deferred();
                         setTimeout(function() {
                             d.resolve('Foo Bar');
-                        }, 500);
+                        }, 100);
                         return d.promise();
                     },
                     baz: {
@@ -1432,8 +1434,8 @@ function tests_on_ready() {
                             expect(object.echo).toHaveBeenCalledWith(token, 'foo');
                             term.destroy().remove();
                             done();
-                        }, 1000);
-                    }, 1000);
+                        }, 500);
+                    }, 500);
                 });
             });
             describe('greetings', function() {
@@ -1452,20 +1454,20 @@ function tests_on_ready() {
                     });
                     term.clear().greetings();
                     var last_div = term.find('.terminal-output > div:last-child');
-                    expect(last_div.text()).toEqual(greetings.string.replace(/ /g, ' '));
+                    expect(last_div.text()).toEqual(nbsp(greetings.string));
                     term.settings().greetings = greetings.fn;
                     term.clear().greetings();
                     expect(greetings.fn).toHaveBeenCalled();
                     setTimeout(function() {
                         last_div = term.find('.terminal-output > div:last-child');
-                        expect(last_div.text()).toEqual(greetings.string.replace(/ /g, ' '));
+                        expect(last_div.text()).toEqual(nbsp(greetings.string));
                         term.settings().greetings = undefined;
                         term.clear().greetings();
                         last_div = term.find('.terminal-output > div:last-child');
                         var text = last_div.find('div').map(function() {
                             return $(this).text();
                         }).get().join('\n');
-                        expect(text).toEqual(term.signature().replace(/ /g, ' '));
+                        expect(text).toEqual(nbsp(term.signature()));
                         term.destroy().remove();
                         done();
                     }, 400);
@@ -1699,6 +1701,89 @@ function tests_on_ready() {
                     expect(term.last_index()).toEqual(term.find('.terminal-output div div').length-1);
                     var last_line = term.find('.terminal-output > div:eq(' + term.last_index() + ') div');
                     expect(last_line.text()).toEqual('Lorem');
+                });
+            });
+            describe('echo', function() {
+                var numChars = 100;
+                var numRows = 25;
+                var term = $('<div/>').terminal($.noop, {
+                    greetings: false,
+                    numChars: numChars,
+                    numRows: numRows
+                });
+                function output() {
+                    return term.find('.terminal-output > div div span').map(function() {
+                        return $(this).text().replace(/\xA0/g, ' ');
+                    }).get();
+                }
+                it('should echo html', function() {
+                    var html = ['<img src="foo.png">', '<p><strong>hello</strong></p>'];
+                    html.forEach(function(html) {
+                        term.echo(html, {raw: true});
+                        var line = term.find('.terminal-output > div:eq(' + term.last_index() + ') div');
+                        expect(line.html()).toEqual(html);
+                    });
+                });
+                it('should call finalize with container div', function() {
+                    var element;
+                    var options = {
+                        finalize: function(div) {
+                            element = div;
+                        }
+                    };
+                    spy(options, 'finalize');
+                    term.echo('Lorem Ipsum', options);
+                    expect(options.finalize).toHaveBeenCalled();
+                    var line = term.find('.terminal-output > div:eq(' + term.last_index() + ')');
+                    expect(element.is(line)).toBeTruthy();
+                });
+                it('should not break words', function() {
+                    var line = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ultrices rhoncus hendrerit. Nunc ligula eros, tincidunt posuere tristique quis, iaculis non elit.';
+                    var lines = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ultrices rhoncus hendrerit. Nunc', 'ligula eros, tincidunt posuere tristique quis, iaculis non elit.'];
+                    term.clear().echo(line, {keepWords: true});
+                    expect(output()).toEqual(lines);
+                });
+                it('should break words if words are longer then the line', function() {
+                    var line = 'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM';
+                    var lines = ['MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM', 'MMMMMMMMMMMMMMMMMMMM'];
+                    term.clear().echo(line);
+                    expect(output()).toEqual(lines);
+                    term.clear().echo(line, {keepWords: true});
+                    expect(output()).toEqual(lines);
+                });
+                it('should echo both lines if one was not flushed', function() {
+                    term.clear();
+                    term.echo('foo', {flush: false});
+                    term.echo('bar');
+                    expect(term.find('.terminal-output').text()).toEqual('foobar');
+                });
+            });
+            describe('error', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                it('should echo error', function() {
+                    spy(term, 'echo');
+                    term.error('Message');
+                    expect(term.echo).toHaveBeenCalledWith('[[;;;error]Message]', undefined);
+                });
+                it('should escape brakets', function() {
+                    spy(term, 'echo');
+                    term.clear().error('[[ Message ]]');
+                    expect(term.echo).toHaveBeenCalledWith('[[;;;error]&#91;&#91; Message &#93;&#93;]',
+                                                          undefined);
+                    var span = term.find('.terminal-output span');
+                    expect(span.length).toEqual(1);
+                    expect(span.hasClass('error')).toBeTruthy();
+                });
+                it('should handle url', function() {
+                    term.clear().error('foo http://jcubic.pl bar');
+                    var children = term.find('.terminal-output div div').children();
+                    children.filter('span').each(function() {
+                        expect($(this).hasClass('error')).toBeTruthy();
+                    });
+                    expect(children.filter('a').hasClass('error')).toBeFalsy();
+                    expect(term.find('.terminal-output a').attr('href')).toEqual('http://jcubic.pl');
                 });
             });
         });
