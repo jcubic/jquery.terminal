@@ -556,6 +556,43 @@ function tests_on_ready() {
                 term.destroy().remove();
             });
         });
+        function AJAXMock(url, response, options) {
+            var ajax = $.ajax;
+            options = $.extend({}, {
+                async: false
+            }, options);
+            $.ajax = function(obj) {
+                function done() {
+                    if ($.isFunction(obj.success)) {
+                        obj.success(response, 'OK', {
+                            getResponseHeader: function(header) {
+                                if (header == 'Content-Type') {
+                                    return 'application/json';
+                                }
+                            },
+                            responseText: response
+                        });
+                    }
+                    defer.resolve(response);
+                }
+                if (obj.url == url) {
+                    var defer = $.Deferred();
+                    try {
+                        obj.beforeSend({}, obj);
+                        if (options.async) {
+                            setTimeout(done, 100);
+                        } else {
+                            done();
+                        }
+                    } catch (e) {
+                        throw new Error(e.message);
+                    }
+                    return defer.promise();
+                } else {
+                    return ajax.apply($, arguments);
+                }
+            };
+        }
         function JSONRPCMock(url, object, options) {
             var defaults = {
                 no_system_describe: false,
@@ -626,7 +663,15 @@ function tests_on_ready() {
                             var error = null;
                             var ret = null;
                             try {
-                                ret = object[req.method].apply(null, req.params);
+                                if ($.isFunction(object[req.method])) {
+                                    ret = object[req.method].apply(null, req.params);
+                                } else {
+                                    ret = null;
+                                    error = {
+                                        "code": -32601,
+                                        "message": "There is no `" + req.method + "' method"
+                                    };
+                                }
                             } catch (e) {
                                 error = {message: e.message};
                             }
@@ -672,6 +717,8 @@ function tests_on_ready() {
                 }
             }
         };
+        AJAXMock('/not-json', 'Response', {async: true});
+        AJAXMock('/not-rpc', '{"foo": "bar"}', {async: true});
         JSONRPCMock('/test', object);
         JSONRPCMock('/no_describe', object, {no_system_describe: true});
         JSONRPCMock('/async', object, {async: true});
@@ -757,6 +804,38 @@ function tests_on_ready() {
                     });
                     expect(term.export_view().interpreters.top().completion).toBeFalsy();
                     term.destroy().remove();
+                });
+                it('should display error on invalid JSON', function(done) {
+                    var term = $('<div/>').appendTo('body').terminal('/not-json', {greetings: false});
+                    setTimeout(function() {
+                        enter(term, 'foo');
+                        setTimeout(function() {
+                            var output = [
+                                '> foo',
+                                '[[;;;error]&#91;AJAX&#93; Invalid JSON - Server responded:',
+                                'Response]'
+                            ].join('\n');
+                            expect(term.get_output()).toEqual(output);
+                            term.destroy().remove();
+                            done();
+                        }, 200);
+                    }, 200);
+                });
+                it('should display error on Invalid JSON-RPC response', function(done) {
+                    var term = $('<div/>').appendTo('body').terminal('/not-rpc', {greetings: false});
+                    setTimeout(function() {
+                        enter(term, 'foo');
+                        setTimeout(function() {
+                            var output = [
+                                '> foo',
+                                '[[;;;error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
+                                '{"foo": "bar"}]'
+                            ].join('\n');
+                            expect(term.get_output()).toEqual(output);
+                            term.destroy().remove();
+                            done();
+                        }, 200);
+                    }, 200);
                 });
             });
         });
@@ -996,7 +1075,6 @@ function tests_on_ready() {
                 term.insert('ec');
                 shortcut(false, false, false, 9);
                 expect(term.get_command()).toEqual('ec\t');
-                console.log(term.id());
                 term.destroy().remove();
             });
         });
@@ -1240,6 +1318,9 @@ function tests_on_ready() {
                             test.test(arg);
                         }
                     }, options);
+                    if (term.token()) {
+                        term.logout();
+                    }
                     setTimeout(function() {
                         expect(options.login).toHaveBeenCalled();
                         expect(test.test).toHaveBeenCalledWith('foo');
@@ -1706,7 +1787,7 @@ function tests_on_ready() {
             describe('echo', function() {
                 var numChars = 100;
                 var numRows = 25;
-                var term = $('<div/>').terminal($.noop, {
+                var term = $('<div/>').appendTo('body').terminal($.noop, {
                     greetings: false,
                     numChars: numChars,
                     numRows: numRows
@@ -1716,8 +1797,21 @@ function tests_on_ready() {
                         return $(this).text().replace(/\xA0/g, ' ');
                     }).get();
                 }
+                it('should echo format urls', function() {
+                    term.clear();
+                    term.echo('foo http://jcubic.pl bar');
+                    var div = term.find('.terminal-output > div div');
+                    expect(div.children().length).toEqual(3);
+                    var link = div.find('a');
+                    expect(link.length).toEqual(1);
+                    expect(link.attr('href')).toEqual('http://jcubic.pl');
+                    expect(link.attr('target')).toEqual('_blank');
+                });
                 it('should echo html', function() {
-                    var html = ['<img src="foo.png">', '<p><strong>hello</strong></p>'];
+                    var html = [
+                        '<img src="http://lorempixel.com/300/200/cats/">',
+                        '<p><strong>hello</strong></p>'
+                    ];
                     html.forEach(function(html) {
                         term.echo(html, {raw: true});
                         var line = term.find('.terminal-output > div:eq(' + term.last_index() + ') div');
@@ -1784,6 +1878,27 @@ function tests_on_ready() {
                     });
                     expect(children.filter('a').hasClass('error')).toBeFalsy();
                     expect(term.find('.terminal-output a').attr('href')).toEqual('http://jcubic.pl');
+                });
+                it('should call finialize', function() {
+                    var options = {
+                        finalize: $.noop
+                    };
+                    spy(options, 'finalize');
+                    term.clear().error('Message', options);
+                    expect(options.finalize).toHaveBeenCalled();
+                });
+                it('should call echo without raw option', function() {
+                    spy(term, 'echo');
+                    var options = {
+                        finalize: $.noop,
+                        raw: true,
+                        flush: true,
+                        keepWords: false
+                    };
+                    term.clear().error('Message', options);
+                    options.raw = false;
+                    expect(term.echo).toHaveBeenCalledWith('[[;;;error]Message]', options);
+
                 });
             });
         });

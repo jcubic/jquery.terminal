@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 08 Jan 2017 11:50:53 +0000
+ * Date: Sun, 08 Jan 2017 15:49:13 +0000
  */
 
 /* TODO:
@@ -2389,11 +2389,16 @@
         } else {
             options = {
                 url: url,
-                method: methd,
+                method: method,
                 params: params,
                 success: success,
                 error: error
             };
+        }
+        function validJSONRPC(response) {
+            return (typeof response.id == 'number' && typeof response.result != 'undefined') ||
+                (options.method == 'system.describe' && response.name == 'DemoService' &&
+                 typeof response.id != 'undefined' && response.procs instanceof Array);
         }
         ids[options.url] = ids[options.url] || 0;
         var request = {
@@ -2434,8 +2439,14 @@
                 if ($.isFunction(options.response)) {
                     options.response(jqXHR, json);
                 }
-                // don't catch errors in success callback
-                options.success(json, status, jqXHR);
+                if (validJSONRPC(json)) {
+                    // don't catch errors in success callback
+                    options.success(json, status, jqXHR);
+                } else if (options.error) {
+                    options.error(jqXHR, 'Invalid JSON-RPC');
+                } else {
+                    throw new Error('Invalid JSON-RPC');
+                }
             },
             error: options.error,
             contentType: 'application/json',
@@ -2917,7 +2928,7 @@
                 settings.onAjaxError.call(self, xhr, status, error);
             } else if (status !== 'abort') {
                 self.error('&#91;AJAX&#93; ' + status + ' - ' +
-                           strings.serverResponse + ': \n' +
+                           strings.serverResponse + ':\n' +
                            $.terminal.escape_brackets(xhr.responseText));
             }
         }
@@ -4755,6 +4766,10 @@
                             keepWords: false
                         }, options || {});
                         if (locals.flush) {
+                            // flush buffer if there was no flush after previous echo
+                            if (output_buffer.length) {
+                                self.flush();
+                            }
                             output_buffer = [];
                         }
                         process_line(string, locals);
@@ -4789,12 +4804,15 @@
             // -------------------------------------------------------------
             // :: echo red text
             // -------------------------------------------------------------
-            error: function(message, finalize) {
+            error: function(message, options) {
+                if (options) {
+                    options = $.extend({}, options, {raw: false});
+                }
                 //quick hack to fix trailing backslash
                 var str = $.terminal.escape_brackets(message).
                     replace(/\\$/, '&#92;').
                     replace(url_re, ']$1[[;;;error]');
-                return self.echo('[[;;;error]' + str + ']', finalize);
+                return self.echo('[[;;;error]' + str + ']', options);
             },
             // -------------------------------------------------------------
             // :: Display Exception on terminal
