@@ -1850,6 +1850,7 @@ function tests_on_ready() {
                     term.echo('foo', {flush: false});
                     term.echo('bar');
                     expect(term.find('.terminal-output').text()).toEqual('foobar');
+                    term.destroy().remove();
                 });
             });
             describe('error', function() {
@@ -1899,6 +1900,31 @@ function tests_on_ready() {
                     options.raw = false;
                     expect(term.echo).toHaveBeenCalledWith('[[;;;error]Message]', options);
 
+                });
+            });
+            describe('exception', function() {
+                var term = $('<div/>').appendTo('body').terminal($.noop, {
+                    greetings: false
+                });
+                it('it should show exception', function() {
+                    var error = new Error('Some Message');
+                    term.exception(error, 'ERROR');
+                    var output = ['[[;;;error]&#91;ERROR&#93;: Some Message]',
+                                  '[[;;;error]Error: Some Message]'];
+                    var re = new RegExp('^' + $.terminal.escape_regex(output.join('\n')));
+                    expect(term.get_output().match(re)).toBeTruthy();
+                    var div = term.find('.terminal-output > div:eq(0)');
+                    expect(div.hasClass('exception')).toBeTruthy();
+                    expect(div.hasClass('message')).toBeTruthy();
+                    if (error.stack) {
+                        output = term.find('.terminal-output div div').map(function() {
+                            return $(this).text().replace(/\xA0/g, ' ');
+                        }).get().slice(1);
+                        expect(error.stack).toEqual(output.join('\n'));
+                        div = term.find('.terminal-output > div:eq(1)');
+                        expect(div.hasClass('exception')).toBeTruthy();
+                        expect(div.hasClass('stack-trace')).toBeTruthy();
+                    }
                 });
             });
         });

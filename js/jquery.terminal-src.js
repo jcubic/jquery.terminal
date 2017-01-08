@@ -2381,7 +2381,7 @@
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
-    var ids = {}; // list of url based id of JSON-RPC
+    var ids = {}; // list of url based ids of JSON-RPC
     $.jrpc = function(url, method, params, success, error) {
         var options;
         if ($.isPlainObject(url)) {
