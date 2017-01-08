@@ -4186,17 +4186,22 @@
             // :: toggle recording of history state
             // -------------------------------------------------------------
             history_state: function(toggle) {
+                function run() {
+                    settings.historyState = true;
+                    if (!save_state.length) {
+                        self.save_state();
+                    } else if (terminals.length() > 1) {
+                        self.save_state(null);
+                    }
+                }
                 if (toggle) {
                     // if set to true and if set from user command we need
                     // not to include the command
-                    setImmediate(function() {
-                        settings.historyState = true;
-                        if (!save_state.length) {
-                            self.save_state();
-                        } else if (terminals.length() > 1) {
-                            self.save_state(null);
-                        }
-                    });
+                    if (typeof window.setImmediate == 'undefined') {
+                        setTimeout(run, 0);
+                    } else {
+                        setImmediate(run);
+                    }
                 } else {
                     settings.historyState = false;
                 }
