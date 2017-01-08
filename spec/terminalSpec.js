@@ -1192,6 +1192,9 @@ function tests_on_ready() {
                             test.test(arg);
                         }
                     }, options);
+                    if (term.token()) {
+                        term.logout();
+                    }
                     var array = ['foo', 'bar', 'echo foo'];
                     term.exec(array).then(function() {
                         expect(options.login).toHaveBeenCalled();
