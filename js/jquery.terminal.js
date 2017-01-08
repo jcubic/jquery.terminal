@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 07 Jan 2017 23:18:04 +0000
+ * Date: Sun, 08 Jan 2017 09:48:24 +0000
  */
 
 /* TODO:
@@ -2629,6 +2629,7 @@
         onRPCError: null,
         completion: false,
         historyFilter: null,
+        softPause: false,
         onInit: $.noop,
         onClear: $.noop,
         onBlur: $.noop,
@@ -2739,7 +2740,7 @@
             var m = url_spec.match(re);
             if (m) {
                 // TODO: do we need to call pause/resume or return promise?
-                self.pause();
+                self.pause(settings.softPause);
                 $.get(m[1], function(response) {
                     var prefix = location.href.replace(/[^\/]+$/, '');
                     var file = m[1].replace(prefix, '');
@@ -2783,7 +2784,7 @@
         // ---------------------------------------------------------------------
         function make_basic_json_rpc(url, auth) {
             var interpreter = function(method, params) {
-                self.pause();
+                self.pause(settings.softPause);
                 $.jrpc({
                     url: url,
                     method: method,
@@ -2939,7 +2940,7 @@
                                                    proc.params.length,
                                                    args_len));
                             } else {
-                                self.pause();
+                                self.pause(settings.softPause);
                                 if (append) {
                                     var token = self.token(true);
                                     if (token) {
@@ -3050,7 +3051,7 @@
                         var rest = interpreters.slice(1);
                         var type = $.type(first);
                         if (type === 'string') {
-                            self.pause();
+                            self.pause(settings.softPause);
                             if (settings.ignoreSystemDescribe) {
                                 if (++rpc_count === 1) {
                                     fn_interpreter = make_basic_json_rpc(first, login);
@@ -3106,7 +3107,7 @@
                     }
                     finalize(object);
                 } else {
-                    self.pause();
+                    self.pause(settings.softPause);
                     make_json_rpc_object(user_intrp, login, function(object) {
                         if (object) {
                             result.interpreter = make_object_interpreter(object,
@@ -3146,7 +3147,7 @@
         function make_json_rpc_login(url, login) {
             var method = $.type(login) === 'boolean' ? 'login' : login;
             return function(user, passwd, callback, term) {
-                self.pause();
+                self.pause(settings.softPause);
                 $.jrpc({
                     url: url,
                     method: method,
@@ -3557,7 +3558,7 @@
                     var result = interpreter.interpreter.call(self, command, self);
                     if (result !== undefined) {
                         // auto pause/resume when user return promises
-                        self.pause(true);
+                        self.pause(settings.softPause);
                         return $.when(result).then(function(result) {
                             // don't echo result if user echo something
                             if (result && position === lines.length-1) {
@@ -3766,21 +3767,28 @@
         // ---------------------------------------------------------------------
         // :: Keydown event handler
         // ---------------------------------------------------------------------
+        function user_key_down(e) {
+            var result, top = interpreters.top();
+            if ($.isFunction(top.keydown)) {
+                result = top.keydown(e, self);
+                if (result !== undefined) {
+                    return result;
+                }
+            } else if ($.isFunction(settings.keydown)) {
+                result = settings.keydown(e, self);
+                if (result !== undefined) {
+                    return result;
+                }
+            }
+        }
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i, top = interpreters.top(), completion;
             if (!self.paused() && self.enabled()) {
-                if ($.isFunction(top.keydown)) {
-                    result = top.keydown(e, self);
-                    if (result !== undefined) {
-                        return result;
-                    }
-                } else if ($.isFunction(settings.keydown)) {
-                    result = settings.keydown(e, self);
-                    if (result !== undefined) {
-                        return result;
-                    }
+                result = user_key_down(e);
+                if (result !== undefined) {
+                    return result;
                 }
                 if (settings.completion &&
                     $.type(settings.completion) != 'boolean' &&
@@ -3873,6 +3881,10 @@
                     self.attr({scrollTop: self.attr('scrollHeight')});
                 }
             } else if (e.which === 68 && e.ctrlKey) { // CTRL+D (if paused)
+                result = user_key_down(e);
+                if (result !== undefined) {
+                    return result;
+                }
                 if (requests.length) {
                     for (i=requests.length; i--;) {
                         var r = requests[i];
@@ -4210,7 +4222,7 @@
             // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
                 function overwrite_interpreter() {
-                    self.pause();
+                    self.pause(settings.softPause);
                     make_interpreter(user_intrp, !!login, function(result) {
                         self.resume();
                         var top = interpreters.top();
@@ -4796,7 +4808,7 @@
                 }
                 if (typeof e.fileName === 'string') {
                     //display filename and line which throw exeption
-                    self.pause();
+                    self.pause(settings.softPause);
                     $.get(e.fileName, function(file) {
                         self.resume();
                         var num = e.lineNumber - 1;
