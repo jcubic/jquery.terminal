@@ -2,10 +2,11 @@ language: node_js
 node_js:
   - "node"
 install:
-  - npm install -g uglifyjs
-  - npm install -g jshint
+  - npm install -g uglifyjs jshint
   - npm install
 script:
   - make
   - make jshint
+  - make test
+after_script:
   - node_modules/istanbul/lib/cli.js cover node_modules/jasmine/bin/jasmine.js --captureExceptions && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
