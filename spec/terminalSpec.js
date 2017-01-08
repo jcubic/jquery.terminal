@@ -285,7 +285,7 @@ function tests_on_ready() {
             });
         });
     });
-    global.support_animations = (function() {
+    support_animations = (function() {
         var animation = false,
             animationstring = 'animation',
             keyframeprefix = '',
