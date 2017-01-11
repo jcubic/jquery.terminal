@@ -15,7 +15,7 @@
           fix echo resolved content when interpreter return a promise
           add option softPause to control pause visible option - it don't hide the prompt when set to true
           add wordAutocomplete option (default true)
-          add complete api method and use it for autocomplete
+          add complete and before_cursor api methods and use it for autocomplete
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.

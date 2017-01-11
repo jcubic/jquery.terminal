@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 11 Jan 2017 22:55:48 +0000
+ * Date: Wed, 11 Jan 2017 23:08:25 +0000
  */
 
 /* TODO:
@@ -3745,28 +3745,7 @@
             }
         }
         function get_string(word) {
-            var pos = command_line.position();
-            command = command_line.get().substring(0, pos);
-            var cmd_strings = command.split(' ');
-            var string; // string before cursor that will be completed
-            if (word) {
-                if (cmd_strings.length == 1) {
-                    string = cmd_strings[0];
-                } else {
-                    string = cmd_strings[cmd_strings.length-1];
-                    for (i=cmd_strings.length-1; i>0; i--) {
-                        // treat escape space as part of the string
-                        if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
-                            string = cmd_strings[i-1] + ' ' + string;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            } else {
-                string = command;
-            }
-            return string;
+            
         }
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
@@ -3813,7 +3792,7 @@
                     //       !!! Problem complete more then one key need terminal
                     switch ($.type(completion)) {
                         case 'function':
-                            var string = get_string(settings.wordAutocomplete);
+                            var string = self.before_cursor(settings.wordAutocomplete);
                             completion(self, string, function(commands) {
                                 self.complete(commands, {
                                     echo: true
@@ -4173,6 +4152,33 @@
                 return settings;
             },
             // -------------------------------------------------------------
+            // :: Get string before cursor
+            // -------------------------------------------------------------
+            before_cursor: function(word) {
+                var pos = command_line.position();
+                var command = command_line.get().substring(0, pos);
+                var cmd_strings = command.split(' ');
+                var string; // string before cursor that will be completed
+                if (word) {
+                    if (cmd_strings.length == 1) {
+                        string = cmd_strings[0];
+                    } else {
+                        string = cmd_strings[cmd_strings.length-1];
+                        for (i=cmd_strings.length-1; i>0; i--) {
+                            // treat escape space as part of the string
+                            if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
+                                string = cmd_strings[i-1] + ' ' + string;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    string = command;
+                }
+                return string;
+            },
+            // -------------------------------------------------------------
             // :: complete word or command based on array of words
             // -------------------------------------------------------------
             complete: function(commands, options) {
@@ -4182,7 +4188,7 @@
                 }, options || {});
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
-                var string = get_string(options.word);
+                var string = self.before_cursor(options.word);
                 // local copy
                 commands = commands.slice();
                 if (settings.clear && $.inArray('clear', commands) == -1) {
@@ -4191,10 +4197,14 @@
                 if (settings.exit && $.inArray('exit', commands) == -1) {
                     commands.push('exit');
                 }
-                var test = command_line.get().substring(0, command_line.position());
-                if (test !== command) {
-                    // command line changed between TABS - ignore
-                    return;
+                if (tab_count % 2 == 0) {
+                    command = command_line.get().substring(0, command_line.position());
+                } else {
+                    var test = command_line.get().substring(0, command_line.position());
+                    if (test !== command) {
+                        // command line changed between TABS - ignore
+                        return;
+                    }
                 }
                 var regex = new RegExp('^' + $.terminal.escape_regex(string));
                 var matched = [];
