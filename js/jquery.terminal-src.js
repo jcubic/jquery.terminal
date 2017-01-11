@@ -4197,7 +4197,7 @@
                 if (settings.exit && $.inArray('exit', commands) == -1) {
                     commands.push('exit');
                 }
-                if (tab_count % 2 == 0) {
+                if (tab_count % 2 === 0) {
                     command = command_line.get().substring(0, command_line.position());
                 } else {
                     var test = command_line.get().substring(0, command_line.position());

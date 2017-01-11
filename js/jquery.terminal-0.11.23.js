@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 11 Jan 2017 23:08:25 +0000
+ * Date: Wed, 11 Jan 2017 23:38:29 +0000
  */
 
 /* TODO:
@@ -4197,7 +4197,7 @@
                 if (settings.exit && $.inArray('exit', commands) == -1) {
                     commands.push('exit');
                 }
-                if (tab_count % 2 == 0) {
+                if (tab_count % 2 === 0) {
                     command = command_line.get().substring(0, command_line.position());
                 } else {
                     var test = command_line.get().substring(0, command_line.position());
