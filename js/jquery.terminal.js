@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 08 Jan 2017 15:49:13 +0000
+ * Date: Wed, 11 Jan 2017 18:31:21 +0000
  */
 
 /* TODO:
@@ -2381,7 +2381,7 @@
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
-    var ids = {}; // list of url based id of JSON-RPC
+    var ids = {}; // list of url based ids of JSON-RPC
     $.jrpc = function(url, method, params, success, error) {
         var options;
         if ($.isPlainObject(url)) {
@@ -3846,7 +3846,7 @@
                     var command = command_line.get().substring(0, pos);
                     var cmd_strings = command.split(' ');
                     var string; // string before cursor that will be completed
-                    if (strings.length == 1) {
+                    if (cmd_strings.length == 1) {
                         string = cmd_strings[0];
                     } else {
                         string = cmd_strings[cmd_strings.length-1];

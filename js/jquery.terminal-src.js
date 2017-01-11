@@ -3846,7 +3846,7 @@
                     var command = command_line.get().substring(0, pos);
                     var cmd_strings = command.split(' ');
                     var string; // string before cursor that will be completed
-                    if (strings.length == 1) {
+                    if (cmd_strings.length == 1) {
                         string = cmd_strings[0];
                     } else {
                         string = cmd_strings[cmd_strings.length-1];
