@@ -3744,6 +3744,30 @@
                 }
             }
         }
+        function get_string(word) {
+            var pos = command_line.position();
+            command = command_line.get().substring(0, pos);
+            var cmd_strings = command.split(' ');
+            var string; // string before cursor that will be completed
+            if (word) {
+                if (cmd_strings.length == 1) {
+                    string = cmd_strings[0];
+                } else {
+                    string = cmd_strings[cmd_strings.length-1];
+                    for (i=cmd_strings.length-1; i>0; i--) {
+                        // treat escape space as part of the string
+                        if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
+                            string = cmd_strings[i-1] + ' ' + string;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                string = command;
+            }
+            return string;
+        }
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
@@ -3789,16 +3813,15 @@
                     //       !!! Problem complete more then one key need terminal
                     switch ($.type(completion)) {
                         case 'function':
+                            var string = get_string(settings.wordAutocomplete);
                             completion(self, string, function(commands) {
                                 self.complete(commands, {
-                                    word: settings.wordAutocomplete,
                                     echo: true
                                 });
                             });
                             break;
                         case 'array':
                             self.complete(completion, {
-                                word: settings.wordAutocomplete,
                                 echo: true
                             });
                             break;
@@ -3883,6 +3906,7 @@
         var num_chars; // numer of chars in line
         var num_rows; // number of lines that fit without scrollbar
         var command_list = []; // for tab completion
+        var command; // for tab completion
         var url;
         var bottom; // indicate if terminal was scrolled to bottom before echo command
         var logins = new Stack(); // stack of logins
@@ -4158,27 +4182,9 @@
                 }, options || {});
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
-                var pos = command_line.position();
-                var command = command_line.get().substring(0, pos);
-                var cmd_strings = command.split(' ');
-                var string; // string before cursor that will be completed
-                if (options.word) {
-                    if (cmd_strings.length == 1) {
-                        string = cmd_strings[0];
-                    } else {
-                        string = cmd_strings[cmd_strings.length-1];
-                        for (i=cmd_strings.length-1; i>0; i--) {
-                            // treat escape space as part of the string
-                            if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
-                                string = cmd_strings[i-1] + ' ' + string;
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    string = command;
-                }
+                var string = get_string(options.word);
+                // local copy
+                commands = commands.slice();
                 if (settings.clear && $.inArray('clear', commands) == -1) {
                     commands.push('clear');
                 }
