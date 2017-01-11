@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 11 Jan 2017 18:31:21 +0000
+ * Date: Wed, 11 Jan 2017 21:38:15 +0000
  */
 
 /* TODO:
@@ -2635,6 +2635,7 @@
         formatters: [],
         onAjaxError: null,
         scrollBottomOffset: 20,
+        wordAutocomplete: true,
         request: $.noop,
         response: $.noop,
         onRPCError: null,
@@ -3811,10 +3812,6 @@
                 if (completion == 'settings') {
                     completion = settings.completion;
                 }
-                // after text pasted into textarea in cmd plugin
-                self.oneTime(10, function() {
-                    on_scrollbar_show_resize();
-                });
                 if (e.which !== 9) { // not a TAB
                     tab_count = 0;
                 }
@@ -3846,18 +3843,22 @@
                     var command = command_line.get().substring(0, pos);
                     var cmd_strings = command.split(' ');
                     var string; // string before cursor that will be completed
-                    if (cmd_strings.length == 1) {
-                        string = cmd_strings[0];
-                    } else {
-                        string = cmd_strings[cmd_strings.length-1];
-                        for (i=cmd_strings.length-1; i>0; i--) {
-                            // treat escape space as part of the string
-                            if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
-                                string = cmd_strings[i-1] + ' ' + string;
-                            } else {
-                                break;
+                    if (settings.wordAutocomplete) {
+                        if (cmd_strings.length == 1) {
+                            string = cmd_strings[0];
+                        } else {
+                            string = cmd_strings[cmd_strings.length-1];
+                            for (i=cmd_strings.length-1; i>0; i--) {
+                                // treat escape space as part of the string
+                                if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
+                                    string = cmd_strings[i-1] + ' ' + string;
+                                } else {
+                                    break;
+                                }
                             }
                         }
+                    } else {
+                        string = command;
                     }
                     switch ($.type(completion)) {
                         case 'function':
@@ -4702,7 +4703,6 @@
                         }
                     }
                     num_rows = get_num_rows(self);
-                    on_scrollbar_show_resize();
                     if (settings.scrollOnEcho || bottom) {
                         scroll_to_bottom();
                     }
@@ -5183,20 +5183,6 @@
                 }
             };
         }));
-
-        // -----------------------------------------------------------------
-        var on_scrollbar_show_resize = (function() {
-            var scroll_bars = have_scrollbars(self);
-            return function() {
-                if (scroll_bars !== have_scrollbars(self)) {
-                    // if the scollbar appearance changes we will have a
-                    // different number of chars
-                    self.resize();
-                    scroll_bars = have_scrollbars(self);
-                }
-            };
-        })();
-
 
         // -----------------------------------------------------------------
         // INIT CODE
