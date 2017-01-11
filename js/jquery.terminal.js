@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 11 Jan 2017 21:38:15 +0000
+ * Date: Wed, 11 Jan 2017 22:29:45 +0000
  */
 
 /* TODO:
@@ -3722,55 +3722,6 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: function complete the command
-        // ---------------------------------------------------------------------
-        function complete_helper(command, string, commands) {
-            if (settings.clear && $.inArray('clear', commands) == -1) {
-                commands.push('clear');
-            }
-            if (settings.exit && $.inArray('exit', commands) == -1) {
-                commands.push('exit');
-            }
-            var test = command_line.get().substring(0, command_line.position());
-            if (test !== command) {
-                // command line changed between TABS - ignore
-                return;
-            }
-            var regex = new RegExp('^' + $.terminal.escape_regex(string));
-            var matched = [];
-            for (var i=commands.length; i--;) {
-                if (regex.test(commands[i])) {
-                    matched.push(commands[i]);
-                }
-            }
-            if (matched.length === 1) {
-                self.insert(matched[0].replace(regex, ''));
-            } else if (matched.length > 1) {
-                if (tab_count >= 2) {
-                    echo_command(command);
-                    var text = matched.reverse().join('\t');
-                    self.echo($.terminal.escape_brackets(text), {keepWords: true});
-                    tab_count = 0;
-                } else {
-                    var found = false;
-                    var found_index;
-                    var j;
-                    loop:
-                    for (j=string.length; j<matched[0].length; ++j) {
-                        for (i=1; i<matched.length; ++i) {
-                            if (matched[0].charAt(j) !== matched[i].charAt(j)) {
-                                break loop;
-                            }
-                        }
-                        found = true;
-                    }
-                    if (found) {
-                        self.insert(matched[0].slice(0, j).replace(regex, ''));
-                    }
-                }
-            }
-        }
-        // ---------------------------------------------------------------------
         // :: If Ghost don't store anything in localstorage
         // ---------------------------------------------------------------------
         function ghost() {
@@ -3836,38 +3787,21 @@
                     // TODO: move this to cmd plugin
                     //       add completion = array | function
                     //       !!! Problem complete more then one key need terminal
-                    ++tab_count;
-                    // cursor can be in the middle of the command
-                    // so we need to get the text before the cursor
-                    var pos = command_line.position();
-                    var command = command_line.get().substring(0, pos);
-                    var cmd_strings = command.split(' ');
-                    var string; // string before cursor that will be completed
-                    if (settings.wordAutocomplete) {
-                        if (cmd_strings.length == 1) {
-                            string = cmd_strings[0];
-                        } else {
-                            string = cmd_strings[cmd_strings.length-1];
-                            for (i=cmd_strings.length-1; i>0; i--) {
-                                // treat escape space as part of the string
-                                if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
-                                    string = cmd_strings[i-1] + ' ' + string;
-                                } else {
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        string = command;
-                    }
+                    
                     switch ($.type(completion)) {
                         case 'function':
                             completion(self, string, function(commands) {
-                                complete_helper(command, string, commands);
+                                self.complete(commands, {
+                                    word: settings.wordAutocomplete,
+                                    echo: true
+                                });
                             });
                             break;
                         case 'array':
-                            complete_helper(command, string, completion);
+                            self.complete(completion, {
+                                word: settings.wordAutocomplete,
+                                echo: true
+                            });
                             break;
                         default:
                             // terminal will not catch this because it's an event
@@ -4214,6 +4148,86 @@
             // -------------------------------------------------------------
             settings: function() {
                 return settings;
+            },
+            // -------------------------------------------------------------
+            // :: complete word or command based on array of words
+            // -------------------------------------------------------------
+            complete: function(commands, options) {
+                options = $.extend({
+                    word: true,
+                    echo: false
+                }, options || {});
+                // cursor can be in the middle of the command
+                // so we need to get the text before the cursor
+                var pos = command_line.position();
+                var command = command_line.get().substring(0, pos);
+                var cmd_strings = command.split(' ');
+                var string; // string before cursor that will be completed
+                if (options.word) {
+                    if (cmd_strings.length == 1) {
+                        string = cmd_strings[0];
+                    } else {
+                        string = cmd_strings[cmd_strings.length-1];
+                        for (i=cmd_strings.length-1; i>0; i--) {
+                            // treat escape space as part of the string
+                            if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
+                                string = cmd_strings[i-1] + ' ' + string;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    string = command;
+                }
+                if (settings.clear && $.inArray('clear', commands) == -1) {
+                    commands.push('clear');
+                }
+                if (settings.exit && $.inArray('exit', commands) == -1) {
+                    commands.push('exit');
+                }
+                var test = command_line.get().substring(0, command_line.position());
+                if (test !== command) {
+                    // command line changed between TABS - ignore
+                    return;
+                }
+                var regex = new RegExp('^' + $.terminal.escape_regex(string));
+                var matched = [];
+                for (var i=commands.length; i--;) {
+                    if (regex.test(commands[i])) {
+                        matched.push(commands[i]);
+                    }
+                }
+                if (matched.length === 1) {
+                    self.insert(matched[0].replace(regex, ''));
+                } else if (matched.length > 1) {
+                    if (++tab_count >= 2) {
+                        if (options.echo) {
+                            echo_command(command);
+                            var text = matched.reverse().join('\t');
+                            self.echo($.terminal.escape_brackets(text), {keepWords: true});
+                            return true;
+                        }
+                        tab_count = 0;
+                    } else {
+                        var found = false;
+                        var found_index;
+                        var j;
+                        loop:
+                        for (j=string.length; j<matched[0].length; ++j) {
+                            for (i=1; i<matched.length; ++i) {
+                                if (matched[0].charAt(j) !== matched[i].charAt(j)) {
+                                    break loop;
+                                }
+                            }
+                            found = true;
+                        }
+                        if (found) {
+                            self.insert(matched[0].slice(0, j).replace(regex, ''));
+                            return true;
+                        }
+                    }
+                }
             },
             // -------------------------------------------------------------
             // :: Return commands function from top interpreter
