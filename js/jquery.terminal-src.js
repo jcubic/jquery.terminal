@@ -3787,7 +3787,6 @@
                     // TODO: move this to cmd plugin
                     //       add completion = array | function
                     //       !!! Problem complete more then one key need terminal
-                    
                     switch ($.type(completion)) {
                         case 'function':
                             completion(self, string, function(commands) {
@@ -4200,6 +4199,7 @@
                 }
                 if (matched.length === 1) {
                     self.insert(matched[0].replace(regex, ''));
+                    return true;
                 } else if (matched.length > 1) {
                     if (++tab_count >= 2) {
                         if (options.echo) {
