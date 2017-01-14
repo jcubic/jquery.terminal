@@ -17,7 +17,24 @@
   "scripts": {
     "test": "make test"
   },
-  "author": "Jakub Jankiewicz <jcubic@onet.pl> (http://jcubic.pl)",
+  "author": {
+    "name": "Jakub Jankiewicz",
+    "email": "jcubic@onet.pl",
+    "url": "http://jcubic.pl/jakub-jankiewicz"
+  },
+  "contributors": [
+    {"name":"Sébastien Warin","url":"http://sebastien.warin.fr"},
+    {"name":"Zuo Qiyang","email":"zuoqy.gk@gmail.com","url":"http://zuoqy.com"},
+    {"name":"Christopher John Ryan","email":"chrisjohnryan@live.com","url":"https://github.com/ChrisJohnRyan"},
+    {"name":"Johan","url":"https://github.com/johanjordaan"},
+    {"name":"finlob","url":"https://github.com/finlob"},
+    {"name":"Martin v. Löwis","url":"https://github.com/loewis"},
+    {"name":"exit1","url":"https://github.com/exit1"},
+    {"name":"Yutong Luo","email":"yutong@yutongluo.com","url":"https://yutongluo.com"},
+    {"name":"Steve Phillips","email":"steve@tryingtobeawesome.com","url":"https://tryingtobeawesome.com/"},
+    {"name":"mrkaiser","url":"https://github.com/mrkaiser"},
+    {"name":"Juraj Vitko","url":"https://github.com/youurayy"}
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
