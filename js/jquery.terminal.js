@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 11 Jan 2017 23:38:29 +0000
+ * Date: Sat, 14 Jan 2017 11:43:10 +0000
  */
 
 /* TODO:
@@ -3419,7 +3419,7 @@
                     if (mask) {
                         command = command.replace(/./g, settings.maskChar);
                     } else {
-                        command = $.terminal.escape_formatting(command);
+                        command = $.terminal.escape_brackets(command);
                     }
                     break;
             }
@@ -3743,9 +3743,6 @@
                     return result;
                 }
             }
-        }
-        function get_string(word) {
-            
         }
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more

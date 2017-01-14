@@ -3419,7 +3419,7 @@
                     if (mask) {
                         command = command.replace(/./g, settings.maskChar);
                     } else {
-                        command = $.terminal.escape_formatting(command);
+                        command = $.terminal.escape_brackets(command);
                     }
                     break;
             }
@@ -3743,9 +3743,6 @@
                     return result;
                 }
             }
-        }
-        function get_string(word) {
-            
         }
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
