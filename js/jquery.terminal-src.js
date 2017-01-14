@@ -1053,7 +1053,7 @@
             // command contains new line characters
             if (string.match(/\n/)) {
                 var tmp = string.split("\n");
-                first_len = num_chars - prompt_len - 1;
+                var first_len = num_chars - prompt_len - 1;
                 // empty character after each line
                 for (i=0; i<tmp.length-1; ++i) {
                     tmp[i] += ' ';
@@ -1172,7 +1172,7 @@
                         string = command.replace(/./g, mask);
                         break;
                 }
-                var i, first_len;
+                var i;
                 self.find('div').remove();
                 before.html('');
                 // long line
@@ -1190,7 +1190,7 @@
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
                         });
                     }
-                    first_len = array[0].length;
+                    var first_len = array[0].length;
                     //cursor in first line
                     if (first_len === 0 && array.length === 1) {
                         // skip empty line
