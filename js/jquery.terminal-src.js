@@ -1049,10 +1049,35 @@
         // :: fit next to prompt (need to have less characters)
         // ---------------------------------------------------------------------
         function get_splited_command_line(string) {
-            string = new Array(prompt_len+1).join('\x01') + string;
-            var array = $.terminal.split_equal(string, num_chars);
-            if (array.length) {
-                array[0] = array[0].replace(/^\x01+/, '');
+            var array;
+            // command contains new line characters
+            if (string.match(/\n/)) {
+                var tmp = string.split("\n");
+                first_len = num_chars - prompt_len - 1;
+                // empty character after each line
+                for (i=0; i<tmp.length-1; ++i) {
+                    tmp[i] += ' ';
+                }
+                // split first line
+                if (tmp[0].length > first_len) {
+                    array = [tmp[0].substring(0, first_len)];
+                    var str = tmp[0].substring(first_len);
+                    array = array.concat(str_parts(str, num_chars));
+                } else {
+                    array = [tmp[0]];
+                }
+                // process rest of the lines
+                for (i=1; i<tmp.length; ++i) {
+                    if (tmp[i].length > num_chars) {
+                        array = array.concat(str_parts(tmp[i], num_chars));
+                    } else {
+                        array.push(tmp[i]);
+                    }
+                }
+            } else {
+                var first = string.substring(0, num_chars - prompt_len);
+                var rest = string.substring(num_chars - prompt_len);
+                array = [first].concat(str_parts(rest, num_chars));
             }
             return array;
         }
@@ -1060,7 +1085,6 @@
         // :: format end encode the string
         // ---------------------------------------------------------------------
         function format(string) {
-            string = $.terminal.escape_brackets(string);
             var formatters = $.terminal.defaults.formatters;
             for (var i=0; i<formatters.length; ++i) {
                 try {
@@ -1140,7 +1164,6 @@
             // -----------------------------------------------------------------
             return function() {
                 var string;
-                var str; // max 80 line helper
                 switch(typeof mask) {
                     case 'boolean':
                         string = mask ? command.replace(/./g, '*') : command;
@@ -1155,41 +1178,13 @@
                 // long line
                 if (string.length > num_chars - prompt_len - 1 ||
                     string.match(/\n/)) {
-                    var array;
                     var tabs = string.match(/\t/g);
                     var tabs_rm = tabs ? tabs.length * 3 : 0;
                     //quick tabulation hack
                     if (tabs) {
                         string = string.replace(/\t/g, '\x00\x00\x00\x00');
                     }
-                    // command contains new line characters
-                    if (string.match(/\n/)) {
-                        var tmp = string.split("\n");
-                        first_len = num_chars - prompt_len - 1;
-                        // empty character after each line
-                        for (i=0; i<tmp.length-1; ++i) {
-                            tmp[i] += ' ';
-                        }
-                        // split first line
-                        if (tmp[0].length > first_len) {
-                            array = [tmp[0].substring(0, first_len)];
-                            str = tmp[0].substring(first_len);
-                            array = array.concat(str_parts(str, num_chars));
-                        } else {
-                            array = [tmp[0]];
-                        }
-                        // process rest of the lines
-                        for (i=1; i<tmp.length; ++i) {
-                            if (tmp[i].length > num_chars) {
-                                array = array.concat(str_parts(tmp[i],
-                                                               num_chars));
-                            } else {
-                                array.push(tmp[i]);
-                            }
-                        }
-                    } else {
-                        array = get_splited_command_line(string);
-                    }
+                    var array = get_splited_command_line(string);
                     if (tabs) {
                         array = $.map(array, function(line) {
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
@@ -1205,7 +1200,7 @@
                     } else if (position === first_len) {
                         before.before(div(array[0]));
                         draw_cursor_line(array[1] || '', 0);
-                        if (array.length == 2) {
+                        if (array.length > 1) {
                             lines_after(array.slice(2));
                         }
                     } else {

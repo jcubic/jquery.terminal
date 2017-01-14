@@ -251,6 +251,13 @@
     line-height: 14px;
     box-sizing: border-box;
 }
+.cmd div:after {
+    content: " "; /* Older browser do not support empty content */
+    visibility: hidden;
+    display: block;
+    height: 0;
+    clear: both;
+}
 @supports (--css: variables) {
     .terminal, .cmd {
         color: var(--color, #aaa);
