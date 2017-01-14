@@ -3419,7 +3419,7 @@
                     if (mask) {
                         command = command.replace(/./g, settings.maskChar);
                     } else {
-                        command = $.terminal.escape_brackets(command);
+                        command = $.terminal.escape_formatting(command);
                     }
                     break;
             }

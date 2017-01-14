@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 14 Jan 2017 11:43:10 +0000
+ * Date: Sat, 14 Jan 2017 11:59:16 +0000
  */
 
 /* TODO:
@@ -3419,7 +3419,7 @@
                     if (mask) {
                         command = command.replace(/./g, settings.maskChar);
                     } else {
-                        command = $.terminal.escape_brackets(command);
+                        command = $.terminal.escape_formatting(command);
                     }
                     break;
             }

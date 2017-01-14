@@ -979,7 +979,7 @@ function tests_on_ready() {
             });
             it('should complete when completion is a function with setTimeout', function(done) {
                 var term = $('<div/>').appendTo('body').terminal($.noop);
-                term.focus().push($.noop, {
+                term.push($.noop, {
                     completion: function(term, string, callback) {
                         setTimeout(function() {
                             callback(['one', 'two', 'tree']);
@@ -987,13 +987,13 @@ function tests_on_ready() {
                     }
                 });
                 term.set_command('');
-                term.insert('o');
+                term.insert('o').focus();
                 shortcut(false, false, false, 9);
                 setTimeout(function() {
                     expect(term.get_command()).toEqual('one');
                     term.destroy().remove();
                     done();
-                }, 200);
+                }, 400);
             });
             function completion(term, string, callback) {
                 var command = term.get_command();
