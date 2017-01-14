@@ -1049,9 +1049,32 @@
         // :: fit next to prompt (need to have less characters)
         // ---------------------------------------------------------------------
         function get_splited_command_line(string) {
-            var first = string.substring(0, num_chars - prompt_len);
-            var rest = string.substring(num_chars - prompt_len);
-            return [first].concat(str_parts(rest, num_chars));
+            string = new Array(prompt_len+1).join('\x01') + string;
+            var array = $.terminal.split_equal(string, num_chars);
+            if (array.length) {
+                array[0] = array[0].replace(/^\x01+/, '');
+            }
+            return array;
+        }
+        // ---------------------------------------------------------------------
+        // :: format end encode the string
+        // ---------------------------------------------------------------------
+        function format(string) {
+            var formatters = $.terminal.defaults.formatters;
+            for (var i=0; i<formatters.length; ++i) {
+                try {
+                    if (typeof formatters[i] == 'function') {
+                        var ret = formatters[i](string);
+                        if (typeof ret == 'string') {
+                            string = ret;
+                        }
+                    }
+                } catch(e) {
+                    alert('formatting error at formatters[' + i + ']\n' +
+                          (e.stack ? e.stack : e));
+                }
+            }
+            return $.terminal.format($.terminal.encode(string));
         }
         // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
@@ -1066,31 +1089,31 @@
             function draw_cursor_line(string, position) {
                 var len = string.length;
                 if (position === len) {
-                    before.html($.terminal.encode(string));
+                    before.html(format(string));
                     cursor.html('&nbsp;');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
                     //fix for tilda in IE
-                    cursor.html($.terminal.encode(string.slice(0, 1)));
-                    //cursor.html($.terminal.encode(string[0]));
-                    after.html($.terminal.encode(string.slice(1)));
+                    cursor.html(format(string.slice(0, 1)));
+                    //cursor.html(format(string[0]));
+                    after.html(format(string.slice(1)));
                 } else {
                     var before_str = string.slice(0, position);
-                    before.html($.terminal.encode(before_str));
+                    before.html(format(before_str));
                     //fix for tilda in IE
                     var c = string.slice(position, position + 1);
                     //cursor.html(string[position]);
-                    cursor.html($.terminal.encode(c));
+                    cursor.html(format(c));
                     if (position === string.length - 1) {
                         after.html('');
                     } else {
-                        after.html($.terminal.encode(string.slice(position + 1)));
+                        after.html(format(string.slice(position + 1)));
                     }
                 }
             }
             function div(string) {
-                return '<div>' + $.terminal.encode(string) + '</div>';
+                return '<div>' + format(string) + '</div>';
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -1180,8 +1203,10 @@
                         lines_after(array.slice(1));
                     } else if (position === first_len) {
                         before.before(div(array[0]));
-                        draw_cursor_line(array[1], 0);
-                        lines_after(array.slice(2));
+                        draw_cursor_line(array[1] || '', 0);
+                        if (array.length == 2) {
+                            lines_after(array.slice(2));
+                        }
                     } else {
                         var num_lines = array.length;
                         var offset = 0;
@@ -3255,23 +3280,25 @@
             var formatters = $.terminal.defaults.formatters;
             var i, len;
             if (!options.raw) {
-                // format using user defined formatters
-                for (i=0; i<formatters.length; ++i) {
-                    try {
-                        if (typeof formatters[i] == 'function') {
-                            var ret = formatters[i](string);
-                            if (typeof ret == 'string') {
-                                string = ret;
+                if (options.formatters) {
+                    // format using user defined formatters
+                    for (i=0; i<formatters.length; ++i) {
+                        try {
+                            if (typeof formatters[i] == 'function') {
+                                var ret = formatters[i](string);
+                                if (typeof ret == 'string') {
+                                    string = ret;
+                                }
+                            }
+                        } catch(e) {
+                            //display_exception(e, 'FORMATTING');
+                            if ($.isFunction(settings.exceptionHandler)) {
+                                settings.exceptionHandler.call(self, e, "FORMATTERS");
+                            } else {
+                                alert('formatting error at formatters[' + i + ']\n' +
+                                      (e.stack ? e.stack : e));
                             }
                         }
-                    } catch(e) {
-                        //display_exception(e, 'FORMATTING');
-                         if ($.isFunction(settings.exceptionHandler)) {
-                             settings.exceptionHandler.call(self, e, "FORMATTERS");
-                         } else {
-                             alert('formatting error at formatters[' + i + ']\n' +
-                                   (e.stack ? e.stack : e));
-                         }
                     }
                 }
                 string = $.terminal.encode(string);
@@ -4790,7 +4817,8 @@
                             flush: true,
                             raw: settings.raw,
                             finalize: $.noop,
-                            keepWords: false
+                            keepWords: false,
+                            formatters: true
                         }, options || {});
                         if (locals.flush) {
                             // flush buffer if there was no flush after previous echo
@@ -4832,9 +4860,7 @@
             // :: echo red text
             // -------------------------------------------------------------
             error: function(message, options) {
-                if (options) {
-                    options = $.extend({}, options, {raw: false});
-                }
+                options = $.extend({}, options, {raw: false, formatters: false});
                 //quick hack to fix trailing backslash
                 var str = $.terminal.escape_brackets(message).
                     replace(/\\$/, '&#92;').

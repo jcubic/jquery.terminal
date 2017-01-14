@@ -1857,16 +1857,20 @@ function tests_on_ready() {
                 var term = $('<div/>').terminal($.noop, {
                     greetings: false
                 });
+                var defaults = {
+                    raw: false,
+                    formatters: false
+                };
                 it('should echo error', function() {
                     spy(term, 'echo');
                     term.error('Message');
-                    expect(term.echo).toHaveBeenCalledWith('[[;;;error]Message]', undefined);
+                    expect(term.echo).toHaveBeenCalledWith('[[;;;error]Message]', defaults);
                 });
                 it('should escape brakets', function() {
                     spy(term, 'echo');
                     term.clear().error('[[ Message ]]');
                     expect(term.echo).toHaveBeenCalledWith('[[;;;error]&#91;&#91; Message &#93;&#93;]',
-                                                          undefined);
+                                                          defaults);
                     var span = term.find('.terminal-output span');
                     expect(span.length).toEqual(1);
                     expect(span.hasClass('error')).toBeTruthy();
@@ -1894,7 +1898,8 @@ function tests_on_ready() {
                         finalize: $.noop,
                         raw: true,
                         flush: true,
-                        keepWords: false
+                        keepWords: false,
+                        formatters: false
                     };
                     term.clear().error('Message', options);
                     options.raw = false;
