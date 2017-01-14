@@ -1060,6 +1060,7 @@
         // :: format end encode the string
         // ---------------------------------------------------------------------
         function format(string) {
+            string = $.terminal.escape_brackets(string);
             var formatters = $.terminal.defaults.formatters;
             for (var i=0; i<formatters.length; ++i) {
                 try {

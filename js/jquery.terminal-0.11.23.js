@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 14 Jan 2017 13:05:57 +0000
+ * Date: Sat, 14 Jan 2017 13:15:07 +0000
  */
 
 /* TODO:
@@ -1054,15 +1054,13 @@
             if (array.length) {
                 array[0] = array[0].replace(/^\x01+/, '');
             }
-            var first = string.substring(0, num_chars - prompt_len);
-            var rest = string.substring(num_chars - prompt_len);
-            var array2 = [first].concat(str_parts(rest, num_chars));
             return array;
         }
         // ---------------------------------------------------------------------
         // :: format end encode the string
         // ---------------------------------------------------------------------
         function format(string) {
+            string = $.terminal.escape_brackets(string);
             var formatters = $.terminal.defaults.formatters;
             for (var i=0; i<formatters.length; ++i) {
                 try {
@@ -2804,7 +2802,6 @@
             if ($.isFunction(settings.onRPCError)) {
                 settings.onRPCError.call(self, error);
             } else {
-                debugger;
                 self.error('&#91;RPC&#93; ' + error.message);
                 if (error.error && error.error.message) {
                     error = error.error;
