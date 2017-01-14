@@ -16,7 +16,9 @@
           add option softPause to control pause visible option - it don't hide the prompt when set to true
           add wordAutocomplete option (default true)
           add complete and before_cursor api methods and use it for autocomplete
-          formatting for command line, new option formatters for echo
+          formatting for command line (you can't type formatting but you can use $.terminal.formatters to
+          format your string)
+          new option formatters for echo (error method by default disable formatters)
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.
