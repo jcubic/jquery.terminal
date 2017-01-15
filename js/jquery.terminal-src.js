@@ -2647,6 +2647,7 @@
         processRPCResponse: null,
         Token: true, // where this came from?
         convertLinks: true,
+        extra: {},
         historyState: false,
         importHistory: false,
         echoCommand: true,
@@ -2669,6 +2670,8 @@
         onFocus: $.noop,
         onTerminalChange: $.noop,
         onExit: $.noop,
+        onPush: $.noop,
+        onPop: $.noop,
         keypress: $.noop,
         keydown: $.noop,
         strings: {
@@ -2935,7 +2938,7 @@
                     if ($.isFunction(fallback)) {
                         fallback(user_command, self);
                     } else if ($.isFunction(settings.onCommandNotFound)) {
-                        settings.onCommandNotFound(user_command, self);
+                        settings.onCommandNotFound.call(self, user_command, self);
                     } else {
                         terminal.error(sprintf(strings.commandNotFound,
                                                command.name));
@@ -3533,13 +3536,13 @@
                 }
                 deferred.resolve();
                 if ($.isFunction(settings.onAfterCommand)) {
-                    settings.onAfterCommand(self, command);
+                    settings.onAfterCommand.call(self, self, command);
                 }
             }
             try {
                 // this callback can disable commands
                 if ($.isFunction(settings.onBeforeCommand)) {
-                    if (settings.onBeforeCommand(self, command) === false) {
+                    if (settings.onBeforeCommand.call(self, self, command) === false) {
                         return;
                     }
                 }
@@ -3627,7 +3630,7 @@
         function global_logout() {
             if ($.isFunction(settings.onBeforeLogout)) {
                 try {
-                    if (settings.onBeforeLogout(self) === false) {
+                    if (settings.onBeforeLogout.call(self, self) === false) {
                         return;
                     }
                 } catch (e) {
@@ -3637,7 +3640,7 @@
             clear_loging_storage();
             if ($.isFunction(settings.onAfterLogout)) {
                 try {
-                    settings.onAfterLogout(self);
+                    settings.onAfterLogout.call(self, self);
                 } catch (e) {
                     display_exception(e, 'onAfterlogout');
                 }
@@ -3685,7 +3688,7 @@
             }
             command_line.set('');
             if (!silent && $.isFunction(interpreter.onStart)) {
-                interpreter.onStart(self);
+                interpreter.onStart.call(self, self);
             }
         }
         // ---------------------------------------------------------------------
@@ -3702,7 +3705,7 @@
                     was_paused = true;
                 };
                 try {
-                    settings.onInit(self);
+                    settings.onInit.call(self, self);
                 } catch (e) {
                     display_exception(e, 'OnInit');
                     // throw e; // it will be catched by terminal
@@ -3756,12 +3759,12 @@
         function user_key_down(e) {
             var result, top = interpreters.top();
             if ($.isFunction(top.keydown)) {
-                result = top.keydown(e, self);
+                result = top.keydown.call(self, e, self);
                 if (result !== undefined) {
                     return result;
                 }
             } else if ($.isFunction(settings.keydown)) {
-                result = settings.keydown(e, self);
+                result = settings.keydown.call(self, e, self);
                 if (result !== undefined) {
                     return result;
                 }
@@ -3938,7 +3941,7 @@
                 output.html('');
                 lines = [];
                 try {
-                    settings.onClear(self);
+                    settings.onClear.call(self, self);
                 } catch (e) {
                     display_exception(e, 'onClear');
                 }
@@ -3953,7 +3956,7 @@
                 var user_export = {};
                 if ($.isFunction(settings.onExport)) {
                     try {
-                        user_export = settings.onExport();
+                        user_export = settings.onExport.call(self);
                     } catch(e) {
                         display_exception(e, 'onExport');
                     }
@@ -3978,7 +3981,7 @@
                 }
                 if ($.isFunction(settings.onImport)) {
                     try {
-                        settings.onImport(view);
+                        settings.onImport.call(self, view);
                     } catch(e) {
                         display_exception(e, 'onImport');
                     }
@@ -4327,7 +4330,7 @@
                             command_line.hidden();
                         }
                         if ($.isFunction(settings.onPause)) {
-                            settings.onPause();
+                            settings.onPause.call(self);
                         }
                     });
                 }
@@ -4355,7 +4358,7 @@
                     }
                     scroll_to_bottom();
                     if ($.isFunction(settings.onResume)) {
-                        settings.onResume();
+                        settings.onResume.call(self);
                     }
                 }
                 if (paused && command_line) {
@@ -4444,7 +4447,7 @@
                     var x = next.offset().top - 50;
                     $('html,body').animate({scrollTop: x}, 500);
                     try {
-                        settings.onTerminalChange(next);
+                        settings.onTerminalChange.call(next, next);
                     } catch (e) {
                         display_exception(e, 'onTerminalChange');
                     }
@@ -4462,7 +4465,7 @@
                     if (terminals.length() === 1) {
                         if (toggle === false) {
                             try {
-                                if (!silent && settings.onBlur(self) !== false ||
+                                if (!silent && settings.onBlur.call(self, self) !== false ||
                                     silent) {
                                     self.disable();
                                 }
@@ -4471,7 +4474,7 @@
                             }
                         } else {
                             try {
-                                if (!silent && settings.onFocus(self) !== false ||
+                                if (!silent && settings.onFocus.call(self, self) !== false ||
                                     silent) {
                                     self.enable();
                                 }
@@ -4488,7 +4491,7 @@
                                 front.disable();
                                 if (!silent) {
                                     try {
-                                        settings.onTerminalChange(self);
+                                        settings.onTerminalChange.call(self, self);
                                     } catch (e) {
                                         display_exception(e, 'onTerminalChange');
                                     }
@@ -4691,7 +4694,7 @@
                         if ($.isFunction(top.resize)) {
                             top.resize(self);
                         } else if ($.isFunction(settings.onResize)) {
-                            settings.onResize(self);
+                            settings.onResize.call(self, self);
                         }
                         old_height = height;
                         old_width = width;
@@ -4899,7 +4902,8 @@
                     }).join('\n'), {
                         finalize: function(div) {
                             div.addClass('exception stack-trace');
-                        }
+                        },
+                        formatters: false
                     });
                 }
             },
@@ -5028,15 +5032,16 @@
                 init_deferr.then(function() {
                     options = options || {};
                     var defaults = {
-                        infiniteLogin: false
+                        infiniteLogin: false,
+                        extra: {}
                     };
-                    var settings = $.extend({}, defaults, options);
-                    if (!settings.name && prev_command) {
+                    var push_settings = $.extend({}, defaults, options);
+                    if (!push_settings.name && prev_command) {
                         // push is called in login
-                        settings.name = prev_command.name;
+                        push_settings.name = prev_command.name;
                     }
-                    if (settings.prompt === undefined) {
-                        settings.prompt = (settings.name || '>') + ' ';
+                    if (push_settings.prompt === undefined) {
+                        push_settings.prompt = (push_settings.name || '>') + ' ';
                     }
                     //names.push(options.name);
                     var top = interpreters.top();
@@ -5044,34 +5049,38 @@
                         top.mask = command_line.mask();
                     }
                     var was_paused = paused;
+                    function init() {
+                        settings.onPush.call(self, top, interpreters.top(), self);
+                        prepare_top_interpreter();
+                    }
                     //self.pause();
                     make_interpreter(interpreter, !!options.login, function(ret) {
                         // result is object with interpreter and completion
                         // properties
-                        interpreters.push($.extend({}, ret, settings));
-                        if ($.isArray(ret.completion) && settings.completion === true) {
+                        interpreters.push($.extend({}, ret, push_settings));
+                        if ($.isArray(ret.completion) && push_settings.completion === true) {
                             interpreters.top().completion = ret.completion;
-                        } else if (!ret.completion && settings.completion === true) {
+                        } else if (!ret.completion && push_settings.completion === true) {
                             interpreters.top().completion = false;
                         }
-                        if (settings.login) {
-                            var type = $.type(settings.login);
+                        if (push_settings.login) {
+                            var type = $.type(push_settings.login);
                             if (type == 'function') {
                                 // self.pop on error
-                                self.login(settings.login,
-                                           settings.infiniteLogin,
-                                           prepare_top_interpreter,
-                                           settings.infiniteLogin ? $.noop : self.pop);
+                                self.login(push_settings.login,
+                                           push_settings.infiniteLogin,
+                                           init,
+                                           push_settings.infiniteLogin ? $.noop : self.pop);
                             } else if ($.type(interpreter) == 'string' &&
                                        type == 'string' || type == 'boolean') {
                                 self.login(make_json_rpc_login(interpreter,
-                                                               settings.login),
-                                           settings.infiniteLogin,
-                                           prepare_top_interpreter,
-                                           settings.infiniteLogin ? $.noop : self.pop);
+                                                               push_settings.login),
+                                           push_settings.infiniteLogin,
+                                           init,
+                                           push_settings.infiniteLogin ? $.noop : self.pop);
                             }
                         } else {
-                            prepare_top_interpreter();
+                            init();
                         }
                         if (!was_paused) {
                             self.resume();
@@ -5089,11 +5098,12 @@
                 }
                 var token = self.token(true);
                 if (interpreters.size() == 1) {
+                    var top = interpreters.top();
                     if (settings.login) {
                         global_logout();
                         if ($.isFunction(settings.onExit)) {
                             try {
-                                settings.onExit(self);
+                                settings.onExit.call(self, self);
                             } catch (e) {
                                 display_exception(e, 'onExit');
                             }
@@ -5102,19 +5112,21 @@
                     } else {
                         self.error(strings.canExitError);
                     }
+                    settings.onPop.call(self, top, null, self)
                 } else {
                     if (self.token(true)) {
                         clear_loging_storage();
                     }
                     var current = interpreters.pop();
                     prepare_top_interpreter();
+                    settings.onPop.call(self, current, interpreters.top());
                     // we check in case if you don't pop from password interpreter
                     if (in_login && self.get_prompt() != strings.login + ': ') {
                         in_login = false;
                     }
                     if ($.isFunction(current.onExit)) {
                         try {
-                            current.onExit(self);
+                            current.onExit.call(self, self);
                         } catch (e) {
                             display_exception(e, 'onExit');
                         }
@@ -5277,7 +5289,7 @@
         // before login event
         if (settings.login && $.isFunction(settings.onBeforeLogin)) {
             try {
-                if (settings.onBeforeLogin(self) === false) {
+                if (settings.onBeforeLogin.call(self, self) === false) {
                     autologin = false;
                 }
             } catch (e) {
@@ -5332,7 +5344,8 @@
                 keydown: settings.keydown,
                 resize: settings.onResize,
                 greetings: settings.greetings,
-                mousewheel: settings.mousewheel
+                mousewheel: settings.mousewheel,
+                extra: settings.extra
             }, itrp));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(self).cmd({
@@ -5346,15 +5359,15 @@
                 keypress: function(e) {
                     var result, i, top = interpreters.top();
                     if ($.isFunction(top.keypress)) {
-                        return top.keypress(e, self);
+                        return top.keypress.call(self, e, self);
                     } else if ($.isFunction(settings.keypress)) {
-                        return settings.keypress(e, self);
+                        return settings.keypress.call(self, e, self);
                     }
                 },
                 onCommandChange: function(command) {
                     if ($.isFunction(settings.onCommandChange)) {
                         try {
-                            settings.onCommandChange(command, self);
+                            settings.onCommandChange.call(self, command, self);
                         } catch (e) {
                             display_exception(e, 'onCommandChange');
                             throw e;
@@ -5375,7 +5388,7 @@
                     var sender = $(e.target);
                     if (!sender.closest('.terminal').length &&
                         self.enabled() &&
-                        settings.onBlur(self) !== false) {
+                        settings.onBlur.call(self, self) !== false) {
                         self.disable();
                     }
                 }
