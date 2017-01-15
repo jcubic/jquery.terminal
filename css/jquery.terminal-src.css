@@ -278,6 +278,7 @@
                 animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
         color: var(--color, #aaa);
         background-color: var(--background, #000);
+        margin-bottom: -3px;
     }
     @-webkit-keyframes terminal-blink {
       0%, 100% {

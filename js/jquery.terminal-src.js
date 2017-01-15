@@ -1146,8 +1146,7 @@
             function lines_after(lines) {
                 var last_ins = after;
                 $.each(lines, function(i, line) {
-                    last_ins = $(div(line)).insertAfter(last_ins).
-                        addClass('clear');
+                    last_ins = $(div(line)).insertAfter(last_ins);
                 });
             }
             // -----------------------------------------------------------------
@@ -1229,13 +1228,12 @@
                             } else {
                                 // in the middle
                                 if (num_lines === 3) {
-                                    str = $.terminal.encode(array[0]);
+                                    var str = format(array[0]);
                                     before.before('<div>' + str + '</div>');
                                     draw_cursor_line(array[1],
                                                      position-first_len-1);
-                                    str = $.terminal.encode(array[2]);
-                                    after.after('<div class="clear">' + str +
-                                                '</div>');
+                                    str = format(array[2]);
+                                    after.after('<div>' + str + '</div>');
                                 } else {
                                     // more lines, cursor in the middle
                                     var line_index;
