@@ -9,7 +9,8 @@
           recalcualate cols and rows on terminal resize (not only window)
           Don't echo extended commands on resize
           use JSON.parse to process strings when parsing command line
-          request and response callbacks
+          request/response and onPush/onPop callbacks
+          all callbacks have terminal as `this` (terminal in parameter stay the same)
           fix rpc in array when there are no system.describe
           call exeptionHandler on every exception (even iternal)
           fix echo resolved content when interpreter return a promise
@@ -19,9 +20,7 @@
           formatting for command line (you can't type formatting but you can use $.terminal.formatters to
           format your string)
           new option formatters for echo (error method by default disable formatters)
-          onPush and onPop callbacks
           interpeter and terminal accept extra option that can be use in onPop or onPush
-          all callbacks have terminal as this (terminal in parameter stay the same)
           fix for valid /[/]/g regex
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
