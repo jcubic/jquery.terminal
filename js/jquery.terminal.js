@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 15 Jan 2017 16:43:06 +0000
+ * Date: Sun, 15 Jan 2017 17:50:25 +0000
  */
 
 /* TODO:
@@ -1959,6 +1959,8 @@
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
+    var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
+    var re_re = /^\/((?:\\\/|[^\/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
     $.terminal = {
         version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
@@ -2325,8 +2327,6 @@
         // :: double quotes
         // ---------------------------------------------------------------------
         parse_arguments: function(string) {
-            var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
-            var re_re = /^\/((?:\\\/|[^\/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
             return $.map(string.match(command_re) || [], function(arg) {
                 var regex = arg.match(re_re);
                 if (regex) {
