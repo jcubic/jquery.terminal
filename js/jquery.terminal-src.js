@@ -2326,14 +2326,15 @@
         // ---------------------------------------------------------------------
         parse_arguments: function(string) {
             var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
+            var re_re = /^\/((?:\\\/|[^\/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
             return $.map(string.match(command_re) || [], function(arg) {
-                if (arg[0] === "'" && arg[arg.length-1] === "'") {
+                var regex = arg.match(re_re);
+                if (regex) {
+                    return new RegExp(regex[1], regex[2]);
+                } else if (arg[0] === "'" && arg[arg.length-1] === "'") {
                     return arg.replace(/^'|'$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
                     return $.parseJSON(arg);
-                } else if (arg.match(/^\/(\\\/|[^\/])+\/[gimy]*$/)) { // RegEx
-                    var m = arg.match(/^\/([^\/]+)\/([^\/]*)$/);
-                    return new RegExp(m[1], m[2]);
                 } else if (arg.match(/^-?[0-9]+$/)) {
                     return parseInt(arg, 10);
                 } else if (arg.match(float_re)) {

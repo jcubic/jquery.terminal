@@ -22,6 +22,7 @@
           onPush and onPop callbacks
           interpeter and terminal accept extra option that can be use in onPop or onPush
           all callbacks have terminal as this (terminal in parameter stay the same)
+          fix for valid /[/]/g regex
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.
