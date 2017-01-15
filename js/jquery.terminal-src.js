@@ -5112,7 +5112,7 @@
                     } else {
                         self.error(strings.canExitError);
                     }
-                    settings.onPop.call(self, top, null, self)
+                    settings.onPop.call(self, top, null, self);
                 } else {
                     if (self.token(true)) {
                         clear_loging_storage();

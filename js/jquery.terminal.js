@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 15 Jan 2017 09:32:08 +0000
+ * Date: Sun, 15 Jan 2017 09:34:30 +0000
  */
 
 /* TODO:
@@ -5112,7 +5112,7 @@
                     } else {
                         self.error(strings.canExitError);
                     }
-                    settings.onPop.call(self, top, null, self)
+                    settings.onPop.call(self, top, null, self);
                 } else {
                     if (self.token(true)) {
                         clear_loging_storage();
