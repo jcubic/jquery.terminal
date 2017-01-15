@@ -2989,10 +2989,10 @@
                                     method: proc.name,
                                     params: args,
                                     request: function(jxhr, request) {
-                                        settings.request(jxhr, self, request);
+                                        settings.request.call(self, jxhr, request, self);
                                     },
                                     response: function(jxhr, response) {
-                                        settings.response(jxhr, self, response);
+                                        settings.response.call(self, jxhr, response, self);
                                     },
                                     success: function(json) {
                                         if (json.error) {

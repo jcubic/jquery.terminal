@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 15 Jan 2017 13:20:07 +0000
+ * Date: Sun, 15 Jan 2017 15:49:16 +0000
  */
 
 /* TODO:
@@ -2989,10 +2989,10 @@
                                     method: proc.name,
                                     params: args,
                                     request: function(jxhr, request) {
-                                        settings.request(jxhr, self, request);
+                                        settings.request.call(self, jxhr, request, self);
                                     },
                                     response: function(jxhr, response) {
-                                        settings.response(jxhr, self, response);
+                                        settings.response.call(self, jxhr, response, self);
                                     },
                                     success: function(json) {
                                         if (json.error) {
