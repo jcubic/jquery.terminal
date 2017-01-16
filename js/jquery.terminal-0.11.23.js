@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 16 Jan 2017 23:33:51 +0000
+ * Date: Mon, 16 Jan 2017 23:44:51 +0000
  */
 
 /* TODO:
@@ -5152,8 +5152,9 @@
                     echo_command(string);
                 }
                 var token = self.token(true);
+                var top;
                 if (interpreters.size() == 1) {
-                    var top = interpreters.top();
+                    top = interpreters.top();
                     if (settings.login) {
                         global_logout();
                         if ($.isFunction(settings.onExit)) {
@@ -5172,7 +5173,7 @@
                         clear_loging_storage();
                     }
                     var current = interpreters.pop();
-                    var top = interpreters.top();
+                    top = interpreters.top();
                     prepare_top_interpreter();
                     settings.onPop.call(self, current, top);
                     // we check in case if you don't pop from password interpreter
