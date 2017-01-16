@@ -1,26 +1,28 @@
 0.12.0    copy to system clipboard when copy to kill area
-          fix width calculation with scrollbar visible
-          fix exception in Firefox throw by setSelectionRange in caret plugin
-          make echo sync when echo string or function (flush didn't work on codepen)
           simplify changing of terminal colors using css variables
-          add bar and underline cursor animations a a way to enable it with single css variable
-          fix onCommandChange callback on backspace
           always export history and import when importHistory option is true
+          add bar and underline cursor animations a a way to enable it with single css variable
           recalcualate cols and rows on terminal resize (not only window)
-          Don't echo extended commands on resize
-          use JSON.parse to process strings when parsing command line
           request/response and onPush/onPop callbacks
           all callbacks have terminal as `this` (terminal in parameter stay the same)
-          fix rpc in array when there are no system.describe
-          call exeptionHandler on every exception (even iternal)
-          fix echo resolved content when interpreter return a promise
           add option softPause to control pause visible option - it don't hide the prompt when set to true
           add wordAutocomplete option (default true)
           add complete and before_cursor api methods and use it for autocomplete
           formatting for command line (you can't type formatting but you can use $.terminal.formatters to
-          format your string)
+          format command you're writing)
           new option formatters for echo (error method by default disable formatters)
           interpeter and terminal accept extra option that can be use in onPop or onPush
+          add keymap option to cmd, terminal and interpreter where you can add shortcuts
+          BUGS:
+          fix width calculation with scrollbar visible
+          fix exception in Firefox throw by setSelectionRange in caret plugin
+          make echo sync when echo string or function (flush didn't work on codepen)
+          fix onCommandChange callback on backspace
+          Don't echo extended commands on resize
+          use JSON.parse to process strings when parsing command line
+          fix rpc in array when there are no system.describe
+          call exeptionHandler on every exception (even iternal)
+          fix echo resolved content when interpreter return a promise
           fix for valid /[/]/g regex
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is

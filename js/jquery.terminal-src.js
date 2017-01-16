@@ -923,6 +923,245 @@
         var cursor = self.find('.cursor');
         var animation;
         var paste_count = 0;
+        function get_key(e) {
+            var key = [];
+            if (e.ctrlKey) {
+                key.push('CTRL');
+            }
+            if (e.shiftKey) {
+                key.push('SHIFT');
+            }
+            if (e.altKey) {
+                key.push('ALT');
+            }
+            if (e.key) {
+                key.push(e.key.toUpperCase());
+            }
+            return key.join('+');
+        }
+        var keymap;
+        var default_keymap = {
+            'ALT+D': function() {
+                self.set(command.slice(0, position) +
+                         command.slice(position).
+                         replace(/ *[^ ]+ *(?= )|[^ ]+$/, ''), true);
+                // chrome jump to address bar
+                return false;
+            },
+            'ENTER': function() {
+                if (history && command && !mask &&
+                    ($.isFunction(options.historyFilter) &&
+                     options.historyFilter(command)) ||
+                    (options.historyFilter instanceof RegExp &&
+                     command.match(options.historyFilter)) ||
+                    !options.historyFilter) {
+                    history.append(command);
+                }
+                var tmp = command;
+                history.reset();
+                self.set('');
+                if (options.commands) {
+                    options.commands(tmp);
+                }
+                if ($.isFunction(prompt)) {
+                    draw_prompt();
+                }
+                $('.clipboard').val('');
+                return true;
+            },
+            'SHIFT+ENTER': function() {
+                self.insert('\n');
+                return false;
+            },
+            'BACKSPACE': function() {
+                if (reverse_search) {
+                    rev_search_str = rev_search_str.slice(0, -1);
+                    draw_reverse_prompt();
+                } else {
+                    if (command !== '' && position > 0) {
+                        self['delete'](-1);
+                    }
+                }
+                return is_touch;
+            },
+            'CTRL+SHIFT+C': function() {
+                selected_text = get_selected_text();
+            },
+            'TAB': function() {
+                self.insert('\t');
+            },
+            'DELETE': function() {
+                self['delete'](1);
+                return true;
+            },
+            'ARROWUP': prev_history,
+            'CTRL+P': prev_history,
+            'ARROWDOWN': next_history,
+            'CTRL+N': next_history,
+            'ARROWLEFT': left,
+            'CTRL+B': left,
+            'CTRL+ARROWLEFT': function() {
+                // jump to one character after last space before prevoius word
+                var len = position - 1;
+                var pos = 0;
+                if (command[len] === ' ') {
+                    --len;
+                }
+                for (var i = len; i > 0; --i) {
+                    if (command[i] === ' ' && command[i+1] !== ' ') {
+                        pos = i + 1;
+                        break;
+                    } else if (command[i] === '\n' &&
+                               command[i+1] !== '\n') {
+                        pos = i;
+                        break;
+                    }
+                }
+                self.position(pos);
+            },
+            'CTRL+R': function() {
+                if (reverse_search) {
+                    reverse_history_search(true);
+                } else {
+                    backup_prompt = prompt;
+                    draw_reverse_prompt();
+                    last_command = command;
+                    self.set('');
+                    redraw();
+                    reverse_search = true;
+                }
+            },
+            'CTRL+G': function() {
+                if (reverse_search) {
+                    prompt = backup_prompt;
+                    draw_prompt();
+                    self.set(last_command);
+                    redraw();
+                    reverse_search = false;
+                    rev_search_str = '';
+                }
+            },
+            'ARROWRIGHT': right,
+            'CTRL+F': right,
+            'CTRL+ARROWRIGHT': function() {
+                // jump to beginning or end of the word
+                if (command[position] === ' ') {
+                    ++position;
+                }
+                var re = /\S[\n\s]{2,}|[\n\s]+\S?/;
+                var match = command.slice(position).match(re);
+                if (!match || match[0].match(/^\s+$/)) {
+                    self.position(command.length);
+                } else {
+                    if (match[0][0] !== ' ') {
+                        position += match.index + 1;
+                    } else {
+                        position += match.index + match[0].length - 1;
+                        if (match[0][match[0].length-1] !== ' ') {
+                            --position;
+                        }
+                    }
+                }
+                redraw();
+            },
+            'F12': return_true, // Allow Firebug
+            'END': end,
+            'CTRL+E': end,
+            'HOME': home,
+            'CTRL+A': home,
+            'SHIFT+INSERT': paste_event,
+            'aaa': function() {
+                clip.val(''); // so we get it before paste event
+                paste_count = 0;
+                if (!is_paste_supported) {
+                    paste(e);
+                } else {
+                    clip.focus();
+                }
+                return true;
+            },
+            'CTRL+SHIFT+T': return_true, // open closed tab
+            'CTRL+W': function() {
+                // don't work in Chromium (can't prevent close tab)
+                if (command !== '' && position !== 0) {
+                    var m = command.slice(0, position).match(/([^ ]+ *$)/);
+                    kill_text = self['delete'](-m[0].length);
+                    text_to_clipboard(self, kill_text);
+                }
+                return false;
+            },
+            'CTRL+H': function() {
+                if (command !== '' && position > 0) {
+                    self['delete'](-1);
+                }
+                return false;
+            },
+            'CTRL+X': return_true,
+            'CTRL+C': return_true,
+            'CTRL+T': return_true,
+            'CTRL+Y': function() {
+                if (kill_text !== '') {
+                    self.insert(kill_text);
+                }
+            },
+            'CTRL+V': paste_event,
+            'CTRL+K': function() {
+                kill_text = self['delete'](command.length-position);
+                text_to_clipboard(self, kill_text);
+                return false;
+            },
+            'CTRL+U': function() {
+                if (command !== '' && position !== 0) {
+                    kill_text = self['delete'](-position);
+                    text_to_clipboard(self, kill_text);
+                }
+                return false;
+            },
+            'CTRL+TAB': function() {
+                return false;
+            }
+        };
+        function return_true() {
+            return true;
+        }
+        function paste_event() {
+            clip.val('');
+            paste_count = 0;
+            clip.focus();
+            clip.on('input', function input(e) {
+                paste(e);
+                clip.off('input', input);
+            });
+        }
+        function prev_history() {
+            if (first_up_history) {
+                last_command = command;
+                self.set(history.current());
+            } else {
+                self.set(history.previous());
+            }
+            first_up_history = false;
+        }
+        function next_history() {
+            self.set(history.end() ? last_command : history.next());
+        }
+        function left() {
+            if (position > 0) {
+                self.position(-1, true);
+                redraw();
+            }
+        }
+        function right() {
+            if (position < command.length) {
+                self.position(1, true);
+            }
+        }
+        function home() {
+            self.position(0);
+        }
+        function end() {
+            self.position(command.length);
+        }
         function mobile_focus() {
             //if (is_touch) {
             var focus = clip.is(':focus');
@@ -1055,7 +1294,7 @@
                 var tmp = string.split("\n");
                 var first_len = num_chars - prompt_len - 1;
                 // empty character after each line
-                for (i=0; i<tmp.length-1; ++i) {
+                for (var i=0; i<tmp.length-1; ++i) {
                     tmp[i] += ' ';
                 }
                 // split first line
@@ -1322,6 +1561,7 @@
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
+        var shift_insert;
         function keydown_event(e) {
             var result, pos, len;
             if (enabled) {
@@ -1329,6 +1569,14 @@
                     result = options.keydown(e);
                     if (result !== undefined) {
                         //prevent_keypress = true;
+                        return result;
+                    }
+                }
+                var key = get_key(e);
+                shift_insert = key == 'SHIFT+INSERT';
+                if ($.isFunction(keymap[key])) {
+                    result = keymap[key]();
+                    if (result !== undefined) {
                         return result;
                     }
                 }
@@ -1351,240 +1599,7 @@
                     /* jshint validthis:true */
                     keydown_event.call(this, e);
                 } else if (e.altKey) {
-                    // Chrome on Windows sets ctrlKey and altKey for alt
-                    // need to check for alt first
-                    //if (e.which === 18) { // press ALT
-                    if (e.which === 68) { //ALT+D
-                        self.set(command.slice(0, position) +
-                                 command.slice(position).
-                                 replace(/ *[^ ]+ *(?= )|[^ ]+$/, ''), true);
-                        // chrome jump to address bar
-                        return false;
-                    }
                     return true;
-                } else if (e.keyCode === 13) { //enter
-                    if (e.shiftKey) {
-                        self.insert('\n');
-                    } else {
-                        if (history && command && !mask &&
-                            ($.isFunction(options.historyFilter) &&
-                             options.historyFilter(command)) ||
-                            (options.historyFilter instanceof RegExp &&
-                             command.match(options.historyFilter)) ||
-                            !options.historyFilter) {
-                            history.append(command);
-                        }
-                        var tmp = command;
-                        history.reset();
-                        self.set('');
-                        if (options.commands) {
-                            options.commands(tmp);
-                        }
-                        if ($.isFunction(prompt)) {
-                            draw_prompt();
-                        }
-                        $('.clipboard').val('');
-                    }
-                } else if (e.which === 8) { //backspace
-                    if (reverse_search) {
-                        rev_search_str = rev_search_str.slice(0, -1);
-                        draw_reverse_prompt();
-                    } else {
-                        if (command !== '' && position > 0) {
-                            self['delete'](-1);
-                        }
-                    }
-                    if (is_touch) {
-                        return true; // mobile fix
-                    }
-                } else if (e.which === 67 && e.ctrlKey && e.shiftKey) {
-                    // CTRL+SHIFT+C
-                    selected_text = get_selected_text();
-                } else if (e.which === 86 && e.ctrlKey && e.shiftKey) {
-                    if (selected_text !== '') {
-                        self.insert(selected_text);
-                    }
-                } else if (e.which === 9 && !(e.ctrlKey || e.altKey)) { // TAB
-                    self.insert('\t');
-                } else if (e.which === 46) {
-                    //DELETE
-                    self['delete'](1);
-                    return;
-                } else if (history && (e.which === 38 && !e.ctrlKey) ||
-                           (e.which === 80 && e.ctrlKey)) {
-                    //UP ARROW or CTRL+P
-                    if (first_up_history) {
-                        last_command = command;
-                        self.set(history.current());
-                    } else {
-                        self.set(history.previous());
-                    }
-                    first_up_history = false;
-                } else if (history && (e.which === 40 && !e.ctrlKey) ||
-                           (e.which === 78 && e.ctrlKey)) {
-                    //DOWN ARROW or CTRL+N
-                    self.set(history.end() ? last_command : history.next());
-                } else if (e.which === 37 || (e.which === 66 && e.ctrlKey)) {
-                    //CTRL+LEFT ARROW or CTRL+B
-                    if (e.ctrlKey && e.which !== 66) {
-                        len = position - 1;
-                        pos = 0;
-                        if (command[len] === ' ') {
-                            --len;
-                        }
-                        for (var i = len; i > 0; --i) {
-                            if (command[i] === ' ' && command[i+1] !== ' ') {
-                                pos = i + 1;
-                                break;
-                            } else if (command[i] === '\n' &&
-                                       command[i+1] !== '\n') {
-                                pos = i;
-                                break;
-                            }
-                        }
-                        self.position(pos);
-                    } else {
-                        //LEFT ARROW or CTRL+B
-                        if (position > 0) {
-                            self.position(-1, true);
-                            redraw();
-                        }
-                    }
-                } else if (e.which === 82 && e.ctrlKey) { // CTRL+R
-                    if (reverse_search) {
-                        reverse_history_search(true);
-                    } else {
-                        backup_prompt = prompt;
-                        draw_reverse_prompt();
-                        last_command = command;
-                        self.set('');
-                        redraw();
-                        reverse_search = true;
-                    }
-                } else if (e.which == 71 && e.ctrlKey) { // CTRL+G
-                    if (reverse_search) {
-                        prompt = backup_prompt;
-                        draw_prompt();
-                        self.set(last_command);
-                        redraw();
-                        reverse_search = false;
-                        rev_search_str = '';
-                    }
-                } else if (e.which === 39 ||
-                           (e.which === 70 && e.ctrlKey)) {
-                    //RIGHT ARROW OR CTRL+F
-                    if (e.ctrlKey && e.which !== 70) {
-                        // jump to beginning or end of the word
-                        if (command[position] === ' ') {
-                            ++position;
-                        }
-                        var re = /\S[\n\s]{2,}|[\n\s]+\S?/;
-                        var match = command.slice(position).match(re);
-                        if (!match || match[0].match(/^\s+$/)) {
-                            self.position(command.length);
-                        } else {
-                            if (match[0][0] !== ' ') {
-                                position += match.index + 1;
-                            } else {
-                                position += match.index + match[0].length - 1;
-                                if (match[0][match[0].length-1] !== ' ') {
-                                    --position;
-                                }
-                            }
-                        }
-                        redraw();
-                    } else {
-                        if (position < command.length) {
-                            self.position(1, true);
-                        }
-                    }
-                } else if (e.which === 123) { // F12 - Allow Firebug
-                    return;
-                } else if (e.which === 36) { // HOME
-                    self.position(0);
-                } else if (e.which === 35) { // END
-                    self.position(command.length);
-                } else if (e.shiftKey && e.which == 45) { // Shift+Insert
-                    clip.val(''); // so we get it before paste event
-                    paste_count = 0;
-                    if (!is_paste_supported) {
-                        paste(e);
-                    } else {
-                        clip.focus();
-                    }
-                    return;
-                } else if (e.ctrlKey || e.metaKey) {
-                    if (e.which === 192) { // CMD+` switch browser window on Mac
-                        return;
-                    }
-                    if (e.metaKey) {
-                        if(e.which === 82) { // CMD+r page reload in Chrome Mac
-                            return;
-                        } else if(e.which === 76) {
-                            // CMD+l jump into Omnibox on Chrome Mac
-                            return;
-                        }
-                    }
-                    if (e.shiftKey) { // CTRL+SHIFT+??
-                        if (e.which === 84) {
-                            //CTRL+SHIFT+T open closed tab
-                            return;
-                        }
-                    //} else if (e.altKey) { //ALT+CTRL+??
-                    } else {
-                        if (e.which === 81) { // CTRL+W
-                            // don't work in Chromium (can't prevent close tab)
-                            if (command !== '' && position !== 0) {
-                                var m = command.slice(0, position).match(/([^ ]+ *$)/);
-                                kill_text = self['delete'](-m[0].length);
-                                text_to_clipboard(self, kill_text);
-                            }
-                            return false;
-                        } else if (e.which === 72) { // CTRL+H
-                            if (command !== '' && position > 0) {
-                                self['delete'](-1);
-                            }
-                            return false;
-                        //NOTE: in opera charCode is undefined
-                        } else if (e.which === 65) {
-                            //CTRL+A
-                            self.position(0);
-                        } else if (e.which === 69) {
-                            //CTRL+E
-                            self.position(command.length);
-                        } else if (e.which === 88 || e.which === 67 ||
-                                   e.which === 84) {
-                            //CTRL+X CTRL+C CTRL+W CTRL+T
-                            return;
-                        } else if (e.which === 89) { // CTRL+Y
-                            if (kill_text !== '') {
-                                self.insert(kill_text);
-                            }
-                        } else if (e.which === 86 || e.which === 118) { // CTRL+V
-                            clip.val('');
-                            paste_count = 0;
-                            if (!is_paste_supported) {
-                                paste(e);
-                            } else {
-                                clip.focus();
-                                clip.on('input', function input(e) {
-                                    paste(e);
-                                    clip.off('input', input);
-                                });
-                            }
-                            return;
-                        } else if (e.which === 75) { // CTRL+K
-                            kill_text = self['delete'](command.length-position);
-                            text_to_clipboard(self, kill_text);
-                        } else if (e.which === 85) { // CTRL+U
-                            if (command !== '' && position !== 0) {
-                                kill_text = self['delete'](-position);
-                                text_to_clipboard(self, kill_text);
-                            }
-                        } else if (e.which === 17) { //CTRL+TAB switch tab
-                            return false;
-                        }
-                    }
                 } else {
                     prevent_keypress = false;
                     no_keypress = true;
@@ -1664,6 +1679,9 @@
                     fire_change_command();
                 }
                 return self;
+            },
+            keymap: function(new_keymap) {
+                keymap = $.extend({}, default_keymap, new_keymap || {});
             },
             insert: function(string, stay) {
                 if (position === command.length) {
@@ -1823,6 +1841,7 @@
         // Keystrokes
         var object;
         var doc = $(document.documentElement || window);
+        self.keymap(options.keymap);
         function keypress_event(e) {
             var result;
             no_keypress = false;
@@ -1863,10 +1882,11 @@
             }
         }
         function input(e) {
-            if (no_keypress) {
+            if (no_keypress && !shift_insert) {
+                // shift insert don't fire keypress on Linux/Chrome
                 // Some Androids don't fire keypress - #39
                 var val = clip.val();
-                if (val || e.which == 8) {  // #209 ; 8 - backspace
+                if (val !== '' || e.which == 8) {  // #209 ; 8 - backspace
                     self.set(val);
                 }
             }
@@ -1954,7 +1974,7 @@
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\]\[)])+\b)/gi;
     var url_nf_re = /\b(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)\b(?![^[\]]*])/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
-    var command_re = /('[^']*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]*)(?=:? |$)|(\\ |[^ ])+|[\w-]+)/gi;
+    var command_re = /('(?:[^']|\\')*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]*)(?=:? |$)|(\\\s|\S)+|[\w-]+)/gi;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
@@ -3680,10 +3700,15 @@
             command_line.name(name);
             if ($.isFunction(interpreter.prompt)) {
                 command_line.prompt(function(command) {
-                    interpreter.prompt(command, self);
+                    interpreter.prompt.call(self, command, self);
                 });
             } else {
                 command_line.prompt(interpreter.prompt);
+            }
+            if ($.isPlainObject(interpreter.keymap)) {
+                command_line.keymap($.omap(interpreter.keymap, function(name, fun) {
+                    return fun.bind(self);
+                }));
             }
             command_line.set('');
             if (!silent && $.isFunction(interpreter.onStart)) {
@@ -3769,15 +3794,31 @@
                 }
             }
         }
-        function key_down(e) {
-            // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
-            // then one terminal)
-            var result, i, top = interpreters.top(), completion;
-            if (!self.paused() && self.enabled()) {
-                result = user_key_down(e);
-                if (result !== undefined) {
-                    return result;
+        var keymap = {
+            'CTRL+D': function() {
+                if (!in_login) {
+                    if (command_line.get() === '') {
+                        if (interpreters.size() > 1 ||
+                            settings.login !== undefined) {
+                            self.pop('');
+                        } else {
+                            self.resume();
+                            self.echo('');
+                        }
+                    } else {
+                        self.set_command('');
+                    }
                 }
+                return false;
+            },
+            'CTRL+L': function() {
+                self.clear();
+            },
+            'TAB': function() {
+                // TODO: move this to cmd plugin
+                //       add completion = array | function
+                //       !!! Problem complete more then one key need terminal
+                var top = interpreters.top(), completion;
                 if (settings.completion &&
                     $.type(settings.completion) != 'boolean' &&
                     top.completion === undefined) {
@@ -3788,30 +3829,7 @@
                 if (completion == 'settings') {
                     completion = settings.completion;
                 }
-                if (e.which !== 9) { // not a TAB
-                    tab_count = 0;
-                }
-                if (e.which === 68 && e.ctrlKey) { // CTRL+D
-                    if (!in_login) {
-                        if (command_line.get() === '') {
-                            if (interpreters.size() > 1 ||
-                                settings.login !== undefined) {
-                                self.pop('');
-                            } else {
-                                self.resume();
-                                self.echo('');
-                            }
-                        } else {
-                            self.set_command('');
-                        }
-                    }
-                    return false;
-                } else if (e.which === 76 && e.ctrlKey) { // CTRL+L
-                    self.clear();
-                } else if (completion && e.which === 9) { // TAB
-                    // TODO: move this to cmd plugin
-                    //       add completion = array | function
-                    //       !!! Problem complete more then one key need terminal
+                if (completion) {
                     switch ($.type(completion)) {
                         case 'function':
                             var string = self.before_cursor(settings.wordAutocomplete);
@@ -3831,24 +3849,41 @@
                             throw new Error(strings.invalidCompletion);
                     }
                     return false;
-                } else if ((e.which === 118 || e.which === 86) &&
-                           (e.ctrlKey || e.metaKey)) { // CTRL+V
-                    self.oneTime(1, function() {
-                        scroll_to_bottom();
-                    });
-                    return;
-                } else if (e.which === 9 && e.ctrlKey) { // CTRL+TAB
-                    if (terminals.length() > 1) {
-                        self.focus(false);
-                        return false;
-                    }
-                } else if (e.which === 34) { // PAGE DOWN
-                    self.scroll(self.height());
-                } else if (e.which === 33) { // PAGE UP
-                    self.scroll(-self.height());
                 } else {
-                    self.attr({scrollTop: self.attr('scrollHeight')});
+                    self.insert('\t'); // original tab is overwritten
                 }
+            },
+            'CTRL+V': function() {
+                self.oneTime(1, function() {
+                    scroll_to_bottom();
+                });
+            },
+            'CTRL+TAB': function() {
+                if (terminals.length() > 1) {
+                    self.focus(false);
+                    return false;
+                }
+            },
+            'PAGEDOWN': function() {
+                self.scroll(self.height());
+            },
+            'PAGEUP': function() {
+                self.scroll(-self.height());
+            }
+        };
+        function key_down(e) {
+            // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
+            // then one terminal)
+            var result, i;
+            if (!self.paused() && self.enabled()) {
+                result = user_key_down(e);
+                if (result !== undefined) {
+                    return result;
+                }
+                if (e.which !== 9) { // not a TAB
+                    tab_count = 0;
+                }
+                self.attr({scrollTop: self.attr('scrollHeight')});
             } else if (e.which === 68 && e.ctrlKey) { // CTRL+D (if paused)
                 result = user_key_down(e);
                 if (result !== undefined) {
@@ -5336,6 +5371,7 @@
                 // so we are able to change it using option API method
                 itrp.completion = 'settings';
             }
+            var new_keymap = $.extend({}, keymap, settings.keymap || {});
             interpreters = new Stack($.extend({
                 name: settings.name,
                 prompt: settings.prompt,
@@ -5344,7 +5380,8 @@
                 resize: settings.onResize,
                 greetings: settings.greetings,
                 mousewheel: settings.mousewheel,
-                extra: settings.extra
+                keymap: new_keymap,
+                extra: settings.extra,
             }, itrp));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(self).cmd({
@@ -5355,6 +5392,7 @@
                 width: '100%',
                 enabled: enabled && !is_touch,
                 keydown: key_down,
+                keymap: new_keymap,
                 keypress: function(e) {
                     var result, i, top = interpreters.top();
                     if ($.isFunction(top.keypress)) {

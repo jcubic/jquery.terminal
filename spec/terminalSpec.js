@@ -44,16 +44,17 @@ function enter_text(text) {
         $root.trigger(e);
     }
 }
-function shortcut(ctrl, alt, shift, which) {
+function shortcut(ctrl, alt, shift, which, key) {
     var e = $.Event("keydown");
     e.ctrlKey = ctrl;
+    e.key = key;
     e.altKey = alt;
     e.shiftKey = shift;
     e.which = e.keyCode = which;
     $(document.documentElement || window).trigger(e);
 }
 function enter_key() {
-    shortcut(false, false, false, 13);
+    shortcut(false, false, false, 13, 'enter');
 }
 function enter(term, text) {
     var active = $.terminal.active();
@@ -494,63 +495,63 @@ function tests_on_ready() {
             });
             it('should execute functions on shortcuts', function() {
                 spy(cmd, 'position');
-                shortcut(true, false, false, 65); // CTRL+A
+                shortcut(true, false, false, 65, 'a'); // CTRL+A
                 expect(cmd.position).toHaveBeenCalled();
                 spy(cmd, 'delete');
-                shortcut(true, false, false, 75); // CTRL+K
+                shortcut(true, false, false, 75, 'k'); // CTRL+K
                 expect(cmd['delete']).toHaveBeenCalled();
                 spy(cmd, 'insert');
-                shortcut(true, false, false, 89); // CTRL+Y
+                shortcut(true, false, false, 89, 'y'); // CTRL+Y
                 expect(cmd.insert).toHaveBeenCalled();
-                shortcut(true, false, false, 85); // CTRL+U
+                shortcut(true, false, false, 85, 'u'); // CTRL+U
                 expect(cmd.kill_text()).toEqual('foobar');
-                shortcut(true, false, true, 13);
+                shortcut(false, false, true, 13, 'enter');
                 expect(cmd.find('.prompt').next().text()).toEqual('\xA0');
                 expect(cmd.get()).toEqual('\n');
                 cmd.set('');
-                shortcut(false, false, false, 9); // TAB
+                shortcut(false, false, false, 9, 'tab'); // TAB
                 expect(cmd.get()).toEqual('\t');
                 history.enable();
                 cmd.set('foo bar');
                 enter_key();
-                shortcut(false, false, false, 38); // UP ARROW
+                shortcut(false, false, false, 38, 'ArrowUp'); // UP ARROW
                 expect(cmd.get()).toEqual('foo bar');
-                shortcut(false, false, false, 40); // DOWN ARROW
+                shortcut(false, false, false, 40, 'arrowDown'); // DOWN ARROW
                 expect(cmd.get()).toEqual('');
                 cmd.insert('hello');
-                shortcut(false, false, false, 38);
-                shortcut(false, false, false, 40);
+                shortcut(false, false, false, 38, 'arrowUp');
+                shortcut(false, false, false, 40, 'arrowDown');
                 expect(cmd.get()).toEqual('hello');
-                shortcut(true, false, false, 80); // CTRL+P
+                shortcut(true, false, false, 80, 'p'); // CTRL+P
                 expect(cmd.get()).toEqual('foo bar');
-                shortcut(true, false, false, 78); // CTRL+N
+                shortcut(true, false, false, 78, 'n'); // CTRL+N
                 expect(cmd.get()).toEqual('hello');
                 cmd.set('foo bar baz');
-                shortcut(false, false, false, 37); // LEFT ARROW
+                shortcut(false, false, false, 37, 'arrowleft'); // LEFT ARROW
                 expect(cmd.position()).toEqual(10);
-                shortcut(true, false, false, 37); // moving by words
+                shortcut(true, false, false, 37, 'arrowleft'); // moving by words
                 expect(cmd.position()).toEqual(8);
-                shortcut(true, false, false, 37);
+                shortcut(true, false, false, 37, 'arrowleft');
                 expect(cmd.position()).toEqual(4);
-                shortcut(true, false, false, 37);
+                shortcut(true, false, false, 37, 'arrowleft');
                 expect(cmd.position()).toEqual(0);
-                shortcut(false, false, false, 39); // RIGHT ARROW
+                shortcut(false, false, false, 39, 'arrowright'); // RIGHT ARROW
                 expect(cmd.position()).toEqual(1);
-                shortcut(true, false, false, 39);
+                shortcut(true, false, false, 39, 'arrowright');
                 expect(cmd.position()).toEqual(3);
-                shortcut(true, false, false, 39);
+                shortcut(true, false, false, 39, 'arrowright');
                 expect(cmd.position()).toEqual(7);
-                shortcut(true, false, false, 39);
+                shortcut(true, false, false, 39, 'arrowright');
                 expect(cmd.position()).toEqual(11);
-                shortcut(false, false, false, 36); // HOME
+                shortcut(false, false, false, 36, 'home'); // HOME
                 expect(cmd.position()).toEqual(0);
-                shortcut(false, false, false, 35); // END
+                shortcut(false, false, false, 35, 'end'); // END
                 expect(cmd.position()).toEqual(cmd.get().length);
-                shortcut(true, false, false, 82); // CTRL+R
+                shortcut(true, false, false, 82, 'r'); // CTRL+R
                 expect(cmd.prompt()).toEqual("(reverse-i-search)`': ");
                 enter_text('foo');
                 expect(cmd.get()).toEqual('foo bar');
-                shortcut(true, false, false, 71); // CTRL+G
+                shortcut(true, false, false, 71, 'g'); // CTRL+G
                 expect(cmd.get()).toEqual('foo bar baz');
                 cmd.purge();
                 term.destroy().remove();
@@ -962,11 +963,11 @@ function tests_on_ready() {
             it('should complete text for main intepreter', function() {
                 term.focus();
                 term.insert('f');
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('foo');
                 term.set_command('');
                 term.insert('lorem\\ ');
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('lorem\\ ipsum');
             });
             it('should complete text for nested intepreter', function() {
@@ -974,7 +975,7 @@ function tests_on_ready() {
                     completion: ['lorem', 'ipsum', 'dolor']
                 });
                 term.insert('l');
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('lorem');
             });
             it('should complete when completion is a function with setTimeout', function(done) {
@@ -988,7 +989,7 @@ function tests_on_ready() {
                 });
                 term.set_command('');
                 term.insert('o').focus();
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 setTimeout(function() {
                     expect(term.get_command()).toEqual('one');
                     term.destroy().remove();
@@ -1011,7 +1012,7 @@ function tests_on_ready() {
                 term.focus().push($.noop, {completion: completion});
                 term.set_command('');
                 term.insert('foo o');
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('foo one');
                 term.pop();
             });
@@ -1020,12 +1021,12 @@ function tests_on_ready() {
                 term.set_command('f one');
                 var cmd = term.cmd();
                 cmd.position(1);
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('foo one');
                 var command = 'lorem\\ ip';
                 term.set_command(command +' one');
                 cmd.position(command.length);
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('lorem\\ ipsum one');
             });
             it('should complete rpc method', function() {
@@ -1034,7 +1035,7 @@ function tests_on_ready() {
                 });
                 term.set_command('').resume().focus();
                 term.insert('ec');
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('echo');
             });
             it('should complete command from array when used with JSON-RPC', function() {
@@ -1043,7 +1044,7 @@ function tests_on_ready() {
                 });
                 term.focus().resume().set_command('');
                 term.insert('f');
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('foo');
             });
             it('should insert tab when RPC used without system.describe', function(done) {
@@ -1053,7 +1054,7 @@ function tests_on_ready() {
                 setTimeout(function() {
                     term.focus().set_command('').cmd().enable().visible();
                     term.insert('f');
-                    shortcut(false, false, false, 9);
+                    shortcut(false, false, false, 9, 'tab');
                     expect(term.get_command()).toEqual('f\t');
                     term.destroy().remove();
                     done();
@@ -1065,7 +1066,7 @@ function tests_on_ready() {
                     completion: true
                 });
                 term.insert('f');
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('f\t');
                 term.destroy().remove();
             });
@@ -1073,7 +1074,7 @@ function tests_on_ready() {
                 term = $('<div/>').appendTo('body').terminal('/test');
                 term.focus();
                 term.insert('ec');
-                shortcut(false, false, false, 9);
+                shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('ec\t');
                 term.destroy().remove();
             });
@@ -1930,6 +1931,7 @@ function tests_on_ready() {
                         expect(div.hasClass('exception')).toBeTruthy();
                         expect(div.hasClass('stack-trace')).toBeTruthy();
                     }
+                    term.destroy().remove();
                 });
             });
         });
