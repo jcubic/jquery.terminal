@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 16 Jan 2017 18:54:26 +0000
+ * Date: Mon, 16 Jan 2017 23:33:51 +0000
  */
 
 /* TODO:
@@ -4368,18 +4368,23 @@
             // :: Pause the terminal, it should be used for ajax calls
             // -------------------------------------------------------------
             pause: function(visible) {
-                onPause();
+                function run() {
+                    onPause();
+                    paused = true;
+                    command_line.disable();
+                    if (!visible) {
+                        command_line.hidden();
+                    }
+                    if ($.isFunction(settings.onPause)) {
+                        settings.onPause.call(self);
+                    }
+                }
                 if (!paused && command_line) {
-                    init_deferr.then(function() {
-                        paused = true;
-                        command_line.disable();
-                        if (!visible) {
-                            command_line.hidden();
-                        }
-                        if ($.isFunction(settings.onPause)) {
-                            settings.onPause.call(self);
-                        }
-                    });
+                    if (init_deferr.state() != 'resolved') {
+                        init_deferr.then(run);
+                    } else {
+                        run();
+                    }
                 }
                 return self;
             },
@@ -4988,12 +4993,16 @@
                         var login = logins.pop();
                         self.set_token(undefined, true);
                         self.login.apply(self, login);
+                    } else if (interpreters.size() == 1 && self.token()) {
+                        self.logout(true);
                     } else {
-                        while (interpreters.size() > 0) {
+                        while (interpreters.size() > 1) {
                             // pop will call global_logout that will call login
                             // and size will be > 0; this is workaround the problem
-                            if (self.pop()) {
-                                break;
+                            if (self.token()) {
+                                self.logout(true).pop().pop();
+                            } else {
+                                self.pop();
                             }
                         }
                     }
@@ -5026,7 +5035,7 @@
             // :: by the set_token method.
             // -------------------------------------------------------------
             get_token: function(local) {
-                return storage.get(self.prefix_name(local) + '_token');
+                return self.token(local);
             },
             // -------------------------------------------------------------
             // :: Function return Login name entered by the user
@@ -5048,7 +5057,7 @@
                     terminal_id;
                 if (local && interpreters.size() > 1) {
                     var local_name = interpreters.map(function(intrp) {
-                        return intrp.name;
+                        return intrp.name || '';
                     }).slice(1).join('_');
                     if (local_name) {
                         name += '_' + local_name;
@@ -5102,8 +5111,7 @@
                     }
                     //self.pause();
                     make_interpreter(interpreter, !!options.login, function(ret) {
-                        // result is object with interpreter and completion
-                        // properties
+                        // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
                         if ($.isArray(ret.completion) && push_settings.completion === true) {
                             interpreters.top().completion = ret.completion;
@@ -5155,7 +5163,6 @@
                                 display_exception(e, 'onExit');
                             }
                         }
-                        return true;
                     } else {
                         self.error(strings.canExitError);
                     }
@@ -5165,8 +5172,9 @@
                         clear_loging_storage();
                     }
                     var current = interpreters.pop();
+                    var top = interpreters.top();
                     prepare_top_interpreter();
-                    settings.onPop.call(self, current, interpreters.top());
+                    settings.onPop.call(self, current, top);
                     // we check in case if you don't pop from password interpreter
                     if (in_login && self.get_prompt() != strings.login + ': ') {
                         in_login = false;
@@ -5179,7 +5187,7 @@
                         }
                     }
                     // restore mask
-                    self.set_mask(interpreters.top().mask);
+                    self.set_mask(top.mask);
                 }
                 return self;
             },

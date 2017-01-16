@@ -1934,6 +1934,310 @@ function tests_on_ready() {
                     term.destroy().remove();
                 });
             });
+            describe('logout/token', function() {
+                var term;
+                beforeEach(function() {
+                    term = $('<div/>').terminal($.noop, {
+                        name: 'logout',
+                        login: function(user, pass, callback) {
+                            callback('TOKEN');
+                        }
+                    });
+                    if (term.token()) {
+                        term.logout();
+                    }
+                    term.focus();
+                    enter(term, 'foo');
+                    enter(term, 'bar');
+                });
+                afterEach(function() {
+                    term.destroy();
+                });
+                function push_interpreter() {
+                    term.push({}, {
+                        prompt: '$ ',
+                        login: function(user, pass, callback) {
+                            callback(user == '1' && pass == '1' ? 'TOKEN2' : null);
+                        }
+                    });
+                }
+                it('should logout from main intepreter', function() {
+                    expect(term.token()).toEqual('TOKEN');
+                    expect(term.get_prompt()).toEqual('> ');
+                    term.logout();
+                    expect(term.get_prompt()).toEqual('login: ');
+                });
+                it('should logout from nested interpeter', function() {
+                    push_interpreter();
+                    enter(term, '1');
+                    enter(term, '1');
+                    expect(term.token(true)).toEqual('TOKEN2');
+                    term.logout(true);
+                    expect(term.get_prompt()).toEqual('login: ');
+                    expect(term.token(true)).toBeFalsy();
+                    enter(term, '1');
+                    enter(term, '1');
+                    expect(term.token(true)).toEqual('TOKEN2');
+                    expect(term.get_prompt()).toEqual('$ ');
+                });
+                it('should not logout from main intepreter', function() {
+                    push_interpreter();
+                    enter(term, '1');
+                    enter(term, '1');
+                    expect(term.token(true)).toEqual('TOKEN2');
+                    term.logout(true);
+                    expect(term.token()).toEqual('TOKEN');
+                });
+                it('should throw exception when calling from login', function() {
+                    term.logout();
+                    var strings = $.terminal.defaults.strings;
+                    expect(function() { term.logout(); }).toThrow(new Error(sprintf(strings.notWhileLogin, 'logout')));
+                    enter(term, '1');
+                    enter(term, '1');
+                    push_interpreter();
+                    expect(function() { term.logout(); }).toThrow(new Error(sprintf(strings.notWhileLogin, 'logout')));
+                });
+                it('should logout from all interpreters', function() {
+                    push_interpreter();
+                    enter(term, '2');
+                    enter(term, '2');
+                    term.logout();
+                    expect(term.token()).toBeFalsy();
+                    expect(term.token(true)).toBeFalsy();
+                    expect(term.get_prompt()).toEqual('login: ');
+                });
+            });
+            describe('get_token', function() {
+                var term = $('<div/>').terminal();
+                it('should call token', function() {
+                    spyOn(term, 'token');
+                    term.get_token();
+                    expect(term.token).toHaveBeenCalled();
+                });
+            });
+            describe('login_name', function() {
+                var term;
+                beforeEach(function() {
+                    term = $('<div/>').terminal({}, {
+                        name: 'login_name',
+                        login: function(user, pass, callback) {
+                            callback('TOKEN');
+                        }
+                    });
+                    if (!term.token()) {
+                        term.focus();
+                        enter(term, 'foo');
+                        enter(term, 'bar');
+                    }
+                });
+                afterEach(function() {
+                    term.destroy();
+                });
+                it('should return main login name', function() {
+                    expect(term.login_name()).toEqual('foo');
+                });
+                function push_interpeter() {
+                    term.push({}, {
+                        name: 'nested',
+                        login: function(user, pass, callback) {
+                            callback('TOKEN2');
+                        }
+                    });
+                    if (!term.token(true)) {
+                        enter(term, 'bar');
+                        enter(term, 'bar');
+                    }
+                }
+                it('should return main login name for nested interpreter', function() {
+                    push_interpeter();
+                    expect(term.login_name()).toEqual('foo');
+                });
+                it('should return nested interpreter name', function() {
+                    push_interpeter();
+                    expect(term.login_name(true)).toEqual('bar');
+                });
+            });
+            describe('name', function() {
+                var term;
+                beforeEach(function() {
+                    term = $('<div/>').terminal({}, {
+                        name: 'test_name'
+                    });
+                });
+                it('should return terminal name', function() {
+                    expect(term.name()).toEqual('test_name');
+                });
+                it('should return nested intepreter name', function() {
+                    term.push({}, {
+                        name: 'other_name'
+                    });
+                    expect(term.name()).toEqual('other_name');
+                });
+            });
+            describe('prefix_name', function() {
+                it('should return terminal id if terminal have no name', function() {
+                    var term = $('<div/>').terminal();
+                    expect(term.prefix_name()).toEqual(String(term.id()));
+                    expect(term.prefix_name(true)).toEqual(String(term.id()));
+                });
+                it('should return name and terminal id for main interpreter', function() {
+                    var term = $('<div/>').terminal({}, {
+                        name: 'test'
+                    });
+                    expect(term.prefix_name()).toEqual('test_' + term.id());
+                    expect(term.prefix_name(true)).toEqual('test_' + term.id());
+                });
+                it('should return main name for nested interpreter', function() {
+                    var term = $('<div/>').terminal({}, {
+                        name: 'test'
+                    });
+                    term.push({}, {name: 'test'});
+                    expect(term.prefix_name()).toEqual('test_' + term.id());
+                });
+                it('should return name for nested intepters', function() {
+                    var term = $('<div/>').terminal({}, {
+                        name: 'test'
+                    });
+                    var names = ['foo', 'bar', 'baz'];
+                    names.forEach(function(name) {
+                        term.push({}, {name: name});
+                    });
+                    expect(term.prefix_name(true)).toEqual('test_' + term.id() + '_' + names.join('_'));
+                });
+                it('should return name for nested interpreter without names', function() {
+                    var term = $('<div/>').terminal({}, {
+                        name: 'test'
+                    });
+                    for(var i=0; i<3; ++i) {
+                        term.push({});
+                    }
+                    expect(term.prefix_name(true)).toEqual('test_' + term.id() + '___');
+                });
+            });
+            describe('read', function() {
+                var term;
+                var test;
+                beforeEach(function() {
+                    term = $('<div/>').terminal();
+                });
+                afterEach(function() {
+                    term.destroy();
+                });
+                it('should call have prompt', function() {
+                    term.read('text: ');
+                    expect(term.get_prompt()).toEqual('text: ');
+                });
+                it('should return promise that get resolved', function() {
+                    var test = {
+                        callback: function() {}
+                    };
+                    spyOn(test, 'callback');
+                    var promise = term.read('foo: ', test.callback);
+                    promise.then(test.callback);
+                    var text = 'lorem ipsum';
+                    enter(term, text);
+                    expect(test.callback).toHaveBeenCalledWith(text);
+                });
+                it('should call call function with text', function() {
+                    var test = {
+                        callback: function() {}
+                    };
+                    spyOn(test, 'callback');
+                    term.read('foo: ', test.callback);
+                    var text = 'lorem ipsum';
+                    enter(term, text);
+                    expect(test.callback).toHaveBeenCalledWith(text);
+                });
+            });
+            describe('push', function() {
+                var term;
+                beforeEach(function() {
+                    term = $('<div/>').terminal({
+                        name: function(name) {
+                            this.push({}, {
+                                name: name
+                            });
+                        },
+                        no_name: function() {
+                            this.push({});
+                        }
+                    });
+                    term.focus();
+                });
+                afterEach(function() {
+                    term.destroy();
+                });
+                it('should push new interpreter', function() {
+                    term.push({});
+                    expect(term.level()).toEqual(2);
+                });
+                it('should create name from previous command', function() {
+                    enter(term, 'name foo');
+                    expect(term.name()).toEqual('foo');
+                });
+                it('should create prompt from previous command', function() {
+                    enter(term, 'no_name');
+                    expect(term.get_prompt()).toEqual('no_name ');
+                });
+                it('should create completion', function() {
+                    term.push({
+                        foo: function() {},
+                        bar: function() {},
+                        baz: function() {}
+                    }, {
+                        name: 'push_completion',
+                        completion: true
+                    });
+                    var top = term.export_view().interpreters.top();
+                    expect(top.name).toEqual('push_completion');
+                    expect(top.completion).toEqual(['foo', 'bar', 'baz']);
+                });
+                it('should create login', function() {
+                    term.push({}, {
+                        login: function() {}
+                    });
+                    expect(term.get_prompt()).toEqual('login: ');
+                });
+                it('should create login for JSON-RPC', function() {
+                    spyOn(object, 'login');
+                    term.push('/test', {
+                        login: true,
+                        name: 'push_login_rpc'
+                    });
+                    if (term.token(true)) {
+                        term.logout(true);
+                    }
+                    expect(term.get_prompt()).toEqual('login: ');
+                    enter(term, 'demo');
+                    enter(term, 'demo');
+                    expect(object.login).toHaveBeenCalled();
+                });
+                it('should keep asking for login when infiniteLogin option is set to true', function() {
+                    var token = 'infiniteLogin_TOKEN';
+                    var prompt = '>>> ';
+                    term.push({}, {
+                        login: function(user, pass, callback) {
+                            callback(user == 'foo' && pass == 'bar' ? token : null);
+                        },
+                        infiniteLogin: true,
+                        name: 'infiniteLogin',
+                        prompt: prompt
+                    });
+                    if (term.token(true)) {
+                        term.logout(true);
+                    }
+                    enter(term, 'baz');
+                    enter(term, 'baz');
+                    var strings = $.terminal.defaults.strings;
+                    var error = nbsp(strings.wrongPasswordTryAgain);
+                    expect(term.find('.terminal-output > div:last-child').text()).toEqual(error);
+                    expect(term.get_prompt()).toEqual('login: ');
+                    enter(term, 'foo');
+                    enter(term, 'bar');
+                    expect(term.get_token(true)).toEqual(token);
+                    expect(term.get_prompt()).toEqual(prompt);
+                });
+            });
         });
         describe('jQuery Terminal options', function() {
 
