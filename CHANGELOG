@@ -1,7 +1,7 @@
 0.12.0    copy to system clipboard when copy to kill area
           simplify changing of terminal colors using css variables
           always export history and import when importHistory option is true
-          add bar and underline cursor animations a a way to enable it with single css variable
+          add bar and underline cursor animations and a way to enable it with single css variable
           recalcualate cols and rows on terminal resize (not only window)
           request/response and onPush/onPop callbacks
           all callbacks have terminal as `this` (terminal in parameter stay the same)

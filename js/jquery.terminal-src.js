@@ -924,20 +924,25 @@
         var animation;
         var paste_count = 0;
         function get_key(e) {
-            var key = [];
-            if (e.ctrlKey) {
-                key.push('CTRL');
+            var key = e.key.toUpperCase();
+            if (key == 'CONTROL') {
+                return 'CTRL';
+            } else {
+                var combo = [];
+                if (e.ctrlKey) {
+                    combo.push('CTRL');
+                }
+                if (e.shiftKey) {
+                    combo.push('SHIFT');
+                }
+                if (e.altKey) {
+                    combo.push('ALT');
+                }
+                if (e.key) {
+                    combo.push(key);
+                }
+                return combo.join('+');
             }
-            if (e.shiftKey) {
-                key.push('SHIFT');
-            }
-            if (e.altKey) {
-                key.push('ALT');
-            }
-            if (e.key) {
-                key.push(e.key.toUpperCase());
-            }
-            return key.join('+');
         }
         var keymap;
         var default_keymap = {
@@ -1030,6 +1035,7 @@
                     redraw();
                     reverse_search = true;
                 }
+                return false;
             },
             'CTRL+G': function() {
                 if (reverse_search) {
@@ -1039,6 +1045,7 @@
                     redraw();
                     reverse_search = false;
                     rev_search_str = '';
+                    return false;
                 }
             },
             'ARROWRIGHT': right,
@@ -1155,6 +1162,7 @@
             if (position < command.length) {
                 self.position(1, true);
             }
+            return false;
         }
         function home() {
             self.position(0);
@@ -1681,7 +1689,12 @@
                 return self;
             },
             keymap: function(new_keymap) {
-                keymap = $.extend({}, default_keymap, new_keymap || {});
+                if (typeof new_keymap == 'undefined') {
+                    return keymap;
+                } else {
+                    keymap = $.extend({}, default_keymap, new_keymap || {});
+                    return self;
+                }
             },
             insert: function(string, stay) {
                 if (position === command.length) {
