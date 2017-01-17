@@ -2583,6 +2583,20 @@
         }
     }
     // -----------------------------------------------------------------------
+    // :: Clear user selected text
+    // -----------------------------------------------------------------------
+    function clear_selection() {
+        if (window.getSelection) {
+            if (window.getSelection().empty) {  // Chrome
+                window.getSelection().empty();
+            } else if (window.getSelection().removeAllRanges) {  // Firefox
+                window.getSelection().removeAllRanges();
+            }
+        } else if (document.selection) {  // IE?
+            document.selection.empty();
+        }
+    }
+    // -----------------------------------------------------------------------
     // :: try to copy given DOM element text to clipboard
     // -----------------------------------------------------------------------
     function text_to_clipboard(container, text) {
@@ -2690,6 +2704,7 @@
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
+        clickTimeout: 400,
         request: $.noop,
         response: $.noop,
         onRPCError: null,
@@ -5481,6 +5496,8 @@
                 (function() {
                     var count = 0;
                     var isDragging = false;
+                    var wasDragging;
+                    var timer;
                     self.mousedown(function() {
                         self.oneTime(1, function() {
                             $(window).mousemove(function() {
@@ -5490,14 +5507,19 @@
                             });
                         });
                     }).mouseup(function() {
-                        var wasDragging = isDragging;
+                        wasDragging = isDragging;
                         isDragging = false;
                         $(window).unbind('mousemove');
-                        if (!wasDragging && ++count == 1) {
-                            count = 0;
-                            if (!self.enabled() && !frozen) {
-                                self.focus();
-                                command_line.enable();
+                        if (!wasDragging) {
+                            if (++count === 1) {
+                                clear_selection();
+                                if (!self.enabled() && !frozen) {
+                                    self.focus();
+                                    command_line.enable();
+                                }
+                                timer = self.oneTime(settings.clickTimeout, 'click', function() {
+                                    count = 0;
+                                });
                             }
                         }
                     });
