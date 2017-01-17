@@ -5496,8 +5496,6 @@
                 (function() {
                     var count = 0;
                     var isDragging = false;
-                    var wasDragging;
-                    var timer;
                     self.mousedown(function() {
                         self.oneTime(1, function() {
                             $(window).mousemove(function() {
@@ -5507,7 +5505,7 @@
                             });
                         });
                     }).mouseup(function() {
-                        wasDragging = isDragging;
+                        var wasDragging = isDragging;
                         isDragging = false;
                         $(window).unbind('mousemove');
                         if (!wasDragging) {
@@ -5517,11 +5515,10 @@
                                     self.focus();
                                     command_line.enable();
                                 }
-                                timer = self.oneTime(settings.clickTimeout, 'click', function() {
-                                    count = 0;
-                                });
                             }
                         }
+                    }).dblclick(function() {
+                        count = 0;
                     });
                 })();
             }
