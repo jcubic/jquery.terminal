@@ -25,6 +25,7 @@
           fix echo resolved content when interpreter return a promise
           fix for valid /[/]/g regex
           fix pushing JSON-RPC intepreter
+          fix selection in IE
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.
