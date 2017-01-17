@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Tue, 17 Jan 2017 16:30:13 +0000
+ * Date: Tue, 17 Jan 2017 16:43:30 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -445,11 +445,11 @@
 .terminal pre, .terminal h1, .terminal h2, .terminal h3, .terminal h4,
 .terminal h5, .terminal h6 {
     -webkit-touch-callout: initial;
-    -webkit-user-select: initial;
-    -khtml-user-select: initial;
-    -moz-user-select: initial;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
     -ms-user-select: text;
-    user-select: initial;
+    user-select: text;
 }
 .terminal, .terminal-output, .terminal-output div {
     -webkit-touch-callout: none;

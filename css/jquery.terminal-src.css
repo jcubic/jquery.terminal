@@ -445,11 +445,11 @@
 .terminal pre, .terminal h1, .terminal h2, .terminal h3, .terminal h4,
 .terminal h5, .terminal h6 {
     -webkit-touch-callout: initial;
-    -webkit-user-select: initial;
-    -khtml-user-select: initial;
-    -moz-user-select: initial;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
     -ms-user-select: text;
-    user-select: initial;
+    user-select: text;
 }
 .terminal, .terminal-output, .terminal-output div {
     -webkit-touch-callout: none;
