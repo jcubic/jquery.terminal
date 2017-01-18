@@ -27,6 +27,7 @@
           fix pushing JSON-RPC intepreter
           fix selection in IE
           clear selection when click anywhere in the terminal
+          fix removing global events on terminal destroy
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.

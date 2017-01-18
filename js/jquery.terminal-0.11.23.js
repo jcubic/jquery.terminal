@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 17 Jan 2017 17:29:02 +0000
+ * Date: Wed, 18 Jan 2017 16:43:49 +0000
  */
 
 /* TODO:
@@ -3792,11 +3792,7 @@
             }
             if (first_instance) {
                 first_instance = false;
-                if ($.fn.hashchange) {
-                    $(window).hashchange(hashchange);
-                } else {
-                    $(window).bind('hashchange', hashchange);
-                }
+                $(window).on('hashchange', hashchange);
             }
         }
         // ---------------------------------------------------------------------
@@ -3940,6 +3936,14 @@
             }
         }
         // ---------------------------------------------------------------------
+        function when_ready(fun) {
+            if (init_defer.state() != 'resolved') {
+                init_defer.then(fun.bind(self));
+            } else {
+                fun.call(self);
+            }
+        }
+        // ---------------------------------------------------------------------
         var self = this;
         if (this.length > 1) {
             return this.each(function() {
@@ -3974,7 +3978,7 @@
         var url;
         var bottom; // indicate if terminal was scrolled to bottom before echo command
         var logins = new Stack(); // stack of logins
-        var init_deferr = $.Deferred();
+        var init_defer = $.Deferred();
         var in_login = false;//some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;//used to indicate that user call pause onInit
@@ -4048,7 +4052,7 @@
                         display_exception(e, 'onImport');
                     }
                 }
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
                     command_line.position(view.position);
@@ -4095,7 +4099,7 @@
             // -------------------------------------------------------------
             exec: function(command, silent, deferred) {
                 var d = deferred || new $.Deferred();
-                function run() {
+                when_ready(function ready() {
                     if ($.isArray(command)) {
                         (function recur() {
                             var cmd = command.shift();
@@ -4117,14 +4121,9 @@
                             d.resolve(self);
                         });
                     }
-                }
+                });
                 // while testing it didn't executed last exec when using this
                 // for resolved deferred
-                if (init_deferr.state() != 'resolved') {
-                    init_deferr.then(run);
-                } else {
-                    run();
-                }
                 return d.promise();
             },
             // -------------------------------------------------------------
@@ -4383,7 +4382,7 @@
             // :: Pause the terminal, it should be used for ajax calls
             // -------------------------------------------------------------
             pause: function(visible) {
-                function run() {
+                when_ready(function ready() {
                     onPause();
                     paused = true;
                     command_line.disable();
@@ -4393,21 +4392,14 @@
                     if ($.isFunction(settings.onPause)) {
                         settings.onPause.call(self);
                     }
-                }
-                if (!paused && command_line) {
-                    if (init_deferr.state() != 'resolved') {
-                        init_deferr.then(run);
-                    } else {
-                        run();
-                    }
-                }
+                });
                 return self;
             },
             // -------------------------------------------------------------
             // :: Resume the previously paused terminal
             // -------------------------------------------------------------
             resume: function() {
-                function run() {
+                when_ready(function ready() {
                     paused = false;
                     if (terminals.front() == self) {
                         command_line.enable();
@@ -4427,14 +4419,7 @@
                     if ($.isFunction(settings.onResume)) {
                         settings.onResume.call(self);
                     }
-                }
-                if (paused && command_line) {
-                    if (init_deferr.state() != 'resolved') {
-                        init_deferr.then(run);
-                    } else {
-                        run();
-                    }
-                }
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -4528,7 +4513,7 @@
             // :: the events will be not fired. Used on init
             // -------------------------------------------------------------
             focus: function(toggle, silent) {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     if (terminals.length() === 1) {
                         if (toggle === false) {
                             try {
@@ -4569,18 +4554,13 @@
                         }
                     }
                 });
-                // why this delay - it can't be use for mobile
-                /*
-                self.oneTime(1, function() {
-                });
-                */
                 return self;
             },
             // -------------------------------------------------------------
             // :: Disable/Enable terminal that can be enabled by click
             // -------------------------------------------------------------
             freeze: function(freeze) {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     if (freeze) {
                         self.disable();
                         frozen = true;
@@ -4605,7 +4585,7 @@
                         //enabling first time
                         self.resize();
                     }
-                    init_deferr.then(function() {
+                    when_ready(function ready() {
                         command_line.enable();
                         enabled = true;
                     });
@@ -4617,7 +4597,7 @@
             // -------------------------------------------------------------
             disable: function() {
                 if (enabled && !frozen) {
-                    init_deferr.then(function() {
+                    when_ready(function ready() {
                         enabled = false;
                         command_line.disable();
                     });
@@ -4665,7 +4645,7 @@
             // :: Change the command line to the new one
             // -------------------------------------------------------------
             set_command: function(command) {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     command_line.set(command);
                 });
                 return self;
@@ -4675,7 +4655,7 @@
             // -------------------------------------------------------------
             insert: function(string) {
                 if (typeof string === 'string') {
-                    init_deferr.then(function() {
+                    when_ready(function ready() {
                         command_line.insert(string);
                     });
                     return self;
@@ -4687,7 +4667,7 @@
             // :: Set the prompt of the command line
             // -------------------------------------------------------------
             set_prompt: function(prompt) {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     if (validate('prompt', prompt)) {
                         if ($.isFunction(prompt)) {
                             command_line.prompt(function(callback) {
@@ -4715,7 +4695,7 @@
             // :: strings longer then one)
             // -------------------------------------------------------------
             set_mask: function(mask) {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     command_line.mask(mask === true ? settings.maskChar : mask);
                 });
                 return self;
@@ -4841,7 +4821,7 @@
             // :: Update the output line - line number can be negative
             // -------------------------------------------------------------
             update: function(line, string) {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     if (line < 0) {
                         line = lines.length + line; // yes +
                     }
@@ -5003,7 +4983,7 @@
                 if (in_login) {
                     throw new Error(sprintf(strings.notWhileLogin, 'logout'));
                 }
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     if (local) {
                         var login = logins.pop();
                         self.set_token(undefined, true);
@@ -5100,7 +5080,7 @@
             // :: Push a new interenter on the Stack
             // -------------------------------------------------------------
             push: function(interpreter, options) {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     options = options || {};
                     var defaults = {
                         infiniteLogin: false,
@@ -5234,7 +5214,7 @@
             // :: Reinitialize the terminal
             // -------------------------------------------------------------
             reset: function() {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     self.clear();
                     while(interpreters.size() > 1) {
                         interpreters.pop();
@@ -5248,7 +5228,7 @@
             // :: logout you until you refresh the browser
             // -------------------------------------------------------------
             purge: function() {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     var prefix = self.prefix_name() + '_';
                     var names = storage.get(prefix + 'interpreters');
                     $.each($.parseJSON(names), function(_, name) {
@@ -5267,11 +5247,11 @@
             // :: when you refresh the browser
             // -------------------------------------------------------------
             destroy: function() {
-                init_deferr.then(function() {
+                when_ready(function ready() {
                     command_line.destroy().remove();
                     output.remove();
-                    $(document).unbind('.terminal');
-                    $(window).unbind('.terminal');
+                    $(document).unbind('.terminal_' + self.id());
+                    $(window).unbind('.terminal_' + self.id());
                     self.unbind('click mousewheel mousedown mouseup');
                     self.removeData('terminal').removeClass('terminal');
                     if (settings.width) {
@@ -5284,10 +5264,18 @@
                         off('focus', focus_terminal);
                     iframe.remove();
                     terminals.remove(terminal_id);
+                    if (!terminal.length()) {
+                        $(window).off('hashchange');
+                    }
                 });
                 return self;
             },
+            // -------------------------------------------------------------
             scroll_to_bottom: scroll_to_bottom,
+            // -------------------------------------------------------------
+            // :: return true if terminal div or body is at the bottom
+            // :: is use scrollBottomOffset option as margin for the check
+            // -------------------------------------------------------------
             is_bottom: function() {
                 var scroll_height, scroll_top, height;
                 if (self.is('body')) {
@@ -5333,7 +5321,7 @@
             scroll_object = self;
         }
         // register ajaxSend for cancel requests on CTRL+D
-        $(document).bind('ajaxSend.terminal', function(e, xhr, opt) {
+        $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr, opt) {
             requests.push(xhr);
         });
         var iframe = $('<iframe/>').appendTo(self);
@@ -5466,14 +5454,14 @@
                         self.disable();
                     }
                 }
-                $(document).bind('click.terminal', disable).
-                    bind('contextmenu.terminal', disable);
+                $(document).bind('click.terminal_' + self.id(), disable).
+                    bind('contextmenu.terminal_' + self.id(), disable);
             });
             var $win = $(window);
             if (!is_touch) {
                 // work weird on mobile
-                $win.on('focus', focus_terminal).
-                    on('blur', blur_terminal);
+                $win.on('focus.terminal_' + self.id(), focus_terminal).
+                    on('blur.terminal_' + self.id(), blur_terminal);
             } else {
                 /*
                 self.find('textarea').on('blur.terminal', function() {
@@ -5498,16 +5486,16 @@
                     var isDragging = false;
                     self.mousedown(function() {
                         self.oneTime(1, function() {
-                            $(window).mousemove(function() {
+                            $(window).on('mousemove.terminal_' + self.id(), function() {
                                 isDragging = true;
                                 count = 0;
-                                $(window).unbind('mousemove');
+                                $(window).off('mousemove.terminal_' + self.id());
                             });
                         });
                     }).mouseup(function() {
                         var wasDragging = isDragging;
                         isDragging = false;
-                        $(window).unbind('mousemove');
+                        $(window).off('mousemove.terminal_' + self.id());
                         if (!wasDragging) {
                             if (++count === 1) {
                                 clear_selection();
@@ -5640,11 +5628,11 @@
             // -------------------------------------------------------------
             if ($.event.special.mousewheel) {
                 var shift = false;
-                $(document).bind('keydown.terminal', function(e) {
+                $(document).bind('keydown.terminal_' + self.id(), function(e) {
                     if (e.shiftKey) {
                         shift = true;
                     }
-                }).bind('keyup.terminal', function(e) {
+                }).bind('keyup.terminal_' + self.id(), function(e) {
                     // in Google Chromium/Linux shiftKey is false
                     if (e.shiftKey || e.which == 16) {
                         shift = false;
@@ -5659,7 +5647,10 @@
                                 return;
                             }
                         } else if ($.isFunction(settings.mousewheel)) {
-                            settings.mousewheel(event, delta, self);
+                            ret = settings.mousewheel(event, delta, self);
+                            if (ret === false) {
+                                return;
+                            }
                         }
                         if (delta > 0) {
                             self.scroll(-40);
@@ -5670,7 +5661,7 @@
                     }
                 });
             }
-            init_deferr.resolve();
+            init_defer.resolve();
         }); // make_interpreter
         self.data('terminal', self);
         return self;
