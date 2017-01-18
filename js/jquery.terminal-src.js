@@ -5641,8 +5641,9 @@
                 self.mousewheel(function(event, delta) {
                     if (!shift) {
                         var interpreter = interpreters.top();
+                        var ret;
                         if ($.isFunction(interpreter.mousewheel)) {
-                            var ret = interpreter.mousewheel(event, delta, self);
+                            ret = interpreter.mousewheel(event, delta, self);
                             if (ret === false) {
                                 return;
                             }

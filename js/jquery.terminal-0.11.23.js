@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 18 Jan 2017 16:43:49 +0000
+ * Date: Wed, 18 Jan 2017 17:25:14 +0000
  */
 
 /* TODO:
@@ -5641,8 +5641,9 @@
                 self.mousewheel(function(event, delta) {
                     if (!shift) {
                         var interpreter = interpreters.top();
+                        var ret;
                         if ($.isFunction(interpreter.mousewheel)) {
-                            var ret = interpreter.mousewheel(event, delta, self);
+                            ret = interpreter.mousewheel(event, delta, self);
                             if (ret === false) {
                                 return;
                             }
