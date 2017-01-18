@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 18 Jan 2017 17:25:14 +0000
+ * Date: Wed, 18 Jan 2017 17:31:37 +0000
  */
 
 /* TODO:
@@ -5264,7 +5264,7 @@
                         off('focus', focus_terminal);
                     iframe.remove();
                     terminals.remove(terminal_id);
-                    if (!terminal.length()) {
+                    if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
                 });

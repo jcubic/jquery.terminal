@@ -5264,7 +5264,7 @@
                         off('focus', focus_terminal);
                     iframe.remove();
                     terminals.remove(terminal_id);
-                    if (!terminal.length()) {
+                    if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
                 });
