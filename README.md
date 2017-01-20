@@ -8,7 +8,7 @@
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-DEV-yellow.svg) [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal) [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel)](https://travis-ci.org/jcubic/jquery.terminal) [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-DEV-yellow.svg) [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal) [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel)](https://travis-ci.org/jcubic/jquery.terminal) [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel) [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 
 ### Summary
 
@@ -172,11 +172,13 @@ make cover
 
 ### Contribution
 
-If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make`. To make it work you need to have installed java to run yuicompressor-2.4.8.jar and install uglifyjs:
+If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make`. To make it work you need to have installed java to run yuicompressor-2.4.8.jar and install uglifyjs and jshint:
 
 ```
-npm install -g uglifyjs
+npm install -g uglifyjs jshint
 ```
+
+Before you create pull request run `make jshint` it will be run by travis
 
 ### License
 
