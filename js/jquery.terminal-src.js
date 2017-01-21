@@ -2682,7 +2682,7 @@
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
-        clickTimeout: 400,
+        clickTimeout: 200,
         request: $.noop,
         response: $.noop,
         onRPCError: null,
@@ -5481,15 +5481,19 @@
                         $(window).off('mousemove.terminal_' + self.id());
                         if (!wasDragging) {
                             if (++count === 1) {
-                                clear_selection();
                                 if (!self.enabled() && !frozen) {
                                     self.focus();
                                     command_line.enable();
                                 }
+                                self.oneTime(settings.clickTimeout, 'resize_' + self.id(), function() {
+                                    clear_selection();
+                                    count = 0;
+                                });
                             }
                         }
                     }).dblclick(function() {
                         count = 0;
+                        self.stopTime('resize_' + self.id());
                     });
                 })();
             }

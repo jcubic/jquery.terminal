@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 21 Jan 2017 16:28:46 +0000
+ * Date: Sat, 21 Jan 2017 21:21:23 +0000
  */
 
 /* TODO:
@@ -2682,7 +2682,7 @@
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
-        clickTimeout: 400,
+        clickTimeout: 200,
         request: $.noop,
         response: $.noop,
         onRPCError: null,
@@ -4910,12 +4910,12 @@
                     //display filename and line which throw exeption
                     self.pause(settings.softPause);
                     $.get(e.fileName, function(file) {
-                        self.resume();
                         var num = e.lineNumber - 1;
                         var line = file.split('\n')[num];
                         if (line) {
                             self.error('[' + e.lineNumber + ']: ' + line);
                         }
+                        self.resume();
                     });
                 }
                 if (e.stack) {
@@ -5481,15 +5481,19 @@
                         $(window).off('mousemove.terminal_' + self.id());
                         if (!wasDragging) {
                             if (++count === 1) {
-                                clear_selection();
                                 if (!self.enabled() && !frozen) {
                                     self.focus();
                                     command_line.enable();
                                 }
+                                self.oneTime(settings.clickTimeout, 'resize_' + self.id(), function() {
+                                    clear_selection();
+                                    count = 0;
+                                });
                             }
                         }
                     }).dblclick(function() {
                         count = 0;
+                        self.stopTime('resize_' + self.id());
                     });
                 })();
             }
