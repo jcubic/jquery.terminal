@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 21 Jan 2017 15:12:18 +0000
+ * Date: Sat, 21 Jan 2017 15:14:59 +0000
  */
 
 /* TODO:
@@ -2549,14 +2549,6 @@
         var width = span[0].getBoundingClientRect().width;
         var result = Math.floor(terminal.find('iframe').width() / width);
         temp.remove();
-        /*
-        if (have_scrollbars(terminal)) {
-            var SCROLLBAR_WIDTH = 20;
-            // assume that scrollbars are 20px - in my Laptop with
-            // Linux/Chrome they are 16px
-            var margins = terminal.innerWidth() - terminal.width();
-            result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
-        }*/
         return result;
     }
     // -----------------------------------------------------------------------
@@ -2621,19 +2613,6 @@
             document.execCommand('copy'); 
         } catch(e) {}
         $div.remove();
-    }
-    // -----------------------------------------------------------------------
-    // :: check if div have scrollbars (need to have overflow auto or always)
-    // -----------------------------------------------------------------------
-    function have_scrollbars(div) {
-        if (div.css('overflow') == 'scroll' ||
-            div.css('overflow-y') == 'scroll') {
-            return true;
-        } else if (div.is('body')) {
-            return $('body').height() > $(window).height();
-        } else {
-            return div.get(0).scrollHeight > div.innerHeight();
-        }
     }
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
