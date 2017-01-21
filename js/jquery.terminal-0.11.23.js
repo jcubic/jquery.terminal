@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 21 Jan 2017 15:14:59 +0000
+ * Date: Sat, 21 Jan 2017 15:20:36 +0000
  */
 
 /* TODO:
@@ -2610,7 +2610,7 @@
             }
         }
         try {
-            document.execCommand('copy'); 
+            document.execCommand('copy');
         } catch(e) {}
         $div.remove();
     }
@@ -5255,17 +5255,22 @@
             // :: is use scrollBottomOffset option as margin for the check
             // -------------------------------------------------------------
             is_bottom: function() {
-                var scroll_height, scroll_top, height;
-                if (self.is('body')) {
-                    scroll_height = $(document).height();
-                    scroll_top = $(window).scrollTop();
-                    height = window.innerHeight;
+                if (settings.scrollBottomOffset == -1) {
+                    return false;
                 } else {
-                    scroll_height = scroll_object[0].scrollHeight;
-                    scroll_top = scroll_object.scrollTop();
-                    height = scroll_object.outerHeight();
+                    var scroll_height, scroll_top, height;
+                    if (self.is('body')) {
+                        scroll_height = $(document).height();
+                        scroll_top = $(window).scrollTop();
+                        height = window.innerHeight;
+                    } else {
+                        scroll_height = scroll_object[0].scrollHeight;
+                        scroll_top = scroll_object.scrollTop();
+                        height = scroll_object.outerHeight();
+                    }
+                    var limit = scroll_height - settings.scrollBottomOffset;
+                    return scroll_top + height > limit;
                 }
-                return scroll_top + height > scroll_height - settings.scrollBottomOffset;
             }
         }, function(name, fun) {
             // wrap all functions and display execptions
