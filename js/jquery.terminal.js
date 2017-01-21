@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 21 Jan 2017 15:20:36 +0000
+ * Date: Sat, 21 Jan 2017 16:28:46 +0000
  */
 
 /* TODO:
@@ -5525,8 +5525,7 @@
             }
             function resize() {
                 if (self.is(':visible')) {
-                    console.log('resize');
-                    var width = iframe.width();
+                    var width = self.width();
                     var height = self.height();
                     // prevent too many calculations in IE
                     if (old_height !== height || old_width !== width) {

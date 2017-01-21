@@ -5525,8 +5525,7 @@
             }
             function resize() {
                 if (self.is(':visible')) {
-                    console.log('resize');
-                    var width = iframe.width();
+                    var width = self.width();
                     var height = self.height();
                     // prevent too many calculations in IE
                     if (old_height !== height || old_width !== width) {
