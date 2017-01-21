@@ -522,6 +522,15 @@ function tests_on_ready() {
                 shortcut(false, false, false, 38, 'arrowUp');
                 shortcut(false, false, false, 40, 'arrowDown');
                 expect(cmd.get()).toEqual('hello');
+                shortcut(false, false, false, 38, 'arrowUp');
+                enter_key();
+                shortcut(false, false, false, 38, 'arrowUp');
+                expect(cmd.get()).toEqual('foo bar');
+                enter_key();
+                shortcut(false, false, false, 38, 'arrowUp');
+                expect(cmd.get()).toEqual('foo bar');
+                shortcut(false, false, false, 40, 'arrowDown');
+                cmd.insert('hello');
                 shortcut(true, false, false, 80, 'p'); // CTRL+P
                 expect(cmd.get()).toEqual('foo bar');
                 shortcut(true, false, false, 78, 'n'); // CTRL+N

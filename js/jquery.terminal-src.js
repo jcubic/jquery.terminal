@@ -1582,15 +1582,15 @@
                 }
                 var key = get_key(e);
                 shift_insert = key == 'SHIFT+INSERT';
+                if (e.which !== 38 &&
+                    !(e.which === 80 && e.ctrlKey)) {
+                    first_up_history = true;
+                }
                 if ($.isFunction(keymap[key])) {
                     result = keymap[key]();
                     if (result !== undefined) {
                         return result;
                     }
-                }
-                if (e.which !== 38 &&
-                    !(e.which === 80 && e.ctrlKey)) {
-                    first_up_history = true;
                 }
                 // arrows / Home / End / ENTER
                 if (reverse_search && (e.which === 35 || e.which === 36 ||
