@@ -2547,7 +2547,7 @@
                      '&nbsp;</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
         var width = span[0].getBoundingClientRect().width;
-        var result = Math.floor(terminal.width() / width) - 1;
+        var result = Math.floor(terminal.find('iframe').width() / width);
         temp.remove();
         /*
         if (have_scrollbars(terminal)) {
@@ -2555,9 +2555,8 @@
             // assume that scrollbars are 20px - in my Laptop with
             // Linux/Chrome they are 16px
             var margins = terminal.innerWidth() - terminal.width();
-            //result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
-        }
-        */
+            result -= Math.ceil((SCROLLBAR_WIDTH - margins / 2) / (width-1));
+        }*/
         return result;
     }
     // -----------------------------------------------------------------------
@@ -5542,7 +5541,8 @@
             }
             function resize() {
                 if (self.is(':visible')) {
-                    var width = self.width();
+                    console.log('resize');
+                    var width = iframe.width();
                     var height = self.height();
                     // prevent too many calculations in IE
                     if (old_height !== height || old_width !== width) {

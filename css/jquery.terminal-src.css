@@ -60,7 +60,6 @@
     color: #f00;
 }
 .terminal {
-    padding: 10px;
     position: relative;
     /*overflow: hidden;*/
     overflow: auto;
@@ -540,7 +539,7 @@
 .terminal iframe {
     position: absolute;
     left: 0;
-    top: -100%;
+    top: 0;
     width: 100%;
     height: 100%;
     margin: 1px 0 0;
@@ -548,4 +547,9 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    box-sizing: border-box;
+    padding: 10px;
+}
+.terminal, .terminal iframe {
+    padding: 10px; /* we get width of the terminal from iframe so it need to have the same padding */
 }
