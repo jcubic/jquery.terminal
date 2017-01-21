@@ -1,4 +1,5 @@
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+var loaded
 if (typeof window === 'undefined') {
     var jsdom = require("jsdom");
     global.window = jsdom.jsdom().defaultView;
@@ -18,7 +19,9 @@ if (typeof window === 'undefined') {
         return [{width: self.width(), height: self.height()}];
     };
     tests_on_ready();
+    loaded = global.loaded || false;
 } else {
+    loaded = window.loaded || false;
     $(tests_on_ready);
 }
 function nbsp(string) {
@@ -63,6 +66,10 @@ function enter(term, text) {
     active.focus();
 }
 function tests_on_ready() {
+    if (loaded) {
+        return false;
+    }
+    loaded = true;
     describe('Terminal utils', function() {
         var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
         var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -1158,7 +1165,7 @@ function tests_on_ready() {
                 term.save_state(); // initial state
                 term.save_state('foo');
                 term.save_state('bar');
-                expect(location.hash).toEqual('#[[8,1,"foo"],[8,2,"bar"]]');
+                expect(decodeURIComponent(location.hash)).toEqual('#[[8,1,"foo"],[8,2,"bar"]]');
                 term.destroy().remove();
             });
             describe('exec', function() {
@@ -1617,10 +1624,10 @@ function tests_on_ready() {
                 var term = $('<div/>').appendTo('body').terminal($.noop);
                 term.echo('history_state');
                 it('should not record commands', function() {
-                    var hash = location.hash;
+                    var hash = decodeURIComponent(location.hash);
                     term.focus();
                     enter(term, 'foo');
-                    expect(location.hash).toEqual(hash);
+                    expect(decodeURIComponent(location.hash)).toEqual(hash);
                 });
                 it('should start recording commands', function(done) {
                     location.hash = '';
@@ -1638,7 +1645,7 @@ function tests_on_ready() {
                         enter(term, 'bar');
                         setTimeout(function() {
                             expect(term.get_output()).toEqual('> foo\n> bar');
-                            expect(location.hash).toEqual(hash);
+                            expect(decodeURIComponent(location.hash)).toEqual(hash);
                             term.destroy().remove();
                             done();
                         }, 0);
@@ -1918,15 +1925,28 @@ function tests_on_ready() {
                 });
             });
             describe('exception', function() {
+                var error = new Error('Some Message');
                 var term = $('<div/>').appendTo('body').terminal($.noop, {
                     greetings: false
                 });
-                it('it should show exception', function() {
-                    var error = new Error('Some Message');
+                if (error.stack) {
+                    var length = Math.max.apply(Math, error.stack.split("\n").map(function(line) {
+                        return line.length;
+                    }));
+                    term.option('numChars', length+1);
+                }
+                it('should show exception', function() {
                     term.exception(error, 'ERROR');
-                    var output = ['[[;;;error]&#91;ERROR&#93;: Some Message]',
-                                  '[[;;;error]Error: Some Message]'];
-                    var re = new RegExp('^' + $.terminal.escape_regex(output.join('\n')));
+                    var message = '[[;;;error]&#91;ERROR&#93;: ';
+                    if (error.fileName) {
+                        message += ']' + error.fileName + '[[;;;error]: ' + error.message;
+                    } else {
+                        message += error.message;
+                    }
+                    message += ']';
+                    window.message = message;
+                    var re = new RegExp('^' + $.terminal.escape_regex(message));
+                    window.term = term;
                     expect(term.get_output().match(re)).toBeTruthy();
                     var div = term.find('.terminal-output > div:eq(0)');
                     expect(div.hasClass('exception')).toBeTruthy();
