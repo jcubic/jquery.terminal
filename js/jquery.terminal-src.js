@@ -4910,12 +4910,12 @@
                     //display filename and line which throw exeption
                     self.pause(settings.softPause);
                     $.get(e.fileName, function(file) {
-                        self.resume();
                         var num = e.lineNumber - 1;
                         var line = file.split('\n')[num];
                         if (line) {
                             self.error('[' + e.lineNumber + ']: ' + line);
                         }
+                        self.resume();
                     });
                 }
                 if (e.stack) {

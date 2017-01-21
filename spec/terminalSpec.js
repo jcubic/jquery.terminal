@@ -1,5 +1,5 @@
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
-var loaded
+var loaded;
 if (typeof window === 'undefined') {
     var jsdom = require("jsdom");
     global.window = jsdom.jsdom().defaultView;
@@ -60,10 +60,8 @@ function enter_key() {
     shortcut(false, false, false, 13, 'enter');
 }
 function enter(term, text) {
-    var active = $.terminal.active();
     term.insert(text).focus();
     enter_key();
-    active.focus();
 }
 function tests_on_ready() {
     if (loaded) {
@@ -1966,7 +1964,7 @@ function tests_on_ready() {
             describe('logout/token', function() {
                 var term;
                 beforeEach(function() {
-                    term = $('<div/>').terminal($.noop, {
+                    term = $('<div/>').appendTo('body').terminal($.noop, {
                         name: 'logout',
                         login: function(user, pass, callback) {
                             callback('TOKEN');
@@ -1980,7 +1978,7 @@ function tests_on_ready() {
                     enter(term, 'bar');
                 });
                 afterEach(function() {
-                    term.destroy();
+                    term.destroy().remove();
                 });
                 function push_interpreter() {
                     term.push({}, {
@@ -1989,6 +1987,9 @@ function tests_on_ready() {
                             callback(user == '1' && pass == '1' ? 'TOKEN2' : null);
                         }
                     });
+                    if (term.token(true)) {
+                        term.logout(true);
+                    }
                 }
                 it('should logout from main intepreter', function() {
                     expect(term.token()).toEqual('TOKEN');
@@ -2020,11 +2021,16 @@ function tests_on_ready() {
                 it('should throw exception when calling from login', function() {
                     term.logout();
                     var strings = $.terminal.defaults.strings;
-                    expect(function() { term.logout(); }).toThrow(new Error(sprintf(strings.notWhileLogin, 'logout')));
-                    enter(term, '1');
-                    enter(term, '1');
-                    push_interpreter();
-                    expect(function() { term.logout(); }).toThrow(new Error(sprintf(strings.notWhileLogin, 'logout')));
+                    var error = new Error(sprintf(strings.notWhileLogin, 'logout'));
+                    expect(function() { term.logout(); }).toThrow(error);
+                    // in firefox terminal is pausing to fetch the line that trigger exception
+                    term.option('onResume', function() {
+                        term.focus();
+                        enter(term, '1');
+                        enter(term, '1');
+                        push_interpreter();
+                        expect(function() { term.logout(true); }).toThrow(error);
+                    });
                 });
                 it('should logout from all interpreters', function() {
                     push_interpreter();
