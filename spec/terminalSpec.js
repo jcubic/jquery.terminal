@@ -995,7 +995,7 @@ function tests_on_ready() {
             it('should complete when completion is a function with setTimeout', function(done) {
                 var term = $('<div/>').appendTo('body').terminal($.noop);
                 term.push($.noop, {
-                    completion: function(term, string, callback) {
+                    completion: function(string, callback) {
                         setTimeout(function() {
                             callback(['one', 'two', 'tree']);
                         }, 100);
@@ -1010,7 +1010,7 @@ function tests_on_ready() {
                     done();
                 }, 400);
             });
-            function completion(term, string, callback) {
+            function completion(string, callback) {
                 var command = term.get_command();
                 var cmd = $.terminal.parse_command(command);
                 var re = new RegExp('^\\s*' + $.terminal.escape_regex(string));
