@@ -1,4 +1,4 @@
-0.1.0     copy to system clipboard when copy to kill area
+1.0.0     copy to system clipboard when copy to kill area
           simplify changing of terminal colors using css variables
           always export history and import when importHistory option is true
           add bar and underline cursor animations and a way to enable it with single css variable
