@@ -2333,7 +2333,9 @@
         active: function() {
             return terminals.front();
         },
-        // implmentation detail id is always length of terminals Cycle
+        // ---------------------------------------------------------------------
+        // :: Implmentation detail id is always length of terminals Cycle
+        // ---------------------------------------------------------------------
         last_id: function() {
             var len = terminals.length();
             if (len) {
