@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 22 Jan 2017 20:20:09 +0000
+ * Date: Sun, 22 Jan 2017 20:24:12 +0000
  */
 
 /* TODO:
@@ -3846,7 +3846,8 @@
                             var string = self.before_cursor(settings.wordAutocomplete);
                             if (completion.length == 3) {
                                 var error = new Error($.terminal.defaults.strings.comletionParameters);
-                                throw error;
+                                self.exception(error, 'USER');
+                                return;
                             }
                             completion.call(self, string, function(commands) {
                                 self.complete(commands, {

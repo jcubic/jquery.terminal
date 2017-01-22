@@ -3846,7 +3846,8 @@
                             var string = self.before_cursor(settings.wordAutocomplete);
                             if (completion.length == 3) {
                                 var error = new Error($.terminal.defaults.strings.comletionParameters);
-                                throw error;
+                                self.exception(error, 'USER');
+                                return;
                             }
                             completion.call(self, string, function(commands) {
                                 self.complete(commands, {
