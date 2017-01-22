@@ -1484,21 +1484,6 @@ function tests_on_ready() {
                     term.destroy().remove();
                 });
             });
-            describe('setInterpreter', function() {
-                it('should call set_interpreter with warning', function() {
-                    var term = $('<div/>').appendTo('body').terminal();
-                    spyOn(term, 'set_interpreter');
-                    var warn = console.warn;
-                    console.warn = $.noop;
-                    spyOn(console, 'warn');
-                    term.setInterpreter($.noop);
-                    expect(term.set_interpreter).toHaveBeenCalledWith($.noop);
-                    var warning = 'This function is deprecated, use set_interpreter insead!';
-                    expect(console.warn).toHaveBeenCalledWith(warning);
-                    console.warn = warn;
-                    term.destroy().remove();
-                });
-            });
             describe('set_interpreter', function() {
                 var term = $('<div/>').appendTo('body').terminal($.noop);
                 it('should change intepreter', function() {
