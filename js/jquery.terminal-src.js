@@ -4294,7 +4294,6 @@
                     command = self.before_cursor(options.word);
                     return true;
                 } else if (matched.length > 1) {
-                    console.log(tab_count);
                     if (++tab_count >= 2) {
                         tab_count = 0;
                         if (options.echo) {

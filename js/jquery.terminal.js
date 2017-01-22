@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 22 Jan 2017 21:01:23 +0000
+ * Date: Sun, 22 Jan 2017 21:04:08 +0000
  */
 
 /* TODO:
@@ -4294,7 +4294,6 @@
                     command = self.before_cursor(options.word);
                     return true;
                 } else if (matched.length > 1) {
-                    console.log(tab_count);
                     if (++tab_count >= 2) {
                         tab_count = 0;
                         if (options.echo) {
