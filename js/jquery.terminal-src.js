@@ -3847,7 +3847,7 @@
                             if (completion.length == 3) {
                                 var error = new Error($.terminal.defaults.strings.comletionParameters);
                                 self.exception(error, 'USER');
-                                return;
+                                return false;
                             }
                             completion.call(self, string, function(commands) {
                                 self.complete(commands, {
