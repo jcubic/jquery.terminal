@@ -69,5 +69,11 @@ jshint:
 	jshint js/unix_formatting.js
 	jshint spec/terminalSpec.js
 
+jsonlint: package.json bower.json
+	jsonlint package.json > /dev/null
+	jsonlint bower.json > /dev/null
+
+lint: jshint jsonlint
+
 install:
 	npm install
