@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 21 Jan 2017 21:21:23 +0000
+ * Date: Sun, 22 Jan 2017 20:05:08 +0000
  */
 
 /* TODO:
@@ -2700,6 +2700,7 @@
         keypress: $.noop,
         keydown: $.noop,
         strings: {
+            comletionParameters: "From version 1.0.0 completion function need to have two arguments",
             wrongPasswordTryAgain: "Wrong password try again!",
             wrongPassword: "Wrong password!",
             ajaxAbortError: "Error while aborting ajax call!",
@@ -3713,7 +3714,15 @@
             }
             if ($.isPlainObject(interpreter.keymap)) {
                 command_line.keymap($.omap(interpreter.keymap, function(name, fun) {
-                    return fun.bind(self);
+                    return function() {
+                        var args = [].slice.call(arguments);
+                        try {
+                            return fun.apply(self, args);
+                        } catch(e) {
+                            self.exception(e, 'USER KEYMAP');
+                            throw e;
+                        }
+                    };
                 }));
             }
             command_line.set('');
@@ -3835,7 +3844,11 @@
                     switch ($.type(completion)) {
                         case 'function':
                             var string = self.before_cursor(settings.wordAutocomplete);
-                            completion(self, string, function(commands) {
+                            if (completion.length == 3) {
+                                var error = new Error($.terminal.defaults.strings.comletionParameters);
+                                throw error;
+                            }
+                            completion.call(self, string, function(commands) {
                                 self.complete(commands, {
                                     echo: true
                                 });
