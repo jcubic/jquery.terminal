@@ -30,6 +30,7 @@
           fix removing global events on terminal destroy
           BREAKING CHANGE:
           completion function now have two arguments string and callback and terminal is in this
+          removed setInterpreter, parseArguments, splitArguments, parseCommand and splitCommand
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.

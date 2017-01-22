@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 22 Jan 2017 21:10:49 +0000
+ * Date: Sun, 22 Jan 2017 21:53:48 +0000
  */
 
 /* TODO:
@@ -2340,19 +2340,6 @@
                 return len - 1;
             }
         },
-        // keep old as backward compatible
-        parseArguments: function(string) {
-            return $.terminal.parse_arguments(string);
-        },
-        splitArguments: function(string) {
-            return $.terminal.split_arguments(string);
-        },
-        parseCommand: function(string) {
-            return $.terminal.parse_command(string);
-        },
-        splitCommand: function(string) {
-            return $.terminal.split_command(string);
-        },
         // ---------------------------------------------------------------------
         // :: Function splits arguments and works with strings like
         // :: 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ a
@@ -4327,16 +4314,6 @@
             // -------------------------------------------------------------
             commands: function() {
                 return interpreters.top().interpreter;
-            },
-            // -------------------------------------------------------------
-            // :: Low Level method that overwrites interpreter
-            // -------------------------------------------------------------
-            setInterpreter: function() {
-                if (window.console && console.warn) {
-                    console.warn('This function is deprecated, use set_inte'+
-                                 'rpreter insead!');
-                }
-                return self.set_interpreter.apply(self, arguments);
             },
             // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
