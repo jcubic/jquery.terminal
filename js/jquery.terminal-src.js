@@ -4316,6 +4316,8 @@
                 return interpreters.top().interpreter;
             },
             // -------------------------------------------------------------
+            // :: Low Level method that overwrites interpreter
+            // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
                 function overwrite_interpreter() {
                     self.pause(settings.softPause);

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 22 Jan 2017 21:53:48 +0000
+ * Date: Sun, 22 Jan 2017 21:54:49 +0000
  */
 
 /* TODO:
@@ -4315,6 +4315,8 @@
             commands: function() {
                 return interpreters.top().interpreter;
             },
+            // -------------------------------------------------------------
+            // :: Low Level method that overwrites interpreter
             // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
                 function overwrite_interpreter() {
