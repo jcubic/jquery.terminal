@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 22 Jan 2017 20:30:42 +0000
+ * Date: Sun, 22 Jan 2017 21:01:23 +0000
  */
 
 /* TODO:
@@ -4274,9 +4274,9 @@
                     commands.push('exit');
                 }
                 if (tab_count % 2 === 0) {
-                    command = command_line.get().substring(0, command_line.position());
+                    command = self.before_cursor(options.word);
                 } else {
-                    var test = command_line.get().substring(0, command_line.position());
+                    var test = self.before_cursor(options.word);
                     if (test !== command) {
                         // command line changed between TABS - ignore
                         return;
@@ -4291,16 +4291,17 @@
                 }
                 if (matched.length === 1) {
                     self.insert(matched[0].replace(regex, ''));
+                    command = self.before_cursor(options.word);
                     return true;
                 } else if (matched.length > 1) {
+                    console.log(tab_count);
                     if (++tab_count >= 2) {
+                        tab_count = 0;
                         if (options.echo) {
-                            echo_command(command);
                             var text = matched.reverse().join('\t');
                             self.echo($.terminal.escape_brackets(text), {keepWords: true});
                             return true;
                         }
-                        tab_count = 0;
                     } else {
                         var found = false;
                         var found_index;
@@ -4316,6 +4317,7 @@
                         }
                         if (found) {
                             self.insert(matched[0].slice(0, j).replace(regex, ''));
+                            command = self.before_cursor(options.word);
                             return true;
                         }
                     }
