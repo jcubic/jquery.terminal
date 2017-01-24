@@ -18,7 +18,7 @@ class MysqlDemo {
       throw new Exception("Sorry you are not allowed to execute '" .
                           $query . "'");
     }
-    if (!preg_match("/(select.*from *test|insert *into *test.*|delete *from *test|update *test)/", $query)) {
+    if (!preg_match("/^\s*(select.*from *test|insert *into *test.*|delete *from *test|update *test)\s*$/", $query)) {
       throw new Exception("Sorry you can't execute '" . $query .
                           "' you are only allowed to select, insert, delete " .
                           "or update 'test' table");
