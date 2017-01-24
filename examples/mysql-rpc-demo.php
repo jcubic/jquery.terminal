@@ -6,13 +6,16 @@ if (function_exists('xdebug_disable')) {
     xdebug_disable();
 }
 
-$link = new mysqli('localhost', 'user', 'password', 'db_name');
+
 
 class MysqlDemo {
   public function query($query) {
-    global $link;
+    $link = new mysqli('localhost', 'user', 'password', 'db_name');
+    if (mysqli_connect_errno()) {
+        throw new Exception("MySQL Connection: " . mysqli_connect_error());
+    }
     if (preg_match("/create|drop/", $query)) {
-      throw new Exception("Sorry you are not allowed to execute '" . 
+      throw new Exception("Sorry you are not allowed to execute '" .
                           $query . "'");
     }
     if (!preg_match("/(select.*from *test|insert *into *test.*|delete *from *test|update *test)/", $query)) {
@@ -33,7 +36,7 @@ class MysqlDemo {
         return array();
       }
     } else {
-      throw new Exception("MySQL Error: " . mysql_error());
+      throw new Exception("MySQL Error: " . mysqli_error($link));
     }
   }
 }
