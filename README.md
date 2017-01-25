@@ -178,7 +178,7 @@ make cover
 
 ### Contribution
 
-If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch. To make it work you need to have installed java to run yuicompressor-2.4.8.jar and install uglifyjs, jshint and jsonlint, also you need to use bash:
+If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well. To make it work you need to have installed java to run yuicompressor-2.4.8.jar and install uglifyjs, jshint and jsonlint, also you need to use bash:
 
 ```
 npm install -g uglifyjs jshint jsonlint
