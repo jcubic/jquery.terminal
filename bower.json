@@ -14,12 +14,12 @@
         "bower.in",
         "Makefile",
         "manifest",
-		".gitignore",
-		".npmignore",
-		"package.in",
-		"package.json",
-		"bin",
-		"version"
+        ".gitignore",
+        ".npmignore",
+        "package.in",
+        "package.json",
+        "bin",
+        "version"
     ],
     "dependencies": {
         "jquery": "~2"

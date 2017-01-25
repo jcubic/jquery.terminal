@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 22 Jan 2017 21:54:49 +0000
+ * Date: Wed, 25 Jan 2017 12:48:52 +0000
  */
 
 /* TODO:
@@ -2333,7 +2333,9 @@
         active: function() {
             return terminals.front();
         },
-        // implmentation detail id is always length of terminals Cycle
+        // ---------------------------------------------------------------------
+        // :: Implmentation detail id is always length of terminals Cycle
+        // ---------------------------------------------------------------------
         last_id: function() {
             var len = terminals.length();
             if (len) {
