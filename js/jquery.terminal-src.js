@@ -4912,7 +4912,7 @@
                             self.error('[' + e.lineNumber + ']: ' + line);
                         }
                         self.resume();
-                    });
+                    }, 'text');
                 }
                 if (e.stack) {
                     var stack = $.terminal.escape_brackets(e.stack);

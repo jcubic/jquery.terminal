@@ -19,9 +19,7 @@ if (typeof window === 'undefined') {
         return [{width: self.width(), height: self.height()}];
     };
     tests_on_ready();
-    loaded = global.loaded || false;
 } else {
-    loaded = window.loaded || false;
     $(tests_on_ready);
 }
 function nbsp(string) {
@@ -64,10 +62,6 @@ function enter(term, text) {
     enter_key();
 }
 function tests_on_ready() {
-    if (loaded) {
-        return false;
-    }
-    loaded = true;
     describe('Terminal utils', function() {
         var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
         var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -2141,7 +2135,7 @@ function tests_on_ready() {
                     term = $('<div/>').terminal();
                 });
                 afterEach(function() {
-                    term.destroy();
+                    term.destroy().remove();
                 });
                 it('should call have prompt', function() {
                     term.read('text: ');
@@ -2185,7 +2179,7 @@ function tests_on_ready() {
                     term.focus();
                 });
                 afterEach(function() {
-                    term.destroy();
+                    term.destroy().remove();
                 });
                 it('should push new interpreter', function() {
                     term.push({});
