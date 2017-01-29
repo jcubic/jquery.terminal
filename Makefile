@@ -75,5 +75,5 @@ jsonlint: package.json bower.json
 
 lint: jshint jsonlint
 
-install:
+install-deps:
 	npm install

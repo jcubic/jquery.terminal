@@ -2135,7 +2135,7 @@ function tests_on_ready() {
                     term = $('<div/>').terminal();
                 });
                 afterEach(function() {
-                    term.destroy().remove();
+                    term.destroy();
                 });
                 it('should call have prompt', function() {
                     term.read('text: ');

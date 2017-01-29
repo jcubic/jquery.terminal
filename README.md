@@ -178,13 +178,22 @@ make cover
 
 ### Contribution
 
-If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well. To make it work you need to have installed java to run yuicompressor-2.4.8.jar and install uglifyjs, jshint and jsonlint, also you need to use bash:
+If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well, fixes to examples and README can be made to master. To build the files (it only replace version and add current date in files and run minifiers on css and js) you need to have java to run yuicompressor-2.4.8.jar nodejs and install uglifyjs, jshint and jsonlint, also you need to use bash:
 
 ```
 npm install -g uglifyjs jshint jsonlint
 ```
 
-Before you create pull request run `make jshint`, it will be run by travis.
+or you can run make install-deps
+
+
+```
+make install-deps
+```
+
+Before you create pull request run `make lint`, it will be run by travis.
+
+Non tech contrubution are also wellcome, if you find a bug in documentation on the website you can file an issue to [jcubic/jquery.terminal-www](https://github.com/jcubic/jquery.terminal-www).
 
 ### License
 
