@@ -152,6 +152,18 @@ $('#term_demo').terminal('service.php', {login: true});
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [full documentation](http://terminal.jcubic.pl/api_reference.php).
 
+### Contribution
+
+If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well, fixes to examples and README can be made to master. To build the files (it only replace version and add current date in files and run minifiers on css and js) you need to have java to run yuicompressor-2.4.8.jar, have nodejs and install uglifyjs, jshint and jsonlint, also you need to use bash:
+
+```
+npm install -g uglifyjs jshint jsonlint
+```
+
+Before you create pull request run `make lint` it will be run by travis.
+
+Non tech contrubution are also wellcome, if you find a bug in documentation on the website you can file an issue to [jcubic/jquery.terminal-www](https://github.com/jcubic/jquery.terminal-www).
+
 ### Test
 
 If you want to run tests from browser you need to run
@@ -160,7 +172,7 @@ If you want to run tests from browser you need to run
 bower install --dev
 ```
 
-and open SpecRunner.html file in the browser
+and open SpecRunner.html file in the browser, make sure you're on the page when the script is running other wise you'll get errors.
 
 
 To run tests from command line you need to run this commands:
@@ -176,24 +188,6 @@ you can also run test covarage using
 make cover
 ```
 
-### Contribution
-
-If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well, fixes to examples and README can be made to master. To build the files (it only replace version and add current date in files and run minifiers on css and js) you need to have java to run yuicompressor-2.4.8.jar nodejs and install uglifyjs, jshint and jsonlint, also you need to use bash:
-
-```
-npm install -g uglifyjs jshint jsonlint
-```
-
-or you can run make install-deps
-
-
-```
-make install-deps
-```
-
-Before you create pull request run `make lint`, it will be run by travis.
-
-Non tech contrubution are also wellcome, if you find a bug in documentation on the website you can file an issue to [jcubic/jquery.terminal-www](https://github.com/jcubic/jquery.terminal-www).
 
 ### License
 
