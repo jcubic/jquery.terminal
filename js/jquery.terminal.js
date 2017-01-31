@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 31 Jan 2017 18:19:15 +0000
+ * Date: Tue, 31 Jan 2017 19:05:20 +0000
  */
 
 /* TODO:
@@ -3168,7 +3168,7 @@
                         interpreter: make_object_interpreter(object,
                                                              false,
                                                              login,
-                                                             fn_interpreter),
+                                                             fn_interpreter.bind(self)),
                         completion: Object.keys(object)
                     });
                 });
@@ -3211,7 +3211,7 @@
                     throw type + " is invalid interpreter value";
                 }
                 finalize({
-                    interpreter: user_intrp,
+                    interpreter: user_intrp.bind(self),
                     completion: settings.completion
                 });
             }
