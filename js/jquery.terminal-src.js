@@ -3752,11 +3752,32 @@
             }
         }
         // ---------------------------------------------------------------------
-        var local_first_instance;
+        function hashchange() {
+            if (fire_hash_change && settings.execHash) {
+                try {
+                    if (location.hash) {
+                        var hash = location.hash.replace(/^#/, '');
+                        hash_commands = $.parseJSON(decodeURIComponent(hash));
+                    } else {
+                        hash_commands = [];
+                    }
+                    if (hash_commands.length) {
+                        restore_state(hash_commands[hash_commands.length-1]);
+                    } else if (save_state[0]) {
+                        self.import_view(save_state[0]);
+                    }
+                } catch(e) {
+                    display_exception(e, 'TERMINAL');
+                }
+            }
+        }
+        // ---------------------------------------------------------------------
         function initialize() {
             prepare_top_interpreter();
             show_greetings();
-            redraw(); // for case when showing long error before init
+            if (lines.length) {
+                redraw(); // for case when showing long error before init
+            }
             // was_paused flag is workaround for case when user call exec before
             // login and pause in onInit, 3rd exec will have proper timing (will
             // execute after onInit resume)
@@ -3777,25 +3798,6 @@
                         // if user pause in onInit wait with exec until it
                         // resume
                         self.resume();
-                    }
-                }
-            }
-            function hashchange() {
-                if (fire_hash_change && settings.execHash) {
-                    try {
-                        if (location.hash) {
-                            var hash = location.hash.replace(/^#/, '');
-                            hash_commands = $.parseJSON(decodeURIComponent(hash));
-                        } else {
-                            hash_commands = [];
-                        }
-                        if (hash_commands.length) {
-                            restore_state(hash_commands[hash_commands.length-1]);
-                        } else if (save_state[0]) {
-                            self.import_view(save_state[0]);
-                        }
-                    } catch(e) {
-                        display_exception(e, 'TERMINAL');
                     }
                 }
             }
