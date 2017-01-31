@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 26 Jan 2017 17:46:40 +0000
+ * Date: Tue, 31 Jan 2017 18:19:15 +0000
  */
 
 /* TODO:
@@ -2698,8 +2698,8 @@
             commandNotFound: "Command '%s' Not Found!",
             oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescr"+
                 "ibe or rpc without system.describe",
-            oneInterpreterFunction: "You can't use more than one function (rpc"+
-                "without system.describe or with option ignoreSystemDescre counts as one)",
+            oneInterpreterFunction: "You can't use more than one function (rpc "+
+                "without system.describe or with option ignoreSystemDescribe counts as one)",
             loginFunctionMissing: "You didn't specify a login function",
             noTokenError: "Access denied (no token)",
             serverResponse: "Server responded",
@@ -2841,10 +2841,18 @@
                     method: method,
                     params: params,
                     request: function(jxhr, request) {
-                        settings.request(jxhr, self, request);
+                        try {
+                            settings.request.apply(self, jxhr, request, self);
+                        } catch(e) {
+                            display_exception(e, 'USER');
+                        }
                     },
                     response: function(jxhr, response) {
-                        settings.response(jxhr, self, response);
+                        try {
+                            settings.response.apply(self, jxhr, response, self);
+                        } catch(e) {
+                            display_exception(e, 'USER');
+                        }
                     },
                     success: function(json) {
                         if (json.error) {
@@ -3006,10 +3014,18 @@
                                     method: proc.name,
                                     params: args,
                                     request: function(jxhr, request) {
-                                        settings.request.call(self, jxhr, request, self);
+                                        try {
+                                            settings.request.call(self, jxhr, request, self);
+                                        } catch (e) {
+                                            display_exception(e, 'USER');
+                                        }
                                     },
                                     response: function(jxhr, response) {
-                                        settings.response.call(self, jxhr, response, self);
+                                        try {
+                                            settings.response.call(self, jxhr, response, self);
+                                        } catch (e) {
+                                            display_exception(e, 'USER');
+                                        }
                                     },
                                     success: function(json) {
                                         if (json.error) {
@@ -3075,10 +3091,18 @@
                 params: [],
                 success: response,
                 request: function(jxhr, request) {
-                    settings.request(jxhr, self, request);
+                    try {
+                        settings.request.call(self, jxhr, request, self);
+                    } catch(e) {
+                        display_exception(e, 'USER');
+                    }
                 },
                 response: function(jxhr, response) {
-                    settings.response(jxhr, self, response);
+                    try {
+                        settings.response.call(self, jxhr, response, self);
+                    } catch(e) {
+                        display_exception(e, 'USER');
+                    }
                 },
                 error: function() {
                     success(null);
@@ -3204,10 +3228,18 @@
                     method: method,
                     params: [user, passwd],
                     request: function(jxhr, request) {
-                        settings.request(jxhr, self, request);
+                        try {
+                            settings.request.call(self, jxhr, request, self);
+                        } catch(e) {
+                            display_exception(e, 'USER');
+                        }
                     },
                     response: function(jxhr, response) {
-                        settings.response(jxhr, self, response);
+                        try {
+                            settings.response.call(self, jxhr, response, self);
+                        } catch(e) {
+                            display_exception(e, 'USER');
+                        }
                     },
                     success: function(response) {
                         if (!response.error && response.result) {
@@ -3708,7 +3740,7 @@
                         try {
                             return fun.apply(self, args);
                         } catch(e) {
-                            self.exception(e, 'USER KEYMAP');
+                            display_exception(e, 'USER KEYMAP');
                             throw e;
                         }
                     };
@@ -3724,6 +3756,7 @@
         function initialize() {
             prepare_top_interpreter();
             show_greetings();
+            redraw(); // for case when showing long error before init
             // was_paused flag is workaround for case when user call exec before
             // login and pause in onInit, 3rd exec will have proper timing (will
             // execute after onInit resume)
@@ -3835,7 +3868,7 @@
                             var string = self.before_cursor(settings.wordAutocomplete);
                             if (completion.length == 3) {
                                 var error = new Error($.terminal.defaults.strings.comletionParameters);
-                                self.exception(error, 'USER');
+                                display_exception(error, 'USER');
                                 return false;
                             }
                             completion.call(self, string, function(commands) {
@@ -4899,7 +4932,8 @@
                     self.error(message, {
                         finalize: function(div) {
                             div.addClass('exception message');
-                        }
+                        },
+                        keepWords: true
                     });
                 }
                 if (typeof e.fileName === 'string') {
