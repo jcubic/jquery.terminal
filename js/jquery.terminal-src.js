@@ -48,7 +48,7 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 
-/* jshint ignore:start */
+/* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
         if (!sprintf.cache.hasOwnProperty(arguments[0])) {
@@ -82,7 +82,7 @@
                     arg = argv[cursor++];
                 }
 
-                if (/[^s]/.test(match[8]) && (get_type(arg) != 'number')) {
+                if (/[^s]/.test(match[8]) && (get_type(arg) !== 'number')) {
                     throw(sprintf('[sprintf] expecting number but found %s', get_type(arg)));
                 }
                 switch (match[8]) {
@@ -97,8 +97,8 @@
                     case 'x': arg = arg.toString(16); break;
                     case 'X': arg = arg.toString(16).toUpperCase(); break;
                 }
-                arg = (/[def]/.test(match[8]) && match[3] && arg >= 0 ? '+'+ arg : arg);
-                pad_character = match[4] ? match[4] == '0' ? '0' : match[4].charAt(1) : ' ';
+                arg = (/[def]/.test(match[8]) && match[3] && arg >= 0 ? ' +' + arg : arg);
+                pad_character = match[4] ? match[4] === '0' ? '0' : match[4].charAt(1) : ' ';
                 pad_length = match[6] - String(arg).length;
                 pad = match[6] ? str_repeat(pad_character, pad_length) : '';
                 output.push(match[5] ? arg + pad : pad + arg);
@@ -180,10 +180,10 @@
      */
     ctx.sprintf = sprintf;
     ctx.vsprintf = vsprintf;
-})(typeof global != "undefined" ? global : window);
-/* jshint ignore:end */
+})(typeof global !== "undefined" ? global : window);
+/* eslint-enable */
 (function($, undefined) {
-    "use strict";
+    'use strict';
     // -----------------------------------------------------------------------
     // :: map object to object
     // -----------------------------------------------------------------------
@@ -197,7 +197,7 @@
     var Clone = {
         clone_object: function(object) {
             var tmp = {};
-            if (typeof object == 'object') {
+            if (typeof object === 'object') {
                 if ($.isArray(object)) {
                     return this.clone_array(object);
                 } else if (object === null) {
@@ -206,7 +206,7 @@
                     for (var key in object) {
                         if ($.isArray(object[key])) {
                             tmp[key] = this.clone_array(object[key]);
-                        } else if (typeof object[key] == 'object') {
+                        } else if (typeof object[key] === 'object') {
                             tmp[key] = this.clone_object(object[key]);
                         } else {
                             tmp[key] = object[key];
@@ -218,11 +218,11 @@
         },
         clone_array: function(array) {
             if (!$.isFunction(Array.prototype.map)) {
-                throw new Error("You'r browser don't support ES5 array map " +
-                                "use es5-shim");
+                throw new Error('You\'r browser don\'t support ES5 array map ' +
+                                'use es5-shim');
             }
             return array.slice(0).map(function(item) {
-                if (typeof item == 'object') {
+                if (typeof item === 'object') {
                     return this.clone_object(item);
                 } else {
                     return item;
@@ -234,7 +234,8 @@
         return Clone.clone_object(object);
     };
 
-    var hasLS = function () {
+    /* eslint-disable */
+    var hasLS = function() {
       var testKey = 'test', storage = window.localStorage;
       try {
         storage.setItem(testKey, '1');
@@ -245,7 +246,6 @@
       }
     };
 
-    /* jshint ignore:start */
     // -----------------------------------------------------------------------
     // :: Storage plugin
     // -----------------------------------------------------------------------
@@ -509,7 +509,7 @@
         compliantExecNpcg = /()??/.exec("")[1] === undef, // NPCG: nonparticipating capturing group
         self;
 
-        self = function (str, separator, limit) {
+        self = function(str, separator, limit) {
             // If `separator` is not a regex, use `nativeSplit`
             if (Object.prototype.toString.call(separator) !== "[object RegExp]") {
                 return nativeSplit.call(str, separator, limit);
@@ -545,7 +545,7 @@
                         // Fix browsers whose `exec` methods don't consistently return `undefined` for
                         // nonparticipating capturing groups
                         if (!compliantExecNpcg && match.length > 1) {
-                            match[0].replace(separator2, function () {
+                            match[0].replace(separator2, function() {
                                 for (var i = 1; i < arguments.length - 2; i++) {
                                     if (arguments[i] === undef) {
                                         match[i] = undef;
@@ -577,7 +577,7 @@
         };
 
         // For convenience
-        String.prototype.split = function (separator, limit) {
+        String.prototype.split = function(separator, limit) {
             return self(this, separator, limit);
         };
 
@@ -591,7 +591,7 @@
         var target = this[0];
         var isContentEditable = target.contentEditable === 'true';
         //get
-        if (arguments.length == 0) {
+        if (arguments.length === 0) {
             //HTML5
             if (window.getSelection) {
                 //contenteditable
@@ -630,7 +630,7 @@
             return 0;
         }
         //set
-        if (pos == -1)
+        if (pos === -1)
             pos = this[isContentEditable? 'text' : 'val']().length;
         //HTML5
         if (window.getSelection) {
@@ -655,7 +655,7 @@
             target.focus();
         return pos;
     };
-    /* jshint ignore:end */
+    /* eslint-enable */
     // -----------------------------------------------------------------------
     // :: Split string to array of strings with the same length
     // -----------------------------------------------------------------------
@@ -665,8 +665,8 @@
         if (len < length) {
             return [str];
         } else if (length < 0) {
-            throw new Error('str_parts: length can\'t be negative'); // '
-         }
+            throw new Error('str_parts: length can\'t be negative'); // ')
+        }
         for (var i = 0; i < len; i += length) {
             result.push(str.substring(i, i + length));
         }
@@ -791,16 +791,16 @@
             data = $.Storage.get(storage_key);
             data = data ? $.parseJSON(data) : [];
         }
-        var pos = data.length-1;
+        var pos = data.length - 1;
         $.extend(this, {
             append: function(item) {
                 if (enabled) {
-                    if (data[data.length-1] !== item) {
+                    if (data[data.length - 1] !== item) {
                         data.push(item);
                         if (size && data.length > size) {
                             data = data.slice(-size);
                         }
-                        pos = data.length-1;
+                        pos = data.length - 1;
                         if (!memory) {
                             $.Storage.set(storage_key, JSON.stringify(data));
                         }
@@ -819,13 +819,13 @@
                 return data;
             },
             reset: function() {
-                pos = data.length-1;
+                pos = data.length - 1;
             },
             last: function() {
-                return data[data.length-1];
+                return data[data.length - 1];
             },
             end: function() {
-                return pos === data.length-1;
+                return pos === data.length - 1;
             },
             position: function() {
                 return pos;
@@ -834,7 +834,7 @@
                 return data[pos];
             },
             next: function() {
-                if (pos < data.length-1) {
+                if (pos < data.length - 1) {
                     ++pos;
                 }
                 if (pos !== -1) {
@@ -870,13 +870,6 @@
             }
         });
     }
-    // -----------------------------------------------------------------------
-    var is_paste_supported = (function() {
-        var el = document.createElement('div');
-        el.setAttribute('onpaste', 'return;');
-        return typeof el.onpaste == "function";
-    })();
-    var first_cmd = true;
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
@@ -913,7 +906,6 @@
         var command = '';
         var last_command;
         // text from selection using CTRL+SHIFT+C (as in Xterm)
-        var selected_text = '';
         var kill_text = ''; // text from command that kill part of the command
         var position = 0;
         var prompt;
@@ -925,7 +917,7 @@
         var paste_count = 0;
         function get_key(e) {
             var key = e.key.toUpperCase();
-            if (key == 'CONTROL') {
+            if (key === 'CONTROL') {
                 return 'CTRL';
             } else {
                 var combo = [];
@@ -982,15 +974,10 @@
                 if (reverse_search) {
                     rev_search_str = rev_search_str.slice(0, -1);
                     draw_reverse_prompt();
-                } else {
-                    if (command !== '' && position > 0) {
-                        self['delete'](-1);
-                    }
+                } else if (command !== '' && position > 0) {
+                    self['delete'](-1);
                 }
                 return is_touch;
-            },
-            'CTRL+SHIFT+C': function() {
-                selected_text = get_selected_text();
             },
             'TAB': function() {
                 self.insert('\t');
@@ -1013,11 +1000,11 @@
                     --len;
                 }
                 for (var i = len; i > 0; --i) {
-                    if (command[i] === ' ' && command[i+1] !== ' ') {
+                    if (command[i] === ' ' && command[i + 1] !== ' ') {
                         pos = i + 1;
                         break;
                     } else if (command[i] === '\n' &&
-                               command[i+1] !== '\n') {
+                               command[i + 1] !== '\n') {
                         pos = i;
                         break;
                     }
@@ -1059,14 +1046,12 @@
                 var match = command.slice(position).match(re);
                 if (!match || match[0].match(/^\s+$/)) {
                     self.position(command.length);
+                } else if (match[0][0] !== ' ') {
+                    position += match.index + 1;
                 } else {
-                    if (match[0][0] !== ' ') {
-                        position += match.index + 1;
-                    } else {
-                        position += match.index + match[0].length - 1;
-                        if (match[0][match[0].length-1] !== ' ') {
-                            --position;
-                        }
+                    position += match.index + match[0].length - 1;
+                    if (match[0][match[0].length - 1] !== ' ') {
+                        --position;
                     }
                 }
                 redraw();
@@ -1077,16 +1062,6 @@
             'HOME': home,
             'CTRL+A': home,
             'SHIFT+INSERT': paste_event,
-            'aaa': function() {
-                clip.val(''); // so we get it before paste event
-                paste_count = 0;
-                if (!is_paste_supported) {
-                    paste(e);
-                } else {
-                    clip.focus();
-                }
-                return true;
-            },
             'CTRL+SHIFT+T': return_true, // open closed tab
             'CTRL+W': function() {
                 // don't work in Chromium (can't prevent close tab)
@@ -1113,7 +1088,7 @@
             },
             'CTRL+V': paste_event,
             'CTRL+K': function() {
-                kill_text = self['delete'](command.length-position);
+                kill_text = self['delete'](command.length - position);
                 text_to_clipboard(self, kill_text);
                 return false;
             },
@@ -1180,10 +1155,8 @@
                         clip.focus();
                     });
                 }
-            } else {
-                if (focus) {
-                    clip.blur();
-                }
+            } else if (focus) {
+                clip.blur();
             }
         }
         // on mobile you can't delete character if input is empty (event
@@ -1191,13 +1164,13 @@
         // data but we put real command and position
         function fix_textarea() {
             // delay worked while experimenting
-            self.oneTime(10, function () {
+            self.oneTime(10, function() {
                 clip.val(command);
                 if (enabled) {
-                    self.oneTime(10, function () {
+                    self.oneTime(10, function() {
                         try {
                             clip.caret(position);
-                        } catch(e) {
+                        } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
                         }
                     });
@@ -1231,14 +1204,14 @@
         // ---------------------------------------------------------------------
         // :: Blinking cursor function
         // ---------------------------------------------------------------------
-        function blink(i) {
+        function blink() {
             cursor.toggleClass('inverted');
         }
         // ---------------------------------------------------------------------
         // :: Set prompt for reverse search
         // ---------------------------------------------------------------------
         function draw_reverse_prompt() {
-            prompt = "(reverse-i-search)`" + rev_search_str + "': ";
+            prompt = '(reverse-i-search)`' + rev_search_str + '\': '; // '
             draw_prompt();
         }
         // ---------------------------------------------------------------------
@@ -1263,10 +1236,10 @@
                 len -= reverse_search_position;
             }
             if (rev_search_str.length > 0) {
-                for (var j=rev_search_str.length; j>0; j--) {
+                for (var j = rev_search_str.length; j > 0; j--) {
                     save_string = $.terminal.escape_regex(rev_search_str.substring(0, j));
                     regex = new RegExp(save_string);
-                    for (var i=len; i--;) {
+                    for (var i = len; i--;) {
                         if (regex.test(history_data[i])) {
                             reverse_search_position = history_data.length - i;
                             self.position(history_data[i].indexOf(save_string));
@@ -1299,10 +1272,10 @@
             var array;
             // command contains new line characters
             if (string.match(/\n/)) {
-                var tmp = string.split("\n");
+                var tmp = string.split('\n');
                 var first_len = num_chars - prompt_len - 1;
                 // empty character after each line
-                for (var i=0; i<tmp.length-1; ++i) {
+                for (var i = 0; i < tmp.length - 1; ++i) {
                     tmp[i] += ' ';
                 }
                 // split first line
@@ -1314,7 +1287,7 @@
                     array = [tmp[0]];
                 }
                 // process rest of the lines
-                for (i=1; i<tmp.length; ++i) {
+                for (i = 1; i < tmp.length; ++i) {
                     if (tmp[i].length > num_chars) {
                         array = array.concat(str_parts(tmp[i], num_chars));
                     } else {
@@ -1333,15 +1306,15 @@
         // ---------------------------------------------------------------------
         function format(string) {
             var formatters = $.terminal.defaults.formatters;
-            for (var i=0; i<formatters.length; ++i) {
+            for (var i = 0; i < formatters.length; ++i) {
                 try {
-                    if (typeof formatters[i] == 'function') {
+                    if (typeof formatters[i] === 'function') {
                         var ret = formatters[i](string);
-                        if (typeof ret == 'string') {
+                        if (typeof ret === 'string') {
                             string = ret;
                         }
                     }
-                } catch(e) {
+                } catch (e) {
                     alert('formatting error at formatters[' + i + ']\n' +
                           (e.stack ? e.stack : e));
                 }
@@ -1352,7 +1325,7 @@
         // :: Function that displays the command line. Split long lines and
         // :: place cursor in the right place
         // ---------------------------------------------------------------------
-        var redraw = (function(self) {
+        var redraw = (function() {
             var before = cursor.prev();
             var after = cursor.next();
             // -----------------------------------------------------------------
@@ -1404,13 +1377,12 @@
                     before.before(div(line));
                 });
             }
-            var count = 0;
             // -----------------------------------------------------------------
             // :: Redraw function
             // -----------------------------------------------------------------
             return function() {
                 var string;
-                switch(typeof mask) {
+                switch (typeof mask) {
                     case 'boolean':
                         string = mask ? command.replace(/./g, '*') : command;
                         break;
@@ -1451,7 +1423,6 @@
                         }
                     } else {
                         var num_lines = array.length;
-                        var offset = 0;
                         if (position < first_len) {
                             draw_cursor_line(array[0], position);
                             lines_after(array.slice(1));
@@ -1469,56 +1440,50 @@
                                 if (last_len === from_last) {
                                     pos = 0;
                                 } else {
-                                    pos = last_len-from_last;
+                                    pos = last_len - from_last;
                                 }
                                 draw_cursor_line(last, pos);
+                            } else if (num_lines === 3) { // in the middle
+                                var str = format(array[0]);
+                                before.before('<div>' + str + '</div>');
+                                draw_cursor_line(array[1], position - first_len - 1);
+                                str = format(array[2]);
+                                after.after('<div>' + str + '</div>');
                             } else {
-                                // in the middle
-                                if (num_lines === 3) {
-                                    var str = format(array[0]);
-                                    before.before('<div>' + str + '</div>');
-                                    draw_cursor_line(array[1],
-                                                     position-first_len-1);
-                                    str = format(array[2]);
-                                    after.after('<div>' + str + '</div>');
-                                } else {
-                                    // more lines, cursor in the middle
-                                    var line_index;
-                                    var current;
-                                    pos = position;
-                                    for (i=0; i<array.length; ++i) {
-                                        var current_len = array[i].length;
-                                        if (pos > current_len) {
-                                            pos -= current_len;
-                                        } else {
-                                            break;
-                                        }
+                                // more lines, cursor in the middle
+                                var line_index;
+                                var current;
+                                pos = position;
+                                for (i = 0; i < array.length; ++i) {
+                                    var current_len = array[i].length;
+                                    if (pos > current_len) {
+                                        pos -= current_len;
+                                    } else {
+                                        break;
                                     }
-                                    current = array[i];
-                                    line_index = i;
-                                    // cursor on first character in line
-                                    if (pos === current.length) {
-                                        pos = 0;
-                                        current = array[++line_index];
-                                    }
-                                    draw_cursor_line(current, pos);
-                                    lines_before(array.slice(0, line_index));
-                                    lines_after(array.slice(line_index+1));
                                 }
+                                current = array[i];
+                                line_index = i;
+                                // cursor on first character in line
+                                if (pos === current.length) {
+                                    pos = 0;
+                                    current = array[++line_index];
+                                }
+                                draw_cursor_line(current, pos);
+                                lines_before(array.slice(0, line_index));
+                                lines_after(array.slice(line_index + 1));
                             }
                         }
                     }
+                } else if (string === '') {
+                    before.html('');
+                    cursor.html('&nbsp;');
+                    after.html('');
                 } else {
-                     if (string === '') {
-                         before.html('');
-                         cursor.html('&nbsp;');
-                         after.html('');
-                     } else {
-                         draw_cursor_line(string, position);
-                     }
+                    draw_cursor_line(string, position);
                 }
             };
-        })(self);
+        })();
         // ---------------------------------------------------------------------
         // :: Draw prompt that can be a function or a string
         // ---------------------------------------------------------------------
@@ -1571,7 +1536,7 @@
         // ---------------------------------------------------------------------
         var shift_insert;
         function keydown_event(e) {
-            var result, pos, len;
+            var result;
             if (enabled) {
                 if ($.isFunction(options.keydown)) {
                     result = options.keydown(e);
@@ -1581,7 +1546,7 @@
                     }
                 }
                 var key = get_key(e);
-                shift_insert = key == 'SHIFT+INSERT';
+                shift_insert = key === 'SHIFT+INSERT';
                 if (e.which !== 38 &&
                     !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
@@ -1631,7 +1596,11 @@
                 if (string !== undefined) {
                     name = string;
                     var enabled = history && history.enabled() || !history;
-                    history = new History(string, historySize, options.history == 'memory');
+                    history = new History(
+                        string,
+                        historySize,
+                        options.history === 'memory'
+                    );
                     // disable new history if old was disabled
                     if (!enabled) {
                         history.disable();
@@ -1660,17 +1629,15 @@
                         command = command.slice(0, position + n) +
                             command.slice(position, command.length);
                         if (!stay) {
-                            self.position(position+n);
+                            self.position(position + n);
                         }
                         fire_change_command();
                     }
-                } else {
-                    if (command !== '' && position < command.length) {
-                        removed = command.slice(position).slice(0, n);
-                        command = command.slice(0, position) +
-                            command.slice(position + n, command.length);
-                        fire_change_command();
-                    }
+                } else if (command !== '' && position < command.length) {
+                    removed = command.slice(position).slice(0, n);
+                    command = command.slice(0, position) +
+                        command.slice(position + n, command.length);
+                    fire_change_command();
                 }
                 redraw();
                 fix_textarea();
@@ -1689,7 +1656,7 @@
                 return self;
             },
             keymap: function(new_keymap) {
-                if (typeof new_keymap == 'undefined') {
+                if (typeof new_keymap === 'undefined') {
                     return keymap;
                 } else {
                     keymap = $.extend({}, default_keymap, new_keymap || {});
@@ -1762,14 +1729,12 @@
                     // if (position !== n) { this don't work, don't know why
                     if (relative) {
                         position += n;
+                    } else if (n < 0) {
+                        position = 0;
+                    } else if (n > command.length) {
+                        position = command.length;
                     } else {
-                        if (n < 0) {
-                            position = 0;
-                        } else if (n > command.length) {
-                            position = command.length;
-                        } else {
-                            position = n;
-                        }
+                        position = n;
                     }
                     if ($.isFunction(options.onPositionChange)) {
                         options.onPositionChange(position);
@@ -1811,7 +1776,7 @@
                 self.addClass('enabled');
                 try {
                     clip.caret(position);
-                } catch(e) {
+                } catch (e) {
                     // firefox throw NS_ERROR_FAILURE ignore
                 }
                 animation(true);
@@ -1842,7 +1807,7 @@
         // :: INIT
         // ---------------------------------------------------------------------
         self.name(options.name || options.prompt || '');
-        if (typeof options.prompt == 'string') {
+        if (typeof options.prompt === 'string') {
             prompt = options.prompt;
         } else {
             prompt = '> ';
@@ -1852,7 +1817,6 @@
             self.enable();
         }
         // Keystrokes
-        var object;
         var doc = $(document.documentElement || window);
         self.keymap(options.keymap);
         function keypress_event(e) {
@@ -1874,7 +1838,7 @@
                     if ($.inArray(e.which, [38, 13, 0, 8]) > -1 &&
                         //!(e.which === 40 && e.shiftKey ||
                         !(e.which === 38 && e.shiftKey)) {
-                        if (e.keyCode == 123) { // for F12 which == 0
+                        if (e.keyCode === 123) { // for F12 which === 0
                             return;
                         }
                         return false;
@@ -1899,7 +1863,7 @@
                 // shift insert don't fire keypress on Linux/Chrome
                 // Some Androids don't fire keypress - #39
                 var val = clip.val();
-                if (val !== '' || e.which == 8) {  // #209 ; 8 - backspace
+                if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
                     self.set(val);
                 }
             }
@@ -1914,32 +1878,19 @@
     // -------------------------------------------------------------------------
     // :: TOOLS
     // -------------------------------------------------------------------------
-    function skip_formatting_count(string) {
-        // this will covert html entities to single characters
-        return $('<div>' + $.terminal.strip(string) + '</div>').text().length;
-    }
-    // -------------------------------------------------------------------------
-    function formatting_count(string) {
-        return string.length - skip_formatting_count(string);
-    }
-    // -------------------------------------------------------------------------
     // taken from https://hacks.mozilla.org/2011/09/detecting-and-generating-
     // css-animations-in-javascript/
     var support_animations = (function() {
         var animation = false,
-            animationstring = 'animation',
-            keyframeprefix = '',
             domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
-            pfx  = '',
             elm = document.createElement('div');
-        if (elm.style.animationName) { animation = true; }
+        if (elm.style.animationName) {
+            animation = true;
+        }
         if (animation === false) {
             for (var i = 0; i < domPrefixes.length; i++) {
                 var name = domPrefixes[i] + 'AnimationName';
-                if (elm.style[ name ] !== undefined) {
-                    pfx = domPrefixes[i];
-                    animationstring = pfx + 'Animation';
-                    keyframeprefix = '-' + pfx.toLowerCase() + '-';
+                if (elm.style[name] !== undefined) {
                     animation = true;
                     break;
                 }
@@ -1948,11 +1899,11 @@
         return animation;
     })();
     // -------------------------------------------------------------------------
-    var is_android = navigator.userAgent.toLowerCase().indexOf("android") != -1;
+    var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
     var is_touch = (function() {
         return ('ontouchstart' in window) || window.DocumentTouch &&
-            document instanceof DocumentTouch;
+            document instanceof window.DocumentTouch;
     })();
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
@@ -1976,24 +1927,24 @@
         }
     }
     // -------------------------------------------------------------------------
-    var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?)/i;
-    var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
-    var format_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]?/gi;
-    var format_exist_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]/gi;
-    var format_full_re = /^\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^\[]*\[[^\]]*)\]$/gi;
+    /* eslint-disable */
+    var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?)/i;
+    var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
+    var format_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
+    var format_exist_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]/gi;
+    var format_full_re = /^\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]$/gi;
     var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
-    //var url_re = /https?:\/\/(?:(?!&[^;]+;)[^\s:"'<>)])+/g;
-    //var url_re = /\bhttps?:\/\/(?:(?!&[^;]+;)[^\s"'<>)])+\b/g;
-    var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\]\[)])+\b)/gi;
+    var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+\b)/gi;
     var url_nf_re = /\b(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)\b(?![^[\]]*])/gi;
-    var email_re = /((([^<>('")[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
-    var command_re = /('(?:[^']|\\')*'|"(\\"|[^"])*"|(?:\/(\\\/|[^\/])+\/[gimy]*)(?=:? |$)|(\\\s|\S)+|[\w-]+)/gi;
+    var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
+    var command_re = /('(?:[^']|\\')*'|"(\\"|[^"])*"|(?:\/(\\\/|[^/])+\/[gimy]*)(?=:? |$)|(\\\s|\S)+|[\w-]+)/gi;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
-    var re_re = /^\/((?:\\\/|[^\/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
+    var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
+    /* eslint-enable */
     $.terminal = {
         version: '{{VER}}',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
@@ -2047,8 +1998,8 @@
         // :: match exact string that contain those characters
         // ---------------------------------------------------------------------
         escape_regex: function(str) {
-            if (typeof str == 'string') {
-                var special = /([-\\\^$\[\]()+{}?*.|])/g;
+            if (typeof str === 'string') {
+                var special = /([-\\^$[\]()+{}?*.|])/g;
                 return str.replace(special, '\\$1');
             }
         },
@@ -2056,10 +2007,10 @@
         // :: test if string contain formatting
         // ---------------------------------------------------------------------
         have_formatting: function(str) {
-            return typeof str == 'string' && !!str.match(format_exist_re);
+            return typeof str === 'string' && !!str.match(format_exist_re);
         },
         is_formatting: function(str) {
-            return typeof str == 'string' && !!str.match(format_full_re);
+            return typeof str === 'string' && !!str.match(format_full_re);
         },
         // ---------------------------------------------------------------------
         // :: return array of formatting and text between them
@@ -2083,9 +2034,9 @@
                 // missing semicolons
                 if (semicolons >= 4) {
                     return _;
-                } else if (semicolons == 2) {
+                } else if (semicolons === 2) {
                     semicolons = ';;';
-                } else if (semicolons == 3) {
+                } else if (semicolons === 3) {
                     semicolons = ';';
                 } else {
                     semicolons = '';
@@ -2098,8 +2049,22 @@
                 return '[[' + format + semicolons + safe + ']' + text + ']';
             }).split(/\n/g);
             function is_space() {
-                return line.substring(j-6, j) == '&nbsp;' ||
-                    line.substring(j-1, j) == ' ';
+                return line.substring(j - 6, j) === '&nbsp;' ||
+                    line.substring(j - 1, j) === ' ';
+            }
+            // Fix output if formatting not closed
+            function fix_close() {
+                var matched = output.match(format_re);
+                if (matched) {
+                    var last = matched[matched.length - 1];
+                    if (last[last.length - 1] !== ']') {
+                        prev_format = last.match(format_begin_re)[1];
+                        output += ']';
+                    } else if (output.match(format_last_re)) {
+                        output = output.replace(format_last_re, '');
+                        prev_format = last.match(format_begin_re)[1];
+                    }
+                }
             }
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
@@ -2111,7 +2076,7 @@
                 var count = 0;
                 var output;
                 var space = -1;
-                for (var j=0, jlen=line.length; j<jlen; ++j) {
+                for (var j = 0, jlen = line.length; j < jlen; ++j) {
                     if (line.substring(j).match(format_start_re)) {
                         formatting = true;
                         in_text = false;
@@ -2129,17 +2094,17 @@
                                 // should never happen if used by terminal,
                                 // because it always calls $.terminal.encode
                                 // before this function
-                                throw new Error("Unclosed html entity in line " +
-                                                (i+1) + ' at char ' + (j+1));
+                                throw new Error('Unclosed html entity in line ' +
+                                                (i + 1) + ' at char ' + (j + 1));
                             }
-                            j+=m[1].length-2; // because continue adds 1 to j
+                            j += m[1].length - 2; // because continue adds 1 to j
                             // if entity is at the end there is no next loop
                             // issue #77
-                            if (j === jlen-1) {
+                            if (j === jlen - 1) {
                                 result.push(output + m[1]);
                             }
                             continue;
-                        } else if (line[j] === ']' && line[j-1] === '\\') {
+                        } else if (line[j] === ']' && line[j - 1] === '\\') {
                             // escape \] counts as one character
                             --count;
                         } else {
@@ -2147,27 +2112,27 @@
                         }
                     }
                     if (is_space() && ((formatting && in_text) || !formatting ||
-                                      (line[j] === '[' && line[j+1] === '['))) {
+                                      (line[j] === '[' && line[j + 1] === '['))) {
                         space = j;
                     }
-                    if ((count === length || j === jlen-1) &&
+                    if ((count === length || j === jlen - 1) &&
                         ((formatting && in_text) || !formatting)) {
                         var text = $.terminal.strip(line.substring(space));
                         text = $('<span>' + text + '</span>').text();
                         var text_len = text.length;
-                        text = text.substring(0, j+length+1);
-                        var can_break = !!text.match(/\s/) || j+length+1 > text_len;
-                        if (words && space != -1 && j !== jlen-1 && can_break) {
+                        text = text.substring(0, j + length + 1);
+                        var can_break = !!text.match(/\s/) || j + length + 1 > text_len;
+                        if (words && space !== -1 && j !== jlen - 1 && can_break) {
                             output = line.substring(first_index, space);
-                            j = space-1;
+                            j = space - 1;
                         } else {
-                            output = line.substring(first_index, j+1);
+                            output = line.substring(first_index, j + 1);
                         }
                         if (words) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
                         }
                         space = -1;
-                        first_index = j+1;
+                        first_index = j + 1;
                         count = 0;
                         if (prev_format) {
                             output = prev_format + output;
@@ -2175,21 +2140,7 @@
                                 prev_format = '';
                             }
                         }
-                        // Fix output if formatting not closed
-                        var matched = output.match(format_re);
-                        if (matched) {
-                            var last = matched[matched.length-1];
-                            if (last[last.length-1] !== ']') {
-                                prev_format = last.match(format_begin_re)[1];
-                                output += ']';
-                            } else if (output.match(format_last_re)) {
-                                var line_len = output.length;
-                                // why this line ???
-                                //var f_len = line_len-last[last.length-1].length;
-                                output = output.replace(format_last_re, '');
-                                prev_format = last.match(format_begin_re)[1];
-                            }
-                        }
+                        fix_close();
                         result.push(output);
                     }
                 }
@@ -2220,7 +2171,7 @@
                 linksNoReferrer: false
             }, options || {});
             if (typeof str === 'string') {
-                //support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
+                // support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splitted = $.terminal.format_split(str);
                 str = $.map(splitted, function(text) {
                     if (text === '') {
@@ -2239,7 +2190,7 @@
                                                                       data_text,
                                                                       text) {
                             if (text === '') {
-                                return ''; //'<span>&nbsp;</span>';
+                                return ''; // '<span>&nbsp;</span>';
                             }
                             text = text.replace(/\\]/g, ']');
                             var style_str = '';
@@ -2353,9 +2304,9 @@
                 var regex = arg.match(re_re);
                 if (regex) {
                     return new RegExp(regex[1], regex[2]);
-                } else if (arg[0] === "'" && arg[arg.length-1] === "'") {
+                } else if (arg[0] === '\'' && arg[arg.length - 1] === '\'') {
                     return arg.replace(/^'|'$/g, '');
-                } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
+                } else if (arg[0] === '"' && arg[arg.length - 1] === '"') {
                     return $.parseJSON(arg);
                 } else if (arg.match(/^-?[0-9]+$/)) {
                     return parseInt(arg, 10);
@@ -2372,9 +2323,9 @@
         // ---------------------------------------------------------------------
         split_arguments: function(string) {
             return $.map(string.match(command_re) || [], function(arg) {
-                if (arg[0] === "'" && arg[arg.length-1] === "'") {
+                if (arg[0] === '\'' && arg[arg.length - 1] === '\'') {
                     return arg.replace(/^'|'$/g, '');
-                } else if (arg[0] === '"' && arg[arg.length-1] === '"') {
+                } else if (arg[0] === '"' && arg[arg.length - 1] === '"') {
                     return arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
                 } else if (arg.match(/\/.*\/[gimy]*$/)) {
                     return arg;
@@ -2405,7 +2356,7 @@
                 term.exec(string, true).then(function() {
                     change_hash = true;
                 });
-            } catch(e) {
+            } catch (e) {
                 // error is process in exec
             }
         }
@@ -2438,13 +2389,16 @@
             };
         }
         function validJSONRPC(response) {
-            return (typeof response.id == 'number' && typeof response.result != 'undefined') ||
-                (options.method == 'system.describe' && response.name == 'DemoService' &&
-                 typeof response.id != 'undefined' && response.procs instanceof Array);
+            return (typeof response.id === 'number' &&
+                    typeof response.result !== 'undefined') ||
+                (options.method === 'system.describe' &&
+                 response.name === 'DemoService' &&
+                 typeof response.id !== 'undefined' &&
+                 response.procs instanceof Array);
         }
         ids[options.url] = ids[options.url] || 0;
         var request = {
-           'jsonrpc': '2.0',
+            'jsonrpc': '2.0',
             'method': options.method,
             'params': options.params,
             'id': ++ids[options.url]
@@ -2460,7 +2414,8 @@
             success: function(response, status, jqXHR) {
                 var content_type = jqXHR.getResponseHeader('Content-Type');
                 if (!content_type.match(/(application|text)\/json/)) {
-                    var msg = 'Response Content-Type is neither application/json nor text/json';
+                    var msg = 'Response Content-Type is neither application/json' +
+                        ' nor text/json';
                     if (console && console.warn) {
                         console.warn(msg);
                     } else {
@@ -2495,7 +2450,7 @@
             dataType: 'text',
             async: true,
             cache: false,
-            //timeout: 1,
+            // timeout: 1,
             type: 'POST'
         });
     };
@@ -2600,18 +2555,18 @@
         }
         try {
             document.execCommand('copy');
-        } catch(e) {}
+        } catch (e) {}
         $div.remove();
     }
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic'+
+    var copyright = 'Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic' +
         '.pl>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
-    //regex is for placing version string aligned to the right
-    var reg = new RegExp(" {" + version_string.length + "}$");
+    // regex is for placing version string aligned to the right
+    var reg = new RegExp(' {' + version_string.length + '}$');
     var name_ver = 'jQuery Terminal Emulator' +
         (version_set ? version_string : '');
     // -----------------------------------------------------------------------
@@ -2621,22 +2576,31 @@
         ['jQuery Terminal', '(c) 2011-2017 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
-        ['      _______                 ________                        __',
-         '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
-         ' __ / / // / // / _  / _/ // / / / _  / _/     / /  \\/ / _ \\/ /',
-         '/  / / // / // / ___/ // // / / / ___/ // / / / / /\\  / // / /__',
-         '\\___/____ \\\\__/____/_/ \\__ / /_/____/_//_/_/_/ /_/  \\/\\__\\_\\___/',
-         '         \\/          /____/                                   '.replace(reg, ' ') +
-         version_string,
-         copyright],
-        ['      __ _____                     ________                              __',
-         '     / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___  / /',
-         ' __ / // // // // // _  // _// // / / // _  // _//     // //  \\/ // _ \\/ /',
-         '/  / // // // // // ___// / / // / / // ___// / / / / // // /\\  // // / /__',
-         '\\___//____ \\\\___//____//_/ _\\_  / /_//____//_/ /_/ /_//_//_/ /_/ \\__\\_\\___/',
-         '          \\/              /____/                                          '.replace(reg, '') +
-         version_string,
-         copyright]
+        [
+            '      _______                 ________                        __',
+            '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
+            ' __ / / // / // / _  / _/ // / / / _  / _/     / /  \\/ / _ \\/ /',
+            '/  / / // / // / ___/ // // / / / ___/ // / / / / /\\  / // / /__',
+            '\\___/____ \\\\__/____/_/ \\__ / /_/____/_//_/_/_/ /_/  \\/\\__\\_\\___/',
+            '         \\/          /____/                                   '
+                .replace(reg, ' ') + version_string,
+            copyright
+        ],
+        [
+            '      __ _____                     ________                            ' +
+                '  __',
+            '     / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___ ' +
+                '/ /',
+            ' __ / // // // // // _  // _// // / / // _  // _//     // //  \\/ // _ ' +
+                '\\/ /',
+            '/  / // // // // // ___// / / // / / // ___// / / / / // // /\\  // // ' +
+                '/ /__',
+            '\\___//____ \\\\___//____//_/ _\\_  / /_//____//_/ /_/ /_//_//_/ /_/ \\' +
+                '__\\_\\___/',
+            '          \\/              /____/                                      ' +
+                '    '.replace(reg, '') + version_string,
+            copyright
+        ]
     ];
     // -----------------------------------------------------------------------
     // :: Default options
@@ -2689,30 +2653,32 @@
         keypress: $.noop,
         keydown: $.noop,
         strings: {
-            comletionParameters: "From version 1.0.0 completion function need to have two arguments",
-            wrongPasswordTryAgain: "Wrong password try again!",
-            wrongPassword: "Wrong password!",
-            ajaxAbortError: "Error while aborting ajax call!",
-            wrongArity: "Wrong number of arguments. Function '%s' expects %s got"+
-                " %s!",
-            commandNotFound: "Command '%s' Not Found!",
-            oneRPCWithIgnore: "You can use only one rpc with ignoreSystemDescr"+
-                "ibe or rpc without system.describe",
-            oneInterpreterFunction: "You can't use more than one function (rpc "+
-                "without system.describe or with option ignoreSystemDescribe counts as one)",
-            loginFunctionMissing: "You didn't specify a login function",
-            noTokenError: "Access denied (no token)",
-            serverResponse: "Server responded",
-            wrongGreetings: "Wrong value of greetings parameter",
-            notWhileLogin: "You can't call `%s' function while in login",
-            loginIsNotAFunction: "Authenticate must be a function",
-            canExitError: "You can't exit from main interpreter",
-            invalidCompletion: "Invalid completion",
-            invalidSelector: 'Sorry, but terminal said that "%s" is not valid '+
+            comletionParameters: 'From version 1.0.0 completion function need to' +
+                'have two arguments',
+            wrongPasswordTryAgain: 'Wrong password try again!',
+            wrongPassword: 'Wrong password!',
+            ajaxAbortError: 'Error while aborting ajax call!',
+            wrongArity: 'Wrong number of arguments. Function \'%s\' expects %s got' +
+                ' %s!',
+            commandNotFound: 'Command \'%s\' Not Found!', // '
+            oneRPCWithIgnore: 'You can use only one rpc with ignoreSystemDescr' +
+                'ibe or rpc without system.describe',
+            oneInterpreterFunction: 'You can\'t use more than one function (rpc ' + // '
+                'without system.describe or with option ignoreSystemDescribe cou' +
+                 'nts as one)',
+            loginFunctionMissing: 'You didn\'t specify a login function', // '
+            noTokenError: 'Access denied (no token)',
+            serverResponse: 'Server responded',
+            wrongGreetings: 'Wrong value of greetings parameter',
+            notWhileLogin: 'You can\'t call `%s\' function while in login',
+            loginIsNotAFunction: 'Authenticate must be a function',
+            canExitError: 'You can\'t exit from main interpreter', // '
+            invalidCompletion: 'Invalid completion',
+            invalidSelector: 'Sorry, but terminal said that "%s" is not valid ' +
                 'selector!',
             invalidTerminalId: 'Invalid Terminal ID',
-            login: "login",
-            password: "password",
+            login: 'login',
+            password: 'password',
             recursiveCall: 'Recursive call detected, skip'
         }
     };
@@ -2728,7 +2694,6 @@
     var change_hash = false; // don't change hash on Init
     var fire_hash_change = true;
     var first_instance = true; // used by history state
-    var last_id;
     $.fn.terminal = function(init_interpreter, options) {
         function StorageHelper(memory) {
             if (memory) {
@@ -2793,17 +2758,17 @@
                 // TODO: do we need to call pause/resume or return promise?
                 self.pause(settings.softPause);
                 $.get(m[1], function(response) {
-                    var prefix = location.href.replace(/[^\/]+$/, '');
+                    var prefix = location.href.replace(/[^/]+$/, '');
                     var file = m[1].replace(prefix, '');
                     self.echo('[[b;white;]' + file + ']');
                     var code = response.split('\n');
-                    var n = +m[2]-1;
-                    self.echo(code.slice(n-2, n+3).map(function(line, i) {
-                        if (i == 2) {
+                    var n = +m[2] - 1;
+                    self.echo(code.slice(n - 2, n + 3).map(function(line, i) {
+                        if (i === 2) {
                             line = '[[;#f00;]' +
                                 $.terminal.escape_brackets(line) + ']';
                         }
-                        return '[' + (n+i) + ']: ' + line;
+                        return '[' + (n + i) + ']: ' + line;
                     }).join('\n')).resume();
                 }, 'text');
             }
@@ -2843,44 +2808,42 @@
                     request: function(jxhr, request) {
                         try {
                             settings.request.apply(self, jxhr, request, self);
-                        } catch(e) {
+                        } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
                     response: function(jxhr, response) {
                         try {
                             settings.response.apply(self, jxhr, response, self);
-                        } catch(e) {
+                        } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
                     success: function(json) {
                         if (json.error) {
                             display_json_rpc_error(json.error);
+                        } else if ($.isFunction(settings.processRPCResponse)) {
+                            settings.processRPCResponse.call(self, json.result, self);
                         } else {
-                            if ($.isFunction(settings.processRPCResponse)) {
-                                settings.processRPCResponse.call(self, json.result, self);
-                            } else {
-                                display_object(json.result);
-                            }
+                            display_object(json.result);
                         }
                         self.resume();
                     },
                     error: ajax_error
                 });
             };
-            //this is the interpreter function
+            // this is the interpreter function
             return function(command, terminal) {
                 if (command === '') {
                     return;
                 }
                 try {
                     command = get_processed_command(command);
-                } catch(e) {
+                } catch (e) {
                     // exception can be thrown on invalid regex
-                    display_exception(e, "TERMINAL (get_processed_command)");
+                    display_exception(e, 'TERMINAL (get_processed_command)');
                     return;
-                    //throw e; // this will show stack in other try..catch
+                    // throw e; // this will show stack in other try..catch
                 }
                 if (!auth || command.name === 'help') {
                     // allows to call help without a token
@@ -2890,7 +2853,7 @@
                     if (token) {
                         interpreter(command.name, [token].concat(command.args));
                     } else {
-                        //should never happen
+                        // should never happen
                         terminal.error('&#91;AUTH&#93; ' +
                                        strings.noTokenError);
                     }
@@ -2908,11 +2871,11 @@
                 if (user_command === '') {
                     return;
                 }
-                //command = split_command_line(command);
+                // command = split_command_line(command);
                 var command;
                 try {
                     command = get_processed_command(user_command);
-                } catch(e) {
+                } catch (e) {
                     // exception can be thrown on invalid regex
                     if ($.isFunction(settings.exception)) {
                         settings.exception(e, self);
@@ -2920,7 +2883,7 @@
                         self.error(e.toString());
                     }
                     return;
-                    //throw e; // this will show stack in other try..catch
+                    // throw e; // this will show stack in other try..catch
                 }
                 /*
                 if (login) {
@@ -2936,7 +2899,7 @@
                 var type = $.type(val);
                 if (type === 'function') {
                     if (arity && val.length !== command.args.length) {
-                        self.error("&#91;Arity&#93; " +
+                        self.error('&#91;Arity&#93; ' +
                                    sprintf(strings.wrongArity,
                                            command.name,
                                            val.length,
@@ -2957,15 +2920,12 @@
                         name: command.name,
                         completion: type === 'object' ? commands : undefined
                     });
+                } else if ($.isFunction(fallback)) {
+                    fallback(user_command, self);
+                } else if ($.isFunction(settings.onCommandNotFound)) {
+                    settings.onCommandNotFound.call(self, user_command, self);
                 } else {
-                    if ($.isFunction(fallback)) {
-                        fallback(user_command, self);
-                    } else if ($.isFunction(settings.onCommandNotFound)) {
-                        settings.onCommandNotFound.call(self, user_command, self);
-                    } else {
-                        terminal.error(sprintf(strings.commandNotFound,
-                                               command.name));
-                    }
+                    terminal.error(sprintf(strings.commandNotFound, command.name));
                 }
             };
         }
@@ -2982,18 +2942,41 @@
         }
         // ---------------------------------------------------------------------
         function make_json_rpc_object(url, auth, success) {
+            function jrpc_success(json) {
+                if (json.error) {
+                    display_json_rpc_error(json.error);
+                } else if ($.isFunction(settings.processRPCResponse)) {
+                    settings.processRPCResponse.call(self, json.result, self);
+                } else {
+                    display_object(json.result);
+                }
+                self.resume();
+            }
+            function jrpc_request(jxhr, request) {
+                try {
+                    settings.request.call(self, jxhr, request, self);
+                } catch (e) {
+                    display_exception(e, 'USER');
+                }
+            }
+            function jrpc_response(jxhr, response) {
+                try {
+                    settings.response.call(self, jxhr, response, self);
+                } catch (e) {
+                    display_exception(e, 'USER');
+                }
+            }
             function response(ret) {
-                var commands = [];
                 if (ret.procs) {
                     var interpreter_object = {};
                     $.each(ret.procs, function(_, proc) {
                         interpreter_object[proc.name] = function() {
-                            var append = auth && proc.name != 'help';
+                            var append = auth && proc.name !== 'help';
                             var args = Array.prototype.slice.call(arguments);
                             var args_len = args.length + (append ? 1 : 0);
                             if (settings.checkArity && proc.params &&
                                 proc.params.length !== args_len) {
-                                self.error("&#91;Arity&#93; " +
+                                self.error('&#91;Arity&#93; ' +
                                            sprintf(strings.wrongArity,
                                                    proc.name,
                                                    proc.params.length,
@@ -3013,48 +2996,24 @@
                                     url: url,
                                     method: proc.name,
                                     params: args,
-                                    request: function(jxhr, request) {
-                                        try {
-                                            settings.request.call(self, jxhr, request, self);
-                                        } catch (e) {
-                                            display_exception(e, 'USER');
-                                        }
-                                    },
-                                    response: function(jxhr, response) {
-                                        try {
-                                            settings.response.call(self, jxhr, response, self);
-                                        } catch (e) {
-                                            display_exception(e, 'USER');
-                                        }
-                                    },
-                                    success: function(json) {
-                                        if (json.error) {
-                                            display_json_rpc_error(json.error);
-                                        } else {
-                                            if ($.isFunction(settings.processRPCResponse)) {
-                                                settings.processRPCResponse.call(self,
-                                                                                 json.result,
-                                                                                 self);
-                                            } else {
-                                                display_object(json.result);
-                                            }
-                                        }
-                                        self.resume();
-                                    },
+                                    request: jrpc_request,
+                                    response: jrpc_response,
+                                    success: jrpc_success,
                                     error: ajax_error
                                 });
                             }
                         };
                     });
                     interpreter_object.help = interpreter_object.help || function(fn) {
-                        if (typeof fn == 'undefined') {
-                            self.echo('Available commands: ' + ret.procs.map(function(proc) {
+                        if (typeof fn === 'undefined') {
+                            var names = ret.procs.map(function(proc) {
                                 return proc.name;
-                            }).join(', ') + ', help');
+                            }).join(', ') + ', help';
+                            self.echo('Available commands: ' + names);
                         } else {
                             var found = false;
                             $.each(ret.procs, function(_, proc) {
-                                if (proc.name == fn) {
+                                if (proc.name === fn) {
                                     found = true;
                                     var msg = '';
                                     msg += '[[bu;#fff;]' + proc.name + ']';
@@ -3069,12 +3028,12 @@
                                 }
                             });
                             if (!found) {
-                                if (fn == 'help') {
+                                if (fn === 'help') {
                                     self.echo('[[bu;#fff;]help] [method]\ndisplay help ' +
-                                              'for the method or list of methods if not'+
+                                              'for the method or list of methods if not' +
                                               ' specified');
                                 } else {
-                                    var msg = 'Method `' + fn.toString() + '\' not found ';//'
+                                    var msg = 'Method `' + fn + '\' not found '; // '
                                     self.error(msg);
                                 }
                             }
@@ -3093,14 +3052,14 @@
                 request: function(jxhr, request) {
                     try {
                         settings.request.call(self, jxhr, request, self);
-                    } catch(e) {
+                    } catch (e) {
                         display_exception(e, 'USER');
                     }
                 },
                 response: function(jxhr, response) {
                     try {
                         settings.response.call(self, jxhr, response, self);
-                    } catch(e) {
+                    } catch (e) {
                         display_exception(e, 'USER');
                     }
                 },
@@ -3138,12 +3097,13 @@
                                 make_json_rpc_object(first, login, function(new_obj) {
                                     if (new_obj) {
                                         $.extend(object, new_obj);
+                                    } else if (++rpc_count === 1) {
+                                        fn_interpreter = make_basic_json_rpc(
+                                            first,
+                                            login
+                                        );
                                     } else {
-                                        if (++rpc_count === 1) {
-                                            fn_interpreter = make_basic_json_rpc(first, login);
-                                        } else {
-                                            self.error(strings.oneRPCWithIgnore);
-                                        }
+                                        self.error(strings.oneRPCWithIgnore);
                                     }
                                     self.resume();
                                     recur(rest, success);
@@ -3208,10 +3168,11 @@
                 if (type === 'undefined') {
                     user_intrp = $.noop;
                 } else if (type !== 'function') {
-                    throw type + " is invalid interpreter value";
+                    throw new Error(type + ' is invalid interpreter value');
                 }
+                // single function don't need bind
                 finalize({
-                    interpreter: user_intrp.bind(self),
+                    interpreter: user_intrp,
                     completion: settings.completion
                 });
             }
@@ -3221,7 +3182,7 @@
         // ---------------------------------------------------------------------
         function make_json_rpc_login(url, login) {
             var method = $.type(login) === 'boolean' ? 'login' : login;
-            return function(user, passwd, callback, term) {
+            return function(user, passwd, callback) {
                 self.pause(settings.softPause);
                 $.jrpc({
                     url: url,
@@ -3230,14 +3191,14 @@
                     request: function(jxhr, request) {
                         try {
                             settings.request.call(self, jxhr, request, self);
-                        } catch(e) {
+                        } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
                     response: function(jxhr, response) {
                         try {
                             settings.response.call(self, jxhr, response, self);
-                        } catch(e) {
+                        } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
@@ -3253,7 +3214,7 @@
                     error: ajax_error
                 });
             };
-            //default name is login so you can pass true
+            // default name is login so you can pass true
         }
         // ---------------------------------------------------------------------
         // :: Return exception message as string
@@ -3328,18 +3289,18 @@
             if (!options.raw) {
                 if (options.formatters) {
                     // format using user defined formatters
-                    for (i=0; i<formatters.length; ++i) {
+                    for (i = 0; i < formatters.length; ++i) {
                         try {
-                            if (typeof formatters[i] == 'function') {
+                            if (typeof formatters[i] === 'function') {
                                 var ret = formatters[i](string);
-                                if (typeof ret == 'string') {
+                                if (typeof ret === 'string') {
                                     string = ret;
                                 }
                             }
-                        } catch(e) {
-                            //display_exception(e, 'FORMATTING');
+                        } catch (e) {
+                            // display_exception(e, 'FORMATTING');
                             if ($.isFunction(settings.exceptionHandler)) {
-                                settings.exceptionHandler.call(self, e, "FORMATTERS");
+                                settings.exceptionHandler.call(self, e, 'FORMATTERS');
                             } else {
                                 alert('formatting error at formatters[' + i + ']\n' +
                                       (e.stack ? e.stack : e));
@@ -3359,14 +3320,12 @@
                 for (i = 0, len = array.length; i < len; ++i) {
                     if (array[i] === '' || array[i] === '\r') {
                         output_buffer.push('<span></span>');
+                    } else if (options.raw) {
+                        output_buffer.push(array[i]);
                     } else {
-                        if (options.raw) {
-                            output_buffer.push(array[i]);
-                        } else {
-                            output_buffer.push($.terminal.format(array[i], {
-                                linksNoReferrer: settings.linksNoReferrer
-                            }));
-                        }
+                        output_buffer.push($.terminal.format(array[i], {
+                            linksNoReferrer: settings.linksNoReferrer
+                        }));
                     }
                 }
             } else if (!options.raw) {
@@ -3390,8 +3349,8 @@
                     raw: false,
                     finalize: $.noop
                 }, options || {});
-                var string = $.type(line) === "function" ? line() : line;
-                string = $.type(string) === "string" ? string : String(string);
+                var string = $.type(line) === 'function' ? line() : line;
+                string = $.type(string) === 'string' ? string : String(string);
                 if (string !== '') {
                     string = $.map(string.split(format_exec_re), function(string) {
                         if (string.match(format_exec_re) &&
@@ -3400,7 +3359,7 @@
                             // and lines variable have all extended commands
                             string = string.replace(/^\[\[|\]\]$/g, '');
                             if (line_settings.exec) {
-                                if (prev_command && prev_command.command == string) {
+                                if (prev_command && prev_command.command === string) {
                                     self.error(strings.recursiveCall);
                                 } else {
                                     $.terminal.extended_command(self, string);
@@ -3420,7 +3379,7 @@
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
                 if ($.isFunction(settings.exceptionHandler)) {
-                    settings.exceptionHandler.call(self, e, "TERMINAL");
+                    settings.exceptionHandler.call(self, e, 'TERMINAL');
                 } else {
                     alert('[Internal Exception(process_line)]:' +
                           exception_message(e) + '\n' + e.stack);
@@ -3439,10 +3398,13 @@
                 // flush will limit lines but if there is lot of
                 // lines we don't need to show them and then remove
                 // them from terminal
-                var limit = settings.outputLimit === 0 ?
-                    self.rows() :
-                    settings.outputLimit;
-                lines_to_show = lines.slice(lines.length-limit-1);
+                var limit;
+                if (settings.outputLimit === 0) {
+                    limit = self.rows();
+                } else {
+                    limit = settings.outputLimit;
+                }
+                lines_to_show = lines.slice(lines.length - limit - 1);
             } else {
                 lines_to_show = lines;
             }
@@ -3453,9 +3415,9 @@
                 });
                 command_line.before(detached_output); // reinsert output
                 self.flush();
-            } catch(e) {
+            } catch (e) {
                 if ($.isFunction(settings.exceptionHandler)) {
-                    settings.exceptionHandler.call(self, e, "TERMINAL (redraw)");
+                    settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
                 } else {
                     alert('Exception in redraw\n' + e.stack);
                 }
@@ -3553,17 +3515,14 @@
         // :: exeptions from user code and displays them on the terminal
         // ---------------------------------------------------------------------
         var first_command = true;
-        var last_command;
         var resume_callbacks = [];
-        var resume_event_bound = false;
         function commands(command, silent, exec) {
-            last_command = command; // for debug
             // first command store state of the terminal before the command get
             // executed
             if (first_command) {
                 first_command = false;
                 // execHash need first empty command too
-                if (settings.historyState || (settings.execHash && exec)) {
+                if (settings.historyState || settings.execHash && exec) {
                     if (!save_state.length) {
                         // first command in first terminal don't have hash
                         self.save_state();
@@ -3626,7 +3585,7 @@
                 } else if (settings.exit && command.match(/^\s*exit\s*$/) &&
                            !in_login) {
                     var level = self.level();
-                    if (level == 1 && self.get_token() || level > 1) {
+                    if (level === 1 && self.get_token() || level > 1) {
                         if (self.get_token(true)) {
                             self.set_token(undefined, true);
                         }
@@ -3638,7 +3597,7 @@
                     self.clear();
                     after_exec();
                 } else {
-                    var position = lines.length-1;
+                    var position = lines.length - 1;
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
                     if (result !== undefined) {
@@ -3646,14 +3605,13 @@
                         self.pause(settings.softPause);
                         return $.when(result).then(function(result) {
                             // don't echo result if user echo something
-                            if (result && position === lines.length-1) {
+                            if (result && position === lines.length - 1) {
                                 display_object(result);
                             }
                             after_exec();
                             self.resume();
                         });
                     } else if (paused) {
-                        var old_command = command;
                         resume_callbacks.push(function() {
                             // exec with resume/pause in user code
                             after_exec();
@@ -3711,7 +3669,7 @@
             } else {
                 names = [];
             }
-            if ($.inArray(interpreter_name, names) == -1) {
+            if ($.inArray(interpreter_name, names) === -1) {
                 names.push(interpreter_name);
                 storage.set(storage_key, JSON.stringify(names));
             }
@@ -3739,7 +3697,7 @@
                         var args = [].slice.call(arguments);
                         try {
                             return fun.apply(self, args);
-                        } catch(e) {
+                        } catch (e) {
                             display_exception(e, 'USER KEYMAP');
                             throw e;
                         }
@@ -3762,11 +3720,11 @@
                         hash_commands = [];
                     }
                     if (hash_commands.length) {
-                        restore_state(hash_commands[hash_commands.length-1]);
+                        restore_state(hash_commands[hash_commands.length - 1]);
                     } else if (save_state[0]) {
                         self.import_view(save_state[0]);
                     }
-                } catch(e) {
+                } catch (e) {
                     display_exception(e, 'TERMINAL');
                 }
             }
@@ -3855,21 +3813,21 @@
                 //       !!! Problem complete more then one key need terminal
                 var top = interpreters.top(), completion;
                 if (settings.completion &&
-                    $.type(settings.completion) != 'boolean' &&
+                    $.type(settings.completion) !== 'boolean' &&
                     top.completion === undefined) {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
                 }
-                if (completion == 'settings') {
+                if (completion === 'settings') {
                     completion = settings.completion;
                 }
                 if (completion) {
                     switch ($.type(completion)) {
                         case 'function':
                             var string = self.before_cursor(settings.wordAutocomplete);
-                            if (completion.length == 3) {
-                                var error = new Error($.terminal.defaults.strings.comletionParameters);
+                            if (completion.length === 3) {
+                                var error = new Error(settings.comletionParameters);
                                 display_exception(error, 'USER');
                                 return false;
                             }
@@ -3930,14 +3888,14 @@
                     return result;
                 }
                 if (requests.length) {
-                    for (i=requests.length; i--;) {
+                    for (i = requests.length; i--;) {
                         var r = requests[i];
-                        if (4 !== r.readyState) {
+                        if (r.readyState !== 4) {
                             try {
                                 r.abort();
                             } catch (error) {
                                 if ($.isFunction(settings.exceptionHandler)) {
-                                    settings.exceptionHandler.call(self, e, "AJAX ABORT");
+                                    settings.exceptionHandler.call(self, e, 'AJAX ABORT');
                                 } else {
                                     self.error(strings.ajaxAbortError);
                                 }
@@ -3953,7 +3911,7 @@
         }
         // ---------------------------------------------------------------------
         function when_ready(fun) {
-            if (init_defer.state() != 'resolved') {
+            if (init_defer.state() !== 'resolved') {
                 init_defer.then(fun.bind(self));
             } else {
                 fun.call(self);
@@ -3975,10 +3933,9 @@
         if (self.length === 0) {
             throw sprintf($.terminal.defaults.strings.invalidSelector, self.selector);
         }
-        //var names = []; // stack if interpreter names
+        // var names = []; // stack if interpreter names
         var scroll_object;
         var prev_command; // used for name on the terminal if not defined
-        var loged_in = false;
         var tab_count = 0; // for tab completion
         // array of line objects:
         // - function (called whenever necessary, result is printed)
@@ -3989,15 +3946,12 @@
         var terminal_id = terminals.length();
         var num_chars; // numer of chars in line
         var num_rows; // number of lines that fit without scrollbar
-        var command_list = []; // for tab completion
         var command; // for tab completion
-        var url;
-        var bottom; // indicate if terminal was scrolled to bottom before echo command
         var logins = new Stack(); // stack of logins
         var init_defer = $.Deferred();
-        var in_login = false;//some Methods should not be called when login
+        var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
-        var onPause = $.noop;//used to indicate that user call pause onInit
+        var onPause = $.noop;// used to indicate that user call pause onInit
         var old_width, old_height;
         var delayed_commands = []; // used when exec commands while paused
         var settings = $.extend({},
@@ -4027,7 +3981,7 @@
                 } catch (e) {
                     display_exception(e, 'onClear');
                 }
-                self.attr({ scrollTop: 0});
+                self.attr({scrollTop: 0});
                 return self;
             },
             // -------------------------------------------------------------
@@ -4039,7 +3993,7 @@
                 if ($.isFunction(settings.onExport)) {
                     try {
                         user_export = settings.onExport.call(self);
-                    } catch(e) {
+                    } catch (e) {
                         display_exception(e, 'onExport');
                     }
                 }
@@ -4064,7 +4018,7 @@
                 if ($.isFunction(settings.onImport)) {
                     try {
                         settings.onImport.call(self, view);
-                    } catch(e) {
+                    } catch (e) {
                         display_exception(e, 'onImport');
                     }
                 }
@@ -4089,8 +4043,8 @@
             // :: Store current terminal state
             // -------------------------------------------------------------
             save_state: function(command, ignore_hash, index) {
-                //save_state.push({view:self.export_view(), join:[]});
-                if (typeof index != 'undefined') {
+                // save_state.push({view:self.export_view(), join:[]});
+                if (typeof index !== 'undefined') {
                     save_state[index] = self.export_view();
                 } else {
                     save_state.push(self.export_view());
@@ -4101,7 +4055,7 @@
                 if (command !== undefined && !ignore_hash) {
                     var state = [
                         terminal_id,
-                        save_state.length-1,
+                        save_state.length - 1,
                         command
                     ];
                     hash_commands.push(state);
@@ -4165,26 +4119,23 @@
                     throw new Error(strings.loginIsNotAFunction);
                 }
                 in_login = true;
-                if (self.token() && self.level() == 1 && !autologin) {
+                if (self.token() && self.level() === 1 && !autologin) {
                     in_login = false; // logout will call login
                     self.logout(true);
-                } else {
-                    if (self.token(true) && self.login_name(true)) {
-                        in_login = false;
-                        if ($.isFunction(success)) {
-                            success();
-                        }
-                        return self;
+                } else if (self.token(true) && self.login_name(true)) {
+                    in_login = false;
+                    if ($.isFunction(success)) {
+                        success();
                     }
+                    return self;
                 }
-                var user = null;
                 // don't store login data in history
                 if (settings.history) {
                     command_line.history().disable();
                 }
                 // so we know how many times call pop
                 var level = self.level();
-                function login_callback(user, token, silent, event) {
+                function login_callback(user, token, silent) {
                     if (token) {
                         while (self.level() > level) {
                             self.pop();
@@ -4232,7 +4183,7 @@
                             auth.call(self, user, pass, function(token, silent) {
                                 login_callback(user, token, silent);
                             });
-                        } catch(e) {
+                        } catch (e) {
                             display_exception(e, 'AUTH');
                         }
                     }, {
@@ -4260,14 +4211,15 @@
                 var cmd_strings = command.split(' ');
                 var string; // string before cursor that will be completed
                 if (word) {
-                    if (cmd_strings.length == 1) {
+                    if (cmd_strings.length === 1) {
                         string = cmd_strings[0];
                     } else {
-                        string = cmd_strings[cmd_strings.length-1];
-                        for (i=cmd_strings.length-1; i>0; i--) {
+                        string = cmd_strings[cmd_strings.length - 1];
+                        for (i = cmd_strings.length - 1; i > 0; i--) {
                             // treat escape space as part of the string
-                            if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
-                                string = cmd_strings[i-1] + ' ' + string;
+                            var prev_string = cmd_strings[i - 1];
+                            if (prev_string[prev_string.length - 1] === '\\') {
+                                string = cmd_strings[i - 1] + ' ' + string;
                             } else {
                                 break;
                             }
@@ -4291,10 +4243,10 @@
                 var string = self.before_cursor(options.word);
                 // local copy
                 commands = commands.slice();
-                if (settings.clear && $.inArray('clear', commands) == -1) {
+                if (settings.clear && $.inArray('clear', commands) === -1) {
                     commands.push('clear');
                 }
-                if (settings.exit && $.inArray('exit', commands) == -1) {
+                if (settings.exit && $.inArray('exit', commands) === -1) {
                     commands.push('exit');
                 }
                 if (tab_count % 2 === 0) {
@@ -4308,7 +4260,7 @@
                 }
                 var regex = new RegExp('^' + $.terminal.escape_regex(string));
                 var matched = [];
-                for (var i=commands.length; i--;) {
+                for (var i = commands.length; i--;) {
                     if (regex.test(commands[i])) {
                         matched.push(commands[i]);
                     }
@@ -4322,16 +4274,17 @@
                         tab_count = 0;
                         if (options.echo) {
                             var text = matched.reverse().join('\t');
-                            self.echo($.terminal.escape_brackets(text), {keepWords: true});
+                            self.echo($.terminal.escape_brackets(text), {
+                                keepWords: true
+                            });
                             return true;
                         }
                     } else {
                         var found = false;
-                        var found_index;
                         var j;
                         loop:
-                        for (j=string.length; j<matched[0].length; ++j) {
-                            for (i=1; i<matched.length; ++i) {
+                        for (j = string.length; j < matched[0].length; ++j) {
+                            for (i = 1; i < matched.length; ++i) {
                                 if (matched[0].charAt(j) !== matched[i].charAt(j)) {
                                     break loop;
                                 }
@@ -4365,7 +4318,7 @@
                         prepare_top_interpreter(true);
                     });
                 }
-                if ($.type(user_intrp) == 'string' && login) {
+                if ($.type(user_intrp) === 'string' && login) {
                     self.login(make_json_rpc_login(user_intrp, login),
                                true,
                                overwrite_interpreter);
@@ -4410,7 +4363,7 @@
             resume: function() {
                 when_ready(function ready() {
                     paused = false;
-                    if (terminals.front() == self) {
+                    if (terminals.front() === self) {
                         command_line.enable();
                     }
                     command_line.visible();
@@ -4436,14 +4389,14 @@
             // :: the terminal
             // -------------------------------------------------------------
             cols: function() {
-                return settings.numChars?settings.numChars:get_num_chars(self);
+                return settings.numChars ? settings.numChars : get_num_chars(self);
             },
             // -------------------------------------------------------------
             // :: Return the number of lines that fit into the height of the
             // :: terminal
             // -------------------------------------------------------------
             rows: function() {
-                return settings.numRows?settings.numRows:get_num_rows(self);
+                return settings.numRows ? settings.numRows : get_num_rows(self);
             },
             // -------------------------------------------------------------
             // :: Return the History object
@@ -4466,7 +4419,7 @@
                 if (toggle) {
                     // if set to true and if set from user command we need
                     // not to include the command
-                    if (typeof window.setImmediate == 'undefined') {
+                    if (typeof window.setImmediate === 'undefined') {
                         setTimeout(run, 0);
                     } else {
                         setImmediate(run);
@@ -4491,9 +4444,6 @@
                 if (terminals.length() === 1) {
                     return self;
                 } else {
-                    var offsetTop = self.offset().top;
-                    var height = self.height();
-                    var scrollTop = self.scrollTop();
                     /*if (!is_scrolled_into_view(self)) {
                         self.enable();
                         $('html,body').animate({
@@ -4523,11 +4473,12 @@
             // -------------------------------------------------------------
             focus: function(toggle, silent) {
                 when_ready(function ready() {
+                    var ret;
                     if (terminals.length() === 1) {
                         if (toggle === false) {
                             try {
-                                if (!silent && settings.onBlur.call(self, self) !== false ||
-                                    silent) {
+                                ret = settings.onBlur.call(self, self);
+                                if (!silent && ret !== false || silent) {
                                     self.disable();
                                 }
                             } catch (e) {
@@ -4535,32 +4486,30 @@
                             }
                         } else {
                             try {
-                                if (!silent && settings.onFocus.call(self, self) !== false ||
-                                    silent) {
+                                ret = settings.onFocus.call(self, self);
+                                if (!silent && ret !== false || silent) {
                                     self.enable();
                                 }
                             } catch (e) {
                                 display_exception(e, 'onFocus');
                             }
                         }
+                    } else if (toggle === false) {
+                        self.next();
                     } else {
-                        if (toggle === false) {
-                            self.next();
-                        } else {
-                            var front = terminals.front();
-                            if (front != self) {
-                                front.disable();
-                                if (!silent) {
-                                    try {
-                                        settings.onTerminalChange.call(self, self);
-                                    } catch (e) {
-                                        display_exception(e, 'onTerminalChange');
-                                    }
+                        var front = terminals.front();
+                        if (front !== self) {
+                            front.disable();
+                            if (!silent) {
+                                try {
+                                    settings.onTerminalChange.call(self, self);
+                                } catch (e) {
+                                    display_exception(e, 'onTerminalChange');
                                 }
                             }
-                            terminals.set(self);
-                            self.enable();
                         }
+                        terminals.set(self);
+                        self.enable();
                     }
                 });
                 return self;
@@ -4591,7 +4540,7 @@
             enable: function() {
                 if (!enabled && !frozen) {
                     if (num_chars === undefined) {
-                        //enabling first time
+                        // enabling first time
                         self.resize();
                     }
                     when_ready(function ready() {
@@ -4624,7 +4573,20 @@
             // -------------------------------------------------------------
             signature: function() {
                 var cols = self.cols();
-                var i = cols < 15 ? null : cols < 35 ? 0 : cols < 55 ? 1 : cols < 64 ? 2 : cols < 75 ? 3 : 4;
+                var i;
+                if (cols < 15) {
+                    i = null;
+                } else if (cols < 35) {
+                    i = 0;
+                } else if (cols < 55) {
+                    i = 1;
+                } else if (cols < 64) {
+                    i = 2;
+                } else if (cols < 75) {
+                    i = 3;
+                } else {
+                    i = 4;
+                }
                 if (i !== null) {
                     return signatures[i].join('\n') + '\n';
                 } else {
@@ -4669,7 +4631,7 @@
                     });
                     return self;
                 } else {
-                    throw "insert function argument is not a string";
+                    throw new Error('insert function argument is not a string');
                 }
             },
             // -------------------------------------------------------------
@@ -4696,7 +4658,7 @@
             get_prompt: function() {
                 return interpreters.top().prompt;
                 // command_line.prompt(); - can be a wrapper
-                //return command_line.prompt();
+                // return command_line.prompt();
             },
             // -------------------------------------------------------------
             // :: Enable or Disable mask depedning on the passed argument
@@ -4778,7 +4740,7 @@
                                 /* this don't work with resize
                                    line(wrapper, function(user_finalize) {
                                    // TODO:
-                                   //user_finalize need to be save in line object
+                                   // user_finalize need to be save in line object
                                    user_finalize(wrapper);
                                    });*/
                             } catch (e) {
@@ -4790,23 +4752,26 @@
                         }
                     });
                     if (settings.outputLimit >= 0) {
-                        var limit = settings.outputLimit === 0 ?
-                            self.rows() :
-                            settings.outputLimit;
+                        var limit;
+                        if (settings.outputLimit === 0) {
+                            limit = self.rows();
+                        } else {
+                            limit = settings.outputLimit;
+                        }
                         var $lines = output.find('div div');
                         if ($lines.length > limit) {
-                            var max = $lines.length-limit+1;
+                            var max = $lines.length - limit + 1;
                             var for_remove = $lines.slice(0, max);
                             // you can't get parent if you remove the
                             // element so we first get the parent
                             var parents = for_remove.parent();
                             for_remove.remove();
                             parents.each(function() {
-                                var self = $(this);
-                                if (self.is(':empty')) {
+                                var $self = $(this);
+                                if ($self.is(':empty')) {
                                     // there can be divs inside parent that
                                     // was not removed
-                                    self.remove();
+                                    $self.remove();
                                 }
                             });
                         }
@@ -4818,7 +4783,7 @@
                     output_buffer = [];
                 } catch (e) {
                     if ($.isFunction(settings.exceptionHandler)) {
-                        settings.exceptionHandler.call(self, e, "TERMINAL (Flush)");
+                        settings.exceptionHandler.call(self, e, 'TERMINAL (Flush)');
                     } else {
                         alert('[Flush] ' + exception_message(e) + '\n' +
                               e.stack);
@@ -4854,7 +4819,7 @@
             // :: after something is echo on the terminal
             // -------------------------------------------------------------
             last_index: function() {
-                return lines.length-1;
+                return lines.length - 1;
             },
             // -------------------------------------------------------------
             // :: Print data to the terminal output. It can have two options
@@ -4895,7 +4860,7 @@
                         // if echo throw exception we can't use error to
                         // display that exception
                         if ($.isFunction(settings.exceptionHandler)) {
-                            settings.exceptionHandler.call(self, e, "TERMINAL (echo)");
+                            settings.exceptionHandler.call(self, e, 'TERMINAL (echo)');
                         } else {
                             alert('[Terminal.echo] ' + exception_message(e) +
                               '\n' + e.stack);
@@ -4904,7 +4869,7 @@
                 }
                 string = string || '';
                 var type = $.type(string);
-                if (type == 'function' || type == 'string') {
+                if (type === 'function' || type === 'string') {
                     echo(string);
                 } else {
                     $.when(string).then(echo);
@@ -4916,7 +4881,7 @@
             // -------------------------------------------------------------
             error: function(message, options) {
                 options = $.extend({}, options, {raw: false, formatters: false});
-                //quick hack to fix trailing backslash
+                // quick hack to fix trailing backslash
                 var str = $.terminal.escape_brackets(message).
                     replace(/\\$/, '&#92;').
                     replace(url_re, ']$1[[;;;error]');
@@ -4939,7 +4904,7 @@
                     });
                 }
                 if (typeof e.fileName === 'string') {
-                    //display filename and line which throw exeption
+                    // display filename and line which throw exeption
                     self.pause(settings.softPause);
                     $.get(e.fileName, function(file) {
                         var num = e.lineNumber - 1;
@@ -4998,7 +4963,7 @@
                         var login = logins.pop();
                         self.set_token(undefined, true);
                         self.login.apply(self, login);
-                    } else if (interpreters.size() == 1 && self.token()) {
+                    } else if (interpreters.size() === 1 && self.token()) {
                         self.logout(true);
                     } else {
                         while (interpreters.size() > 1) {
@@ -5028,7 +4993,7 @@
             // -------------------------------------------------------------
             set_token: function(token, local) {
                 var name = self.prefix_name(local) + '_token';
-                if (typeof token == 'undefined') {
+                if (typeof token === 'undefined') {
                     storage.remove(name, token);
                 } else {
                     storage.set(name, token);
@@ -5058,7 +5023,7 @@
             // :: Function return prefix name for login/token
             // -------------------------------------------------------------
             prefix_name: function(local) {
-                var name = (settings.name ? settings.name + '_': '') +
+                var name = (settings.name ? settings.name + '_' : '') +
                     terminal_id;
                 if (local && interpreters.size() > 1) {
                     var local_name = interpreters.map(function(intrp) {
@@ -5104,7 +5069,7 @@
                     if (push_settings.prompt === undefined) {
                         push_settings.prompt = (push_settings.name || '>') + ' ';
                     }
-                    //names.push(options.name);
+                    // names.push(options.name);
                     var top = interpreters.top();
                     if (top) {
                         top.mask = command_line.mask();
@@ -5114,30 +5079,34 @@
                         settings.onPush.call(self, top, interpreters.top(), self);
                         prepare_top_interpreter();
                     }
-                    //self.pause();
+                    // self.pause();
                     make_interpreter(interpreter, !!options.login, function(ret) {
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
-                        if ($.isArray(ret.completion) && push_settings.completion === true) {
-                            interpreters.top().completion = ret.completion;
-                        } else if (!ret.completion && push_settings.completion === true) {
-                            interpreters.top().completion = false;
+                        if (push_settings.completion === true) {
+                            if ($.isArray(ret.completion)) {
+                                interpreters.top().completion = ret.completion;
+                            } else if (!ret.completion) {
+                                interpreters.top().completion = false;
+                            }
                         }
                         if (push_settings.login) {
+                            var error;
                             var type = $.type(push_settings.login);
-                            if (type == 'function') {
-                                // self.pop on error
+                            if (type === 'function') {
+                                error = push_settings.infiniteLogin ? $.noop : self.pop;
                                 self.login(push_settings.login,
                                            push_settings.infiniteLogin,
                                            init,
-                                           push_settings.infiniteLogin ? $.noop : self.pop);
-                            } else if ($.type(interpreter) == 'string' &&
-                                       type == 'string' || type == 'boolean') {
+                                           error);
+                            } else if ($.type(interpreter) === 'string' &&
+                                       type === 'string' || type === 'boolean') {
+                                error = push_settings.infiniteLogin ? $.noop : self.pop;
                                 self.login(make_json_rpc_login(interpreter,
                                                                push_settings.login),
                                            push_settings.infiniteLogin,
                                            init,
-                                           push_settings.infiniteLogin ? $.noop : self.pop);
+                                           error);
                             }
                         } else {
                             init();
@@ -5158,7 +5127,7 @@
                 }
                 var token = self.token(true);
                 var top;
-                if (interpreters.size() == 1) {
+                if (interpreters.size() === 1) {
                     top = interpreters.top();
                     if (settings.login) {
                         global_logout();
@@ -5174,7 +5143,7 @@
                     }
                     settings.onPop.call(self, top, null, self);
                 } else {
-                    if (self.token(true)) {
+                    if (token) {
                         clear_loging_storage();
                     }
                     var current = interpreters.pop();
@@ -5182,7 +5151,7 @@
                     prepare_top_interpreter();
                     settings.onPop.call(self, current, top);
                     // we check in case if you don't pop from password interpreter
-                    if (in_login && self.get_prompt() != strings.login + ': ') {
+                    if (in_login && self.get_prompt() !== strings.login + ': ') {
                         in_login = false;
                     }
                     if ($.isFunction(current.onExit)) {
@@ -5201,10 +5170,10 @@
             // :: Change terminal option(s) at runtime
             // -------------------------------------------------------------
             option: function(object_or_name, value) {
-                if (typeof value == 'undefined') {
-                    if (typeof object_or_name == 'string') {
+                if (typeof value === 'undefined') {
+                    if (typeof object_or_name === 'string') {
                         return settings[object_or_name];
-                    } else if (typeof object_or_name == 'object') {
+                    } else if (typeof object_or_name === 'object') {
                         $.each(object_or_name, function(key, value) {
                             settings[key] = value;
                         });
@@ -5226,7 +5195,7 @@
             reset: function() {
                 when_ready(function ready() {
                     self.clear();
-                    while(interpreters.size() > 1) {
+                    while (interpreters.size() > 1) {
                         interpreters.pop();
                     }
                     initialize();
@@ -5287,7 +5256,7 @@
             // :: is use scrollBottomOffset option as margin for the check
             // -------------------------------------------------------------
             is_bottom: function() {
-                if (settings.scrollBottomOffset == -1) {
+                if (settings.scrollBottomOffset === -1) {
                     return false;
                 } else {
                     var scroll_height, scroll_top, height;
@@ -5329,14 +5298,14 @@
             self.height(settings.height);
         }
         var agent = navigator.userAgent.toLowerCase();
-        if (!agent.match(/(webkit)[ \/]([\w.]+)/) &&
-            self[0].tagName.toLowerCase() == 'body') {
+        if (!agent.match(/(webkit)[ /]([\w.]+)/) &&
+            self[0].tagName.toLowerCase() === 'body') {
             scroll_object = $('html');
         } else {
             scroll_object = self;
         }
         // register ajaxSend for cancel requests on CTRL+D
-        $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr, opt) {
+        $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
         });
         var iframe = $('<iframe/>').appendTo(self);
@@ -5371,15 +5340,14 @@
                 throw e;
             }
         }
-        var auth = settings.login;
         // create json-rpc authentication function
         var base_interpreter;
-        if (typeof init_interpreter == 'string') {
+        if (typeof init_interpreter === 'string') {
             base_interpreter = init_interpreter;
         } else if (init_interpreter instanceof Array) {
             // first JSON-RPC
-            for (var i=0, len=init_interpreter.length; i<len; ++i) {
-                if (typeof init_interpreter[i] == 'string') {
+            for (var i = 0, len = init_interpreter.length; i < len; ++i) {
+                if (typeof init_interpreter[i] === 'string') {
                     base_interpreter = init_interpreter[i];
                     break;
                 }
@@ -5404,7 +5372,7 @@
             self.disable();
         }
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
-            if (settings.completion && typeof settings.completion != 'boolean' ||
+            if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
                 // overwrite interpreter completion by global setting #224
                 // we use string to indicate that it need to be taken from settings
@@ -5421,7 +5389,7 @@
                 greetings: settings.greetings,
                 mousewheel: settings.mousewheel,
                 keymap: new_keymap,
-                extra: settings.extra,
+                extra: settings.extra
             }, itrp));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(self).cmd({
@@ -5434,7 +5402,7 @@
                 keydown: key_down,
                 keymap: new_keymap,
                 keypress: function(e) {
-                    var result, i, top = interpreters.top();
+                    var top = interpreters.top();
                     if ($.isFunction(top.keypress)) {
                         return top.keypress.call(self, e, self);
                     } else if ($.isFunction(settings.keypress)) {
@@ -5517,7 +5485,8 @@
                                     self.focus();
                                     command_line.enable();
                                 }
-                                self.oneTime(settings.clickTimeout, 'resize_' + self.id(), function() {
+                                var name = 'resize_' + self.id();
+                                self.oneTime(settings.clickTimeout, name, function() {
                                     clear_selection();
                                     count = 0;
                                 });
@@ -5530,7 +5499,7 @@
                 })();
             }
             self.delegate('.exception a', 'click', function(e) {
-                //.on('click', '.exception a', function(e) {
+                // .on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on
                 var href = $(this).attr('href');
                 if (href.match(/:[0-9]+$/)) { // display line if specified
@@ -5541,7 +5510,7 @@
             if (!navigator.platform.match(/linux/i)) {
                 // on linux system paste work with middle mouse button
                 self.mousedown(function(e) {
-                    if (e.which == 2) {
+                    if (e.which === 2) {
                         var selected = get_selected_text();
                         self.insert(selected);
                     }
@@ -5570,7 +5539,8 @@
                 }
             }
             self.oneTime(100, function() {
-                // idea taken from https://github.com/developit/simple-element-resize-detector
+                // idea taken from https://github.com/developit/simple-element
+                // -resize-detector
                 function bind() {
                     iframe[0].contentWindow.onresize = resize;
                 }
@@ -5585,32 +5555,32 @@
             function exec_spec(spec) {
                 var terminal = terminals.get()[spec[0]];
                 // execute if belong to this terminal
-                if (terminal && terminal_id == terminal.id()) {
+                if (terminal && terminal_id === terminal.id()) {
                     if (spec[2]) {
                         try {
                             if (paused) {
                                 var defer = $.Deferred();
                                 resume_callbacks.push(function() {
-                                    return terminal.exec(spec[2]).then(function(term, i) {
+                                    return terminal.exec(spec[2]).then(function() {
                                         terminal.save_state(spec[2], true, spec[1]);
                                         defer.resolve();
                                     });
                                 });
                                 return defer.promise();
                             } else {
-                                return terminal.exec(spec[2]).then(function(term, i) {
+                                return terminal.exec(spec[2]).then(function() {
                                     terminal.save_state(spec[2], true, spec[1]);
                                 });
                             }
                         } catch (e) {
                             var settings = terminal.settings();
-                             if ($.isFunction(settings.exceptionHandler)) {
-                                 settings.exceptionHandler.call(self, e, "EXEC HASH");
-                             } else {
-                                 var cmd = $.terminal.escape_brackets(command);
-                                 var msg = "Error while exec with command " + cmd;
-                                 terminal.error(msg).exception(e);
-                             }
+                            if ($.isFunction(settings.exceptionHandler)) {
+                                settings.exceptionHandler.call(self, e, 'EXEC HASH');
+                            } else {
+                                var cmd = $.terminal.escape_brackets(command);
+                                var msg = 'Error while exec with command ' + cmd;
+                                terminal.error(msg).exception(e);
+                            }
                         }
                     }
                 }
@@ -5632,9 +5602,9 @@
                                 } else {
                                     change_hash = true;
                                 }
-                            })();//*/
+                            })();// */
                         } catch (e) {
-                            //invalid json - ignore
+                            // invalid json - ignore
                         }
                     });
                 } else {
@@ -5643,7 +5613,7 @@
             } else {
                 change_hash = true; // if enabled later
             }
-            //change_hash = true; // exec can now change hash
+            // change_hash = true; // exec can now change hash
             // -------------------------------------------------------------
             if ($.event.special.mousewheel) {
                 var shift = false;
@@ -5653,7 +5623,7 @@
                     }
                 }).bind('keyup.terminal_' + self.id(), function(e) {
                     // in Google Chromium/Linux shiftKey is false
-                    if (e.shiftKey || e.which == 16) {
+                    if (e.shiftKey || e.which === 16) {
                         shift = false;
                     }
                 });
@@ -5677,7 +5647,7 @@
                         } else {
                             self.scroll(40);
                         }
-                        //event.preventDefault();
+                        // event.preventDefault();
                     }
                 });
             }
@@ -5685,5 +5655,5 @@
         }); // make_interpreter
         self.data('terminal', self);
         return self;
-    }; //terminal plugin
+    }; // terminal plugin
 })(jQuery);

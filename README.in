@@ -160,15 +160,21 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 
 ### Contribution
 
-If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well, fixes to examples and README can be made to master. To build the files (it only replace version and add current date in files and run minifiers on css and js) you need to have java to run yuicompressor-2.4.8.jar, have nodejs and install uglifyjs, jshint and jsonlint:
+If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well, fixes to examples and README can be made to master. To build the files (it only replace version and add current date in files and run minifiers on css and js) you need to have nodejs and run:
 
 ```
-npm install -g uglifyjs jshint jsonlint
+npm install
+```
+
+to build the files you need to run
+
+```
+make
 ```
 
 You also need to use bash (on Windows you can use git-bash that's get installed when you install git).
 
-Before you create pull request run `make lint`, it will be run by travis.
+Before you create pull request run `make lint`, it will be run by travis, and fix any errors that may show up, the linter used is [eslint](http://eslint.org/). You can find rules for eslint in package.json.
 
 Non tech contrubution are also wellcome, if you find a bug in documentation on the website you can file an issue to [jcubic/jquery.terminal-www](https://github.com/jcubic/jquery.terminal-www).
 
