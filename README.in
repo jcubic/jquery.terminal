@@ -160,7 +160,7 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 
 ### Contribution
 
-If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well, fixes to examples and README can be made to master. To build the files (it only replace version and add current date in files and run minifiers on css and js) you need to have nodejs and run:
+If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well, fixes to examples and README can be made to master. To build the files (it only replace version, add current date in files and run minifiers on css and js) you need to have nodejs and run:
 
 ```
 npm install
@@ -196,6 +196,8 @@ To run tests from command line you need to run this commands:
 npm install
 make test
 ```
+
+(You don't need to run npm again if you did it when buuilding the files)
 
 you can also run test covarage using
 
