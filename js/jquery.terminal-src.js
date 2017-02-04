@@ -1892,28 +1892,43 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
-        var isDragging = false;
-        var was_down = false;
-        self.on('mousedown.cmd', function() {
-            was_down = true;
-            self.oneTime(1, function() {
-                $(window).on('mousemove.cmd_' + id, function() {
-                    isDragging = true;
-                    $(window).off('mousemove.cmd_' + id);
+        (function() {
+            var isDragging = false;
+            var was_down = false;
+            var count = 0;
+            self.on('mousedown.cmd', function() {
+                was_down = true;
+                self.oneTime(1, function() {
+                    $(window).on('mousemove.cmd_' + id, function() {
+                        isDragging = true;
+                        $(window).off('mousemove.cmd_' + id);
+                    });
                 });
+            }).on('mouseup.cmd', function(e) {
+                var wasDragging = isDragging;
+                isDragging = false;
+                $(window).off('mousemove.cmd_' + id);
+                if (!wasDragging) {
+                    var name = 'click_' + id;
+                    if (++count === 1) {
+                        var down = was_down;
+                        self.oneTime(options.clickTimeout, name, function() {
+                            if (!$(e.target).is('.prompt') && down) {
+                                self.position(get_char_pos({
+                                    x: e.pageX,
+                                    y: e.pageY
+                                }));
+                            }
+                            count = 0;
+                        });
+                    } else {
+                        self.stopTime(name);
+                        count = 0;
+                    }
+                }
+                was_down = false;
             });
-        }).on('mouseup.cmd', function(e) {
-            var wasDragging = isDragging;
-            isDragging = false;
-            $(window).off('mousemove.cmd_' + id);
-            if (!$(e.target).is('.prompt') && !wasDragging && was_down) {
-                self.position(get_char_pos({
-                    x: e.pageX,
-                    y: e.pageY
-                }));
-            }
-            was_down = false;
-        });
+        })();
         self.data('cmd', self);
         return self;
     }; // cmd plugin
@@ -5429,6 +5444,7 @@
                 enabled: enabled && !is_touch,
                 keydown: key_down,
                 keymap: new_keymap,
+                clickTimeout: settings.clickTimeout,
                 keypress: function(e) {
                     var top = interpreters.top();
                     if ($.isFunction(top.keypress)) {
@@ -5515,7 +5531,7 @@
                                     self.focus();
                                     command_line.enable();
                                 }
-                                var name = 'resize_' + self.id();
+                                var name = 'click_' + self.id();
                                 self.oneTime(settings.clickTimeout, name, function() {
                                     clear_selection();
                                     // move cursor to the end if clicked after .cmd
@@ -5527,13 +5543,13 @@
                                     count = 0;
                                 });
                             } else {
-                                self.stopTime('resize_' + self.id());
+                                self.stopTime('click_' + self.id());
                                 count = 0;
                             }
                         }
                     }).dblclick(function() {
                         count = 0;
-                        self.stopTime('resize_' + self.id());
+                        self.stopTime('click_' + self.id());
                     });
                 })();
             }
