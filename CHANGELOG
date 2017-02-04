@@ -31,9 +31,11 @@
           fix removing global events on terminal destroy
           don't execute javascript file when fetching line that trigger exception in browser that have
           fileName in exception (like Firfox)
-          BREAKING CHANGE:
+          BREAKING CHANGES:
           completion function now have two arguments string and callback and terminal is in this
           removed setInterpreter, parseArguments, splitArguments, parseCommand and splitCommand
+          if you execute keydown event manualy to trigger terminal/cmd shortcuts you need to pass key property with key name
+          see spec/terminalSpec.js file
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.
