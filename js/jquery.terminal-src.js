@@ -5531,7 +5531,7 @@
                                 count = 0;
                             }
                         }
-                    }).dblclick(function(e) {
+                    }).dblclick(function() {
                         count = 0;
                         self.stopTime('resize_' + self.id());
                     });
