@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 04 Feb 2017 19:36:00 +0000
+ * Date: Sat, 04 Feb 2017 19:40:45 +0000
  */
 
 /* TODO:
@@ -5273,7 +5273,7 @@
                 when_ready(function ready() {
                     command_line.destroy().remove();
                     output.remove();
-                    self.unwrap();
+                    wrapper.remove();
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
                     self.unbind('click mousewheel mousedown mouseup');

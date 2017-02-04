@@ -5273,7 +5273,7 @@
                 when_ready(function ready() {
                     command_line.destroy().remove();
                     output.remove();
-                    self.unwrap();
+                    wrapper.remove();
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
                     self.unbind('click mousewheel mousedown mouseup');
