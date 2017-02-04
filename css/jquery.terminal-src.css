@@ -251,6 +251,9 @@
     line-height: 14px;
     box-sizing: border-box;
 }
+.cmd div {
+    float: left;
+}
 .cmd div:after {
     content: " "; /* Older browser do not support empty content */
     visibility: hidden;
@@ -432,6 +435,7 @@
 }
 .terminal-output > div > div * {
     overflow-wrap: break-word; /* when echo html */
+    word-wrap: break-word;
 }
 .terminal .terminal-output div span {
     display: inline-block;

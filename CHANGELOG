@@ -13,6 +13,7 @@
           new option formatters for echo (error method by default disable formatters)
           interpeter and terminal accept extra option that can be use in onPop or onPush
           add keymap option to cmd, terminal and interpreter where you can add shortcuts
+          clicking on character, in cmd plugin, move cursor to that character
           BUGS:
           fix width calculation with scrollbar visible
           fix exception in Firefox throw by setSelectionRange in caret plugin

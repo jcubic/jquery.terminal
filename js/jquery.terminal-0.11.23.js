@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 01 Feb 2017 23:13:57 +0000
+ * Date: Sat, 04 Feb 2017 18:07:31 +0000
  */
 
 /* TODO:
@@ -873,12 +873,14 @@
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
+    var cmd_index = 0;
     $.fn.cmd = function(options) {
         var self = this;
         var maybe_data = self.data('cmd');
         if (maybe_data) {
             return maybe_data;
         }
+        var id = cmd_index++;
         self.addClass('cmd');
         self.append('<span class="prompt"></span><span></span>' +
                     '<span class="cursor">&nbsp;</span><span></span>');
@@ -915,6 +917,26 @@
         var cursor = self.find('.cursor');
         var animation;
         var paste_count = 0;
+        function get_char_size() {
+            var span = $('<span>&nbsp;</span>').appendTo(self);
+            var rect = span[0].getBoundingClientRect();
+            span.remove();
+            return rect;
+        }
+        function get_char_pos(point) {
+            var prompt_len = self.find('.prompt').text().length;
+            var size = get_char_size();
+            var width = size.width;
+            var height = size.height;
+            var offset = self.offset();
+            var col = Math.floor((point.x - offset.left) / width);
+            var row = Math.floor((point.y - offset.top) / height);
+            var try_pos = col - prompt_len + (row > 0 ? num_chars * row : 0);
+            var text = command.replace(/\t/g, '\x00\x00\x00\x00');
+            var before = text.slice(0, try_pos);
+            var len = before.replace(/\x00{4}/g, '\t').replace(/\x00+/, '').length;
+            return len > command.length ? command.length : len;
+        }
         function get_key(e) {
             var key = e.key.toUpperCase();
             if (key === 'CONTROL') {
@@ -1701,7 +1723,7 @@
                 self.find('.cursor').next().remove().end().prev().remove().
                     end().remove();
                 self.find('.prompt, .clipboard').remove();
-                self.removeClass('cmd').removeData('cmd');
+                self.removeClass('cmd').removeData('cmd').off('.cmd');
                 return self;
             },
             prompt: function(user_prompt) {
@@ -1870,7 +1892,25 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
-        // characters
+        var isDragging = false;
+        self.on('mousedown.cmd', function() {
+            self.oneTime(1, function() {
+                $(window).on('mousemove.cmd_' + id, function() {
+                    isDragging = true;
+                    $(window).off('mousemove.cmd_' + id);
+                });
+            });
+        }).on('mouseup.cmd', function(e) {
+            var wasDragging = isDragging;
+            isDragging = false;
+            $(window).off('mousemove.cmd_' + id);
+            if (!$(e.target).is('.prompt') && !wasDragging) {
+                self.position(get_char_pos({
+                    x: e.pageX,
+                    y: e.pageY
+                }));
+            }
+        });
         self.data('cmd', self);
         return self;
     }; // cmd plugin
@@ -2454,6 +2494,7 @@
             type: 'POST'
         });
     };
+
     // -----------------------------------------------------------------------
     /*
     function is_scrolled_into_view(elem) {
@@ -3846,10 +3887,10 @@
                             // terminal will not catch this because it's an event
                             throw new Error(strings.invalidCompletion);
                     }
-                    return false;
                 } else {
                     self.insert('\t'); // original tab is overwritten
                 }
+                return false;
             },
             'CTRL+V': function() {
                 self.oneTime(1, function() {
