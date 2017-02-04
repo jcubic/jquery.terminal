@@ -2577,20 +2577,6 @@
         }
     }
     // -----------------------------------------------------------------------
-    // :: Clear user selected text
-    // -----------------------------------------------------------------------
-    function clear_selection() {
-        if (window.getSelection) {
-            if (window.getSelection().empty) {  // Chrome
-                window.getSelection().empty();
-            } else if (window.getSelection().removeAllRanges) {  // Firefox
-                window.getSelection().removeAllRanges();
-            }
-        } else if (document.selection) {  // IE?
-            document.selection.empty();
-        }
-    }
-    // -----------------------------------------------------------------------
     // :: try to copy given DOM element text to clipboard
     // -----------------------------------------------------------------------
     function text_to_clipboard(container, text) {
@@ -5533,7 +5519,6 @@
                                 }
                                 var name = 'click_' + self.id();
                                 self.oneTime(settings.clickTimeout, name, function() {
-                                    clear_selection();
                                     // move cursor to the end if clicked after .cmd
                                     if (!target.is('.terminal-output') &&
                                         !target.is('.cmd') &&

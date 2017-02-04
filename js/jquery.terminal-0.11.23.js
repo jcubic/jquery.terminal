@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 04 Feb 2017 21:26:45 +0000
+ * Date: Sat, 04 Feb 2017 21:42:43 +0000
  */
 
 /* TODO:
@@ -2574,20 +2574,6 @@
             }
         } else if (document.selection) {
             return document.selection.createRange().text;
-        }
-    }
-    // -----------------------------------------------------------------------
-    // :: Clear user selected text
-    // -----------------------------------------------------------------------
-    function clear_selection() {
-        if (window.getSelection) {
-            if (window.getSelection().empty) {  // Chrome
-                window.getSelection().empty();
-            } else if (window.getSelection().removeAllRanges) {  // Firefox
-                window.getSelection().removeAllRanges();
-            }
-        } else if (document.selection) {  // IE?
-            document.selection.empty();
         }
     }
     // -----------------------------------------------------------------------
@@ -5533,7 +5519,6 @@
                                 }
                                 var name = 'click_' + self.id();
                                 self.oneTime(settings.clickTimeout, name, function() {
-                                    clear_selection();
                                     // move cursor to the end if clicked after .cmd
                                     if (!target.is('.terminal-output') &&
                                         !target.is('.cmd') &&
