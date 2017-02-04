@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 04 Feb 2017 21:42:43 +0000
+ * Date: Sat, 04 Feb 2017 22:12:22 +0000
  */
 
 /* TODO:
@@ -1556,7 +1556,7 @@
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
-        var shift_insert;
+        var skip_insert;
         function keydown_event(e) {
             var result;
             if (enabled) {
@@ -1568,7 +1568,7 @@
                     }
                 }
                 var key = get_key(e);
-                shift_insert = key === 'SHIFT+INSERT';
+                skip_insert = ['SHIFT+INSERT', 'BACKSPACE'].indexOf(key) !== -1;
                 if (e.which !== 38 &&
                     !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
@@ -1854,6 +1854,7 @@
             if (!reverse_search && $.isFunction(options.keypress)) {
                 result = options.keypress(e);
             }
+            var key = event.key || String.fromCharCode(e.which);
             //$.terminal.active().echo(JSON.stringify(result));
             if (result === undefined || result) {
                 if (enabled) {
@@ -1867,11 +1868,11 @@
                     } else if (!e.ctrlKey && !(e.altKey && e.which === 100) ||
                                e.altKey) { // ALT+D
                         if (reverse_search) {
-                            rev_search_str += String.fromCharCode(e.which);
+                            rev_search_str += key;
                             reverse_history_search();
                             draw_reverse_prompt();
                         } else {
-                            self.insert(String.fromCharCode(e.which));
+                            self.insert(key);
                         }
                         return false;
                     }
@@ -1881,8 +1882,8 @@
             }
         }
         function input(e) {
-            if (no_keypress && !shift_insert) {
-                // shift insert don't fire keypress on Linux/Chrome
+            if (no_keypress && !skip_insert) {
+                // shift insert and backspace don't fire keypress on Linux/Chrome
                 // Some Androids don't fire keypress - #39
                 var val = clip.val();
                 if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
