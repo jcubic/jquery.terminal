@@ -496,6 +496,7 @@
 .terminal .terminal-output div div a::-moz-selection,
 .cmd div::-moz-selection,
 .cmd > span::-moz-selection,
+.cmd > span span::-moz-selection,
 .cmd .prompt span::-moz-selection {
     background-color: #aaa;
     color: #000;
@@ -521,6 +522,7 @@
 .terminal .terminal-output div span::selection,
 .cmd div::selection,
 .cmd > span::selection,
+.cmd > span span::selection,
 .cmd .prompt span::selection {
     background-color: #aaa;
     color: #000;

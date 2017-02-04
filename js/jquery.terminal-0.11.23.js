@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 04 Feb 2017 19:20:28 +0000
+ * Date: Sat, 04 Feb 2017 19:36:00 +0000
  */
 
 /* TODO:
@@ -1893,7 +1893,9 @@
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
         var isDragging = false;
+        var was_down = false;
         self.on('mousedown.cmd', function() {
+            was_down = true;
             self.oneTime(1, function() {
                 $(window).on('mousemove.cmd_' + id, function() {
                     isDragging = true;
@@ -1904,12 +1906,13 @@
             var wasDragging = isDragging;
             isDragging = false;
             $(window).off('mousemove.cmd_' + id);
-            if (!$(e.target).is('.prompt') && !wasDragging) {
+            if (!$(e.target).is('.prompt') && !wasDragging && was_down) {
                 self.position(get_char_pos({
                     x: e.pageX,
                     y: e.pageY
                 }));
             }
+            was_down = false;
         });
         self.data('cmd', self);
         return self;
@@ -5523,9 +5526,12 @@
                                     }
                                     count = 0;
                                 });
+                            } else {
+                                self.stopTime('resize_' + self.id());
+                                count = 0;
                             }
                         }
-                    }).dblclick(function() {
+                    }).dblclick(function(e) {
                         count = 0;
                         self.stopTime('resize_' + self.id());
                     });

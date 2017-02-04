@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sat, 04 Feb 2017 19:13:53 +0000
+ * Date: Sat, 04 Feb 2017 19:36:01 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -496,6 +496,7 @@
 .terminal .terminal-output div div a::-moz-selection,
 .cmd div::-moz-selection,
 .cmd > span::-moz-selection,
+.cmd > span span::-moz-selection,
 .cmd .prompt span::-moz-selection {
     background-color: #aaa;
     color: #000;
@@ -521,6 +522,7 @@
 .terminal .terminal-output div span::selection,
 .cmd div::selection,
 .cmd > span::selection,
+.cmd > span span::selection,
 .cmd .prompt span::selection {
     background-color: #aaa;
     color: #000;
