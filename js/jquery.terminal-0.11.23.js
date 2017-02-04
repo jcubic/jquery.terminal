@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 04 Feb 2017 18:07:31 +0000
+ * Date: Sat, 04 Feb 2017 19:20:28 +0000
  */
 
 /* TODO:
@@ -5270,6 +5270,7 @@
                 when_ready(function ready() {
                     command_line.destroy().remove();
                     output.remove();
+                    self.unwrap();
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
                     self.unbind('click mousewheel mousedown mouseup');
@@ -5349,27 +5350,10 @@
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
         });
-        var iframe = $('<iframe/>').appendTo(self);
-        output = $('<div>').addClass('terminal-output').appendTo(self);
+        var wrapper = $('<div class="wrapper"/>').appendTo(self);
+        var iframe = $('<iframe/>').appendTo(wrapper);
+        output = $('<div>').addClass('terminal-output').appendTo(wrapper);
         self.addClass('terminal');
-        // keep focus in clipboard textarea in mobile
-        /*
-          if (('ontouchstart' in window) || window.DocumentTouch &&
-          document instanceof DocumentTouch) {
-          self.click(function() {
-          self.find('textarea').focus();
-          });
-          self.find('textarea').focus();
-          }
-        */
-        /*
-          self.bind('touchstart.touchScroll', function() {
-
-          });
-          self.bind('touchmove.touchScroll', function() {
-
-          });
-        */
         // before login event
         if (settings.login && $.isFunction(settings.onBeforeLogin)) {
             try {
@@ -5433,7 +5417,7 @@
                 extra: settings.extra
             }, itrp));
             // CREATE COMMAND LINE
-            command_line = $('<div/>').appendTo(self).cmd({
+            command_line = $('<div/>').appendTo(wrapper).cmd({
                 prompt: settings.prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
@@ -5508,7 +5492,9 @@
                 (function() {
                     var count = 0;
                     var isDragging = false;
-                    self.mousedown(function() {
+                    var target;
+                    self.mousedown(function(e) {
+                        target = $(e.target).parents().andSelf();
                         self.oneTime(1, function() {
                             $(window).on('mousemove.terminal_' + self.id(), function() {
                                 isDragging = true;
@@ -5529,6 +5515,12 @@
                                 var name = 'resize_' + self.id();
                                 self.oneTime(settings.clickTimeout, name, function() {
                                     clear_selection();
+                                    // move cursor to the end if clicked after .cmd
+                                    if (!target.is('.terminal-output') &&
+                                        !target.is('.cmd') &&
+                                        target.is('.terminal > div')) {
+                                        command_line.position(command_line.get().length);
+                                    }
                                     count = 0;
                                 });
                             }

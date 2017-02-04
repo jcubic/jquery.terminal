@@ -65,6 +65,9 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
+.terminal > div {
+    height: 100%;
+}
 .cmd {
     padding: 0;
     height: 1.3em;
