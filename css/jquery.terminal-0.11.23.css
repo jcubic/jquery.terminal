@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sat, 04 Feb 2017 19:36:01 +0000
+ * Date: Sun, 05 Feb 2017 14:40:09 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -264,6 +264,135 @@
     height: 0;
     clear: both;
 }
+.terminal-output > div {
+    /*padding-top: 3px;*/
+    min-height: 14px;
+}
+.terminal-output > div > div * {
+    overflow-wrap: break-word; /* when echo html */
+    word-wrap: break-word;
+}
+.terminal .terminal-output div span {
+    display: inline-block;
+}
+.cmd span {
+    float: left;
+    /*display: inline-block; */
+}
+/* fix double style of selecting text in terminal */
+.terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal td,
+.terminal pre, .terminal h1, .terminal h2, .terminal h3, .terminal h4,
+.terminal h5, .terminal h6 {
+    -webkit-touch-callout: initial;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+.terminal, .terminal-output, .terminal-output div {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+/* firefox hack */
+@-moz-document url-prefix() {
+    .terminal, .terminal-output, .terminal-output div {
+        -webkit-touch-callout: initial;
+        -webkit-user-select: initial;
+        -khtml-user-select: initial;
+        -moz-user-select: initial;
+        -ms-user-select: initial;
+        user-select: initial;
+    }
+}
+.terminal table {
+    border-collapse: collapse;
+}
+.terminal td {
+    border: 1px solid #aaa;
+}
+.terminal h1::-moz-selection,
+.terminal h2::-moz-selection,
+.terminal h3::-moz-selection,
+.terminal h4::-moz-selection,
+.terminal h5::-moz-selection,
+.terminal h6::-moz-selection,
+.terminal pre::-moz-selection,
+.terminal td::-moz-selection,
+.terminal .terminal-output div div::-moz-selection,
+.terminal .terminal-output div span::-moz-selection,
+.terminal .terminal-output div div a::-moz-selection,
+.cmd div::-moz-selection,
+.cmd > span::-moz-selection,
+.cmd > span span::-moz-selection,
+.cmd .prompt span::-moz-selection {
+    background-color: #aaa;
+    color: #000;
+}
+/* this don't work in Chrome
+.terminal tr td::-moz-selection {
+    border-color: #000;
+}
+.terminal tr td::selection {
+    border-color: #000;
+}
+*/
+.terminal h1::selection,
+.terminal h2::selection,
+.terminal h3::selection,
+.terminal h4::selection,
+.terminal h5::selection,
+.terminal h6::selection,
+.terminal pre::selection,
+.terminal td::selection,
+.terminal .terminal-output div div::selection,
+.terminal .terminal-output div div a::selection,
+.terminal .terminal-output div span::selection,
+.cmd div::selection,
+.cmd > span::selection,
+.cmd > span span::selection,
+.cmd .prompt span::selection {
+    background-color: #aaa;
+    color: #000;
+}
+.terminal .terminal-output div.error, .terminal .terminal-output div.error div {
+    color: red;
+}
+.tilda {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1100;
+}
+.clear {
+    clear: both;
+}
+.terminal a {
+    color: #0F60FF;
+}
+.terminal a:hover {
+    color: red;
+}
+.terminal iframe {
+    position: absolute;
+    left: 0;
+    top: -100%;
+    width: 100%;
+    height: 100%;
+    margin: 1px 0 0;
+    border: none;
+    opacity: 0;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+.terminal, .terminal iframe {
+    padding: 10px; /* we get width of the terminal from iframe so it need to have the same padding */
+}
 @supports (--css: variables) {
     .terminal, .cmd {
         color: var(--color, #aaa);
@@ -285,6 +414,42 @@
         color: var(--color, #aaa);
         background-color: var(--background, #000);
         margin-bottom: -3px;
+    }
+    .terminal h1::-moz-selection,
+    .terminal h2::-moz-selection,
+    .terminal h3::-moz-selection,
+    .terminal h4::-moz-selection,
+    .terminal h5::-moz-selection,
+    .terminal h6::-moz-selection,
+    .terminal pre::-moz-selection,
+    .terminal td::-moz-selection,
+    .terminal .terminal-output div div::-moz-selection,
+    .terminal .terminal-output div span::-moz-selection,
+    .terminal .terminal-output div div a::-moz-selection,
+    .cmd div::-moz-selection,
+    .cmd > span::-moz-selection,
+    .cmd > span span::-moz-selection,
+    .cmd .prompt span::-moz-selection {
+        background-color: var(--color, #aaa);
+        color: var(--background, #000);
+    }
+    .terminal h1::selection,
+    .terminal h2::selection,
+    .terminal h3::selection,
+    .terminal h4::selection,
+    .terminal h5::selection,
+    .terminal h6::selection,
+    .terminal pre::selection,
+    .terminal td::selection,
+    .terminal .terminal-output div div::selection,
+    .terminal .terminal-output div div a::selection,
+    .terminal .terminal-output div span::selection,
+    .cmd div::selection,
+    .cmd > span::selection,
+    .cmd > span span::selection,
+    .cmd .prompt span::selection {
+        background-color: var(--color, #aaa);
+        color: var(--background, #000);
     }
     @-webkit-keyframes terminal-blink {
       0%, 100% {
@@ -431,133 +596,4 @@
           margin: 0;
       }
     }
-}
-.terminal-output > div {
-    /*padding-top: 3px;*/
-    min-height: 14px;
-}
-.terminal-output > div > div * {
-    overflow-wrap: break-word; /* when echo html */
-    word-wrap: break-word;
-}
-.terminal .terminal-output div span {
-    display: inline-block;
-}
-.cmd span {
-    float: left;
-    /*display: inline-block; */
-}
-/* fix double style of selecting text in terminal */
-.terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal td,
-.terminal pre, .terminal h1, .terminal h2, .terminal h3, .terminal h4,
-.terminal h5, .terminal h6 {
-    -webkit-touch-callout: initial;
-    -webkit-user-select: text;
-    -khtml-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-}
-.terminal, .terminal-output, .terminal-output div {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-/* firefox hack */
-@-moz-document url-prefix() {
-    .terminal, .terminal-output, .terminal-output div {
-        -webkit-touch-callout: initial;
-        -webkit-user-select: initial;
-        -khtml-user-select: initial;
-        -moz-user-select: initial;
-        -ms-user-select: initial;
-        user-select: initial;
-    }
-}
-.terminal table {
-    border-collapse: collapse;
-}
-.terminal td {
-    border: 1px solid #aaa;
-}
-.terminal h1::-moz-selection,
-.terminal h2::-moz-selection,
-.terminal h3::-moz-selection,
-.terminal h4::-moz-selection,
-.terminal h5::-moz-selection,
-.terminal h6::-moz-selection,
-.terminal pre::-moz-selection,
-.terminal td::-moz-selection,
-.terminal .terminal-output div div::-moz-selection,
-.terminal .terminal-output div span::-moz-selection,
-.terminal .terminal-output div div a::-moz-selection,
-.cmd div::-moz-selection,
-.cmd > span::-moz-selection,
-.cmd > span span::-moz-selection,
-.cmd .prompt span::-moz-selection {
-    background-color: #aaa;
-    color: #000;
-}
-/* this don't work in Chrome
-.terminal tr td::-moz-selection {
-    border-color: #000;
-}
-.terminal tr td::selection {
-    border-color: #000;
-}
-*/
-.terminal h1::selection,
-.terminal h2::selection,
-.terminal h3::selection,
-.terminal h4::selection,
-.terminal h5::selection,
-.terminal h6::selection,
-.terminal pre::selection,
-.terminal td::selection,
-.terminal .terminal-output div div::selection,
-.terminal .terminal-output div div a::selection,
-.terminal .terminal-output div span::selection,
-.cmd div::selection,
-.cmd > span::selection,
-.cmd > span span::selection,
-.cmd .prompt span::selection {
-    background-color: #aaa;
-    color: #000;
-}
-.terminal .terminal-output div.error, .terminal .terminal-output div.error div {
-    color: red;
-}
-.tilda {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1100;
-}
-.clear {
-    clear: both;
-}
-.terminal a {
-    color: #0F60FF;
-}
-.terminal a:hover {
-    color: red;
-}
-.terminal iframe {
-    position: absolute;
-    left: 0;
-    top: -100%;
-    width: 100%;
-    height: 100%;
-    margin: 1px 0 0;
-    border: none;
-    opacity: 0;
-    pointer-events: none;
-    box-sizing: border-box;
-}
-.terminal, .terminal iframe {
-    padding: 10px; /* we get width of the terminal from iframe so it need to have the same padding */
 }
