@@ -359,7 +359,11 @@
 .cmd > div::selection,
 .cmd > div span::selection,
 .cmd .prompt span::selection {
-    background-color: #aaa;
+    /*
+     * use rgba to fix transparent selection in chrome
+     * http://stackoverflow.com/questions/7224445/css3-selection-behaves-differently-in-ff-chrome
+     */
+    background-color: rgba(170, 170, 170, 0.99);
     color: #000;
 }
 .terminal .terminal-output div.error, .terminal .terminal-output div.error div {
@@ -455,7 +459,7 @@
     .cmd > div::selection,
     .cmd > div span::selection,
     .cmd .prompt span::selection {
-        background-color: var(--color, #aaa);
+        background-color: var(--color, rgba(170, 170, 170, 0.99));
         color: var(--background, #000);
     }
     @-webkit-keyframes terminal-blink {
