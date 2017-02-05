@@ -4,11 +4,17 @@
   __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-           \/              /____/                              version 0.11.23
+           \/              /____/                              version DEV
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-0.11.23-blue.svg)](https://www.npmjs.com/package/jquery.terminal) ![npm](https://img.shields.io/badge/bower-0.11.23-yellow.svg) [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal) [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master)](https://travis-ci.org/jcubic/jquery.terminal) [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
+[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
+[![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+[![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
+
 
 ### Summary
 
@@ -63,43 +69,47 @@ or npm:
 npm install --save jquery.terminal
 ```
 
-Include js/jquery.terminal-0.11.23.min.js and css/jquery.terminal-0.11.23.css
+Include jQuery library, you can use cdn from http://jquery.com/download/
+
+
+Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.css
 You can also include js/jquery.mousewheel-min.js
 
 ```html
-<script src="js/jquery.terminal-0.11.23.min.js"></script>
+<script src="js/jquery.terminal-DEV.min.js"></script>
 <script src="js/jquery.mousewheel-min.js"></script>
-<link href="css/jquery.terminal-0.11.23.css" rel="stylesheet"/>
+<link href="css/jquery.terminal-DEV.css" rel="stylesheet"/>
 ```
 
 You can also grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.11.23/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/0.11.23/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/jquery.terminal/0.11.23/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/0.11.23/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/jquery.terminal/DEV/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/DEV/jquery.terminal.min.css">
 ```
 
 And you're good to go.
 
-### Example of usage (javascript interpreter)
 
-This is code that uses low level, that gives you full control of the commands,
+### Example of usage
+
+This is code that uses low level function, that gives you full control of the commands,
 just pass anything that the user types into a function.
 
 ```javascript
 jQuery(function($, undefined) {
-    $('#term_demo').terminal(function(command, term) {
+    $('#term_demo').terminal(function(command) {
         if (command !== '') {
             var result = window.eval(command);
             if (result != undefined) {
-                term.echo(String(result));
+                this.echo(String(result));
             }
         }
     }, {
@@ -115,7 +125,6 @@ jQuery(function($, undefined) {
 Here is a higher level call, using an object as an interpreter, By default the terminal will
 parse commands that a user types and replace number like strings with real numbers
 regex with regexes and process escape characters in double quoted strings.
-Command foo will execute json-rpc from foo.php file.
 
 ```javascript
 jQuery(function($, undefined) {
@@ -137,6 +146,8 @@ jQuery(function($, undefined) {
 });
 ```
 
+Command foo will execute json-rpc from foo.php file.
+
 You can create JSON-RPC interpreter with authentication in just one line:
 
 ```javascript
@@ -145,6 +156,28 @@ $('#term_demo').terminal('service.php', {login: true});
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [full documentation](http://terminal.jcubic.pl/api_reference.php).
+
+
+### Contribution
+
+If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well, fixes to examples and README can be made to master. To build the files (it only replace version, add current date in files and run minifiers on css and js) you need to have nodejs and run:
+
+```
+npm install
+```
+
+to build the files you need to run
+
+```
+make
+```
+
+You also need to use bash (on Windows you can use git-bash that's get installed when you install git).
+
+Before you create pull request run `make lint`, it will be run by travis, and fix any errors that may show up, the linter used is [eslint](http://eslint.org/). You can find rules for eslint in package.json.
+
+Non tech contrubution are also wellcome, if you find a bug in documentation on the website you can file an issue to [jcubic/jquery.terminal-www](https://github.com/jcubic/jquery.terminal-www).
+
 
 ### Test
 
@@ -164,22 +197,17 @@ npm install
 make test
 ```
 
+(You don't need to run npm again if you did it when buuilding the files)
+
 you can also run test covarage using
 
 ```
 make cover
 ```
 
-### Contribution
-
-If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make`. To make it work you need to have installed java to run yuicompressor-2.4.8.jar and install uglifyjs:
-
-```
-npm install -g uglifyjs
-```
 
 ### License
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
-Copyright (c) 2011-2016 [Jakub Jankiewicz](http://jcubic.pl)
+Copyright (c) 2011-2017 [Jakub Jankiewicz](http://jcubic.pl)

@@ -1,3 +1,41 @@
+1.0.0     copy to system clipboard when copy to kill area
+          simplify changing of terminal colors using css variables
+          always export history and import when importHistory option is true
+          add bar and underline cursor animations and a way to enable it with single css variable
+          recalcualate cols and rows on terminal resize (not only window)
+          request/response and onPush/onPop callbacks
+          all callbacks have terminal as `this` (terminal in parameter stay the same)
+          add option softPause to control pause visible option - it don't hide the prompt when set to true
+          add wordAutocomplete option (default true)
+          add complete and before_cursor api methods and use it for autocomplete
+          formatting for command line (you can't type formatting but you can use $.terminal.formatters to
+          format command you're writing)
+          new option formatters for echo (error method by default disable formatters)
+          interpeter and terminal accept extra option that can be use in onPop or onPush
+          add keymap option to cmd, terminal and interpreter where you can add shortcuts
+          clicking on character, in cmd plugin, move cursor to that character
+          BUGS:
+          fix width calculation with scrollbar visible
+          fix exception in Firefox throw by setSelectionRange in caret plugin
+          make echo sync when echo string or function (flush didn't work on codepen)
+          fix onCommandChange callback on backspace
+          Don't echo extended commands on resize
+          use JSON.parse to process strings when parsing command line
+          fix rpc in array when there are no system.describe
+          call exeptionHandler on every exception (even iternal)
+          fix echo resolved content when interpreter return a promise
+          fix for valid /[/]/g regex
+          fix pushing JSON-RPC intepreter
+          fix selection in IE
+          clear selection when click anywhere in the terminal
+          fix removing global events on terminal destroy
+          don't execute javascript file when fetching line that trigger exception in browser that have
+          fileName in exception (like Firfox)
+          BREAKING CHANGES:
+          completion function now have two arguments string and callback and terminal is in this
+          removed setInterpreter, parseArguments, splitArguments, parseCommand and splitCommand
+          if you execute keydown event manualy to trigger terminal/cmd shortcuts you need to pass key property with key name
+          see spec/terminalSpec.js file
 0.11.23   add scrollBottomOffset option
 0.11.22   scroll to bottom of the terminal when option scrollOnEcho is set to false but the terminal is
           at the bottom, add new api methods is_bottom and scroll_to_bottom.

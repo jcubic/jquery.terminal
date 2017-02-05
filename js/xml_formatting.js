@@ -9,7 +9,7 @@
  *
  * This is example of how to create custom formatter for jQuery Terminal
  *
- * Copyright (c) 2014-2016 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2014-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
  */
@@ -23,9 +23,9 @@
         var stack = [];
         var output = [];
         var parts = string.split(/(<\/?[a-zA-Z]+>)/);
-        for (var i=0; i<parts.length; ++i) {
-            if (parts[i][0] == '<') {
-                if (parts[i][1] == '/') {
+        for (var i = 0; i < parts.length; ++i) {
+            if (parts[i][0] === '<') {
+                if (parts[i][1] === '/') {
                     if (stack.length) {
                         stack.pop();
                     }
@@ -35,11 +35,11 @@
             } else {
                 if (stack.length) {
                     // top of the stack
-                    output.push('[[;' + stack[stack.length-1] + ';]');
+                    output.push('[[;' + stack[stack.length - 1] + ';]');
                 }
                 output.push(parts[i]);
                 if (stack.length) {
-                     output.push(']');
+                    output.push(']');
                 }
             }
         }
