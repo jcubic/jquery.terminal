@@ -2248,7 +2248,7 @@
                                                                       data_text,
                                                                       text) {
                             if (text === '') {
-                                return ''; // '<span>&nbsp;</span>';
+                                return ''; //'<span>&nbsp;</span>';
                             }
                             text = text.replace(/\\]/g, ']');
                             var style_str = '';

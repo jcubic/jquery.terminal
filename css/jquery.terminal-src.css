@@ -256,13 +256,13 @@
 }
 .cmd div {
     float: left;
-}
-.cmd div:after {
-    content: " "; /* Older browser do not support empty content */
-    visibility: hidden;
-    display: block;
-    height: 0;
     clear: both;
+}
+.cmd div + span {
+    clear: both;
+}
+.cmd .prompt + div {
+    clear: right;
 }
 .terminal-output > div {
     /*padding-top: 3px;*/
@@ -277,7 +277,6 @@
 }
 .cmd span {
     float: left;
-    /*display: inline-block; */
 }
 /* fix double style of selecting text in terminal */
 .terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal td,
@@ -329,6 +328,8 @@
 .cmd div::-moz-selection,
 .cmd > span::-moz-selection,
 .cmd > span span::-moz-selection,
+.cmd > div::-moz-selection,
+.cmd > div span::-moz-selection,
 .cmd .prompt span::-moz-selection {
     background-color: #aaa;
     color: #000;
@@ -355,6 +356,8 @@
 .cmd div::selection,
 .cmd > span::selection,
 .cmd > span span::selection,
+.cmd > div::selection,
+.cmd > div span::selection,
 .cmd .prompt span::selection {
     background-color: #aaa;
     color: #000;
@@ -429,6 +432,8 @@
     .cmd div::-moz-selection,
     .cmd > span::-moz-selection,
     .cmd > span span::-moz-selection,
+    .cmd > div::-moz-selection,
+    .cmd > div span::-moz-selection,
     .cmd .prompt span::-moz-selection {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
@@ -447,6 +452,8 @@
     .cmd div::selection,
     .cmd > span::selection,
     .cmd > span span::selection,
+    .cmd > div::selection,
+    .cmd > div span::selection,
     .cmd .prompt span::selection {
         background-color: var(--color, #aaa);
         color: var(--background, #000);

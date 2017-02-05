@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 05 Feb 2017 14:30:15 +0000
+ * Date: Sun, 05 Feb 2017 15:12:38 +0000
  */
 
 /* TODO:
@@ -2248,7 +2248,7 @@
                                                                       data_text,
                                                                       text) {
                             if (text === '') {
-                                return ''; // '<span>&nbsp;</span>';
+                                return ''; //'<span>&nbsp;</span>';
                             }
                             text = text.replace(/\\]/g, ']');
                             var style_str = '';
