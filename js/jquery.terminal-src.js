@@ -218,7 +218,7 @@
         },
         clone_array: function(array) {
             if (!$.isFunction(Array.prototype.map)) {
-                throw new Error('You\'r browser don\'t support ES5 array map ' +
+                throw new Error("Your browser don't support ES5 array map " +
                                 'use es5-shim');
             }
             return array.slice(0).map(function(item) {
@@ -665,7 +665,7 @@
         if (len < length) {
             return [str];
         } else if (length < 0) {
-            throw new Error('str_parts: length can\'t be negative'); // ')
+            throw new Error("str_parts: length can't be negative");
         }
         for (var i = 0; i < len; i += length) {
             result.push(str.substring(i, i + length));
@@ -1201,7 +1201,7 @@
         }
         // terminal animation don't work on andorid because they animate
         // 2 properties
-        if ((support_animations && !is_android)) {
+        if (support_animations && !is_android) {
             animation = function(toggle) {
                 if (toggle) {
                     cursor.addClass('blink');
@@ -1233,7 +1233,7 @@
         // :: Set prompt for reverse search
         // ---------------------------------------------------------------------
         function draw_reverse_prompt() {
-            prompt = '(reverse-i-search)`' + rev_search_str + '\': '; // '
+            prompt = '(reverse-i-search)`' + rev_search_str + "': ";
             draw_prompt();
         }
         // ---------------------------------------------------------------------
@@ -1569,8 +1569,7 @@
                 }
                 var key = get_key(e);
                 skip_insert = ['SHIFT+INSERT', 'BACKSPACE'].indexOf(key) !== -1;
-                if (e.which !== 38 &&
-                    !(e.which === 80 && e.ctrlKey)) {
+                if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }
                 if ($.isFunction(keymap[key])) {
@@ -1844,7 +1843,7 @@
         function keypress_event(e) {
             var result;
             no_keypress = false;
-            if ((e.ctrlKey || e.metaKey) && ([99, 118, 86].indexOf(e.which) !== -1)) {
+            if ((e.ctrlKey || e.metaKey) && [99, 118, 86].indexOf(e.which) !== -1) {
                 // CTRL+C or CTRL+V
                 return;
             }
@@ -1961,7 +1960,7 @@
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
     var is_touch = (function() {
-        return ('ontouchstart' in window) || window.DocumentTouch &&
+        return 'ontouchstart' in window || window.DocumentTouch &&
             document instanceof window.DocumentTouch;
     })();
     // -------------------------------------------------------------------------
@@ -2363,7 +2362,7 @@
                 var regex = arg.match(re_re);
                 if (regex) {
                     return new RegExp(regex[1], regex[2]);
-                } else if (arg[0] === '\'' && arg[arg.length - 1] === '\'') {
+                } else if (arg[0] === "'" && arg[arg.length - 1] === "'") {
                     return arg.replace(/^'|'$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length - 1] === '"') {
                     return $.parseJSON(arg);
@@ -2382,7 +2381,7 @@
         // ---------------------------------------------------------------------
         split_arguments: function(string) {
             return $.map(string.match(command_re) || [], function(arg) {
-                if (arg[0] === '\'' && arg[arg.length - 1] === '\'') {
+                if (arg[0] === "'" && arg[arg.length - 1] === "'") {
                     return arg.replace(/^'|'$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length - 1] === '"') {
                     return arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
@@ -2704,21 +2703,21 @@
             wrongPasswordTryAgain: 'Wrong password try again!',
             wrongPassword: 'Wrong password!',
             ajaxAbortError: 'Error while aborting ajax call!',
-            wrongArity: 'Wrong number of arguments. Function \'%s\' expects %s got' +
+            wrongArity: "Wrong number of arguments. Function '%s' expects %s got" +
                 ' %s!',
-            commandNotFound: 'Command \'%s\' Not Found!', // '
+            commandNotFound: "Command '%s' Not Found!",
             oneRPCWithIgnore: 'You can use only one rpc with ignoreSystemDescr' +
                 'ibe or rpc without system.describe',
-            oneInterpreterFunction: 'You can\'t use more than one function (rpc ' + // '
+            oneInterpreterFunction: "You can't use more than one function (rpc " +
                 'without system.describe or with option ignoreSystemDescribe cou' +
                  'nts as one)',
-            loginFunctionMissing: 'You didn\'t specify a login function', // '
+            loginFunctionMissing: "You didn't specify a login function",
             noTokenError: 'Access denied (no token)',
             serverResponse: 'Server responded',
             wrongGreetings: 'Wrong value of greetings parameter',
-            notWhileLogin: 'You can\'t call `%s\' function while in login',
+            notWhileLogin: "You can't call `%s' function while in login",
             loginIsNotAFunction: 'Authenticate must be a function',
-            canExitError: 'You can\'t exit from main interpreter', // '
+            canExitError: "You can't exit from main interpreter",
             invalidCompletion: 'Invalid completion',
             invalidSelector: 'Sorry, but terminal said that "%s" is not valid ' +
                 'selector!',
@@ -3079,7 +3078,7 @@
                                               'for the method or list of methods if not' +
                                               ' specified');
                                 } else {
-                                    var msg = 'Method `' + fn + '\' not found '; // '
+                                    var msg = 'Method `' + fn + "' not found ";
                                     self.error(msg);
                                 }
                             }
