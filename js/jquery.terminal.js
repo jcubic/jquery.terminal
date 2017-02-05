@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.0.0
+ *           \/              /____/                              version 1.0.1
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 05 Feb 2017 16:57:08 +0000
+ * Date: Sun, 05 Feb 2017 17:28:26 +0000
  */
 
 /* TODO:
@@ -2012,7 +2012,7 @@
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
     /* eslint-enable */
     $.terminal = {
-        version: '1.0.0',
+        version: '1.0.1',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -2643,15 +2643,15 @@
             '      __ _____                     ________                            ' +
                 '  __',
             '     / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___ ' +
-                '/ /',
+                ' / /',
             ' __ / // // // // // _  // _// // / / // _  // _//     // //  \\/ // _ ' +
                 '\\/ /',
             '/  / // // // // // ___// / / // / / // ___// / / / / // // /\\  // // ' +
                 '/ /__',
             '\\___//____ \\\\___//____//_/ _\\_  / /_//____//_/ /_/ /_//_//_/ /_/ \\' +
                 '__\\_\\___/',
-            '          \\/              /____/                                      ' +
-                '    '.replace(reg, '') + version_string,
+            ('          \\/              /____/                                      ' +
+             '    ').replace(reg, '') + version_string,
             copyright
         ]
     ];
