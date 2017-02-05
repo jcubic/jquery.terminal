@@ -1854,7 +1854,7 @@
             if (!reverse_search && $.isFunction(options.keypress)) {
                 result = options.keypress(e);
             }
-            var key = event.key || String.fromCharCode(e.which);
+            var key = e.key || String.fromCharCode(e.which);
             //$.terminal.active().echo(JSON.stringify(result));
             if (result === undefined || result) {
                 if (enabled) {
