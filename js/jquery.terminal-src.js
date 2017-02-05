@@ -931,7 +931,15 @@
             var offset = self.offset();
             var col = Math.floor((point.x - offset.left) / width);
             var row = Math.floor((point.y - offset.top) / height);
-            var try_pos = col - prompt_len + (row > 0 ? num_chars * row : 0);
+            var lines = get_splited_command_line(command);
+            var try_pos;
+            if (row > 0 && lines.length > 1) {
+                try_pos = col + lines.slice(0, row).reduce(function(sum, line) {
+                    return sum + line.length;
+                }, 0);
+            } else {
+                try_pos = col - prompt_len;
+            }
             var text = command.replace(/\t/g, '\x00\x00\x00\x00');
             var before = text.slice(0, try_pos);
             var len = before.replace(/\x00{4}/g, '\t').replace(/\x00+/, '').length;
