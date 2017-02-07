@@ -1073,8 +1073,8 @@
                 }
             },
             'ARROWRIGHT': right,
-            'RIGHT': right,
             'CTRL+F': right,
+            'RIGHT': right, // IE
             'CTRL+ARROWRIGHT': function() {
                 // jump to beginning or end of the word
                 if (command[position] === ' ') {

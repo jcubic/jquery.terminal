@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 07 Feb 2017 21:56:29 +0000
+ * Date: Tue, 07 Feb 2017 22:17:31 +0000
  */
 
 /* TODO:
@@ -1073,8 +1073,8 @@
                 }
             },
             'ARROWRIGHT': right,
-            'RIGHT': right,
             'CTRL+F': right,
+            'RIGHT': right, // IE
             'CTRL+ARROWRIGHT': function() {
                 // jump to beginning or end of the word
                 if (command[position] === ' ') {
