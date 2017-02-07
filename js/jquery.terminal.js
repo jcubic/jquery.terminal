@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 07 Feb 2017 22:17:31 +0000
+ * Date: Tue, 07 Feb 2017 22:52:47 +0000
  */
 
 /* TODO:
@@ -1881,7 +1881,7 @@
                 result = options.keypress(e);
             }
             var key = e.key || String.fromCharCode(e.which);
-            if (key.toUpperCase() == 'SPACEBAR') {
+            if (key.toUpperCase() === 'SPACEBAR') {
                 key = ' ';
             }
             //$.terminal.active().echo(JSON.stringify(result));

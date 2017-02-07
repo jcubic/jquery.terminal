@@ -1881,7 +1881,7 @@
                 result = options.keypress(e);
             }
             var key = e.key || String.fromCharCode(e.which);
-            if (key.toUpperCase() == 'SPACEBAR') {
+            if (key.toUpperCase() === 'SPACEBAR') {
                 key = ' ';
             }
             //$.terminal.active().echo(JSON.stringify(result));
