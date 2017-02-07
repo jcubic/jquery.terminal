@@ -1,3 +1,5 @@
+1.0.2     fix CTRL+V in Firefox
+1.0.1     fix signature
 1.0.0     copy to system clipboard when copy to kill area
           simplify changing of terminal colors using css variables
           always export history and import when importHistory option is true

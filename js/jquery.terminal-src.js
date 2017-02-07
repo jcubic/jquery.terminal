@@ -3878,7 +3878,7 @@
             'CTRL+L': function() {
                 self.clear();
             },
-            'TAB': function() {
+            'TAB': function(e, orignal) {
                 // TODO: move this to cmd plugin
                 //       add completion = array | function
                 //       !!! Problem complete more then one key need terminal
@@ -3918,7 +3918,7 @@
                             throw new Error(strings.invalidCompletion);
                     }
                 } else {
-                    self.insert('\t'); // original tab is overwritten
+                    orignal();
                 }
                 return false;
             },

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 07 Feb 2017 14:11:53 +0000
+ * Date: Tue, 07 Feb 2017 14:28:02 +0000
  */
 
 /* TODO:
@@ -3878,7 +3878,7 @@
             'CTRL+L': function() {
                 self.clear();
             },
-            'TAB': function() {
+            'TAB': function(e, orignal) {
                 // TODO: move this to cmd plugin
                 //       add completion = array | function
                 //       !!! Problem complete more then one key need terminal
@@ -3918,7 +3918,7 @@
                             throw new Error(strings.invalidCompletion);
                     }
                 } else {
-                    self.insert('\t'); // original tab is overwritten
+                    orignal();
                 }
                 return false;
             },
