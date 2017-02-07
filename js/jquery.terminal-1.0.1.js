@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 07 Feb 2017 14:33:25 +0000
+ * Date: Tue, 07 Feb 2017 21:07:01 +0000
  */
 
 /* TODO:
@@ -1540,12 +1540,9 @@
         // ---------------------------------------------------------------------
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
-        function paste(e) {
+        function paste() {
             if (paste_count++ > 0) {
                 return;
-            }
-            if (e.originalEvent) {
-                e = e.originalEvent;
             }
             if (self.isenabled()) {
                 var clip = self.find('textarea');
@@ -1580,7 +1577,9 @@
                     }
                 }
                 var key = get_key(e);
-                skip_insert = ['SHIFT+INSERT', 'BACKSPACE'].indexOf(key) !== -1;
+                // shift+insert and backspace don't fire keypress on Linux/Chrome
+                // CTRL+V don't fire in IE11
+                skip_insert = ['SHIFT+INSERT', 'BACKSPACE', 'CTRL+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }
@@ -1878,6 +1877,9 @@
                 result = options.keypress(e);
             }
             var key = e.key || String.fromCharCode(e.which);
+            if (key.toUpperCase() == 'SPACEBAR') {
+                key = ' ';
+            }
             //$.terminal.active().echo(JSON.stringify(result));
             if (result === undefined || result) {
                 if (enabled) {
@@ -1906,7 +1908,6 @@
         }
         function input(e) {
             if (no_keypress && !skip_insert) {
-                // shift insert and backspace don't fire keypress on Linux/Chrome
                 // Some Androids don't fire keypress - #39
                 var val = clip.val();
                 if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
@@ -1984,7 +1985,7 @@
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
     var is_touch = (function() {
-        return 'ontouchstart' in window || window.DocumentTouch &&
+        return 'ontouchstart' in window || !!window.DocumentTouch &&
             document instanceof window.DocumentTouch;
     })();
     // -------------------------------------------------------------------------
@@ -4786,8 +4787,6 @@
                         } else if ($.isFunction(settings.onResize)) {
                             settings.onResize.call(self, self);
                         }
-                        old_height = height;
-                        old_width = width;
                         scroll_to_bottom();
                     }
                 }
@@ -5381,7 +5380,7 @@
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
         });
-        var wrapper = $('<div class="wrapper"/>').appendTo(self);
+        var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
         var iframe = $('<iframe/>').appendTo(wrapper);
         output = $('<div>').addClass('terminal-output').appendTo(wrapper);
         self.addClass('terminal');
@@ -5526,7 +5525,12 @@
                     var isDragging = false;
                     var target;
                     self.mousedown(function(e) {
-                        target = $(e.target).parents().addBack();
+                        var parents = $(e.target).parents();
+                        if (parents.addBack) {
+                            target = parents.addBack();
+                        } else {
+                            target = parents.andSelf();
+                        }
                         self.oneTime(1, function() {
                             $(window).on('mousemove.terminal_' + self.id(), function() {
                                 isDragging = true;
@@ -5603,6 +5607,8 @@
                     if (old_height !== height || old_width !== width) {
                         self.resize();
                     }
+                    old_height = height;
+                    old_width = width;
                 }
             }
             self.oneTime(100, function() {

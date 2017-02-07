@@ -1,5 +1,6 @@
-1.0.2     fix CTRL+V in Firefox
+1.0.2     fix CTRL+V in Firefox and IE
           fix issue in jQuery >= 3.0
+          fix space, backspace and resize in IE
 1.0.1     fix signature
 1.0.0     copy to system clipboard when copy to kill area
           simplify changing of terminal colors using css variables
