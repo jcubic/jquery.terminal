@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 07 Feb 2017 14:28:02 +0000
+ * Date: Tue, 07 Feb 2017 14:33:25 +0000
  */
 
 /* TODO:
@@ -5526,7 +5526,7 @@
                     var isDragging = false;
                     var target;
                     self.mousedown(function(e) {
-                        target = $(e.target).parents().andSelf();
+                        target = $(e.target).parents().addBack();
                         self.oneTime(1, function() {
                             $(window).on('mousemove.terminal_' + self.id(), function() {
                                 isDragging = true;

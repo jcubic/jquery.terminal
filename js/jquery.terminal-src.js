@@ -5526,7 +5526,7 @@
                     var isDragging = false;
                     var target;
                     self.mousedown(function(e) {
-                        target = $(e.target).parents().andSelf();
+                        target = $(e.target).parents().addBack();
                         self.oneTime(1, function() {
                             $(window).on('mousemove.terminal_' + self.id(), function() {
                                 isDragging = true;
