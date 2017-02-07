@@ -5164,7 +5164,7 @@
                         } else {
                             init();
                         }
-                        if (!was_paused) {
+                        if (!was_paused && self.enabled()) {
                             self.resume();
                         }
                     });
