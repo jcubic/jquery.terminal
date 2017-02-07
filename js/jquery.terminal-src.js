@@ -946,6 +946,10 @@
             return len > command.length ? command.length : len;
         }
         function get_key(e) {
+            if (!e.key) {
+                throw new Error('key event property not supported try ' +
+                                'https://github.com/cvan/keyboardevent-key-polyfill');
+            }
             var key = e.key.toUpperCase();
             if (key === 'CONTROL') {
                 return 'CTRL';
@@ -1582,6 +1586,9 @@
                 }
                 if ($.isFunction(keymap[key])) {
                     result = keymap[key]();
+                    if (result === true) {
+                        return;
+                    }
                     if (result !== undefined) {
                         return result;
                     }
@@ -1688,7 +1695,16 @@
                 if (typeof new_keymap === 'undefined') {
                     return keymap;
                 } else {
-                    keymap = $.extend({}, default_keymap, new_keymap || {});
+                    keymap = $.extend(
+                        {},
+                        default_keymap,
+                        $.omap(new_keymap || {}, function(key, fn) {
+                            return function(e) {
+                                // new keymap function will get default as 2nd argument
+                                return fn(e, default_keymap[key]);
+                            };
+                        })
+                    );
                     return self;
                 }
             },
@@ -2427,9 +2443,8 @@
             }
         }
     };
-
     // -----------------------------------------------------------------------
-    // Helper plugins
+    // Helper plugins and functions
     // -----------------------------------------------------------------------
     $.fn.visible = function() {
         return this.css('visibility', 'visible');
@@ -2437,6 +2452,14 @@
     $.fn.hidden = function() {
         return this.css('visibility', 'hidden');
     };
+    // -----------------------------------------------------------------------
+    function warn(msg) {
+        if (console && console.warn) {
+            console.warn(msg);
+        } else {
+            throw new Error('WARN: ' + msg);
+        }
+    }
     // -----------------------------------------------------------------------
     // JSON-RPC CALL
     // -----------------------------------------------------------------------
@@ -2480,13 +2503,8 @@
             success: function(response, status, jqXHR) {
                 var content_type = jqXHR.getResponseHeader('Content-Type');
                 if (!content_type.match(/(application|text)\/json/)) {
-                    var msg = 'Response Content-Type is neither application/json' +
-                        ' nor text/json';
-                    if (console && console.warn) {
-                        console.warn(msg);
-                    } else {
-                        throw new Error('WARN: ' + msg);
-                    }
+                    warn('Response Content-Type is neither application/json' +
+                         ' nor text/json');
                 }
                 var json;
                 try {
@@ -3860,7 +3878,7 @@
             'CTRL+L': function() {
                 self.clear();
             },
-            'TAB': function() {
+            'TAB': function(e, orignal) {
                 // TODO: move this to cmd plugin
                 //       add completion = array | function
                 //       !!! Problem complete more then one key need terminal
@@ -3900,11 +3918,12 @@
                             throw new Error(strings.invalidCompletion);
                     }
                 } else {
-                    self.insert('\t'); // original tab is overwritten
+                    orignal();
                 }
                 return false;
             },
-            'CTRL+V': function() {
+            'CTRL+V': function(e, original) {
+                original(e);
                 self.oneTime(1, function() {
                     scroll_to_bottom();
                 });
@@ -5507,7 +5526,7 @@
                     var isDragging = false;
                     var target;
                     self.mousedown(function(e) {
-                        target = $(e.target).parents().andSelf();
+                        target = $(e.target).parents().addBack();
                         self.oneTime(1, function() {
                             $(window).on('mousemove.terminal_' + self.id(), function() {
                                 isDragging = true;

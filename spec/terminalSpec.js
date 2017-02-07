@@ -587,7 +587,9 @@ function tests_on_ready() {
                 if (obj.url == url) {
                     var defer = $.Deferred();
                     try {
-                        obj.beforeSend({}, obj);
+                        if ($.isFunction(obj.beforeSend)) {
+                            obj.beforeSend({}, obj);
+                        }
                         if (options.async) {
                             setTimeout(done, 100);
                         } else {
