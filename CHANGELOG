@@ -1,6 +1,6 @@
 1.0.2     fix CTRL+V in Firefox and IE
           fix issue in jQuery >= 3.0
-          fix space, backspace and resize in IE
+          fix space, backspace, resize and arrows in IE
           fix middle mouse paste on GNU/Linux
 1.0.1     fix signature
 1.0.0     copy to system clipboard when copy to kill area

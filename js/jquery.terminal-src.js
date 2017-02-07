@@ -1021,10 +1021,13 @@
                 return true;
             },
             'ARROWUP': prev_history,
+            'UP': prev_history,
             'CTRL+P': prev_history,
             'ARROWDOWN': next_history,
+            'DOWN': next_history, // IE
             'CTRL+N': next_history,
             'ARROWLEFT': left,
+            'LEFT': left, // IE
             'CTRL+B': left,
             'CTRL+ARROWLEFT': function() {
                 // jump to one character after last space before prevoius word
@@ -1070,6 +1073,7 @@
                 }
             },
             'ARROWRIGHT': right,
+            'RIGHT': right,
             'CTRL+F': right,
             'CTRL+ARROWRIGHT': function() {
                 // jump to beginning or end of the word
