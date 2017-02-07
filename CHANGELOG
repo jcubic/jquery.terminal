@@ -1,6 +1,7 @@
 1.0.2     fix CTRL+V in Firefox and IE
           fix issue in jQuery >= 3.0
           fix space, backspace and resize in IE
+          fix middle mouse paste on GNU/Linux
 1.0.1     fix signature
 1.0.0     copy to system clipboard when copy to kill area
           simplify changing of terminal colors using css variables
@@ -123,7 +124,7 @@
           Don't print empty string after removing extended commands strings
           fix history_state method
 0.9.2     Don't change command line history if ctrl key is pressed
-          fix middle mouse copy on linux
+          fix middle mouse copy on GNU/Linux
           fix resize issue
 0.9.1     freeze and frozen API methods that disable/enable terminal that can't be enabled
           by click

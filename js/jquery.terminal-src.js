@@ -1577,7 +1577,7 @@
                     }
                 }
                 var key = get_key(e);
-                // shift+insert and backspace don't fire keypress on Linux/Chrome
+                // shift+insert and backspace don't fire keypress on Chromium/Linux
                 // CTRL+V don't fire in IE11
                 skip_insert = ['SHIFT+INSERT', 'BACKSPACE', 'CTRL+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
@@ -5578,15 +5578,12 @@
                     print_line(href);
                 }
             });
-            if (!navigator.platform.match(/linux/i)) {
-                // on linux system paste work with middle mouse button
-                self.mousedown(function(e) {
-                    if (e.which === 2) {
-                        var selected = get_selected_text();
-                        self.insert(selected);
-                    }
-                });
-            }
+            self.mousedown(function(e) {
+                if (e.which === 2) {
+                    var selected = get_selected_text();
+                    self.insert(selected);
+                }
+            });
             if (self.is(':visible')) {
                 num_chars = self.cols();
                 command_line.resize(num_chars);
