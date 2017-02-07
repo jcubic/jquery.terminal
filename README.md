@@ -81,6 +81,8 @@ You can also include js/jquery.mousewheel-min.js
 <link href="css/jquery.terminal-1.0.1.css" rel="stylesheet"/>
 ```
 
+**NOTE:** From version 1.0.0 if you want to support old browsers or Safari then you'll need to use [key event property polyfill](https://github.com/cvan/keyboardevent-key-polyfill/))
+
 You can also grab the files from CDN:
 
 ```html
