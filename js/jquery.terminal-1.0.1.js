@@ -4031,7 +4031,7 @@
                                 {name: self.selector},
                                 options || {});
         var storage = new StorageHelper(settings.memory);
-        var strings = $.terminal.defaults.strings;
+        var strings = $.extend({}, $.terminal.defaults.strings, options.strings);
         var enabled = settings.enabled, frozen = false;
         var paused = false;
         var autologin = true; // set to false of onBeforeLogin return false
