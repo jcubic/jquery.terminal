@@ -3804,7 +3804,7 @@
                     // throw e; // it will be catched by terminal
                 } finally {
                     onPause = $.noop;
-                    if (!was_paused) {
+                    if (!was_paused && self.enabled()) {
                         // resume login if user didn't call pause in onInit
                         // if user pause in onInit wait with exec until it
                         // resume
