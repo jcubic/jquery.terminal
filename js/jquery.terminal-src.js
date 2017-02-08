@@ -2466,7 +2466,7 @@
             return false;
         }
         var get = Object.getOwnPropertyDescriptor(KeyboardEvent.prototype, 'key').get;
-        return get.toString().match("[native code]");
+        return get.toString().match(/\[native code\]/);
     }
     // -----------------------------------------------------------------------
     function warn(msg) {

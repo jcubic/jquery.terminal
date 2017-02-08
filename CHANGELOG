@@ -1,3 +1,4 @@
+1.0.3     fix keypress with key polyfill
 1.0.2     fix CTRL+V in Firefox and IE
           fix issue in jQuery >= 3.0
           fix space, backspace, resize and arrows in IE
