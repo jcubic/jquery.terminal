@@ -1016,6 +1016,10 @@
             'TAB': function() {
                 self.insert('\t');
             },
+            'CTRL+D': function() {
+                self['delete'](1);
+                return false;
+            },
             'DELETE': function() {
                 self['delete'](1);
                 return true;
@@ -3876,7 +3880,7 @@
             }
         }
         var keymap = {
-            'CTRL+D': function() {
+            'CTRL+D': function(e, original) {
                 if (!in_login) {
                     if (command_line.get() === '') {
                         if (interpreters.size() > 1 ||
@@ -3887,7 +3891,7 @@
                             self.echo('');
                         }
                     } else {
-                        self.set_command('');
+                        original();
                     }
                 }
                 return false;
