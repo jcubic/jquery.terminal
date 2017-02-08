@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.0.3
+ *           \/              /____/                              version 1.0.4
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 08 Feb 2017 18:42:34 +0000
+ * Date: Wed, 08 Feb 2017 18:58:09 +0000
  */
 
 /* TODO:
@@ -2037,7 +2037,7 @@
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
     /* eslint-enable */
     $.terminal = {
-        version: '1.0.3',
+        version: '1.0.4',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -2462,10 +2462,10 @@
         return this.css('visibility', 'hidden');
     };
     function is_key_native() {
-        if (!('KeyboardEvent' in window && 'key' in KeyboardEvent.prototype)) {
+        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             return false;
         }
-        var get = Object.getOwnPropertyDescriptor(KeyboardEvent.prototype, 'key').get;
+        var get = Object.getOwnPropertyDescriptor(window.KeyboardEvent.prototype, 'key').get;
         return get.toString().match(/\[native code\]/);
     }
     // -----------------------------------------------------------------------
