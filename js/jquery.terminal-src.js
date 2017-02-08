@@ -1882,7 +1882,9 @@
             if (!reverse_search && $.isFunction(options.keypress)) {
                 result = options.keypress(e);
             }
-            var key = e.key || String.fromCharCode(e.which);
+            // key polyfill is not correct for keypress
+            // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
+            var key = is_key_native() ? e.key : String.fromCharCode(e.which);
             if (key.toUpperCase() === 'SPACEBAR') {
                 key = ' ';
             }
@@ -2459,6 +2461,13 @@
     $.fn.hidden = function() {
         return this.css('visibility', 'hidden');
     };
+    function is_key_native() {
+        if (!('KeyboardEvent' in window && 'key' in KeyboardEvent.prototype)) {
+            return false;
+        }
+        var get = Object.getOwnPropertyDescriptor(KeyboardEvent.prototype, 'key').get;
+        return get.toString().match("[native code]");
+    }
     // -----------------------------------------------------------------------
     function warn(msg) {
         if (console && console.warn) {
