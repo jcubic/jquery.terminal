@@ -3827,7 +3827,7 @@
                     // throw e; // it will be catched by terminal
                 } finally {
                     onPause = $.noop;
-                    if (!was_paused) {
+                    if (!was_paused && self.enabled()) {
                         // resume login if user didn't call pause in onInit
                         // if user pause in onInit wait with exec until it
                         // resume
@@ -4036,7 +4036,7 @@
                                 {name: self.selector},
                                 options || {});
         var storage = new StorageHelper(settings.memory);
-        var strings = $.terminal.defaults.strings;
+        var strings = $.extend({}, $.terminal.defaults.strings, settings.strings);
         var enabled = settings.enabled, frozen = false;
         var paused = false;
         var autologin = true; // set to false of onBeforeLogin return false
@@ -5186,7 +5186,7 @@
                         } else {
                             init();
                         }
-                        if (!was_paused) {
+                        if (!was_paused && self.enabled()) {
                             self.resume();
                         }
                     });
