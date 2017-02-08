@@ -1,4 +1,5 @@
 1.0.5     fix CTRL+D to delete forward one character
+          don't use user agent sniffing to get scroll element if terminal attached to body
 1.0.3/4   fix keypress with key polyfill
 1.0.2     fix CTRL+V in Firefox and IE
           fix issue in jQuery >= 3.0

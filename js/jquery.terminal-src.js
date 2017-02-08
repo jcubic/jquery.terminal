@@ -2465,6 +2465,45 @@
     $.fn.hidden = function() {
         return this.css('visibility', 'hidden');
     };
+    // -----------------------------------------------------------------------
+    // :: hack to get scroll element if terminal attached to the body
+    // :: is better then userAgent sniffing because other browsers beside
+    // :: chrome may use body as scroll element instead of html like
+    // :: IE and FireFox
+    // -----------------------------------------------------------------------
+    $.fn.scroll_element = function() {
+        var defaults = $.fn.scroll_element.defaults;
+        return this.map(function() {
+            var $this = $(this);
+            if ($this.is('body')) {
+                var html = $('html');
+                var body = $('body');
+                var scrollTop = body.scrollTop() || html.scrollTop();
+                var pre = $('<pre/>').css(defaults.pre).appendTo('body');
+                pre.html(new Array(defaults.lines).join('\n'));
+                $('body,html').scrollTop(10);
+                var scroll_object;
+                if (body.scrollTop() === 10) {
+                    body.scrollTop(scrollTop);
+                    scroll_object = body[0];
+                } else if (html.scrollTop() === 10) {
+                    html.scrollTop(scrollTop);
+                    scroll_object = html[0];
+                }
+                pre.remove();
+                return scroll_object;
+            } else {
+                return this;
+            }
+        });
+    };
+    $.fn.scroll_element.defaults = {
+        lines: 2000,
+        pre: {
+            'font-size': '14px',
+            'white-space': 'pre' // just in case if user overwrite css for pre tag
+        }
+    };
     function is_key_native() {
         var proto = window.KeyboardEvent.prototype;
         if (!('KeyboardEvent' in window && 'key' in proto)) {
@@ -5389,13 +5428,7 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        var agent = navigator.userAgent.toLowerCase();
-        if (!agent.match(/(webkit)[ /]([\w.]+)/) &&
-            self[0].tagName.toLowerCase() === 'body') {
-            scroll_object = $('html');
-        } else {
-            scroll_object = self;
-        }
+        scroll_object = self.scroll_element();
         // register ajaxSend for cancel requests on CTRL+D
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);

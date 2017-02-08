@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.0.4
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 08 Feb 2017 20:58:07 +0000
+ * Date: Wed, 08 Feb 2017 22:12:06 +0000
  */
 
 /* TODO:
@@ -1015,6 +1015,10 @@
             },
             'TAB': function() {
                 self.insert('\t');
+            },
+            'CTRL+D': function() {
+                self['delete'](1);
+                return false;
             },
             'DELETE': function() {
                 self['delete'](1);
@@ -2037,7 +2041,7 @@
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
     /* eslint-enable */
     $.terminal = {
-        version: '1.0.4',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -2460,6 +2464,45 @@
     };
     $.fn.hidden = function() {
         return this.css('visibility', 'hidden');
+    };
+    // -----------------------------------------------------------------------
+    // :: hack to get scroll element if terminal attached to the body
+    // :: is better then userAgent sniffing because other browsers beside
+    // :: chrome may use body as scroll element instead of html like
+    // :: IE and FireFox
+    // -----------------------------------------------------------------------
+    $.fn.scroll_element = function() {
+        var defaults = $.fn.scroll_element.defaults;
+        return this.map(function() {
+            var $this = $(this);
+            if ($this.is('body')) {
+                var html = $('html');
+                var body = $('body');
+                var scrollTop = body.scrollTop() || html.scrollTop();
+                var pre = $('<pre/>').css(defaults.pre).appendTo('body');
+                pre.html(new Array(defaults.lines).join('\n'));
+                $('body,html').scrollTop(10);
+                var scroll_object;
+                if (body.scrollTop() === 10) {
+                    body.scrollTop(scrollTop);
+                    scroll_object = body[0];
+                } else if (html.scrollTop() === 10) {
+                    html.scrollTop(scrollTop);
+                    scroll_object = html[0];
+                }
+                pre.remove();
+                return scroll_object;
+            } else {
+                return this;
+            }
+        });
+    };
+    $.fn.scroll_element.defaults = {
+        lines: 2000,
+        pre: {
+            'font-size': '14px',
+            'white-space': 'pre' // just in case if user overwrite css for pre tag
+        }
     };
     function is_key_native() {
         var proto = window.KeyboardEvent.prototype;
@@ -3876,7 +3919,7 @@
             }
         }
         var keymap = {
-            'CTRL+D': function() {
+            'CTRL+D': function(e, original) {
                 if (!in_login) {
                     if (command_line.get() === '') {
                         if (interpreters.size() > 1 ||
@@ -3887,7 +3930,7 @@
                             self.echo('');
                         }
                     } else {
-                        command_line['delete'](1);
+                        original();
                     }
                 }
                 return false;
@@ -5385,13 +5428,7 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        var agent = navigator.userAgent.toLowerCase();
-        if (!agent.match(/(webkit)[ /]([\w.]+)/) &&
-            self[0].tagName.toLowerCase() === 'body') {
-            scroll_object = $('html');
-        } else {
-            scroll_object = self;
-        }
+        scroll_object = self.scroll_element();
         // register ajaxSend for cancel requests on CTRL+D
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
