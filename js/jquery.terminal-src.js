@@ -2462,10 +2462,11 @@
         return this.css('visibility', 'hidden');
     };
     function is_key_native() {
-        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
+        var proto = window.KeyboardEvent.prototype;
+        if (!('KeyboardEvent' in window && 'key' in proto)) {
             return false;
         }
-        var get = Object.getOwnPropertyDescriptor(window.KeyboardEvent.prototype, 'key').get;
+        var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
         return get.toString().match(/\[native code\]/);
     }
     // -----------------------------------------------------------------------

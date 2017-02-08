@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 08 Feb 2017 18:58:09 +0000
+ * Date: Wed, 08 Feb 2017 19:03:09 +0000
  */
 
 /* TODO:
@@ -2462,10 +2462,11 @@
         return this.css('visibility', 'hidden');
     };
     function is_key_native() {
-        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
+        var proto = window.KeyboardEvent.prototype;
+        if (!('KeyboardEvent' in window && 'key' in proto)) {
             return false;
         }
-        var get = Object.getOwnPropertyDescriptor(window.KeyboardEvent.prototype, 'key').get;
+        var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
         return get.toString().match(/\[native code\]/);
     }
     // -----------------------------------------------------------------------
