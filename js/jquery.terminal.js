@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 09 Feb 2017 17:24:07 +0000
+ * Date: Thu, 09 Feb 2017 19:46:04 +0000
  */
 
 /* TODO:
@@ -1895,8 +1895,13 @@
             //$.terminal.active().echo(JSON.stringify(result));
             if (result === undefined || result) {
                 if (enabled) {
+                    if ($.inArray(e.which, [13, 0, 8]) > -1) {
+                        if (e.keyCode === 123) { // for F12 which === 0
+                            return;
+                        }
+                        return false;
                     // which == 100 - d
-                    if (key && !e.ctrlKey && (!(e.altKey && e.which === 100) ||
+                    } else if (key && !e.ctrlKey && (!(e.altKey && e.which === 100) ||
                                               e.altKey)) {
                         if (reverse_search) {
                             rev_search_str += key;

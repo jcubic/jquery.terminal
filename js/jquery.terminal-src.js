@@ -1895,8 +1895,13 @@
             //$.terminal.active().echo(JSON.stringify(result));
             if (result === undefined || result) {
                 if (enabled) {
+                    if ($.inArray(e.which, [13, 0, 8]) > -1) {
+                        if (e.keyCode === 123) { // for F12 which === 0
+                            return;
+                        }
+                        return false;
                     // which == 100 - d
-                    if (key && !e.ctrlKey && (!(e.altKey && e.which === 100) ||
+                    } else if (key && !e.ctrlKey && (!(e.altKey && e.which === 100) ||
                                               e.altKey)) {
                         if (reverse_search) {
                             rev_search_str += key;
