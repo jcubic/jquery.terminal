@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 10 Feb 2017 17:02:04 +0000
+ * Date: Tue, 14 Feb 2017 09:57:12 +0000
  */
 
 /* TODO:
@@ -1901,8 +1901,8 @@
                         }
                         return false;
                     // which == 100 - d
-                    } else if (key && !e.ctrlKey && (!(e.altKey && e.which === 100) ||
-                                              e.altKey)) {
+                    } else if (key && (!e.ctrlKey || (e.ctrlKey && e.ctrlKey)) &&
+                               (!(e.altKey && e.which === 100) || e.altKey)) {
                         if (reverse_search) {
                             rev_search_str += key;
                             reverse_history_search();
