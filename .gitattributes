@@ -1,6 +1,5 @@
 * text eol=lf
 .* text eol=lf
-bin/yuicompressor-2.4.8.jar binary
 js/jquery.terminal-[0-9]* binary
 js/jquery.terminal.min.js binary
 js/jquery.terminal.js binary

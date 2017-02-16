@@ -37,7 +37,8 @@
     {"name":"Steve Phillips","email":"steve@tryingtobeawesome.com","url":"https://tryingtobeawesome.com/"},
     {"name":"coderaiser","email":"mnemonic.enemy@gmail.com","url":"http://coderaiser.github.io"},
     {"name":"Juraj Vitko","url":"https://github.com/youurayy"},
-    {"name":"Yutong Luo","email":"yutong@yutongluo.com","url":"https://yutongluo.com"}
+    {"name":"Yutong Luo","email":"yutong@yutongluo.com","url":"https://yutongluo.com"},
+    {"name":"Ishan Ratnapala","url":"https://github.com/IshanRatnapala"}
   ],
   "license": "MIT",
   "repository": {
