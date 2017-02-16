@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 16 Feb 2017 21:21:31 +0000
+ * Date: Thu, 16 Feb 2017 22:36:09 +0000
  */
 
 /* TODO:
@@ -1887,7 +1887,13 @@
             }
             // key polyfill is not correct for keypress
             // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
-            var key = is_key_native() ? e.key : String.fromCharCode(e.which);
+            var key;
+            if (is_key_native()) {
+                key = e.key;
+            }
+            if (!key) {
+                key = String.fromCharCode(e.which);
+            }
             if (key.toUpperCase() === 'SPACEBAR') {
                 key = ' ';
             }
@@ -3834,6 +3840,7 @@
                 }));
             }
             command_line.set('');
+            init_defer.resolve();
             if (!silent && $.isFunction(interpreter.onStart)) {
                 interpreter.onStart.call(self, self);
             }
@@ -4039,13 +4046,14 @@
                 return false;
             }
         }
-        // ---------------------------------------------------------------------
-        function when_ready(fun) {
-            if (init_defer.state() !== 'resolved') {
-                init_defer.then(fun.bind(self));
-            } else {
-                fun.call(self);
-            }
+        function ready(defer) {
+            return function(fun) {
+                if (defer.state() !== 'resolved') {
+                    defer.then(fun.bind(self));
+                } else {
+                    fun.call(self);
+                }
+            };
         }
         // ---------------------------------------------------------------------
         var self = this;
@@ -4078,7 +4086,10 @@
         var num_rows; // number of lines that fit without scrollbar
         var command; // for tab completion
         var logins = new Stack(); // stack of logins
+        var command_defer = $.Deferred();
         var init_defer = $.Deferred();
+        var when_ready = ready(init_defer);
+        var cmd_ready = ready(command_defer);
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;// used to indicate that user call pause onInit
@@ -4199,7 +4210,7 @@
             // -------------------------------------------------------------
             exec: function(command, silent, deferred) {
                 var d = deferred || new $.Deferred();
-                when_ready(function ready() {
+                cmd_ready(function ready() {
                     if ($.isArray(command)) {
                         (function recur() {
                             var cmd = command.shift();
@@ -4474,7 +4485,7 @@
             // :: Pause the terminal, it should be used for ajax calls
             // -------------------------------------------------------------
             pause: function(visible) {
-                when_ready(function() {
+                cmd_ready(function ready() {
                     onPause();
                     paused = true;
                     command_line.disable();
@@ -5183,7 +5194,7 @@
             // :: Push a new interenter on the Stack
             // -------------------------------------------------------------
             push: function(interpreter, options) {
-                when_ready(function ready() {
+                cmd_ready(function ready() {
                     options = options || {};
                     var defaults = {
                         infiniteLogin: false,
@@ -5642,7 +5653,7 @@
             }
             // -------------------------------------------------------------
             // Run Login
-            init_defer.resolve();
+            command_defer.resolve();
             if (settings.login) {
                 self.login(settings.login, true, initialize);
             } else {

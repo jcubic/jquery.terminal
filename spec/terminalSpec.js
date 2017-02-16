@@ -1343,7 +1343,7 @@ function tests_on_ready() {
             describe('methods after creating async rpc with system.describe', function() {
                 it('should call methods', function(done) {
                     spy(object, 'echo');
-                    var term = $('<div/>').terminal('/async');
+                    var term = $('<div/>').appendTo('body').terminal('/async');
                     term.exec('echo foo bar');
                     term.insert('foo');
                     setTimeout(function() {
