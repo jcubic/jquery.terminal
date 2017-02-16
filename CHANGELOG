@@ -1,3 +1,4 @@
+1.0.7     fix exec when pause called in onInit
 1.0.6     fix AltGr on non US keyboard layouts
 1.0.5     fix CTRL+D to delete forward one character
           don't use user agent sniffing to get scroll element if terminal attached to body

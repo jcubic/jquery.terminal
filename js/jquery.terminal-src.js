@@ -4475,17 +4475,15 @@
             // :: Pause the terminal, it should be used for ajax calls
             // -------------------------------------------------------------
             pause: function(visible) {
-                when_ready(function ready() {
-                    onPause();
-                    paused = true;
-                    command_line.disable();
-                    if (!visible) {
-                        command_line.hidden();
-                    }
-                    if ($.isFunction(settings.onPause)) {
-                        settings.onPause.call(self);
-                    }
-                });
+                onPause();
+                paused = true;
+                command_line.disable();
+                if (!visible) {
+                    command_line.hidden();
+                }
+                if ($.isFunction(settings.onPause)) {
+                    settings.onPause.call(self);
+                }
                 return self;
             },
             // -------------------------------------------------------------
