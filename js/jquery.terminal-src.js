@@ -1593,15 +1593,6 @@
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }
-                if ($.isFunction(keymap[key])) {
-                    result = keymap[key]();
-                    if (result === true) {
-                        return;
-                    }
-                    if (result !== undefined) {
-                        return result;
-                    }
-                }
                 // arrows / Home / End / ENTER
                 if (reverse_search && (e.which === 35 || e.which === 36 ||
                                        e.which === 37 || e.which === 38 ||
@@ -1616,6 +1607,14 @@
                     // finish reverse search and execute normal event handler
                     /* jshint validthis:true */
                     keydown_event.call(this, e);
+                } else if ($.isFunction(keymap[key])) {
+                    result = keymap[key]();
+                    if (result === true) {
+                        return;
+                    }
+                    if (result !== undefined) {
+                        return result;
+                    }
                 } else if (e.altKey) {
                     return true;
                 } else {
@@ -2784,7 +2783,7 @@
         keydown: $.noop,
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
-                'have two arguments',
+                ' have two arguments',
             wrongPasswordTryAgain: 'Wrong password try again!',
             wrongPassword: 'Wrong password!',
             ajaxAbortError: 'Error while aborting ajax call!',
@@ -3957,7 +3956,7 @@
                         case 'function':
                             var string = self.before_cursor(settings.wordAutocomplete);
                             if (completion.length === 3) {
-                                var error = new Error(settings.comletionParameters);
+                                var error = new Error(strings.comletionParameters);
                                 display_exception(error, 'USER');
                                 return false;
                             }
@@ -4475,15 +4474,17 @@
             // :: Pause the terminal, it should be used for ajax calls
             // -------------------------------------------------------------
             pause: function(visible) {
-                onPause();
-                paused = true;
-                command_line.disable();
-                if (!visible) {
-                    command_line.hidden();
-                }
-                if ($.isFunction(settings.onPause)) {
-                    settings.onPause.call(self);
-                }
+                when_ready(function() {
+                    onPause();
+                    paused = true;
+                    command_line.disable();
+                    if (!visible) {
+                        command_line.hidden();
+                    }
+                    if ($.isFunction(settings.onPause)) {
+                        settings.onPause.call(self);
+                    }
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -5641,6 +5642,7 @@
             }
             // -------------------------------------------------------------
             // Run Login
+            init_defer.resolve();
             if (settings.login) {
                 self.login(settings.login, true, initialize);
             } else {
@@ -5771,7 +5773,6 @@
                     }
                 });
             }
-            init_defer.resolve();
         }); // make_interpreter
         self.data('terminal', self);
         return self;
