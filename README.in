@@ -162,54 +162,6 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [full documentation](http://terminal.jcubic.pl/api_reference.php).
 
 
-### Contribution
-
-If you want to contribute make sure you modify `js/jquery.terminal-src.js` and `css/jquery.terminal-src.css` files and run `make` and make sure you're on devel branch and create PR to devel brach as well, fixes to examples and README can be made to master. To build the files (it only replace version, add current date in files and run minifiers on css and js) you need to have nodejs and run:
-
-```
-npm install
-```
-
-to build the files you need to run
-
-```
-make
-```
-
-You also need to use bash (on Windows you can use git-bash that's get installed when you install git).
-
-Before you create pull request run `make lint`, it will be run by travis, and fix any errors that may show up, the linter used is [eslint](http://eslint.org/). You can find rules for eslint in package.json.
-
-Non tech contrubution are also wellcome, if you find a bug in documentation on the website you can file an issue to [jcubic/jquery.terminal-www](https://github.com/jcubic/jquery.terminal-www).
-
-
-### Test
-
-If you want to run tests from browser you need to run
-
-```
-bower install --dev
-```
-
-and open SpecRunner.html file in the browser
-
-
-To run tests from command line you need to run this commands:
-
-```
-npm install
-make test
-```
-
-(You don't need to run npm again if you did it when buuilding the files)
-
-you can also run test covarage using
-
-```
-make cover
-```
-
-
 ### License
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
