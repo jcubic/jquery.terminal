@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 17 Feb 2017 22:22:10 +0000
+ * Date: Fri, 17 Feb 2017 22:28:22 +0000
  */
 
 /* TODO:
@@ -958,13 +958,13 @@
                 if (e.ctrlKey) {
                     combo.push('CTRL');
                 }
-                if (e.metaKey) {
+                if (e.metaKey && key !== 'META') {
                     combo.push('META');
                 }
-                if (e.shiftKey) {
+                if (e.shiftKey && key !== 'SHIFT') {
                     combo.push('SHIFT');
                 }
-                if (e.altKey) {
+                if (e.altKey && key !== 'ALT') {
                     combo.push('ALT');
                 }
                 if (e.key) {
