@@ -34,6 +34,13 @@ function spy(obj, method) {
     }
     return spy;
 }
+function count(spy) {
+    if (spy.calls.count) {
+        return spy.calls.count();
+    } else {
+        return spy.calls.length;
+    }
+}
 function enter_text(text) {
     var e;
     var $root = $(document.documentElement || window);
@@ -561,6 +568,7 @@ function tests_on_ready() {
                 expect(cmd.get()).toEqual('foo bar');
                 shortcut(true, false, false, 71, 'g'); // CTRL+G
                 expect(cmd.get()).toEqual('foo bar baz');
+                expect(cmd.prompt()).toEqual("> ");
                 cmd.purge();
                 term.destroy().remove();
             });
@@ -2252,6 +2260,71 @@ function tests_on_ready() {
                     enter(term, 'bar');
                     expect(term.get_token(true)).toEqual(token);
                     expect(term.get_prompt()).toEqual(prompt);
+                });
+            });
+            describe('pop', function() {
+                describe('with login', function() {
+                    var token = 'TOKEN';
+                    var term;
+                    var options;
+                    beforeEach(function() {
+                        options = {
+                            name: 'pop',
+                            onExit: function() {},
+                            login: function(user, password, callback) {
+                                callback(token);
+                            },
+                            onPop: function() {}
+                        };
+                        spy(options, 'onExit');
+                        spy(options, 'onPop');
+                        options.onExit.calls.reset();
+                        options.onPop.calls.reset();
+                        term = $('<div/>').terminal({}, options);
+                        if (term.token()) {
+                            term.logout();
+                        }
+                        enter(term, 'foo');
+                        enter(term, 'bar');
+                        ['one', 'two', 'three', 'four'].forEach(function(name, index) {
+                            term.push($.noop, {
+                                name: name,
+                                prompt: (index+1) + '> '
+                            });
+                        });
+                    });
+                    it('shoulr return terminal object', function() {
+                        expect(term.pop()).toEqual(term);
+                    });
+                    it('should pop one interpreter', function() {
+                        term.pop();
+                        expect(term.name()).toEqual('three');
+                        expect(term.get_prompt()).toEqual('3> ');
+                    });
+                    it('should pop all interpreters', function() {
+                        while(term.level() > 1) {
+                            term.pop();
+                        }
+                        expect(term.name()).toEqual('pop');
+                        expect(term.get_prompt()).toEqual('> ');
+                    });
+                    it('should logout from main intepreter', function() {
+                        while(term.level() > 1) {
+                            term.pop();
+                        }
+                        term.pop();
+                        expect(term.get_prompt()).toEqual('login: ');
+                    });
+                    it('should call callbacks', function() {
+                        while(term.level() > 1) {
+                            term.pop();
+                        }
+                        term.pop();
+                        expect(options.onExit).toHaveBeenCalled();
+                        expect(options.onExit).toHaveBeenCalled();
+                        expect(count(options.onExit)).toBe(1);
+                        expect(count(options.onPop)).toBe(4);
+                    });
                 });
             });
         });

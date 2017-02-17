@@ -1160,6 +1160,7 @@
                 paste(e);
                 clip.off('input', input);
             });
+            return true;
         }
         function prev_history() {
             if (first_up_history) {
@@ -1582,6 +1583,7 @@
         var skip_insert;
         function keydown_event(e) {
             var result;
+            no_keypress = true;
             if (enabled) {
                 if ($.isFunction(options.keydown)) {
                     result = options.keydown(e);
@@ -1613,6 +1615,7 @@
                     keydown_event.call(this, e);
                 } else if ($.isFunction(keymap[key])) {
                     result = keymap[key]();
+                    console.log('1', result);
                     if (result === true) {
                         return;
                     }
@@ -1623,7 +1626,6 @@
                     return true;
                 } else {
                     prevent_keypress = false;
-                    no_keypress = true;
                     return;
                 }
                 // this will prevent for instance backspace to go back one page
@@ -1898,7 +1900,7 @@
             if (!key) {
                 key = String.fromCharCode(e.which);
             }
-            if (key.toUpperCase() === 'SPACEBAR') {
+            if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
                 key = ' ';
             }
             //$.terminal.active().echo(JSON.stringify(result));
@@ -3993,9 +3995,10 @@
             },
             'CTRL+V': function(e, original) {
                 original(e);
-                self.oneTime(1, function() {
+                self.oneTime(200, function() {
                     scroll_to_bottom();
                 });
+                return true;
             },
             'CTRL+TAB': function() {
                 if (terminals.length() > 1) {
