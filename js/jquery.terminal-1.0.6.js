@@ -958,6 +958,9 @@
                 if (e.ctrlKey) {
                     combo.push('CTRL');
                 }
+                if (e.metaKey) {
+                    combo.push('META');
+                }
                 if (e.shiftKey) {
                     combo.push('SHIFT');
                 }
@@ -1129,6 +1132,7 @@
                 }
             },
             'CTRL+V': paste_event,
+            'META+V': paste_event,
             'CTRL+K': function() {
                 kill_text = self['delete'](command.length - position);
                 text_to_clipboard(self, kill_text);
