@@ -4502,7 +4502,7 @@
             // :: Resume the previously paused terminal
             // -------------------------------------------------------------
             resume: function() {
-                when_ready(function ready() {
+                cmd_ready(function ready() {
                     paused = false;
                     if (terminals.front() === self) {
                         command_line.enable();
@@ -4613,7 +4613,7 @@
             // :: the events will be not fired. Used on init
             // -------------------------------------------------------------
             focus: function(toggle, silent) {
-                when_ready(function ready() {
+                cmd_ready(function ready() {
                     var ret;
                     if (terminals.length() === 1) {
                         if (toggle === false) {
@@ -4684,7 +4684,7 @@
                         // enabling first time
                         self.resize();
                     }
-                    when_ready(function ready() {
+                    cmd_ready(function ready() {
                         command_line.enable();
                         enabled = true;
                     });
@@ -4695,12 +4695,10 @@
             // :: Disable the terminal
             // -------------------------------------------------------------
             disable: function() {
-                if (enabled && !frozen) {
-                    when_ready(function ready() {
-                        enabled = false;
-                        command_line.disable();
-                    });
-                }
+                cmd_ready(function ready() {
+                    enabled = false;
+                    command_line.disable();
+                });
                 return self;
             },
             // -------------------------------------------------------------
