@@ -1028,7 +1028,7 @@
                 return true;
             },
             'ARROWUP': prev_history,
-            'UP': prev_history,
+            'UP': prev_history, // IE
             'CTRL+P': prev_history,
             'ARROWDOWN': next_history,
             'DOWN': next_history, // IE
@@ -1615,7 +1615,6 @@
                     keydown_event.call(this, e);
                 } else if ($.isFunction(keymap[key])) {
                     result = keymap[key]();
-                    console.log('1', result);
                     if (result === true) {
                         return;
                     }
@@ -4286,7 +4285,7 @@
                 function login_callback(user, token, silent) {
                     if (token) {
                         while (self.level() > level) {
-                            self.pop();
+                            self.pop(undefined, true);
                         }
                         if (settings.history) {
                             command_line.history().enable();
@@ -4307,13 +4306,13 @@
                             if (!silent) {
                                 self.error(strings.wrongPasswordTryAgain);
                             }
-                            self.pop().set_mask(false);
+                            self.pop(undefined, true).set_mask(false);
                         } else {
                             in_login = false;
                             if (!silent) {
                                 self.error(strings.wrongPassword);
                             }
-                            self.pop().pop();
+                            self.pop(undefined, true).pop(undefined, true);
                         }
                         // used only to call pop in push
                         if ($.isFunction(error)) {
@@ -5265,7 +5264,7 @@
             // -------------------------------------------------------------
             // :: Remove the last interpreter from the Stack
             // -------------------------------------------------------------
-            pop: function(string) {
+            pop: function(string, silent) {
                 if (string !== undefined) {
                     echo_command(string);
                 }
@@ -5285,7 +5284,9 @@
                     } else {
                         self.error(strings.canExitError);
                     }
-                    settings.onPop.call(self, top, null, self);
+                    if (!silent) {
+                        settings.onPop.call(self, top, null, self);
+                    }
                 } else {
                     if (token) {
                         clear_loging_storage();
@@ -5293,7 +5294,9 @@
                     var current = interpreters.pop();
                     top = interpreters.top();
                     prepare_top_interpreter();
-                    settings.onPop.call(self, current, top);
+                    if (!silent) {
+                        settings.onPop.call(self, current, top);
+                    }
                     // we check in case if you don't pop from password interpreter
                     if (in_login && self.get_prompt() !== strings.login + ': ') {
                         in_login = false;

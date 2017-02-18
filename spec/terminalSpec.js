@@ -37,8 +37,19 @@ function spy(obj, method) {
 function count(spy) {
     if (spy.calls.count) {
         return spy.calls.count();
+    } else if (spy.calls.callCount) {
+        return spy.calls.callCount;
     } else {
         return spy.calls.length;
+    }
+}
+function reset(spy) {
+    if (spy.calls.reset) {
+        spy.calls.reset();
+    } else if (spy.calls.callCount) {
+        spy.calls.callCount = 0;
+    } else {
+        spy.calls.length = 0;
     }
 }
 function enter_text(text) {
@@ -2278,8 +2289,6 @@ function tests_on_ready() {
                         };
                         spy(options, 'onExit');
                         spy(options, 'onPop');
-                        options.onExit.calls.reset();
-                        options.onPop.calls.reset();
                         term = $('<div/>').terminal({}, options);
                         if (term.token()) {
                             term.logout();
@@ -2293,7 +2302,12 @@ function tests_on_ready() {
                             });
                         });
                     });
-                    it('shoulr return terminal object', function() {
+                    afterEach(function() {
+                        reset(options.onExit);
+                        reset(options.onPop);
+                        term.destroy();
+                    });
+                    it('should return terminal object', function() {
                         expect(term.pop()).toEqual(term);
                     });
                     it('should pop one interpreter', function() {
@@ -2316,6 +2330,7 @@ function tests_on_ready() {
                         expect(term.get_prompt()).toEqual('login: ');
                     });
                     it('should call callbacks', function() {
+                        expect(count(options.onPop)).toBe(0);
                         while(term.level() > 1) {
                             term.pop();
                         }
@@ -2323,7 +2338,7 @@ function tests_on_ready() {
                         expect(options.onExit).toHaveBeenCalled();
                         expect(options.onExit).toHaveBeenCalled();
                         expect(count(options.onExit)).toBe(1);
-                        expect(count(options.onPop)).toBe(4);
+                        expect(count(options.onPop)).toBe(5);
                     });
                 });
             });
