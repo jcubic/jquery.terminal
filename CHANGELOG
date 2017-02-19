@@ -3,6 +3,7 @@
           fix 3 argument in completion error
           fix login from hash for async JSON-RPC
           fix focus(false)/disable in exec from hash
+          fix regression of pasting in MacOS
 1.0.6     fix AltGr on non US keyboard layouts
 1.0.5     fix CTRL+D to delete forward one character
           don't use user agent sniffing to get scroll element if terminal attached to body
