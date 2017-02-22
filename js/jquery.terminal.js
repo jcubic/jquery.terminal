@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 18 Feb 2017 10:30:42 +0000
+ * Date: Wed, 22 Feb 2017 10:09:14 +0000
  */
 
 /* TODO:
@@ -2819,7 +2819,8 @@
             invalidTerminalId: 'Invalid Terminal ID',
             login: 'login',
             password: 'password',
-            recursiveCall: 'Recursive call detected, skip'
+            recursiveCall: 'Recursive call detected, skip',
+            notAString: '%s function: argument is not a string'
         }
     };
     // -------------------------------------------------------------------------
@@ -4772,11 +4773,15 @@
             insert: function(string) {
                 if (typeof string === 'string') {
                     when_ready(function ready() {
+                        var bottom = self.is_bottom();
                         command_line.insert(string);
+                        if (settings.scrollOnEcho || bottom) {
+                            scroll_to_bottom();
+                        }
                     });
                     return self;
                 } else {
-                    throw new Error('insert function argument is not a string');
+                    throw new Error(sprintf(strings.notAString, 'insert'));
                 }
             },
             // -------------------------------------------------------------
