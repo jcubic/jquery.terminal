@@ -5206,8 +5206,7 @@
                 cmd_ready(function ready() {
                     options = options || {};
                     var defaults = {
-                        infiniteLogin: false,
-                        extra: {}
+                        infiniteLogin: false
                     };
                     var push_settings = $.extend({}, defaults, options);
                     if (!push_settings.name && prev_command) {
@@ -5510,7 +5509,7 @@
                 itrp.completion = 'settings';
             }
             var new_keymap = $.extend({}, keymap, settings.keymap || {});
-            interpreters = new Stack($.extend({
+            interpreters = new Stack($.extend({}, settings.extra, {
                 name: settings.name,
                 prompt: settings.prompt,
                 keypress: settings.keypress,
@@ -5518,8 +5517,7 @@
                 resize: settings.onResize,
                 greetings: settings.greetings,
                 mousewheel: settings.mousewheel,
-                keymap: new_keymap,
-                extra: settings.extra
+                keymap: new_keymap
             }, itrp));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
