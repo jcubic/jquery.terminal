@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 24 Feb 2017 19:51:39 +0000
+ * Date: Fri, 24 Feb 2017 20:20:52 +0000
  */
 
 /* TODO:
@@ -1910,7 +1910,7 @@
                             return;
                         }
                         return false;
-                    // which == 100 - d
+                    // which === 100 - d
                     } else if (key && (!e.ctrlKey || (e.ctrlKey && e.ctrlKey)) &&
                                (!(e.altKey && e.which === 100) || e.altKey)) {
                         if (reverse_search) {
@@ -2408,14 +2408,18 @@
                 var regex = arg.match(re_re);
                 if (regex) {
                     return new RegExp(regex[1], regex[2]);
-                } else if (arg[0] === "'" && arg[arg.length - 1] === "'") {
+                } else if (arg[0] === "'" && arg[arg.length - 1] === "'" &&
+                           arg.length > 1) {
                     return arg.replace(/^'|'$/g, '');
-                } else if (arg[0] === '"' && arg[arg.length - 1] === '"') {
+                } else if (arg[0] === '"' && arg[arg.length - 1] === '"' &&
+                           arg.length > 1) {
                     return $.parseJSON(arg);
                 } else if (arg.match(/^-?[0-9]+$/)) {
                     return parseInt(arg, 10);
                 } else if (arg.match(float_re)) {
                     return parseFloat(arg);
+                } else if (arg.match(/^['"]$/)) {
+                    return '';
                 } else {
                     return arg.replace(/\\(['"() ])/g, '$1');
                 }
@@ -4368,9 +4372,9 @@
                         }).length : 0;
                         m = command.match(/'/g);
                         var single_quote = m ? m.length : 0;
-                        if (single_quote % 2 == 1) {
+                        if (single_quote % 2 === 1) {
                             string = command.match(/('[^']*)$/)[0];
-                        } else if (double_quotes % 2 == 1) {
+                        } else if (double_quotes % 2 === 1) {
                             string = command.match(/("(?:[^"]|\\")*)$/)[0];
                         } else {
                             string = cmd_strings[cmd_strings.length - 1];
@@ -4427,25 +4431,24 @@
                         return;
                     }
                 }
-                var safe = $.terminal.escape_regex(string).replace(/\\(["'() ])/g, '\\?$1');
+                var safe = $.terminal.escape_regex(string)
+                    .replace(/\\(["'() ])/g, '\\?$1');
                 var regex = new RegExp('^' + safe);
                 var matched = [];
                 for (var i = commands.length; i--;) {
                     if (regex.test(commands[i])) {
                         var match = commands[i];
-                        if (quote == '"') {
+                        if (quote === '"') {
                             match = match.replace(/"/g, '\\"');
                         }
-                        if (quote) {
-                            match += quote;
-                        } else {
+                        if (!quote) {
                             match = match.replace(/(["'() ])/g, '\\$1');
                         }
                         matched.push(match);
                     }
                 }
                 if (matched.length === 1) {
-                    self.insert(matched[0].replace(regex, ''));
+                    self.insert(matched[0].replace(regex, '') + (quote || ''));
                     command = self.before_cursor(options.word);
                     return true;
                 } else if (matched.length > 1) {
