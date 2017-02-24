@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 23 Feb 2017 19:50:14 +0000
+ * Date: Fri, 24 Feb 2017 19:51:39 +0000
  */
 
 /* TODO:
@@ -2417,7 +2417,7 @@
                 } else if (arg.match(float_re)) {
                     return parseFloat(arg);
                 } else {
-                    return arg.replace(/\\ /g, ' ');
+                    return arg.replace(/\\(['"() ])/g, '$1');
                 }
             });
         },
@@ -4362,14 +4362,26 @@
                     if (cmd_strings.length === 1) {
                         string = cmd_strings[0];
                     } else {
-                        string = cmd_strings[cmd_strings.length - 1];
-                        for (i = cmd_strings.length - 1; i > 0; i--) {
-                            // treat escape space as part of the string
-                            var prev_string = cmd_strings[i - 1];
-                            if (prev_string[prev_string.length - 1] === '\\') {
-                                string = cmd_strings[i - 1] + ' ' + string;
-                            } else {
-                                break;
+                        var m = command.match(/(\\?")/g);
+                        var double_quotes = m ? m.filter(function(chr) {
+                            return !chr.match(/^\\/);
+                        }).length : 0;
+                        m = command.match(/'/g);
+                        var single_quote = m ? m.length : 0;
+                        if (single_quote % 2 == 1) {
+                            string = command.match(/('[^']*)$/)[0];
+                        } else if (double_quotes % 2 == 1) {
+                            string = command.match(/("(?:[^"]|\\")*)$/)[0];
+                        } else {
+                            string = cmd_strings[cmd_strings.length - 1];
+                            for (i = cmd_strings.length - 1; i > 0; i--) {
+                                // treat escape space as part of the string
+                                var prev_string = cmd_strings[i - 1];
+                                if (prev_string[prev_string.length - 1] === '\\') {
+                                    string = cmd_strings[i - 1] + ' ' + string;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -4388,7 +4400,16 @@
                 }, options || {});
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
-                var string = self.before_cursor(options.word);
+                var string = self.before_cursor(options.word).replace(/\\"/g, '"');
+                var quote = false;
+                if (string.match(/^"/)) {
+                    quote = '"';
+                } else if (string.match(/^'/)) {
+                    quote = "'";
+                }
+                if (quote) {
+                    string = string.replace(/^["']/, '');
+                }
                 // local copy
                 commands = commands.slice();
                 if (settings.clear && $.inArray('clear', commands) === -1) {
@@ -4406,11 +4427,21 @@
                         return;
                     }
                 }
-                var regex = new RegExp('^' + $.terminal.escape_regex(string));
+                var safe = $.terminal.escape_regex(string).replace(/\\(["'() ])/g, '\\?$1');
+                var regex = new RegExp('^' + safe);
                 var matched = [];
                 for (var i = commands.length; i--;) {
                     if (regex.test(commands[i])) {
-                        matched.push(commands[i]);
+                        var match = commands[i];
+                        if (quote == '"') {
+                            match = match.replace(/"/g, '\\"');
+                        }
+                        if (quote) {
+                            match += quote;
+                        } else {
+                            match = match.replace(/(["'() ])/g, '\\$1');
+                        }
+                        matched.push(match);
                     }
                 }
                 if (matched.length === 1) {

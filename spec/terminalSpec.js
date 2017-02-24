@@ -987,7 +987,7 @@ function tests_on_ready() {
             var term = $('<div/>').appendTo('body').terminal($.noop, {
                 name: 'completion',
                 greetings: false,
-                completion: ['foo', 'bar', 'baz', 'lorem\\ ipsum']
+                completion: ['foo', 'bar', 'baz', 'lorem ipsum']
             });
             it('should complete text for main intepreter', function() {
                 term.focus();
@@ -1030,7 +1030,7 @@ function tests_on_ready() {
                 var cmd = $.terminal.parse_command(command);
                 var re = new RegExp('^\\s*' + $.terminal.escape_regex(string));
                 if (command.match(re)) {
-                    callback(['foo', 'bar', 'baz', 'lorem\\ ipsum']);
+                    callback(['foo', 'bar', 'baz', 'lorem ipsum']);
                 } else if (cmd.name == 'foo') {
                     callback(['one', 'two', 'tree']);
                 } else {
@@ -1105,6 +1105,56 @@ function tests_on_ready() {
                 term.insert('ec');
                 shortcut(false, false, false, 9, 'tab');
                 expect(term.get_command()).toEqual('ec\t');
+                term.destroy().remove();
+            });
+            it('should complete text with spaces inside quotes', function() {
+                term = $('<div/>').appendTo('body').terminal({}, {
+                    completion: ['foo bar baz']
+                });
+                term.focus();
+                term.insert('asd foo\\ b');
+                shortcut(false, false, false, 9, 'tab');
+                expect(term.get_command()).toEqual('asd foo\\ bar\\ baz');
+                term.destroy().remove();
+            });
+            it('should complete text that have spaces inside double quote', function() {
+                term = $('<div/>').appendTo('body').terminal({}, {
+                    completion: ['foo bar baz']
+                });
+                term.focus();
+                term.insert('asd "foo b');
+                shortcut(false, false, false, 9, 'tab');
+                expect(term.get_command()).toEqual('asd "foo bar baz"');
+                term.destroy().remove();
+            });
+            it('should complete when text have escaped quotes', function() {
+                term = $('<div/>').appendTo('body').terminal({}, {
+                    completion: ['foo "bar" baz']
+                });
+                term.focus();
+                term.insert('asd "foo');
+                shortcut(false, false, false, 9, 'tab');
+                expect(term.get_command()).toEqual('asd "foo \\"bar\\" baz"');
+                term.destroy().remove();
+            });
+            it('should complete when text have double quote inside single quotes', function() {
+                term = $('<div/>').appendTo('body').terminal({}, {
+                    completion: ['foo "bar" baz']
+                });
+                term.focus();
+                term.insert("asd 'foo");
+                shortcut(false, false, false, 9, 'tab');
+                expect(term.get_command()).toEqual("asd 'foo \"bar\" baz'");
+                term.destroy().remove();
+            });
+            it('should complete when text have single quote inside double quotes', function() {
+                term = $('<div/>').appendTo('body').terminal({}, {
+                    completion: ["foo 'bar' baz"]
+                });
+                term.focus();
+                term.insert('asd "foo');
+                shortcut(false, false, false, 9, 'tab');
+                expect(term.get_command()).toEqual("asd \"foo 'bar' baz\"");
                 term.destroy().remove();
             });
         });
