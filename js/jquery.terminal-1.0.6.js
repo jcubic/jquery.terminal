@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 25 Feb 2017 10:42:29 +0000
+ * Date: Sat, 25 Feb 2017 10:43:02 +0000
  */
 
 /* TODO:
@@ -1601,12 +1601,6 @@
                 skip_insert = ['SHIFT+INSERT', 'BACKSPACE', 'CTRL+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
-                }
-                if (e.metaKey && [192, 82, 76].indexOf(e.which) != -1) {
-                    // 192 - CMD+` switch browser window on Mac
-                    //  82 - CMD+r page reload in Chrome Mac
-                    //  76 - CMD+l jump into Ominbox on Chrome Mac
-                    return;
                 }
                 // arrows / Home / End / ENTER
                 if (reverse_search && (e.which === 35 || e.which === 36 ||
