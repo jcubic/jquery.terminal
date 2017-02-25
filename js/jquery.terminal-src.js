@@ -1599,6 +1599,12 @@
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }
+                if (e.metaKey && [192, 82, 76].indexOf(e.which) != -1) {
+                    // 192 - CMD+` switch browser window on Mac
+                    // 82 - CMD+r page reload in Chrome Mac
+                    // 76 - CMD+l jump into Ominbox on Chrome Mac
+                    return;
+                }
                 // arrows / Home / End / ENTER
                 if (reverse_search && (e.which === 35 || e.which === 36 ||
                                        e.which === 37 || e.which === 38 ||
