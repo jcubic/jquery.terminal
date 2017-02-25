@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 25 Feb 2017 10:39:09 +0000
+ * Date: Sat, 25 Feb 2017 10:42:29 +0000
  */
 
 /* TODO:
@@ -1147,7 +1147,10 @@
             },
             'CTRL+TAB': function() {
                 return false;
-            }
+            },
+            'META+`': return_true, // CMD+` switch browser window on Mac
+            'META+R': return_true, // CMD+R page reload in Chrome Mac
+            'META+L': return_true  // CLD+L jump into Ominbox on Chrome Mac
         };
         function return_true() {
             return true;
@@ -1601,8 +1604,8 @@
                 }
                 if (e.metaKey && [192, 82, 76].indexOf(e.which) != -1) {
                     // 192 - CMD+` switch browser window on Mac
-                    // 82 - CMD+r page reload in Chrome Mac
-                    // 76 - CMD+l jump into Ominbox on Chrome Mac
+                    //  82 - CMD+r page reload in Chrome Mac
+                    //  76 - CMD+l jump into Ominbox on Chrome Mac
                     return;
                 }
                 // arrows / Home / End / ENTER
