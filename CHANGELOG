@@ -8,6 +8,7 @@
           remove default extra property from interpreter (all properties are saved in interperter)
           and make main options extra pass to intepterer not using extra property
           fix completion when text have spaces (escaped or inside quotes)
+          fix dead keys on MacOSX (testing shortcuts now require keydown and keypress events)
 1.0.6     fix AltGr on non US keyboard layouts
 1.0.5     fix CTRL+D to delete forward one character
           don't use user agent sniffing to get scroll element if terminal attached to body

@@ -65,12 +65,16 @@ function enter_text(text) {
 }
 function shortcut(ctrl, alt, shift, which, key) {
     var e = $.Event("keydown");
+    var doc = $(document.documentElement || window);
     e.ctrlKey = ctrl;
     e.key = key;
     e.altKey = alt;
     e.shiftKey = shift;
     e.which = e.keyCode = which;
-    $(document.documentElement || window).trigger(e);
+    doc.trigger(e);
+    e = $.Event("keypress");
+    e.which = e.keyCode = 0;
+    doc.trigger(e);
 }
 function enter_key() {
     shortcut(false, false, false, 13, 'enter');

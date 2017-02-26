@@ -36,7 +36,7 @@
     position: absolute;
     left: -16px;
     top: 0;
-    width: 10px;
+    width: 20px;
     height: 16px;
     /* this seems to work after all on Android */
     /*left: -99999px;

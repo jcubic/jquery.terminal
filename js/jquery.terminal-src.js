@@ -946,31 +946,33 @@
             return len > command.length ? command.length : len;
         }
         function get_key(e) {
-            if (!e.key) {
+            if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
                 throw new Error('key event property not supported try ' +
                                 'https://github.com/cvan/keyboardevent-key-polyfill');
             }
-            var key = e.key.toUpperCase();
-            if (key === 'CONTROL') {
-                return 'CTRL';
-            } else {
-                var combo = [];
-                if (e.ctrlKey) {
-                    combo.push('CTRL');
+            if (e.key) {
+                var key = e.key.toUpperCase();
+                if (key === 'CONTROL') {
+                    return 'CTRL';
+                } else {
+                    var combo = [];
+                    if (e.ctrlKey) {
+                        combo.push('CTRL');
+                    }
+                    if (e.metaKey && key !== 'META') {
+                        combo.push('META');
+                    }
+                    if (e.shiftKey && key !== 'SHIFT') {
+                        combo.push('SHIFT');
+                    }
+                    if (e.altKey && key !== 'ALT') {
+                        combo.push('ALT');
+                    }
+                    if (e.key) {
+                        combo.push(key);
+                    }
+                    return combo.join('+');
                 }
-                if (e.metaKey && key !== 'META') {
-                    combo.push('META');
-                }
-                if (e.shiftKey && key !== 'SHIFT') {
-                    combo.push('SHIFT');
-                }
-                if (e.altKey && key !== 'ALT') {
-                    combo.push('ALT');
-                }
-                if (e.key) {
-                    combo.push(key);
-                }
-                return combo.join('+');
             }
         }
         var keymap;
@@ -1579,13 +1581,15 @@
         // prevent_keypress - hack for Android that was inserting characters on
         // backspace
         var prevent_keypress = false;
-        var no_keypress;
+        var dead_key = false;
+        var no_keypress = false;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
         var skip_insert;
         function keydown_event(e) {
             var result;
+            dead_key = no_keypress;
             no_keypress = true;
             if (enabled) {
                 if ($.isFunction(options.keydown)) {
@@ -1596,6 +1600,7 @@
                     }
                 }
                 var key = get_key(e);
+
                 // shift+insert and backspace don't fire keypress on Chromium/Linux
                 // CTRL+V don't fire in IE11
                 skip_insert = ['SHIFT+INSERT', 'BACKSPACE', 'CTRL+V'].indexOf(key) !== -1;
@@ -1625,7 +1630,7 @@
                         return result;
                     }
                 } else if (e.altKey) {
-                    return true;
+                    return;
                 } else {
                     prevent_keypress = false;
                     return;
@@ -1905,7 +1910,6 @@
             if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
                 key = ' ';
             }
-            //$.terminal.active().echo(JSON.stringify(result));
             if (result === undefined || result) {
                 if (enabled) {
                     if ($.inArray(e.which, [13, 0, 8]) > -1) {
@@ -1915,7 +1919,9 @@
                         return false;
                     // which === 100 - d
                     } else if (key && (!e.ctrlKey || (e.ctrlKey && e.ctrlKey)) &&
-                               (!(e.altKey && e.which === 100) || e.altKey)) {
+                               (!(e.altKey && e.which === 100) || e.altKey) &&
+                               !dead_key) {
+                        // dead_key are handled by input event
                         if (reverse_search) {
                             rev_search_str += key;
                             reverse_history_search();
@@ -1931,11 +1937,18 @@
             }
         }
         function input(e) {
-            if (no_keypress && !skip_insert) {
-                // Some Androids don't fire keypress - #39
+            // Some Androids don't fire keypress - #39
+            // if there is dead_key we also need to grab real character #158
+            if (no_keypress && !skip_insert || dead_key) {
                 var val = clip.val();
                 if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
-                    self.set(val);
+                    if (reverse_search) {
+                        rev_search_str = val;
+                        reverse_history_search();
+                        draw_reverse_prompt();
+                    } else {
+                        self.set(val);
+                    }
                 }
             }
         }
@@ -2521,10 +2534,10 @@
         }
     };
     function is_key_native() {
-        var proto = window.KeyboardEvent.prototype;
-        if (!('KeyboardEvent' in window && 'key' in proto)) {
+        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             return false;
         }
+        var proto = window.KeyboardEvent.prototype;
         var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
         return get.toString().match(/\[native code\]/);
     }
