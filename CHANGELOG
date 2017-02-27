@@ -1,3 +1,4 @@
+1.0.8     fix paste in IE and Edge
 1.0.7     fix exec when pause called in onInit
           fix reverse search
           fix 3 argument in completion error
