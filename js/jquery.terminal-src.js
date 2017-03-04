@@ -1582,6 +1582,7 @@
         // backspace
         var prevent_keypress = false;
         var dead_key = false;
+        var single_key = false;
         var no_keypress = false;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
@@ -1589,7 +1590,9 @@
         var skip_insert;
         function keydown_event(e) {
             var result;
-            dead_key = no_keypress;
+            dead_key = no_keypress && key;
+            // special keys don't trigger keypress fix #293
+            single_key = e.key && e.key.length === 1;
             no_keypress = true;
             if (enabled) {
                 if ($.isFunction(options.keydown)) {
@@ -1940,6 +1943,7 @@
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             if ((no_keypress || dead_key) && !skip_insert) {
+                console.log('input');
                 var val = clip.val();
                 if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
                     if (reverse_search) {
