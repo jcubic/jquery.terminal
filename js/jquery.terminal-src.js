@@ -1489,7 +1489,7 @@
                             var from_last = string.length - position - tabs_rm;
                             var last_len = last.length;
                             var pos = 0;
-                            if (from_last <= last_len) {
+                            if (from_last <= last_len) { // in last line
                                 lines_before(array.slice(0, -1));
                                 if (last_len === from_last) {
                                     pos = 0;
@@ -1522,6 +1522,11 @@
                                 if (pos === current.length) {
                                     pos = 0;
                                     current = array[++line_index];
+                                    if (current === undefined) {
+                                        //should never happen
+                                        var msg = $.terminal.defaults.strings.redrawError;
+                                        throw new Error(msg);
+                                    }
                                 }
                                 draw_cursor_line(current, pos);
                                 lines_before(array.slice(0, line_index));
@@ -1582,6 +1587,7 @@
         // backspace
         var prevent_keypress = false;
         var dead_key = false;
+        var single_key = false;
         var no_keypress = false;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
@@ -1589,7 +1595,9 @@
         var skip_insert;
         function keydown_event(e) {
             var result;
-            dead_key = no_keypress;
+            dead_key = no_keypress && single_key;
+            // special keys don't trigger keypress fix #293
+            single_key = e.key && e.key.length === 1;
             no_keypress = true;
             if (enabled) {
                 if ($.isFunction(options.keydown)) {
@@ -1939,7 +1947,7 @@
         function input(e) {
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
-            if (no_keypress && !skip_insert || dead_key) {
+            if ((no_keypress || dead_key) && !skip_insert) {
                 var val = clip.val();
                 if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
                     if (reverse_search) {
@@ -2840,7 +2848,8 @@
             login: 'login',
             password: 'password',
             recursiveCall: 'Recursive call detected, skip',
-            notAString: '%s function: argument is not a string'
+            notAString: '%s function: argument is not a string',
+            redrawError: 'Internal error, wrong position in cmd redraw'
         }
     };
     // -------------------------------------------------------------------------
