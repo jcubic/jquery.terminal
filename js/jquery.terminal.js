@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 11 Mar 2017 20:08:23 +0000
+ * Date: Sat, 11 Mar 2017 20:32:16 +0000
  */
 
 /* TODO:
@@ -1835,13 +1835,16 @@
         var no_key = false;
         var backspace = false;
         var skip_insert;
-        // we hold text before keydown to fix backspace for Android/Chrome with SwiftKey
+        var was_keydown = false;
+        // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
         var text;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
         function keydown_event(e) {
+            was_keydown = true;
+            $.terminal.active().echo('keydown ' + e.which + ' ' + e.key);
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
@@ -1958,7 +1961,7 @@
                 !backspace) {
                 var pos = position;
                 var val = clip.val();
-                if (val !== '') {  // #209 ; 8 - backspace
+                if (val !== '') {
                     if (reverse_search) {
                         rev_search_str = val;
                         reverse_history_search();
@@ -1966,10 +1969,13 @@
                     } else {
                         self.set(val);
                     }
+                    // backspace detection for Android/Chrome/SwiftKey
                     if (backspace || val.length < text.length) {
                         self.position(pos - 1);
                     } else {
-                        self.position(pos + 1);
+                        // user enter more then one character if click on complete word
+                        // on android
+                        self.position(pos + Math.abs(val.length - text.length));
                     }
                 }
             }
