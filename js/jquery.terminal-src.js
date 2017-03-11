@@ -1609,9 +1609,8 @@
                 }
                 var key = get_key(e);
 
-                // shift+insert and backspace don't fire keypress on Chromium/Linux
                 // CTRL+V don't fire in IE11
-                skip_insert = ['SHIFT+INSERT', 'BACKSPACE', 'CTRL+V'].indexOf(key) !== -1;
+                skip_insert = ['CTRL+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }
@@ -1947,7 +1946,7 @@
         function input(e) {
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
-            if ((no_keypress || dead_key) && !skip_insert) {
+            if ((no_keypress || dead_key) && !skip_insert && single_key) {
                 var val = clip.val();
                 if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
                     if (reverse_search) {

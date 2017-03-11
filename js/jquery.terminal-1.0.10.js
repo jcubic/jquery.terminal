@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 04 Mar 2017 10:48:34 +0000
+ * Date: Sat, 11 Mar 2017 10:41:53 +0000
  */
 
 /* TODO:
@@ -1609,9 +1609,8 @@
                 }
                 var key = get_key(e);
 
-                // shift+insert and backspace don't fire keypress on Chromium/Linux
                 // CTRL+V don't fire in IE11
-                skip_insert = ['SHIFT+INSERT', 'BACKSPACE', 'CTRL+V'].indexOf(key) !== -1;
+                skip_insert = ['CTRL+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }
@@ -1947,7 +1946,7 @@
         function input(e) {
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
-            if ((no_keypress || dead_key) && !skip_insert) {
+            if ((no_keypress || dead_key) && !skip_insert && single_key) {
                 var val = clip.val();
                 if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
                     if (reverse_search) {
