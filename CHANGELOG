@@ -1,3 +1,4 @@
+1.0.12    fix for Android Chrome that have unidentified as key property for single character keys
 1.0.11    fix dead keys logic (for special keys that don't trigger keypress like delete)
 1.0.9/10  fix dead_keys logic (when keypress after special keys like arrows)
 1.0.8     fix paste in IE and Edge

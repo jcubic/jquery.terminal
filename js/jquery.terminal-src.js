@@ -1589,6 +1589,7 @@
         var dead_key = false;
         var single_key = false;
         var no_keypress = false;
+        var no_key = false;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
@@ -1598,6 +1599,7 @@
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
             single_key = e.key && e.key.length === 1;
+            no_key = String(e.key).toLowerCase() === 'unidentified'; // chrome on android
             no_keypress = true;
             if (enabled) {
                 if ($.isFunction(options.keydown)) {
@@ -1911,7 +1913,7 @@
             if (is_key_native()) {
                 key = e.key;
             }
-            if (!key) {
+            if (!key || no_key) {
                 key = String.fromCharCode(e.which);
             }
             if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
@@ -1946,7 +1948,7 @@
         function input(e) {
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
-            if ((no_keypress || dead_key) && !skip_insert && single_key) {
+            if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key)) {
                 var val = clip.val();
                 if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
                     if (reverse_search) {
