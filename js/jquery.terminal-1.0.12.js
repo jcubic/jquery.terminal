@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 11 Mar 2017 20:33:17 +0000
+ * Date: Sat, 11 Mar 2017 20:41:54 +0000
  */
 
 /* TODO:
@@ -1835,7 +1835,6 @@
         var no_key = false;
         var backspace = false;
         var skip_insert;
-        var was_keydown = false;
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
         var text;
@@ -1843,8 +1842,6 @@
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
         function keydown_event(e) {
-            was_keydown = true;
-            $.terminal.active().echo('keydown ' + e.which + ' ' + e.key);
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
