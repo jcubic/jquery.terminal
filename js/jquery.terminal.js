@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 11 Mar 2017 15:27:33 +0000
+ * Date: Sat, 11 Mar 2017 17:11:47 +0000
  */
 
 /* TODO:
@@ -1949,6 +1949,7 @@
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key)) {
+                var pos = position;
                 var val = clip.val();
                 if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
                     if (reverse_search) {
@@ -1957,6 +1958,11 @@
                         draw_reverse_prompt();
                     } else {
                         self.set(val);
+                    }
+                    if (e.which === 8) {
+                        self.position(pos - 1);
+                    } else {
+                        self.position(pos + 1);
                     }
                 }
             }
