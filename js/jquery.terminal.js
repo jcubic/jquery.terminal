@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 11 Mar 2017 17:11:47 +0000
+ * Date: Sat, 11 Mar 2017 20:08:23 +0000
  */
 
 /* TODO:
@@ -1016,7 +1016,8 @@
                 } else if (command !== '' && position > 0) {
                     self['delete'](-1);
                 }
-                return is_touch;
+                return false;
+                //return is_touch;
             },
             'TAB': function() {
                 self.insert('\t');
@@ -1582,73 +1583,6 @@
                 });
             }
         }
-        var first_up_history = true;
-        // prevent_keypress - hack for Android that was inserting characters on
-        // backspace
-        var prevent_keypress = false;
-        var dead_key = false;
-        var single_key = false;
-        var no_keypress = false;
-        var no_key = false;
-        // ---------------------------------------------------------------------
-        // :: Keydown Event Handler
-        // ---------------------------------------------------------------------
-        var skip_insert;
-        function keydown_event(e) {
-            var result;
-            dead_key = no_keypress && single_key;
-            // special keys don't trigger keypress fix #293
-            single_key = e.key && e.key.length === 1;
-            no_key = String(e.key).toLowerCase() === 'unidentified'; // chrome on android
-            no_keypress = true;
-            if (enabled) {
-                if ($.isFunction(options.keydown)) {
-                    result = options.keydown(e);
-                    if (result !== undefined) {
-                        //prevent_keypress = true;
-                        return result;
-                    }
-                }
-                var key = get_key(e);
-
-                // CTRL+V don't fire in IE11
-                skip_insert = ['CTRL+V'].indexOf(key) !== -1;
-                if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
-                    first_up_history = true;
-                }
-                // arrows / Home / End / ENTER
-                if (reverse_search && (e.which === 35 || e.which === 36 ||
-                                       e.which === 37 || e.which === 38 ||
-                                       e.which === 39 || e.which === 40 ||
-                                       e.which === 13 || e.which === 27)) {
-                    clear_reverse_state();
-                    draw_prompt();
-                    if (e.which === 27) { // ESC
-                        self.set('');
-                    }
-                    redraw();
-                    // finish reverse search and execute normal event handler
-                    /* jshint validthis:true */
-                    keydown_event.call(this, e);
-                } else if ($.isFunction(keymap[key])) {
-                    result = keymap[key]();
-                    if (result === true) {
-                        return;
-                    }
-                    if (result !== undefined) {
-                        return result;
-                    }
-                } else if (e.altKey) {
-                    return;
-                } else {
-                    prevent_keypress = false;
-                    return;
-                }
-                // this will prevent for instance backspace to go back one page
-                //prevent_keypress = true;
-                e.preventDefault();
-            }
-        }
         function fire_change_command() {
             if ($.isFunction(options.onCommandChange)) {
                 options.onCommandChange(command);
@@ -1891,7 +1825,79 @@
         if (options.enabled === undefined || options.enabled === true) {
             self.enable();
         }
-        // Keystrokes
+        var first_up_history = true;
+        // prevent_keypress - hack for Android that was inserting characters on
+        // backspace
+        var prevent_keypress = false;
+        var dead_key = false;
+        var single_key = false;
+        var no_keypress = false;
+        var no_key = false;
+        var backspace = false;
+        var skip_insert;
+        // we hold text before keydown to fix backspace for Android/Chrome with SwiftKey
+        // keyboard that generate keycode 229 for all keys #296
+        var text;
+        // ---------------------------------------------------------------------
+        // :: Keydown Event Handler
+        // ---------------------------------------------------------------------
+        function keydown_event(e) {
+            var result;
+            dead_key = no_keypress && single_key;
+            // special keys don't trigger keypress fix #293
+            single_key = e.key && e.key.length === 1;
+            no_key = String(e.key).toLowerCase() === 'unidentified'; // chrome on android
+            backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
+            text = clip.val();
+            no_keypress = true;
+            if (enabled) {
+                if ($.isFunction(options.keydown)) {
+                    result = options.keydown(e);
+                    if (result !== undefined) {
+                        //prevent_keypress = true;
+                        return result;
+                    }
+                }
+                var key = get_key(e);
+
+                // CTRL+V don't fire keypress in IE11
+                skip_insert = ['CTRL+V'].indexOf(key) !== -1;
+                if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
+                    first_up_history = true;
+                }
+                // arrows / Home / End / ENTER
+                if (reverse_search && (e.which === 35 || e.which === 36 ||
+                                       e.which === 37 || e.which === 38 ||
+                                       e.which === 39 || e.which === 40 ||
+                                       e.which === 13 || e.which === 27)) {
+                    clear_reverse_state();
+                    draw_prompt();
+                    if (e.which === 27) { // ESC
+                        self.set('');
+                    }
+                    redraw();
+                    // finish reverse search and execute normal event handler
+                    /* jshint validthis:true */
+                    keydown_event.call(this, e);
+                } else if ($.isFunction(keymap[key])) {
+                    result = keymap[key]();
+                    if (result === true) {
+                        return;
+                    }
+                    if (result !== undefined) {
+                        return result;
+                    }
+                } else if (e.altKey) {
+                    return;
+                } else {
+                    prevent_keypress = false;
+                    return;
+                }
+                // this will prevent for instance backspace to go back one page
+                //prevent_keypress = true;
+                e.preventDefault();
+            }
+        }
         var doc = $(document.documentElement || window);
         self.keymap(options.keymap);
         function keypress_event(e) {
@@ -1945,13 +1951,14 @@
                 return result;
             }
         }
-        function input(e) {
+        function input() {
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
-            if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key)) {
+            if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key) &&
+                !backspace) {
                 var pos = position;
                 var val = clip.val();
-                if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
+                if (val !== '') {  // #209 ; 8 - backspace
                     if (reverse_search) {
                         rev_search_str = val;
                         reverse_history_search();
@@ -1959,7 +1966,7 @@
                     } else {
                         self.set(val);
                     }
-                    if (e.which === 8) {
+                    if (backspace || val.length < text.length) {
                         self.position(pos - 1);
                     } else {
                         self.position(pos + 1);

@@ -1833,16 +1833,22 @@
         var single_key = false;
         var no_keypress = false;
         var no_key = false;
+        var backspace = false;
+        var skip_insert;
+        // we hold text before keydown to fix backspace for Android/Chrome with SwiftKey
+        // keyboard that generate keycode 229 for all keys #296
+        var text;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
-        var skip_insert;
         function keydown_event(e) {
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
             single_key = e.key && e.key.length === 1;
             no_key = String(e.key).toLowerCase() === 'unidentified'; // chrome on android
+            backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
+            text = clip.val();
             no_keypress = true;
             if (enabled) {
                 if ($.isFunction(options.keydown)) {
@@ -1945,13 +1951,14 @@
                 return result;
             }
         }
-        function input(e) {
+        function input() {
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
-            if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key)) {
+            if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key) &&
+                !backspace) {
                 var pos = position;
                 var val = clip.val();
-                if (val !== '' || e.which === 8) {  // #209 ; 8 - backspace
+                if (val !== '') {  // #209 ; 8 - backspace
                     if (reverse_search) {
                         rev_search_str = val;
                         reverse_history_search();
@@ -1959,7 +1966,7 @@
                     } else {
                         self.set(val);
                     }
-                    if (e.which === 8) {
+                    if (backspace || val.length < text.length) {
                         self.position(pos - 1);
                     } else {
                         self.position(pos + 1);
