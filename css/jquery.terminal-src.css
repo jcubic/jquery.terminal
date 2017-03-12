@@ -80,6 +80,7 @@
 }
 .cmd .cursor {
     border-bottom: 3px solid transparent;
+    margin-bottom: -3px;
     background-clip: content-box;
 }
 .cmd .cursor.blink {

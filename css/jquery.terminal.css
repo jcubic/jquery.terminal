@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 12 Mar 2017 07:59:54 +0000
+ * Date: Sun, 12 Mar 2017 10:43:58 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -80,6 +80,7 @@
 }
 .cmd .cursor {
     border-bottom: 3px solid transparent;
+    margin-bottom: -3px;
     background-clip: content-box;
 }
 .cmd .cursor.blink {
