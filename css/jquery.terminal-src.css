@@ -78,15 +78,17 @@
     background-color: #aaa;
     color: #000;
 }
+.cmd .cursor {
+    border-bottom: 3px solid transparent;
+    background-clip: content-box;
+}
 .cmd .cursor.blink {
     -webkit-animation: terminal-blink 1s infinite steps(1, start);
        -moz-animation: terminal-blink 1s infinite steps(1, start);
         -ms-animation: terminal-blink 1s infinite steps(1, start);
             animation: terminal-blink 1s infinite steps(1, start);
     border-left: 1px solid transparent;
-    border-bottom: 3px solid transparent;
     margin-left: -1px;
-    background-clip: content-box;
 }
 .bar.terminal .inverted, .bar.cmd .inverted {
     border-left-color: #aaa;
