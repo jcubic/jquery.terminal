@@ -1999,15 +1999,19 @@
                     var name = 'click_' + id;
                     if (++count === 1) {
                         var down = was_down;
-                        self.oneTime(options.clickTimeout, name, function() {
-                            if (!$(e.target).is('.prompt') && down) {
-                                self.position(get_char_pos({
-                                    x: e.pageX,
-                                    y: e.pageY
-                                }));
-                            }
+                        if (enabled) {
+                            self.oneTime(options.clickTimeout, name, function() {
+                                if (!$(e.target).is('.prompt') && down) {
+                                    self.position(get_char_pos({
+                                        x: e.pageX,
+                                        y: e.pageY
+                                    }));
+                                }
+                                count = 0;
+                            });
+                        } else {
                             count = 0;
-                        });
+                        }
                     } else {
                         self.stopTime(name);
                         count = 0;
@@ -5696,17 +5700,20 @@
                                 if (!self.enabled() && !frozen) {
                                     self.focus();
                                     command_line.enable();
-                                }
-                                var name = 'click_' + self.id();
-                                self.oneTime(settings.clickTimeout, name, function() {
-                                    // move cursor to the end if clicked after .cmd
-                                    if (!target.is('.terminal-output') &&
-                                        !target.is('.cmd') &&
-                                        target.is('.terminal > div')) {
-                                        command_line.position(command_line.get().length);
-                                    }
                                     count = 0;
-                                });
+                                } else {
+                                    var name = 'click_' + self.id();
+                                    self.oneTime(settings.clickTimeout, name, function() {
+                                        // move cursor to the end if clicked after .cmd
+                                        if (!target.is('.terminal-output') &&
+                                            !target.is('.cmd') &&
+                                            target.is('.terminal > div')) {
+                                            var len = command_line.get().length;
+                                            command_line.position(len);
+                                        }
+                                        count = 0;
+                                    });
+                                }
                             } else {
                                 self.stopTime('click_' + self.id());
                                 count = 0;

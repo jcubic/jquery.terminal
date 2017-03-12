@@ -1,4 +1,5 @@
 next      fix moving of the content on focus/blur when command line at the bottom
+          don't move cursor on click when focusing
 1.0.12    fix for Android/Chrome that have unidentified as key property for single character keys
           fix entering text in the middle on Android/Chrome
           fix backspace on Android/Chrome/SwiftKey
