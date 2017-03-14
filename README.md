@@ -4,12 +4,12 @@
   __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-           \/              /____/                              version 1.0.12
+           \/              /____/                              version 1.0.14
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-1.0.12-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-1.0.12-yellow.svg)
+[![npm](https://img.shields.io/badge/npm-1.0.14-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-1.0.14-yellow.svg)
 [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
 [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
@@ -74,13 +74,13 @@ npm install --save jquery.terminal
 Include jQuery library, you can use cdn from http://jquery.com/download/
 
 
-Then include js/jquery.terminal-1.0.12.min.js and css/jquery.terminal-1.0.12.css
+Then include js/jquery.terminal-1.0.14.min.js and css/jquery.terminal-1.0.14.css
 You can also include js/jquery.mousewheel-min.js
 
 ```html
-<script src="js/jquery.terminal-1.0.12.min.js"></script>
+<script src="js/jquery.terminal-1.0.14.min.js"></script>
 <script src="js/jquery.mousewheel-min.js"></script>
-<link href="css/jquery.terminal-1.0.12.css" rel="stylesheet"/>
+<link href="css/jquery.terminal-1.0.14.css" rel="stylesheet"/>
 ```
 
 **NOTE:** From version 1.0.0 if you want to support old browsers or Safari then you'll need to use [key event property polyfill](https://github.com/cvan/keyboardevent-key-polyfill/)
@@ -88,15 +88,15 @@ You can also include js/jquery.mousewheel-min.js
 You can also grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.0.12/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.0.12/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.0.14/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.0.14/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/jquery.terminal/1.0.12/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/1.0.12/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/jquery.terminal/1.0.14/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/1.0.14/jquery.terminal.min.css">
 ```
 
 And you're good to go.

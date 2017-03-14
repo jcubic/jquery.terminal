@@ -1,4 +1,4 @@
-next      fix moving of the content on focus/blur when command line at the bottom
+1.0.14    fix moving of the content on focus/blur when command line at the bottom
           don't move cursor on click when focusing
           throw exception about key property polyfill on init of cmd plugin
 1.0.12    fix for Android/Chrome that have unidentified as key property for single character keys

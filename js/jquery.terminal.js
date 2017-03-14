@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.0.12
+ *           \/              /____/                              version 1.0.14
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 14 Mar 2017 16:12:12 +0000
+ * Date: Tue, 14 Mar 2017 16:16:26 +0000
  */
 
 /* TODO:
@@ -1843,9 +1843,10 @@
             // special keys don't trigger keypress fix #293
             try {
                 single_key = e.key && e.key.length === 1;
-                no_key = String(e.key).toLowerCase() === 'unidentified'; // chrome on android
+                // chrome on android support key property but it's "Unidentified"
+                no_key = String(e.key).toLowerCase() === 'unidentified';
                 backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
-            } catch(e) {}
+            } catch (exception) {}
             text = clip.val();
             no_keypress = true;
             if (enabled) {
@@ -2099,7 +2100,7 @@
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
     /* eslint-enable */
     $.terminal = {
-        version: '1.0.12',
+        version: '1.0.14',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
