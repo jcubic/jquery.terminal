@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 12 Mar 2017 12:10:46 +0000
+ * Date: Tue, 14 Mar 2017 16:12:12 +0000
  */
 
 /* TODO:
@@ -946,10 +946,6 @@
             return len > command.length ? command.length : len;
         }
         function get_key(e) {
-            if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
-                throw new Error('key event property not supported try ' +
-                                'https://github.com/cvan/keyboardevent-key-polyfill');
-            }
             if (e.key) {
                 var key = e.key.toUpperCase();
                 if (key === 'CONTROL') {
@@ -1845,9 +1841,11 @@
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
-            single_key = e.key && e.key.length === 1;
-            no_key = String(e.key).toLowerCase() === 'unidentified'; // chrome on android
-            backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
+            try {
+                single_key = e.key && e.key.length === 1;
+                no_key = String(e.key).toLowerCase() === 'unidentified'; // chrome on android
+                backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
+            } catch(e) {}
             text = clip.val();
             no_keypress = true;
             if (enabled) {
@@ -2021,6 +2019,12 @@
             });
         })();
         self.data('cmd', self);
+        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
+            setTimeout(function() {
+                throw new Error('key event property not supported try ' +
+                                'https://github.com/cvan/keyboardevent-key-polyfill');
+            }, 0);
+        }
         return self;
     }; // cmd plugin
 

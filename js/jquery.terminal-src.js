@@ -946,10 +946,6 @@
             return len > command.length ? command.length : len;
         }
         function get_key(e) {
-            if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
-                throw new Error('key event property not supported try ' +
-                                'https://github.com/cvan/keyboardevent-key-polyfill');
-            }
             if (e.key) {
                 var key = e.key.toUpperCase();
                 if (key === 'CONTROL') {
@@ -1845,9 +1841,12 @@
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
-            single_key = e.key && e.key.length === 1;
-            no_key = String(e.key).toLowerCase() === 'unidentified'; // chrome on android
-            backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
+            try {
+                single_key = e.key && e.key.length === 1;
+                // chrome on android support key property but it's "Unidentified"
+                no_key = String(e.key).toLowerCase() === 'unidentified';
+                backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
+            } catch (exception) {}
             text = clip.val();
             no_keypress = true;
             if (enabled) {
@@ -2021,6 +2020,12 @@
             });
         })();
         self.data('cmd', self);
+        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
+            setTimeout(function() {
+                throw new Error('key event property not supported try ' +
+                                'https://github.com/cvan/keyboardevent-key-polyfill');
+            }, 0);
+        }
         return self;
     }; // cmd plugin
 
