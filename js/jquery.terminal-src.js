@@ -3640,8 +3640,12 @@
         // :: Display prompt and last command
         // ---------------------------------------------------------------------
         function echo_command(command) {
+            if (typeof command === 'undefined') {
+                command = self.get_command();
+            }
             var prompt = command_line.prompt();
             var mask = command_line.mask();
+            console.log(command);
             switch (typeof mask) {
                 case 'string':
                     command = command.replace(/./g, mask);
@@ -4506,6 +4510,7 @@
                     if (++tab_count >= 2) {
                         tab_count = 0;
                         if (options.echo) {
+                            echo_command();
                             var text = matched.reverse().join('\t');
                             self.echo($.terminal.escape_brackets(text), {
                                 keepWords: true

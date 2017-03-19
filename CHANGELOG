@@ -1,3 +1,4 @@
+next      fix echo command when press tab twice and there are more then one completion
 1.0.14    fix moving of the content on focus/blur when command line at the bottom
           don't move cursor on click when focusing
           throw exception about key property polyfill on init of cmd plugin
