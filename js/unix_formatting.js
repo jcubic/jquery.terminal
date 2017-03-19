@@ -17,6 +17,7 @@
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');
     }
+    var terminal = $.terminal;
     // ---------------------------------------------------------------------
     // :: Replace overtyping (from man) formatting with terminal formatting
     // ---------------------------------------------------------------------
@@ -152,7 +153,7 @@
             var _8bit_color = false;
             var _8bit_background = false;
             var process_8bit = false;
-            var palette = $.terminal.ansi_colors.palette;
+            var palette = terminal.ansi_colors.palette;
             function set_styles(num) {
                 switch (num) {
                     case 1:
@@ -220,11 +221,11 @@
             }
             var colors, color, background, backgrounds;
             if (bold) {
-                colors = backgrounds = $.terminal.ansi_colors.bold;
+                colors = backgrounds = terminal.ansi_colors.bold;
             } else if (faited) {
-                colors = backgrounds = $.terminal.ansi_colors.faited;
+                colors = backgrounds = terminal.ansi_colors.faited;
             } else {
-                colors = backgrounds = $.terminal.ansi_colors.normal;
+                colors = backgrounds = terminal.ansi_colors.normal;
             }
             if (_8bit_color) {
                 color = output_color;
