@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 23 Mar 2017 18:12:17 +0000
+ * Date: Thu, 23 Mar 2017 18:36:32 +0000
  */
 
 /* TODO:
@@ -1911,6 +1911,9 @@
             }
             if ($.isFunction(options.keypress)) {
                 result = options.keypress(e);
+                if (result !== undefined) {
+                    return result;
+                }
             }
             // key polyfill is not correct for keypress
             // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
@@ -1924,30 +1927,26 @@
             if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
                 key = ' ';
             }
-            if (result === undefined || result) {
-                if (enabled) {
-                    if ($.inArray(e.which, [13, 0, 8]) > -1) {
-                        if (e.keyCode === 123) { // for F12 which === 0
-                            return;
-                        }
-                        return false;
-                    // which === 100 - d
-                    } else if (key && (!e.ctrlKey || (e.ctrlKey && e.ctrlKey)) &&
-                               (!(e.altKey && e.which === 100) || e.altKey) &&
-                               !dead_key) {
-                        // dead_key are handled by input event
-                        if (reverse_search) {
-                            rev_search_str += key;
-                            reverse_history_search();
-                            draw_reverse_prompt();
-                        } else {
-                            self.insert(key);
-                        }
-                        return false;
+            if (enabled) {
+                if ($.inArray(e.which, [13, 0, 8]) > -1) {
+                    if (e.keyCode === 123) { // for F12 which === 0
+                        return;
                     }
+                    return false;
+                    // which === 100 - d
+                } else if (key && (!e.ctrlKey || (e.ctrlKey && e.ctrlKey)) &&
+                           (!(e.altKey && e.which === 100) || e.altKey) &&
+                           !dead_key) {
+                    // dead_key are handled by input event
+                    if (reverse_search) {
+                        rev_search_str += key;
+                        reverse_history_search();
+                        draw_reverse_prompt();
+                    } else {
+                        self.insert(key);
+                    }
+                    return false;
                 }
-            } else {
-                return result;
             }
         }
         function input() {
