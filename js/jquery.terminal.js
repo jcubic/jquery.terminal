@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 23 Mar 2017 17:59:14 +0000
+ * Date: Thu, 23 Mar 2017 18:12:17 +0000
  */
 
 /* TODO:
@@ -1909,7 +1909,7 @@
             if (prevent_keypress) {
                 return;
             }
-            if (!reverse_search && $.isFunction(options.keypress)) {
+            if ($.isFunction(options.keypress)) {
                 result = options.keypress(e);
             }
             // key polyfill is not correct for keypress

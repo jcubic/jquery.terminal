@@ -1909,7 +1909,7 @@
             if (prevent_keypress) {
                 return;
             }
-            if (!reverse_search && $.isFunction(options.keypress)) {
+            if ($.isFunction(options.keypress)) {
                 result = options.keypress(e);
             }
             // key polyfill is not correct for keypress
