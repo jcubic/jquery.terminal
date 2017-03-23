@@ -1,4 +1,6 @@
 next      fix echo command when press tab twice and there are more then one completion
+          fix CTRL+D when paused (it now resume the interpreter)
+          focus don't enable terminal when paused (it was hidden by you could enter text)
 1.0.14    fix moving of the content on focus/blur when command line at the bottom
           don't move cursor on click when focusing
           throw exception about key property polyfill on init of cmd plugin

@@ -1849,14 +1849,14 @@
             } catch (exception) {}
             text = clip.val();
             no_keypress = true;
-            if (enabled) {
-                if ($.isFunction(options.keydown)) {
-                    result = options.keydown(e);
-                    if (result !== undefined) {
-                        //prevent_keypress = true;
-                        return result;
-                    }
+            if ($.isFunction(options.keydown)) {
+                result = options.keydown(e);
+                if (result !== undefined) {
+                    //prevent_keypress = true;
+                    return result;
                 }
+            }
+            if (enabled) {
                 var key = get_key(e);
 
                 // CTRL+V don't fire keypress in IE11
@@ -3645,7 +3645,6 @@
             }
             var prompt = command_line.prompt();
             var mask = command_line.mask();
-            console.log(command);
             switch (typeof mask) {
                 case 'string':
                     command = command.replace(/./g, mask);
@@ -4076,40 +4075,41 @@
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i;
-            if (!self.paused() && self.enabled()) {
-                result = user_key_down(e);
-                if (result !== undefined) {
-                    return result;
-                }
-                if (e.which !== 9) { // not a TAB
-                    tab_count = 0;
-                }
-                self.attr({scrollTop: self.attr('scrollHeight')});
-            } else if (e.which === 68 && e.ctrlKey) { // CTRL+D (if paused)
-                result = user_key_down(e);
-                if (result !== undefined) {
-                    return result;
-                }
-                if (requests.length) {
-                    for (i = requests.length; i--;) {
-                        var r = requests[i];
-                        if (r.readyState !== 4) {
-                            try {
-                                r.abort();
-                            } catch (error) {
-                                if ($.isFunction(settings.exceptionHandler)) {
-                                    settings.exceptionHandler.call(self, e, 'AJAX ABORT');
-                                } else {
-                                    self.error(strings.ajaxAbortError);
+            if (self.enabled()) {
+                if (!self.paused()) {
+                    result = user_key_down(e);
+                    if (result !== undefined) {
+                        return result;
+                    }
+                    if (e.which !== 9) { // not a TAB
+                        tab_count = 0;
+                    }
+                    self.attr({scrollTop: self.attr('scrollHeight')});
+                } else if (e.which === 68 && e.ctrlKey) { // CTRL+D (if paused)
+                    result = user_key_down(e);
+                    if (result !== undefined) {
+                        return result;
+                    }
+                    if (requests.length) {
+                        for (i = requests.length; i--;) {
+                            var r = requests[i];
+                            if (r.readyState !== 4) {
+                                try {
+                                    r.abort();
+                                } catch (error) {
+                                    if ($.isFunction(settings.exceptionHandler)) {
+                                        settings.exceptionHandler.call(self, e, 'AJAX ABORT');
+                                    } else {
+                                        self.error(strings.ajaxAbortError);
+                                    }
                                 }
                             }
                         }
+                        requests = [];
                     }
-                    requests = [];
-                    // only resume if there are ajax calls
                     self.resume();
+                    return false;
                 }
-                return false;
             }
         }
         function ready(defer) {
@@ -4782,7 +4782,9 @@
                         self.resize();
                     }
                     cmd_ready(function ready() {
-                        command_line.enable();
+                        if (!self.paused()) {
+                            command_line.enable();
+                        }
                         enabled = true;
                     });
                 }
