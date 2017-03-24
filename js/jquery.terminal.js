@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 23 Mar 2017 18:37:34 +0000
+ * Date: Fri, 24 Mar 2017 20:16:25 +0000
  */
 
 /* TODO:
@@ -1860,7 +1860,7 @@
                 var key = get_key(e);
 
                 // CTRL+V don't fire keypress in IE11
-                skip_insert = ['CTRL+V'].indexOf(key) !== -1;
+                skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }

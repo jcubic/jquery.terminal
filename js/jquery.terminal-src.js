@@ -1860,7 +1860,7 @@
                 var key = get_key(e);
 
                 // CTRL+V don't fire keypress in IE11
-                skip_insert = ['CTRL+V'].indexOf(key) !== -1;
+                skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }
