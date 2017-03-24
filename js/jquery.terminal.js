@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 24 Mar 2017 20:16:25 +0000
+ * Date: Fri, 24 Mar 2017 20:49:09 +0000
  */
 
 /* TODO:
@@ -4097,7 +4097,9 @@
                                     r.abort();
                                 } catch (error) {
                                     if ($.isFunction(settings.exceptionHandler)) {
-                                        settings.exceptionHandler.call(self, e, 'AJAX ABORT');
+                                        settings.exceptionHandler.call(self,
+                                                                       e,
+                                                                       'AJAX ABORT');
                                     } else {
                                         self.error(strings.ajaxAbortError);
                                     }

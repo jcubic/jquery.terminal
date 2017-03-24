@@ -4097,7 +4097,9 @@
                                     r.abort();
                                 } catch (error) {
                                     if ($.isFunction(settings.exceptionHandler)) {
-                                        settings.exceptionHandler.call(self, e, 'AJAX ABORT');
+                                        settings.exceptionHandler.call(self,
+                                                                       e,
+                                                                       'AJAX ABORT');
                                     } else {
                                         self.error(strings.ajaxAbortError);
                                     }
