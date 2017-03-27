@@ -1858,6 +1858,9 @@
             }
             if (enabled) {
                 var key = get_key(e);
+                if (key === 'DEL') {
+                    key = 'DELETE'; // IE11
+                }
 
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;

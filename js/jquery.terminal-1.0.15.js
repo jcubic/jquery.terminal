@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 24 Mar 2017 20:49:09 +0000
+ * Date: Mon, 27 Mar 2017 09:26:28 +0000
  */
 
 /* TODO:
@@ -1858,6 +1858,9 @@
             }
             if (enabled) {
                 var key = get_key(e);
+                if (key === 'DEL') {
+                    key = 'DELETE'; // IE11
+                }
 
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
