@@ -1,4 +1,5 @@
 next      fix delete in IE11
+          fix CMD+V on MacOS chrome
 1.0.15    fix echo command when press tab twice and there are more then one completion
           fix CTRL+D when paused (it now resume the interpreter)
           focus don't enable terminal when paused (it was hidden by you could enter text)
