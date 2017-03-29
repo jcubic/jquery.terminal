@@ -4866,11 +4866,11 @@
             // -------------------------------------------------------------
             // :: Insert text into the command line after the cursor
             // -------------------------------------------------------------
-            insert: function(string) {
+            insert: function(string, stay) {
                 if (typeof string === 'string') {
                     when_ready(function ready() {
                         var bottom = self.is_bottom();
-                        command_line.insert(string);
+                        command_line.insert(string, stay);
                         if (settings.scrollOnEcho || bottom) {
                             scroll_to_bottom();
                         }

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 27 Mar 2017 09:26:28 +0000
+ * Date: Wed, 29 Mar 2017 12:50:12 +0000
  */
 
 /* TODO:
@@ -4866,11 +4866,11 @@
             // -------------------------------------------------------------
             // :: Insert text into the command line after the cursor
             // -------------------------------------------------------------
-            insert: function(string) {
+            insert: function(string, stay) {
                 if (typeof string === 'string') {
                     when_ready(function ready() {
                         var bottom = self.is_bottom();
-                        command_line.insert(string);
+                        command_line.insert(string, stay);
                         if (settings.scrollOnEcho || bottom) {
                             scroll_to_bottom();
                         }
