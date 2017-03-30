@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 30 Mar 2017 19:51:44 +0000
+ * Date: Thu, 30 Mar 2017 20:01:04 +0000
  */
 
 /* TODO:
@@ -1852,11 +1852,13 @@
             } catch (exception) {}
             text = clip.val();
             no_keypress = true;
-            if ($.isFunction(options.keydown)) {
-                result = options.keydown(e);
-                if (result !== undefined) {
-                    //prevent_keypress = true;
-                    return result;
+            if (enabled || !options.pauseEvents) {
+                if ($.isFunction(options.keydown)) {
+                    result = options.keydown(e);
+                    if (result !== undefined) {
+                        //prevent_keypress = true;
+                        return result;
+                    }
                 }
             }
             var key = get_key(e);
@@ -1922,10 +1924,12 @@
             if (prevent_keypress) {
                 return;
             }
-            if ($.isFunction(options.keypress)) {
-                result = options.keypress(e);
-                if (result !== undefined) {
-                    return result;
+            if (enabled || !options.pauseEvents) {
+                if ($.isFunction(options.keypress)) {
+                    result = options.keypress(e);
+                    if (result !== undefined) {
+                        return result;
+                    }
                 }
             }
             // key polyfill is not correct for keypress
