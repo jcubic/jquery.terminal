@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 29 Mar 2017 12:50:12 +0000
+ * Date: Thu, 30 Mar 2017 19:51:44 +0000
  */
 
 /* TODO:
@@ -874,7 +874,10 @@
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
     var cmd_index = 0;
-    $.fn.cmd = function(options) {
+    $.fn.cmd = function(settings) {
+        var options = $.extend({
+            pauseEventsw: true
+        }, settings);
         var self = this;
         var maybe_data = self.data('cmd');
         if (maybe_data) {
@@ -1856,12 +1859,11 @@
                     return result;
                 }
             }
+            var key = get_key(e);
+            if (key === 'DEL') {
+                key = 'DELETE'; // IE11
+            }
             if (enabled) {
-                var key = get_key(e);
-                if (key === 'DEL') {
-                    key = 'DELETE'; // IE11
-                }
-
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
@@ -1898,6 +1900,14 @@
                 // this will prevent for instance backspace to go back one page
                 //prevent_keypress = true;
                 e.preventDefault();
+            } else if (!options.pauseEvents && $.isFunction(keymap[key])) {
+                result = keymap[key]();
+                if (result === true) {
+                    return;
+                }
+                if (result !== undefined) {
+                    return result;
+                }
             }
         }
         var doc = $(document.documentElement || window);
@@ -2813,6 +2823,7 @@
         checkArity: true,
         raw: false,
         exceptionHandler: null,
+        pauseEvents: true,
         memory: false,
         cancelableAjax: true,
         processArguments: true,
@@ -4087,32 +4098,42 @@
                         tab_count = 0;
                     }
                     self.attr({scrollTop: self.attr('scrollHeight')});
-                } else if (e.which === 68 && e.ctrlKey) { // CTRL+D (if paused)
-                    result = user_key_down(e);
-                    if (result !== undefined) {
-                        return result;
+                } else {
+                    if (!settings.pauseEvents) {
+                        result = user_key_down(e);
+                        if (result !== undefined) {
+                            return result;
+                        }
                     }
-                    if (requests.length) {
-                        for (i = requests.length; i--;) {
-                            var r = requests[i];
-                            if (r.readyState !== 4) {
-                                try {
-                                    r.abort();
-                                } catch (error) {
-                                    if ($.isFunction(settings.exceptionHandler)) {
-                                        settings.exceptionHandler.call(self,
-                                                                       e,
-                                                                       'AJAX ABORT');
-                                    } else {
-                                        self.error(strings.ajaxAbortError);
+                    if (e.which === 68 && e.ctrlKey) { // CTRL+D (if paused)
+                        if (settings.pauseEvents) {
+                            result = user_key_down(e);
+                            if (result !== undefined) {
+                                return result;
+                            }
+                        }
+                        if (requests.length) {
+                            for (i = requests.length; i--;) {
+                                var r = requests[i];
+                                if (r.readyState !== 4) {
+                                    try {
+                                        r.abort();
+                                    } catch (error) {
+                                        if ($.isFunction(settings.exceptionHandler)) {
+                                            settings.exceptionHandler.call(self,
+                                                                           e,
+                                                                           'AJAX ABORT');
+                                        } else {
+                                            self.error(strings.ajaxAbortError);
+                                        }
                                     }
                                 }
                             }
+                            requests = [];
                         }
-                        requests = [];
+                        self.resume();
+                        return false;
                     }
-                    self.resume();
-                    return false;
                 }
             }
         }
@@ -5623,6 +5644,7 @@
                 historySize: settings.historySize,
                 width: '100%',
                 enabled: enabled && !is_touch,
+                pauseEvents: settings.pauseEvents,
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
