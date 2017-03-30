@@ -968,7 +968,11 @@
                         combo.push('ALT');
                     }
                     if (e.key) {
-                        combo.push(key);
+                        if (e.key === 'DEL') { // IE11
+                            combo.push('DELETE');
+                        } else {
+                            combo.push(key);
+                        }
                     }
                     return combo.join('+');
                 }
@@ -1862,9 +1866,6 @@
                 }
             }
             var key = get_key(e);
-            if (key === 'DEL') {
-                key = 'DELETE'; // IE11
-            }
             if (enabled) {
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
