@@ -1,4 +1,4 @@
-next      fix delete in IE11
+1.1.0     fix delete in IE11
           fix CMD+V on MacOS chrome
           add stay option to insert same as in cmd plugin
           add option pauseEvents - default set to true
