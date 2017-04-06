@@ -876,7 +876,7 @@
     var cmd_index = 0;
     $.fn.cmd = function(settings) {
         var options = $.extend({
-            pauseEventsw: true
+            pauseEvents: true
         }, settings);
         var self = this;
         var maybe_data = self.data('cmd');

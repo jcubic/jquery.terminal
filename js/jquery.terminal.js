@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 06 Apr 2017 19:56:47 +0000
+ * Date: Thu, 06 Apr 2017 20:04:22 +0000
  */
 
 /* TODO:
@@ -876,7 +876,7 @@
     var cmd_index = 0;
     $.fn.cmd = function(settings) {
         var options = $.extend({
-            pauseEventsw: true
+            pauseEvents: true
         }, settings);
         var self = this;
         var maybe_data = self.data('cmd');
