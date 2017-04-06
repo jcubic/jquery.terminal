@@ -1859,15 +1859,6 @@
             } catch (exception) {}
             text = clip.val();
             no_keypress = true;
-            if (enabled || !options.pauseEvents) {
-                if ($.isFunction(options.keydown)) {
-                    result = options.keydown(e);
-                    if (result !== undefined) {
-                        //prevent_keypress = true;
-                        return result;
-                    }
-                }
-            }
             var key = get_key(e);
             if (enabled) {
                 // CTRL+V don't fire keypress in IE11
@@ -1913,6 +1904,15 @@
                 }
                 if (result !== undefined) {
                     return result;
+                }
+            }
+            if (enabled || !options.pauseEvents) {
+                if ($.isFunction(options.keydown)) {
+                    result = options.keydown(e);
+                    if (result !== undefined) {
+                        //prevent_keypress = true;
+                        return result;
+                    }
                 }
             }
         }
