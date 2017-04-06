@@ -2462,6 +2462,130 @@ function tests_on_ready() {
                     expect(term.get_output()).toEqual(greetings);
                 });
             });
+            describe('purge', function() {
+                var token = 'purge_TOKEN';
+                var password = 'password';
+                var username = 'some-user';
+                var term;
+                beforeEach(function() {
+                    term = $('<div/>').terminal($.noop, {
+                        login: function(user, pass, callback) {
+                            callback(token);
+                        },
+                        name: 'purge'
+                    });
+                    if (term.token()) {
+                        term.logout();
+                    }
+                    enter(term, username);
+                    enter(term, password);
+                });
+                afterEach(function() {
+                    term.purge().destroy();
+                });
+                it('should remove login and token', function() {
+                    expect(term.login_name()).toEqual(username);
+                    expect(term.token()).toEqual(token);
+                    term.purge();
+                    expect(term.login_name()).toBeFalsy();
+                    expect(term.token()).toBeFalsy();
+                });
+                it('should remove commands history', function() {
+                    var commands = ['echo "foo"', 'sleep', 'pause'];
+                    commands.forEach(function(command) {
+                        enter(term, command);
+                    });
+                    var history = term.history();
+                    expect(history.data()).toEqual(commands);
+                    term.purge();
+                    expect(history.data()).toEqual([]);
+                });
+            });
+            describe('destroy', function() {
+                var greetings = 'hello world!';
+                var element = '<span>span</span>';
+                var term;
+                var height = 400;
+                var width = 200;
+                beforeEach(function() {
+                    term = $('<div class="foo">' + element + '</div>').terminal($.noop, {
+                        greetings: greetings,
+                        width: width,
+                        height: height
+                    });
+                });
+                it('should remove terminal class', function() {
+                    expect(term.hasClass('terminal')).toBeTruthy();
+                    term.destroy();
+                    expect(term.hasClass('terminal')).toBeFalsy();
+                    expect(term.hasClass('foo')).toBeTruthy();
+                });
+                it('should remove command line and output', function() {
+                    term.destroy();
+                    expect(term.find('.terminal-output').length).toEqual(0);
+                    expect(term.find('.cmd').length).toEqual(0);
+                });
+                it('should leave span that intact', function() {
+                    term.destroy();
+                    expect(term.html()).toEqual(element);
+                });
+            });
+            describe('set_token', function() {
+                var token = 'set_token';
+                var term = $('<div/>').terminal($.noop, {
+                    login: function(user, password, callback) {
+                        callback(token);
+                    }
+                });
+                if (term.token()) {
+                    term.logout();
+                }
+                it('should set token', function() {
+                    expect(term.token()).toBeFalsy();
+                    enter(term, 'user');
+                    enter(term, 'password');
+                    expect(term.token()).toEqual(token);
+                    var newToken = 'set_token_new';
+                    term.set_token(newToken);
+                    expect(term.token()).toEqual(newToken);
+                });
+            });
+            describe('before_cursor', function() {
+                var term = $('<div/>').terminal();
+                var cmd = term.cmd();
+                it('should return word before cursor', function() {
+                    var commands = [
+                        ['foo bar baz', 'baz'],
+                        ['foo "bar baz', '"bar baz'],
+                        ["foo \"bar\" 'baz quux", "'baz quux"],
+                        ['foo "foo \\" bar', '"foo \\" bar']
+                    ];
+                    commands.forEach(function(spec) {
+                        term.set_command(spec[0]);
+                        expect(term.before_cursor(true)).toEqual(spec[1]);
+                    });
+                });
+                it('should return word before cursor when cursor not at the end', function() {
+                    var commands = [
+                        ['foo bar baz', 'b'],
+                        ['foo "bar baz', '"bar b'],
+                        ["foo \"bar\" 'baz quux", "'baz qu"],
+                        ['foo "foo \\" bar', '"foo \\" b']
+                    ];
+                    commands.forEach(function(spec) {
+                        term.set_command(spec[0]);
+                        cmd.position(-2, true);
+                        expect(term.before_cursor(true)).toEqual(spec[1]);
+                    });
+                });
+                it('should return text before cursor', function() {
+                    var command = 'foo bar baz';
+                    term.set_command(command);
+                    expect(term.before_cursor()).toEqual(command);
+                    cmd.position(-2, true);
+                    expect(term.before_cursor()).toEqual('foo bar b');
+                });
+            });
         });
         describe('jQuery Terminal options', function() {
 

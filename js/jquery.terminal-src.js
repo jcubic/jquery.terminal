@@ -5483,11 +5483,13 @@
                 when_ready(function ready() {
                     var prefix = self.prefix_name() + '_';
                     var names = storage.get(prefix + 'interpreters');
-                    $.each($.parseJSON(names), function(_, name) {
-                        storage.remove(name + '_commands');
-                        storage.remove(name + '_token');
-                        storage.remove(name + '_login');
-                    });
+                    if (names) {
+                        $.each($.parseJSON(names), function(_, name) {
+                            storage.remove(name + '_commands');
+                            storage.remove(name + '_token');
+                            storage.remove(name + '_login');
+                        });
+                    }
                     command_line.purge();
                     storage.remove(prefix + 'interpreters');
                 });
