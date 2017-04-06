@@ -1,4 +1,4 @@
-VERSION=1.0.15
+VERSION=1.1.0
 UGLIFY=uglifyjs
 SED=sed
 CP=cp
