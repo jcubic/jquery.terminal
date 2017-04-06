@@ -12,6 +12,7 @@ JSONLINT=./node_modules/jsonlint/lib/cli.js
 ISTANBUL=./node_modules/istanbul/lib/cli.js
 JASMINE=./node_modules/jasmine-node/bin/jasmine-node
 CSSNANO=./node_modules/cssnano-cli/cmd.js
+SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
 
 ALL: Makefile .$(VERSION) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
 
@@ -46,7 +47,7 @@ css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 	$(CSSNANO) css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css
 
 README.md: README.in .$(VERSION)
-	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{BRANCH}}/$(BRANCH)/g" < README.in > README.md || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH)/g" < README.in > README.md
+	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" < README.in > README.md || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" < README.in > README.md
 
 .$(VERSION): Makefile
 	touch .$(VERSION)
