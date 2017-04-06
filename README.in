@@ -166,4 +166,4 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
-Copyright (c) 2011-2017 [Jakub Jankiewicz](http://jcubic.pl)
+Copyright (c) 2011-2017 [Jakub Jankiewicz](http://jcubic.pl/jakub-jankiewicz)

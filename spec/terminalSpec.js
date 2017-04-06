@@ -856,7 +856,9 @@ function tests_on_ready() {
                     }, 200);
                 });
                 it('should display error on Invalid JSON-RPC response', function(done) {
-                    var term = $('<div/>').appendTo('body').terminal('/not-rpc', {greetings: false});
+                    var term = $('<div/>').appendTo('body').terminal('/not-rpc', {
+                        greetings: false
+                    });
                     setTimeout(function() {
                         enter(term, 'foo');
                         setTimeout(function() {
@@ -1793,7 +1795,7 @@ function tests_on_ready() {
                     expect(term.signature()).toEqual('');
                 });
                 it('should return proper max length of signature', function() {
-                    var numbers = {20: 20, 36: 30, 60: 49, 70: 64, 100: 75};
+                    var numbers = {20: 20, 36: 30, 60: 52, 70: 64, 100: 75};
                     Object.keys(numbers).forEach(function(numChars) {
                         var length = numbers[numChars];
                         term.option('numChars', numChars);
@@ -2394,6 +2396,70 @@ function tests_on_ready() {
                         expect(count(options.onExit)).toBe(1);
                         expect(count(options.onPop)).toBe(5);
                     });
+                });
+            });
+            describe('option', function() {
+                var options = {
+                    prompt: '$ ',
+                    onInit: function() {
+                    },
+                    width: 400,
+                    onPop: function() {
+                    }
+                };
+                var term = $('<div/>').terminal($.noop, options);
+                it('should return option', function() {
+                    Object.keys(options).forEach(function(name) {
+                        expect(term.option(name)).toEqual(options[name]);
+                    });
+                });
+                it('should set single value', function() {
+                    expect(term.option('prompt')).toEqual('$ ');
+                    term.option('prompt', '>>> ');
+                    expect(term.option('prompt')).toEqual('>>> ');
+                });
+                it('should set object', function() {
+                    var options = {
+                        prompt: '# ',
+                        onInit: function() {
+                            console.log('onInit');
+                        }
+                    };
+                    term.option(options);
+                    Object.keys(options).forEach(function(name) {
+                        expect(term.option(name)).toEqual(options[name]);
+                    });
+                });
+            });
+            describe('level', function() {
+                var term = $('<div/>').terminal();
+                it('should return proper level name', function() {
+                    expect(term.level()).toEqual(1);
+                    term.push($.noop);
+                    term.push($.noop);
+                    expect(term.level()).toEqual(3);
+                    term.pop();
+                    expect(term.level()).toEqual(2);
+                });
+            });
+            describe('reset', function() {
+                var interpreter = function(command) {
+                };
+                var greetings = 'Hello';
+                var term = $('<div/>').terminal(interpreter, {
+                    prompt: '1> ',
+                    greetings: greetings
+                });
+                it('should reset all interpreters', function() {
+                    term.push($.noop, {prompt: '2> '});
+                    term.push($.noop, {prompt: '3> '});
+                    term.push($.noop, {prompt: '4> '});
+                    expect(term.level()).toEqual(4);
+                    term.echo('foo');
+                    term.reset();
+                    expect(term.level()).toEqual(1);
+                    expect(term.get_prompt()).toEqual('1> ');
+                    expect(term.get_output()).toEqual(greetings);
                 });
             });
         });
