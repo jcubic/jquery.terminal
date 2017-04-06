@@ -1828,6 +1828,9 @@
         if (options.enabled === undefined || options.enabled === true) {
             self.enable();
         }
+        if (!options.history) {
+            history.disable();
+        }
         var first_up_history = true;
         // prevent_keypress - hack for Android that was inserting characters on
         // backspace

@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2017 Jakub Jankiewicz <http://jcubic.pl>
+ * Copyright (c) 2010-2017 Jakub Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 30 Mar 2017 20:25:11 +0000
+ * Date: Thu, 06 Apr 2017 19:56:47 +0000
  */
 
 /* TODO:
@@ -1828,6 +1828,9 @@
         if (options.enabled === undefined || options.enabled === true) {
             self.enable();
         }
+        if (!options.history) {
+            history.disable();
+        }
         var first_up_history = true;
         // prevent_keypress - hack for Android that was inserting characters on
         // backspace
@@ -2774,7 +2777,7 @@
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic' +
-        '.pl>';
+        '.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
     var reg = new RegExp(' {' + version_string.length + '}$');
@@ -5483,11 +5486,13 @@
                 when_ready(function ready() {
                     var prefix = self.prefix_name() + '_';
                     var names = storage.get(prefix + 'interpreters');
-                    $.each($.parseJSON(names), function(_, name) {
-                        storage.remove(name + '_commands');
-                        storage.remove(name + '_token');
-                        storage.remove(name + '_login');
-                    });
+                    if (names) {
+                        $.each($.parseJSON(names), function(_, name) {
+                            storage.remove(name + '_commands');
+                            storage.remove(name + '_token');
+                            storage.remove(name + '_login');
+                        });
+                    }
                     command_line.purge();
                     storage.remove(prefix + 'interpreters');
                 });

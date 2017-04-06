@@ -332,6 +332,102 @@ function tests_on_ready() {
         return animation;
     })();
     describe('Terminal plugin', function() {
+        describe('jQuery Terminal options', function() {
+            
+            describe('prompt', function() {
+                it('should set prompt', function() {
+                    var prompt = '>>> ';
+                    var term = $('<div/>').terminal($.noop, {
+                        prompt: prompt
+                    });
+                    expect(term.get_prompt()).toEqual(prompt);
+                });
+                it('should have default prompt', function() {
+                    var term = $('<div/>').terminal($.noop);
+                    expect(term.get_prompt()).toEqual('> ');
+                });
+            });
+            describe('history', function() {
+                it('should save data in history', function() {
+                    var term = $('<div/>').terminal($.noop, {
+                        history: true,
+                        name: 'history_enabled'
+                    });
+                    expect(term.history().data()).toEqual([]);
+                    var commands = ['foo', 'bar', 'baz'];
+                    commands.forEach(function(command) {
+                        enter(term, command);
+                    });
+                    expect(term.history().data()).toEqual(commands);
+                });
+                it('should not store history', function() {
+                    var term = $('<div/>').terminal($.noop, {
+                        history: false,
+                        name: 'history_disabled'
+                    });
+                    expect(term.history().data()).toEqual([]);
+                    var commands = ['foo', 'bar', 'baz'];
+                    commands.forEach(function(command) {
+                        enter(term, command);
+                    });
+                    expect(term.history().data()).toEqual([]);
+                });
+            });
+            describe('exit', function() {
+                it('should add exit command', function() {
+                    var term = $('<div/>').terminal($.noop, {
+                        exit: true
+                    });
+                    term.push($.noop);
+                    expect(term.level()).toEqual(2);
+                    enter(term, 'exit');
+                    expect(term.level()).toEqual(1);
+                });
+                it('should not add exit command', function() {
+                    var term = $('<div/>').terminal($.noop, {
+                        exit: false
+                    });
+                    term.push($.noop);
+                    expect(term.level()).toEqual(2);
+                    enter(term, 'exit');
+                    expect(term.level()).toEqual(2);
+                });
+            });
+            describe('clear', function() {
+                it('should add clear command', function() {
+                    var term = $('<div/>').terminal($.noop, {
+                        clear: true
+                    });
+                    term.clear().echo('foo').echo('bar');
+                    expect(term.get_output()).toEqual('foo\nbar');
+                    enter(term, 'clear');
+                    expect(term.get_output()).toEqual('');
+                });
+                it('should not add clear command', function() {
+                    var term = $('<div/>').terminal($.noop, {
+                        clear: false
+                    });
+                    term.clear().echo('foo').echo('bar');
+                    expect(term.get_output()).toEqual('foo\nbar');
+                    enter(term, 'clear');
+                    expect(term.get_output()).toEqual('foo\nbar\n> clear');
+                });
+            });
+            describe('enabled', function() {
+                it('should enable terminal', function() {
+                    var term = $('<div/>').terminal($.noop, {
+                        enabled: true
+                    });
+                    expect(term.enabled()).toBeTruthy();
+                });
+                it('should not enable terminal', function() {
+                    var term = $('<div/>').terminal($.noop, {
+                        enabled: false
+                    });
+                    expect(term.enabled()).toBeFalsy();
+                });
+            });
+        });
         describe('terminal create / terminal destroy', function() {
             var term = $('<div/>').appendTo('body').terminal();
             it('should create terminal', function() {
@@ -2586,9 +2682,6 @@ function tests_on_ready() {
                     expect(term.before_cursor()).toEqual('foo bar b');
                 });
             });
-        });
-        describe('jQuery Terminal options', function() {
-
         });
     });
 }
