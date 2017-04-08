@@ -23,22 +23,95 @@
     "url": "http://jcubic.pl/jakub-jankiewicz"
   },
   "contributors": [
-    {"name":"Johan","url":"https://github.com/johanjordaan"},
-    {"name":"Christopher John Ryan","email":"chrisjohnryan@live.com","url":"https://github.com/ChrisJohnRyan"},
-    {"name":"Zuo Qiyang","email":"zuoqy.gk@gmail.com","url":"http://zuoqy.com"},
-    {"name":"Sébastien Warin","url":"http://sebastien.warin.fr"},
-    {"name":"Florian Schäfer","email":"florian.schaefer+github@gmail.com","url":"https://github.com/fschaefer"},
-    {"name":"Tomasz Ducin","email":"tomasz@ducin.it","url":"http://ducin.it"},
-    {"name":"Hasan","url":"https://github.com/JuanPotato"},
-    {"name":"Hraban Luyat","email":"hraban@0brg.net","url":"https://luyat.com"},
-    {"name":"Mateusz Paprocki","email":"mattpap@gmail.com","url":"https://github.com/mattpap"},
-    {"name":"Martin v. Löwis","url":"https://github.com/loewis"},
-    {"name":"Robert Wikman","email":"rbw@vault13.org","url":"flatwired.com"},
-    {"name":"Steve Phillips","email":"steve@tryingtobeawesome.com","url":"https://tryingtobeawesome.com/"},
-    {"name":"coderaiser","email":"mnemonic.enemy@gmail.com","url":"http://coderaiser.github.io"},
-    {"name":"Juraj Vitko","url":"https://github.com/youurayy"},
-    {"name":"Yutong Luo","email":"yutong@yutongluo.com","url":"https://yutongluo.com"},
-    {"name":"Ishan Ratnapala","url":"https://github.com/IshanRatnapala"}
+    {
+      "name": "Zuo Qiy  ang",
+      "email": "zuoqy.gk@gmail.com",
+      "url": "http://zuoqy.com"
+    },
+    {
+      "name": "Sébastien Warin",
+      "url": "http://sebastien.warin.fr"
+    },
+    {
+      "name": "Christopher John Ryan",
+      "url": "https://github.com/ChrisJohnRyan"
+    },
+    {
+      "name": "Johan",
+      "url": "https://github.com/johanjordaan"
+    },
+    {
+      "name": "Florian Schäfer",
+      "email": "florian.schaefer+github@gmail.com",
+      "url": "https://github.com/fschaefer"
+    },
+    {
+      "name": "Ishan Ratnapala",
+      "url": "https://github.com/IshanRatnapala"
+    },
+    {
+      "name": "Tomasz Ducin",
+      "email": "tomasz@ducin.it",
+      "url": "http://ducin.it"
+    },
+    {
+      "name": "finlob",
+      "url": "https://github.com/finlob"
+    },
+    {
+      "name": "Hasan",
+      "url": "https://github.com/JuanPotato"
+    },
+    {
+      "name": "Hraban Luyat",
+      "email": "hraban@0brg.net",
+      "url": "https://luyat.com"
+    },
+    {
+      "name": "Martin v. Löwis",
+      "url": "https://github.com/loewis"
+    },
+    {
+      "name": "Mateusz Paprocki",
+      "email": "mattpap@gmail.com",
+      "url": "https://github.com/mattpap"
+    },
+    {
+      "name": "exit1",
+      "url": "https://github.com/exit1"
+    },
+    {
+      "name": "Robert Wikman",
+      "email": "rbw@vault13.org",
+      "url": "https://github.com/rbw0"
+    },
+    {
+      "name": "Steve Phillips",
+      "email": "steve@tryingtobeawesome.com",
+      "url": "https://tryingtobeawesome.com/"
+    },
+    {
+      "name": "Yutong Luo",
+      "email": "yutong@yutongluo.com",
+      "url": "https://yutongluo.com"
+    },
+    {
+      "name": "coderaiser",
+      "email": "mnemonic.enemy@gmail.com",
+      "url": "http://coderaiser.github.io"
+    },
+    {
+      "name": "mrkaiser",
+      "url": "https://github.com/mrkaiser"
+    },
+    {
+      "name": "stereobooster",
+      "url": "https://github.com/stereobooster"
+    },
+    {
+      "name": "Juraj Vitko",
+      "url": "https://github.com/youurayy"
+    }
   ],
   "license": "MIT",
   "repository": {

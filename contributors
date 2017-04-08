@@ -1,0 +1,77 @@
+#!/usr/bin/node
+
+var https = require('https');
+var path = require('path');
+var fs = require('fs');
+var argv = require('optimist').argv;
+
+function get(host, path) {
+    var options = {
+        host: host,
+        path: path,
+        headers: {
+            'User-Agent': 'Node.js'
+        }
+    };
+    if (argv.auth) {
+        options.auth = argv.auth;
+    }
+    return new Promise(function(resolve, reject) {
+        https.get(options, function(res) {
+            if (res.statusCode == 200) {
+                var output = '';
+                res.setEncoding('utf8');
+
+                res.on('data', function (chunk) {
+                    output += chunk;
+                });
+
+                res.on('end', function() {
+                    resolve(JSON.parse(output));
+                });
+            } else if (+res.headers['x-ratelimit-remaining'] == 0) {
+                var date = new Date(+res.headers['x-ratelimit-reset']*1000);
+                reject('Rate limit util ' + date);
+            }
+        });
+    });
+}
+
+
+if (argv.u && argv.r) {
+    var user = argv.u;
+    var repo = argv.r;
+    var path = '/repos/' + user + '/' + repo + '/contributors';
+    get('api.github.com', path + '?per_page=100').then(function(contributors) {
+        return Promise.all(contributors.map(function(contributor) {
+            if (contributor.login != user) {
+                var path = contributor.url.replace(/https:\/\/[^\/]+/, '');
+                return get('api.github.com', path).then(function(user) {
+                    if (user.name || user.login) {
+                        var object = {
+                            name: user.name || user.login
+                        };
+                        if (user.email) {
+                            object.email = user.email;
+                        }
+                        if (user.blog) {
+                            object.url = user.blog;
+                        } else {
+                            object.url = "https://github.com/" + user.login
+                        }
+                        return object;
+                    }
+                });
+            } else {
+                return null;
+            }
+        }).filter(Boolean));
+    }).then(function(contributors) {
+        console.log(JSON.stringify(contributors, null, 4));
+    }).catch(function(error) {
+        console.log(error);
+    });
+} else {
+    console.log('usage: \n' + path.basename(process.argv[1]) + '-u <user> -r <repo> ' +
+                '[--auth githubUsername:githubPassword]');
+}
