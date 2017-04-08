@@ -1,5 +1,4 @@
 VERSION=1.1.0
-UGLIFY=uglifyjs
 SED=sed
 CP=cp
 RM=rm
@@ -8,6 +7,7 @@ DATE=`date -uR`
 GIT=git
 BRANCH=`git branch | grep '^*' | sed 's/* //'`
 ESLINT=./node_modules/eslint/bin/eslint.js
+UGLIFY=./node_modules/uglifyjs/bin/uglifyjs
 JSONLINT=./node_modules/jsonlint/lib/cli.js
 ISTANBUL=./node_modules/istanbul/lib/cli.js
 JASMINE=./node_modules/jasmine-node/bin/jasmine-node
