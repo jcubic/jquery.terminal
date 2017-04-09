@@ -1,4 +1,4 @@
-VERSION=1.1.0
+VERSION=1.1.1
 SED=sed
 CP=cp
 RM=rm
