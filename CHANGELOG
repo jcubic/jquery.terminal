@@ -1,5 +1,7 @@
-1.1.0     fix delete in IE11
-          fix CMD+V on MacOS chrome
+1.1.1     don't fire keymap when terminal paused
+          fix delete in IE11
+          restore order of keymap/keydown - keydown is executed first
+1.1.0     fix CMD+V on MacOS chrome
           add stay option to insert same as in cmd plugin
           add option pauseEvents - default set to true
           fix exception when calling purge more then once

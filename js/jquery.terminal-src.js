@@ -968,7 +968,7 @@
                         combo.push('ALT');
                     }
                     if (e.key) {
-                        if (e.key === 'DEL') { // IE11
+                        if (key === 'DEL') { // IE11
                             combo.push('DELETE');
                         } else {
                             combo.push(key);
@@ -1860,6 +1860,15 @@
             text = clip.val();
             no_keypress = true;
             var key = get_key(e);
+            if (enabled || !options.pauseEvents) {
+                if ($.isFunction(options.keydown)) {
+                    result = options.keydown(e);
+                    if (result !== undefined) {
+                        //prevent_keypress = true;
+                        return result;
+                    }
+                }
+            }
             if (enabled) {
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
@@ -1904,15 +1913,6 @@
                 }
                 if (result !== undefined) {
                     return result;
-                }
-            }
-            if (enabled || !options.pauseEvents) {
-                if ($.isFunction(options.keydown)) {
-                    result = options.keydown(e);
-                    if (result !== undefined) {
-                        //prevent_keypress = true;
-                        return result;
-                    }
                 }
             }
         }
