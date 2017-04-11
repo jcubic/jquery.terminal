@@ -1,3 +1,4 @@
+
 .*
 *~
 www
@@ -18,4 +19,5 @@ version
 CONTRIBUTING.md
 methods
 options
+files
 contributors
