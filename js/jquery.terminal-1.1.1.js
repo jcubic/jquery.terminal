@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 09 Apr 2017 08:41:51 +0000
+ * Date: Tue, 11 Apr 2017 16:38:21 +0000
  */
 
 /* TODO:
@@ -874,10 +874,7 @@
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
     var cmd_index = 0;
-    $.fn.cmd = function(settings) {
-        var options = $.extend({
-            pauseEvents: true
-        }, settings);
+    $.fn.cmd = function(options) {
         var self = this;
         var maybe_data = self.data('cmd');
         if (maybe_data) {
@@ -1860,13 +1857,11 @@
             text = clip.val();
             no_keypress = true;
             var key = get_key(e);
-            if (enabled || !options.pauseEvents) {
-                if ($.isFunction(options.keydown)) {
-                    result = options.keydown(e);
-                    if (result !== undefined) {
-                        //prevent_keypress = true;
-                        return result;
-                    }
+            if ($.isFunction(options.keydown)) {
+                result = options.keydown(e);
+                if (result !== undefined) {
+                    //prevent_keypress = true;
+                    return result;
                 }
             }
             if (enabled) {
@@ -1906,14 +1901,6 @@
                 // this will prevent for instance backspace to go back one page
                 //prevent_keypress = true;
                 e.preventDefault();
-            } else if (!options.pauseEvents && $.isFunction(keymap[key])) {
-                result = keymap[key]();
-                if (result === true) {
-                    return;
-                }
-                if (result !== undefined) {
-                    return result;
-                }
             }
         }
         var doc = $(document.documentElement || window);
@@ -1928,12 +1915,10 @@
             if (prevent_keypress) {
                 return;
             }
-            if (enabled || !options.pauseEvents) {
-                if ($.isFunction(options.keypress)) {
-                    result = options.keypress(e);
-                    if (result !== undefined) {
-                        return result;
-                    }
+            if ($.isFunction(options.keypress)) {
+                result = options.keypress(e);
+                if (result !== undefined) {
+                    return result;
                 }
             }
             // key polyfill is not correct for keypress
@@ -4140,8 +4125,8 @@
                             requests = [];
                         }
                         self.resume();
-                        return false;
                     }
+                    return false;
                 }
             }
         }
@@ -5654,7 +5639,6 @@
                 historySize: settings.historySize,
                 width: '100%',
                 enabled: enabled && !is_touch,
-                pauseEvents: settings.pauseEvents,
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
