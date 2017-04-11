@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.1.1
+ *           \/              /____/                              version 1.1.2
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 11 Apr 2017 16:38:21 +0000
+ * Date: Tue, 11 Apr 2017 16:39:20 +0000
  */
 
 /* TODO:
@@ -2105,7 +2105,7 @@
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
     /* eslint-enable */
     $.terminal = {
-        version: '1.1.1',
+        version: '1.1.2',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
