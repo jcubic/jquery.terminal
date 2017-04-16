@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 16 Apr 2017 16:06:03 +0000
+ * Date: Sun, 16 Apr 2017 16:08:17 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -173,7 +173,7 @@
       border-bottom-color: #aaa;
       position: relative;
       top: 2px;
-      line-height: 11px;
+      line-height: 12px;
       border-left: none;
       margin: 0;
   }
@@ -181,7 +181,7 @@
       border-bottom-color: #000;
       position: relative;
       top: 2px;
-      line-height: 11px;
+      line-height: 12px;
       border-left: none;
       margin: 0;
   }
@@ -191,7 +191,7 @@
       border-bottom-color: #aaa;
       position: relative;
       top: 2px;
-      line-height: 11px;
+      line-height: 12px;
       border-left: none;
       margin: 0;
   }
@@ -199,7 +199,7 @@
       border-bottom-color: #000;
       position: relative;
       top: 2px;
-      line-height: 11px;
+      line-height: 12px;
       border-left: none;
       margin: 0;
   }
@@ -209,7 +209,7 @@
       border-bottom-color: #aaa;
       position: relative;
       top: 2px;
-      line-height: 11px;
+      line-height: 12px;
       border-left: none;
       margin: 0;
   }
