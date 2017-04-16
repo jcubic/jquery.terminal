@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 16 Apr 2017 15:46:19 +0000
+ * Date: Sun, 16 Apr 2017 15:58:44 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -543,7 +543,7 @@
           border-bottom-color: var(--color, #aaa);
           position: relative;
           top: 2px;
-          line-height: calc(var(--size, 1) * 11px);
+          line-height: calc(var(--size, 1) * 12px);
           border-left: none;
           margin: 0;
       }
@@ -551,7 +551,7 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           top: 2px;
-          line-height: calc(var(--size, 1) * 11px);
+          line-height: calc(var(--size, 1) * 12px);
           border-left: none;
           margin: 0;
       }
@@ -561,7 +561,7 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           top: 2px;
-          line-height: calc(var(--size, 1) * 11px);
+          line-height: calc(var(--size, 1) * 12px);
           border-left: none;
           margin: 0;
       }
@@ -569,7 +569,7 @@
           border-bottom-color: var(--color, #aaa);
           position: relative;
           top: 2px;
-          line-height: calc(var(--size, 1) * 11px);
+          line-height: calc(var(--size, 1) * 12px);
           border-left: none;
           margin: 0;
       }
@@ -579,7 +579,7 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           top: 2px;
-          line-height: calc(var(--size, 1) * 11px);
+          line-height: calc(var(--size, 1) * 12px);
           border-left: none;
           margin: 0;
       }
@@ -587,7 +587,7 @@
           border-bottom-color: var(--color, #aaa);
           position: relative;
           top: 2px;
-          line-height: calc(var(--size, 1) * 11px);
+          line-height: calc(var(--size, 1) * 12px);
           border-left: none;
           margin: 0;
       }
@@ -597,7 +597,7 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           top: 2px;
-          line-height: calc(var(--size, 1) * 11px);
+          line-height: calc(var(--size, 1) * 12px);
           border-left: none;
           margin: 0;
       }
@@ -605,7 +605,7 @@
           border-bottom-color: var(--color, #aaa);
           position: relative;
           top: 2px;
-          line-height: calc(var(--size, 1) * 11px);
+          line-height: calc(var(--size, 1) * 12px);
           border-left: none;
           margin: 0;
       }
