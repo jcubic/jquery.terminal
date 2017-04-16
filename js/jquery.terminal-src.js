@@ -940,7 +940,8 @@
             } else {
                 try_pos = col - prompt_len;
             }
-            var text = command.replace(/\t/g, '\x00\x00\x00\x00');
+            // tabs are 4 spaces and newline don't show up in results
+            var text = command.replace(/\t/g, '\x00\x00\x00\x00').replace(/\n/, '');
             var before = text.slice(0, try_pos);
             var len = before.replace(/\x00{4}/g, '\t').replace(/\x00+/, '').length;
             return len > command.length ? command.length : len;

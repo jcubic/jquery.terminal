@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.1.2
+ *           \/              /____/                              version 1.1.3
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 11 Apr 2017 16:39:20 +0000
+ * Date: Sun, 16 Apr 2017 11:16:29 +0000
  */
 
 /* TODO:
@@ -940,7 +940,8 @@
             } else {
                 try_pos = col - prompt_len;
             }
-            var text = command.replace(/\t/g, '\x00\x00\x00\x00');
+            // tabs are 4 spaces and newline don't show up in results
+            var text = command.replace(/\t/g, '\x00\x00\x00\x00').replace(/\n/, '');
             var before = text.slice(0, try_pos);
             var len = before.replace(/\x00{4}/g, '\t').replace(/\x00+/, '').length;
             return len > command.length ? command.length : len;
@@ -2105,7 +2106,7 @@
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
     /* eslint-enable */
     $.terminal = {
-        version: '1.1.2',
+        version: '1.1.3',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

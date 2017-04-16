@@ -1,3 +1,4 @@
+1.1.3     fix click to change position when command have newlines
 1.1.2     from pauseEvents option form cmd plugin - it always execute keyboard events
 1.1.1     don't fire keymap when terminal paused
           fix delete in IE11
