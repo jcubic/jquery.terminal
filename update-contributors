@@ -1,0 +1,11 @@
+#!/bin/bash
+
+CONTRIBUTORS=`./contributors -u jcubic -r jquery.terminal -m $@  | tr '\n' '☺'`
+
+if echo "$CONTRIBUTORS" | grep -v ERROR > /dev/null; then
+    cat README.in | sed -n "/CONTRIBUTORS-START/{p;:a;N;/CONTRIBUTORS-END/!ba;s%.*\n%${CONTRIBUTORS}%};p" | tr '☺' '\n' > README.tmp
+    cp README.tmp README.in
+    rm README.tmp
+fi
+
+

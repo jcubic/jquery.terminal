@@ -5,6 +5,20 @@ var path = require('path');
 var fs = require('fs');
 var argv = require('optimist').argv;
 
+function split_equal(array, length) {
+    var result = [];
+    var len = array.length;
+    if (len < length) {
+        return array;
+    } else if (length < 0) {
+        throw new Error("split_equal: length can't be negative");
+    }
+    for (var i = 0; i < len; i += length) {
+        result.push(array.slice(i, i + length));
+    }
+    return result;
+}
+
 function get(host, path) {
     var options = {
         host: host,
@@ -59,6 +73,10 @@ if (argv.u && argv.r) {
                         } else {
                             object.url = "https://github.com/" + user.login
                         }
+                        if (argv.m) {
+                            object.avatar = contributor.avatar_url;
+                            object.login = user.login;
+                        }
                         return object;
                     }
                 });
@@ -67,11 +85,23 @@ if (argv.u && argv.r) {
             }
         }).filter(Boolean));
     }).then(function(contributors) {
-        console.log(JSON.stringify(contributors, null, 4));
+        if (argv.m) {
+            var table = split_equal(contributors, 7).map(function(list) {
+                return '| ' + list.map(function(contributor) {
+                    return '[<img src="' + contributor.avatar + '" width="100px;"/>' +
+                        '<br /><sub>' + contributor.name + '</sub>](' +
+                        contributor.url + ')<br>[commits](https://github.com/jcubic' +
+                        'jquery.terminal/commits?author=' + contributor.login + ')';
+                }).join(' | ') + ' |\n';
+            }).join('| :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n');
+            console.log(table.replace(/\n$/, ''));
+        } else {
+            console.log(JSON.stringify(contributors, null, 4));
+        }
     }).catch(function(error) {
-        console.log(error);
+        console.log('ERROR: ' + error);
     });
 } else {
     console.log('usage: \n' + path.basename(process.argv[1]) + '-u <user> -r <repo> ' +
-                '[--auth githubUsername:githubPassword]');
+                '[--auth githubUsername:githubPassword] [-m]');
 }
