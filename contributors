@@ -58,31 +58,27 @@ if (argv.u && argv.r) {
     var path = '/repos/' + user + '/' + repo + '/contributors';
     get('api.github.com', path + '?per_page=100').then(function(contributors) {
         return Promise.all(contributors.map(function(contributor) {
-            if (contributor.login != user) {
-                var path = contributor.url.replace(/https:\/\/[^\/]+/, '');
-                return get('api.github.com', path).then(function(user) {
-                    if (user.name || user.login) {
-                        var object = {
-                            name: user.name || user.login
-                        };
-                        if (user.email) {
-                            object.email = user.email;
-                        }
-                        if (user.blog) {
-                            object.url = user.blog;
-                        } else {
-                            object.url = "https://github.com/" + user.login
-                        }
-                        if (argv.m) {
-                            object.avatar = contributor.avatar_url;
-                            object.login = user.login;
-                        }
-                        return object;
+            var path = contributor.url.replace(/https:\/\/[^\/]+/, '');
+            return get('api.github.com', path).then(function(user) {
+                if (user.name || user.login) {
+                    var object = {
+                        name: user.name || user.login
+                    };
+                    if (user.email) {
+                        object.email = user.email;
                     }
-                });
-            } else {
-                return null;
-            }
+                    if (user.blog) {
+                        object.url = user.blog;
+                    } else {
+                        object.url = "https://github.com/" + user.login
+                    }
+                    if (argv.m) {
+                        object.avatar = contributor.avatar_url;
+                        object.login = user.login;
+                    }
+                    return object;
+                }
+            });
         }).filter(Boolean));
     }).then(function(contributors) {
         if (argv.m) {
