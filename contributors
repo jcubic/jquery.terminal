@@ -92,7 +92,7 @@ if (argv.u && argv.r) {
                     return '[<img src="' + contributor.avatar + '" width="100px;"/>' +
                         '<br /><sub>' + contributor.name + '</sub>](' +
                         contributor.url + ')<br>[commits](https://github.com/jcubic' +
-                        'jquery.terminal/commits?author=' + contributor.login + ')';
+                        '/jquery.terminal/commits?author=' + contributor.login + ')';
                 }).join(' | ') + ' |';
             });
             rows.splice(1, 0, align);
