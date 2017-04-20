@@ -1317,10 +1317,10 @@ function tests_on_ready() {
                 expect(term.get_command()).toEqual(command);
                 expect(term.get_prompt()).toEqual(prompt);
                 expect(cmd.position()).toEqual(position);
-                var html = '<div class="command">'+
+                var html = '<div class="command" role="presentation" aria-hidden="true">'+
                                '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
                            '</div>'+
-                           '<div class="command">'+
+                           '<div class="command" role="presentation" aria-hidden="true">'+
                                '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
                            '</div>';
                 expect(term.find('.terminal-output').html()).toEqual(html);

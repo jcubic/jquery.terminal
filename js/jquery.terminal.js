@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 20 Apr 2017 17:19:18 +0000
+ * Date: Thu, 20 Apr 2017 18:36:39 +0000
  */
 
 /* TODO:
@@ -893,6 +893,7 @@
         self.addClass('cmd');
         self.append('<span class="prompt"></span><span></span>' +
                     '<span class="cursor">&nbsp;</span><span></span>');
+        // a11y: don't read command it's in textarea that's in focus
         a11y_hide(self.find('span').not(':eq(0)'));
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
@@ -1126,8 +1127,10 @@
                 // don't work in Chromium (can't prevent close tab)
                 if (command !== '' && position !== 0) {
                     var m = command.slice(0, position).match(/([^ ]+ *$)/);
-                    kill_text = self['delete'](-m[0].length);
-                    text_to_clipboard(self, kill_text);
+                    if (m[0].length) {
+                        kill_text = self['delete'](-m[0].length);
+                        text_to_clipboard(self, kill_text);
+                    }
                 }
                 return false;
             },
@@ -1148,8 +1151,10 @@
             'CTRL+V': paste_event,
             'META+V': paste_event,
             'CTRL+K': function() {
-                kill_text = self['delete'](command.length - position);
-                text_to_clipboard(self, kill_text);
+                if (command.length - position) {
+                    kill_text = self['delete'](command.length - position);
+                    text_to_clipboard(self, kill_text);
+                }
                 return false;
             },
             'CTRL+U': function() {
@@ -1970,7 +1975,7 @@
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key) &&
-                !backspace) {
+                !backspace && enabled) {
                 var pos = position;
                 var val = clip.val();
                 if (val !== '') {
@@ -1994,6 +1999,11 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
+        self.on('blur.cmd', 'textarea', function blur() {
+            if (enabled) {
+                return false;
+            }
+        });
         (function() {
             var isDragging = false;
             var was_down = false;
@@ -2111,7 +2121,7 @@
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
-    var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
+    var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
     /* eslint-enable */
@@ -3641,6 +3651,7 @@
         // ---------------------------------------------------------------------
         function show_greetings() {
             if (settings.greetings === undefined) {
+                // signature have ascii art so it's not suite for screen readers
                 self.echo(self.signature, {finalize: a11y_hide});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
@@ -5624,13 +5635,11 @@
         var command_line;
         var old_enabled;
         self.on('focus.terminal', 'textarea', function() {
-            if (!enabled) {
-                self.focus();
-            }
-        }).on('blur.terminal', 'textarea', function() {
-            if (enabled) {
-                self.focus(false);
-            }
+            self.oneTime(100, function() {
+                if (!enabled) {
+                    self.enable();
+                }
+            });
         });
         function focus_terminal() {
             if (old_enabled) {
