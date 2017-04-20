@@ -657,6 +657,15 @@
     };
     /* eslint-enable */
     // -----------------------------------------------------------------------
+    // :: hide elements from screen readers
+    // -----------------------------------------------------------------------
+    function a11y_hide(element) {
+        element.attr({
+            role: 'presentation',
+            'aria-hidden': 'true'
+        });
+    }
+    // -----------------------------------------------------------------------
     // :: Split string to array of strings with the same length
     // -----------------------------------------------------------------------
     function str_parts(str, length) {
@@ -884,6 +893,7 @@
         self.addClass('cmd');
         self.append('<span class="prompt"></span><span></span>' +
                     '<span class="cursor">&nbsp;</span><span></span>');
+        a11y_hide(self.find('span').not(':eq(0)'));
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
@@ -3631,7 +3641,7 @@
         // ---------------------------------------------------------------------
         function show_greetings() {
             if (settings.greetings === undefined) {
-                self.echo(self.signature);
+                self.echo(self.signature, {finalize: a11y_hide});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
                 if (type === 'string') {
@@ -3666,7 +3676,7 @@
             }
             var options = {
                 finalize: function(div) {
-                    div.addClass('command');
+                    a11y_hide(div.addClass('command'));
                 }
             };
             if ($.isFunction(prompt)) {
@@ -5006,8 +5016,8 @@
                                 display_exception(e, 'USER:echo(finalize)');
                             }
                         } else {
-                            $('<div/>').html(line).
-                                appendTo(wrapper).width('100%');
+                            $('<div/>').html(line)
+                                .appendTo(wrapper).width('100%');
                         }
                     });
                     if (settings.outputLimit >= 0) {
@@ -5099,6 +5109,14 @@
                             keepWords: false,
                             formatters: true
                         }, options || {});
+                        if (locals.raw) {
+                            (function(finalize) {
+                                locals.finalize = function(div) {
+                                    div.addClass('raw');
+                                    finalize(div);
+                                };
+                            })(locals.finalize);
+                        }
                         if (locals.flush) {
                             // flush buffer if there was no flush after previous echo
                             if (output_buffer.length) {
@@ -5569,7 +5587,8 @@
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
         var iframe = $('<iframe/>').appendTo(wrapper);
-        output = $('<div>').addClass('terminal-output').appendTo(wrapper);
+        output = $('<div>').addClass('terminal-output').attr('role', 'log')
+            .appendTo(wrapper);
         self.addClass('terminal');
         // before login event
         if (settings.login && $.isFunction(settings.onBeforeLogin)) {
@@ -5604,6 +5623,15 @@
         var interpreters;
         var command_line;
         var old_enabled;
+        self.on('focus.terminal', 'textarea', function() {
+            if (!enabled) {
+                self.focus();
+            }
+        }).on('blur.terminal', 'textarea', function() {
+            if (enabled) {
+                self.focus(false);
+            }
+        });
         function focus_terminal() {
             if (old_enabled) {
                 self.focus();
