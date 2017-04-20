@@ -1221,9 +1221,9 @@
             var focus = clip.is(':focus');
             if (enabled) {
                 if (!focus) {
-                    clip.focus();
+                    clip.trigger('focus', [true]);
                     self.oneTime(10, function() {
-                        clip.focus();
+                        clip.trigger('focus', [true]);
                     });
                 }
             } else if (focus) {
@@ -1975,7 +1975,7 @@
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key) &&
-                !backspace && enabled) {
+                !backspace) {
                 var pos = position;
                 var val = clip.val();
                 if (val !== '') {
@@ -1999,11 +1999,6 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
-        self.on('blur.cmd', 'textarea', function blur() {
-            if (enabled) {
-                return false;
-            }
-        });
         (function() {
             var isDragging = false;
             var was_down = false;
@@ -5634,12 +5629,10 @@
         var interpreters;
         var command_line;
         var old_enabled;
-        self.on('focus.terminal', 'textarea', function() {
-            self.oneTime(100, function() {
-                if (!enabled) {
-                    self.enable();
-                }
-            });
+        self.on('focus.terminal', 'textarea', function(e, skip) {
+            if (!enabled && !skip) {
+                self.enable();
+            }
         });
         function focus_terminal() {
             if (old_enabled) {
