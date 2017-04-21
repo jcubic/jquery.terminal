@@ -1,3 +1,6 @@
+/* global jasmine, global, it, expect, describe, require, spyOn, setTimeout, location,
+          beforeEach, afterEach, sprintf */
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 var loaded;
 if (typeof window === 'undefined') {
@@ -6,7 +9,8 @@ if (typeof window === 'undefined') {
     global.document = window.document;
     var navigator = {userAgent: "node-js", platform: "Linux i686"};
     global.window.navigator = global.navigator = navigator;
-    global.jQuery = global.$ = require("jquery");
+    var jQuery = require("jquery");
+    var $ = jQuery;
     require('../js/jquery.terminal-src');
     require('../js/unix_formatting');
     global.location = global.window.location = {hash: ''};
@@ -307,7 +311,7 @@ function tests_on_ready() {
             });
         });
     });
-    support_animations = (function() {
+    global.support_animations = (function() {
         var animation = false,
             animationstring = 'animation',
             keyframeprefix = '',
@@ -333,7 +337,6 @@ function tests_on_ready() {
     })();
     describe('Terminal plugin', function() {
         describe('jQuery Terminal options', function() {
-            
             describe('prompt', function() {
                 it('should set prompt', function() {
                     var prompt = '>>> ';

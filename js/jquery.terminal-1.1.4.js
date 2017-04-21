@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 20 Apr 2017 18:36:39 +0000
+ * Date: Fri, 21 Apr 2017 08:19:31 +0000
  */
 
 /* TODO:
@@ -47,7 +47,8 @@
  * NOTE: json-rpc don't need promises and delegate resume/pause because only
  *       exec can call it and exec call interpreter that work with resume/pause
  */
-
+/* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
+          setImmediate */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -1221,9 +1222,9 @@
             var focus = clip.is(':focus');
             if (enabled) {
                 if (!focus) {
-                    clip.focus();
+                    clip.trigger('focus', [true]);
                     self.oneTime(10, function() {
-                        clip.focus();
+                        clip.trigger('focus', [true]);
                     });
                 }
             } else if (focus) {
@@ -1975,7 +1976,7 @@
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key) &&
-                !backspace && enabled) {
+                !backspace) {
                 var pos = position;
                 var val = clip.val();
                 if (val !== '') {
@@ -1999,11 +2000,6 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
-        self.on('blur.cmd', 'textarea', function blur() {
-            if (enabled) {
-                return false;
-            }
-        });
         (function() {
             var isDragging = false;
             var was_down = false;
@@ -4210,6 +4206,9 @@
         var enabled = settings.enabled, frozen = false;
         var paused = false;
         var autologin = true; // set to false of onBeforeLogin return false
+        var interpreters;
+        var command_line;
+        var old_enabled;
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
@@ -5631,15 +5630,10 @@
                                                  settings.login);
         }
         terminals.append(self);
-        var interpreters;
-        var command_line;
-        var old_enabled;
-        self.on('focus.terminal', 'textarea', function() {
-            self.oneTime(100, function() {
-                if (!enabled) {
-                    self.enable();
-                }
-            });
+        self.on('focus.terminal', 'textarea', function(e, skip) {
+            if (!enabled && !skip) {
+                self.enable();
+            }
         });
         function focus_terminal() {
             if (old_enabled) {

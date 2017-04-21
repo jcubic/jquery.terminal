@@ -13,6 +13,7 @@
  * Released under the MIT license
  *
  */
+/* global jQuery */
 (function($) {
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');

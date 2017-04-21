@@ -47,7 +47,8 @@
  * NOTE: json-rpc don't need promises and delegate resume/pause because only
  *       exec can call it and exec call interpreter that work with resume/pause
  */
-
+/* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
+          setImmediate */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -4205,6 +4206,9 @@
         var enabled = settings.enabled, frozen = false;
         var paused = false;
         var autologin = true; // set to false of onBeforeLogin return false
+        var interpreters;
+        var command_line;
+        var old_enabled;
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
@@ -5626,9 +5630,6 @@
                                                  settings.login);
         }
         terminals.append(self);
-        var interpreters;
-        var command_line;
-        var old_enabled;
         self.on('focus.terminal', 'textarea', function(e, skip) {
             if (!enabled && !skip) {
                 self.enable();

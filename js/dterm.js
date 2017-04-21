@@ -10,6 +10,7 @@
  * Released under the MIT license
  *
  */
+/* global jQuery */
 (function($) {
     $.extend_if_has = function(desc, source, array) {
         for (var i = array.length; i--;) {
