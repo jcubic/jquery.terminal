@@ -1,3 +1,6 @@
+/* global jasmine, global, it, expect, describe, require, spyOn, setTimeout, location,
+          beforeEach, afterEach, sprintf, $ */
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 var loaded;
 if (typeof window === 'undefined') {
@@ -307,7 +310,7 @@ function tests_on_ready() {
             });
         });
     });
-    support_animations = (function() {
+    global.support_animations = (function() {
         var animation = false,
             animationstring = 'animation',
             keyframeprefix = '',
@@ -333,7 +336,6 @@ function tests_on_ready() {
     })();
     describe('Terminal plugin', function() {
         describe('jQuery Terminal options', function() {
-            
             describe('prompt', function() {
                 it('should set prompt', function() {
                     var prompt = '>>> ';
@@ -1317,10 +1319,10 @@ function tests_on_ready() {
                 expect(term.get_command()).toEqual(command);
                 expect(term.get_prompt()).toEqual(prompt);
                 expect(cmd.position()).toEqual(position);
-                var html = '<div class="command">'+
+                var html = '<div class="command" role="presentation" aria-hidden="true">'+
                                '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
                            '</div>'+
-                           '<div class="command">'+
+                           '<div class="command" role="presentation" aria-hidden="true">'+
                                '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
                            '</div>';
                 expect(term.find('.terminal-output').html()).toEqual(html);

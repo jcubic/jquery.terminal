@@ -47,7 +47,8 @@
  * NOTE: json-rpc don't need promises and delegate resume/pause because only
  *       exec can call it and exec call interpreter that work with resume/pause
  */
-
+/* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
+          setImmediate */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -657,6 +658,15 @@
     };
     /* eslint-enable */
     // -----------------------------------------------------------------------
+    // :: hide elements from screen readers
+    // -----------------------------------------------------------------------
+    function a11y_hide(element) {
+        element.attr({
+            role: 'presentation',
+            'aria-hidden': 'true'
+        });
+    }
+    // -----------------------------------------------------------------------
     // :: Split string to array of strings with the same length
     // -----------------------------------------------------------------------
     function str_parts(str, length) {
@@ -884,12 +894,15 @@
         self.addClass('cmd');
         self.append('<span class="prompt"></span><span></span>' +
                     '<span class="cursor">&nbsp;</span><span></span>');
+        // a11y: don't read command it's in textarea that's in focus
+        a11y_hide(self.find('span').not(':eq(0)'));
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
         var clip = $('<textarea>').attr({
             autocapitalize: 'off',
-            spellcheck: 'false'
+            spellcheck: 'false',
+            tabindex: 1
         }).addClass('clipboard').appendTo(self);
         // we don't need this but leave it as a comment just in case
         //var contentEditable = $('<div contentEditable></div>')
@@ -1116,8 +1129,10 @@
                 // don't work in Chromium (can't prevent close tab)
                 if (command !== '' && position !== 0) {
                     var m = command.slice(0, position).match(/([^ ]+ *$)/);
-                    kill_text = self['delete'](-m[0].length);
-                    text_to_clipboard(self, kill_text);
+                    if (m[0].length) {
+                        kill_text = self['delete'](-m[0].length);
+                        text_to_clipboard(self, kill_text);
+                    }
                 }
                 return false;
             },
@@ -1138,8 +1153,10 @@
             'CTRL+V': paste_event,
             'META+V': paste_event,
             'CTRL+K': function() {
-                kill_text = self['delete'](command.length - position);
-                text_to_clipboard(self, kill_text);
+                if (command.length - position) {
+                    kill_text = self['delete'](command.length - position);
+                    text_to_clipboard(self, kill_text);
+                }
                 return false;
             },
             'CTRL+U': function() {
@@ -1206,9 +1223,9 @@
             var focus = clip.is(':focus');
             if (enabled) {
                 if (!focus) {
-                    clip.focus();
+                    clip.trigger('focus', [true]);
                     self.oneTime(10, function() {
-                        clip.focus();
+                        clip.trigger('focus', [true]);
                     });
                 }
             } else if (focus) {
@@ -2101,7 +2118,7 @@
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
-    var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
+    var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
     /* eslint-enable */
@@ -2399,6 +2416,9 @@
                                         result += 'rel="noreferrer" ';
                                     }
                                 }
+                                // make focus to terminal textarea that will enable
+                                // terminal when pressing tab and terminal is disabled
+                                result += 'tabindex="1000" ';
                             } else {
                                 result = '<span';
                             }
@@ -3631,7 +3651,8 @@
         // ---------------------------------------------------------------------
         function show_greetings() {
             if (settings.greetings === undefined) {
-                self.echo(self.signature);
+                // signature have ascii art so it's not suite for screen readers
+                self.echo(self.signature, {finalize: a11y_hide});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
                 if (type === 'string') {
@@ -3666,7 +3687,7 @@
             }
             var options = {
                 finalize: function(div) {
-                    div.addClass('command');
+                    a11y_hide(div.addClass('command'));
                 }
             };
             if ($.isFunction(prompt)) {
@@ -4189,6 +4210,9 @@
         var enabled = settings.enabled, frozen = false;
         var paused = false;
         var autologin = true; // set to false of onBeforeLogin return false
+        var interpreters;
+        var command_line;
+        var old_enabled;
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
@@ -5006,8 +5030,8 @@
                                 display_exception(e, 'USER:echo(finalize)');
                             }
                         } else {
-                            $('<div/>').html(line).
-                                appendTo(wrapper).width('100%');
+                            $('<div/>').html(line)
+                                .appendTo(wrapper).width('100%');
                         }
                     });
                     if (settings.outputLimit >= 0) {
@@ -5099,6 +5123,14 @@
                             keepWords: false,
                             formatters: true
                         }, options || {});
+                        if (locals.raw) {
+                            (function(finalize) {
+                                locals.finalize = function(div) {
+                                    div.addClass('raw');
+                                    finalize(div);
+                                };
+                            })(locals.finalize);
+                        }
                         if (locals.flush) {
                             // flush buffer if there was no flush after previous echo
                             if (output_buffer.length) {
@@ -5569,7 +5601,8 @@
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
         var iframe = $('<iframe/>').appendTo(wrapper);
-        output = $('<div>').addClass('terminal-output').appendTo(wrapper);
+        output = $('<div>').addClass('terminal-output').attr('role', 'log')
+            .appendTo(wrapper);
         self.addClass('terminal');
         // before login event
         if (settings.login && $.isFunction(settings.onBeforeLogin)) {
@@ -5601,9 +5634,11 @@
                                                  settings.login);
         }
         terminals.append(self);
-        var interpreters;
-        var command_line;
-        var old_enabled;
+        self.on('focus.terminal', 'textarea', function(e, skip) {
+            if (!enabled && !skip) {
+                self.enable();
+            }
+        });
         function focus_terminal() {
             if (old_enabled) {
                 self.focus();
