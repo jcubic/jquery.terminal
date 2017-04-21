@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 21 Apr 2017 08:19:31 +0000
+ * Date: Fri, 21 Apr 2017 16:06:28 +0000
  */
 
 /* TODO:
@@ -901,7 +901,8 @@
         //self.append('<span class="mask"></mask>');
         var clip = $('<textarea>').attr({
             autocapitalize: 'off',
-            spellcheck: 'false'
+            spellcheck: 'false',
+            tabindex: 1
         }).addClass('clipboard').appendTo(self);
         // we don't need this but leave it as a comment just in case
         //var contentEditable = $('<div contentEditable></div>')
@@ -2415,6 +2416,9 @@
                                         result += 'rel="noreferrer" ';
                                     }
                                 }
+                                // make focus to terminal textarea that will enable
+                                // terminal when pressing tab and terminal is disabled
+                                result += 'tabindex="1000" ';
                             } else {
                                 result = '<span';
                             }
