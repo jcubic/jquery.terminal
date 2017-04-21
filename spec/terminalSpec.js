@@ -1,5 +1,5 @@
 /* global jasmine, global, it, expect, describe, require, spyOn, setTimeout, location,
-          beforeEach, afterEach, sprintf */
+          beforeEach, afterEach, sprintf, $ */
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 var loaded;
@@ -9,8 +9,7 @@ if (typeof window === 'undefined') {
     global.document = window.document;
     var navigator = {userAgent: "node-js", platform: "Linux i686"};
     global.window.navigator = global.navigator = navigator;
-    var jQuery = require("jquery");
-    var $ = jQuery;
+    global.jQuery = global.$ = require("jquery");
     require('../js/jquery.terminal-src');
     require('../js/unix_formatting');
     global.location = global.window.location = {hash: ''};
