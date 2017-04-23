@@ -2545,7 +2545,7 @@
         // ---------------------------------------------------------------------
         split_command: function(string) {
             return process_command(string, function(arg) {
-                $.terminal.parse_argument(arg, false);
+                return $.terminal.parse_argument(arg, false);
             });
         },
         // ---------------------------------------------------------------------

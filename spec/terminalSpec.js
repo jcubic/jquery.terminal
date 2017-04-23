@@ -128,6 +128,7 @@ function tests_on_ready() {
                         '10',
                         '1e10'
                     ],
+                    args_quotes: ['"', '', '', '', '', ''],
                     rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10'
                 });
             });
@@ -146,6 +147,7 @@ function tests_on_ready() {
                         10,
                         1e10
                     ],
+                    args_quotes: ['"', '', '', '', '', ''],
                     rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10'
                 });
             });
@@ -451,6 +453,7 @@ function tests_on_ready() {
                 term.focus(true);
                 expect(cursor.hasClass('blink')).toBe(true);
                 expect(term.find('.clipboard').length).toBe(1);
+                
             });
             it('should have signature', function() {
                 var sig = term.find('.terminal-output div div').map(function() { return $(this).text(); }).get().join('\n');

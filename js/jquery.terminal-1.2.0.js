@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 23 Apr 2017 09:07:16 +0000
+ * Date: Sun, 23 Apr 2017 09:54:38 +0000
  */
 
 /* TODO:
@@ -2545,7 +2545,7 @@
         // ---------------------------------------------------------------------
         split_command: function(string) {
             return process_command(string, function(arg) {
-                $.terminal.parse_argument(arg, false);
+                return $.terminal.parse_argument(arg, false);
             });
         },
         // ---------------------------------------------------------------------
