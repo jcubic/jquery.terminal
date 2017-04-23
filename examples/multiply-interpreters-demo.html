@@ -51,6 +51,9 @@ jQuery(document).ready(function($) {
                            term.resume();
                            if (data.error && data.error.message) {
                                term.error(data.error.message);
+                               if (data.error.error && data.error.error.message) {
+                                   term.error(data.error.error.message);
+                               }
                            } else {
                                if (typeof data.result == 'boolean') {
                                    term.echo(data.result ? 'success' : 'fail');
