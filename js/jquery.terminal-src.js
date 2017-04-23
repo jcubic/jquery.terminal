@@ -2084,14 +2084,20 @@
     })();
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
-        var array = fn(string);
+        var array = string.match(command_re) || [];
         if (array.length) {
             var name = array.shift();
+            var args = $.map(array, fn);
+            var quotes = $.map(array, function(arg) {
+                var m = arg.match(/^(['"]).*\1$/);
+                return m && m[1] || '';
+            });
             var rest = string.substring(name.length).trim();
             return {
                 command: string,
                 name: name,
-                args: array,
+                args: args,
+                args_quotes: quotes,
                 rest: rest
             };
         } else {
@@ -2099,6 +2105,7 @@
                 command: string,
                 name: '',
                 args: [],
+                args_quotes: quotes,
                 rest: ''
             };
         }
@@ -2474,39 +2481,14 @@
             }
         },
         // ---------------------------------------------------------------------
-        // :: Function splits arguments and works with strings like
-        // :: 'asd' 'asd\' asd' "asd asd" asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ a
-        // :: it creates a regex and numbers and replaces escape characters in
-        // :: double quotes
+        // :: Function that works with strings like 'asd' 'asd\' asd' "asd asd"
+        // :: asd\ 123 -n -b / [^ ]+ / /\s+/ asd\ a it creates a regex and
+        // :: numbers and replaces escape characters in double quotes
+        // :: if strict is set to false it only strips single and double quotes
+        // :: and escapes spaces
         // ---------------------------------------------------------------------
-        parse_arguments: function(string) {
-            return $.map(string.match(command_re) || [], function(arg) {
-                var regex = arg.match(re_re);
-                if (regex) {
-                    return new RegExp(regex[1], regex[2]);
-                } else if (arg[0] === "'" && arg[arg.length - 1] === "'" &&
-                           arg.length > 1) {
-                    return arg.replace(/^'|'$/g, '');
-                } else if (arg[0] === '"' && arg[arg.length - 1] === '"' &&
-                           arg.length > 1) {
-                    return $.parseJSON(arg);
-                } else if (arg.match(/^-?[0-9]+$/)) {
-                    return parseInt(arg, 10);
-                } else if (arg.match(float_re)) {
-                    return parseFloat(arg);
-                } else if (arg.match(/^['"]$/)) {
-                    return '';
-                } else {
-                    return arg.replace(/\\(['"() ])/g, '$1');
-                }
-            });
-        },
-        // ---------------------------------------------------------------------
-        // :: Split arguments: it only strips single and double quotes and
-        // :: escapes spaces
-        // ---------------------------------------------------------------------
-        split_arguments: function(string) {
-            return $.map(string.match(command_re) || [], function(arg) {
+        parse_argument: function(arg, strict) {
+            if (strict === false) {
                 if (arg[0] === "'" && arg[arg.length - 1] === "'") {
                     return arg.replace(/^'|'$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length - 1] === '"') {
@@ -2516,6 +2498,39 @@
                 } else {
                     return arg.replace(/\\ /g, ' ');
                 }
+            }
+            var regex = arg.match(re_re);
+            if (regex) {
+                return new RegExp(regex[1], regex[2]);
+            } else if (arg[0] === "'" && arg[arg.length - 1] === "'" &&
+                       arg.length > 1) {
+                return arg.replace(/^'|'$/g, '');
+            } else if (arg[0] === '"' && arg[arg.length - 1] === '"' &&
+                       arg.length > 1) {
+                return $.parseJSON(arg);
+            } else if (arg.match(/^-?[0-9]+$/)) {
+                return parseInt(arg, 10);
+            } else if (arg.match(float_re)) {
+                return parseFloat(arg);
+            } else if (arg.match(/^['"]$/)) {
+                return '';
+            } else {
+                return arg.replace(/\\(['"() ])/g, '$1');
+            }
+        },
+        // ---------------------------------------------------------------------
+        // :: function split and parse arguments
+        // ---------------------------------------------------------------------
+        parse_arguments: function(string) {
+            return $.map(string.match(command_re) || [], $.terminal.parse_argument);
+        },
+        // ---------------------------------------------------------------------
+        // :: Function split and strips single and double quotes
+        // :: and escapes spaces
+        // ---------------------------------------------------------------------
+        split_arguments: function(string) {
+            return $.map(string.match(command_re) || [], function(arg) {
+                return $.terminal.parse_argument(arg, false);
             });
         },
         // ---------------------------------------------------------------------
@@ -2523,13 +2538,15 @@
         // :: using the function parse_arguments
         // ---------------------------------------------------------------------
         parse_command: function(string) {
-            return process_command(string, $.terminal.parse_arguments);
+            return process_command(string, $.terminal.parse_argument);
         },
         // ---------------------------------------------------------------------
         // :: Same as parse_command but arguments are parsed using split_arguments
         // ---------------------------------------------------------------------
         split_command: function(string) {
-            return process_command(string, $.terminal.split_arguments);
+            return process_command(string, function(arg) {
+                $.terminal.parse_argument(arg, false);
+            });
         },
         // ---------------------------------------------------------------------
         // :: function executed for each text inside [{ .... }]
@@ -4155,9 +4172,11 @@
         function ready(defer) {
             return function(fun) {
                 if (defer.state() !== 'resolved') {
-                    defer.then(fun.bind(self));
+                    defer.then(fun).fail(function(e) {
+                        self.error(e);
+                    });
                 } else {
-                    fun.call(self);
+                    fun.call(fun);
                 }
             };
         }
@@ -5420,6 +5439,9 @@
                 if (interpreters.size() === 1) {
                     top = interpreters.top();
                     if (settings.login) {
+                        if (!silent) {
+                            settings.onPop.call(self, top, null, self);
+                        }
                         global_logout();
                         if ($.isFunction(settings.onExit)) {
                             try {
@@ -5430,9 +5452,6 @@
                         }
                     } else {
                         self.error(strings.canExitError);
-                    }
-                    if (!silent) {
-                        settings.onPop.call(self, top, null, self);
                     }
                 } else {
                     if (token) {
