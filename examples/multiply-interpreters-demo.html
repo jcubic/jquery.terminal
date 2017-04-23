@@ -49,10 +49,13 @@ jQuery(document).ready(function($) {
                        [command],
                        function(data) {
                            term.resume();
-                           if (data.error && data.error.message) {
-                               term.error(data.error.message);
+                           if (data.error) {
                                if (data.error.error && data.error.error.message) {
                                    term.error(data.error.error.message);
+                               } else if (data.error.message) {
+                                   term.error(data.error.message);
+                               } else {
+                                   term.error('unknow rpc error');
                                }
                            } else {
                                if (typeof data.result == 'boolean') {
