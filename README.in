@@ -75,11 +75,9 @@ Include jQuery library, you can use cdn from http://jquery.com/download/
 
 
 Then include js/jquery.terminal-{{VER}}.min.js and css/jquery.terminal-{{VER}}.css
-You can also include js/jquery.mousewheel-min.js
 
 ```html
 <script src="js/jquery.terminal-{{VER}}.min.js"></script>
-<script src="js/jquery.mousewheel-min.js"></script>
 <link href="css/jquery.terminal-{{VER}}.css" rel="stylesheet"/>
 ```
 

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 23 Apr 2017 09:54:38 +0000
+ * Date: Mon, 24 Apr 2017 17:06:35 +0000
  */
 
 /* TODO:
@@ -1722,7 +1722,6 @@
             destroy: function() {
                 doc.unbind('keypress.cmd', keypress_event);
                 doc.unbind('keydown.cmd', keydown_event);
-                doc.unbind('paste.cmd', paste);
                 doc.unbind('input.cmd', input);
                 self.stopTime('blink', blink);
                 self.find('.cursor').next().remove().end().prev().remove().
@@ -5667,6 +5666,26 @@
             old_enabled = enabled;
             self.disable();
         }
+        function paste_image(e) {
+            e = e.originalEvent;
+            // we don't care about browser that don't support clipboard data
+            // those browser simple will not have this feature normal paste
+            // is cross-browser and it's handled by cmd plugin
+            if (e.clipboardData) {
+                var items = e.clipboardData.items;
+                if (items) {
+                    for (var i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf('image') !== -1) {
+                            var blob = items[i].getAsFile();
+                            var URL = window.URL || window.webkitURL;
+                            var source = URL.createObjectURL(blob);
+                            self.echo('<img src="' + source + '"/>', {raw: true});
+                        }
+                    }
+                }
+            }
+        }
+        $(document).on('paste.terminal_' + self.id(), paste_image);
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
             if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
@@ -5929,40 +5948,50 @@
             }
             // change_hash = true; // exec can now change hash
             // -------------------------------------------------------------
+            var shift = false;
+            $(document).bind('keydown.terminal_' + self.id(), function(e) {
+                if (e.shiftKey) {
+                    shift = true;
+                }
+            }).bind('keyup.terminal_' + self.id(), function(e) {
+                // in Google Chromium/Linux shiftKey is false
+                if (e.shiftKey || e.which === 16) {
+                    shift = false;
+                }
+            });
+            // this could work without calling scroll on wheel event but we
+            // need to for cases where you have mouse wheel work differently
+            // like with less command that scroll text
+            function mousewheel(event, delta) {
+                if (!shift) {
+                    var interpreter = interpreters.top();
+                    var ret;
+                    if ($.isFunction(interpreter.mousewheel)) {
+                        ret = interpreter.mousewheel(event, delta, self);
+                        if (ret === false) {
+                            return;
+                        }
+                    } else if ($.isFunction(settings.mousewheel)) {
+                        ret = settings.mousewheel(event, delta, self);
+                        if (ret === false) {
+                            return;
+                        }
+                    }
+                    if (delta > 0) {
+                        self.scroll(-40);
+                    } else {
+                        self.scroll(40);
+                    }
+                }
+            }
             if ($.event.special.mousewheel) {
-                var shift = false;
-                $(document).bind('keydown.terminal_' + self.id(), function(e) {
-                    if (e.shiftKey) {
-                        shift = true;
-                    }
-                }).bind('keyup.terminal_' + self.id(), function(e) {
-                    // in Google Chromium/Linux shiftKey is false
-                    if (e.shiftKey || e.which === 16) {
-                        shift = false;
-                    }
-                });
                 self.mousewheel(function(event, delta) {
-                    if (!shift) {
-                        var interpreter = interpreters.top();
-                        var ret;
-                        if ($.isFunction(interpreter.mousewheel)) {
-                            ret = interpreter.mousewheel(event, delta, self);
-                            if (ret === false) {
-                                return;
-                            }
-                        } else if ($.isFunction(settings.mousewheel)) {
-                            ret = settings.mousewheel(event, delta, self);
-                            if (ret === false) {
-                                return;
-                            }
-                        }
-                        if (delta > 0) {
-                            self.scroll(-40);
-                        } else {
-                            self.scroll(40);
-                        }
-                        // event.preventDefault();
-                    }
+                    mousewheel(event, delta);
+                }).on('wheel', function() { return false; });
+            } else {
+                self.on('wheel', function(e) {
+                    mousewheel(e, -e.originalEvent.deltaY);
+                    return false;
                 });
             }
         }); // make_interpreter
