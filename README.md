@@ -12,7 +12,7 @@ http://terminal.jcubic.pl
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
 [![Gitter chat](https://badges.gitter.im/jcubic/jquery.terminal.png)](https://gitter.im/jcubic/jquery.terminal)
 [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&969959fce5c1793c5b91a3b5c1f45a1f)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&9484118b62f4b005718dbc10ec08e9b8)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 
@@ -75,11 +75,9 @@ Include jQuery library, you can use cdn from http://jquery.com/download/
 
 
 Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.css
-You can also include js/jquery.mousewheel-min.js
 
 ```html
 <script src="js/jquery.terminal-DEV.min.js"></script>
-<script src="js/jquery.mousewheel-min.js"></script>
 <link href="css/jquery.terminal-DEV.css" rel="stylesheet"/>
 ```
 

@@ -5984,15 +5984,24 @@
                     }
                 }
             }
+            // detection take from:
+            // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+            var event;
+            if ("onwheel" in document.createElement("div")) {
+                event = "wheel"; // Modern browsers support "wheel"
+            } else if (document.onmousewheel !== undefined) {
+                event = "mousewheel"; // Webkit and IE support at least "mousewheel"
+            } else {
+                // let's assume that remaining browsers are older Firefox
+                event = "DOMMouseScroll";
+            }
             if ($.event.special.mousewheel) {
-                // browser support for wheel event is good
-                // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
-                // but for backward compatibility we keep use of mousewheel plugin
+                // we keep mousewheel plugin just in case
                 self.mousewheel(function(event, delta) {
                     mousewheel(event, delta);
-                }).on('wheel', function() { return false; });
+                }).on(event, function() { return false; });
             } else {
-                self.on('wheel', function(e) {
+                self.on(event, function(e) {
                     mousewheel(e, -e.originalEvent.deltaY);
                     return false;
                 });
