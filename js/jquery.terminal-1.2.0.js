@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 24 Apr 2017 17:16:25 +0000
+ * Date: Tue, 25 Apr 2017 17:01:37 +0000
  */
 
 /* TODO:
@@ -2724,7 +2724,7 @@
     // -----------------------------------------------------------------------
     function char_size() {
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
-                     'ss="cursor">&nbsp;</span></div></div>').appendTo('body');
+                     'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
         var span = temp.find('span');
         var result = {
             width: span.width(),

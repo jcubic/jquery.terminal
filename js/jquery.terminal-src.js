@@ -2724,7 +2724,7 @@
     // -----------------------------------------------------------------------
     function char_size() {
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
-                     'ss="cursor">&nbsp;</span></div></div>').appendTo('body');
+                     'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
         var span = temp.find('span');
         var result = {
             width: span.width(),

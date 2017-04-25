@@ -2,6 +2,7 @@
           add args_quotes to parse_/split_ command api utilities
           mousewheel work without jQuery mousewheel and fix jumps of text
           paste of images (using echo) in browsers that support clipboard event
+          fix number of rows after adding underline animation
 1.2.0     make terminal accessible to screen readers:
            - terminal focus using tab key (we can't blur on tab keybecause it's used
              to enter tab character or for completion)
