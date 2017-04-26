@@ -3649,12 +3649,12 @@
                     string = $.type(string) === 'string' ? string : String(string);
                     if (string.length > num_chars) {
                         var options = line[1];
-                        var lines = $.terminal.split_equal(
+                        var splitted = $.terminal.split_equal(
                             string,
                             num_chars,
                             options.keepWords
                         );
-                        lines_to_show = lines_to_show.concat(lines.map(function(line) {
+                        lines_to_show = lines_to_show.concat(splitted.map(function(line) {
                             return [line, options];
                         }));
                     } else {
@@ -5078,8 +5078,8 @@
                             limit = settings.outputLimit;
                         }
                         var $lines = output.find('div div');
-                        if ($lines.length+1 > limit) {
-                            var max = $lines.length - limit + 1;;
+                        if ($lines.length + 1 > limit) {
+                            var max = $lines.length - limit + 1;
                             var for_remove = $lines.slice(0, max);
                             // you can't get parent if you remove the
                             // element so we first get the parent
@@ -6022,8 +6022,8 @@
                 }
                 self.on(event, function(e) {
                     var delta;
-                    if (event == 'mousewheel') {
-                        delta = - 1/40 * e.originalEvent.wheelDelta;
+                    if (event === 'mousewheel') {
+                        delta = - 1 / 40 * e.originalEvent.wheelDelta;
                     } else {
                         delta = e.originalEvent.deltaY || e.originalEvent.detail;
                     }
