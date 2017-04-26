@@ -5546,7 +5546,7 @@
                     wrapper.remove();
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
-                    self.unbind('click mousewheel mousedown mouseup');
+                    self.unbind('click wheel mousewheel mousedown mouseup');
                     self.removeData('terminal').removeClass('terminal');
                     if (settings.width) {
                         self.css('width', '');
@@ -5984,23 +5984,24 @@
                     }
                 }
             }
-            // detection take from:
-            // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
-            var event;
-            if ("onwheel" in document.createElement("div")) {
-                event = "wheel"; // Modern browsers support "wheel"
-            } else if (document.onmousewheel !== undefined) {
-                event = "mousewheel"; // Webkit and IE support at least "mousewheel"
-            } else {
-                // let's assume that remaining browsers are older Firefox
-                event = "DOMMouseScroll";
-            }
             if ($.event.special.mousewheel) {
                 // we keep mousewheel plugin just in case
-                self.mousewheel(function(event, delta) {
+                self.on('mousewheel', function(event, delta) {
                     mousewheel(event, delta);
-                }).on(event, function() { return false; });
+                    event.preventDefault();
+                });
             } else {
+                // detection take from:
+                // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+                var event;
+                if ("onwheel" in document.createElement("div")) {
+                    event = "wheel"; // Modern browsers support "wheel"
+                } else if (document.onmousewheel !== undefined) {
+                    event = "mousewheel"; // Webkit and IE support at least "mousewheel"
+                } else {
+                    // let's assume that remaining browsers are older Firefox
+                    event = "DOMMouseScroll";
+                }
                 self.on(event, function(e) {
                     mousewheel(e, -e.originalEvent.deltaY);
                     return false;
