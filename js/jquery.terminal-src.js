@@ -6003,7 +6003,13 @@
                     event = "DOMMouseScroll";
                 }
                 self.on(event, function(e) {
-                    mousewheel(e, -e.originalEvent.deltaY);
+                    var delta;
+                    if (event == 'mousewheel') {
+                        delta = - 1/40 * e.originalEvent.wheelDelta;
+                    } else {
+                        delta = e.originalEvent.deltaY || e.originalEvent.detail;
+                    }
+                    mousewheel(e, -delta);
                     return false;
                 });
             }

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 26 Apr 2017 12:17:34 +0000
+ * Date: Wed, 26 Apr 2017 12:33:25 +0000
  */
 
 /* TODO:
@@ -6003,7 +6003,13 @@
                     event = "DOMMouseScroll";
                 }
                 self.on(event, function(e) {
-                    mousewheel(e, -e.originalEvent.deltaY);
+                    var delta;
+                    if (event == 'mousewheel') {
+                        delta = - 1/40 * e.originalEvent.wheelDelta;
+                    } else {
+                        delta = e.originalEvent.deltaY || e.originalEvent.detail;
+                    }
+                    mousewheel(e, -delta);
                     return false;
                 });
             }
