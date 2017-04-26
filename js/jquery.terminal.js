@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 26 Apr 2017 12:33:25 +0000
+ * Date: Wed, 26 Apr 2017 14:33:07 +0000
  */
 
 /* TODO:
@@ -3632,7 +3632,8 @@
             command_line.resize(num_chars);
             // we don't want reflow while processing lines
             var detached_output = output.empty().detach();
-            var lines_to_show;
+            var lines_to_show = [];
+            // Dead code
             if (settings.outputLimit >= 0) {
                 // flush will limit lines but if there is lot of
                 // lines we don't need to show them and then remove
@@ -3643,13 +3644,30 @@
                 } else {
                     limit = settings.outputLimit;
                 }
-                lines_to_show = lines.slice(lines.length - limit - 1);
+                lines.forEach(function(line) {
+                    var string = $.type(line[0]) === 'function' ? line[0]() : line[0];
+                    string = $.type(string) === 'string' ? string : String(string);
+                    if (string.length > num_chars) {
+                        var options = line[1];
+                        var lines = $.terminal.split_equal(
+                            string,
+                            num_chars,
+                            options.keepWords
+                        );
+                        lines_to_show = lines_to_show.concat(lines.map(function(line) {
+                            return [line, options];
+                        }));
+                    } else {
+                        lines_to_show.push(line);
+                    }
+                });
+                lines_to_show = lines_to_show.slice(lines_to_show.length - limit - 1);
             } else {
                 lines_to_show = lines;
             }
             try {
                 output_buffer = [];
-                $.each(lines_to_show, function(i, line) {
+                $.each(lines, function(i, line) {
                     process_line.apply(null, line); // line is an array
                 });
                 command_line.before(detached_output); // reinsert output
@@ -5060,8 +5078,8 @@
                             limit = settings.outputLimit;
                         }
                         var $lines = output.find('div div');
-                        if ($lines.length > limit) {
-                            var max = $lines.length - limit + 1;
+                        if ($lines.length+1 > limit) {
+                            var max = $lines.length - limit + 1;;
                             var for_remove = $lines.slice(0, max);
                             // you can't get parent if you remove the
                             // element so we first get the parent
