@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 26 Apr 2017 14:33:07 +0000
+ * Date: Thu, 27 Apr 2017 15:19:52 +0000
  */
 
 /* TODO:
@@ -3649,12 +3649,12 @@
                     string = $.type(string) === 'string' ? string : String(string);
                     if (string.length > num_chars) {
                         var options = line[1];
-                        var lines = $.terminal.split_equal(
+                        var splitted = $.terminal.split_equal(
                             string,
                             num_chars,
                             options.keepWords
                         );
-                        lines_to_show = lines_to_show.concat(lines.map(function(line) {
+                        lines_to_show = lines_to_show.concat(splitted.map(function(line) {
                             return [line, options];
                         }));
                     } else {
@@ -4890,25 +4890,15 @@
             // -------------------------------------------------------------
             signature: function() {
                 var cols = self.cols();
-                var i;
-                if (cols < 15) {
-                    i = null;
-                } else if (cols < 35) {
-                    i = 0;
-                } else if (cols < 55) {
-                    i = 1;
-                } else if (cols < 64) {
-                    i = 2;
-                } else if (cols < 75) {
-                    i = 3;
-                } else {
-                    i = 4;
+                for (var i = signatures.length; i--;) {
+                    var lenghts = signatures[i].map(function(line) {
+                        return line.length;
+                    });
+                    if (Math.max.apply(null, lenghts) <= cols) {
+                        return signatures[i].join('\n') + '\n';
+                    }
                 }
-                if (i !== null) {
-                    return signatures[i].join('\n') + '\n';
-                } else {
-                    return '';
-                }
+                return '';
             },
             // -------------------------------------------------------------
             // :: Return the version number
@@ -5078,8 +5068,8 @@
                             limit = settings.outputLimit;
                         }
                         var $lines = output.find('div div');
-                        if ($lines.length+1 > limit) {
-                            var max = $lines.length - limit + 1;;
+                        if ($lines.length + 1 > limit) {
+                            var max = $lines.length - limit + 1;
                             var for_remove = $lines.slice(0, max);
                             // you can't get parent if you remove the
                             // element so we first get the parent
@@ -6022,8 +6012,8 @@
                 }
                 self.on(event, function(e) {
                     var delta;
-                    if (event == 'mousewheel') {
-                        delta = - 1/40 * e.originalEvent.wheelDelta;
+                    if (event === 'mousewheel') {
+                        delta = - 1 / 40 * e.originalEvent.wheelDelta;
                     } else {
                         delta = e.originalEvent.deltaY || e.originalEvent.detail;
                     }

@@ -4890,25 +4890,15 @@
             // -------------------------------------------------------------
             signature: function() {
                 var cols = self.cols();
-                var i;
-                if (cols < 15) {
-                    i = null;
-                } else if (cols < 35) {
-                    i = 0;
-                } else if (cols < 55) {
-                    i = 1;
-                } else if (cols < 64) {
-                    i = 2;
-                } else if (cols < 75) {
-                    i = 3;
-                } else {
-                    i = 4;
+                for (var i = signatures.length; i--;) {
+                    var lenghts = signatures[i].map(function(line) {
+                        return line.length;
+                    });
+                    if (Math.max.apply(null, lenghts) <= cols) {
+                        return signatures[i].join('\n') + '\n';
+                    }
                 }
-                if (i !== null) {
-                    return signatures[i].join('\n') + '\n';
-                } else {
-                    return '';
-                }
+                return '';
             },
             // -------------------------------------------------------------
             // :: Return the version number
