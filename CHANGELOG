@@ -7,6 +7,7 @@
           element resizer (as jQuery plugin) that work inside iframe
           add IntersectionObserver to add resizer and call resize (not all browser support it,
           polyfill exists)
+          fix calculation of cols and rows
 1.2.0     make terminal accessible to screen readers:
            - terminal focus using tab key (we can't blur on tab keybecause it's used
              to enter tab character or for completion)
