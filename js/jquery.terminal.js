@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 27 Apr 2017 15:46:14 +0000
+ * Date: Thu, 27 Apr 2017 16:03:20 +0000
  */
 
 /* TODO:
@@ -5116,7 +5116,7 @@
                         redraw();
                         var top = interpreters.top();
                         if ($.isFunction(top.resize)) {
-                            top.resize(self);
+                            top.resize.call(self, self);
                         } else if ($.isFunction(settings.onResize)) {
                             settings.onResize.call(self, self);
                         }

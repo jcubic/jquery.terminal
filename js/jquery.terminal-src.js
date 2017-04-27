@@ -5116,7 +5116,7 @@
                         redraw();
                         var top = interpreters.top();
                         if ($.isFunction(top.resize)) {
-                            top.resize(self);
+                            top.resize.call(self, self);
                         } else if ($.isFunction(settings.onResize)) {
                             settings.onResize.call(self, self);
                         }
