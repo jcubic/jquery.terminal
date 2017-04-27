@@ -388,20 +388,7 @@
 .terminal a:hover {
     color: red;
 }
-.terminal .terminal-fill {
-    position: absolute;
-    left: 0;
-    top: -100%;
-    width: 100%;
-    height: 100%;
-    margin: 1px 0 0;
-    border: none;
-    opacity: 0;
-    pointer-events: none;
-    box-sizing: border-box;
-}
-/* we get width of the terminal from .terminal-fill so it need to have the same padding */
-.terminal, .terminal .terminal-fill {
+.terminal {
     padding: 10px;
 }
 @supports (--css: variables) {

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 27 Apr 2017 16:03:20 +0000
+ * Date: Thu, 27 Apr 2017 16:35:21 +0000
  */
 
 /* TODO:
@@ -2819,10 +2819,10 @@
     function char_size() {
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
-        var span = temp.find('span');
+        var rect = temp.find('span')[0].getBoundingClientRect();
         var result = {
-            width: span.width(),
-            height: span.outerHeight()
+            width: rect.width,
+            height: rect.height
         };
         temp.remove();
         return result;
@@ -2831,13 +2831,9 @@
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        var temp = $('<div class="terminal wrap"><span class="cursor">' +
-                     '&nbsp;</span></div>').appendTo('body').css('padding', 0);
-        var span = temp.find('span');
-        var width = span[0].getBoundingClientRect().width;
-        var result = Math.floor(terminal.find('.terminal-wrapper').width() / width);
-        temp.remove();
-        return result;
+        var result = Math.floor(terminal.width() / char_size().width);
+        // random number to not get NaN in node but big enough to not wrap exception
+        return result || 1000;
     }
     // -----------------------------------------------------------------------
     // :: Calculate number of lines that fit without scroll
