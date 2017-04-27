@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 27 Apr 2017 16:42:17 +0000
+ * Date: Thu, 27 Apr 2017 17:11:13 +0000
  */
 
 /* TODO:
@@ -2833,7 +2833,8 @@
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        var result = Math.floor(terminal.width() / char_size().width);
+        var width = terminal.find('.terminal-fill').width();
+        var result = Math.floor(width / char_size().width);
         // random number to not get NaN in node but big enough to not wrap exception
         return result || 1000;
     }
@@ -2841,7 +2842,7 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal) {
-        return Math.floor(terminal.height() / char_size().height);
+        return Math.floor(terminal.find('.terminal-fill').height() / char_size().height);
     }
     // -----------------------------------------------------------------------
     // :: Get Selected Text (this is internal because it return text even if
@@ -5657,6 +5658,7 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
+                    self.find('.terminal-fill').remove();
                     terminals.remove(terminal_id);
                     if (visibility_observer) {
                         visibility_observer.unobserve(self[0]);
@@ -5722,6 +5724,7 @@
             requests.push(xhr);
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
+        $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
