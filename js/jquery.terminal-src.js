@@ -678,79 +678,77 @@
         }
         return this.each(function() {
             var $this = $(this);
-            if ($this.data('events')) {
-                if (unbind) {
-                    $(this).removeData('events').find('.resizer').remove();
-                } else {
-                    $(this).data('events').push(callback);
-                }
-                return;
-            }
-            $this.data('events', [callback]);
-            var self = this;
-            var resizer = $('<div/>').addClass('resizer').appendTo(this)[0];
-            var style =
-                'position: absolute; left: 0; top: 0; right: 0; bottom: 0; ' +
-                'overflow: hidden; z-index: -1; visibility: hidden;';
-            var styleChild = 'position: absolute; left: 0; top: 0; transition: 0s;';
-            resizer.style.cssText = style;
-            resizer.innerHTML =
-                '<div class="resize-sensor-expand" style="' + style + '">' +
-                '<div style="' + styleChild + '"></div>' + "</div>" +
-                '<div class="resize-sensor-shrink" style="' + style + '">' +
-                '<div style="' + styleChild + ' width: 200%; height: 200%"></div>' +
-                "</div>";
+            if (unbind) {
+                $(this).removeData('callbacks').find('.resizer').remove();
+            } else if ($this.data('callbacks')) {
+                $(this).data('callbacks').push(callback);
+            } else {
+                $this.data('callbacks', [callback]);
+                var self = this;
+                var resizer = $('<div/>').addClass('resizer').appendTo(this)[0];
+                var style =
+                    'position: absolute; left: 0; top: 0; right: 0; bottom: 0; ' +
+                    'overflow: hidden; z-index: -1; visibility: hidden;';
+                var styleChild = 'position: absolute; left: 0; top: 0; transition: 0s;';
+                resizer.style.cssText = style;
+                resizer.innerHTML =
+                    '<div class="resize-sensor-expand" style="' + style + '">' +
+                    '<div style="' + styleChild + '"></div>' + "</div>" +
+                    '<div class="resize-sensor-shrink" style="' + style + '">' +
+                    '<div style="' + styleChild + ' width: 200%; height: 200%"></div>' +
+                    "</div>";
 
-            var expand = resizer.childNodes[0];
-            var expandChild = expand.childNodes[0];
-            var shrink = resizer.childNodes[1];
-            var dirty, rafId, newWidth, newHeight;
-            var lastWidth = self.offsetWidth;
-            var lastHeight = self.offsetHeight;
+                var expand = resizer.childNodes[0];
+                var expandChild = expand.childNodes[0];
+                var shrink = resizer.childNodes[1];
+                var dirty, rafId, newWidth, newHeight;
+                var lastWidth = self.offsetWidth;
+                var lastHeight = self.offsetHeight;
 
-            var reset = function() {
-                expandChild.style.width = '100000px';
-                expandChild.style.height = '100000px';
+                var reset = function() {
+                    expandChild.style.width = '100000px';
+                    expandChild.style.height = '100000px';
 
-                expand.scrollLeft = 100000;
-                expand.scrollTop = 100000;
+                    expand.scrollLeft = 100000;
+                    expand.scrollTop = 100000;
 
-                shrink.scrollLeft = 100000;
-                shrink.scrollTop = 100000;
-            };
-
-            reset();
-
-            var onResized = function() {
-                rafId = 0;
-
-                if (!dirty) {
-                    return;
-                }
-
-                lastWidth = newWidth;
-                lastHeight = newHeight;
-                var events = $this.data("events");
-                if (events && events.length) {
-                    events.forEach(function(fn) {
-                        fn();
-                    });
-                }
-            };
-
-            var onScroll = function() {
-                newWidth = self.offsetWidth;
-                newHeight = self.offsetHeight;
-                dirty = newWidth !== lastWidth || newHeight !== lastHeight;
-
-                if (dirty && !rafId) {
-                    rafId = requestAnimationFrame(onResized);
-                }
+                    shrink.scrollLeft = 100000;
+                    shrink.scrollTop = 100000;
+                };
 
                 reset();
-            };
-            $(expand).on("scroll", onScroll);
-            $(shrink).on("scroll", onScroll);
+
+                var onResized = function() {
+                    rafId = 0;
+
+                    if (!dirty) {
+                        return;
+                    }
+
+                    lastWidth = newWidth;
+                    lastHeight = newHeight;
+                    var callbacks = $this.data('callbacks');
+                    if (callbacks && callbacks.length) {
+                        callbacks.forEach(function(fn) {
+                            fn();
+                        });
+                    }
+                };
+
+                var onScroll = function() {
+                    newWidth = self.offsetWidth;
+                    newHeight = self.offsetHeight;
+                    dirty = newWidth !== lastWidth || newHeight !== lastHeight;
+
+                    if (dirty && !rafId) {
+                        rafId = requestAnimationFrame(onResized);
+                    }
+
+                    reset();
+                };
+                $(expand).on("scroll", onScroll);
+                $(shrink).on("scroll", onScroll);
+            }
         });
     };
     // -----------------------------------------------------------------------
