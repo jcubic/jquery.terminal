@@ -47,8 +47,8 @@
  * NOTE: json-rpc don't need promises and delegate resume/pause because only
  *       exec can call it and exec call interpreter that work with resume/pause
  */
-/* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
-          setImmediate */
+/* global location jQuery setTimeout window global localStorage sprintf
+          setImmediate IntersectionObserver*/
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -657,6 +657,102 @@
         return pos;
     };
     /* eslint-enable */
+    var requestAnimationFrame =
+        window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        function(fn) {
+            return window.setTimeout(fn, 20);
+        };
+    // -----------------------------------------------------------------------
+    // :: Cross-browser resize element plugin
+    // :: Taken from ResizeSensor.js file from marcj/css-element-queries (MIT license)
+    // :: not all jQuerifided
+    // -----------------------------------------------------------------------
+    $.fn.resizer = function(callback) {
+        var unbind = arguments[0] === "unbind";
+        if (!unbind && !$.isFunction(callback)) {
+            throw new Error(
+                'Invalid argument, it need to a function of string "unbind".'
+            );
+        }
+        return this.each(function() {
+            var $this = $(this);
+            if ($this.data('events')) {
+                if (unbind) {
+                    $(this).removeData('events').find('.resizer').remove();
+                } else {
+                    $(this).data('events').push(callback);
+                }
+                return;
+            }
+            $this.data('events', [callback]);
+            var self = this;
+            var resizer = $('<div/>').addClass('resizer').appendTo(this)[0];
+            var style =
+                'position: absolute; left: 0; top: 0; right: 0; bottom: 0; ' +
+                'overflow: hidden; z-index: -1; visibility: hidden;';
+            var styleChild = 'position: absolute; left: 0; top: 0; transition: 0s;';
+            resizer.style.cssText = style;
+            resizer.innerHTML =
+                '<div class="resize-sensor-expand" style="' + style + '">' +
+                '<div style="' + styleChild + '"></div>' + "</div>" +
+                '<div class="resize-sensor-shrink" style="' + style + '">' +
+                '<div style="' + styleChild + ' width: 200%; height: 200%"></div>' +
+                "</div>";
+
+            var expand = resizer.childNodes[0];
+            var expandChild = expand.childNodes[0];
+            var shrink = resizer.childNodes[1];
+            var dirty, rafId, newWidth, newHeight;
+            var lastWidth = self.offsetWidth;
+            var lastHeight = self.offsetHeight;
+
+            var reset = function() {
+                expandChild.style.width = '100000px';
+                expandChild.style.height = '100000px';
+
+                expand.scrollLeft = 100000;
+                expand.scrollTop = 100000;
+
+                shrink.scrollLeft = 100000;
+                shrink.scrollTop = 100000;
+            };
+
+            reset();
+
+            var onResized = function() {
+                rafId = 0;
+
+                if (!dirty) {
+                    return;
+                }
+
+                lastWidth = newWidth;
+                lastHeight = newHeight;
+                var events = $this.data("events");
+                if (events && events.length) {
+                    events.forEach(function(fn) {
+                        fn();
+                    });
+                }
+            };
+
+            var onScroll = function() {
+                newWidth = self.offsetWidth;
+                newHeight = self.offsetHeight;
+                dirty = newWidth !== lastWidth || newHeight !== lastHeight;
+
+                if (dirty && !rafId) {
+                    rafId = requestAnimationFrame(onResized);
+                }
+
+                reset();
+            };
+            $(expand).on("scroll", onScroll);
+            $(shrink).on("scroll", onScroll);
+        });
+    };
     // -----------------------------------------------------------------------
     // :: hide elements from screen readers
     // -----------------------------------------------------------------------
@@ -2741,7 +2837,7 @@
                      '&nbsp;</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
         var width = span[0].getBoundingClientRect().width;
-        var result = Math.floor(terminal.find('iframe').width() / width);
+        var result = Math.floor(terminal.find('.terminal-wrapper').width() / width);
         temp.remove();
         return result;
     }
@@ -4249,6 +4345,7 @@
         var interpreters;
         var command_line;
         var old_enabled;
+        var visibility_observer;
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
@@ -5564,8 +5661,11 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
-                    iframe.remove();
                     terminals.remove(terminal_id);
+                    if (visibility_observer) {
+                        visibility_observer.unobserve(self[0]);
+                    }
+                    self.resizer('unbind');
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
@@ -5626,7 +5726,6 @@
             requests.push(xhr);
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
-        var iframe = $('<iframe/>').appendTo(wrapper);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
@@ -5879,18 +5978,22 @@
                     old_width = width;
                 }
             }
-            self.oneTime(100, function() {
-                // idea taken from https://github.com/developit/simple-element
-                // -resize-detector
-                function bind() {
-                    iframe[0].contentWindow.onresize = resize;
-                }
-                if (iframe.is(':visible')) {
-                    bind();
-                } else {
-                    iframe.on('load', bind);
-                }
-            });
+            if (self.is(':visible')) {
+                self.resizer(resize);
+            }
+            if (window.IntersectionObserver) {
+                var visibility_observer = new IntersectionObserver(function(entries) {
+                    if (entries[0].intersectionRatio) {
+                        self.resizer('unbind').resizer(resize);
+                        resize();
+                    } else {
+                        self.disable();
+                    }
+                }, {
+                    root: document.body
+                });
+                visibility_observer.observe(self[0]);
+            }
             // -------------------------------------------------------------
             // :: helper
             function exec_spec(spec) {
