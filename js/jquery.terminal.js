@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 27 Apr 2017 16:35:21 +0000
+ * Date: Thu, 27 Apr 2017 16:42:17 +0000
  */
 
 /* TODO:
@@ -1427,9 +1427,11 @@
         // :: Recalculate number of characters in command line
         // ---------------------------------------------------------------------
         function change_num_chars() {
+            var $prompt = self.find('.prompt').text('&nbsp;');
             var W = self.width();
-            var w = cursor[0].getBoundingClientRect().width;
+            var w = $prompt[0].getBoundingClientRect().width;
             num_chars = Math.floor(W / w);
+            draw_prompt();
         }
         // ---------------------------------------------------------------------
         // :: Split String that fit into command line where first line need to
