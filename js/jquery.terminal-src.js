@@ -2835,7 +2835,7 @@
                      '&nbsp;</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
         var width = span[0].getBoundingClientRect().width;
-        var result = Math.floor(terminal.find('.terminal-wrapper').width() / width);
+        var result = Math.floor(terminal.find('.terminal-fill').width() / width);
         temp.remove();
         return result;
     }
@@ -5724,6 +5724,7 @@
             requests.push(xhr);
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
+        wrapper.append('<div class="terminal-fill"/>');
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
