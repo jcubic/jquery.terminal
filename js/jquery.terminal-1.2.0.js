@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 27 Apr 2017 17:11:13 +0000
+ * Date: Fri, 28 Apr 2017 09:29:36 +0000
  */
 
 /* TODO:
@@ -1474,6 +1474,8 @@
         // :: format end encode the string
         // ---------------------------------------------------------------------
         function format(string) {
+            // we don't want to format command when user type formatting in
+            string = $.terminal.escape_formatting(string);
             var formatters = $.terminal.defaults.formatters;
             for (var i = 0; i < formatters.length; ++i) {
                 try {
@@ -4800,14 +4802,14 @@
             // :: the terminal
             // -------------------------------------------------------------
             cols: function() {
-                return settings.numChars ? settings.numChars : get_num_chars(self);
+                return settings.numChars ? settings.numChars : num_chars;
             },
             // -------------------------------------------------------------
             // :: Return the number of lines that fit into the height of the
             // :: terminal
             // -------------------------------------------------------------
             rows: function() {
-                return settings.numRows ? settings.numRows : get_num_rows(self);
+                return settings.numRows ? settings.numRows : num_rows;
             },
             // -------------------------------------------------------------
             // :: Return the History object
@@ -5105,8 +5107,8 @@
                     }
                     width = self.width();
                     height = self.height();
-                    var new_num_chars = self.cols();
-                    var new_num_rows = self.rows();
+                    var new_num_chars = get_num_chars(self);
+                    var new_num_rows = get_num_rows(self);
                     // only if number of chars changed
                     if (new_num_chars !== num_chars ||
                         new_num_rows !== num_rows) {
