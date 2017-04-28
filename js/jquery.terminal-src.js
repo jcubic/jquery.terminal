@@ -48,7 +48,7 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 /* global location jQuery setTimeout window global localStorage sprintf
-          setImmediate IntersectionObserver*/
+          setImmediate IntersectionObserver MutationObserver*/
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -4345,6 +4345,7 @@
         var command_line;
         var old_enabled;
         var visibility_observer;
+        var mutation_observer;
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
@@ -5665,6 +5666,9 @@
                     if (visibility_observer) {
                         visibility_observer.unobserve(self[0]);
                     }
+                    if (mutation_observer) {
+                        mutation_observer.disconnect();
+                    }
                     self.resizer('unbind');
                     if (!terminals.length()) {
                         $(window).off('hashchange');
@@ -5982,8 +5986,11 @@
             if (self.is(':visible')) {
                 self.resizer(resize);
             }
-            if (window.IntersectionObserver) {
-                var visibility_observer = new IntersectionObserver(function(entries) {
+            function observe_visibility() {
+                if (visibility_observer) {
+                    visibility_observer.unobserve(self[0]);
+                }
+                visibility_observer = new IntersectionObserver(function(entries) {
                     if (entries[0].intersectionRatio) {
                         self.resizer('unbind').resizer(resize);
                         resize();
@@ -5994,6 +6001,26 @@
                     root: document.body
                 });
                 visibility_observer.observe(self[0]);
+            }
+            var in_dom = !!self.closest('body').length;
+            if (window.IntersectionObserver) {
+                mutation_observer = new MutationObserver(function(mutations) {
+                    if (self.closest('body').length) {
+                        if (!in_dom) {
+                            observe_visibility();
+                        }
+                        in_dom = true;
+                    } else if (in_dom) {
+                        in_dom = false;
+                    }
+                });
+                mutation_observer.observe(document.body, {childList: true});
+                // check if element is in the DOM if not running IntersectionObserver
+                // don't make sense
+                if (in_dom) {
+                    observe_visibility();
+                }
+
             }
             // -------------------------------------------------------------
             // :: helper

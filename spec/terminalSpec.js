@@ -1,5 +1,5 @@
-/* global jasmine, global, it, expect, describe, require, spyOn, setTimeout, location,
-          beforeEach, afterEach, sprintf, $ */
+/* global jasmine global it expect describe require spyOn setTimeout location
+          beforeEach afterEach sprintf jQuery $ */
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 var loaded;
@@ -86,6 +86,31 @@ function enter(term, text) {
     term.insert(text).focus();
     enter_key();
 }
+
+var support_animations = (function() {
+    var animation = false,
+    animationstring = 'animation',
+    keyframeprefix = '',
+    domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
+    pfx  = '',
+    elm = document.createElement('div');
+    if (elm.style.animationName) {
+        animation = true;
+    }
+    if (animation === false) {
+        for (var i = 0; i < domPrefixes.length; i++) {
+            var name = domPrefixes[i] + 'AnimationName';
+            if (typeof elm.style[name] !== 'undefined') {
+                pfx = domPrefixes[i];
+                animationstring = pfx + 'Animation';
+                keyframeprefix = '-' + pfx.toLowerCase() + '-';
+                animation = true;
+                break;
+            }
+        }
+    }
+    return animation;
+})();
 function tests_on_ready() {
     describe('Terminal utils', function() {
         var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -312,30 +337,6 @@ function tests_on_ready() {
             });
         });
     });
-    global.support_animations = (function() {
-        var animation = false,
-            animationstring = 'animation',
-            keyframeprefix = '',
-            domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
-            pfx  = '',
-            elm = document.createElement('div');
-        if (elm.style.animationName) {
-            animation = true;
-        }
-        if (animation === false) {
-            for (var i = 0; i < domPrefixes.length; i++) {
-                var name = domPrefixes[i] + 'AnimationName';
-                if (typeof elm.style[name] !== 'undefined') {
-                    pfx = domPrefixes[i];
-                    animationstring = pfx + 'Animation';
-                    keyframeprefix = '-' + pfx.toLowerCase() + '-';
-                    animation = true;
-                    break;
-                }
-            }
-        }
-        return animation;
-    })();
     describe('Terminal plugin', function() {
         describe('jQuery Terminal options', function() {
             describe('prompt', function() {
