@@ -2703,7 +2703,7 @@
     $.fn.scroll_element.defaults = {
         lines: 2000,
         pre: {
-            'font-size': '14px',
+            'font-size': '100px',
             'white-space': 'pre' // just in case if user overwrite css for pre tag
         }
     };

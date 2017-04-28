@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 28 Apr 2017 16:54:09 +0000
+ * Date: Fri, 28 Apr 2017 17:36:24 +0000
  */
 
 /* TODO:
@@ -2703,7 +2703,7 @@
     $.fn.scroll_element.defaults = {
         lines: 2000,
         pre: {
-            'font-size': '14px',
+            'font-size': '100px',
             'white-space': 'pre' // just in case if user overwrite css for pre tag
         }
     };
