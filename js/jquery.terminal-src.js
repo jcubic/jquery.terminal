@@ -6004,7 +6004,7 @@
             }
             var in_dom = !!self.closest('body').length;
             if (window.IntersectionObserver) {
-                mutation_observer = new MutationObserver(function(mutations) {
+                mutation_observer = new MutationObserver(function() {
                     if (self.closest('body').length) {
                         if (!in_dom) {
                             observe_visibility();

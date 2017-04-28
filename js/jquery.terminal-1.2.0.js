@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 28 Apr 2017 16:43:48 +0000
+ * Date: Fri, 28 Apr 2017 16:54:09 +0000
  */
 
 /* TODO:
@@ -6004,7 +6004,7 @@
             }
             var in_dom = !!self.closest('body').length;
             if (window.IntersectionObserver) {
-                mutation_observer = new MutationObserver(function(mutations) {
+                mutation_observer = new MutationObserver(function() {
                     if (self.closest('body').length) {
                         if (!in_dom) {
                             observe_visibility();
