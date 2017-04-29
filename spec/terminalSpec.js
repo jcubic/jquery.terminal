@@ -325,14 +325,16 @@ function tests_on_ready() {
                 var cols = [10, 40, 60, 400];
                 for (var i=cols.length; i--;) {
                     var lines = $.terminal.split_equal(text, cols[i]);
-                    var success = true;
+                    var lengths = lines.map(function(line) {
+                        return $.terminal.strip(line).length;
+                    });
                     for (var j=0; j<lines.length; ++j) {
-                        if ($.terminal.strip(lines[j]).length > cols[i]) {
-                            success = false;
-                            break;
+                        if (lengths[j] > cols[i]) {
+                            throw new Error('Lines count is ' + JSON.stringify(lengths) +
+                                           ' but it should have ' + cols[i]);
                         }
                     }
-                    expect(success).toEqual(true);
+                    expect(true).toEqual(true);
                 }
             });
         });

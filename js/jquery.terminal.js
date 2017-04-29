@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 28 Apr 2017 17:36:24 +0000
+ * Date: Sat, 29 Apr 2017 10:32:08 +0000
  */
 
 /* TODO:
@@ -2300,17 +2300,106 @@
             return str.split(format_split_re);
         },
         // ---------------------------------------------------------------------
-        // :: split text into lines with equal length so each line can be
-        // :: rendered separately (text formatting can be longer then a line).
+        // :: helper function used by substring and split_equal it loop over
+        // :: string and execute callback with text count and other data
         // ---------------------------------------------------------------------
-        split_equal: function(str, length, words) {
+        iterate_formatting: function(string, callback) {
+            function is_space() {
+                return string.substring(i - 6, i) === '&nbsp;' ||
+                    string.substring(i - 1, i) === ' ';
+            }
             var formatting = false;
             var in_text = false;
-            var prev_format = '';
-            var result = [];
-            // add format text as 5th paramter to formatting it's used for
-            // data attribute in format function
-            var array = str.replace(format_re, function(_, format, text) {
+            var count = 0;
+            var match;
+            var space = -1;
+            for (var i = 0; i < string.length; i++) {
+                match = string.substring(i).match(format_start_re);
+                if (match) {
+                    formatting = match[1];
+                    in_text = false;
+                } else if (formatting) {
+                    if (string[i] === ']') {
+                        if (in_text) {
+                            formatting = '';
+                            in_text = false;
+                        } else {
+                            in_text = true;
+                        }
+                    }
+                } else {
+                    in_text = true;
+                }
+                if ((formatting && in_text) || !formatting) {
+                    if (string[i] === '&') { // treat entity as one character
+                        match = string.substring(i).match(/^(&[^;]+;)/);
+                        if (!match) {
+                            // should never happen if used by terminal,
+                            // because it always calls $.terminal.encode
+                            // before this function
+                            throw new Error('Unclosed html entity at char ' + (i + 1));
+                        }
+                    } else if (string[i] === ']' && string[i - 1] === '\\') {
+                        // escape \] counts as one character
+                        --count;
+                    } else {
+                        ++count;
+                    }
+                }
+                if (is_space() && ((formatting && in_text) || !formatting ||
+                                   (string[i] === '[' && string[i + 1] === '['))) {
+                    space = i;
+                }
+                if ((formatting && in_text) || !formatting) {
+                    var data = {
+                        count: count,
+                        index: i,
+                        formatting: formatting,
+                        space: space
+                    };
+                    var ret = callback(data);
+                    if (ret === false) {
+                        break;
+                    } else if (ret) {
+                        if (ret.index) {
+                            i = ret.index;
+                        }
+                        count = ret.count;
+                    }
+                }
+            }
+        },
+        // ---------------------------------------------------------------------
+        // :: formatting aware substring function
+        // ---------------------------------------------------------------------
+        substring: function(string, start_index, end_index) {
+            if (start_index > 0) {
+                var start;
+                var end = string.length;
+                var start_formatting = '';
+                var end_formatting = '';
+                $.terminal.iterate_formatting(string, function(data) {
+                    if (data.count === start_index) {
+                        start = data.index;
+                        start_formatting = data.formatting;
+                    } else if (end_index && data.count === end_index) {
+                        end = data.index;
+                        end_formatting = data.formatting;
+                    }
+                });
+                string = start_formatting + string.substring(start, end);
+                if (end_formatting) {
+                    string += ']';
+                }
+            }
+            return $.terminal.normalize(string);
+        },
+        // ---------------------------------------------------------------------
+        // :: add format text as 5th paramter to formatting it's used for
+        // :: data attribute in format function
+        // ---------------------------------------------------------------------
+        normalize: function(string) {
+            return string.replace(format_re, function(_, format, text) {
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
                 if (semicolons >= 4) {
@@ -2328,11 +2417,16 @@
                 var safe = text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n').
                     replace(/&nbsp;/g, ' ');
                 return '[[' + format + semicolons + safe + ']' + text + ']';
-            }).split(/\n/g);
-            function is_space() {
-                return line.substring(j - 6, j) === '&nbsp;' ||
-                    line.substring(j - 1, j) === ' ';
-            }
+            });
+        },
+        // ---------------------------------------------------------------------
+        // :: split text into lines with equal length so each line can be
+        // :: rendered separately (text formatting can be longer then a line).
+        // ---------------------------------------------------------------------
+        split_equal: function(str, length, words) {
+            var prev_format = '';
+            var result = [];
+            var array = $.terminal.normalize(str).split(/\n/g);
             // Fix output if formatting not closed
             function fix_close() {
                 var matched = output.match(format_re);
@@ -2354,67 +2448,35 @@
                 }
                 var line = array[i];
                 var first_index = 0;
-                var count = 0;
                 var output;
-                var space = -1;
-                for (var j = 0, jlen = line.length; j < jlen; ++j) {
-                    if (line.substring(j).match(format_start_re)) {
-                        formatting = true;
-                        in_text = false;
-                    } else if (formatting && line[j] === ']') {
-                        if (in_text) {
-                            formatting = false;
-                            in_text = false;
-                        } else {
-                            in_text = true;
-                        }
-                    } else if ((formatting && in_text) || !formatting) {
-                        if (line[j] === '&') { // treat entity as one character
-                            var m = line.substring(j).match(/^(&[^;]+;)/);
-                            if (!m) {
-                                // should never happen if used by terminal,
-                                // because it always calls $.terminal.encode
-                                // before this function
-                                throw new Error('Unclosed html entity in line ' +
-                                                (i + 1) + ' at char ' + (j + 1));
-                            }
-                            j += m[1].length - 2; // because continue adds 1 to j
-                            // if entity is at the end there is no next loop
-                            // issue #77
-                            if (j === jlen - 1) {
-                                result.push(output + m[1]);
-                            }
-                            continue;
-                        } else if (line[j] === ']' && line[j - 1] === '\\') {
-                            // escape \] counts as one character
-                            --count;
-                        } else {
-                            ++count;
-                        }
-                    }
-                    if (is_space() && ((formatting && in_text) || !formatting ||
-                                      (line[j] === '[' && line[j + 1] === '['))) {
-                        space = j;
-                    }
-                    if ((count === length || j === jlen - 1) &&
-                        ((formatting && in_text) || !formatting)) {
-                        var text = $.terminal.strip(line.substring(space));
+                var line_length = line.length;
+                $.terminal.iterate_formatting(line, function(data) {
+                    if (data.count === length || data.index === line_length - 1) {
+                        var text = $.terminal.strip(line.substring(data.space));
+                        // replace html entities with characters
                         text = $('<span>' + text + '</span>').text();
+                        // real length, not counting formatting
                         var text_len = text.length;
-                        text = text.substring(0, j + length + 1);
-                        var can_break = !!text.match(/\s/) || j + length + 1 > text_len;
-                        if (words && space !== -1 && j !== jlen - 1 && can_break) {
-                            output = line.substring(first_index, space);
-                            j = space - 1;
+                        text = text.substring(0, data.index + length + 1);
+                        var can_break = false;
+                        if (text.match(/\s/) || data.index + length + 1 > text_len) {
+                            can_break = true;
+                        }
+                        // if words is true we split at space and make next loop
+                        // continue where the space where located
+                        if (words && data.space !== -1 &&
+                            data.index !== line_length - 1 && can_break) {
+                            output = line.substring(first_index, data.space);
+                            var new_index = data.space - 1;
                         } else {
-                            output = line.substring(first_index, j + 1);
+                            output = line.substring(first_index, data.index + 1);
                         }
                         if (words) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
                         }
-                        space = -1;
-                        first_index = j + 1;
-                        count = 0;
+                        data.space = -1;
+                        first_index = data.index + 1;
+                        // prev_format added in fix_close function
                         if (prev_format) {
                             output = prev_format + output;
                             if (output.match(']')) {
@@ -2423,8 +2485,10 @@
                         }
                         fix_close();
                         result.push(output);
+                        // modify loop by returing new data
+                        return {index: new_index, count: 0};
                     }
-                }
+                });
             }
             return result;
         },
