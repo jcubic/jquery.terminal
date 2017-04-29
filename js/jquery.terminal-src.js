@@ -6095,18 +6095,21 @@
             }
             var in_dom = !!self.closest('body').length;
             if (window.IntersectionObserver) {
-                mutation_observer = new MutationObserver(function() {
-                    if (self.closest('body').length) {
-                        if (!in_dom) {
-                            self.scroll_to_bottom();
-                            observe_visibility();
+                var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+                if (MutationObserver) {
+                    mutation_observer = new MutationObserver(function() {
+                        if (self.closest('body').length) {
+                            if (!in_dom) {
+                                self.scroll_to_bottom();
+                                observe_visibility();
+                            }
+                            in_dom = true;
+                        } else if (in_dom) {
+                            in_dom = false;
                         }
-                        in_dom = true;
-                    } else if (in_dom) {
-                        in_dom = false;
-                    }
-                });
-                mutation_observer.observe(document.body, {childList: true});
+                    });
+                    mutation_observer.observe(document.body, {childList: true});
+                }
                 // check if element is in the DOM if not running IntersectionObserver
                 // don't make sense
                 if (in_dom) {
