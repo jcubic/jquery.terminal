@@ -2266,7 +2266,7 @@
         // ---------------------------------------------------------------------
         // :: Validate html color (it can be name or hex)
         // ---------------------------------------------------------------------
-        valid_color: function(color) {
+        valid_color: function valid_color(color) {
             if (color.match(color_hex_re)) {
                 return true;
             } else {
@@ -2278,7 +2278,7 @@
         // :: Escape all special regex characters, so it can be use as regex to
         // :: match exact string that contain those characters
         // ---------------------------------------------------------------------
-        escape_regex: function(str) {
+        escape_regex: function escape_regex(str) {
             if (typeof str === 'string') {
                 var special = /([-\\^$[\]()+{}?*.|])/g;
                 return str.replace(special, '\\$1');
@@ -2287,23 +2287,23 @@
         // ---------------------------------------------------------------------
         // :: test if string contain formatting
         // ---------------------------------------------------------------------
-        have_formatting: function(str) {
+        have_formatting: function have_formatting(str) {
             return typeof str === 'string' && !!str.match(format_exist_re);
         },
-        is_formatting: function(str) {
+        is_formatting: function is_formatting(str) {
             return typeof str === 'string' && !!str.match(format_full_re);
         },
         // ---------------------------------------------------------------------
         // :: return array of formatting and text between them
         // ---------------------------------------------------------------------
-        format_split: function(str) {
+        format_split: function format_split(str) {
             return str.split(format_split_re);
         },
         // ---------------------------------------------------------------------
         // :: helper function used by substring and split_equal it loop over
         // :: string and execute callback with text count and other data
         // ---------------------------------------------------------------------
-        iterate_formatting: function(string, callback) {
+        iterate_formatting: function iterate_formatting(string, callback) {
             function is_space() {
                 return string.substring(i - 6, i) === '&nbsp;' ||
                     string.substring(i - 1, i) === ' ';
@@ -2339,6 +2339,16 @@
                             // before this function
                             throw new Error('Unclosed html entity at char ' + (i + 1));
                         }
+                        i += match[1].length - 2; // because continue adds 1 to i
+                        // here was code for issue #77 but it work without it
+                        // after refactoring and it would be hard to run this code
+                        // in this general function, maybe call callback one more time
+                        /*
+                        if (i === string.length - 1) {
+                            result.push(output + m[1]);
+                        }
+                        */
+                        continue;
                     } else if (string[i] === ']' && string[i - 1] === '\\') {
                         // escape \] counts as one character
                         --count;
@@ -2372,7 +2382,7 @@
         // ---------------------------------------------------------------------
         // :: formatting aware substring function
         // ---------------------------------------------------------------------
-        substring: function(string, start_index, end_index) {
+        substring: function substring(string, start_index, end_index) {
             if (start_index > 0) {
                 var start;
                 var end = string.length;
@@ -2398,7 +2408,7 @@
         // :: add format text as 5th paramter to formatting it's used for
         // :: data attribute in format function
         // ---------------------------------------------------------------------
-        normalize: function(string) {
+        normalize: function normalize(string) {
             return string.replace(format_re, function(_, format, text) {
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
@@ -2423,7 +2433,7 @@
         // :: split text into lines with equal length so each line can be
         // :: rendered separately (text formatting can be longer then a line).
         // ---------------------------------------------------------------------
-        split_equal: function(str, length, words) {
+        split_equal: function split_equal(str, length, words) {
             var prev_format = '';
             var result = [];
             var array = $.terminal.normalize(str).split(/\n/g);
@@ -2495,7 +2505,7 @@
         // ---------------------------------------------------------------------
         // :: Encode formating as html for insertion into DOM
         // ---------------------------------------------------------------------
-        encode: function(str) {
+        encode: function encode(str) {
             // don't escape entities
             str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
             return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -2505,13 +2515,13 @@
         // ---------------------------------------------------------------------
         // :: safe function that will render text as it is
         // ---------------------------------------------------------------------
-        escape_formatting: function(string) {
+        escape_formatting: function escape_formatting(string) {
             return $.terminal.escape_brackets($.terminal.encode(string));
         },
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
-        format: function(str, options) {
+        format: function format(str, options) {
             var settings = $.extend({}, {
                 linksNoReferrer: false
             }, options || {});
@@ -2617,25 +2627,25 @@
         // ---------------------------------------------------------------------
         // :: Replace brackets with html entities
         // ---------------------------------------------------------------------
-        escape_brackets: function(string) {
+        escape_brackets: function escape_brackets(string) {
             return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
         },
         // ---------------------------------------------------------------------
         // :: Remove formatting from text
         // ---------------------------------------------------------------------
-        strip: function(str) {
+        strip: function strip(str) {
             return str.replace(format_parts_re, '$6');
         },
         // ---------------------------------------------------------------------
         // :: Return active terminal
         // ---------------------------------------------------------------------
-        active: function() {
+        active: function active() {
             return terminals.front();
         },
         // ---------------------------------------------------------------------
         // :: Implmentation detail id is always length of terminals Cycle
         // ---------------------------------------------------------------------
-        last_id: function() {
+        last_id: function last_id() {
             var len = terminals.length();
             if (len) {
                 return len - 1;
@@ -2648,7 +2658,7 @@
         // :: if strict is set to false it only strips single and double quotes
         // :: and escapes spaces
         // ---------------------------------------------------------------------
-        parse_argument: function(arg, strict) {
+        parse_argument: function parse_argument(arg, strict) {
             if (strict === false) {
                 if (arg[0] === "'" && arg[arg.length - 1] === "'") {
                     return arg.replace(/^'|'$/g, '');
@@ -2682,7 +2692,7 @@
         // ---------------------------------------------------------------------
         // :: function split and parse arguments
         // ---------------------------------------------------------------------
-        parse_arguments: function(string) {
+        parse_arguments: function parse_arguments(string) {
             return $.map(string.match(command_re) || [], $.terminal.parse_argument);
         },
         // ---------------------------------------------------------------------
@@ -2698,7 +2708,7 @@
         // :: Function that returns an object {name,args}. Arguments are parsed
         // :: using the function parse_arguments
         // ---------------------------------------------------------------------
-        parse_command: function(string) {
+        parse_command: function parse_command(string) {
             return process_command(string, $.terminal.parse_argument);
         },
         // ---------------------------------------------------------------------
@@ -2712,7 +2722,7 @@
         // ---------------------------------------------------------------------
         // :: function executed for each text inside [{ .... }]
         // ---------------------------------------------------------------------
-        extended_command: function(term, string) {
+        extended_command: function extended_command(term, string) {
             try {
                 change_hash = false;
                 term.exec(string, true).then(function() {
@@ -2821,13 +2831,13 @@
         };
         return $.ajax({
             url: options.url,
-            beforeSend: function(jxhr, settings) {
+            beforeSend: function beforeSend(jxhr, settings) {
                 if ($.isFunction(options.request)) {
                     options.request(jxhr, request);
                 }
                 settings.data = JSON.stringify(request);
             },
-            success: function(response, status, jqXHR) {
+            success: function success(response, status, jqXHR) {
                 var content_type = jqXHR.getResponseHeader('Content-Type');
                 if (!content_type.match(/(application|text)\/json/)) {
                     warn('Response Content-Type is neither application/json' +
@@ -3203,21 +3213,21 @@
                     url: url,
                     method: method,
                     params: params,
-                    request: function(jxhr, request) {
+                    request: function request(jxhr, request) {
                         try {
                             settings.request.apply(self, jxhr, request, self);
                         } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
-                    response: function(jxhr, response) {
+                    response: function response(jxhr, response) {
                         try {
                             settings.response.apply(self, jxhr, response, self);
                         } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
-                    success: function(json) {
+                    success: function success(json) {
                         if (json.error) {
                             display_json_rpc_error(json.error);
                         } else if ($.isFunction(settings.processRPCResponse)) {
@@ -3447,21 +3457,21 @@
                 method: 'system.describe',
                 params: [],
                 success: response,
-                request: function(jxhr, request) {
+                request: function request(jxhr, request) {
                     try {
                         settings.request.call(self, jxhr, request, self);
                     } catch (e) {
                         display_exception(e, 'USER');
                     }
                 },
-                response: function(jxhr, response) {
+                response: function response(jxhr, response) {
                     try {
                         settings.response.call(self, jxhr, response, self);
                     } catch (e) {
                         display_exception(e, 'USER');
                     }
                 },
-                error: function() {
+                error: function error() {
                     success(null);
                 }
             });
@@ -3586,21 +3596,21 @@
                     url: url,
                     method: method,
                     params: [user, passwd],
-                    request: function(jxhr, request) {
+                    request: function request(jxhr, request) {
                         try {
                             settings.request.call(self, jxhr, request, self);
                         } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
-                    response: function(jxhr, response) {
+                    response: function response(jxhr, response) {
                         try {
                             settings.response.call(self, jxhr, response, self);
                         } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
-                    success: function(response) {
+                    success: function success(response) {
                         if (!response.error && response.result) {
                             callback(response.result);
                         } else {
@@ -3879,7 +3889,7 @@
                     break;
             }
             var options = {
-                finalize: function(div) {
+                finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
                 }
             };
