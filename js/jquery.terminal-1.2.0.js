@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 29 Apr 2017 12:07:47 +0000
+ * Date: Sat, 29 Apr 2017 12:24:59 +0000
  */
 
 /* TODO:
@@ -839,6 +839,9 @@
             },
             map: function(fn) {
                 return data.map(fn);
+            },
+            forEach: function(fn) {
+                data.forEach(fn);
             },
             append: function(item) {
                 data.push(item);
@@ -2316,7 +2319,6 @@
             var count = 0;
             var match;
             var space = -1;
-            var start;
             for (var i = 0; i < string.length; i++) {
                 match = string.substring(i).match(format_start_re);
                 if (match) {
@@ -2364,7 +2366,6 @@
                                    (string[i] === '[' && string[i + 1] === '['))) {
                     space = i;
                 }
-
                 if ((formatting && in_text) || !formatting) {
                     var data = {
                         count: count,
@@ -2383,7 +2384,6 @@
                             space = ret.space;
                         }
                         if (ret.index !== undefined) {
-                            start = true;
                             i = ret.index;
                         }
                     }
@@ -5000,7 +5000,7 @@
                             // there should be only from terminal enabled but tests
                             // sometime fail because there where more them one
                             // where cursor have blink class
-                            terminals.map(function(terminal) {
+                            terminals.forEach(function(terminal) {
                                 if (terminal.enabled()) {
                                     terminal.disable();
                                 }

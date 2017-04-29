@@ -840,6 +840,9 @@
             map: function(fn) {
                 return data.map(fn);
             },
+            forEach: function(fn) {
+                data.forEach(fn);
+            },
             append: function(item) {
                 data.push(item);
             }
@@ -2316,7 +2319,6 @@
             var count = 0;
             var match;
             var space = -1;
-            var start;
             for (var i = 0; i < string.length; i++) {
                 match = string.substring(i).match(format_start_re);
                 if (match) {
@@ -2364,7 +2366,6 @@
                                    (string[i] === '[' && string[i + 1] === '['))) {
                     space = i;
                 }
-
                 if ((formatting && in_text) || !formatting) {
                     var data = {
                         count: count,
@@ -2383,7 +2384,6 @@
                             space = ret.space;
                         }
                         if (ret.index !== undefined) {
-                            start = true;
                             i = ret.index;
                         }
                     }
@@ -5000,7 +5000,7 @@
                             // there should be only from terminal enabled but tests
                             // sometime fail because there where more them one
                             // where cursor have blink class
-                            terminals.map(function(terminal) {
+                            terminals.forEach(function(terminal) {
                                 if (terminal.enabled()) {
                                     terminal.disable();
                                 }
