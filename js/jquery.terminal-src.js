@@ -6094,10 +6094,10 @@
                 visibility_observer.observe(self[0]);
             }
             var in_dom = !!self.closest('body').length;
+            var MutationObsrv = window.MutationObserver || window.WebKitMutationObserver;
             if (window.IntersectionObserver) {
-                var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-                if (MutationObserver) {
-                    mutation_observer = new MutationObserver(function() {
+                if (MutationObsrv) {
+                    mutation_observer = new MutationObsrv(function() {
                         if (self.closest('body').length) {
                             if (!in_dom) {
                                 self.scroll_to_bottom();

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 29 Apr 2017 13:04:34 +0000
+ * Date: Sat, 29 Apr 2017 13:13:45 +0000
  */
 
 /* TODO:
@@ -6094,10 +6094,10 @@
                 visibility_observer.observe(self[0]);
             }
             var in_dom = !!self.closest('body').length;
+            var MutationObsrv = window.MutationObserver || window.WebKitMutationObserver;
             if (window.IntersectionObserver) {
-                var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-                if (MutationObserver) {
-                    mutation_observer = new MutationObserver(function() {
+                if (MutationObsrv) {
+                    mutation_observer = new MutationObsrv(function() {
                         if (self.closest('body').length) {
                             if (!in_dom) {
                                 self.scroll_to_bottom();
