@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 29 Apr 2017 11:47:08 +0000
+ * Date: Sat, 29 Apr 2017 12:07:47 +0000
  */
 
 /* TODO:
@@ -836,6 +836,9 @@
                     }
                     return data[index];
                 }
+            },
+            map: function(fn) {
+                return data.map(fn);
             },
             append: function(item) {
                 data.push(item);
@@ -2492,7 +2495,7 @@
                         if (keep_words) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
                         }
-                        first_index = new_index + 1;
+                        first_index = (new_index || data.index) + 1;
                         // prev_format added in fix_close function
                         if (prev_format) {
                             output = prev_format + output;
@@ -4994,7 +4997,14 @@
                     } else {
                         var front = terminals.front();
                         if (front !== self) {
-                            front.disable();
+                            // there should be only from terminal enabled but tests
+                            // sometime fail because there where more them one
+                            // where cursor have blink class
+                            terminals.map(function(terminal) {
+                                if (terminal.enabled()) {
+                                    terminal.disable();
+                                }
+                            });
                             if (!silent) {
                                 try {
                                     settings.onTerminalChange.call(self, self);
@@ -6088,6 +6098,7 @@
                 mutation_observer = new MutationObserver(function() {
                     if (self.closest('body').length) {
                         if (!in_dom) {
+                            self.scroll_to_bottom();
                             observe_visibility();
                         }
                         in_dom = true;
