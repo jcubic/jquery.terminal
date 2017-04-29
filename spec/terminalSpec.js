@@ -2027,6 +2027,7 @@ function tests_on_ready() {
                     term.destroy().remove();
                 });
             });
+            return;
             describe('error', function() {
                 var term = $('<div/>').terminal($.noop, {
                     greetings: false

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 29 Apr 2017 11:05:46 +0000
+ * Date: Sat, 29 Apr 2017 11:47:08 +0000
  */
 
 /* TODO:
@@ -2313,6 +2313,7 @@
             var count = 0;
             var match;
             var space = -1;
+            var start;
             for (var i = 0; i < string.length; i++) {
                 match = string.substring(i).match(format_start_re);
                 if (match) {
@@ -2360,6 +2361,7 @@
                                    (string[i] === '[' && string[i + 1] === '['))) {
                     space = i;
                 }
+
                 if ((formatting && in_text) || !formatting) {
                     var data = {
                         count: count,
@@ -2371,10 +2373,16 @@
                     if (ret === false) {
                         break;
                     } else if (ret) {
-                        if (ret.index) {
+                        if (ret.count !== undefined) {
+                            count = ret.count;
+                        }
+                        if (ret.space !== undefined) {
+                            space = ret.space;
+                        }
+                        if (ret.index !== undefined) {
+                            start = true;
                             i = ret.index;
                         }
-                        count = ret.count;
                     }
                 }
             }
@@ -2433,7 +2441,7 @@
         // :: split text into lines with equal length so each line can be
         // :: rendered separately (text formatting can be longer then a line).
         // ---------------------------------------------------------------------
-        split_equal: function split_equal(str, length, words) {
+        split_equal: function split_equal(str, length, keep_words) {
             var prev_format = '';
             var result = [];
             var array = $.terminal.normalize(str).split(/\n/g);
@@ -2474,18 +2482,17 @@
                         }
                         // if words is true we split at space and make next loop
                         // continue where the space where located
-                        if (words && data.space !== -1 &&
+                        if (keep_words && data.space !== -1 &&
                             data.index !== line_length - 1 && can_break) {
                             output = line.substring(first_index, data.space);
                             var new_index = data.space - 1;
                         } else {
                             output = line.substring(first_index, data.index + 1);
                         }
-                        if (words) {
+                        if (keep_words) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
                         }
-                        data.space = -1;
-                        first_index = data.index + 1;
+                        first_index = new_index + 1;
                         // prev_format added in fix_close function
                         if (prev_format) {
                             output = prev_format + output;
@@ -2496,7 +2503,7 @@
                         fix_close();
                         result.push(output);
                         // modify loop by returing new data
-                        return {index: new_index, count: 0};
+                        return {index: new_index, count: 0, space: -1};
                     }
                 });
             }
