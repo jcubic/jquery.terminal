@@ -2227,7 +2227,8 @@
     var command_re = /('(?:[^']|\\')*'|"(\\"|[^"])*"|(?:\/(\\\/|[^/])+\/[gimy]*)(?=:? |$)|(\\\s|\S)+|[\w-]+)/gi;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
-    var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
+    var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
+    var format_closed_last_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\][^\]]*\])[^\]]*$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
@@ -2371,6 +2372,7 @@
                         count: count,
                         index: i,
                         formatting: formatting,
+                        text: in_text,
                         space: space
                     };
                     var ret = callback(data);
@@ -2394,6 +2396,9 @@
         // :: formatting aware substring function
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
+            if (!$.terminal.have_formatting(string)) {
+                return string.substring(start_index, end_index);
+            }
             if (start_index > 0) {
                 var start;
                 var end = string.length;
@@ -2445,23 +2450,12 @@
         // :: rendered separately (text formatting can be longer then a line).
         // ---------------------------------------------------------------------
         split_equal: function split_equal(str, length, keep_words) {
+            if (!$.terminal.have_formatting(str) && !keep_words) {
+                return str_parts(str, length);
+            }
             var prev_format = '';
             var result = [];
             var array = $.terminal.normalize(str).split(/\n/g);
-            // Fix output if formatting not closed
-            function fix_close() {
-                var matched = output.match(format_re);
-                if (matched) {
-                    var last = matched[matched.length - 1];
-                    if (last[last.length - 1] !== ']') {
-                        prev_format = last.match(format_begin_re)[1];
-                        output += ']';
-                    } else if (output.match(format_last_re)) {
-                        output = output.replace(format_last_re, '');
-                        prev_format = last.match(format_begin_re)[1];
-                    }
-                }
-            }
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');
@@ -2483,7 +2477,7 @@
                         if (text.match(/\s/) || data.index + length + 1 > text_len) {
                             can_break = true;
                         }
-                        // if words is true we split at space and make next loop
+                        // if words is true we split at last space and make next loop
                         // continue where the space where located
                         if (keep_words && data.space !== -1 &&
                             data.index !== line_length - 1 && can_break) {
@@ -2499,11 +2493,21 @@
                         // prev_format added in fix_close function
                         if (prev_format) {
                             output = prev_format + output;
-                            if (output.match(']')) {
+                            if (output.match(format_closed_last_re)) {
                                 prev_format = '';
                             }
                         }
-                        fix_close();
+                        var matched = output.match(format_re);
+                        if (matched) {
+                            var last = matched[matched.length - 1];
+                            if (last[last.length - 1] !== ']') {
+                                prev_format = last.match(format_begin_re)[1];
+                                output += ']';
+                            } else if (output.match(format_end_re)) {
+                                output = output.replace(format_end_re, '');
+                                prev_format = last.match(format_begin_re)[1];
+                            }
+                        }
                         result.push(output);
                         // modify loop by returing new data
                         return {index: new_index, count: 0, space: -1};
