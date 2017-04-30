@@ -496,7 +496,6 @@ function tests_on_ready() {
             });
         });
     });
-    return;
     describe('Terminal plugin', function() {
         describe('jQuery Terminal options', function() {
             describe('prompt', function() {
