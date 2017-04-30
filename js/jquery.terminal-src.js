@@ -2483,7 +2483,7 @@
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
-                        if (keep_words && data.space !== -1 &&
+                        if (keep_words && !last_bracket && data.space !== -1 &&
                             data.index !== line_length - 1 && can_break) {
                             output = line.substring(first_index, data.space);
                             var new_index = data.space - 1;
@@ -2504,6 +2504,7 @@
                         }
                         if (last_bracket) {
                             output += ']';
+                            prev_format = '';
                         }
                         var matched = output.match(format_re);
                         if (matched) {
@@ -2656,7 +2657,14 @@
         // :: Remove formatting from text
         // ---------------------------------------------------------------------
         strip: function strip(str) {
-            return str.replace(format_parts_re, '$6');
+            str = str.replace(format_parts_re, '$6');
+            return str.replace(/(\\?)([[\]])/g, function(whole, slash, bracket) {
+                if (slash) {
+                    return whole;
+                } else {
+                    return '';
+                }
+            });
         },
         // ---------------------------------------------------------------------
         // :: Return active terminal
@@ -5434,6 +5442,11 @@
                 }
                 if (e.stack) {
                     var stack = $.terminal.escape_brackets(e.stack);
+                    console.log(JSON.stringify(stack.split(/\n/g).map(function(trace) {
+                        return '[[;;;error]' + trace.replace(url_re, function(url) {
+                            return ']' + url + '[[;;;error]';
+                        }) + ']';
+                    }).join('\n')));
                     self.echo(stack.split(/\n/g).map(function(trace) {
                         return '[[;;;error]' + trace.replace(url_re, function(url) {
                             return ']' + url + '[[;;;error]';

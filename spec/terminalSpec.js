@@ -458,14 +458,45 @@ function tests_on_ready() {
                             ['[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi',
                              'scing elit.]Lorem ipsum dolor sit amet, consectetur adipis',
                              'cing elit.]'].join('')]
+                    },
+                    {
+                        input: ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
+                                'scing elit.]\n[[bui;#fff;]Lorem ipsum dolor sit amet, con',
+                                'sectetur adipiscing elit.]\n[[bui;#fff;]Lorem ipsum dolor',
+                                ' sit amet, consectetur adipiscing elit.]\n[[bui;#fff;]Lor',
+                                'em ipsum dolor sit amet, consectetur adipiscing elit.]'
+                               ].join(''),
+                        output: ['[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adi'+
+                                 'piscing elit.]Lorem ipsum dolor si]','[[bui;#fff;;;Lorem'+
+                                 ' ipsum dolor sit amet, consectetur adipiscing elit.]t am'+
+                                 'et, consectetur ]','[[bui;#fff;;;Lorem ipsum dolor sit a'+
+                                 'met, consectetur adipiscing elit.]adipiscing elit.]','[['+
+                                 'bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi'+
+                                 'scing elit.]Lorem ipsum dolor si]','[[bui;#fff;;;Lorem i'+
+                                 'psum dolor sit amet, consectetur adipiscing elit.]t amet'+
+                                 ', consectetur ]','[[bui;#fff;;;Lorem ipsum dolor sit ame'+
+                                 't, consectetur adipiscing elit.]adipiscing elit.]','[[bu'+
+                                 'i;#fff;;;Lorem ipsum dolor sit amet, consectetur adipisc'+
+                                 'ing elit.]Lorem ipsum dolor si]','[[bui;#fff;;;Lorem ips'+
+                                 'um dolor sit amet, consectetur adipiscing elit.]t amet, '+
+                                 'consectetur ]','[[bui;#fff;;;Lorem ipsum dolor sit amet,'+
+                                 ' consectetur adipiscing elit.]adipiscing elit.]','[[bui;'+
+                                 '#fff;;;Lorem ipsum dolor sit amet, consectetur adipiscin'+
+                                 'g elit.]Lorem ipsum dolor si]','[[bui;#fff;;;Lorem ipsum'+
+                                 ' dolor sit amet, consectetur adipiscing elit.]t amet, co'+
+                                 'nsectetur ]','[[bui;#fff;;;Lorem ipsum dolor sit amet, c'+
+                                 'onsectetur adipiscing elit.]adipiscing elit.]'],
+                        split: 20
                     }
                 ];
                 test.forEach(function(test) {
-                    expect($.terminal.split_equal(test.input, 100)).toEqual(test.output);
+                    var array = $.terminal.split_equal(test.input, test.split || 100);
+                    expect(array).toEqual(test.output);
                 });
             });
         });
     });
+    return;
     describe('Terminal plugin', function() {
         describe('jQuery Terminal options', function() {
             describe('prompt', function() {
