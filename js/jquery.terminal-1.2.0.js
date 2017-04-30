@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 30 Apr 2017 07:50:44 +0000
+ * Date: Sun, 30 Apr 2017 08:01:57 +0000
  */
 
 /* TODO:
@@ -2340,7 +2340,8 @@
                 if (is_space() && ((formatting && in_text) || !formatting || opening)) {
                     space = i;
                 }
-                if (!string[i].match(/[\[\]]/) && ((formatting && in_text) || !formatting)) {
+                var braket = string[i].match(/[[\]]/);
+                if (!braket && ((formatting && in_text) || !formatting)) {
                     if (string[i] === '&') { // treat entity as one character
                         match = string.substring(i).match(/^(&[^;]+;)/);
                         if (!match) {
@@ -2463,15 +2464,6 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
-                $.ofilter = function(obj, fn) {
-                    var result = {};
-                    Object.keys(obj).filter(function(key) {
-                        if (fn(key, obj[key])) {
-                            result[key] = obj[key];
-                        }
-                    });
-                    return result;
-                };
                 $.terminal.iterate_formatting(line, function(data) {
                     if (data.count === length || data.index === line_length - 1) {
                         if (keep_words) {
