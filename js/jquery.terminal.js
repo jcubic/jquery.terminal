@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 29 Apr 2017 19:59:46 +0000
+ * Date: Sun, 30 Apr 2017 07:50:44 +0000
  */
 
 /* TODO:
@@ -2228,7 +2228,6 @@
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
-    var format_closed_last_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\][^\]]*\])[^\]]*$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
@@ -2337,7 +2336,11 @@
                 } else {
                     in_text = true;
                 }
-                if ((formatting && in_text) || !formatting) {
+                var opening = string[i] === '[' && string[i + 1] === '[';
+                if (is_space() && ((formatting && in_text) || !formatting || opening)) {
+                    space = i;
+                }
+                if (!string[i].match(/[\[\]]/) && ((formatting && in_text) || !formatting)) {
                     if (string[i] === '&') { // treat entity as one character
                         match = string.substring(i).match(/^(&[^;]+;)/);
                         if (!match) {
@@ -2362,12 +2365,6 @@
                     } else {
                         ++count;
                     }
-                }
-                if (is_space() && ((formatting && in_text) || !formatting ||
-                                   (string[i] === '[' && string[i + 1] === '['))) {
-                    space = i;
-                }
-                if ((formatting && in_text) || !formatting) {
                     var data = {
                         count: count,
                         index: i,
@@ -2450,12 +2447,13 @@
         // :: rendered separately (text formatting can be longer then a line).
         // ---------------------------------------------------------------------
         split_equal: function split_equal(str, length, keep_words) {
+            str = $.terminal.normalize(str);
             if (!$.terminal.have_formatting(str) && !keep_words) {
                 return str_parts(str, length);
             }
             var prev_format = '';
             var result = [];
-            var array = $.terminal.normalize(str).split(/\n/g);
+            var array = str.split(/\n/g);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');
@@ -2465,17 +2463,28 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
+                $.ofilter = function(obj, fn) {
+                    var result = {};
+                    Object.keys(obj).filter(function(key) {
+                        if (fn(key, obj[key])) {
+                            result[key] = obj[key];
+                        }
+                    });
+                    return result;
+                };
                 $.terminal.iterate_formatting(line, function(data) {
                     if (data.count === length || data.index === line_length - 1) {
-                        var text = $.terminal.strip(line.substring(data.space));
-                        // replace html entities with characters
-                        text = $('<span>' + text + '</span>').text();
-                        // real length, not counting formatting
-                        var text_len = text.length;
-                        text = text.substring(0, data.index + length + 1);
-                        var can_break = false;
-                        if (text.match(/\s/) || data.index + length + 1 > text_len) {
-                            can_break = true;
+                        if (keep_words) {
+                            var text = $.terminal.strip(line.substring(data.space));
+                            // replace html entities with characters
+                            text = $('<span>' + text + '</span>').text();
+                            // real length, not counting formatting
+                            var text_len = text.length;
+                            text = text.substring(0, data.index + length + 1);
+                            var can_break = false;
+                            if (text.match(/\s/) || data.index + length + 1 > text_len) {
+                                can_break = true;
+                            }
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
@@ -2492,8 +2501,9 @@
                         first_index = (new_index || data.index) + 1;
                         // prev_format added in fix_close function
                         if (prev_format) {
+                            var closed_formatting = output.match(/^[^\]]*\]/);
                             output = prev_format + output;
-                            if (output.match(format_closed_last_re)) {
+                            if (closed_formatting) {
                                 prev_format = '';
                             }
                         }
