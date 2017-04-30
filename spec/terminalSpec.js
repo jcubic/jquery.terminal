@@ -430,9 +430,42 @@ function tests_on_ready() {
                     return $('<div>' + line + '</div>').text();
                 });
             });
+            it('should return whole lines if length > then the length of the line', function() {
+                var test = [
+                    {
+                        input: ['[[bui;#fff;]Lorem ipsum dolor sit amet,] consectetur adipi',
+                                'scing elit.'].join(''),
+                        output: [['[[bui;#fff;;;Lorem ipsum dolor sit amet,]Lorem ipsum dol',
+                                 'or sit amet,] consectetur adipiscing elit.'].join('')]
+                    },
+                    {
+                        input: ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
+                                'scing elit.]'].join(''),
+                        output: [[
+                            '[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi',
+                            'scing elit.]Lorem ipsum dolor sit amet, consectetur adipis',
+                            'cing elit.]'].join('')]
+                    },
+                    {
+                        input: ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
+                                'scing elit.]\n[[bui;#fff;]Lorem ipsum dolor sit amet, con',
+                                'sectetur adipiscing elit.]'].join(''),
+                        output: [
+                            [
+                                '[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi',
+                                'scing elit.]Lorem ipsum dolor sit amet, consectetur adipis',
+                                'cing elit.]'].join(''),
+                            ['[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi',
+                             'scing elit.]Lorem ipsum dolor sit amet, consectetur adipis',
+                             'cing elit.]'].join('')]
+                    }
+                ];
+                test.forEach(function(test) {
+                    expect($.terminal.split_equal(test.input, 100)).toEqual(test.output);
+                });
+            });
         });
     });
-    return;
     describe('Terminal plugin', function() {
         describe('jQuery Terminal options', function() {
             describe('prompt', function() {

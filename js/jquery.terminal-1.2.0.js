@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 30 Apr 2017 08:37:29 +0000
+ * Date: Sun, 30 Apr 2017 09:19:23 +0000
  */
 
 /* TODO:
@@ -2464,7 +2464,11 @@
                 var output;
                 var line_length = line.length;
                 $.terminal.iterate_formatting(line, function(data) {
-                    if (data.count === length || data.index === line_length - 1) {
+                    // we don't iterate over last closing bracket
+                    var last_bracket = data.index === line_length - 2 &&
+                        line[data.index + 1] === ']';
+                    var last_iteraction = data.index === line_length - 1 || last_bracket;
+                    if (data.count === length || last_iteraction) {
                         if (keep_words) {
                             var text = $.terminal.strip(line.substring(data.space));
                             // replace html entities with characters
@@ -2497,6 +2501,9 @@
                             if (closed_formatting) {
                                 prev_format = '';
                             }
+                        }
+                        if (last_bracket) {
+                            output += ']';
                         }
                         var matched = output.match(format_re);
                         if (matched) {
