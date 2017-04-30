@@ -2811,6 +2811,7 @@
             'white-space': 'pre' // just in case if user overwrite css for pre tag
         }
     };
+    // -----------------------------------------------------------------------
     function is_key_native() {
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             return false;
@@ -2824,7 +2825,10 @@
         if (console && console.warn) {
             console.warn(msg);
         } else {
-            throw new Error('WARN: ' + msg);
+            // prevent catching in outer try..catch
+            setTimeout(function() {
+                throw new Error('WARN: ' + msg);
+            }, 0);
         }
     }
     // -----------------------------------------------------------------------
@@ -3293,7 +3297,7 @@
                     } else {
                         // should never happen
                         terminal.error('&#91;AUTH&#93; ' +
-                                       strings.noTokenError);
+                                       strings().noTokenError);
                     }
                 }
             };
@@ -3338,7 +3342,7 @@
                 if (type === 'function') {
                     if (arity && val.length !== command.args.length) {
                         self.error('&#91;Arity&#93; ' +
-                                   sprintf(strings.wrongArity,
+                                   sprintf(strings().wrongArity,
                                            command.name,
                                            val.length,
                                            command.args.length));
@@ -3363,7 +3367,7 @@
                 } else if ($.isFunction(settings.onCommandNotFound)) {
                     settings.onCommandNotFound.call(self, user_command, self);
                 } else {
-                    terminal.error(sprintf(strings.commandNotFound, command.name));
+                    terminal.error(sprintf(strings().commandNotFound, command.name));
                 }
             };
         }
@@ -3374,7 +3378,7 @@
                 settings.onAjaxError.call(self, xhr, status, error);
             } else if (status !== 'abort') {
                 self.error('&#91;AJAX&#93; ' + status + ' - ' +
-                           strings.serverResponse + ':\n' +
+                           strings().serverResponse + ':\n' +
                            $.terminal.escape_brackets(xhr.responseText));
             }
         }
@@ -3415,7 +3419,7 @@
                             if (settings.checkArity && proc.params &&
                                 proc.params.length !== args_len) {
                                 self.error('&#91;Arity&#93; ' +
-                                           sprintf(strings.wrongArity,
+                                           sprintf(strings().wrongArity,
                                                    proc.name,
                                                    proc.params.length,
                                                    args_len));
@@ -3427,7 +3431,7 @@
                                         args = [token].concat(args);
                                     } else {
                                         self.error('&#91;AUTH&#93; ' +
-                                                   strings.noTokenError);
+                                                   strings().noTokenError);
                                     }
                                 }
                                 $.jrpc({
@@ -3528,7 +3532,7 @@
                                 if (++rpc_count === 1) {
                                     fn_interpreter = make_basic_json_rpc(first, login);
                                 } else {
-                                    self.error(strings.oneRPCWithIgnore);
+                                    self.error(strings().oneRPCWithIgnore);
                                 }
                                 recur(rest, success);
                             } else {
@@ -3541,7 +3545,7 @@
                                             login
                                         );
                                     } else {
-                                        self.error(strings.oneRPCWithIgnore);
+                                        self.error(strings().oneRPCWithIgnore);
                                     }
                                     self.resume();
                                     recur(rest, success);
@@ -3549,7 +3553,7 @@
                             }
                         } else if (type === 'function') {
                             if (fn_interpreter) {
-                                self.error(strings.oneInterpreterFunction);
+                                self.error(strings().oneInterpreterFunction);
                             } else {
                                 fn_interpreter = first;
                             }
@@ -3798,7 +3802,7 @@
                             string = string.replace(/^\[\[|\]\]$/g, '');
                             if (line_settings.exec) {
                                 if (prev_command && prev_command.command === string) {
-                                    self.error(strings.recursiveCall);
+                                    self.error(strings().recursiveCall);
                                 } else {
                                     $.terminal.extended_command(self, string);
                                 }
@@ -3893,7 +3897,7 @@
                 } else if (type === 'function') {
                     settings.greetings.call(self, self.echo);
                 } else {
-                    self.error(strings.wrongGreetings);
+                    self.error(strings().wrongGreetings);
                 }
             }
         }
@@ -3938,7 +3942,7 @@
             // spec [terminal_id, state_index, command]
             var terminal = terminals.get()[spec[0]];
             if (!terminal) {
-                throw new Error(strings.invalidTerminalId);
+                throw new Error(strings().invalidTerminalId);
             }
             var command_idx = spec[1];
             if (save_state[command_idx]) { // state exists
@@ -4288,7 +4292,7 @@
                         case 'function':
                             var string = self.before_cursor(settings.wordAutocomplete);
                             if (completion.length === 3) {
-                                var error = new Error(strings.comletionParameters);
+                                var error = new Error(strings().comletionParameters);
                                 display_exception(error, 'USER');
                                 return false;
                             }
@@ -4305,7 +4309,7 @@
                             break;
                         default:
                             // terminal will not catch this because it's an event
-                            throw new Error(strings.invalidCompletion);
+                            throw new Error(strings().invalidCompletion);
                     }
                 } else {
                     orignal();
@@ -4372,7 +4376,7 @@
                                                                            e,
                                                                            'AJAX ABORT');
                                         } else {
-                                            self.error(strings.ajaxAbortError);
+                                            self.error(strings().ajaxAbortError);
                                         }
                                     }
                                 }
@@ -4396,6 +4400,9 @@
                 }
             };
         }
+        function strings() {
+            return $.extend({}, $.terminal.defaults.strings, settings.strings);
+        }
         // ---------------------------------------------------------------------
         var self = this;
         if (this.length > 1) {
@@ -4410,7 +4417,7 @@
             return self.data('terminal');
         }
         if (self.length === 0) {
-            throw sprintf($.terminal.defaults.strings.invalidSelector, self.selector);
+            throw new Error(sprintf(strings().invalidSelector, self.selector));
         }
         // var names = []; // stack if interpreter names
         var scroll_object;
@@ -4441,10 +4448,9 @@
                                 {name: self.selector},
                                 options || {});
         var storage = new StorageHelper(settings.memory);
-        var strings = $.extend({}, $.terminal.defaults.strings, settings.strings);
         var enabled = settings.enabled, frozen = false;
         var paused = false;
-        var autologin = true; // set to false of onBeforeLogin return false
+        var autologin = true; // set to false if onBeforeLogin return false
         var interpreters;
         var command_line;
         var old_enabled;
@@ -4500,7 +4506,7 @@
             // -------------------------------------------------------------
             import_view: function(view) {
                 if (in_login) {
-                    throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
+                    throw new Error(sprintf(strings().notWhileLogin, 'import_view'));
                 }
                 if ($.isFunction(settings.onImport)) {
                     try {
@@ -4600,10 +4606,10 @@
             login: function(auth, infinite, success, error) {
                 logins.push([].slice.call(arguments));
                 if (in_login) {
-                    throw new Error(sprintf(strings.notWhileLogin, 'login'));
+                    throw new Error(sprintf(strings().notWhileLogin, 'login'));
                 }
                 if (!$.isFunction(auth)) {
-                    throw new Error(strings.loginIsNotAFunction);
+                    throw new Error(strings().loginIsNotAFunction);
                 }
                 in_login = true;
                 if (self.token() && self.level() === 1 && !autologin) {
@@ -4644,13 +4650,13 @@
                     } else {
                         if (infinite) {
                             if (!silent) {
-                                self.error(strings.wrongPasswordTryAgain);
+                                self.error(strings().wrongPasswordTryAgain);
                             }
                             self.pop(undefined, true).set_mask(false);
                         } else {
                             in_login = false;
                             if (!silent) {
-                                self.error(strings.wrongPassword);
+                                self.error(strings().wrongPassword);
                             }
                             self.pop(undefined, true).pop(undefined, true);
                         }
@@ -4674,11 +4680,11 @@
                             display_exception(e, 'AUTH');
                         }
                     }, {
-                        prompt: strings.password + ': ',
+                        prompt: strings().password + ': ',
                         name: 'password'
                     });
                 }, {
-                    prompt: strings.login + ': ',
+                    prompt: strings().login + ': ',
                     name: 'login'
                 });
                 return self;
@@ -5150,7 +5156,7 @@
                     });
                     return self;
                 } else {
-                    throw new Error(sprintf(strings.notAString, 'insert'));
+                    throw new Error(sprintf(strings().notAString, 'insert'));
                 }
             },
             // -------------------------------------------------------------
@@ -5481,7 +5487,7 @@
             // -------------------------------------------------------------
             logout: function(local) {
                 if (in_login) {
-                    throw new Error(sprintf(strings.notWhileLogin, 'logout'));
+                    throw new Error(sprintf(strings().notWhileLogin, 'logout'));
                 }
                 when_ready(function ready() {
                     if (local) {
@@ -5666,7 +5672,7 @@
                             }
                         }
                     } else {
-                        self.error(strings.canExitError);
+                        self.error(strings().canExitError);
                     }
                 } else {
                     if (token) {
@@ -5679,7 +5685,7 @@
                         settings.onPop.call(self, current, top);
                     }
                     // we check in case if you don't pop from password interpreter
-                    if (in_login && self.get_prompt() !== strings.login + ': ') {
+                    if (in_login && self.get_prompt() !== strings().login + ': ') {
                         in_login = false;
                     }
                     if ($.isFunction(current.onExit)) {
