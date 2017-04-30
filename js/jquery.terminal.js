@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 30 Apr 2017 08:01:57 +0000
+ * Date: Sun, 30 Apr 2017 08:37:29 +0000
  */
 
 /* TODO:
@@ -2336,12 +2336,13 @@
                 } else {
                     in_text = true;
                 }
+                var not_formatting = (formatting && in_text) || !formatting;
                 var opening = string[i] === '[' && string[i + 1] === '[';
-                if (is_space() && ((formatting && in_text) || !formatting || opening)) {
+                if (is_space() && (not_formatting || opening)) {
                     space = i;
                 }
                 var braket = string[i].match(/[[\]]/);
-                if (!braket && ((formatting && in_text) || !formatting)) {
+                if (not_formatting) {
                     if (string[i] === '&') { // treat entity as one character
                         match = string.substring(i).match(/^(&[^;]+;)/);
                         if (!match) {
@@ -2363,9 +2364,11 @@
                     } else if (string[i] === ']' && string[i - 1] === '\\') {
                         // escape \] counts as one character
                         --count;
-                    } else {
+                    } else if (!braket) {
                         ++count;
                     }
+                }
+                if (!braket && not_formatting) {
                     var data = {
                         count: count,
                         index: i,
@@ -2448,13 +2451,9 @@
         // :: rendered separately (text formatting can be longer then a line).
         // ---------------------------------------------------------------------
         split_equal: function split_equal(str, length, keep_words) {
-            str = $.terminal.normalize(str);
-            if (!$.terminal.have_formatting(str) && !keep_words) {
-                return str_parts(str, length);
-            }
             var prev_format = '';
             var result = [];
-            var array = str.split(/\n/g);
+            var array = $.terminal.normalize(str).split(/\n/g);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');

@@ -393,13 +393,20 @@ function tests_on_ready() {
                     }
                 });
             });
-            it('should split text into equal length chunks', function() {
+            function test_lenghts(string, fn) {
                 var cols = [10, 40, 60, 400];
                 for (var i=cols.length; i--;) {
-                    var lines = $.terminal.split_equal(text, cols[i]);
-                    var lengths = lines.map(function(line) {
-                        return $.terminal.strip(line).length;
-                    });
+                    var lines = $.terminal.split_equal(string, cols[i]);
+                    var lengths;
+                    if (fn) {
+                        lengths = lines.map(function(line) {
+                            return fn(line).length;
+                        });
+                    } else {
+                        lengths = lines.map(function(line) {
+                            return line.length;
+                        });
+                    }
                     lengths.slice(0, -1).forEach(function(length) {
                         if (length != cols[i]) {
                             throw new Error('Lines count is ' + JSON.stringify(lengths) +
@@ -412,9 +419,20 @@ function tests_on_ready() {
                     }
                     expect(true).toEqual(true);
                 }
+            }
+            it('should split text into equal length chunks', function() {
+                test_lenghts(text, function(line) {
+                    return $.terminal.strip(line);
+                });
+            });
+            it('should split text when all brackets are escaped', function() {
+                test_lenghts($.terminal.escape_brackets(text), function(line) {
+                    return $('<div>' + line + '</div>').text();
+                });
             });
         });
     });
+    return;
     describe('Terminal plugin', function() {
         describe('jQuery Terminal options', function() {
             describe('prompt', function() {
@@ -2185,7 +2203,7 @@ function tests_on_ready() {
                     expect(div.hasClass('exception')).toBeTruthy();
                     expect(div.hasClass('message')).toBeTruthy();
                     if (error.stack) {
-                        output = term.find('.terminal-output div div').map(function() {
+                        var output = term.find('.terminal-output div div').map(function() {
                             return $(this).text().replace(/\xA0/g, ' ');
                         }).get().slice(1);
                         expect(error.stack).toEqual(output.join('\n'));
