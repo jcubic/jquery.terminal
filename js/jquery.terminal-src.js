@@ -2658,7 +2658,7 @@
         // ---------------------------------------------------------------------
         strip: function strip(str) {
             str = str.replace(format_parts_re, '$6');
-            return str.replace(/(\\?)([[\]])/g, function(whole, slash, bracket) {
+            return str.replace(/(\\?)([[\]])/g, function(whole, slash) {
                 if (slash) {
                     return whole;
                 } else {
@@ -5442,11 +5442,6 @@
                 }
                 if (e.stack) {
                     var stack = $.terminal.escape_brackets(e.stack);
-                    console.log(JSON.stringify(stack.split(/\n/g).map(function(trace) {
-                        return '[[;;;error]' + trace.replace(url_re, function(url) {
-                            return ']' + url + '[[;;;error]';
-                        }) + ']';
-                    }).join('\n')));
                     self.echo(stack.split(/\n/g).map(function(trace) {
                         return '[[;;;error]' + trace.replace(url_re, function(url) {
                             return ']' + url + '[[;;;error]';

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 30 Apr 2017 09:58:44 +0000
+ * Date: Sun, 30 Apr 2017 10:03:39 +0000
  */
 
 /* TODO:
@@ -2658,7 +2658,7 @@
         // ---------------------------------------------------------------------
         strip: function strip(str) {
             str = str.replace(format_parts_re, '$6');
-            return str.replace(/(\\?)([[\]])/g, function(whole, slash, bracket) {
+            return str.replace(/(\\?)([[\]])/g, function(whole, slash) {
                 if (slash) {
                     return whole;
                 } else {
@@ -5442,11 +5442,6 @@
                 }
                 if (e.stack) {
                     var stack = $.terminal.escape_brackets(e.stack);
-                    console.log(JSON.stringify(stack.split(/\n/g).map(function(trace) {
-                        return '[[;;;error]' + trace.replace(url_re, function(url) {
-                            return ']' + url + '[[;;;error]';
-                        }) + ']';
-                    }).join('\n')));
                     self.echo(stack.split(/\n/g).map(function(trace) {
                         return '[[;;;error]' + trace.replace(url_re, function(url) {
                             return ']' + url + '[[;;;error]';
