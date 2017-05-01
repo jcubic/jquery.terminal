@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 01 May 2017 11:01:48 +0000
+ * Date: Mon, 01 May 2017 11:32:55 +0000
  */
 
 /* TODO:
@@ -5047,7 +5047,7 @@
                             // sometime fail because there where more them one
                             // where cursor have blink class
                             terminals.forEach(function(terminal) {
-                                if (terminal != self && terminal.enabled()) {
+                                if (terminal !== self && terminal.enabled()) {
                                     terminal.disable();
                                 }
                             });
