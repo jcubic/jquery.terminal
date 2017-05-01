@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 01 May 2017 06:53:51 +0000
+ * Date: Mon, 01 May 2017 08:02:08 +0000
  */
 
 /* TODO:
@@ -2281,6 +2281,22 @@
             }
         },
         // ---------------------------------------------------------------------
+        // :: function check if given string contain invalid strings
+        // ---------------------------------------------------------------------
+        unclosed_strings: function unclosed_strings(string) {
+            if (!string.match(/["']/)) {
+                return false;
+            }
+            var count = 0;
+            string.match(/\\*["']/g).forEach(function(quote) {
+                var slashes = quote.match(/\\/g);
+                if (slashes && slashes.length % 2 === 0 || !slashes) {
+                    count++;
+                }
+            });
+            return count % 2 !== 0;
+        },
+        // ---------------------------------------------------------------------
         // :: Escape all special regex characters, so it can be use as regex to
         // :: match exact string that contain those characters
         // ---------------------------------------------------------------------
@@ -3121,7 +3137,8 @@
             password: 'password',
             recursiveCall: 'Recursive call detected, skip',
             notAString: '%s function: argument is not a string',
-            redrawError: 'Internal error, wrong position in cmd redraw'
+            redrawError: 'Internal error, wrong position in cmd redraw',
+            invalidStrings: 'Command %s have unclosed strings'
         }
     };
     // -------------------------------------------------------------------------
@@ -3167,7 +3184,10 @@
         // :: helper function
         // ---------------------------------------------------------------------
         function get_processed_command(command) {
-            if ($.isFunction(settings.processArguments)) {
+            if ($.terminal.unclosed_strings(command)) {
+                var string = $.terminal.escape_brackets(command);
+                throw new Error(sprintf(strings().invalidStrings, "`" + string + "`"));
+            } else if ($.isFunction(settings.processArguments)) {
                 return process_command(command, settings.processArguments);
             } else if (settings.processArguments) {
                 return $.terminal.parse_command(command);
