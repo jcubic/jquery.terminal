@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 01 May 2017 11:32:55 +0000
+ * Date: Mon, 01 May 2017 15:14:07 +0000
  */
 
 /* TODO:
@@ -3058,6 +3058,39 @@
         ]
     ];
     // -----------------------------------------------------------------------
+    // :: Default formatter that allow for nested formatting, example:
+    // :: [[;;#000]hello [[;#f00;]red] world]
+    // -----------------------------------------------------------------------
+    function nested_formatting(string) {
+        if (!$.terminal.have_formatting(string)) {
+            return string;
+        }
+        var stack = [];
+        var re = /(\[\[(?:[^\]]|\\\])+\](?:[^\][]|\\\])+\]?)/;
+        return string.split(re).filter(Boolean).map(function(string) {
+            if (string.match(/^\[\[/)) {
+                if (!$.terminal.is_formatting(string)) {
+                    string += ']';
+                    stack.push(string.replace(/(\[\[(?:[^\]]|\\\])+\])[\s\S]*/, '$1'));
+                }
+            } else {
+                var pop = false;
+                if (string.match(/\]/)) {
+                    pop = true;
+                }
+                if (stack.length) {
+                    string = stack[stack.length - 1] + string;
+                }
+                if (pop) {
+                    stack.pop();
+                } else if (stack.length) {
+                    string += ']';
+                }
+            }
+            return string;
+        }).join('');
+    }
+    // -----------------------------------------------------------------------
     // :: Default options
     // -----------------------------------------------------------------------
     $.terminal.defaults = {
@@ -3087,7 +3120,7 @@
         scrollOnEcho: true,
         login: null,
         outputLimit: -1,
-        formatters: [],
+        formatters: [nested_formatting],
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,

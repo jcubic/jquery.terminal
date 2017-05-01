@@ -314,6 +314,6 @@
             return output.join(''); //.replace(/\[\[[^\]]+\]\]/g, '');
         };
     })();
-    $.terminal.defaults.formatters.push($.terminal.overtyping);
-    $.terminal.defaults.formatters.push($.terminal.from_ansi);
+    $.terminal.defaults.formatters.unshift($.terminal.overtyping);
+    $.terminal.defaults.formatters.unshift($.terminal.from_ansi);
 })(jQuery);

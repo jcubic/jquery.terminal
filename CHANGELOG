@@ -15,6 +15,7 @@
           change it dynamically after terminal is created (use command to change language)
           when using rpc or object interpreter it will throw exception when there are
           unclosed strings
+          add default formatter that handle nested formatting
 1.2.0     make terminal accessible to screen readers:
            - terminal focus using tab key (we can't blur on tab keybecause it's used
              to enter tab character or for completion)
