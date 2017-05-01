@@ -597,7 +597,7 @@ function tests_on_ready() {
             it('should create terminal', function() {
                 expect(term.length).toBe(1);
             });
-            it('should have proper elements', function() {
+            it('should have proper elements', function(done) {
                 expect(term.hasClass('terminal')).toBe(true);
                 expect(term.find('.terminal-output').length).toBe(1);
                 expect(term.find('.cmd').length).toBe(1);
@@ -611,8 +611,11 @@ function tests_on_ready() {
                 expect(cursor.prev().is('span')).toBe(true);
                 expect(cursor.next().is('span')).toBe(true);
                 term.focus(true);
-                expect(cursor.hasClass('blink')).toBe(true);
-                expect(term.find('.clipboard').length).toBe(1);
+                setTimeout(function() {
+                    expect(cursor.hasClass('blink')).toBe(true);
+                    expect(term.find('.clipboard').length).toBe(1);
+                    done();
+                }, 100);
             });
             it('should have signature', function() {
                 var sig = term.find('.terminal-output div div').map(function() { return $(this).text(); }).get().join('\n');
@@ -630,16 +633,19 @@ function tests_on_ready() {
             });
         });
         describe('cursor', function() {
-            it('only one terminal should have blinking cursor', function() {
+            it('only one terminal should have blinking cursor', function(done) {
                 var term1 = $('<div/>').appendTo('body').terminal($.noop);
                 term1.focus();
                 var term2 = $('<div/>').appendTo('body').terminal($.noop);
                 term1.pause();
                 term2.focus();
-                term1.resume();
-                expect($('.cursor.blink').length).toEqual(1);
-                term1.destroy().remove();
-                term2.destroy().remove();
+                setTimeout(function() {
+                    term1.resume();
+                    expect($('.cursor.blink').length).toEqual(1);
+                    term1.destroy().remove();
+                    term2.destroy().remove();
+                    done();
+                }, 100);
             });
         });
         describe('enter text', function() {

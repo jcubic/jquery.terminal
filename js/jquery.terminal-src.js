@@ -5047,7 +5047,7 @@
                             // sometime fail because there where more them one
                             // where cursor have blink class
                             terminals.forEach(function(terminal) {
-                                if (terminal.enabled()) {
+                                if (terminal != self && terminal.enabled()) {
                                     terminal.disable();
                                 }
                             });
