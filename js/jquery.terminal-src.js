@@ -2231,6 +2231,7 @@
     var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
+    var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
         version: '{{VER}}',
@@ -2284,17 +2285,7 @@
         // :: function check if given string contain invalid strings
         // ---------------------------------------------------------------------
         unclosed_strings: function unclosed_strings(string) {
-            if (!string.match(/["']/)) {
-                return false;
-            }
-            var count = 0;
-            string.match(/\\*["']/g).forEach(function(quote) {
-                var slashes = quote.match(/\\/g);
-                if (slashes && slashes.length % 2 === 0 || !slashes) {
-                    count++;
-                }
-            });
-            return count % 2 !== 0;
+            return !!string.match(unclosed_strings_re);
         },
         // ---------------------------------------------------------------------
         // :: Escape all special regex characters, so it can be use as regex to
@@ -2550,6 +2541,40 @@
             return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/ /g, '&nbsp;')
                 .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+        },
+        // -----------------------------------------------------------------------
+        // :: Default formatter that allow for nested formatting, example:
+        // :: [[;;#000]hello [[;#f00;]red] world]
+        // -----------------------------------------------------------------------
+        nested_formatting: function nested_formatting(string) {
+            if (!$.terminal.have_formatting(string)) {
+                return string;
+            }
+            var stack = [];
+            var re = /(\[\[(?:[^\]]|\\\])+\](?:[^\][]|\\\])+\]?)/;
+            var format_re = /(\[\[(?:[^\]]|\\\])+\])[\s\S]*/;
+            return string.split(re).filter(Boolean).map(function(string) {
+                if (string.match(/^\[\[/)) {
+                    if (!$.terminal.is_formatting(string)) {
+                        string += ']';
+                        stack.push(string.replace(format_re, '$1'));
+                    }
+                } else {
+                    var pop = false;
+                    if (string.match(/\]/)) {
+                        pop = true;
+                    }
+                    if (stack.length) {
+                        string = stack[stack.length - 1] + string;
+                    }
+                    if (pop) {
+                        stack.pop();
+                    } else if (stack.length) {
+                        string += ']';
+                    }
+                }
+                return string;
+            }).join('');
         },
         // ---------------------------------------------------------------------
         // :: safe function that will render text as it is
@@ -3058,39 +3083,6 @@
         ]
     ];
     // -----------------------------------------------------------------------
-    // :: Default formatter that allow for nested formatting, example:
-    // :: [[;;#000]hello [[;#f00;]red] world]
-    // -----------------------------------------------------------------------
-    function nested_formatting(string) {
-        if (!$.terminal.have_formatting(string)) {
-            return string;
-        }
-        var stack = [];
-        var re = /(\[\[(?:[^\]]|\\\])+\](?:[^\][]|\\\])+\]?)/;
-        return string.split(re).filter(Boolean).map(function(string) {
-            if (string.match(/^\[\[/)) {
-                if (!$.terminal.is_formatting(string)) {
-                    string += ']';
-                    stack.push(string.replace(/(\[\[(?:[^\]]|\\\])+\])[\s\S]*/, '$1'));
-                }
-            } else {
-                var pop = false;
-                if (string.match(/\]/)) {
-                    pop = true;
-                }
-                if (stack.length) {
-                    string = stack[stack.length - 1] + string;
-                }
-                if (pop) {
-                    stack.pop();
-                } else if (stack.length) {
-                    string += ']';
-                }
-            }
-            return string;
-        }).join('');
-    }
-    // -----------------------------------------------------------------------
     // :: Default options
     // -----------------------------------------------------------------------
     $.terminal.defaults = {
@@ -3111,7 +3103,6 @@
         processArguments: true,
         linksNoReferrer: false,
         processRPCResponse: null,
-        Token: true, // where this came from?
         convertLinks: true,
         extra: {},
         historyState: false,
@@ -3120,7 +3111,7 @@
         scrollOnEcho: true,
         login: null,
         outputLimit: -1,
-        formatters: [nested_formatting],
+        formatters: [$.terminal.nested_formatting],
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
