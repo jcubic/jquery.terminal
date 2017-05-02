@@ -186,6 +186,24 @@
 (function($, undefined) {
     'use strict';
     // -----------------------------------------------------------------------
+    // :: Replacemenet for jQuery 2 deferred objects
+    // -----------------------------------------------------------------------
+    function DelayQueue() {
+        var callbacks = $.Callbacks();
+        var resolved = false;
+        this.resolve = function() {
+            callbacks.fire();
+            resolved = true;
+        };
+        this.add = function(fn) {
+            if (resolved) {
+                fn();
+            } else {
+                callbacks.add(fn);
+            }
+        };
+    }
+    // -----------------------------------------------------------------------
     // :: map object to object
     // -----------------------------------------------------------------------
     $.omap = function(o, fn) {
@@ -4216,7 +4234,7 @@
                 }));
             }
             command_line.set('');
-            init_defer.resolve();
+            init_queue.resolve();
             if (!silent && $.isFunction(interpreter.onStart)) {
                 interpreter.onStart.call(self, self);
             }
@@ -4436,13 +4454,9 @@
                 }
             }
         }
-        function ready(defer) {
+        function ready(queue) {
             return function(fun) {
-                if (defer.state() !== 'resolved') {
-                    defer.done(fun);
-                } else {
-                    fun.call();
-                }
+                queue.add(fun);
             };
         }
         function strings() {
@@ -4479,10 +4493,10 @@
         var num_rows; // number of lines that fit without scrollbar
         var command; // for tab completion
         var logins = new Stack(); // stack of logins
-        var command_defer = $.Deferred();
-        var init_defer = $.Deferred();
-        var when_ready = ready(init_defer);
-        var cmd_ready = ready(command_defer);
+        var command_queue = new DelayQueue();
+        var init_queue = new DelayQueue();
+        var when_ready = ready(init_queue);
+        var cmd_ready = ready(command_queue);
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;// used to indicate that user call pause onInit
@@ -6126,7 +6140,7 @@
             }
             // -------------------------------------------------------------
             // Run Login
-            command_defer.resolve();
+            command_queue.resolve();
             if (settings.login) {
                 self.login(settings.login, true, initialize);
             } else {
