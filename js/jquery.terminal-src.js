@@ -186,6 +186,54 @@
 (function($, undefined) {
     'use strict';
     // -----------------------------------------------------------------------
+    // :: Defered object that work like in jQuery 2
+    // -----------------------------------------------------------------------
+    function Deferred() {
+        var then_callbacks = [];
+        var resolved = false;
+        var rejected = false;
+        var fail_callbacks = [];
+        this.state = function() {
+            if (resolved) {
+                return 'resolved';
+            }
+            if (rejected) {
+                return 'rejected';
+            }
+            return 'pending';
+        };
+        this.fail = function(fn) {
+            if (rejected) {
+                fn();
+            } else {
+                fail_callbacks.push(fn);
+            }
+            return this;
+        };
+        this.then = function(fn) {
+            if (resolved) {
+                fn();
+            } else {
+                then_callbacks.push(fn);
+            }
+            return this;
+        };
+        this.resolve = function() {
+            then_callbacks.forEach(function(fn) {
+                fn();
+            });
+            then_callbacks = [];
+            resolved = true;
+        };
+        this.reject = function() {
+            fail_callbacks.forEach(function(fn) {
+                fn();
+            });
+            fail_callbacks = [];
+            rejected = true;
+        };
+    }
+    // -----------------------------------------------------------------------
     // :: map object to object
     // -----------------------------------------------------------------------
     $.omap = function(o, fn) {
@@ -195,6 +243,9 @@
         });
         return result;
     };
+    // -----------------------------------------------------------------------
+    // :: Deep clone of objects and arrays
+    // -----------------------------------------------------------------------
     var Clone = {
         clone_object: function(object) {
             var tmp = {};
@@ -899,7 +950,7 @@
             data = [];
         } else {
             data = $.Storage.get(storage_key);
-            data = data ? $.parseJSON(data) : [];
+            data = data ? JSON.parse(data) : [];
         }
         var pos = data.length - 1;
         $.extend(this, {
@@ -2749,7 +2800,7 @@
                 return arg.replace(/^'|'$/g, '');
             } else if (arg[0] === '"' && arg[arg.length - 1] === '"' &&
                        arg.length > 1) {
-                return $.parseJSON(arg);
+                return JSON.parse(arg);
             } else if (arg.match(/^-?[0-9]+$/)) {
                 return parseInt(arg, 10);
             } else if (arg.match(float_re)) {
@@ -2920,7 +2971,7 @@
                 }
                 var json;
                 try {
-                    json = $.parseJSON(response);
+                    json = JSON.parse(response);
                 } catch (e) {
                     if (options.error) {
                         options.error(jqXHR, 'Invalid JSON', e);
@@ -4173,7 +4224,7 @@
             var storage_key = self.prefix_name() + '_interpreters';
             var names = storage.get(storage_key);
             if (names) {
-                names = $.parseJSON(names);
+                names = JSON.parse(names);
             } else {
                 names = [];
             }
@@ -4224,7 +4275,7 @@
                 try {
                     if (location.hash) {
                         var hash = location.hash.replace(/^#/, '');
-                        hash_commands = $.parseJSON(decodeURIComponent(hash));
+                        hash_commands = JSON.parse(decodeURIComponent(hash));
                     } else {
                         hash_commands = [];
                     }
@@ -4436,11 +4487,9 @@
         function ready(defer) {
             return function(fun) {
                 if (defer.state() !== 'resolved') {
-                    defer.then(fun).fail(function(e) {
-                        self.error(e);
-                    });
+                    defer.then(fun);
                 } else {
-                    fun.call(fun);
+                    fun.call();
                 }
             };
         }
@@ -4478,8 +4527,8 @@
         var num_rows; // number of lines that fit without scrollbar
         var command; // for tab completion
         var logins = new Stack(); // stack of logins
-        var command_defer = $.Deferred();
-        var init_defer = $.Deferred();
+        var command_defer = new Deferred();
+        var init_defer = new Deferred();
         var when_ready = ready(init_defer);
         var cmd_ready = ready(command_defer);
         var in_login = false;// some Methods should not be called when login
@@ -5013,7 +5062,7 @@
                     return self;
                 } else {
                     /*if (!is_scrolled_into_view(self)) {
-                        self.enable();
+                       self.enable();
                         $('html,body').animate({
                             scrollTop: offsetTop-50
                         }, 500);
@@ -5442,12 +5491,10 @@
                         }
                     }
                 }
-                string = string || '';
-                var type = $.type(string);
-                if (type === 'function' || type === 'string') {
-                    echo(string);
-                } else {
+                if ($.isFunction(string.then)) {
                     $.when(string).then(echo);
+                } else {
+                    echo(string);
                 }
                 return self;
             },
@@ -5789,7 +5836,7 @@
                     var prefix = self.prefix_name() + '_';
                     var names = storage.get(prefix + 'interpreters');
                     if (names) {
-                        $.each($.parseJSON(names), function(_, name) {
+                        $.each(JSON.parse(names), function(_, name) {
                             storage.remove(name + '_commands');
                             storage.remove(name + '_token');
                             storage.remove(name + '_login');
@@ -5925,6 +5972,7 @@
                                                  settings.login);
         }
         terminals.append(self);
+        //terminals.set(self);
         self.on('focus.terminal', 'textarea', function(e, skip) {
             if (!enabled && !skip) {
                 self.enable();
@@ -6230,7 +6278,7 @@
                         try {
                             var hash = location.hash.replace(/^#/, '');
                             // yes no var - local inside terminal
-                            hash_commands = $.parseJSON(decodeURIComponent(hash));
+                            hash_commands = JSON.parse(decodeURIComponent(hash));
                             var i = 0;
                             (function recur() {
                                 var spec = hash_commands[i++];

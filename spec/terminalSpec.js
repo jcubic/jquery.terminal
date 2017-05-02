@@ -1148,6 +1148,7 @@ function tests_on_ready() {
                         baz: function() {
                         },
                         add: function(a, b) {
+                            console.log('add');
                             this.echo(a+b);
                         },
                         type: function(obj) {
