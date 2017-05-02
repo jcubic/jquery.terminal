@@ -597,7 +597,7 @@ function tests_on_ready() {
             it('should create terminal', function() {
                 expect(term.length).toBe(1);
             });
-            it('should have proper elements', function(done) {
+            it('should have proper elements', function() {
                 expect(term.hasClass('terminal')).toBe(true);
                 expect(term.find('.terminal-output').length).toBe(1);
                 expect(term.find('.cmd').length).toBe(1);
@@ -611,11 +611,8 @@ function tests_on_ready() {
                 expect(cursor.prev().is('span')).toBe(true);
                 expect(cursor.next().is('span')).toBe(true);
                 term.focus(true);
-                setTimeout(function() {
-                    expect(cursor.hasClass('blink')).toBe(true);
-                    expect(term.find('.clipboard').length).toBe(1);
-                    done();
-                }, 100);
+                expect(cursor.hasClass('blink')).toBe(true);
+                expect(term.find('.clipboard').length).toBe(1);
             });
             it('should have signature', function() {
                 var sig = term.find('.terminal-output div div').map(function() { return $(this).text(); }).get().join('\n');
@@ -1148,7 +1145,6 @@ function tests_on_ready() {
                         baz: function() {
                         },
                         add: function(a, b) {
-                            console.log('add');
                             this.echo(a+b);
                         },
                         type: function(obj) {
