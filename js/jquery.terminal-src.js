@@ -186,54 +186,6 @@
 (function($, undefined) {
     'use strict';
     // -----------------------------------------------------------------------
-    // :: Defered object that work like in jQuery 2
-    // -----------------------------------------------------------------------
-    function Deferred() {
-        var then_callbacks = [];
-        var resolved = false;
-        var rejected = false;
-        var fail_callbacks = [];
-        this.state = function() {
-            if (resolved) {
-                return 'resolved';
-            }
-            if (rejected) {
-                return 'rejected';
-            }
-            return 'pending';
-        };
-        this.fail = function(fn) {
-            if (rejected) {
-                fn();
-            } else {
-                fail_callbacks.push(fn);
-            }
-            return this;
-        };
-        this.then = function(fn) {
-            if (resolved) {
-                fn();
-            } else {
-                then_callbacks.push(fn);
-            }
-            return this;
-        };
-        this.resolve = function() {
-            then_callbacks.forEach(function(fn) {
-                fn();
-            });
-            then_callbacks = [];
-            resolved = true;
-        };
-        this.reject = function() {
-            fail_callbacks.forEach(function(fn) {
-                fn();
-            });
-            fail_callbacks = [];
-            rejected = true;
-        };
-    }
-    // -----------------------------------------------------------------------
     // :: map object to object
     // -----------------------------------------------------------------------
     $.omap = function(o, fn) {
@@ -2847,7 +2799,7 @@
         extended_command: function extended_command(term, string) {
             try {
                 change_hash = false;
-                term.exec(string, true).then(function() {
+                term.exec(string, true).done(function() {
                     change_hash = true;
                 });
             } catch (e) {
@@ -4047,7 +3999,7 @@
                 change_hash = false;
                 var command = spec[2];
                 if (command) {
-                    terminal.exec(command).then(function() {
+                    terminal.exec(command).done(function() {
                         change_hash = true;
                         save_state[command_idx] = terminal.export_view();
                     });
@@ -4162,7 +4114,7 @@
                     if (result !== undefined) {
                         // auto pause/resume when user return promises
                         self.pause(settings.softPause);
-                        return $.when(result).then(function(result) {
+                        return $.when(result).done(function(result) {
                             // don't echo result if user echo something
                             if (result && position === lines.length - 1) {
                                 display_object(result);
@@ -4487,7 +4439,7 @@
         function ready(defer) {
             return function(fun) {
                 if (defer.state() !== 'resolved') {
-                    defer.then(fun);
+                    defer.done(fun);
                 } else {
                     fun.call();
                 }
@@ -4527,8 +4479,8 @@
         var num_rows; // number of lines that fit without scrollbar
         var command; // for tab completion
         var logins = new Stack(); // stack of logins
-        var command_defer = new Deferred();
-        var init_defer = new Deferred();
+        var command_defer = $.Deferred();
+        var init_defer = $.Deferred();
         var when_ready = ready(init_defer);
         var cmd_ready = ready(command_defer);
         var in_login = false;// some Methods should not be called when login
@@ -4660,7 +4612,7 @@
                         (function recur() {
                             var cmd = command.shift();
                             if (cmd) {
-                                self.exec(cmd, silent).then(recur);
+                                self.exec(cmd, silent).done(recur);
                             } else {
                                 d.resolve();
                             }
@@ -4673,7 +4625,7 @@
                         // commands may return promise from user code
                         // it will resolve exec promise when user promise
                         // is resolved
-                        commands(command, silent, true).then(function() {
+                        commands(command, silent, true).done(function() {
                             d.resolve(self);
                         });
                     }
@@ -5492,7 +5444,7 @@
                     }
                 }
                 if ($.isFunction(string.then)) {
-                    $.when(string).then(echo);
+                    $.when(string).done(echo);
                 } else {
                     echo(string);
                 }
@@ -6246,14 +6198,14 @@
                             if (paused) {
                                 var defer = $.Deferred();
                                 resume_callbacks.push(function() {
-                                    return terminal.exec(spec[2]).then(function() {
+                                    return terminal.exec(spec[2]).done(function() {
                                         terminal.save_state(spec[2], true, spec[1]);
                                         defer.resolve();
                                     });
                                 });
                                 return defer.promise();
                             } else {
-                                return terminal.exec(spec[2]).then(function() {
+                                return terminal.exec(spec[2]).done(function() {
                                     terminal.save_state(spec[2], true, spec[1]);
                                 });
                             }
@@ -6283,7 +6235,7 @@
                             (function recur() {
                                 var spec = hash_commands[i++];
                                 if (spec) {
-                                    exec_spec(spec).then(recur);
+                                    exec_spec(spec).done(recur);
                                 } else {
                                     change_hash = true;
                                 }
