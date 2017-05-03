@@ -228,7 +228,7 @@
     }
   },
   "dependencies": {
-    "jquery": "^2.1.4"
+    "jquery": "~3"
   },
   "devDependencies": {
     "coveralls": "^2.11.15",

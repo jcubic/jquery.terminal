@@ -139,7 +139,7 @@ function extract_id() {
     $regex = '/[\'"]id[\'"] *: *([0-9]*)/';
     $raw_data = get_raw_post_data();
     if (preg_match($regex, $raw_data, $m)) {
-        return $m[1];
+        return intval($m[1]);
     } else {
         return null;
     }
@@ -187,7 +187,7 @@ function service_description($object) {
 // ----------------------------------------------------------------------------
 function get_json_request() {
     $request = get_raw_post_data();
-	if ($request == "") {
+    if ($request == "") {
         throw new JsonRpcExeption(101, "Parse Error: no data");
     }
     $encoding = mb_detect_encoding($request, 'auto');
@@ -211,7 +211,7 @@ function handle_json_rpc($object) {
 
         $method = get_field($input, 'method', null);
         $params = get_field($input, 'params', null);
-        $id = get_field($input, 'id', null);
+        $id = intval(get_field($input, 'id', null));
 
         // json rpc error
         if (!($method && $id)) {

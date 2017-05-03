@@ -388,7 +388,7 @@
 .terminal a:hover {
     color: red;
 }
-.terminal iframe {
+.terminal .terminal-fill {
     position: absolute;
     left: 0;
     top: -100%;
@@ -400,8 +400,8 @@
     pointer-events: none;
     box-sizing: border-box;
 }
-.terminal, .terminal iframe {
-    padding: 10px; /* we get width of the terminal from iframe so it need to have the same padding */
+.terminal, .terminal .terminal-fill {
+    padding: 10px;
 }
 @supports (--css: variables) {
     .terminal, .cmd {

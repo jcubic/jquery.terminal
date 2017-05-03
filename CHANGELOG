@@ -1,3 +1,21 @@
+1.3.0     remove onPop event from main interpreter (with null as next)
+          add args_quotes to parse_/split_ command api utilities
+          mousewheel work without jQuery mousewheel and fix jumps of text
+          paste of images (using echo) in browsers that support clipboard event
+          fix number of rows after adding underline animation
+          fix outputLimit
+          element resizer (as jQuery plugin) that work inside iframe
+          add IntersectionObserver to add resizer and call resize (not all browser support it,
+          polyfill exists)
+          add MutationObserver to detect when terminal is added/removed from DOM and
+          call IntersectionObserver when added
+          fix calculation of cols and rows
+          New API utiltites normalize, substring, unclosed_strings and helper iterate_formatting
+          strings object are not longer saved in variable on terminal creation so you can
+          change it dynamically after terminal is created (use command to change language)
+          when using rpc or object interpreter it will throw exception when there are
+          unclosed strings
+          add default formatter that handle nested formatting
 1.2.0     make terminal accessible to screen readers:
            - terminal focus using tab key (we can't blur on tab keybecause it's used
              to enter tab character or for completion)

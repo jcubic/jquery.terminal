@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Fri, 21 Apr 2017 16:18:05 +0000
+ * Date: Sun, 30 Apr 2017 20:11:09 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -388,7 +388,7 @@
 .terminal a:hover {
     color: red;
 }
-.terminal iframe {
+.terminal .terminal-fill {
     position: absolute;
     left: 0;
     top: -100%;
@@ -400,8 +400,8 @@
     pointer-events: none;
     box-sizing: border-box;
 }
-.terminal, .terminal iframe {
-    padding: 10px; /* we get width of the terminal from iframe so it need to have the same padding */
+.terminal, .terminal .terminal-fill {
+    padding: 10px;
 }
 @supports (--css: variables) {
     .terminal, .cmd {

@@ -21,7 +21,7 @@
     // ---------------------------------------------------------------------
     // :: Replace overtyping (from man) formatting with terminal formatting
     // ---------------------------------------------------------------------
-    $.terminal.overtyping = function(string) {
+    $.terminal.overtyping = function overtyping(string) {
         return string.replace(/((?:_\x08.|.\x08_)+)/g, function(full) {
             var striped = full.replace(/_x08|\x08_|_\u0008|\u0008_/g, '');
             return '[[u;;]' + striped + ']';
@@ -243,7 +243,7 @@
             }
             return [styles.join(''), color, background];
         }
-        return function(input) {
+        return function from_ansi(input) {
             //merge multiple codes
             /*input = input.replace(/((?:\x1B\[[0-9;]*[A-Za-z])*)/g, function(group) {
               return group.replace(/m\x1B\[/g, ';');
@@ -314,6 +314,6 @@
             return output.join(''); //.replace(/\[\[[^\]]+\]\]/g, '');
         };
     })();
-    $.terminal.defaults.formatters.push($.terminal.overtyping);
-    $.terminal.defaults.formatters.push($.terminal.from_ansi);
+    $.terminal.defaults.formatters.unshift($.terminal.overtyping);
+    $.terminal.defaults.formatters.unshift($.terminal.from_ansi);
 })(jQuery);

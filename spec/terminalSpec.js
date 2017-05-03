@@ -1,5 +1,5 @@
-/* global jasmine, global, it, expect, describe, require, spyOn, setTimeout, location,
-          beforeEach, afterEach, sprintf, $ */
+/* global jasmine global it expect describe require spyOn setTimeout location
+          beforeEach afterEach sprintf jQuery $ */
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 var loaded;
@@ -86,6 +86,31 @@ function enter(term, text) {
     term.insert(text).focus();
     enter_key();
 }
+
+var support_animations = (function() {
+    var animation = false,
+    animationstring = 'animation',
+    keyframeprefix = '',
+    domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
+    pfx  = '',
+    elm = document.createElement('div');
+    if (elm.style.animationName) {
+        animation = true;
+    }
+    if (animation === false) {
+        for (var i = 0; i < domPrefixes.length; i++) {
+            var name = domPrefixes[i] + 'AnimationName';
+            if (typeof elm.style[name] !== 'undefined') {
+                pfx = domPrefixes[i];
+                animationstring = pfx + 'Animation';
+                keyframeprefix = '-' + pfx.toLowerCase() + '-';
+                animation = true;
+                break;
+            }
+        }
+    }
+    return animation;
+})();
 function tests_on_ready() {
     describe('Terminal utils', function() {
         var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
@@ -128,6 +153,7 @@ function tests_on_ready() {
                         '10',
                         '1e10'
                     ],
+                    args_quotes: ['"', '', '', '', '', ''],
                     rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10'
                 });
             });
@@ -146,6 +172,7 @@ function tests_on_ready() {
                         10,
                         1e10
                     ],
+                    args_quotes: ['"', '', '', '', '', ''],
                     rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10'
                 });
             });
@@ -294,46 +321,181 @@ function tests_on_ready() {
                         'ollis. Nam ac varius risus. Cras faucibus euismod nulla, ac aucto',
                         'r diam rutrum sit amet. Nulla vel odio erat], ac mattis enim.'
                        ].join('');
-            it('should split text that into equal length chunks', function() {
+            it('should keep formatting if it span across multiple lines', function() {
+                var array = ["[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipisc"+
+                             "ing elit. Nulla sed dolor nisl, in suscipit justo. Donec a e"+
+                             "nim et est porttitor semper at vitae augue. Proin at nulla a"+
+                             "t dui mattis mattis. Nam a volutpat ante. Aliquam consequat "+
+                             "dui eu sem convallis ullamcorper. Nulla suscipit, massa vita"+
+                             "e suscipit ornare, tellus]Lorem ipsum dolor sit amet, consec"+
+                             "tetur adipiscing elit. Nulla sed dolor nisl, in suscipit jus"+
+                             "to. Do]","[[bui;#fff;;;Lorem ipsum dolor sit amet, consectet"+
+                             "ur adipiscing elit. Nulla sed dolor nisl, in suscipit justo."+
+                             " Donec a enim et est porttitor semper at vitae augue. Proin "+
+                             "at nulla at dui mattis mattis. Nam a volutpat ante. Aliquam "+
+                             "consequat dui eu sem convallis ullamcorper. Nulla suscipit, "+
+                             "massa vitae suscipit ornare, tellus]nec a enim et est portti"+
+                             "tor semper at vitae augue. Proin at nulla at dui mattis matt"+
+                             "is. Nam a volutp]","[[bui;#fff;;;Lorem ipsum dolor sit amet,"+
+                             " consectetur adipiscing elit. Nulla sed dolor nisl, in susci"+
+                             "pit justo. Donec a enim et est porttitor semper at vitae aug"+
+                             "ue. Proin at nulla at dui mattis mattis. Nam a volutpat ante"+
+                             ". Aliquam consequat dui eu sem convallis ullamcorper. Nulla "+
+                             "suscipit, massa vitae suscipit ornare, tellus]at ante. Aliqu"+
+                             "am consequat dui eu sem convallis ullamcorper. Nulla suscipi"+
+                             "t, massa vitae suscipit or]","[[bui;#fff;;;Lorem ipsum dolor"+
+                             " sit amet, consectetur adipiscing elit. Nulla sed dolor nisl"+
+                             ", in suscipit justo. Donec a enim et est porttitor semper at"+
+                             " vitae augue. Proin at nulla at dui mattis mattis. Nam a vol"+
+                             "utpat ante. Aliquam consequat dui eu sem convallis ullamcorp"+
+                             "er. Nulla suscipit, massa vitae suscipit ornare, tellus]nare"+
+                             ", tellus] est [[b;;#f00;;consequat nunc, quis blandit elit o"+
+                             "dio eu arcu. Nam a urna nec nisl varius sodales. Mauris iacu"+
+                             "lis tincidunt orci id commodo. Aliquam]consequat nunc, quis "+
+                             "blandit elit odio eu arcu. Nam a urna nec nisl varius sodale"+
+                             "s.]","[[b;;#f00;;consequat nunc, quis blandit elit odio eu a"+
+                             "rcu. Nam a urna nec nisl varius sodales. Mauris iaculis tinc"+
+                             "idunt orci id commodo. Aliquam] Mauris iaculis tincidunt orc"+
+                             "i id commodo. Aliquam] non magna quis [[i;;;;tortor malesuad"+
+                             "a aliquam]tortor malesuada aliquam] eget ut l","acus. Nam ut"+
+                             " vestibulum est. Praesent volutpat tellus in eros dapibus el"+
+                             "ementum. Nam laoreet risus n","on nulla mollis ac luctus [[u"+
+                             "b;#fff;;;felis dapibus. Pellentesque mattis elementum augue "+
+                             "non sollicitudin. Nullam lobortis fermentum elit ac mollis. "+
+                             "Nam ac varius risus. Cras faucibus euismod nulla, ac auctor "+
+                             "diam rutrum sit amet. Nulla vel odio erat]felis dapibus. Pel"+
+                             "lentesque mattis elementum augue non sollicitudin. Nulla]",
+                             "[[ub;#fff;;;felis dapibus. Pellentesque mattis elementum aug"+
+                             "ue non sollicitudin. Nullam lobortis fermentum elit ac molli"+
+                             "s. Nam ac varius risus. Cras faucibus euismod nulla, ac auct"+
+                             "or diam rutrum sit amet. Nulla vel odio erat]m lobortis ferm"+
+                             "entum elit ac mollis. Nam ac varius risus. Cras faucibus eui"+
+                             "smod nulla, ac auctor dia]","[[ub;#fff;;;felis dapibus. Pell"+
+                             "entesque mattis elementum augue non sollicitudin. Nullam lob"+
+                             "ortis fermentum elit ac mollis. Nam ac varius risus. Cras fa"+
+                             "ucibus euismod nulla, ac auctor diam rutrum sit amet. Nulla "+
+                             "vel odio erat]m rutrum sit amet. Nulla vel odio erat], ac ma"+
+                             "ttis enim."];
+                expect($.terminal.split_equal(text, 100)).toEqual(array);
+            });
+            it("should keep formatting if span across line with newline characters", function() {
+                var text = ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
+                            'scing elit. Nulla sed dolor nisl, in suscipit justo. Donec a enim',
+                            ' et est porttitor semper at vitae augue. Proin at nulla at dui ma',
+                            'ttis mattis. Nam a volutpat ante. Aliquam consequat dui eu sem co',
+                            'nvallis ullamcorper. Nulla suscipit, massa vitae suscipit ornare,',
+                            ' tellus]'].join('\n');
+                var formatting = /^\[\[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi\\nscing elit. Nulla sed dolor nisl, in suscipit justo. Donec a enim\\n et est porttitor semper at vitae augue. Proin at nulla at dui ma\\nttis mattis. Nam a volutpat ante. Aliquam consequat dui eu sem co\\nnvallis ullamcorper. Nulla suscipit, massa vitae suscipit ornare,\\n tellus\]/;
+                $.terminal.split_equal(text, 100).forEach(function(line, i) {
+                    if (!line.match(formatting)) {
+                        throw new Error("Line nr " + i + " " + line + " don't have correct " +
+                                        "formatting");
+                    }
+                });
+            });
+            function test_lenghts(string, fn) {
                 var cols = [10, 40, 60, 400];
                 for (var i=cols.length; i--;) {
-                    var lines = $.terminal.split_equal(text, cols[i]);
-                    var success = true;
-                    for (var j=0; j<lines.length; ++j) {
-                        if ($.terminal.strip(lines[j]).length > cols[i]) {
-                            success = false;
-                            break;
-                        }
+                    var lines = $.terminal.split_equal(string, cols[i]);
+                    var lengths;
+                    if (fn) {
+                        lengths = lines.map(function(line) {
+                            return fn(line).length;
+                        });
+                    } else {
+                        lengths = lines.map(function(line) {
+                            return line.length;
+                        });
                     }
-                    expect(success).toEqual(true);
+                    lengths.slice(0, -1).forEach(function(length) {
+                        if (length != cols[i]) {
+                            throw new Error('Lines count is ' + JSON.stringify(lengths) +
+                                           ' but it should have ' + cols[i]);
+                        }
+                    });
+                    if (lengths[lengths-1] > cols[i]) {
+                        throw new Error('Lines count is ' + JSON.stringify(lengths) +
+                                        ' but it should have ' + cols[i]);
+                    }
+                    expect(true).toEqual(true);
                 }
+            }
+            it('should split text into equal length chunks', function() {
+                test_lenghts(text, function(line) {
+                    return $.terminal.strip(line);
+                });
+            });
+            it('should split text when all brackets are escaped', function() {
+                test_lenghts($.terminal.escape_brackets(text), function(line) {
+                    return $('<div>' + line + '</div>').text();
+                });
+            });
+            it('should return whole lines if length > then the length of the line', function() {
+                var test = [
+                    {
+                        input: ['[[bui;#fff;]Lorem ipsum dolor sit amet,] consectetur adipi',
+                                'scing elit.'].join(''),
+                        output: [['[[bui;#fff;;;Lorem ipsum dolor sit amet,]Lorem ipsum dol',
+                                 'or sit amet,] consectetur adipiscing elit.'].join('')]
+                    },
+                    {
+                        input: ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
+                                'scing elit.]'].join(''),
+                        output: [[
+                            '[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi',
+                            'scing elit.]Lorem ipsum dolor sit amet, consectetur adipis',
+                            'cing elit.]'].join('')]
+                    },
+                    {
+                        input: ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
+                                'scing elit.]\n[[bui;#fff;]Lorem ipsum dolor sit amet, con',
+                                'sectetur adipiscing elit.]'].join(''),
+                        output: [
+                            [
+                                '[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi',
+                                'scing elit.]Lorem ipsum dolor sit amet, consectetur adipis',
+                                'cing elit.]'].join(''),
+                            ['[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi',
+                             'scing elit.]Lorem ipsum dolor sit amet, consectetur adipis',
+                             'cing elit.]'].join('')]
+                    },
+                    {
+                        input: ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
+                                'scing elit.]\n[[bui;#fff;]Lorem ipsum dolor sit amet, con',
+                                'sectetur adipiscing elit.]\n[[bui;#fff;]Lorem ipsum dolor',
+                                ' sit amet, consectetur adipiscing elit.]\n[[bui;#fff;]Lor',
+                                'em ipsum dolor sit amet, consectetur adipiscing elit.]'
+                               ].join(''),
+                        output: ['[[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adi'+
+                                 'piscing elit.]Lorem ipsum dolor si]','[[bui;#fff;;;Lorem'+
+                                 ' ipsum dolor sit amet, consectetur adipiscing elit.]t am'+
+                                 'et, consectetur ]','[[bui;#fff;;;Lorem ipsum dolor sit a'+
+                                 'met, consectetur adipiscing elit.]adipiscing elit.]','[['+
+                                 'bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi'+
+                                 'scing elit.]Lorem ipsum dolor si]','[[bui;#fff;;;Lorem i'+
+                                 'psum dolor sit amet, consectetur adipiscing elit.]t amet'+
+                                 ', consectetur ]','[[bui;#fff;;;Lorem ipsum dolor sit ame'+
+                                 't, consectetur adipiscing elit.]adipiscing elit.]','[[bu'+
+                                 'i;#fff;;;Lorem ipsum dolor sit amet, consectetur adipisc'+
+                                 'ing elit.]Lorem ipsum dolor si]','[[bui;#fff;;;Lorem ips'+
+                                 'um dolor sit amet, consectetur adipiscing elit.]t amet, '+
+                                 'consectetur ]','[[bui;#fff;;;Lorem ipsum dolor sit amet,'+
+                                 ' consectetur adipiscing elit.]adipiscing elit.]','[[bui;'+
+                                 '#fff;;;Lorem ipsum dolor sit amet, consectetur adipiscin'+
+                                 'g elit.]Lorem ipsum dolor si]','[[bui;#fff;;;Lorem ipsum'+
+                                 ' dolor sit amet, consectetur adipiscing elit.]t amet, co'+
+                                 'nsectetur ]','[[bui;#fff;;;Lorem ipsum dolor sit amet, c'+
+                                 'onsectetur adipiscing elit.]adipiscing elit.]'],
+                        split: 20
+                    }
+                ];
+                test.forEach(function(test) {
+                    var array = $.terminal.split_equal(test.input, test.split || 100);
+                    expect(array).toEqual(test.output);
+                });
             });
         });
     });
-    global.support_animations = (function() {
-        var animation = false,
-            animationstring = 'animation',
-            keyframeprefix = '',
-            domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
-            pfx  = '',
-            elm = document.createElement('div');
-        if (elm.style.animationName) {
-            animation = true;
-        }
-        if (animation === false) {
-            for (var i = 0; i < domPrefixes.length; i++) {
-                var name = domPrefixes[i] + 'AnimationName';
-                if (typeof elm.style[name] !== 'undefined') {
-                    pfx = domPrefixes[i];
-                    animationstring = pfx + 'Animation';
-                    keyframeprefix = '-' + pfx.toLowerCase() + '-';
-                    animation = true;
-                    break;
-                }
-            }
-        }
-        return animation;
-    })();
     describe('Terminal plugin', function() {
         describe('jQuery Terminal options', function() {
             describe('prompt', function() {
@@ -468,16 +630,19 @@ function tests_on_ready() {
             });
         });
         describe('cursor', function() {
-            it('only one terminal should have blinking cursor', function() {
+            it('only one terminal should have blinking cursor', function(done) {
                 var term1 = $('<div/>').appendTo('body').terminal($.noop);
                 term1.focus();
                 var term2 = $('<div/>').appendTo('body').terminal($.noop);
                 term1.pause();
                 term2.focus();
-                term1.resume();
-                expect($('.cursor.blink').length).toEqual(1);
-                term1.destroy().remove();
-                term2.destroy().remove();
+                setTimeout(function() {
+                    term1.resume();
+                    expect($('.cursor.blink').length).toEqual(1);
+                    term1.destroy().remove();
+                    term2.destroy().remove();
+                    done();
+                }, 100);
             });
         });
         describe('enter text', function() {
@@ -2104,7 +2269,7 @@ function tests_on_ready() {
                     expect(div.hasClass('exception')).toBeTruthy();
                     expect(div.hasClass('message')).toBeTruthy();
                     if (error.stack) {
-                        output = term.find('.terminal-output div div').map(function() {
+                        var output = term.find('.terminal-output div div').map(function() {
                             return $(this).text().replace(/\xA0/g, ' ');
                         }).get().slice(1);
                         expect(error.stack).toEqual(output.join('\n'));

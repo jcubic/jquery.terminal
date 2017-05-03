@@ -22,7 +22,7 @@
         "version"
     ],
     "dependencies": {
-        "jquery": "~2"
+        "jquery": "~3"
     },
     "devDependencies": {
         "jasmine": "~2.5.2",
