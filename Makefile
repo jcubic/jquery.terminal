@@ -1,4 +1,4 @@
-VERSION=1.2.0
+VERSION=1.3.0
 SED=sed
 CP=cp
 RM=rm
@@ -53,7 +53,7 @@ README.md: README.in .$(VERSION)
 	touch .$(VERSION)
 
 Makefile: Makefile.in
-	sed -e "s/{{VER""SION}}/"$(VERSION)"/" Makefile.in > Makefile
+	$(SED) -e "s/{{VER""SION}}/"$(VERSION)"/" Makefile.in > Makefile
 
 terminal.jquery.json: manifest .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json
