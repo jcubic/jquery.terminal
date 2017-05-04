@@ -4976,7 +4976,7 @@
                     return settings.numChars;
                 }
                 if (!num_chars) {
-                   num_chars = get_num_chars(self);
+                    num_chars = get_num_chars(self);
                 }
                 return num_chars;
             },

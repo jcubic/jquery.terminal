@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 04 May 2017 11:23:27 +0000
+ * Date: Thu, 04 May 2017 12:08:15 +0000
  */
 
 /* TODO:
@@ -4976,7 +4976,7 @@
                     return settings.numChars;
                 }
                 if (!num_chars) {
-                   num_chars = get_num_chars(self);
+                    num_chars = get_num_chars(self);
                 }
                 return num_chars;
             },
