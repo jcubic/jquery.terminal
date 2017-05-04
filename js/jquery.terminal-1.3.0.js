@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.3.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 03 May 2017 13:26:11 +0000
+ * Date: Thu, 04 May 2017 11:23:27 +0000
  */
 
 /* TODO:
@@ -2255,7 +2255,7 @@
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
-        version: '1.3.0',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4972,14 +4972,26 @@
             // :: the terminal
             // -------------------------------------------------------------
             cols: function() {
-                return settings.numChars ? settings.numChars : num_chars;
+                if (settings.numChars) {
+                    return settings.numChars;
+                }
+                if (!num_chars) {
+                   num_chars = get_num_chars(self);
+                }
+                return num_chars;
             },
             // -------------------------------------------------------------
             // :: Return the number of lines that fit into the height of the
             // :: terminal
             // -------------------------------------------------------------
             rows: function() {
-                return settings.numRows ? settings.numRows : num_rows;
+                if (settings.numRows) {
+                    return settings.numRows;
+                }
+                if (!num_rows) {
+                    num_rows = get_num_rows(self);
+                }
+                return num_rows;
             },
             // -------------------------------------------------------------
             // :: Return the History object
