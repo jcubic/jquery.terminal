@@ -4972,14 +4972,26 @@
             // :: the terminal
             // -------------------------------------------------------------
             cols: function() {
-                return settings.numChars ? settings.numChars : num_chars;
+                if (settings.numChars) {
+                    return settings.numChars;
+                }
+                if (!num_chars) {
+                    num_chars = get_num_chars(self);
+                }
+                return num_chars;
             },
             // -------------------------------------------------------------
             // :: Return the number of lines that fit into the height of the
             // :: terminal
             // -------------------------------------------------------------
             rows: function() {
-                return settings.numRows ? settings.numRows : num_rows;
+                if (settings.numRows) {
+                    return settings.numRows;
+                }
+                if (!num_rows) {
+                    num_rows = get_num_rows(self);
+                }
+                return num_rows;
             },
             // -------------------------------------------------------------
             // :: Return the History object
