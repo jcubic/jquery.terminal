@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 05 May 2017 17:41:52 +0000
+ * Date: Fri, 05 May 2017 20:19:49 +0000
  */
 
 /* TODO:
@@ -4835,7 +4835,6 @@
                 if (quote) {
                     string = string.replace(/^["']/, '');
                 }
-                string = self.before_cursor();
                 // local copy
                 commands = commands.slice();
                 if (settings.clear && $.inArray('clear', commands) === -1) {
@@ -4845,9 +4844,9 @@
                     commands.push('exit');
                 }
                 if (tab_count % 2 === 0) {
-                    command = self.before_cursor();
+                    command = self.before_cursor(options.word);
                 } else {
-                    var test = self.before_cursor();
+                    var test = self.before_cursor(options.word);
                     if (test !== command) {
                         // command line changed between TABS - ignore
                         return;
@@ -4871,7 +4870,7 @@
                 }
                 if (matched.length === 1) {
                     self.insert(matched[0].replace(regex, '') + (quote || ''));
-                    command = self.before_cursor();
+                    command = self.before_cursor(options.word);
                     return true;
                 } else if (matched.length > 1) {
                     if (++tab_count >= 2) {
@@ -6110,7 +6109,11 @@
                                 $(window).off('mousemove.terminal_' + self.id());
                             });
                         });
-                    }).mouseup(function() {
+                    }).mouseup(function(e) {
+                        if (e.originalEvent.button != 1) {
+                            console.log(e.originalEvent.button);
+                            //return;
+                        }
                         var wasDragging = isDragging;
                         isDragging = false;
                         $(window).off('mousemove.terminal_' + self.id());
