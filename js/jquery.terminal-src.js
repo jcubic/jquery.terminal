@@ -4301,6 +4301,28 @@
             return in_login || command_line.mask() !== false;
         }
         // ---------------------------------------------------------------------
+        // :: return string that are common in all elements of the array
+        // ---------------------------------------------------------------------
+        function common_string(string, array) {
+            if (!array.length) {
+                return '';
+            }
+            var found = false;
+            loop:
+            for (var j = string.length; j < array[0].length; ++j) {
+                for (var i = 1; i < array.length; ++i) {
+                    if (array[0].charAt(j) !== array[i].charAt(j)) {
+                        break loop;
+                    }
+                }
+                found = true;
+            }
+            if (found) {
+                return array[0].slice(0, j);
+            }
+            return '';
+        }
+        // ---------------------------------------------------------------------
         // :: Keydown event handler
         // ---------------------------------------------------------------------
         function user_key_down(e) {
@@ -4373,7 +4395,6 @@
                             });
                             break;
                         default:
-                            // terminal will not catch this because it's an event
                             throw new Error(strings().invalidCompletion);
                     }
                 } else {
@@ -4814,6 +4835,7 @@
                 if (quote) {
                     string = string.replace(/^["']/, '');
                 }
+                string = self.before_cursor();
                 // local copy
                 commands = commands.slice();
                 if (settings.clear && $.inArray('clear', commands) === -1) {
@@ -4823,9 +4845,9 @@
                     commands.push('exit');
                 }
                 if (tab_count % 2 === 0) {
-                    command = self.before_cursor(options.word);
+                    command = self.before_cursor();
                 } else {
-                    var test = self.before_cursor(options.word);
+                    var test = self.before_cursor();
                     if (test !== command) {
                         // command line changed between TABS - ignore
                         return;
@@ -4849,7 +4871,7 @@
                 }
                 if (matched.length === 1) {
                     self.insert(matched[0].replace(regex, '') + (quote || ''));
-                    command = self.before_cursor(options.word);
+                    command = self.before_cursor();
                     return true;
                 } else if (matched.length > 1) {
                     if (++tab_count >= 2) {
@@ -4863,19 +4885,9 @@
                             return true;
                         }
                     } else {
-                        var found = false;
-                        var j;
-                        loop:
-                        for (j = string.length; j < matched[0].length; ++j) {
-                            for (i = 1; i < matched.length; ++i) {
-                                if (matched[0].charAt(j) !== matched[i].charAt(j)) {
-                                    break loop;
-                                }
-                            }
-                            found = true;
-                        }
-                        if (found) {
-                            self.insert(matched[0].slice(0, j).replace(regex, ''));
+                        var common = common_string(string, matched);
+                        if (common) {
+                            self.insert(common.replace(regex, ''));
                             command = self.before_cursor(options.word);
                             return true;
                         }
@@ -5338,6 +5350,8 @@
                                    user_finalize(wrapper);
                                    });*/
                             } catch (e) {
+                                // remove function that throw exception
+                                output_buffer.splice(i, 1);
                                 display_exception(e, 'USER:echo(finalize)');
                             }
                         } else {
