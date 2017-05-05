@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 05 May 2017 20:27:49 +0000
+ * Date: Fri, 05 May 2017 22:12:56 +0000
  */
 
 /* TODO:
@@ -2124,7 +2124,7 @@
             }
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
-            bind('input.cmd', input);
+            unbind('input.cmd', input);
         (function() {
             var isDragging = false;
             var was_down = false;
@@ -3015,22 +3015,6 @@
     // -----------------------------------------------------------------------
     function get_num_rows(terminal) {
         return Math.floor(terminal.find('.terminal-fill').height() / char_size().height);
-    }
-    // -----------------------------------------------------------------------
-    // :: Get Selected Text (this is internal because it return text even if
-    // :: it's outside of terminal, is used to paste text to the terminal)
-    // -----------------------------------------------------------------------
-    function get_selected_text() {
-        if (window.getSelection || document.getSelection) {
-            var selection = (window.getSelection || document.getSelection)();
-            if (selection.text) {
-                return selection.text;
-            } else {
-                return selection.toString();
-            }
-        } else if (document.selection) {
-            return document.selection.createRange().text;
-        }
     }
     // -----------------------------------------------------------------------
     // :: try to copy given DOM element text to clipboard
@@ -5851,7 +5835,8 @@
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
                     self.unbind('click wheel mousewheel mousedown mouseup');
-                    self.removeData('terminal').removeClass('terminal');
+                    self.removeData('terminal').removeClass('terminal').
+                        unbind('.terminal');
                     if (settings.width) {
                         self.css('width', '');
                     }
@@ -5978,7 +5963,7 @@
             old_enabled = enabled;
             self.disable();
         }
-        function paste_image(e) {
+        function paste_event(e) {
             e = e.originalEvent;
             // we don't care about browser that don't support clipboard data
             // those browser simple will not have this feature normal paste
@@ -5992,12 +5977,18 @@
                             var URL = window.URL || window.webkitURL;
                             var source = URL.createObjectURL(blob);
                             self.echo('<img src="' + source + '"/>', {raw: true});
+                        } else if (items[i].type.indexOf('text/plain') !== -1) {
+                            items[i].getAsString(self.insert);
                         }
                     }
+                } else if (e.clipboardData.getData) {
+                    var text = e.clipboardData.getData('text/plain');
+                    self.insert(text);
                 }
+                return false;
             }
         }
-        $(document).on('paste.terminal_' + self.id(), paste_image);
+        $(document).on('paste.terminal_' + self.id(), paste_event);
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
             if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
@@ -6142,6 +6133,24 @@
                         self.stopTime('click_' + self.id());
                     });
                 })();
+                (function() {
+                    var position = {};
+                    var clip = self.find('textarea');
+                    self.on('mousemove.terminal', function(e) {
+                        var offset = command_line.offset();
+                        position.left = e.pageX - offset.left - 5;
+                        position.top = e.pageY - offset.top - 5;
+                    });
+                    self.on('mousedown.terminal', function(e) {
+                        if (e.originalEvent.button === 2) {
+                            e.preventDefault();
+                            clip.css(position);
+                            self.oneTime(50, function() {
+                                clip.css({left: '', top: ''});
+                            });
+                        }
+                    });
+                })();
             }
             self.delegate('.exception a', 'click', function(e) {
                 // .on('click', '.exception a', function(e) {
@@ -6150,12 +6159,6 @@
                 if (href.match(/:[0-9]+$/)) { // display line if specified
                     e.preventDefault();
                     print_line(href);
-                }
-            });
-            self.mousedown(function(e) {
-                if (e.which === 2) {
-                    var selected = get_selected_text();
-                    self.insert(selected);
                 }
             });
             if (self.is(':visible')) {
