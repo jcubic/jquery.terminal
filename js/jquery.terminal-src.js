@@ -6109,11 +6109,7 @@
                                 $(window).off('mousemove.terminal_' + self.id());
                             });
                         });
-                    }).mouseup(function(e) {
-                        if (e.originalEvent.button != 1) {
-                            console.log(e.originalEvent.button);
-                            //return;
-                        }
+                    }).mouseup(function() {
                         var wasDragging = isDragging;
                         isDragging = false;
                         $(window).off('mousemove.terminal_' + self.id());

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 05 May 2017 20:19:49 +0000
+ * Date: Fri, 05 May 2017 20:27:49 +0000
  */
 
 /* TODO:
@@ -6109,11 +6109,7 @@
                                 $(window).off('mousemove.terminal_' + self.id());
                             });
                         });
-                    }).mouseup(function(e) {
-                        if (e.originalEvent.button != 1) {
-                            console.log(e.originalEvent.button);
-                            //return;
-                        }
+                    }).mouseup(function() {
                         var wasDragging = isDragging;
                         isDragging = false;
                         $(window).off('mousemove.terminal_' + self.id());
