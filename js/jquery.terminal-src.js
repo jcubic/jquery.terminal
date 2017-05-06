@@ -6145,10 +6145,13 @@
                         if (e.originalEvent.button === 2) {
                             e.preventDefault();
                             clip.css(position);
-                            self.oneTime(50, function() {
-                                clip.css({left: '', top: ''});
-                            });
                         }
+                    });
+                    // contextmenu is fired after mousedown
+                    self.bind('contextmenu', function() {
+                        self.oneTime(100, function() {
+                            clip.css({left: '', top: ''});
+                        });
                     });
                 })();
             }

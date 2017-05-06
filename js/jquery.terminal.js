@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 05 May 2017 22:19:46 +0000
+ * Date: Sat, 06 May 2017 07:24:52 +0000
  */
 
 /* TODO:
@@ -6145,10 +6145,13 @@
                         if (e.originalEvent.button === 2) {
                             e.preventDefault();
                             clip.css(position);
-                            self.oneTime(50, function() {
-                                clip.css({left: '', top: ''});
-                            });
                         }
+                    });
+                    // contextmenu is fired after mousedown
+                    self.bind('contextmenu', function() {
+                        self.oneTime(100, function() {
+                            clip.css({left: '', top: ''});
+                        });
                     });
                 })();
             }
