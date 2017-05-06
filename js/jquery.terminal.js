@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 04 May 2017 12:33:14 +0000
+ * Date: Sat, 06 May 2017 18:53:55 +0000
  */
 
 /* TODO:
@@ -3759,12 +3759,12 @@
         // :: validating if object is a string or a function, call that function
         // :: and display the exeption if any
         // ---------------------------------------------------------------------
-        function validate(label, object) {
+        function validate(label, object, term) {
             try {
                 if ($.isFunction(object)) {
                     object(function() {
                         // don't care
-                    });
+                    }, term);
                 } else if (typeof object !== 'string') {
                     var msg = label + ' must be string or function';
                     throw msg;
@@ -5235,7 +5235,7 @@
             // -------------------------------------------------------------
             set_prompt: function(prompt) {
                 when_ready(function ready() {
-                    if (validate('prompt', prompt)) {
+                    if (validate('prompt', prompt, self)) {
                         if ($.isFunction(prompt)) {
                             command_line.prompt(function(callback) {
                                 prompt(callback, self);
