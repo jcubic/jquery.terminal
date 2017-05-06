@@ -6093,6 +6093,9 @@
                         } else {
                             target = parents.andSelf();
                         }
+                        if (e.originalEvent.button === 2) {
+                            return;
+                        }
                         self.oneTime(1, function() {
                             $(window).on('mousemove.terminal_' + self.id(), function() {
                                 isDragging = true;
