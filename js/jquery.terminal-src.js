@@ -6136,15 +6136,17 @@
                 (function() {
                     var position = {};
                     var clip = self.find('textarea');
-                    self.on('mousemove.terminal', function(e) {
-                        var offset = command_line.offset();
-                        position.left = e.pageX - offset.left - 5;
-                        position.top = e.pageY - offset.top - 5;
-                    });
                     self.on('mousedown.terminal', function(e) {
                         if (e.originalEvent.button === 2) {
+                            if (!self.enabled()) {
+                                self.enable();
+                            }
                             e.preventDefault();
-                            clip.css(position);
+                            var offset = command_line.offset();
+                            clip.css({
+                                left: e.pageX - offset.left - 5,
+                                top: e.pageY - offset.top - 5
+                            });
                         }
                     });
                     // contextmenu is fired after mousedown
