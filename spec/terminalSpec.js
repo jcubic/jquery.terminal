@@ -610,7 +610,7 @@ function tests_on_ready() {
                 expect(cursor.is('span')).toBe(true);
                 expect(cursor.prev().is('span')).toBe(true);
                 expect(cursor.next().is('span')).toBe(true);
-                term.focus(true);
+                term.focus(true).cmd().enable();
                 expect(cursor.hasClass('blink')).toBe(true);
                 expect(term.find('.clipboard').length).toBe(1);
             });
