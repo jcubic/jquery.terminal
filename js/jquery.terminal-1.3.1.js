@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 06 May 2017 07:48:00 +0000
+ * Date: Sat, 06 May 2017 08:07:38 +0000
  */
 
 /* TODO:
@@ -6137,7 +6137,6 @@
                     });
                 })();
                 (function() {
-                    var position = {};
                     var clip = self.find('textarea');
                     self.on('mousedown.terminal', function(e) {
                         if (e.originalEvent.button === 2) {

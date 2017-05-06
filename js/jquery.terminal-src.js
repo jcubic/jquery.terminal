@@ -6137,7 +6137,6 @@
                     });
                 })();
                 (function() {
-                    var position = {};
                     var clip = self.find('textarea');
                     self.on('mousedown.terminal', function(e) {
                         if (e.originalEvent.button === 2) {
