@@ -3759,12 +3759,12 @@
         // :: validating if object is a string or a function, call that function
         // :: and display the exeption if any
         // ---------------------------------------------------------------------
-        function validate(label, object) {
+        function validate(label, object, term) {
             try {
                 if ($.isFunction(object)) {
                     object(function() {
                         // don't care
-                    });
+                    }, term);
                 } else if (typeof object !== 'string') {
                     var msg = label + ' must be string or function';
                     throw msg;
@@ -5235,7 +5235,7 @@
             // -------------------------------------------------------------
             set_prompt: function(prompt) {
                 when_ready(function ready() {
-                    if (validate('prompt', prompt)) {
+                    if (validate('prompt', prompt, self)) {
                         if ($.isFunction(prompt)) {
                             command_line.prompt(function(callback) {
                                 prompt(callback, self);
