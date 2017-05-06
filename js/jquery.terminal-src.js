@@ -3108,6 +3108,7 @@
         processArguments: true,
         linksNoReferrer: false,
         processRPCResponse: null,
+        completionEscape: true,
         convertLinks: true,
         extra: {},
         historyState: false,
@@ -4369,13 +4370,17 @@
                             }
                             completion.call(self, string, function(commands) {
                                 self.complete(commands, {
-                                    echo: true
+                                    echo: true,
+                                    word: settings.wordAutocomplete,
+                                    escape: settings.completionEscape
                                 });
                             });
                             break;
                         case 'array':
                             self.complete(completion, {
-                                echo: true
+                                echo: true,
+                                word: settings.wordAutocomplete,
+                                escape: settings.completionEscape
                             });
                             break;
                         default:
@@ -4805,19 +4810,22 @@
             complete: function(commands, options) {
                 options = $.extend({
                     word: true,
-                    echo: false
+                    echo: false,
+                    escape: true
                 }, options || {});
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
                 var string = self.before_cursor(options.word).replace(/\\"/g, '"');
                 var quote = false;
-                if (string.match(/^"/)) {
-                    quote = '"';
-                } else if (string.match(/^'/)) {
-                    quote = "'";
-                }
-                if (quote) {
-                    string = string.replace(/^["']/, '');
+                if (options.word) {
+                    if (string.match(/^"/)) {
+                        quote = '"';
+                    } else if (string.match(/^'/)) {
+                        quote = "'";
+                    }
+                    if (quote) {
+                        string = string.replace(/^["']/, '');
+                    }
                 }
                 // local copy
                 commands = commands.slice();
@@ -4836,8 +4844,10 @@
                         return;
                     }
                 }
-                var safe = $.terminal.escape_regex(string)
-                    .replace(/\\(["'() ])/g, '\\?$1');
+                var safe = $.terminal.escape_regex(string);
+                if (options.escape) {
+                    safe = safe.replace(/\\(["'() ])/g, '\\?$1');
+                }
                 var regex = new RegExp('^' + safe);
                 var matched = [];
                 for (var i = commands.length; i--;) {
@@ -4846,7 +4856,7 @@
                         if (quote === '"') {
                             match = match.replace(/"/g, '\\"');
                         }
-                        if (!quote) {
+                        if (!quote && options.escape) {
                             match = match.replace(/(["'() ])/g, '\\$1');
                         }
                         matched.push(match);
