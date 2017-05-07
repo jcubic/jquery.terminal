@@ -16,7 +16,7 @@
           add MutationObserver to detect when terminal is added/removed from DOM and
           call IntersectionObserver when added
           fix calculation of cols and rows
-          New API utiltites normalize, substring, unclosed_strings and helper iterate_formatting
+          new API utiltites normalize, substring, unclosed_strings and helper iterate_formatting
           strings object are not longer saved in variable on terminal creation so you can
           change it dynamically after terminal is created (use command to change language)
           when using rpc or object interpreter it will throw exception when there are

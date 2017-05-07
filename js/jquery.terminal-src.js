@@ -3752,9 +3752,7 @@
         function validate(label, object) {
             try {
                 if ($.isFunction(object)) {
-                    object(function() {
-                        // don't care
-                    });
+                    object.call(self, $.noop, self);
                 } else if (typeof object !== 'string') {
                     var msg = label + ' must be string or function';
                     throw msg;
@@ -5339,19 +5337,7 @@
                         } else if ($.isFunction(line)) {
                             // this is finalize function from echo
                             wrapper.appendTo(output);
-                            try {
-                                line(wrapper);
-                                /* this don't work with resize
-                                   line(wrapper, function(user_finalize) {
-                                   // TODO:
-                                   // user_finalize need to be save in line object
-                                   user_finalize(wrapper);
-                                   });*/
-                            } catch (e) {
-                                // remove function that throw exception
-                                output_buffer.splice(i, 1);
-                                display_exception(e, 'USER:echo(finalize)');
-                            }
+                            line(wrapper);
                         } else {
                             $('<div/>').html(line)
                                 .appendTo(wrapper).width('100%');
@@ -5481,10 +5467,17 @@
                         }
                     }
                 }
-                if ($.isFunction(string.then)) {
-                    $.when(string).done(echo);
-                } else {
-                    echo(string);
+                try {
+                    if ($.isFunction(options.finalize)) {
+                        options.finalize($('<div/>'));
+                    }
+                    if ($.isFunction(string.then)) {
+                        $.when(string).done(echo);
+                    } else {
+                        echo(string);
+                    }
+                } catch(e) {
+                    display_exception(e, 'USER:echo(finalize)');
                 }
                 return self;
             },
