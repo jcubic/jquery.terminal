@@ -5468,7 +5468,7 @@
                     }
                 }
                 try {
-                    if ($.isFunction(options.finalize)) {
+                    if (options && $.isFunction(options.finalize)) {
                         options.finalize($('<div/>'));
                     }
                     if ($.isFunction(string.then)) {

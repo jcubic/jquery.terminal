@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 07 May 2017 08:04:16 +0000
+ * Date: Sun, 07 May 2017 08:10:34 +0000
  */
 
 /* TODO:
@@ -5468,7 +5468,7 @@
                     }
                 }
                 try {
-                    if ($.isFunction(options.finalize)) {
+                    if (options && $.isFunction(options.finalize)) {
                         options.finalize($('<div/>'));
                     }
                     if ($.isFunction(string.then)) {
