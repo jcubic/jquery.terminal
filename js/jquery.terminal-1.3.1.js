@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 07 May 2017 08:10:34 +0000
+ * Date: Sun, 07 May 2017 09:41:10 +0000
  */
 
 /* TODO:
@@ -5476,7 +5476,7 @@
                     } else {
                         echo(string);
                     }
-                } catch(e) {
+                } catch (e) {
                     display_exception(e, 'USER:echo(finalize)');
                 }
                 return self;

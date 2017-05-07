@@ -5476,7 +5476,7 @@
                     } else {
                         echo(string);
                     }
-                } catch(e) {
+                } catch (e) {
                     display_exception(e, 'USER:echo(finalize)');
                 }
                 return self;
