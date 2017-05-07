@@ -2249,8 +2249,6 @@
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
-    var single_string_re = /(?:(?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|(?:\\\s|\S))+)(?=\s|$)/;
-    var double_string_re = /(?:(?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|(?:\\\s|\S))+)(?=\s|$)/;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
@@ -2756,15 +2754,7 @@
             function parse_string(string) {
                 // remove quotes if before are even number of slashes
                 // we don't remove slases becuase they are handled by JSON.parse
-                string = string.replace(/(\\*)(['"])/g, function(_, slashes, quote) {
-                    if (!slashes.length) {
-                        return '';
-                    } else if (slashes.length % 2 === 1) {
-                        return slashes + quote;
-                    } else {
-                        return slashes;
-                    }
-                });
+                string = string.replace(/((^|[^\\])(?:\\\\)*)['"]/g, '$1');
                 // use build in function to parse rest of escaped characters
                 return JSON.parse('"' + string + '"');
             }
