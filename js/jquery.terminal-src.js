@@ -859,10 +859,10 @@
                 }
             },
             map: function(fn) {
-                return data.map(fn);
+                return data.filter(Boolean).map(fn);
             },
             forEach: function(fn) {
-                data.forEach(fn);
+                data.filter(Boolean).forEach(fn);
             },
             append: function(item) {
                 data.push(item);
