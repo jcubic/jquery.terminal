@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 09 May 2017 15:04:03 +0000
+ * Date: Tue, 09 May 2017 16:56:29 +0000
  */
 
 /* TODO:
@@ -2331,7 +2331,7 @@
         // :: return array of formatting and text between them
         // ---------------------------------------------------------------------
         format_split: function format_split(str) {
-            return str.split(format_split_re);
+            return str.split(format_split_re).filter(Boolean);
         },
         // ---------------------------------------------------------------------
         // :: helper function used by substring and split_equal it loop over
@@ -2433,10 +2433,12 @@
             var start_formatting = '';
             var end_formatting = '';
             $.terminal.iterate_formatting(string, function(data) {
-                if (data.count === start_index) {
+                if (data.count === start_index + 1) {
                     start = data.index;
-                    start_formatting = data.formatting;
-                } else if (end_index && data.count === end_index) {
+                    if (data.formatting) {
+                        start_formatting = data.formatting;
+                    }
+                } else if (end_index && data.count === end_index+1) {
                     end = data.index;
                     end_formatting = data.formatting;
                 }
@@ -2445,7 +2447,7 @@
             if (end_formatting) {
                 string += ']';
             }
-            return $.terminal.normalize(string);
+            return string;
         },
         // ---------------------------------------------------------------------
         // :: add format text as 5th paramter to formatting it's used for
@@ -2459,7 +2461,10 @@
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
                 if (semicolons >= 4) {
-                    return _;
+                    var args = format.split(/;/);
+                    var start = args.slice(0, 4).join(';');
+                    var arg = args.slice(4).join(';');
+                    return '[[' + start + ';' + (arg || text) + ']' + text + ']';
                 } else if (semicolons === 2) {
                     semicolons = ';;';
                 } else if (semicolons === 3) {
@@ -2777,7 +2782,6 @@
             if (regex) {
                 return new RegExp(regex[1], regex[2]);
             } else if (arg.match(/['"]/)) {
-                console.log('string');
                 return parse_string(arg);
             } else if (arg.match(/^-?[0-9]+$/)) {
                 return parseInt(arg, 10);

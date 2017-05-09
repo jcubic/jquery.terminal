@@ -217,6 +217,84 @@ function tests_on_ready() {
             });
         });
         describe('$.terminal.format_split', function() {
+            var input = [
+                ['[[;;]][[;;]Foo][[;;]Bar][[;;]]', ['[[;;]]','[[;;]Foo]','[[;;]Bar]','[[;;]]']],
+                ['Lorem[[;;]]Ipsum[[;;]Foo]Dolor[[;;]Bar]Sit[[;;]]Amet', [
+                    'Lorem', '[[;;]]', 'Ipsum', '[[;;]Foo]', 'Dolor', '[[;;]Bar]', 'Sit', '[[;;]]', 'Amet'
+                ]]
+            ];
+            it('should split text inot formatting', function() {
+                input.forEach(function(spec) {
+                    expect($.terminal.format_split(spec[0])).toEqual(spec[1]);
+                });
+            });
+        });
+        describe('$.terminal.substring', function() {
+            var input = '[[;;]Lorem ipsum dolor sit amet], [[;;]consectetur adipiscing elit]. [[;;]Maecenas ac massa tellus. Sed ac feugiat leo].';
+            it('should return substring when starting at 0', function() {
+                var tests = [
+                    [25, '[[;;]Lorem ipsum dolor sit ame]'],
+                    [26, '[[;;]Lorem ipsum dolor sit amet]'],
+                    [27, '[[;;]Lorem ipsum dolor sit amet],'],
+                    [30, '[[;;]Lorem ipsum dolor sit amet], [[;;]co]']
+                ];
+                tests.forEach(function(spec) {
+                    expect($.terminal.substring(input, 0, spec[0])).toEqual(spec[1]);
+                });
+            });
+            it('should return substring when ending at length or larger', function() {
+                var tests = [
+                    [0, '[[;;]Lorem ipsum dolor sit amet], [[;;]consectetur adipiscing elit]. [[;;]Maecenas ac massa tellus. Sed ac feugiat leo].'],
+                    [10, '[[;;]m dolor sit amet], [[;;]consectetur adipiscing elit]. [[;;]Maecenas ac massa tellus. Sed ac feugiat leo].'],
+                    [27, ' [[;;]consectetur adipiscing elit]. [[;;]Maecenas ac massa tellus. Sed ac feugiat leo].'],
+                    [30, '[[;;]nsectetur adipiscing elit]. [[;;]Maecenas ac massa tellus. Sed ac feugiat leo].']
+                ];
+                tests.forEach(function(spec) {
+                    expect($.terminal.substring(input, spec[0], 102)).toEqual(spec[1]);
+                    expect($.terminal.substring(input, spec[0], 200)).toEqual(spec[1]);
+                });
+            });
+            it('should return substring when input starts from normal text', function() {
+                var input = 'Lorem Ipsum [[;;]Dolor]';
+                expect($.terminal.substring(input, 10, 200)).toEqual('m [[;;]Dolor]');
+            });
+            it('should substring when string have no formatting', function() {
+                var input = 'Lorem Ipsum Dolor Sit Amet';
+                var tests = [
+                    [0, 10, 'Lorem Ipsu'],
+                    [10, 20, 'm Dolor Si'],
+                    [20, 27, 't Amet']
+                ];
+                tests.forEach(function(spec) {
+                    expect($.terminal.substring(input, spec[0], spec[1])).toEqual(spec[2]);
+                });
+            });
+        });
+        describe('$.terminal.normalize', function() {
+            function test(specs) {
+                specs.forEach(function(spec) {
+                    expect($.terminal.normalize(spec[0])).toEqual(spec[1]);
+                });
+            }
+            it('should add 5 argument to formatting', function() {
+                var tests = [
+                    ['[[;;]Lorem] [[;;]Ipsum] [[;;;]Dolor]', '[[;;;;Lorem]Lorem] [[;;;;Ipsum]Ipsum] [[;;;;Dolor]Dolor]'],
+                    ['[[;;;;]Lorem Ipsum Dolor] [[;;;;]Amet]', '[[;;;;Lorem Ipsum Dolor]Lorem Ipsum Dolor] [[;;;;Amet]Amet]']
+                ];
+                test(tests);
+            });
+            it('should not add 5 argument', function() {
+                var tests = [
+                    ['[[;;;;Foo]Lorem Ipsum Dolor] [[;;;;Bar]Amet]', '[[;;;;Foo]Lorem Ipsum Dolor] [[;;;;Bar]Amet]']
+                ];
+                test(tests);
+            });
+            it('should remove empty formatting', function() {
+                var tests = [
+                    ['[[;;]]Lorem Ipsum [[;;]]Dolor Sit [[;;;;]]Amet', 'Lorem Ipsum Dolor Sit Amet']
+                ];
+                test(tests);
+            });
         });
         describe('$.terminal.is_formatting', function() {
 
