@@ -59,7 +59,7 @@ terminal.jquery.json: manifest .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json
 
 www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
-	@test $(BRANCH) = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
+	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 test:
 	$(JASMINE) --captureExceptions --verbose --junitreport --color --forceexit spec
