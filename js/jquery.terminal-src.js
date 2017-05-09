@@ -2438,7 +2438,7 @@
                     if (data.formatting) {
                         start_formatting = data.formatting;
                     }
-                } else if (end_index && data.count === end_index+1) {
+                } else if (end_index && data.count === end_index + 1) {
                     end = data.index;
                     end_formatting = data.formatting;
                 }

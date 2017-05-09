@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 09 May 2017 16:56:29 +0000
+ * Date: Tue, 09 May 2017 16:58:38 +0000
  */
 
 /* TODO:
@@ -2438,7 +2438,7 @@
                     if (data.formatting) {
                         start_formatting = data.formatting;
                     }
-                } else if (end_index && data.count === end_index+1) {
+                } else if (end_index && data.count === end_index + 1) {
                     end = data.index;
                     end_formatting = data.formatting;
                 }
