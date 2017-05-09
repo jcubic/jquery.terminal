@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 07 May 2017 09:41:10 +0000
+ * Date: Tue, 09 May 2017 15:04:03 +0000
  */
 
 /* TODO:
@@ -2428,24 +2428,22 @@
             if (!$.terminal.have_formatting(string)) {
                 return string.substring(start_index, end_index);
             }
-            if (start_index > 0) {
-                var start;
-                var end = string.length;
-                var start_formatting = '';
-                var end_formatting = '';
-                $.terminal.iterate_formatting(string, function(data) {
-                    if (data.count === start_index) {
-                        start = data.index;
-                        start_formatting = data.formatting;
-                    } else if (end_index && data.count === end_index) {
-                        end = data.index;
-                        end_formatting = data.formatting;
-                    }
-                });
-                string = start_formatting + string.substring(start, end);
-                if (end_formatting) {
-                    string += ']';
+            var start;
+            var end = string.length;
+            var start_formatting = '';
+            var end_formatting = '';
+            $.terminal.iterate_formatting(string, function(data) {
+                if (data.count === start_index) {
+                    start = data.index;
+                    start_formatting = data.formatting;
+                } else if (end_index && data.count === end_index) {
+                    end = data.index;
+                    end_formatting = data.formatting;
                 }
+            });
+            string = start_formatting + string.substring(start, end);
+            if (end_formatting) {
+                string += ']';
             }
             return $.terminal.normalize(string);
         },
@@ -2455,6 +2453,9 @@
         // ---------------------------------------------------------------------
         normalize: function normalize(string) {
             return string.replace(format_re, function(_, format, text) {
+                if (text === '') {
+                    return '';
+                }
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
                 if (semicolons >= 4) {
