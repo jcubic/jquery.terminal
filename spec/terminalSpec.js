@@ -1749,10 +1749,15 @@ function tests_on_ready() {
                         term.logout();
                     }
                     setTimeout(function() {
-                        expect(options.login).toHaveBeenCalled();
-                        expect(test.test).toHaveBeenCalledWith('foo');
-                        term.logout().destroy().remove();
-                        done();
+                        try {
+                            expect(options.login).toHaveBeenCalled();
+                            expect(test.test).toHaveBeenCalledWith('foo');
+                            term.logout().destroy().remove();
+                        } catch (e) {
+                            console.log(e.stack);
+                        } finally {
+                            done();
+                        }
                     }, 500);
                 }, 1000);
             });
