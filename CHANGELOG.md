@@ -4,6 +4,8 @@
 * add paste using context menu
 * fix `wordAutocomplete` and add `completionEscape` option
 * improve parsing commands (it now convert "foo"bar'baz' to foobarbaz like bash)
+* fix normalize and substring
+* remove empty formatting in normalize function
 
 ## 1.3.1
 * fix cols/rows that was causing signature to not show
