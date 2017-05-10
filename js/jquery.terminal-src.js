@@ -859,10 +859,10 @@
                 }
             },
             map: function(fn) {
-                return data.map(fn);
+                return data.filter(Boolean).map(fn);
             },
             forEach: function(fn) {
-                data.forEach(fn);
+                data.filter(Boolean).forEach(fn);
             },
             append: function(item) {
                 data.push(item);
@@ -2124,7 +2124,7 @@
             }
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
-            bind('input.cmd', input);
+            unbind('input.cmd', input);
         (function() {
             var isDragging = false;
             var was_down = false;
@@ -2245,7 +2245,7 @@
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+\b)/gi;
     var url_nf_re = /\b(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)\b(?![^[\]]*])/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
-    var command_re = /("[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimy]*(?=\s|$)|(?:\\\s|\S)+)/gi;
+    var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
@@ -2331,7 +2331,7 @@
         // :: return array of formatting and text between them
         // ---------------------------------------------------------------------
         format_split: function format_split(str) {
-            return str.split(format_split_re);
+            return str.split(format_split_re).filter(Boolean);
         },
         // ---------------------------------------------------------------------
         // :: helper function used by substring and split_equal it loop over
@@ -2428,26 +2428,26 @@
             if (!$.terminal.have_formatting(string)) {
                 return string.substring(start_index, end_index);
             }
-            if (start_index > 0) {
-                var start;
-                var end = string.length;
-                var start_formatting = '';
-                var end_formatting = '';
-                $.terminal.iterate_formatting(string, function(data) {
-                    if (data.count === start_index) {
-                        start = data.index;
+            var start;
+            var end = string.length;
+            var start_formatting = '';
+            var end_formatting = '';
+            $.terminal.iterate_formatting(string, function(data) {
+                if (data.count === start_index + 1) {
+                    start = data.index;
+                    if (data.formatting) {
                         start_formatting = data.formatting;
-                    } else if (end_index && data.count === end_index) {
-                        end = data.index;
-                        end_formatting = data.formatting;
                     }
-                });
-                string = start_formatting + string.substring(start, end);
-                if (end_formatting) {
-                    string += ']';
+                } else if (end_index && data.count === end_index + 1) {
+                    end = data.index;
+                    end_formatting = data.formatting;
                 }
+            });
+            string = start_formatting + string.substring(start, end);
+            if (end_formatting) {
+                string += ']';
             }
-            return $.terminal.normalize(string);
+            return string;
         },
         // ---------------------------------------------------------------------
         // :: add format text as 5th paramter to formatting it's used for
@@ -2455,10 +2455,16 @@
         // ---------------------------------------------------------------------
         normalize: function normalize(string) {
             return string.replace(format_re, function(_, format, text) {
+                if (text === '') {
+                    return '';
+                }
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
                 if (semicolons >= 4) {
-                    return _;
+                    var args = format.split(/;/);
+                    var start = args.slice(0, 4).join(';');
+                    var arg = args.slice(4).join(';');
+                    return '[[' + start + ';' + (arg || text) + ']' + text + ']';
                 } else if (semicolons === 2) {
                     semicolons = ';;';
                 } else if (semicolons === 3) {
@@ -2751,6 +2757,13 @@
         // :: and escapes spaces
         // ---------------------------------------------------------------------
         parse_argument: function parse_argument(arg, strict) {
+            function parse_string(string) {
+                // remove quotes if before are even number of slashes
+                // we don't remove slases becuase they are handled by JSON.parse
+                string = string.replace(/((^|[^\\])(?:\\\\)*)['"]/g, '$1');
+                // use build in function to parse rest of escaped characters
+                return JSON.parse('"' + string + '"');
+            }
             if (strict === false) {
                 if (arg[0] === "'" && arg[arg.length - 1] === "'") {
                     return arg.replace(/^'|'$/g, '');
@@ -2758,6 +2771,9 @@
                     return arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
                 } else if (arg.match(/\/.*\/[gimy]*$/)) {
                     return arg;
+                } else if (arg.match(/['"]]/)) {
+                    // part of arg is in quote
+                    return parse_string(arg);
                 } else {
                     return arg.replace(/\\ /g, ' ');
                 }
@@ -2765,18 +2781,12 @@
             var regex = arg.match(re_re);
             if (regex) {
                 return new RegExp(regex[1], regex[2]);
-            } else if (arg[0] === "'" && arg[arg.length - 1] === "'" &&
-                       arg.length > 1) {
-                return arg.replace(/^'|'$/g, '');
-            } else if (arg[0] === '"' && arg[arg.length - 1] === '"' &&
-                       arg.length > 1) {
-                return JSON.parse(arg);
+            } else if (arg.match(/['"]/)) {
+                return parse_string(arg);
             } else if (arg.match(/^-?[0-9]+$/)) {
                 return parseInt(arg, 10);
             } else if (arg.match(float_re)) {
                 return parseFloat(arg);
-            } else if (arg.match(/^['"]$/)) {
-                return '';
             } else {
                 return arg.replace(/\\(['"() ])/g, '$1');
             }
@@ -3017,22 +3027,6 @@
         return Math.floor(terminal.find('.terminal-fill').height() / char_size().height);
     }
     // -----------------------------------------------------------------------
-    // :: Get Selected Text (this is internal because it return text even if
-    // :: it's outside of terminal, is used to paste text to the terminal)
-    // -----------------------------------------------------------------------
-    function get_selected_text() {
-        if (window.getSelection || document.getSelection) {
-            var selection = (window.getSelection || document.getSelection)();
-            if (selection.text) {
-                return selection.text;
-            } else {
-                return selection.toString();
-            }
-        } else if (document.selection) {
-            return document.selection.createRange().text;
-        }
-    }
-    // -----------------------------------------------------------------------
     // :: try to copy given DOM element text to clipboard
     // -----------------------------------------------------------------------
     function text_to_clipboard(container, text) {
@@ -3124,6 +3118,7 @@
         processArguments: true,
         linksNoReferrer: false,
         processRPCResponse: null,
+        completionEscape: true,
         convertLinks: true,
         extra: {},
         historyState: false,
@@ -3762,9 +3757,7 @@
         function validate(label, object) {
             try {
                 if ($.isFunction(object)) {
-                    object(function() {
-                        // don't care
-                    });
+                    object.call(self, $.noop, self);
                 } else if (typeof object !== 'string') {
                     var msg = label + ' must be string or function';
                     throw msg;
@@ -4301,6 +4294,28 @@
             return in_login || command_line.mask() !== false;
         }
         // ---------------------------------------------------------------------
+        // :: return string that are common in all elements of the array
+        // ---------------------------------------------------------------------
+        function common_string(string, array) {
+            if (!array.length) {
+                return '';
+            }
+            var found = false;
+            loop:
+            for (var j = string.length; j < array[0].length; ++j) {
+                for (var i = 1; i < array.length; ++i) {
+                    if (array[0].charAt(j) !== array[i].charAt(j)) {
+                        break loop;
+                    }
+                }
+                found = true;
+            }
+            if (found) {
+                return array[0].slice(0, j);
+            }
+            return '';
+        }
+        // ---------------------------------------------------------------------
         // :: Keydown event handler
         // ---------------------------------------------------------------------
         function user_key_down(e) {
@@ -4363,17 +4378,20 @@
                             }
                             completion.call(self, string, function(commands) {
                                 self.complete(commands, {
-                                    echo: true
+                                    echo: true,
+                                    word: settings.wordAutocomplete,
+                                    escape: settings.completionEscape
                                 });
                             });
                             break;
                         case 'array':
                             self.complete(completion, {
-                                echo: true
+                                echo: true,
+                                word: settings.wordAutocomplete,
+                                escape: settings.completionEscape
                             });
                             break;
                         default:
-                            // terminal will not catch this because it's an event
                             throw new Error(strings().invalidCompletion);
                     }
                 } else {
@@ -4800,19 +4818,22 @@
             complete: function(commands, options) {
                 options = $.extend({
                     word: true,
-                    echo: false
+                    echo: false,
+                    escape: true
                 }, options || {});
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
                 var string = self.before_cursor(options.word).replace(/\\"/g, '"');
                 var quote = false;
-                if (string.match(/^"/)) {
-                    quote = '"';
-                } else if (string.match(/^'/)) {
-                    quote = "'";
-                }
-                if (quote) {
-                    string = string.replace(/^["']/, '');
+                if (options.word) {
+                    if (string.match(/^"/)) {
+                        quote = '"';
+                    } else if (string.match(/^'/)) {
+                        quote = "'";
+                    }
+                    if (quote) {
+                        string = string.replace(/^["']/, '');
+                    }
                 }
                 // local copy
                 commands = commands.slice();
@@ -4831,8 +4852,10 @@
                         return;
                     }
                 }
-                var safe = $.terminal.escape_regex(string)
-                    .replace(/\\(["'() ])/g, '\\?$1');
+                var safe = $.terminal.escape_regex(string);
+                if (options.escape) {
+                    safe = safe.replace(/\\(["'() ])/g, '\\?$1');
+                }
                 var regex = new RegExp('^' + safe);
                 var matched = [];
                 for (var i = commands.length; i--;) {
@@ -4841,7 +4864,7 @@
                         if (quote === '"') {
                             match = match.replace(/"/g, '\\"');
                         }
-                        if (!quote) {
+                        if (!quote && options.escape) {
                             match = match.replace(/(["'() ])/g, '\\$1');
                         }
                         matched.push(match);
@@ -4863,19 +4886,9 @@
                             return true;
                         }
                     } else {
-                        var found = false;
-                        var j;
-                        loop:
-                        for (j = string.length; j < matched[0].length; ++j) {
-                            for (i = 1; i < matched.length; ++i) {
-                                if (matched[0].charAt(j) !== matched[i].charAt(j)) {
-                                    break loop;
-                                }
-                            }
-                            found = true;
-                        }
-                        if (found) {
-                            self.insert(matched[0].slice(0, j).replace(regex, ''));
+                        var common = common_string(string, matched);
+                        if (common) {
+                            self.insert(common.replace(regex, ''));
                             command = self.before_cursor(options.word);
                             return true;
                         }
@@ -5329,17 +5342,7 @@
                         } else if ($.isFunction(line)) {
                             // this is finalize function from echo
                             wrapper.appendTo(output);
-                            try {
-                                line(wrapper);
-                                /* this don't work with resize
-                                   line(wrapper, function(user_finalize) {
-                                   // TODO:
-                                   // user_finalize need to be save in line object
-                                   user_finalize(wrapper);
-                                   });*/
-                            } catch (e) {
-                                display_exception(e, 'USER:echo(finalize)');
-                            }
+                            line(wrapper);
                         } else {
                             $('<div/>').html(line)
                                 .appendTo(wrapper).width('100%');
@@ -5469,10 +5472,17 @@
                         }
                     }
                 }
-                if ($.isFunction(string.then)) {
-                    $.when(string).done(echo);
-                } else {
-                    echo(string);
+                try {
+                    if (options && $.isFunction(options.finalize)) {
+                        options.finalize($('<div/>'));
+                    }
+                    if ($.isFunction(string.then)) {
+                        $.when(string).done(echo);
+                    } else {
+                        echo(string);
+                    }
+                } catch (e) {
+                    display_exception(e, 'USER:echo(finalize)');
                 }
                 return self;
             },
@@ -5838,7 +5848,8 @@
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
                     self.unbind('click wheel mousewheel mousedown mouseup');
-                    self.removeData('terminal').removeClass('terminal');
+                    self.removeData('terminal').removeClass('terminal').
+                        unbind('.terminal');
                     if (settings.width) {
                         self.css('width', '');
                     }
@@ -5965,7 +5976,7 @@
             old_enabled = enabled;
             self.disable();
         }
-        function paste_image(e) {
+        function paste_event(e) {
             e = e.originalEvent;
             // we don't care about browser that don't support clipboard data
             // those browser simple will not have this feature normal paste
@@ -5979,12 +5990,18 @@
                             var URL = window.URL || window.webkitURL;
                             var source = URL.createObjectURL(blob);
                             self.echo('<img src="' + source + '"/>', {raw: true});
+                        } else if (items[i].type.indexOf('text/plain') !== -1) {
+                            items[i].getAsString(self.insert);
                         }
                     }
+                } else if (e.clipboardData.getData) {
+                    var text = e.clipboardData.getData('text/plain');
+                    self.insert(text);
                 }
+                return false;
             }
         }
-        $(document).on('paste.terminal_' + self.id(), paste_image);
+        $(document).on('paste.terminal_' + self.id(), paste_event);
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
             if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
@@ -6089,6 +6106,9 @@
                         } else {
                             target = parents.andSelf();
                         }
+                        if (e.originalEvent.button === 2) {
+                            return;
+                        }
                         self.oneTime(1, function() {
                             $(window).on('mousemove.terminal_' + self.id(), function() {
                                 isDragging = true;
@@ -6129,6 +6149,28 @@
                         self.stopTime('click_' + self.id());
                     });
                 })();
+                (function() {
+                    var clip = self.find('textarea');
+                    self.on('mousedown.terminal', function(e) {
+                        if (e.originalEvent.button === 2) {
+                            if (!self.enabled()) {
+                                self.enable();
+                            }
+                            e.preventDefault();
+                            var offset = command_line.offset();
+                            clip.css({
+                                left: e.pageX - offset.left - 5,
+                                top: e.pageY - offset.top - 5
+                            });
+                        }
+                    });
+                    // contextmenu is fired after mousedown
+                    self.bind('contextmenu', function() {
+                        self.oneTime(100, function() {
+                            clip.css({left: '', top: ''});
+                        });
+                    });
+                })();
             }
             self.delegate('.exception a', 'click', function(e) {
                 // .on('click', '.exception a', function(e) {
@@ -6137,12 +6179,6 @@
                 if (href.match(/:[0-9]+$/)) { // display line if specified
                     e.preventDefault();
                     print_line(href);
-                }
-            });
-            self.mousedown(function(e) {
-                if (e.which === 2) {
-                    var selected = get_selected_text();
-                    self.insert(selected);
                 }
             });
             if (self.is(':visible')) {

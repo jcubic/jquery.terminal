@@ -90,6 +90,7 @@
             animation: terminal-blink 1s infinite steps(1, start);
     border-left: 1px solid transparent;
     margin-left: -1px;
+    margin-top: 1px;
 }
 .bar.terminal .inverted, .bar.cmd .inverted {
     border-left-color: #aaa;
@@ -172,72 +173,56 @@
   0%, 100% {
       border-bottom-color: #aaa;
       position: relative;
-      top: 2px;
       line-height: 12px;
       border-left: none;
-      margin: 0;
   }
   50% {
       border-bottom-color: #000;
       position: relative;
-      top: 2px;
       line-height: 12px;
       border-left: none;
-      margin: 0;
   }
 }
 @-ms-keyframes terminal-underline {
   0%, 100% {
       border-bottom-color: #aaa;
       position: relative;
-      top: 2px;
       line-height: 12px;
       border-left: none;
-      margin: 0;
   }
   50% {
       border-bottom-color: #000;
       position: relative;
-      top: 2px;
       line-height: 12px;
       border-left: none;
-      margin: 0;
   }
 }
 @-moz-keyframes terminal-underline {
   0%, 100% {
       border-bottom-color: #aaa;
       position: relative;
-      top: 2px;
       line-height: 12px;
       border-left: none;
-      margin: 0;
   }
   50% {
       border-bottom-color: #000;
       position: relative;
-      top: 2px;
       line-height: 11px;
       border-left: none;
-      margin: 0;
   }
 }
 @keyframes terminal-underline {
   0%, 100% {
       border-bottom-color: #aaa;
       position: relative;
-      top: 2px;
       line-height: 11px;
       border-left: none;
-      margin: 0;
   }
   50% {
       border-bottom-color: #000;
       position: relative;
-      top: 2px;
       line-height: 11px;
       border-left: none;
-      margin: 0;
   }
 }
 .terminal .terminal-output div div, .cmd .prompt {
@@ -423,7 +408,7 @@
                 animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
         color: var(--color, #aaa);
         background-color: var(--background, #000);
-        margin-bottom: -3px;
+        margin-top: calc(var(--size) * 1px);
     }
     .terminal h1::-moz-selection,
     .terminal h2::-moz-selection,
@@ -542,72 +527,56 @@
       0%, 100% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
-          top: 2px;
           line-height: calc(var(--size, 1) * 12px);
           border-left: none;
-          margin: 0;
       }
       50% {
           border-bottom-color: var(--background, #000);
           position: relative;
-          top: 2px;
           line-height: calc(var(--size, 1) * 12px);
           border-left: none;
-          margin: 0;
       }
     }
     @-ms-keyframes terminal-underline {
       0%, 100% {
           border-bottom-color: var(--background, #000);
           position: relative;
-          top: 2px;
           line-height: calc(var(--size, 1) * 12px);
           border-left: none;
-          margin: 0;
       }
       50% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
-          top: 2px;
           line-height: calc(var(--size, 1) * 12px);
           border-left: none;
-          margin: 0;
       }
     }
     @-moz-keyframes terminal-underline {
       0%, 100% {
           border-bottom-color: var(--background, #000);
           position: relative;
-          top: 2px;
           line-height: calc(var(--size, 1) * 12px);
           border-left: none;
-          margin: 0;
       }
       50% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
-          top: 2px;
           line-height: calc(var(--size, 1) * 12px);
           border-left: none;
-          margin: 0;
       }
     }
     @keyframes terminal-underline {
       0%, 100% {
           border-bottom-color: var(--background, #000);
           position: relative;
-          top: 2px;
           line-height: calc(var(--size, 1) * 12px);
           border-left: none;
-          margin: 0;
       }
       50% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
-          top: 2px;
           line-height: calc(var(--size, 1) * 12px);
           border-left: none;
-          margin: 0;
       }
     }
 }
