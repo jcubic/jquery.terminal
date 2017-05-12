@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.4.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 10 May 2017 07:23:33 +0000
+ * Date: Fri, 12 May 2017 10:08:40 +0000
  */
 
 /* TODO:
@@ -2255,7 +2255,7 @@
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
-        version: '1.4.0',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -2678,16 +2678,18 @@
                             var result;
                             if (style.indexOf('!') !== -1) {
                                 if (data.match(email_re)) {
-                                    result = '<a href="mailto:' + data + '" ';
+                                    result = '<a href="mailto:' + data + '"';
                                 } else {
-                                    result = '<a target="_blank" href="' + data + '" ';
+                                    result = '<a target="_blank" href="' + data + '"';
                                     if (settings.linksNoReferrer) {
-                                        result += 'rel="noreferrer" ';
+                                        result += ' rel="noreferrer noopener"';
+                                    } else {
+                                        result += ' rel="noopener"';
                                     }
                                 }
                                 // make focus to terminal textarea that will enable
                                 // terminal when pressing tab and terminal is disabled
-                                result += 'tabindex="1000" ';
+                                result += ' tabindex="1000"';
                             } else {
                                 result = '<span';
                             }

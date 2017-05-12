@@ -2678,16 +2678,18 @@
                             var result;
                             if (style.indexOf('!') !== -1) {
                                 if (data.match(email_re)) {
-                                    result = '<a href="mailto:' + data + '" ';
+                                    result = '<a href="mailto:' + data + '"';
                                 } else {
-                                    result = '<a target="_blank" href="' + data + '" ';
+                                    result = '<a target="_blank" href="' + data + '"';
                                     if (settings.linksNoReferrer) {
-                                        result += 'rel="noreferrer" ';
+                                        result += ' rel="noreferrer noopener"';
+                                    } else {
+                                        result += ' rel="noopener"';
                                     }
                                 }
                                 // make focus to terminal textarea that will enable
                                 // terminal when pressing tab and terminal is disabled
-                                result += 'tabindex="1000" ';
+                                result += ' tabindex="1000"';
                             } else {
                                 result = '<span';
                             }
