@@ -1,3 +1,6 @@
+## 1.4.1
+* add rel="noopener" to all links
+
 ## 1.4.0
 * fix recursive exception when `finalize` echo function throw exception
 * fix underline animation
