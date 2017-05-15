@@ -1,5 +1,6 @@
 ## 1.4.1
 * add rel="noopener" to all links
+* remove anonymous function name that was duplicating parameter with the same name
 
 ## 1.4.0
 * fix recursive exception when `finalize` echo function throw exception
