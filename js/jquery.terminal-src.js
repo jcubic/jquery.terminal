@@ -3309,14 +3309,14 @@
                     url: url,
                     method: method,
                     params: params,
-                    request: function request(jxhr, request) {
+                    request: function(jxhr, request) {
                         try {
                             settings.request.apply(self, jxhr, request, self);
                         } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
-                    response: function response(jxhr, response) {
+                    response: function(jxhr, response) {
                         try {
                             settings.response.apply(self, jxhr, response, self);
                         } catch (e) {
@@ -3553,14 +3553,14 @@
                 method: 'system.describe',
                 params: [],
                 success: response,
-                request: function request(jxhr, request) {
+                request: function(jxhr, request) {
                     try {
                         settings.request.call(self, jxhr, request, self);
                     } catch (e) {
                         display_exception(e, 'USER');
                     }
                 },
-                response: function response(jxhr, response) {
+                response: function(jxhr, response) {
                     try {
                         settings.response.call(self, jxhr, response, self);
                     } catch (e) {
@@ -3692,14 +3692,14 @@
                     url: url,
                     method: method,
                     params: [user, passwd],
-                    request: function request(jxhr, request) {
+                    request: function(jxhr, request) {
                         try {
                             settings.request.call(self, jxhr, request, self);
                         } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
-                    response: function response(jxhr, response) {
+                    response: function(jxhr, response) {
                         try {
                             settings.response.call(self, jxhr, response, self);
                         } catch (e) {
