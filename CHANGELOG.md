@@ -1,3 +1,6 @@
+## 1.4.2
+* fix context menu pasting and pasting images when terminal not in focus
+
 ## 1.4.1
 * add rel="noopener" to all links
 * remove anonymous function name that was duplicating parameter with the same name
