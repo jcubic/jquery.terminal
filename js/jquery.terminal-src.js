@@ -5984,23 +5984,25 @@
             // those browser simple will not have this feature normal paste
             // is cross-browser and it's handled by cmd plugin
             if (e.clipboardData) {
-                var items = e.clipboardData.items;
-                if (items) {
-                    for (var i = 0; i < items.length; i++) {
-                        if (items[i].type.indexOf('image') !== -1) {
-                            var blob = items[i].getAsFile();
-                            var URL = window.URL || window.webkitURL;
-                            var source = URL.createObjectURL(blob);
-                            self.echo('<img src="' + source + '"/>', {raw: true});
-                        } else if (items[i].type.indexOf('text/plain') !== -1) {
-                            items[i].getAsString(self.insert);
+                if (self.enabled()) {
+                    var items = e.clipboardData.items;
+                    if (items) {
+                        for (var i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf('image') !== -1) {
+                                var blob = items[i].getAsFile();
+                                var URL = window.URL || window.webkitURL;
+                                var source = URL.createObjectURL(blob);
+                                self.echo('<img src="' + source + '"/>', {raw: true});
+                            } else if (items[i].type.indexOf('text/plain') !== -1) {
+                                items[i].getAsString(self.insert);
+                            }
                         }
+                    } else if (e.clipboardData.getData) {
+                        var text = e.clipboardData.getData('text/plain');
+                        self.insert(text);
                     }
-                } else if (e.clipboardData.getData) {
-                    var text = e.clipboardData.getData('text/plain');
-                    self.insert(text);
+                    return false;
                 }
-                return false;
             }
         }
         $(document).on('paste.terminal_' + self.id(), paste_event);

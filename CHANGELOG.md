@@ -1,12 +1,19 @@
+## 1.4.2
+* fix context menu pasting and pasting images when terminal not in focus (thanks to Alex Molchanov
+  for reporing a bug)
+
 ## 1.4.1
 * add rel="noopener" to all links
-* remove anonymous function name that was duplicating parameter with the same name
+* remove anonymous function name that was duplicating parameter with the same name that was causing error
+  in PhantomJS (thanks to @rteshnizi for bug report)
 
 ## 1.4.0
+### Features
+* add paste using context menu
+### Bugs
 * fix recursive exception when `finalize` echo function throw exception
 * fix underline animation
-* add paste using context menu
-* fix `wordAutocomplete` and add `completionEscape` option
+* fix `wordAutocomplete` and add `completionEscape` option (issue reported by Quentin Barrand)
 * improve parsing commands (it now convert "foo"bar'baz' to foobarbaz like bash)
 * fix normalize and substring
 * remove empty formatting in normalize function
@@ -15,25 +22,28 @@
 * fix cols/rows that was causing signature to not show
 
 ## 1.3.0
-* remove `onPop` event from main interpreter (with null as next)
-* add `args_quotes` to `parse_/split_ command` api utilities
-* mousewheel work without jQuery mousewheel and fix jumps of text
+### Feateres
 * paste of images (using `echo`) in browsers that support clipboard event
-* fix number of rows after adding underline animation
-* fix outputLimit
-* element resizer (as jQuery plugin) that work inside iframe
+* add `args_quotes` to `parse_/split_ command` api utilities
 * add `IntersectionObserver` to add resizer and call resize (not all browser support it,
   polyfill exists)
 * add `MutationObserver` to detect when terminal is added/removed from DOM and
   call `IntersectionObserver` when added
-* fix calculation of cols and rows
 * new API utiltites `normalize`, `substring`, `unclosed_strings` and helper `iterate_formatting`
-* strings object are not longer saved in variable on terminal creation so you can
-* change it dynamically after terminal is created (use command to change language)
-* when using rpc or object interpreter it will throw exception when there are unclosed strings
 * add default formatter that handle nested formatting
+* when using rpc or object interpreter it will throw exception when there are unclosed strings
+* element resizer (as jQuery plugin) that work inside iframe
+### Bugs
+* remove `onPop` event from main interpreter (with null as next)
+* mousewheel work without jQuery mousewheel and fix jumps of text
+* fix number of rows after adding underline animation
+* fix outputLimit
+* fix calculation of cols and rows
+* strings object are not longer saved in variable on terminal creation so you can
+  change it dynamically after terminal is created (use command to change language)
 
 ## 1.2.0
+### Features
 * make terminal accessible to screen readers:
   * terminal focus using tab key (we can't blur on tab keybecause it's used
     to enter tab character or for completion)

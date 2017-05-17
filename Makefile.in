@@ -6,12 +6,12 @@ CAT=cat
 DATE=`date -uR`
 GIT=git
 BRANCH=`git branch | grep '^*' | sed 's/* //'`
-ESLINT=./node_modules/eslint/bin/eslint.js
-UGLIFY=./node_modules/uglifyjs/bin/uglifyjs
-JSONLINT=./node_modules/jsonlint/lib/cli.js
-ISTANBUL=./node_modules/istanbul/lib/cli.js
-JASMINE=./node_modules/jasmine-node/bin/jasmine-node
-CSSNANO=./node_modules/cssnano-cli/cmd.js
+ESLINT=./node_modules/.bin/eslint
+UGLIFY=./node_modules/.bin/uglifyjs
+JSONLINT=./node_modules/.bin/jsonlint
+ISTANBUL=./node_modules/.bin/istanbul
+JASMINE=./node_modules/.bin/jasmine-node
+CSSNANO=./node_modules/.bin/cssnano
 SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
 
 ALL: Makefile .$(VERSION) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile terminal.jquery.json bower.json package.json
@@ -68,7 +68,7 @@ cover:
 	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js
 
 coveralls:
-	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js --captureExceptions && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js -v
+	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js --captureExceptions && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls -v
 
 eslint:
 	$(ESLINT) js/jquery.terminal-src.js

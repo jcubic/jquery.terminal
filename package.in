@@ -240,6 +240,6 @@
     "jsdom": "^9.9.1",
     "jsonlint": "^1.6.2",
     "optimist": "^0.6.1",
-    "uglifyjs": "^2.4.10"
+    "uglify-js": "^3.0.7"
   }
 }

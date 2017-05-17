@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.4.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 15 May 2017 18:55:12 +0000
+ * Date: Tue, 16 May 2017 20:14:15 +0000
  */
 
 /* TODO:
@@ -2255,7 +2255,7 @@
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
-        version: '1.4.1',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5984,23 +5984,25 @@
             // those browser simple will not have this feature normal paste
             // is cross-browser and it's handled by cmd plugin
             if (e.clipboardData) {
-                var items = e.clipboardData.items;
-                if (items) {
-                    for (var i = 0; i < items.length; i++) {
-                        if (items[i].type.indexOf('image') !== -1) {
-                            var blob = items[i].getAsFile();
-                            var URL = window.URL || window.webkitURL;
-                            var source = URL.createObjectURL(blob);
-                            self.echo('<img src="' + source + '"/>', {raw: true});
-                        } else if (items[i].type.indexOf('text/plain') !== -1) {
-                            items[i].getAsString(self.insert);
+                if (self.enabled()) {
+                    var items = e.clipboardData.items;
+                    if (items) {
+                        for (var i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf('image') !== -1) {
+                                var blob = items[i].getAsFile();
+                                var URL = window.URL || window.webkitURL;
+                                var source = URL.createObjectURL(blob);
+                                self.echo('<img src="' + source + '"/>', {raw: true});
+                            } else if (items[i].type.indexOf('text/plain') !== -1) {
+                                items[i].getAsString(self.insert);
+                            }
                         }
+                    } else if (e.clipboardData.getData) {
+                        var text = e.clipboardData.getData('text/plain');
+                        self.insert(text);
                     }
-                } else if (e.clipboardData.getData) {
-                    var text = e.clipboardData.getData('text/plain');
-                    self.insert(text);
+                    return false;
                 }
-                return false;
             }
         }
         $(document).on('paste.terminal_' + self.id(), paste_event);
