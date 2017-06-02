@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 02 Jun 2017 20:23:41 +0000
+ * Date: Fri, 02 Jun 2017 22:05:05 +0000
  */
 
 /* TODO:
@@ -3133,6 +3133,7 @@
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
+        caseInsensitiveAutoComplete: false,
         clickTimeout: 200,
         request: $.noop,
         response: $.noop,
@@ -4298,7 +4299,7 @@
         // ---------------------------------------------------------------------
         // :: return string that are common in all elements of the array
         // ---------------------------------------------------------------------
-        function common_string(string, array) {
+        function common_string(string, array, caseSensitive) {
             if (!array.length) {
                 return '';
             }
@@ -4306,7 +4307,9 @@
             loop:
             for (var j = string.length; j < array[0].length; ++j) {
                 for (var i = 1; i < array.length; ++i) {
-                    if (array[0].charAt(j) !== array[i].charAt(j)) {
+                    var ch1 = caseSensitive ? array[0].charAt(j) : array[0].charAt(j).toLowerCase();
+                    var ch2 = caseSensitive ? array[i].charAt(j) : array[i].charAt(j).toLowerCase();
+                    if (ch1 !== ch2) {
                         break loop;
                     }
                 }
@@ -4382,7 +4385,8 @@
                                 self.complete(commands, {
                                     echo: true,
                                     word: settings.wordAutocomplete,
-                                    escape: settings.completionEscape
+                                    escape: settings.completionEscape,
+                                    caseSensitive: !settings.caseInsensitiveAutoComplete
                                 });
                             });
                             break;
@@ -4390,7 +4394,8 @@
                             self.complete(completion, {
                                 echo: true,
                                 word: settings.wordAutocomplete,
-                                escape: settings.completionEscape
+                                escape: settings.completionEscape,
+                                caseSensitive: !settings.caseInsensitiveAutoComplete
                             });
                             break;
                         default:
@@ -4821,7 +4826,8 @@
                 options = $.extend({
                     word: true,
                     echo: false,
-                    escape: true
+                    escape: true,
+                    caseSensitive: true
                 }, options || {});
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
@@ -4858,7 +4864,12 @@
                 if (options.escape) {
                     safe = safe.replace(/\\(["'() ])/g, '\\?$1');
                 }
-                var regex = new RegExp('^' + safe);
+                var regex;
+                if (options.caseSensitive) {
+                    regex = new RegExp('^' + safe);
+                } else {
+                    regex = new RegExp('^' + safe, 'i');
+                }
                 var matched = [];
                 for (var i = commands.length; i--;) {
                     if (regex.test(commands[i])) {
@@ -4888,7 +4899,7 @@
                             return true;
                         }
                     } else {
-                        var common = common_string(string, matched);
+                        var common = common_string(string, matched, options.caseSensitive);
                         if (common) {
                             self.insert(common.replace(regex, ''));
                             command = self.before_cursor(options.word);
