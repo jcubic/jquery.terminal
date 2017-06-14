@@ -34,15 +34,15 @@ jQuery(document).ready(function($) {
     var settings = {
             height: 100,
             enabled: false,
-            completion: ['YES', 'NO'],
-            caseInsensitiveAutoComplete: true,
-            greetings: 'AutoComplete',
+            completion: ['YES', 'yEeS', 'NO'],
+            caseInsensitiveAutocomplete: true,
             keypress: function(e) {
                 if (e.which == 96) {
                     return false;
                 }
             }
         };
+        settings.greetings = 'AutoComplete [Case Sensitive: ' + !settings.caseInsensitiveAutocomplete + ']';
     var eval = function(command, term) {
 
     }

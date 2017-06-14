@@ -3133,7 +3133,7 @@
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
-        caseInsensitiveAutoComplete: false,
+        caseInsensitiveAutocomplete: false,
         clickTimeout: 200,
         request: $.noop,
         response: $.noop,
@@ -4388,7 +4388,7 @@
                                     echo: true,
                                     word: settings.wordAutocomplete,
                                     escape: settings.completionEscape,
-                                    caseSensitive: !settings.caseInsensitiveAutoComplete
+                                    caseSensitive: !settings.caseInsensitiveAutocomplete
                                 });
                             });
                             break;
@@ -4397,7 +4397,7 @@
                                 echo: true,
                                 word: settings.wordAutocomplete,
                                 escape: settings.completionEscape,
-                                caseSensitive: !settings.caseInsensitiveAutoComplete
+                                caseSensitive: !settings.caseInsensitiveAutocomplete
                             });
                             break;
                         default:
@@ -4886,7 +4886,7 @@
                     }
                 }
                 if (matched.length === 1) {
-                    self.insert(matched[0].replace(regex, '') + (quote || ''));
+                    self.set_command(matched[0] + (quote || ''));
                     command = self.before_cursor(options.word);
                     return true;
                 } else if (matched.length > 1) {

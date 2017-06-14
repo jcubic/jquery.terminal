@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 14 Jun 2017 17:03:59 +0000
+ * Date: Wed, 14 Jun 2017 17:36:40 +0000
  */
 
 /* TODO:
@@ -3133,7 +3133,7 @@
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
-        caseInsensitiveAutoComplete: false,
+        caseInsensitiveAutocomplete: false,
         clickTimeout: 200,
         request: $.noop,
         response: $.noop,
@@ -4388,7 +4388,7 @@
                                     echo: true,
                                     word: settings.wordAutocomplete,
                                     escape: settings.completionEscape,
-                                    caseSensitive: !settings.caseInsensitiveAutoComplete
+                                    caseSensitive: !settings.caseInsensitiveAutocomplete
                                 });
                             });
                             break;
@@ -4397,7 +4397,7 @@
                                 echo: true,
                                 word: settings.wordAutocomplete,
                                 escape: settings.completionEscape,
-                                caseSensitive: !settings.caseInsensitiveAutoComplete
+                                caseSensitive: !settings.caseInsensitiveAutocomplete
                             });
                             break;
                         default:
@@ -4886,7 +4886,7 @@
                     }
                 }
                 if (matched.length === 1) {
-                    self.insert(matched[0].replace(regex, '') + (quote || ''));
+                    self.set_command(matched[0] + (quote || ''));
                     command = self.before_cursor(options.word);
                     return true;
                 } else if (matched.length > 1) {
