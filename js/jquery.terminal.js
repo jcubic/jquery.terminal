@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 14 Jun 2017 17:36:40 +0000
+ * Date: Wed, 14 Jun 2017 18:21:56 +0000
  */
 
 /* TODO:
@@ -4366,7 +4366,7 @@
                 var top = interpreters.top(), completion;
                 if (settings.completion &&
                     $.type(settings.completion) !== 'boolean' &&
-                    top.completion === undefined) {
+                    typeof top.completion === 'undefined') {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
@@ -4375,6 +4375,12 @@
                     completion = settings.completion;
                 }
                 if (completion) {
+                    var caseSensitive;
+                    if (typeof top.caseInsensitiveAutocomplete !== 'undefined') {
+                        caseSensitive = !top.caseInsensitiveAutocomplete;
+                    } else {
+                        caseSensitive = !settings.caseInsensitiveAutocomplete;
+                    }
                     switch ($.type(completion)) {
                         case 'function':
                             var string = self.before_cursor(settings.wordAutocomplete);
@@ -4388,7 +4394,7 @@
                                     echo: true,
                                     word: settings.wordAutocomplete,
                                     escape: settings.completionEscape,
-                                    caseSensitive: !settings.caseInsensitiveAutocomplete
+                                    caseSensitive: caseSensitive
                                 });
                             });
                             break;
@@ -4397,7 +4403,7 @@
                                 echo: true,
                                 word: settings.wordAutocomplete,
                                 escape: settings.completionEscape,
-                                caseSensitive: !settings.caseInsensitiveAutocomplete
+                                caseSensitive: caseSensitive
                             });
                             break;
                         default:
