@@ -4307,8 +4307,10 @@
             loop:
             for (var j = string.length; j < array[0].length; ++j) {
                 for (var i = 1; i < array.length; ++i) {
-                    var ch1 = caseSensitive ? array[0].charAt(j) : array[0].charAt(j).toLowerCase();
-                    var ch2 = caseSensitive ? array[i].charAt(j) : array[i].charAt(j).toLowerCase();
+                    var ch1 = caseSensitive ?
+                        array[0].charAt(j) : array[0].charAt(j).toLowerCase();
+                    var ch2 = caseSensitive ?
+                        array[i].charAt(j) : array[i].charAt(j).toLowerCase();
                     if (ch1 !== ch2) {
                         break loop;
                     }
@@ -4899,7 +4901,8 @@
                             return true;
                         }
                     } else {
-                        var common = common_string(string, matched, options.caseSensitive);
+                        var common =
+                            common_string(string, matched, options.caseSensitive);
                         if (common) {
                             self.insert(common.replace(regex, ''));
                             command = self.before_cursor(options.word);
