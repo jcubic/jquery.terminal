@@ -1,0 +1,56 @@
+<!-- -*- mode:javascript -*--->
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Simple Demo</title>
+  <meta name="Description" content="This is demonstration of JQuery Terminal Emulator Plugin."/>
+  <script src="../js/jquery-1.7.1.min.js"></script>
+  <script src="../js/jquery.mousewheel-min.js"></script>
+  <script src="../js/jquery.terminal.js"></script>
+  <link href="../css/jquery.terminal.css" rel="stylesheet"/>
+<!--[if IE]>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+}
+.tilda {
+    position: absolute;
+}
+</style>
+<script>
+jQuery(document).ready(function($) {
+   $(window).scroll(function() {
+      $('.tilda').each(function() {
+         $(this).css({top: $('body').prop('scrollTop')});
+      });
+   });
+});
+</script>
+<![endif]-->
+<script>
+jQuery(document).ready(function($) {
+    var settings = {
+            height: 100,
+            enabled: false,
+            completion: ['YES', 'yEeS', 'NO'],
+            caseInsensitiveAutocomplete: false,
+            keypress: function(e) {
+                if (e.which == 96) {
+                    return false;
+                }
+            }
+        };
+        settings.greetings = 'AutoComplete [Case Sensitive: ' + !settings.caseInsensitiveAutocomplete + ']';
+    var eval = function(command, term) {
+
+    }
+    $('body').terminal(eval ,settings);
+});
+
+</script>
+</head>
+<body>
+</body>
+</html>

@@ -3133,6 +3133,7 @@
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
+        caseInsensitiveAutocomplete: false,
         clickTimeout: 200,
         request: $.noop,
         response: $.noop,
@@ -4298,7 +4299,7 @@
         // ---------------------------------------------------------------------
         // :: return string that are common in all elements of the array
         // ---------------------------------------------------------------------
-        function common_string(string, array) {
+        function common_string(string, array, caseSensitive) {
             if (!array.length) {
                 return '';
             }
@@ -4306,7 +4307,11 @@
             loop:
             for (var j = string.length; j < array[0].length; ++j) {
                 for (var i = 1; i < array.length; ++i) {
-                    if (array[0].charAt(j) !== array[i].charAt(j)) {
+                    var ch1 = caseSensitive ?
+                        array[0].charAt(j) : array[0].charAt(j).toLowerCase();
+                    var ch2 = caseSensitive ?
+                        array[i].charAt(j) : array[i].charAt(j).toLowerCase();
+                    if (ch1 !== ch2) {
                         break loop;
                     }
                 }
@@ -4361,7 +4366,7 @@
                 var top = interpreters.top(), completion;
                 if (settings.completion &&
                     $.type(settings.completion) !== 'boolean' &&
-                    top.completion === undefined) {
+                    typeof top.completion === 'undefined') {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
@@ -4370,6 +4375,12 @@
                     completion = settings.completion;
                 }
                 if (completion) {
+                    var caseSensitive;
+                    if (typeof top.caseInsensitiveAutocomplete !== 'undefined') {
+                        caseSensitive = !top.caseInsensitiveAutocomplete;
+                    } else {
+                        caseSensitive = !settings.caseInsensitiveAutocomplete;
+                    }
                     switch ($.type(completion)) {
                         case 'function':
                             var string = self.before_cursor(settings.wordAutocomplete);
@@ -4382,7 +4393,8 @@
                                 self.complete(commands, {
                                     echo: true,
                                     word: settings.wordAutocomplete,
-                                    escape: settings.completionEscape
+                                    escape: settings.completionEscape,
+                                    caseSensitive: caseSensitive
                                 });
                             });
                             break;
@@ -4390,7 +4402,8 @@
                             self.complete(completion, {
                                 echo: true,
                                 word: settings.wordAutocomplete,
-                                escape: settings.completionEscape
+                                escape: settings.completionEscape,
+                                caseSensitive: caseSensitive
                             });
                             break;
                         default:
@@ -4821,7 +4834,8 @@
                 options = $.extend({
                     word: true,
                     echo: false,
-                    escape: true
+                    escape: true,
+                    caseSensitive: true
                 }, options || {});
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
@@ -4858,7 +4872,12 @@
                 if (options.escape) {
                     safe = safe.replace(/\\(["'() ])/g, '\\?$1');
                 }
-                var regex = new RegExp('^' + safe);
+                var regex;
+                if (options.caseSensitive) {
+                    regex = new RegExp('^' + safe);
+                } else {
+                    regex = new RegExp('^' + safe, 'i');
+                }
                 var matched = [];
                 for (var i = commands.length; i--;) {
                     if (regex.test(commands[i])) {
@@ -4873,7 +4892,7 @@
                     }
                 }
                 if (matched.length === 1) {
-                    self.insert(matched[0].replace(regex, '') + (quote || ''));
+                    self.set_command(matched[0] + (quote || ''));
                     command = self.before_cursor(options.word);
                     return true;
                 } else if (matched.length > 1) {
@@ -4888,7 +4907,8 @@
                             return true;
                         }
                     } else {
-                        var common = common_string(string, matched);
+                        var common =
+                            common_string(string, matched, options.caseSensitive);
                         if (common) {
                             self.insert(common.replace(regex, ''));
                             command = self.before_cursor(options.word);
