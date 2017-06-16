@@ -2124,7 +2124,7 @@
             }
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
-            unbind('input.cmd', input);
+            bind('input.cmd', input);
         (function() {
             var isDragging = false;
             var was_down = false;
