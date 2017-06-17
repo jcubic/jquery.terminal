@@ -1,3 +1,6 @@
+# Next
+* Don't execute keypress callback when terminal is disabled (reported by @artursOs)
+
 ## 1.4.2
 * fix context menu pasting and pasting images when terminal not in focus (thanks to Alex Molchanov
   for reporing a bug)

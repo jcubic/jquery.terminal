@@ -2057,25 +2057,25 @@
             if (prevent_keypress) {
                 return;
             }
-            if ($.isFunction(options.keypress)) {
-                result = options.keypress(e);
-                if (result !== undefined) {
-                    return result;
-                }
-            }
-            // key polyfill is not correct for keypress
-            // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
-            var key;
-            if (is_key_native()) {
-                key = e.key;
-            }
-            if (!key || no_key) {
-                key = String.fromCharCode(e.which);
-            }
-            if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
-                key = ' ';
-            }
             if (enabled) {
+                if ($.isFunction(options.keypress)) {
+                    result = options.keypress(e);
+                    if (result !== undefined) {
+                        return result;
+                    }
+                }
+                // key polyfill is not correct for keypress
+                // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
+                var key;
+                if (is_key_native()) {
+                    key = e.key;
+                }
+                if (!key || no_key) {
+                    key = String.fromCharCode(e.which);
+                }
+                if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
+                    key = ' ';
+                }
                 if ($.inArray(e.which, [13, 0, 8]) > -1) {
                     if (e.keyCode === 123) { // for F12 which === 0
                         return;

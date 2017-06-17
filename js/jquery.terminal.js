@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 16 May 2017 20:14:15 +0000
+ * Date: Sat, 17 Jun 2017 11:11:12 +0000
  */
 
 /* TODO:
@@ -2057,25 +2057,25 @@
             if (prevent_keypress) {
                 return;
             }
-            if ($.isFunction(options.keypress)) {
-                result = options.keypress(e);
-                if (result !== undefined) {
-                    return result;
-                }
-            }
-            // key polyfill is not correct for keypress
-            // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
-            var key;
-            if (is_key_native()) {
-                key = e.key;
-            }
-            if (!key || no_key) {
-                key = String.fromCharCode(e.which);
-            }
-            if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
-                key = ' ';
-            }
             if (enabled) {
+                if ($.isFunction(options.keypress)) {
+                    result = options.keypress(e);
+                    if (result !== undefined) {
+                        return result;
+                    }
+                }
+                // key polyfill is not correct for keypress
+                // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
+                var key;
+                if (is_key_native()) {
+                    key = e.key;
+                }
+                if (!key || no_key) {
+                    key = String.fromCharCode(e.which);
+                }
+                if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
+                    key = ' ';
+                }
                 if ($.inArray(e.which, [13, 0, 8]) > -1) {
                     if (e.keyCode === 123) { // for F12 which === 0
                         return;
@@ -2124,7 +2124,7 @@
             }
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
-            unbind('input.cmd', input);
+            bind('input.cmd', input);
         (function() {
             var isDragging = false;
             var was_down = false;
