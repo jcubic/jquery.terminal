@@ -1,5 +1,6 @@
 # Next
-* Don't execute keypress callback when terminal is disabled (reported by @artursOs)
+* don't execute keypress callback when terminal is disabled (reported by @artursOs)
+* fix android
 
 ## 1.4.2
 * fix context menu pasting and pasting images when terminal not in focus (thanks to Alex Molchanov
