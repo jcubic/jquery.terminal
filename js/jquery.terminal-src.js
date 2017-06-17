@@ -2050,8 +2050,7 @@
         function keypress_event(e) {
             var result;
             no_keypress = false;
-            if ((e.ctrlKey || e.metaKey) && [99, 118, 86].indexOf(e.which) !== -1) {
-                // CTRL+C or CTRL+V
+            if (e.ctrlKey || e.metaKey) {
                 return;
             }
             if (prevent_keypress) {

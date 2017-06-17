@@ -1,6 +1,7 @@
 # Next
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)
 * fix android
+* disable keypress when you press CTRL+key and caps-lock is on (but in firefox reported by @artursOs)
 
 ## 1.4.2
 * fix context menu pasting and pasting images when terminal not in focus (thanks to Alex Molchanov
