@@ -1,6 +1,6 @@
-# Next
+# 1.4.3
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)
-* fix android
+* fix android (input event was not bind)
 * disable keypress when you press CTRL+key and caps-lock is on (bug in firefox reported by @artursOs)
 
 ## 1.4.2
