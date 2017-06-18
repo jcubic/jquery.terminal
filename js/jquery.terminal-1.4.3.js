@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.4.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 17 May 2017 20:25:25 +0000
+ * Date: Sun, 18 Jun 2017 06:22:23 +0000
  */
 
 /* TODO:
@@ -2050,32 +2050,31 @@
         function keypress_event(e) {
             var result;
             no_keypress = false;
-            if ((e.ctrlKey || e.metaKey) && [99, 118, 86].indexOf(e.which) !== -1) {
-                // CTRL+C or CTRL+V
+            if (e.ctrlKey || e.metaKey) {
                 return;
             }
             if (prevent_keypress) {
                 return;
             }
-            if ($.isFunction(options.keypress)) {
-                result = options.keypress(e);
-                if (result !== undefined) {
-                    return result;
-                }
-            }
-            // key polyfill is not correct for keypress
-            // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
-            var key;
-            if (is_key_native()) {
-                key = e.key;
-            }
-            if (!key || no_key) {
-                key = String.fromCharCode(e.which);
-            }
-            if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
-                key = ' ';
-            }
             if (enabled) {
+                if ($.isFunction(options.keypress)) {
+                    result = options.keypress(e);
+                    if (result !== undefined) {
+                        return result;
+                    }
+                }
+                // key polyfill is not correct for keypress
+                // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
+                var key;
+                if (is_key_native()) {
+                    key = e.key;
+                }
+                if (!key || no_key) {
+                    key = String.fromCharCode(e.which);
+                }
+                if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
+                    key = ' ';
+                }
                 if ($.inArray(e.which, [13, 0, 8]) > -1) {
                     if (e.keyCode === 123) { // for F12 which === 0
                         return;
@@ -2124,7 +2123,7 @@
             }
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
-            unbind('input.cmd', input);
+            bind('input.cmd', input);
         (function() {
             var isDragging = false;
             var was_down = false;
@@ -2255,7 +2254,7 @@
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
-        version: '1.4.2',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
