@@ -4962,7 +4962,7 @@
             resume: function() {
                 cmd_ready(function ready() {
                     paused = false;
-                    if (terminals.front() === self) {
+                    if (enabled && terminals.front() === self) {
                         command_line.enable();
                     }
                     command_line.visible();

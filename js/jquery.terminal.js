@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 21 Jun 2017 13:21:16 +0000
+ * Date: Wed, 21 Jun 2017 14:10:22 +0000
  */
 
 /* TODO:
@@ -4962,7 +4962,7 @@
             resume: function() {
                 cmd_ready(function ready() {
                     paused = false;
-                    if (terminals.front() === self) {
+                    if (enabled && terminals.front() === self) {
                         command_line.enable();
                     }
                     command_line.visible();
