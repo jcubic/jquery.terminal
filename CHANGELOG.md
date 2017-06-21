@@ -1,3 +1,7 @@
+# next
+* add option to cmd::disable to not blur so it don't hide android keyboard
+  on terminal::pause(true)
+
 # 1.4.3
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)
 * fix android (input event was not bind)

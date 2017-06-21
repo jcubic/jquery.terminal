@@ -1937,11 +1937,13 @@
             isenabled: function() {
                 return enabled;
             },
-            disable: function() {
+            disable: function(focus) {
                 enabled = false;
                 self.removeClass('enabled');
                 animation(false);
-                mobile_focus();
+                if (!focus) {
+                    mobile_focus();
+                }
                 return self;
             },
             mask: function(new_mask) {
@@ -4944,7 +4946,7 @@
                 cmd_ready(function ready() {
                     onPause();
                     paused = true;
-                    command_line.disable();
+                    command_line.disable(visible);
                     if (!visible) {
                         command_line.hidden();
                     }
