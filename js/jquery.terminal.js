@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 21 Jun 2017 14:10:22 +0000
+ * Date: Thu, 22 Jun 2017 07:26:47 +0000
  */
 
 /* TODO:
@@ -47,8 +47,9 @@
  * NOTE: json-rpc don't need promises and delegate resume/pause because only
  *       exec can call it and exec call interpreter that work with resume/pause
  */
-/* global location jQuery setTimeout window global localStorage sprintf
-          setImmediate IntersectionObserver MutationObserver*/
+/* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
+ *        setImmediate, IntersectionObserver, MutationObserver
+ */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
