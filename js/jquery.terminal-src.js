@@ -48,8 +48,7 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
- *        setImmediate, IntersectionObserver, MutationObserver
- */
+         setImmediate, IntersectionObserver, MutationObserver */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {

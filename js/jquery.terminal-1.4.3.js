@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 22 Jun 2017 07:26:47 +0000
+ * Date: Thu, 22 Jun 2017 08:35:12 +0000
  */
 
 /* TODO:
@@ -48,8 +48,7 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
- *        setImmediate, IntersectionObserver, MutationObserver
- */
+         setImmediate, IntersectionObserver, MutationObserver */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
