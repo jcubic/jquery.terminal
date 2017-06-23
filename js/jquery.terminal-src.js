@@ -1993,7 +1993,7 @@
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
             try {
-                single_key = e.key && e.key.length === 1;
+                single_key = e.key && e.key.length === 1 && !e.ctrlKey;
                 // chrome on android support key property but it's "Unidentified"
                 no_key = String(e.key).toLowerCase() === 'unidentified';
                 backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;

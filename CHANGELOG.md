@@ -2,6 +2,7 @@
 * add option to cmd::disable to not blur so it don't hide android keyboard
   on terminal::pause(true)
 * don't enable terminal on init on Android
+* fix next key after CTRL+V that was triggering input event (reported by @artursOs)
 
 # 1.4.3
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)
