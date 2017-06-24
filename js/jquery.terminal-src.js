@@ -2764,7 +2764,9 @@
                 // remove quotes if before are even number of slashes
                 // we don't remove slases becuase they are handled by JSON.parse
                 string = string.replace(/((^|[^\\])(?:\\\\)*)['"]/g, '$1');
+                string = string.replace(/([^\\])['"]$/g, '$1');
                 // use build in function to parse rest of escaped characters
+                console.log(string);
                 return JSON.parse('"' + string + '"');
             }
             if (strict === false) {
