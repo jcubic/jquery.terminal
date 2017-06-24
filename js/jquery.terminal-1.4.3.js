@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 24 Jun 2017 14:10:53 +0000
+ * Date: Sat, 24 Jun 2017 15:23:47 +0000
  */
 
 /* TODO:
@@ -4951,9 +4951,9 @@
                 cmd_ready(function ready() {
                     onPause();
                     paused = true;
-                    command_line.disable(visible);
+                    command_line.disable(visible || is_android);
                     if (!visible) {
-                        command_line.hidden();
+                        command_line.find('.prompt').hidden();
                     }
                     if ($.isFunction(settings.onPause)) {
                         settings.onPause.call(self);
@@ -4970,7 +4970,7 @@
                     if (enabled && terminals.front() === self) {
                         command_line.enable();
                     }
-                    command_line.visible();
+                    command_line.find('.prompt').visible();
                     var original = delayed_commands;
                     delayed_commands = [];
                     for (var i = 0; i < original.length; ++i) {

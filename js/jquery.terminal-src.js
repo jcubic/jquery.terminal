@@ -4951,9 +4951,9 @@
                 cmd_ready(function ready() {
                     onPause();
                     paused = true;
-                    command_line.disable(visible);
+                    command_line.disable(visible || is_android);
                     if (!visible) {
-                        command_line.hidden();
+                        command_line.find('.prompt').hidden();
                     }
                     if ($.isFunction(settings.onPause)) {
                         settings.onPause.call(self);
@@ -4970,7 +4970,7 @@
                     if (enabled && terminals.front() === self) {
                         command_line.enable();
                     }
-                    command_line.visible();
+                    command_line.find('.prompt').visible();
                     var original = delayed_commands;
                     delayed_commands = [];
                     for (var i = 0; i < original.length; ++i) {
