@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 25 Jun 2017 13:44:06 +0000
+ * Date: Sun, 25 Jun 2017 14:49:36 +0000
  */
 
 /* TODO:
@@ -1991,7 +1991,6 @@
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
         function keydown_event(e) {
-            console.log('keydown');
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
@@ -2006,7 +2005,7 @@
             if (!e.fake) {
                 text = clip.val();
             }
-            if (e.key == "Unidentified") {
+            if (e.key === "Unidentified") {
                 text = clip.val();
                 no_keydown = true;
                 // android swift keyboard have always which == 229 we will triger proper
@@ -2017,7 +2016,6 @@
             no_keypress = true;
             no_keydown = false;
             var key = get_key(e);
-            console.log('keydown', e);
             if ($.isFunction(options.keydown)) {
                 result = options.keydown(e);
                 if (result !== undefined) {
@@ -2068,7 +2066,6 @@
         var doc = $(document.documentElement || window);
         self.keymap(options.keymap);
         function keypress_event(e) {
-            console.log('keypress');
             var result;
             no_keypress = false;
             if (e.ctrlKey || e.metaKey) {
@@ -2122,8 +2119,14 @@
                 }
             }
         }
+        function event(type, chr, which) {
+            var event = $.Event(type);
+            event.which = which;
+            event.key = chr;
+            event.fake = true;
+            doc.trigger(event);
+        }
         function input() {
-            console.log('input');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             if (no_keydown || ((no_keypress || dead_key) && !skip_insert &&
@@ -2131,35 +2134,20 @@
                                !backspace)) {
                 var pos = position;
                 var val = clip.val();
-                function event(type, chr, which) {
-                    var event = $.Event(type);
-                    event.which = which;
-                    event.key = chr;
-                    event.fake = true;
-                    doc.trigger(event);
-                }
-                function keydown(chr) {
-                    event('keydown', chr, chr.toUpperCase().charCodeAt(0));
-                }
-                function keypress(chr) {
-                    event('keypress', chr, chr.charCodeAt(0));
-                }
                 if (val !== '') {
                     if (reverse_search) {
                         rev_search_str = val;
                         reverse_history_search();
                         draw_reverse_prompt();
                     } else {
-                        var entered_text = val.substring(position);
-                        if (entered_text.length == 1) {
+                        var chr = val.substring(position);
+                        if (chr.length === 1) {
                             // we trigger events so keypress and keydown callback work
                             if (no_keydown) {
-                                console.log('no_keydown');
-                                keydown(entered_text);
+                                event('keydown', chr, chr.toUpperCase().charCodeAt(0));
                             }
                             if (no_keypress) {
-                                console.log('no_keypress');
-                                keypress(entered_text);
+                                event('keypress', chr, chr.charCodeAt(0));
                             }
                         }
                         // if user return false in keydown we don't want to insert text
