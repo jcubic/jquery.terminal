@@ -5374,6 +5374,10 @@
                     }
                     width = self.width();
                     height = self.height();
+                    if (typeof settings.numChars != 'undefined' &&
+                        typeof settings.numRows != 'undefined') {
+                        return;
+                    }
                     char_size = get_char_size();
                     var new_num_chars = get_num_chars(self, char_size);
                     var new_num_rows = get_num_rows(self, char_size);

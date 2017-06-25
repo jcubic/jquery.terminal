@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 25 Jun 2017 16:21:04 +0000
+ * Date: Sun, 25 Jun 2017 16:25:57 +0000
  */
 
 /* TODO:
@@ -5374,6 +5374,10 @@
                     }
                     width = self.width();
                     height = self.height();
+                    if (typeof settings.numChars != 'undefined' &&
+                        typeof settings.numRows != 'undefined') {
+                        return;
+                    }
                     char_size = get_char_size();
                     var new_num_chars = get_num_chars(self, char_size);
                     var new_num_rows = get_num_rows(self, char_size);
