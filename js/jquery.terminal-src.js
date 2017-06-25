@@ -5053,7 +5053,7 @@
                 if (settings.numChars) {
                     return settings.numChars;
                 }
-                if (typeof num_chars == 'undefined') {
+                if (typeof num_chars === 'undefined') {
                     num_chars = get_num_chars(self, char_size);
                 }
                 return num_chars;
@@ -5066,7 +5066,7 @@
                 if (settings.numRows) {
                     return settings.numRows;
                 }
-                if (typeof num_rows == 'undefined') {
+                if (typeof num_rows === 'undefined') {
                     num_rows = get_num_rows(self, char_size);
                 }
                 return num_rows;
@@ -5374,8 +5374,8 @@
                     }
                     width = self.width();
                     height = self.height();
-                    if (typeof settings.numChars != 'undefined' &&
-                        typeof settings.numRows != 'undefined') {
+                    if (typeof settings.numChars !== 'undefined' &&
+                        typeof settings.numRows !== 'undefined') {
                         return;
                     }
                     char_size = get_char_size();

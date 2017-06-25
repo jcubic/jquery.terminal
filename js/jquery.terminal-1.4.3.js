@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 25 Jun 2017 16:25:57 +0000
+ * Date: Sun, 25 Jun 2017 16:38:34 +0000
  */
 
 /* TODO:
@@ -5053,7 +5053,7 @@
                 if (settings.numChars) {
                     return settings.numChars;
                 }
-                if (typeof num_chars == 'undefined') {
+                if (typeof num_chars === 'undefined') {
                     num_chars = get_num_chars(self, char_size);
                 }
                 return num_chars;
@@ -5066,7 +5066,7 @@
                 if (settings.numRows) {
                     return settings.numRows;
                 }
-                if (typeof num_rows == 'undefined') {
+                if (typeof num_rows === 'undefined') {
                     num_rows = get_num_rows(self, char_size);
                 }
                 return num_rows;
@@ -5374,8 +5374,8 @@
                     }
                     width = self.width();
                     height = self.height();
-                    if (typeof settings.numChars != 'undefined' &&
-                        typeof settings.numRows != 'undefined') {
+                    if (typeof settings.numChars !== 'undefined' &&
+                        typeof settings.numRows !== 'undefined') {
                         return;
                     }
                     char_size = get_char_size();
