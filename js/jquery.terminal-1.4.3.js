@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 25 Jun 2017 16:38:34 +0000
+ * Date: Sun, 25 Jun 2017 16:56:06 +0000
  */
 
 /* TODO:
@@ -2016,9 +2016,10 @@
                 // event in input
                 return;
             }
-
-            no_keypress = true;
-            no_keydown = false;
+            if (!e.fake) {
+                no_keypress = true;
+                no_keydown = false;
+            }
             var key = get_key(e);
 
             if (enabled) {
@@ -2142,6 +2143,7 @@
             if (no_keydown || ((no_keypress || dead_key) && !skip_insert &&
                                (single_key || no_key) &&
                                !backspace)) {
+                var was_no_keydown = no_keydown;
                 var pos = position;
                 var val = clip.val();
                 if (val !== '') {
@@ -2175,6 +2177,9 @@
                         // on android
                         self.position(pos + Math.abs(val.length - text.length));
                     }
+                }
+                if (!no_keydown) {
+                    text = val;
                 }
             }
             skip_insert = false;
