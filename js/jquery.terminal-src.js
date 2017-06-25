@@ -2016,15 +2016,18 @@
             no_keypress = true;
             no_keydown = false;
             var key = get_key(e);
-            if ($.isFunction(options.keydown)) {
-                result = options.keydown(e);
-                if (result !== undefined) {
-                    //prevent_keypress = true;
-                    skip_insert = true;
-                    return result;
-                }
-            }
+
             if (enabled) {
+                if ($.isFunction(options.keydown)) {
+                    result = options.keydown(e);
+                    if (result !== undefined) {
+                        //prevent_keypress = true;
+                        if (!result) {
+                            skip_insert = true;
+                        }
+                        return result;
+                    }
+                }
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
@@ -2078,6 +2081,9 @@
                 if ($.isFunction(options.keypress)) {
                     result = options.keypress(e);
                     if (result !== undefined) {
+                        if (!result) {
+                            skip_insert = true;
+                        }
                         return result;
                     }
                 }
