@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 25 Jun 2017 14:57:55 +0000
+ * Date: Sun, 25 Jun 2017 16:21:04 +0000
  */
 
 /* TODO:
@@ -1051,6 +1051,7 @@
         var cursor = self.find('.cursor');
         var animation;
         var paste_count = 0;
+        var char_size;
         function get_char_size() {
             var span = $('<span>&nbsp;</span>').appendTo(self);
             var rect = span[0].getBoundingClientRect();
@@ -1059,9 +1060,11 @@
         }
         function get_char_pos(point) {
             var prompt_len = self.find('.prompt').text().length;
-            var size = get_char_size();
-            var width = size.width;
-            var height = size.height;
+            if (!char_size) {
+                char_size = get_char_size();
+            }
+            var width = char_size.width;
+            var height = char_size.height;
             var offset = self.offset();
             var col = Math.floor((point.x - offset.left) / width);
             var row = Math.floor((point.y - offset.top) / height);
@@ -1925,6 +1928,7 @@
             enable: function() {
                 enabled = true;
                 self.addClass('enabled');
+                char_size = get_char_size();
                 try {
                     clip.caret(position);
                 } catch (e) {
@@ -3060,7 +3064,7 @@
     // :: DOM at init like with:
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
-    function char_size() {
+    function get_char_size() {
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
         var rect = temp.find('span')[0].getBoundingClientRect();
@@ -3074,17 +3078,17 @@
     // -----------------------------------------------------------------------
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
-    function get_num_chars(terminal) {
+    function get_num_chars(terminal, char_size) {
         var width = terminal.find('.terminal-fill').width();
-        var result = Math.floor(width / char_size().width);
+        var result = Math.floor(width / char_size.width);
         // random number to not get NaN in node but big enough to not wrap exception
         return result || 1000;
     }
     // -----------------------------------------------------------------------
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
-    function get_num_rows(terminal) {
-        return Math.floor(terminal.find('.terminal-fill').height() / char_size().height);
+    function get_num_rows(terminal, char_size) {
+        return Math.floor(terminal.find('.terminal-fill').height() / char_size.height);
     }
     // -----------------------------------------------------------------------
     // :: try to copy given DOM element text to clipboard
@@ -4574,6 +4578,7 @@
         var command_queue = new DelayQueue();
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
+        var char_size = get_char_size();
         var cmd_ready = ready(command_queue);
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
@@ -5048,8 +5053,8 @@
                 if (settings.numChars) {
                     return settings.numChars;
                 }
-                if (!num_chars) {
-                    num_chars = get_num_chars(self);
+                if (typeof num_chars == 'undefined') {
+                    num_chars = get_num_chars(self, char_size);
                 }
                 return num_chars;
             },
@@ -5061,8 +5066,8 @@
                 if (settings.numRows) {
                     return settings.numRows;
                 }
-                if (!num_rows) {
-                    num_rows = get_num_rows(self);
+                if (typeof num_rows == 'undefined') {
+                    num_rows = get_num_rows(self, char_size);
                 }
                 return num_rows;
             },
@@ -5369,13 +5374,15 @@
                     }
                     width = self.width();
                     height = self.height();
-                    var new_num_chars = get_num_chars(self);
-                    var new_num_rows = get_num_rows(self);
+                    char_size = get_char_size();
+                    var new_num_chars = get_num_chars(self, char_size);
+                    var new_num_rows = get_num_rows(self, char_size);
                     // only if number of chars changed
                     if (new_num_chars !== num_chars ||
                         new_num_rows !== num_rows) {
                         num_chars = new_num_chars;
                         num_rows = new_num_rows;
+                        command_line.resize(num_chars);
                         redraw();
                         var top = interpreters.top();
                         if ($.isFunction(top.resize)) {
@@ -5433,7 +5440,7 @@
                             });
                         }
                     }
-                    num_rows = get_num_rows(self);
+                    //num_rows = get_num_rows(self, char_size);
                     if (settings.scrollOnEcho || bottom) {
                         scroll_to_bottom();
                     }
@@ -6251,7 +6258,10 @@
             if (self.is(':visible')) {
                 num_chars = self.cols();
                 command_line.resize(num_chars);
-                num_rows = get_num_rows(self);
+                if (!char_size) {
+                    char_size = get_char_size();
+                }
+                num_rows = get_num_rows(self, char_size);
             }
             // -------------------------------------------------------------
             // Run Login

@@ -1,7 +1,8 @@
 ## next
 ### Features
 * run fake keypress and keydown created in input when not fired by the browser (android)
-
+* improve perfomance by calculating char size only on resize and init (issue reported
+  by @artursOs)
 ### Bugs
 * add option to cmd::disable to not blur so it don't hide android keyboard on pause
 * don't enable terminal on init on Android
