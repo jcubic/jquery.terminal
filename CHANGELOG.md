@@ -1,13 +1,19 @@
-# next
+## next
+### Features
+* run fake keypress and keydown created in input when not fired by the browser (android)
+
+### Bugs
 * add option to cmd::disable to not blur so it don't hide android keyboard on pause
 * don't enable terminal on init on Android
 * fix next key after CTRL+V that was triggering input event (reported by @artursOs)
 * fix parsing strings
 * don't hide virtual keyboard on Android when called pause()
 * fix input on Firefox with google keyboard (reported by Filip Wieland)
-* disable terminal on resume event in cordova
+* disable terminal on resume event in cordova (is the terminal is disabled when
+  no virutal keyboard)
 
-# 1.4.3
+
+## 1.4.3
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)
 * fix android (input event was not bind)
 * disable keypress when you press CTRL+key and caps-lock is on (bug in firefox reported by @artursOs)

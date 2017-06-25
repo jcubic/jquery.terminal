@@ -1991,7 +1991,7 @@
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
         function keydown_event(e) {
-            no_keydown = false;
+            console.log('keydown');
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
@@ -2001,13 +2001,28 @@
                 no_key = String(e.key).toLowerCase() === 'unidentified';
                 backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
             } catch (exception) {}
-            text = clip.val();
+            // keydown created in input will have text already inserted and we
+            // want text before input
+            if (!e.fake) {
+                text = clip.val();
+            }
+            if (e.key == "Unidentified") {
+                text = clip.val();
+                no_keydown = true;
+                // android swift keyboard have always which == 229 we will triger proper
+                // event in input
+                return;
+            }
+
             no_keypress = true;
+            no_keydown = false;
             var key = get_key(e);
+            console.log('keydown', e);
             if ($.isFunction(options.keydown)) {
                 result = options.keydown(e);
                 if (result !== undefined) {
                     //prevent_keypress = true;
+                    skip_insert = true;
                     return result;
                 }
             }
@@ -2053,6 +2068,7 @@
         var doc = $(document.documentElement || window);
         self.keymap(options.keymap);
         function keypress_event(e) {
+            console.log('keypress');
             var result;
             no_keypress = false;
             if (e.ctrlKey || e.metaKey) {
@@ -2067,6 +2083,11 @@
                     if (result !== undefined) {
                         return result;
                     }
+                }
+                if (e.fake) {
+                    // event created in input, we prevent inserting text
+                    // in different interpreter when keydown called pop
+                    return;
                 }
                 // key polyfill is not correct for keypress
                 // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
@@ -2102,6 +2123,7 @@
             }
         }
         function input() {
+            console.log('input');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             if (no_keydown || ((no_keypress || dead_key) && !skip_insert &&
@@ -2109,12 +2131,42 @@
                                !backspace)) {
                 var pos = position;
                 var val = clip.val();
+                function event(type, chr, which) {
+                    var event = $.Event(type);
+                    event.which = which;
+                    event.key = chr;
+                    event.fake = true;
+                    doc.trigger(event);
+                }
+                function keydown(chr) {
+                    event('keydown', chr, chr.toUpperCase().charCodeAt(0));
+                }
+                function keypress(chr) {
+                    event('keypress', chr, chr.charCodeAt(0));
+                }
                 if (val !== '') {
                     if (reverse_search) {
                         rev_search_str = val;
                         reverse_history_search();
                         draw_reverse_prompt();
                     } else {
+                        var entered_text = val.substring(position);
+                        if (entered_text.length == 1) {
+                            // we trigger events so keypress and keydown callback work
+                            if (no_keydown) {
+                                console.log('no_keydown');
+                                keydown(entered_text);
+                            }
+                            if (no_keypress) {
+                                console.log('no_keypress');
+                                keypress(entered_text);
+                            }
+                        }
+                        // if user return false in keydown we don't want to insert text
+                        if (skip_insert) {
+                            skip_insert = false;
+                            return;
+                        }
                         self.set(val);
                     }
                     // backspace detection for Android/Chrome/SwiftKey
@@ -2127,6 +2179,7 @@
                     }
                 }
             }
+            skip_insert = false;
             no_keydown = true;
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).

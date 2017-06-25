@@ -1,5 +1,5 @@
-/* global jasmine global it expect describe require spyOn setTimeout location
-          beforeEach afterEach sprintf jQuery $ */
+/* global jasmine, global, it, expect, describe, require, spyOn, setTimeout, location,
+          beforeEach, afterEach, sprintf, jQuery $ */
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 var loaded;
