@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 25 Jun 2017 08:10:37 +0000
+ * Date: Sun, 25 Jun 2017 10:42:51 +0000
  */
 
 /* TODO:
@@ -1931,6 +1931,7 @@
                     // firefox throw NS_ERROR_FAILURE ignore
                 }
                 animation(true);
+                draw_prompt();
                 mobile_focus();
                 return self;
             },
@@ -6073,19 +6074,24 @@
             } else {
                 self.disable();
             }
-            self.oneTime(100, function() {
-                function disable(e) {
-                    var sender = $(e.target);
-                    if (!sender.closest('.terminal').length &&
-                        self.enabled() &&
-                        settings.onBlur.call(self, self) !== false) {
-                        self.disable();
-                    }
+            function disable(e) {
+                var sender = $(e.target);
+                if (!sender.closest('.terminal').length &&
+                    self.enabled() &&
+                    settings.onBlur.call(self, self) !== false) {
+                    self.disable();
                 }
+            }
+            self.oneTime(100, function() {
                 $(document).bind('click.terminal_' + self.id(), disable).
                     bind('contextmenu.terminal_' + self.id(), disable);
             });
             var $win = $(window);
+            // cordova application, if keyboard was open and we resume it will be
+            // closed so we need to disable terminal so you can enable it with tap
+            document.addEventListener("resume", function() {
+                self.disable();
+            });
             if (!is_touch) {
                 // work weird on mobile
                 $win.on('focus.terminal_' + self.id(), focus_terminal).
