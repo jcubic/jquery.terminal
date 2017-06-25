@@ -5,6 +5,7 @@
 * fix next key after CTRL+V that was triggering input event (reported by @artursOs)
 * fix parsing strings
 * don't hide virtual keyboard on Android when called pause()
+* fix input on Firefox with google keyboard (reported by Filip Wieland)
 
 # 1.4.3
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)

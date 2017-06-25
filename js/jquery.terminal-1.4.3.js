@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 24 Jun 2017 15:23:47 +0000
+ * Date: Sun, 25 Jun 2017 08:10:37 +0000
  */
 
 /* TODO:
@@ -1980,6 +1980,7 @@
         var single_key = false;
         var no_keypress = false;
         var no_key = false;
+        var no_keydown = true;
         var backspace = false;
         var skip_insert;
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
@@ -1989,6 +1990,7 @@
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
         function keydown_event(e) {
+            no_keydown = false;
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
@@ -2101,8 +2103,9 @@
         function input() {
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
-            if ((no_keypress || dead_key) && !skip_insert && (single_key || no_key) &&
-                !backspace) {
+            if (no_keydown || ((no_keypress || dead_key) && !skip_insert &&
+                               (single_key || no_key) &&
+                               !backspace)) {
                 var pos = position;
                 var val = clip.val();
                 if (val !== '') {
@@ -2123,6 +2126,7 @@
                     }
                 }
             }
+            no_keydown = true;
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
