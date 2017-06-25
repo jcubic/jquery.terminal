@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 25 Jun 2017 16:56:06 +0000
+ * Date: Sun, 25 Jun 2017 19:00:19 +0000
  */
 
 /* TODO:
@@ -1051,7 +1051,6 @@
         var cursor = self.find('.cursor');
         var animation;
         var paste_count = 0;
-        var char_size;
         function get_char_size() {
             var span = $('<span>&nbsp;</span>').appendTo(self);
             var rect = span[0].getBoundingClientRect();
@@ -1060,11 +1059,9 @@
         }
         function get_char_pos(point) {
             var prompt_len = self.find('.prompt').text().length;
-            if (!char_size) {
-                char_size = get_char_size();
-            }
-            var width = char_size.width;
-            var height = char_size.height;
+            var size = get_char_size();
+            var width = size.width;
+            var height = size.height;
             var offset = self.offset();
             var col = Math.floor((point.x - offset.left) / width);
             var row = Math.floor((point.y - offset.top) / height);
@@ -1133,6 +1130,11 @@
                 }
                 var tmp = command;
                 history.reset();
+
+                // for next input event on firefox/android with google keyboard
+                text = '';
+                no_keydown = true;
+
                 self.set('');
                 if (options.commands) {
                     options.commands(tmp);
@@ -1928,7 +1930,6 @@
             enable: function() {
                 enabled = true;
                 self.addClass('enabled');
-                char_size = get_char_size();
                 try {
                     clip.caret(position);
                 } catch (e) {
@@ -1990,7 +1991,7 @@
         var skip_insert;
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
-        var text;
+        var text = '';
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
@@ -1999,29 +2000,27 @@
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
             try {
-                single_key = e.key && e.key.length === 1 && !e.ctrlKey;
-                // chrome on android support key property but it's "Unidentified"
-                no_key = String(e.key).toLowerCase() === 'unidentified';
-                backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
+                if (!e.fake) {
+                    single_key = e.key && e.key.length === 1 && !e.ctrlKey;
+                    // chrome on android support key property but it's "Unidentified"
+                    no_key = String(e.key).toLowerCase() === 'unidentified';
+                    backspace = e.key.toUpperCase() === 'BACKSPACE' || e.which === 8;
+                }
             } catch (exception) {}
             // keydown created in input will have text already inserted and we
             // want text before input
-            if (!e.fake) {
-                text = clip.val();
-            }
             if (e.key === "Unidentified") {
-                text = clip.val();
                 no_keydown = true;
                 // android swift keyboard have always which == 229 we will triger proper
-                // event in input
+                // event in input with e.fake == true
                 return;
             }
+            // without this backspace don't work
             if (!e.fake) {
                 no_keypress = true;
                 no_keydown = false;
             }
             var key = get_key(e);
-
             if (enabled) {
                 if ($.isFunction(options.keydown)) {
                     result = options.keydown(e);
@@ -2100,7 +2099,7 @@
                 // key polyfill is not correct for keypress
                 // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
                 var key;
-                if (is_key_native()) {
+                if (is_key_native() || e.fake) {
                     key = e.key;
                 }
                 if (!key || no_key) {
@@ -2140,48 +2139,56 @@
         function input() {
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
+            // Firefox/Android with google keyboard don't fire keydown and keyup #319
             if (no_keydown || ((no_keypress || dead_key) && !skip_insert &&
-                               (single_key || no_key) &&
-                               !backspace)) {
-                var was_no_keydown = no_keydown;
+                               (single_key || no_key) && !backspace)) {
                 var pos = position;
                 var val = clip.val();
-                if (val !== '') {
-                    if (reverse_search) {
-                        rev_search_str = val;
-                        reverse_history_search();
-                        draw_reverse_prompt();
-                    } else {
-                        var chr = val.substring(position);
-                        if (chr.length === 1) {
-                            // we trigger events so keypress and keydown callback work
-                            if (no_keydown) {
-                                event('keydown', chr, chr.toUpperCase().charCodeAt(0));
-                            }
-                            if (no_keypress) {
-                                event('keypress', chr, chr.charCodeAt(0));
-                            }
-                        }
-                        // if user return false in keydown we don't want to insert text
-                        if (skip_insert) {
-                            skip_insert = false;
-                            return;
-                        }
-                        self.set(val);
-                    }
-                    // backspace detection for Android/Chrome/SwiftKey
-                    if (backspace || val.length < text.length) {
-                        self.position(pos - 1);
-                    } else {
-                        // user enter more then one character if click on complete word
-                        // on android
-                        self.position(pos + Math.abs(val.length - text.length));
-                    }
+                // backspace is set in keydown if no keydown we need to get new one
+                if (no_keydown) {
+                    backspace = val.length < text.length;
                 }
-                if (!no_keydown) {
-                    text = val;
+                if (reverse_search) {
+                    rev_search_str = val;
+                    reverse_history_search();
+                    draw_reverse_prompt();
+                } else {
+                    var chr = val.substring(position);
+                    if (chr.length === 1 || backspace) {
+                        // we trigger events so keypress and keydown callback work
+                        if (no_keydown) {
+                            var keycode;
+                            if (backspace) {
+                                keycode = 8;
+                            } else {
+                                keycode = chr.toUpperCase().charCodeAt(0);
+                            }
+                            event('keydown', backspace ? 'Backspace' : chr, keycode);
+                        }
+                        if (no_keypress && !backspace) {
+                            event('keypress', chr, chr.charCodeAt(0));
+                        }
+                    }
+                    if (backspace) {
+                        text = command;
+                        return;
+                    }
+                    // if user return false in keydown we don't want to insert text
+                    if (skip_insert) {
+                        skip_insert = false;
+                        return;
+                    }
+                    self.set(val);
+                }
+                if (backspace) {
+                    self.position(pos - 1);
+                } else {
+                    // user enter more then one character if click on complete word
+                    // on android
+                    self.position(pos + Math.abs(val.length - text.length));
                 }
             }
+            text = command;
             skip_insert = false;
             no_keydown = true;
         }

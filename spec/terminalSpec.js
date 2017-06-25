@@ -59,8 +59,13 @@ function enter_text(text) {
     var e;
     var $root = $(document.documentElement || window);
     for (var i=0; i<text.length; ++i) {
+        e = $.Event("keydown");
+        e.which = e.keyCode = text.toUpperCase().charCodeAt(i);
+        e.key = text[i];
+        $root.trigger(e);
         e = $.Event("keypress");
         e.which = e.keyCode = text.charCodeAt(i);
+        e.key = text[i];
         e.ctrlKey = false;
         e.altKey = false;
         $root.trigger(e);
@@ -76,6 +81,7 @@ function shortcut(ctrl, alt, shift, which, key) {
     e.which = e.keyCode = which;
     doc.trigger(e);
     e = $.Event("keypress");
+    e.key = key;
     e.which = e.keyCode = 0;
     doc.trigger(e);
 }
