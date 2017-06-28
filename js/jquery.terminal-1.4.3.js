@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 25 Jun 2017 19:00:19 +0000
+ * Date: Wed, 28 Jun 2017 16:07:48 +0000
  */
 
 /* TODO:
@@ -2074,7 +2074,9 @@
         self.keymap(options.keymap);
         function keypress_event(e) {
             var result;
-            no_keypress = false;
+            if (!e.fake) {
+                no_keypress = false;
+            }
             if (e.ctrlKey || e.metaKey) {
                 return;
             }
@@ -2125,7 +2127,6 @@
                     } else {
                         self.insert(key);
                     }
-                    return false;
                 }
             }
         }
@@ -2154,6 +2155,7 @@
                     draw_reverse_prompt();
                 } else {
                     var chr = val.substring(position);
+                    $.terminal.active().echo(chr);
                     if (chr.length === 1 || backspace) {
                         // we trigger events so keypress and keydown callback work
                         if (no_keydown) {
