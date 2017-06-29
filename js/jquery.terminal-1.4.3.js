@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 28 Jun 2017 16:07:48 +0000
+ * Date: Thu, 29 Jun 2017 06:54:43 +0000
  */
 
 /* TODO:
@@ -6191,6 +6191,7 @@
                     var count = 0;
                     var isDragging = false;
                     var target;
+                    var name = 'click_' + self.id();
                     self.mousedown(function(e) {
                         var parents = $(e.target).parents();
                         if (parents.addBack) {
@@ -6219,26 +6220,18 @@
                                     command_line.enable();
                                     count = 0;
                                 } else {
-                                    var name = 'click_' + self.id();
                                     self.oneTime(settings.clickTimeout, name, function() {
-                                        // move cursor to the end if clicked after .cmd
-                                        if (!target.is('.terminal-output') &&
-                                            !target.is('.cmd') &&
-                                            target.is('.terminal > div')) {
-                                            var len = command_line.get().length;
-                                            command_line.position(len);
-                                        }
                                         count = 0;
                                     });
                                 }
                             } else {
-                                self.stopTime('click_' + self.id());
+                                self.stopTime(name);
                                 count = 0;
                             }
                         }
                     }).dblclick(function() {
                         count = 0;
-                        self.stopTime('click_' + self.id());
+                        self.stopTime(name);
                     });
                 })();
                 (function() {
