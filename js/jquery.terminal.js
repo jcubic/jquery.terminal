@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 29 Jun 2017 07:45:01 +0000
+ * Date: Thu, 29 Jun 2017 08:58:30 +0000
  */
 
 /* TODO:
@@ -1156,6 +1156,8 @@
                 } else if (command !== '' && position > 0) {
                     self['delete'](-1);
                 }
+                // for next input after naitve backspace
+                no_keydown = true;
                 return false;
                 //return is_touch;
             },
@@ -1996,6 +1998,7 @@
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
         function keydown_event(e) {
+            debug('keydown "' +e.key+'" ' + e.fake);
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
@@ -2015,7 +2018,6 @@
                 // event in input with e.fake == true
                 return;
             }
-            // without this backspace don't work
             if (!e.fake) {
                 no_keypress = true;
                 no_keydown = false;
@@ -2073,6 +2075,7 @@
         var doc = $(document.documentElement || window);
         self.keymap(options.keymap);
         function keypress_event(e) {
+            debug('keypress "' +e.key+'" ' + e.fake);
             var result;
             if (!e.fake) {
                 no_keypress = false;
@@ -2137,7 +2140,12 @@
             event.fake = true;
             doc.trigger(event);
         }
+        function debug(str) {
+            //$.terminal.active().echo(str);
+        }
         function input() {
+            debug(no_keydown+' || (('+no_keypress+' || '+dead_key+') && !'+skip_insert+' &&\n'+
+                               '('+single_key+' || '+no_key+') && !'+backspace+')');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
@@ -2145,6 +2153,7 @@
                                (single_key || no_key) && !backspace)) {
                 var pos = position;
                 var val = clip.val();
+                debug(JSON.stringify(val));
                 // backspace is set in keydown if no keydown we need to get new one
                 if (no_keydown) {
                     backspace = val.length < text.length;
@@ -2155,7 +2164,6 @@
                     draw_reverse_prompt();
                 } else {
                     var chr = val.substring(position);
-                    $.terminal.active().echo(chr);
                     if (chr.length === 1 || backspace) {
                         // we trigger events so keypress and keydown callback work
                         if (no_keydown) {
