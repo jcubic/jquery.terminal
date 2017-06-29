@@ -6192,12 +6192,6 @@
                     var isDragging = false;
                     var name = 'click_' + self.id();
                     self.mousedown(function(e) {
-                        var parents = $(e.target).parents();
-                        if (parents.addBack) {
-                            target = parents.addBack();
-                        } else {
-                            target = parents.andSelf();
-                        }
                         if (e.originalEvent.button === 2) {
                             return;
                         }

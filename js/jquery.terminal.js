@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 29 Jun 2017 07:15:17 +0000
+ * Date: Thu, 29 Jun 2017 07:45:01 +0000
  */
 
 /* TODO:
@@ -6192,12 +6192,6 @@
                     var isDragging = false;
                     var name = 'click_' + self.id();
                     self.mousedown(function(e) {
-                        var parents = $(e.target).parents();
-                        if (parents.addBack) {
-                            target = parents.addBack();
-                        } else {
-                            target = parents.andSelf();
-                        }
                         if (e.originalEvent.button === 2) {
                             return;
                         }
