@@ -6190,7 +6190,6 @@
                 (function() {
                     var count = 0;
                     var isDragging = false;
-                    var target;
                     var name = 'click_' + self.id();
                     self.mousedown(function(e) {
                         var parents = $(e.target).parents();
