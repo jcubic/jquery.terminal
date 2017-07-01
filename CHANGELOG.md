@@ -12,7 +12,7 @@
 * fix input on Firefox with google keyboard (reported by Filip Wieland)
 * disable terminal on resume event in cordova (is the terminal is disabled when
   no virutal keyboard)
-* fix moving cursor on click and the height of the cmd plugin
+* fix moving cursor on click (after multiline command) and the height of the cmd plugin
 
 
 ## 1.4.3

@@ -1998,7 +1998,7 @@
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
         function keydown_event(e) {
-            debug('keydown "' +e.key+'" ' + e.fake);
+            debug('keydown "' + e.key + '" ' + e.fake);
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
@@ -2075,7 +2075,7 @@
         var doc = $(document.documentElement || window);
         self.keymap(options.keymap);
         function keypress_event(e) {
-            debug('keypress "' +e.key+'" ' + e.fake);
+            debug('keypress "' + e.key + '" ' + e.fake);
             var result;
             if (!e.fake) {
                 no_keypress = false;
@@ -2141,11 +2141,11 @@
             doc.trigger(event);
         }
         function debug(str) {
-            //$.terminal.active().echo(str);
+            if (false) {
+                $.terminal.active().echo(str);
+            }
         }
         function input() {
-            debug(no_keydown+' || (('+no_keypress+' || '+dead_key+') && !'+skip_insert+' &&\n'+
-                               '('+single_key+' || '+no_key+') && !'+backspace+')');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
@@ -2153,7 +2153,6 @@
                                (single_key || no_key) && !backspace)) {
                 var pos = position;
                 var val = clip.val();
-                debug(JSON.stringify(val));
                 // backspace is set in keydown if no keydown we need to get new one
                 if (no_keydown) {
                     backspace = val.length < text.length;
@@ -2657,7 +2656,7 @@
                 return string;
             }
             var stack = [];
-            var re = /(\[\[(?:[^\]]|\\\])+\](?:[^\][]|\\\])+\]?)/;
+            var re = /(\[\[(?:[^\]]|\\\])+\](?:[^\][]|\\\])*\]?)/;
             var format_re = /(\[\[(?:[^\]]|\\\])+\])[\s\S]*/;
             return string.split(re).filter(Boolean).map(function(string) {
                 if (string.match(/^\[\[/)) {
@@ -3915,6 +3914,7 @@
                     }
                 }
             } else if (!options.raw) {
+                string = $.terminal.normalize(string);
                 string = $.terminal.format(string, {
                     linksNoReferrer: settings.linksNoReferrer
                 });
@@ -3939,7 +3939,7 @@
                 string = $.type(string) === 'string' ? string : String(string);
                 if (string !== '') {
                     string = $.map(string.split(format_exec_re), function(string) {
-                        if (string.match(format_exec_re) &&
+                        if (string && string.match(format_exec_re) &&
                             !$.terminal.is_formatting(string)) {
                             // redraw should not execute commands and it have
                             // and lines variable have all extended commands
