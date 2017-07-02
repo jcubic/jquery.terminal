@@ -1143,11 +1143,11 @@
                     draw_prompt();
                 }
                 $('.clipboard').val('');
-                return true;
+                return false;
             },
             'SHIFT+ENTER': function() {
                 self.insert('\n');
-                return false;
+                return true;
             },
             'BACKSPACE': function() {
                 if (reverse_search) {
