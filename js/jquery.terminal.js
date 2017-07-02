@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 02 Jul 2017 08:53:06 +0000
+ * Date: Sun, 02 Jul 2017 09:12:42 +0000
  */
 
 /* TODO:
@@ -4963,17 +4963,19 @@
                         matched.push(match);
                     }
                 }
-                var text;
+                function replace(input, replacement) {
+                    var text = self.get_command();
+                    var pos = self.get_position();
+                    var re = new RegExp(input + '$');
+                    var pre = text.substring(0, pos).replace(re, '');
+                    var post = text.substring(pos);
+                    var to_insert = replacement + (quote || '');
+                    self.set_command(pre + to_insert + post);
+                    self.set_position((pre + to_insert).length);
+                }
                 if (matched.length === 1) {
                     if (options.escape) {
-                        text = self.get_command();
-                        var pos = self.get_position();
-                        var end_re = new RegExp(safe + '$');
-                        var pre = text.substring(0, pos).replace(end_re, '');
-                        var post = text.substring(pos);
-                        var to_insert = matched[0] + (quote || '');
-                        self.set_command(pre + to_insert + post);
-                        self.set_position((pre + to_insert).length);
+                        replace(safe, matched[0]);
                     } else {
                         self.insert(matched[0].replace(regex, '') + (quote || ''));
                     }
@@ -4984,7 +4986,7 @@
                         tab_count = 0;
                         if (options.echo) {
                             echo_command();
-                            text = matched.reverse().join('\t');
+                            var text = matched.reverse().join('\t');
                             self.echo($.terminal.escape_brackets(text), {
                                 keepWords: true
                             });
@@ -4993,7 +4995,7 @@
                     } else {
                         var common = common_string(string, matched);
                         if (common) {
-                            self.insert(common.replace(regex, ''));
+                            replace(string, common);
                             command = self.before_cursor(options.word);
                             return true;
                         }
