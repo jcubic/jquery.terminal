@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 02 Jul 2017 17:56:27 +0000
+ * Date: Sun, 02 Jul 2017 17:59:17 +0000
  */
 
 /* TODO:
@@ -4153,6 +4153,14 @@
                     settings.onAfterCommand.call(self, self, command);
                 }
             }
+            function show(result) {
+                // don't echo result if user echo something
+                if (result && position === lines.length - 1) {
+                    display_object(result);
+                }
+                after_exec();
+                self.resume();
+            }
             try {
                 // this callback can disable commands
                 if ($.isFunction(settings.onBeforeCommand)) {
@@ -4183,14 +4191,6 @@
                 // execute_extended_command disable it and it can be executed
                 // after delay
                 var saved_change_hash = change_hash;
-                function show(result) {
-                    // don't echo result if user echo something
-                    if (result && position === lines.length - 1) {
-                        display_object(result);
-                    }
-                    after_exec();
-                    self.resume();
-                }
                 if (command.match(/^\s*login\s*$/) && self.token(true)) {
                     if (self.level() > 1) {
                         self.logout(true);
