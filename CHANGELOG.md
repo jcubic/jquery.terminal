@@ -4,6 +4,7 @@
 * improve perfomance by calculating char size only on resize and init (issue reported
   by @artursOs)
 * new cmd delage method `get_position`/`set_position`
+* resolve promises returned from intrpreter in jQuery 2.x
 ### Bugs
 * add option to cmd::disable to not blur so it don't hide android keyboard on pause
 * don't enable terminal on init on Android

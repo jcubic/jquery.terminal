@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 02 Jul 2017 13:48:47 +0000
+ * Date: Sun, 02 Jul 2017 17:56:27 +0000
  */
 
 /* TODO:
@@ -4183,6 +4183,14 @@
                 // execute_extended_command disable it and it can be executed
                 // after delay
                 var saved_change_hash = change_hash;
+                function show(result) {
+                    // don't echo result if user echo something
+                    if (result && position === lines.length - 1) {
+                        display_object(result);
+                    }
+                    after_exec();
+                    self.resume();
+                }
                 if (command.match(/^\s*login\s*$/) && self.token(true)) {
                     if (self.level() > 1) {
                         self.logout(true);
@@ -4211,14 +4219,12 @@
                     if (result !== undefined) {
                         // auto pause/resume when user return promises
                         self.pause(settings.softPause);
-                        return $.when(result).done(function(result) {
-                            // don't echo result if user echo something
-                            if (result && position === lines.length - 1) {
-                                display_object(result);
-                            }
-                            after_exec();
-                            self.resume();
-                        });
+                        // when for native Promise object work only in jQuery 3.x
+                        if (result.then) {
+                            result.then(show);
+                        } else {
+                            return $.when(result).done(show);
+                        }
                     } else if (paused) {
                         resume_callbacks.push(function() {
                             // exec with resume/pause in user code
