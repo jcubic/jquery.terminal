@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 01 Jul 2017 18:30:15 +0000
+ * Date: Sun, 02 Jul 2017 08:53:06 +0000
  */
 
 /* TODO:
@@ -1366,11 +1366,11 @@
         function fix_textarea() {
             // delay worked while experimenting
             self.oneTime(10, function() {
-                clip.val(command);
+                //clip.val(command);
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
-                            clip.caret(position);
+                            //clip.caret(position);
                         } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
                         }
@@ -4941,7 +4941,13 @@
                 }
                 var safe = $.terminal.escape_regex(string);
                 if (options.escape) {
-                    safe = safe.replace(/\\(["'() ])/g, '\\?$1');
+                    safe = safe.replace(/(\\+)(["'() ])/g, function(_, slash, chr) {
+                        if (chr.match(/[()]/)) {
+                            return slash + '\\?\\' + chr;
+                        } else {
+                            return slash + '?' + chr;
+                        }
+                    });
                 }
                 var regex = new RegExp('^' + safe);
                 var matched = [];
@@ -4957,8 +4963,20 @@
                         matched.push(match);
                     }
                 }
+                var text;
                 if (matched.length === 1) {
-                    self.insert(matched[0].replace(regex, '') + (quote || ''));
+                    if (options.escape) {
+                        text = self.get_command();
+                        var pos = self.get_position();
+                        var end_re = new RegExp(safe + '$');
+                        var pre = text.substring(0, pos).replace(end_re, '');
+                        var post = text.substring(pos);
+                        var to_insert = matched[0] + (quote || '');
+                        self.set_command(pre + to_insert + post);
+                        self.set_position((pre + to_insert).length);
+                    } else {
+                        self.insert(matched[0].replace(regex, '') + (quote || ''));
+                    }
                     command = self.before_cursor(options.word);
                     return true;
                 } else if (matched.length > 1) {
@@ -4966,7 +4984,7 @@
                         tab_count = 0;
                         if (options.echo) {
                             echo_command();
-                            var text = matched.reverse().join('\t');
+                            text = matched.reverse().join('\t');
                             self.echo($.terminal.escape_brackets(text), {
                                 keepWords: true
                             });
@@ -5312,6 +5330,21 @@
                     command_line.set(command);
                 });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: Change position of the command line
+            // -------------------------------------------------------------
+            set_position: function(position, relative) {
+                when_ready(function ready() {
+                    command_line.position(position, relative);
+                });
+                return self;
+            },
+            // -------------------------------------------------------------
+            // :: Return position of the command line
+            // -------------------------------------------------------------
+            get_position: function() {
+                return command_line.position();
             },
             // -------------------------------------------------------------
             // :: Insert text into the command line after the cursor

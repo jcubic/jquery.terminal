@@ -3,6 +3,7 @@
 * run fake keypress and keydown created in input when not fired by the browser (android)
 * improve perfomance by calculating char size only on resize and init (issue reported
   by @artursOs)
+* new cmd delage method `get_position`/`set_position`
 ### Bugs
 * add option to cmd::disable to not blur so it don't hide android keyboard on pause
 * don't enable terminal on init on Android
@@ -13,7 +14,7 @@
 * disable terminal on resume event in cordova (is the terminal is disabled when
   no virutal keyboard)
 * fix moving cursor on click (after multiline command) and the height of the cmd plugin
-
+* fix escape completion (that enabled by default)
 
 ## 1.4.3
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)
