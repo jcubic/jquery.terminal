@@ -2100,7 +2100,7 @@ function tests_on_ready() {
                             done();
                         }, 500);
                     }, 500);
-                });
+                }, 5000);
             });
             describe('greetings', function() {
                 it('should show greetings', function(done) {
