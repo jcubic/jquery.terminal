@@ -233,7 +233,7 @@
   "devDependencies": {
     "coveralls": "^2.11.15",
     "cssnano-cli": "^1.0.5",
-    "eslint": "^4.2.0",
+    "eslint": "^3.14.1",
     "istanbul": "^0.4.3",
     "jasmine": "^2.4.1",
     "jasmine-node": "^1.14.5",
