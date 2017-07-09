@@ -6,6 +6,7 @@
 * new cmd delegate method `get_position`/`set_position` added to terminal
 * resolve promises returned from intrpreter in jQuery 2.x
 * allow to use newlines in prompt
+* don't rethrow user exception when exceptionHandler is set (mainly for testing that option)
 ### Bugs
 * add option to cmd::disable to not blur so it don't hide android keyboard on pause
 * don't enable terminal on init on Android

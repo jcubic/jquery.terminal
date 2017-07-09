@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 09 Jul 2017 12:28:24 +0000
+ * Date: Sun, 09 Jul 2017 15:39:49 +0000
  */
 
 /* TODO:
@@ -2035,17 +2035,17 @@
                 no_keydown = false;
             }
             var key = get_key(e);
-            if (enabled) {
-                if ($.isFunction(options.keydown)) {
-                    result = options.keydown(e);
-                    if (result !== undefined) {
-                        //prevent_keypress = true;
-                        if (!result) {
-                            skip_insert = true;
-                        }
-                        return result;
+            if ($.isFunction(options.keydown)) {
+                result = options.keydown(e);
+                if (result !== undefined) {
+                    //prevent_keypress = true;
+                    if (!result) {
+                        skip_insert = true;
                     }
+                    return result;
                 }
+            }
+            if (enabled) {
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
@@ -2098,16 +2098,16 @@
             if (prevent_keypress) {
                 return;
             }
-            if (enabled) {
-                if ($.isFunction(options.keypress)) {
-                    result = options.keypress(e);
-                    if (result !== undefined) {
-                        if (!result) {
-                            skip_insert = true;
-                        }
-                        return result;
+            if ($.isFunction(options.keypress)) {
+                result = options.keypress(e);
+                if (result !== undefined) {
+                    if (!result) {
+                        skip_insert = true;
                     }
+                    return result;
                 }
+            }
+            if (enabled) {
                 if (e.fake) {
                     // event created in input, we prevent inserting text
                     // in different interpreter when keydown called pop
@@ -3203,13 +3203,13 @@
         exit: true,
         clear: true,
         enabled: true,
-        historySize: 60,
         maskChar: '*',
         wrap: true,
         checkArity: true,
         raw: false,
         exceptionHandler: null,
         pauseEvents: true,
+        softPause: false,
         memory: false,
         cancelableAjax: true,
         processArguments: true,
@@ -3218,8 +3218,10 @@
         completionEscape: true,
         convertLinks: true,
         extra: {},
+        historySize: 60,
         historyState: false,
         importHistory: false,
+        historyFilter: null,
         echoCommand: true,
         scrollOnEcho: true,
         login: null,
@@ -3233,8 +3235,6 @@
         response: $.noop,
         onRPCError: null,
         completion: false,
-        historyFilter: null,
-        softPause: false,
         onInit: $.noop,
         onClear: $.noop,
         onBlur: $.noop,
@@ -4250,7 +4250,9 @@
             } catch (e) {
                 display_exception(e, 'USER');
                 self.resume();
-                throw e;
+                if (!settings.exceptionHandler) {
+                    throw e;
+                }
             }
         }
         // ---------------------------------------------------------------------
@@ -4325,7 +4327,9 @@
                             return fun.apply(self, args);
                         } catch (e) {
                             display_exception(e, 'USER KEYMAP');
-                            throw e;
+                            if (!settings.exceptionHandler) {
+                                throw e;
+                            }
                         }
                     };
                 }));
@@ -6053,7 +6057,9 @@
                     if (name !== 'exec' && name !== 'resume') {
                         display_exception(e, 'TERMINAL');
                     }
-                    throw e;
+                    if (!settings.exceptionHandler) {
+                        throw e;
+                    }
                 }
             };
         }));
@@ -6085,7 +6091,9 @@
                 }
             } catch (e) {
                 display_exception(e, 'onBeforeLogin');
-                throw e;
+                if (!settings.exceptionHandler) {
+                    throw e;
+                }
             }
         }
         // create json-rpc authentication function
@@ -6182,10 +6190,12 @@
                 clickTimeout: settings.clickTimeout,
                 keypress: function(e) {
                     var top = interpreters.top();
-                    if ($.isFunction(top.keypress)) {
-                        return top.keypress.call(self, e, self);
-                    } else if ($.isFunction(settings.keypress)) {
-                        return settings.keypress.call(self, e, self);
+                    if (enabled && (!paused || !settings.pauseEvents)) {
+                        if ($.isFunction(top.keypress)) {
+                            return top.keypress.call(self, e, self);
+                        } else if ($.isFunction(settings.keypress)) {
+                            return settings.keypress.call(self, e, self);
+                        }
                     }
                 },
                 onCommandChange: function(command) {
@@ -6194,7 +6204,9 @@
                             settings.onCommandChange.call(self, command, self);
                         } catch (e) {
                             display_exception(e, 'onCommandChange');
-                            throw e;
+                            if (!settings.exceptionHandler) {
+                                throw e;
+                            }
                         }
                     }
                     scroll_to_bottom();
