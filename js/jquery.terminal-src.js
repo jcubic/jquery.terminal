@@ -1699,8 +1699,18 @@
         // ---------------------------------------------------------------------
         var draw_prompt = (function() {
             function set(prompt) {
-                prompt_node.html($.terminal.format($.terminal.encode(prompt)));
-                prompt_len = prompt_node.text().length;
+                var lines = $.terminal.split_equal($.terminal.encode(prompt));
+                var formatted = lines.slice(0, -1).map(function(line) {
+                    line = $.terminal.format(line);
+                    if (line.match(/class="/)) {
+                        return line.replace(/class="/, 'class="line ');
+                    } else {
+                        return line.replace(/^<span/, '<span class="line"');
+                    }
+                }).concat(lines.slice(-1).map($.terminal.format)).join('\n');
+                var width = self.width();
+                prompt_node.html(formatted).find('.line').width(width);
+                prompt_len = prompt_node.find('span:last').text().length;
             }
             return function() {
                 switch (typeof prompt) {
@@ -1927,6 +1937,7 @@
                     change_num_chars();
                 }
                 redraw();
+                draw_prompt();
                 return self;
             },
             enable: function() {

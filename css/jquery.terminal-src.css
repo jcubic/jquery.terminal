@@ -100,7 +100,7 @@
     line-height: 14px;
     height: auto;
 }
-.cmd .prompt {
+.cmd .prompt > span {
     float: left;
 }
 .terminal, .cmd {
@@ -133,8 +133,11 @@
 .terminal .terminal-output div span {
     display: inline-block;
 }
-.cmd span {
+.cmd > span:not(.prompt) {
     float: left;
+}
+.cmd .prompt span.line {
+    display: block;
 }
 /* fix double style of selecting text in terminal */
 .terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal td,
