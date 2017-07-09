@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 09 Jul 2017 18:13:36 +0000
+ * Date: Sun, 09 Jul 2017 18:55:00 +0000
  */
 
 /* TODO:
@@ -3021,8 +3021,7 @@
             return (typeof response.id === 'number' &&
                     typeof response.result !== 'undefined') ||
                 (options.method === 'system.describe' &&
-                 response.name === 'DemoService' &&
-                 typeof response.id !== 'undefined' &&
+                 response.name && typeof response.id !== 'undefined' &&
                  response.procs instanceof Array);
         }
         ids[options.url] = ids[options.url] || 0;

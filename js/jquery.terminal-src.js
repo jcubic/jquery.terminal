@@ -3021,8 +3021,7 @@
             return (typeof response.id === 'number' &&
                     typeof response.result !== 'undefined') ||
                 (options.method === 'system.describe' &&
-                 response.name === 'DemoService' &&
-                 typeof response.id !== 'undefined' &&
+                 response.name && typeof response.id !== 'undefined' &&
                  response.procs instanceof Array);
         }
         ids[options.url] = ids[options.url] || 0;

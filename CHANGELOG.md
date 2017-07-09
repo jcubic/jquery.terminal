@@ -18,6 +18,7 @@
   no virutal keyboard)
 * fix moving cursor on click (after multiline command) and the height of the cmd plugin
 * fix escape completion (that enabled by default)
+* remove harcoded DemoService from json-rpc
 
 ## 1.4.3
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)
