@@ -1700,6 +1700,7 @@
         var draw_prompt = (function() {
             function set(prompt) {
                 var lines = $.terminal.split_equal($.terminal.encode(prompt));
+                var last_line = lines.slice(-1).map($.terminal.format)[0];
                 var formatted = lines.slice(0, -1).map(function(line) {
                     line = $.terminal.format(line);
                     if (line.match(/class="/)) {
@@ -1707,10 +1708,10 @@
                     } else {
                         return line.replace(/^<span/, '<span class="line"');
                     }
-                }).concat(lines.slice(-1).map($.terminal.format)).join('\n');
+                }).concat([last_line]).join('\n');
                 var width = self.width();
                 prompt_node.html(formatted).find('.line').width(width);
-                prompt_len = prompt_node.find('span:last').text().length;
+                prompt_len = $('<span>' + last_line + '</span>').text().length;
             }
             return function() {
                 switch (typeof prompt) {
