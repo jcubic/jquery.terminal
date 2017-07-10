@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 10 Jul 2017 08:07:58 +0000
+ * Date: Mon, 10 Jul 2017 08:22:32 +0000
  */
 
 /* TODO:
@@ -3576,10 +3576,6 @@
                     });
                 }
                 if (procs && procs.length) {
-                    if (!settings.completion) {
-                        warn('If you use option completion = true you will get automa' +
-                             'tic completion for all JSON-RPC methods');
-                    }
                     var interpreter_object = {};
                     $.each(procs, function(_, proc) {
                         interpreter_object[proc.name] = function() {

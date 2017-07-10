@@ -1925,7 +1925,7 @@ function tests_on_ready() {
                             done();
                         }
                     }, 500);
-                }, 1000);
+                }, 5000);
             });
             describe('methods after creating async rpc with system.describe', function() {
                 it('should call methods', function(done) {

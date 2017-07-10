@@ -3576,10 +3576,6 @@
                     });
                 }
                 if (procs && procs.length) {
-                    if (!settings.completion) {
-                        warn('If you use option completion = true you will get automa' +
-                             'tic completion for all JSON-RPC methods');
-                    }
                     var interpreter_object = {};
                     $.each(procs, function(_, proc) {
                         interpreter_object[proc.name] = function() {
