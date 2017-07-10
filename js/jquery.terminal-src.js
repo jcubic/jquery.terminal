@@ -1942,16 +1942,18 @@
                 return self;
             },
             enable: function() {
-                enabled = true;
-                self.addClass('enabled');
-                try {
-                    clip.caret(position);
-                } catch (e) {
-                    // firefox throw NS_ERROR_FAILURE ignore
+                if (!enabled) {
+                    enabled = true;
+                    self.addClass('enabled');
+                    try {
+                        clip.caret(position);
+                    } catch (e) {
+                        // firefox throw NS_ERROR_FAILURE ignore
+                    }
+                    animation(true);
+                    draw_prompt();
+                    mobile_focus();
                 }
-                animation(true);
-                draw_prompt();
-                mobile_focus();
                 return self;
             },
             isenabled: function() {
