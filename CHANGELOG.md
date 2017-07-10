@@ -7,6 +7,8 @@
 * resolve promises returned from intrpreter in jQuery 2.x
 * allow to use newlines in prompt
 * don't rethrow user exception when exceptionHandler is set (mainly for testing that option)
+* add option describe that is a string mapping procs from system.describe procs (default "procs")
+  it can be "result" or "result.procs" if system.describe is normal JSON-RPC method
 ### Bugs
 * add option to cmd::disable to not blur so it don't hide android keyboard on pause
 * don't enable terminal on init on Android
@@ -18,7 +20,7 @@
   no virutal keyboard)
 * fix moving cursor on click (after multiline command) and the height of the cmd plugin
 * fix escape completion (that enabled by default)
-* remove harcoded DemoService from json-rpc
+* remove hardcoded DemoService from json-rpc system.describe
 
 ## 1.4.3
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)

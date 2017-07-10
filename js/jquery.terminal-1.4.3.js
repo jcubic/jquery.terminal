@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 09 Jul 2017 18:55:00 +0000
+ * Date: Mon, 10 Jul 2017 07:31:43 +0000
  */
 
 /* TODO:
@@ -2991,6 +2991,7 @@
     }
     // -----------------------------------------------------------------------
     function warn(msg) {
+        msg = '[jQuery Terminal] ' + msg;
         if (console && console.warn) {
             console.warn(msg);
         } else {
@@ -3018,11 +3019,9 @@
             };
         }
         function validJSONRPC(response) {
-            return (typeof response.id === 'number' &&
-                    typeof response.result !== 'undefined') ||
-                (options.method === 'system.describe' &&
-                 response.name && typeof response.id !== 'undefined' &&
-                 response.procs instanceof Array);
+            return $.isNumeric(response.id) &&
+                (typeof response.result !== 'undefined' ||
+                 typeof response.error !== 'undefined');
         }
         ids[options.url] = ids[options.url] || 0;
         var request = {
@@ -3059,7 +3058,7 @@
                 if ($.isFunction(options.response)) {
                     options.response(jqXHR, json);
                 }
-                if (validJSONRPC(json)) {
+                if (validJSONRPC(json) || options.method === 'system.describe') {
                     // don't catch errors in success callback
                     options.success(json, status, jqXHR);
                 } else if (options.error) {
@@ -3232,6 +3231,7 @@
         clickTimeout: 200,
         request: $.noop,
         response: $.noop,
+        describe: 'procs',
         onRPCError: null,
         completion: false,
         onInit: $.noop,
@@ -3253,11 +3253,11 @@
             wrongArity: "Wrong number of arguments. Function '%s' expects %s got" +
                 ' %s!',
             commandNotFound: "Command '%s' Not Found!",
-            oneRPCWithIgnore: 'You can use only one rpc with ignoreSystemDescr' +
-                'ibe or rpc without system.describe',
+            oneRPCWithIgnore: 'You can use only one rpc with describe == false ' +
+                'or rpc without system.describe',
             oneInterpreterFunction: "You can't use more than one function (rpc " +
-                'without system.describe or with option ignoreSystemDescribe cou' +
-                 'nts as one)',
+                'without system.describe or with option describe == false count' +
+                 's as one)',
             loginFunctionMissing: "You didn't specify a login function",
             noTokenError: 'Access denied (no token)',
             serverResponse: 'Server responded',
@@ -3564,10 +3564,22 @@
                     display_exception(e, 'USER');
                 }
             }
-            function response(ret) {
-                if (ret.procs) {
+            function response(response) {
+                var procs = response;
+                // we check if it's false before we call this function but
+                // it don't hurt to be explicit here
+                if (settings.describe !== '') {
+                    settings.describe.split('.').forEach(function(field) {
+                        procs = procs[field];
+                    });
+                }
+                if (procs && procs.length) {
+                    if (!settings.completion) {
+                        warn('If you use option completion = true you will get automa' +
+                             'tic completion for all JSON-RPC methods');
+                    }
                     var interpreter_object = {};
-                    $.each(ret.procs, function(_, proc) {
+                    $.each(procs, function(_, proc) {
                         interpreter_object[proc.name] = function() {
                             var append = auth && proc.name !== 'help';
                             var args = Array.prototype.slice.call(arguments);
@@ -3604,13 +3616,13 @@
                     });
                     interpreter_object.help = interpreter_object.help || function(fn) {
                         if (typeof fn === 'undefined') {
-                            var names = ret.procs.map(function(proc) {
+                            var names = response.procs.map(function(proc) {
                                 return proc.name;
                             }).join(', ') + ', help';
                             self.echo('Available commands: ' + names);
                         } else {
                             var found = false;
-                            $.each(ret.procs, function(_, proc) {
+                            $.each(procs, function(_, proc) {
                                 if (proc.name === fn) {
                                     found = true;
                                     var msg = '';
@@ -3647,20 +3659,8 @@
                 method: 'system.describe',
                 params: [],
                 success: response,
-                request: function(jxhr, request) {
-                    try {
-                        settings.request.call(self, jxhr, request, self);
-                    } catch (e) {
-                        display_exception(e, 'USER');
-                    }
-                },
-                response: function(jxhr, response) {
-                    try {
-                        settings.response.call(self, jxhr, response, self);
-                    } catch (e) {
-                        display_exception(e, 'USER');
-                    }
-                },
+                request: jrpc_request,
+                response: jrpc_response,
                 error: function error() {
                     success(null);
                 }
@@ -3684,7 +3684,7 @@
                         var type = $.type(first);
                         if (type === 'string') {
                             self.pause(settings.softPause);
-                            if (settings.ignoreSystemDescribe) {
+                            if (settings.describe === false) {
                                 if (++rpc_count === 1) {
                                     fn_interpreter = make_basic_json_rpc(first, login);
                                 } else {
@@ -6066,6 +6066,10 @@
         // -----------------------------------------------------------------
         // INIT CODE
         // -----------------------------------------------------------------
+        // backward compatibility
+        if (settings.ignoreSystemDescribe === true) {
+            settings.describe = false;
+        }
         if (settings.width) {
             self.width(settings.width);
         }
