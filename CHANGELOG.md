@@ -1,4 +1,28 @@
-# 1.4.3
+## next
+### Features
+* run fake keypress and keydown created in input when not fired by the browser (android)
+* improve perfomance by calculating char size only on resize and init (issue reported
+  by @artursOs)
+* new cmd delegate method `get_position`/`set_position` added to terminal
+* resolve promises returned from intrpreter in jQuery 2.x
+* allow to use newlines in prompt
+* don't rethrow user exception when exceptionHandler is set (mainly for testing that option)
+* add option describe that is a string mapping procs from system.describe procs (default "procs")
+  it can be "result" or "result.procs" if system.describe is normal JSON-RPC method
+### Bugs
+* add option to cmd::disable to not blur so it don't hide android keyboard on pause
+* don't enable terminal on init on Android
+* fix next key after CTRL+V that was triggering input event (reported by @artursOs)
+* fix parsing strings
+* don't hide virtual keyboard on Android when called pause()
+* fix input on Firefox with google keyboard (reported by Filip Wieland)
+* disable terminal on resume event in cordova (is the terminal is disabled when
+  no virutal keyboard)
+* fix moving cursor on click (after multiline command) and the height of the cmd plugin
+* fix escape completion (that enabled by default)
+* remove hardcoded DemoService from json-rpc system.describe
+
+## 1.4.3
 * don't execute keypress callback when terminal is disabled (reported by @artursOs)
 * fix android (input event was not bind)
 * disable keypress when you press CTRL+key and caps-lock is on (bug in firefox reported by @artursOs)

@@ -68,7 +68,7 @@ cover:
 	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js
 
 coveralls:
-	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js --captureExceptions && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls -v
+	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js --captureExceptions; cat ./coverage/lcov.info | ./node_modules/.bin/coveralls -v
 
 eslint:
 	$(ESLINT) js/jquery.terminal-src.js
