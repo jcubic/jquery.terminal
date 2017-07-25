@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.5.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 10 Jul 2017 09:10:00 +0000
+ * Date: Tue, 25 Jul 2017 19:59:05 +0000
  */
 
 /* TODO:
@@ -48,7 +48,7 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
-         setImmediate, IntersectionObserver, MutationObserver */
+         setImmediate, IntersectionObserver, MutationObserver, wcwidth */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -1057,28 +1057,45 @@
             span.remove();
             return rect;
         }
+        var length = (function() {
+            if (typeof wcwidth == 'undefined') {
+                return function(string) {
+                    return string.length;
+                };
+            } else {
+                return wcwidth;
+            }
+        })();
         function get_char_pos(point) {
-            var prompt_len = self.find('.prompt').text().length;
+            var prompt_len = length(self.find('.prompt').text());
             var size = get_char_size();
             var width = size.width;
             var height = size.height;
             var offset = self.offset();
-            var col = Math.floor((point.x - offset.left) / width);
+            var col_count = Math.floor((point.x - offset.left) / width);
             var row = Math.floor((point.y - offset.top) / height);
             var lines = get_splited_command_line(command);
+            var line = lines[row];
+            var col = 0;
+            var i = col_count;
+            while (i >= 0) {
+                i -= length(line[col]);
+                col++;
+            }
             var try_pos;
             if (row > 0 && lines.length > 1) {
                 try_pos = col + lines.slice(0, row).reduce(function(sum, line) {
-                    return sum + line.length;
+                    return sum + length(line);
                 }, 0);
             } else {
-                try_pos = col - prompt_len;
+                try_pos = col;
             }
             // tabs are 4 spaces and newline don't show up in results
             var text = command.replace(/\t/g, '\x00\x00\x00\x00').replace(/\n/, '');
             var before = text.slice(0, try_pos);
             var len = before.replace(/\x00{4}/g, '\t').replace(/\x00+/, '').length;
-            return len > command.length ? command.length : len;
+            var command_len = command.length;
+            return len > command_len ? command_len : len;
         }
         function get_key(e) {
             if (e.key) {
@@ -2347,7 +2364,7 @@
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
-        version: '1.5.0',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
