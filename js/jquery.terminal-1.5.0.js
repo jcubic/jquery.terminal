@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 25 Jul 2017 19:59:05 +0000
+ * Date: Wed, 26 Jul 2017 12:29:58 +0000
  */
 
 /* TODO:
@@ -1058,7 +1058,7 @@
             return rect;
         }
         var length = (function() {
-            if (typeof wcwidth == 'undefined') {
+            if (typeof wcwidth === 'undefined') {
                 return function(string) {
                     return string.length;
                 };
@@ -1067,7 +1067,6 @@
             }
         })();
         function get_char_pos(point) {
-            var prompt_len = length(self.find('.prompt').text());
             var size = get_char_size();
             var width = size.width;
             var height = size.height;
@@ -1078,7 +1077,7 @@
             var line = lines[row];
             var col = 0;
             var i = col_count;
-            while (i >= 0) {
+            while (i > 0) {
                 i -= length(line[col]);
                 col++;
             }
@@ -1373,7 +1372,7 @@
                         clip.trigger('focus', [true]);
                     });
                 }
-            } else if (focus) {
+            } else if (focus && is_touch) {
                 clip.blur();
             }
         }
@@ -2021,6 +2020,7 @@
         var no_key = false;
         var no_keydown = true;
         var backspace = false;
+        var process = false;
         var skip_insert;
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
@@ -2030,6 +2030,7 @@
         // ---------------------------------------------------------------------
         function keydown_event(e) {
             debug('keydown "' + e.key + '" ' + e.fake);
+            process = (e.key || '').toLowerCase() === 'process';
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
@@ -2177,16 +2178,19 @@
             }
         }
         function input() {
+            debug('input ' + no_keydown + ' || ((' + no_keypress + ' || ' +
+                  dead_key + ') && !' + skip_insert + ' && (' + single_key +
+                  ' || ' + no_key + ') && !' + backspace + ')');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
-            if (no_keydown || ((no_keypress || dead_key) && !skip_insert &&
-                               (single_key || no_key) && !backspace)) {
+            if (no_keydown || process || ((no_keypress || dead_key) && !skip_insert &&
+                                          (single_key || no_key) && !backspace)) {
                 var pos = position;
                 var val = clip.val();
                 // backspace is set in keydown if no keydown we need to get new one
                 if (no_keydown) {
-                    backspace = val.length < text.length;
+                    backspace = text.substring(0, text.length - 1) === text.length;
                 }
                 if (reverse_search) {
                     rev_search_str = val;
