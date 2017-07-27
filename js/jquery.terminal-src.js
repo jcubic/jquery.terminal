@@ -1463,10 +1463,37 @@
         // :: fit next to prompt (need to have less characters)
         // ---------------------------------------------------------------------
         function get_splited_command_line(string) {
+            function split(string) {
+                return $.terminal.split_equal(string, num_chars);
+            }
             var prompt = prompt_node.text();
-            var array = $.terminal.split_equal(prompt + string, num_chars);
             var re = new RegExp('^' + $.terminal.escape_regex(prompt));
-            array[0] = array[0].replace(re, '');
+            var array;
+            if (string.match(/\n/)) {
+                var tmp = string.split('\n');
+                var first_len = num_chars - prompt_len - 1;
+                for (var i = 0; i < tmp.length - 1; ++i) {
+                    tmp[i] += ' ';
+                }
+                // split first line
+                if (strlen(tmp[0]) > first_len) {
+                    array = split(tmp[0], num_chars);
+                    array[0] = array[0].replace(re, '');
+                } else {
+                    array = [tmp[0]];
+                }
+                // process rest of the lines
+                for (i = 1; i < tmp.length; ++i) {
+                    if (tmp[i].length > num_chars) {
+                        array = array.concat(split(tmp[i], num_chars));
+                    } else {
+                        array.push(tmp[i]);
+                    }
+                }
+            } else {
+                array = split(prompt + string, num_chars);
+                array[0] = array[0].replace(re, '');
+            }
             return array;
         }
         // ---------------------------------------------------------------------
@@ -1679,7 +1706,7 @@
                 }).concat([last_line]).join('\n');
                 var width = self.width();
                 prompt_node.html(formatted).find('.line').width(width);
-                prompt_len = $('<span>' + last_line + '</span>').text().length;
+                prompt_len = strlen($('<span>' + last_line + '</span>').text());
             }
             return function() {
                 switch (typeof prompt) {
@@ -2633,8 +2660,8 @@
                             }
                         }
                         result.push(output);
-                        new_index = first_index;
-                        if (data.count === length - 1) {
+                        if (data.count === length - 1 &&
+                            strlen(line[data.index + 1]) === 2) {
                             new_index--;
                         }
                         // modify loop by returing new data
@@ -6361,7 +6388,7 @@
                 if (visibility_observer) {
                     visibility_observer.unobserve(self[0]);
                 }
-                visibility_observer = new IntersectionObserver(function(entries) {
+                visibility_observer = new IntersectionObserver(function() {
                     if (self.is(':visible')) {
                         self.resizer('unbind').resizer(resize);
                         resize();
