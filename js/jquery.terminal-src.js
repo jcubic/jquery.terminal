@@ -1041,25 +1041,48 @@
             span.remove();
             return rect;
         }
-        function get_char_pos(point) {
+        function get_focus() {
+            var sel;
+            if (!((sel = window.getSelection()) && (sel.focusNode != null))) {
+                return null;
+            }
+            return [sel.focusNode, sel.focusOffset];
+        }
+        function get_char_pos(e) {
+            var focus = get_focus();
+            var col;
+            var x = e.pageX;
+            var y = e.pageY;
             var size = get_char_size();
             var width = size.width;
             var height = size.height;
             var offset = self.offset();
-            var col_count = Math.floor((point.x - offset.left) / width);
-            var row = Math.floor((point.y - offset.top) / height);
+            var col_count = Math.floor((x - offset.left) / width);
+            var row = Math.floor((y - offset.top) / height);
+            if (focus) {
+                var node = $(e.target).closest('[role="presentation"]');
+                if ($(focus[0]).is('.cmd')) {
+                    return command.length;
+                } else if (node.is('div')) {
+                    col = focus[1];
+                } else if (node.next().is('.cursor')) {
+                    col = focus[1];
+                } else if (node.is('.cursor')) {
+                    return position;
+                } else if (node.prev().is('.cursor')) {
+                    return position + focus[1];
+                } else {
+                    col = 0;
+                }
+            } else {
+                return command.length;
+            }
             var lines = get_splited_command_line(command);
             var line = lines[row];
-            var col = 0;
-            var i = col_count;
-            while (i > 0) {
-                i -= strlen(line[col]);
-                col++;
-            }
             var try_pos;
             if (row > 0 && lines.length > 1) {
                 try_pos = col + lines.slice(0, row).reduce(function(sum, line) {
-                    return sum + strlen(line);
+                    return sum + line.length;
                 }, 0);
             } else {
                 try_pos = col;
@@ -1477,7 +1500,7 @@
                 }
                 // split first line
                 if (strlen(tmp[0]) > first_len) {
-                    array = split(tmp[0], num_chars);
+                    array = split(prompt + tmp[0], num_chars);
                     array[0] = array[0].replace(re, '');
                 } else {
                     array = [tmp[0]];
@@ -1555,7 +1578,7 @@
                 }
             }
             function div(string) {
-                return '<div>' + format(string) + '</div>';
+                return '<div role="presentation">' + format(string) + '</div>';
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -1642,10 +1665,14 @@
                                 draw_cursor_line(last, pos);
                             } else if (num_lines === 3) { // in the middle
                                 var str = format(array[0]);
-                                before.before('<div>' + str + '</div>');
+                                before.before('<div role="presentation">' +
+                                              str +
+                                              '</div>');
                                 draw_cursor_line(array[1], position - first_len - 1);
                                 str = format(array[2]);
-                                after.after('<div>' + str + '</div>');
+                                after.after('<div role="presentation">' +
+                                            str +
+                                            '</div>');
                             } else {
                                 // more lines, cursor in the middle
                                 var line_index;
@@ -2240,10 +2267,11 @@
                         if (enabled) {
                             self.oneTime(options.clickTimeout, name, function() {
                                 if (!$(e.target).is('.prompt') && down) {
-                                    self.position(get_char_pos({
-                                        x: e.pageX,
-                                        y: e.pageY
-                                    }));
+                                    if ($(e.target).is('.cmd')) {
+                                        self.position(command.length);
+                                    } else {
+                                        self.position(get_char_pos(e));
+                                    }
                                 }
                                 count = 0;
                             });
@@ -2660,10 +2688,6 @@
                             }
                         }
                         result.push(output);
-                        if (data.count === length - 1 &&
-                            strlen(line[data.index + 1]) === 2) {
-                            new_index--;
-                        }
                         // modify loop by returing new data
                         return {index: new_index, count: 0, space: -1};
                     }
