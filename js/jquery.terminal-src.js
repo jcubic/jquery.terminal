@@ -6362,7 +6362,7 @@
                     visibility_observer.unobserve(self[0]);
                 }
                 visibility_observer = new IntersectionObserver(function(entries) {
-                    if (entries[0].intersectionRatio) {
+                    if (self.is(':visible')) {
                         self.resizer('unbind').resizer(resize);
                         resize();
                     } else {

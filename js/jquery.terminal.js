@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 26 Jul 2017 19:21:31 +0000
+ * Date: Thu, 27 Jul 2017 15:16:20 +0000
  */
 
 /* TODO:
@@ -6362,7 +6362,7 @@
                     visibility_observer.unobserve(self[0]);
                 }
                 visibility_observer = new IntersectionObserver(function(entries) {
-                    if (entries[0].intersectionRatio) {
+                    if (self.is(':visible')) {
                         self.resizer('unbind').resizer(resize);
                         resize();
                     } else {
