@@ -1041,36 +1041,29 @@
             span.remove();
             return rect;
         }
-        function get_focus() {
+        function get_focus_offset() {
             var sel;
-            if (!((sel = window.getSelection()) && (sel.focusNode != null))) {
-                return null;
+            if ((sel = window.getSelection()) && (sel.focusNode !== null)) {
+                return sel.focusOffset;
             }
-            return [sel.focusNode, sel.focusOffset];
         }
         function get_char_pos(e) {
-            var focus = get_focus();
+            var focus = get_focus_offset();
             var col;
-            var x = e.pageX;
-            var y = e.pageY;
             var size = get_char_size();
-            var width = size.width;
             var height = size.height;
             var offset = self.offset();
-            var col_count = Math.floor((x - offset.left) / width);
-            var row = Math.floor((y - offset.top) / height);
-            if (focus) {
+            var row = Math.floor((e.pageY - offset.top) / height);
+            if ($.isNumeric(focus)) {
                 var node = $(e.target).closest('[role="presentation"]');
-                if ($(focus[0]).is('.cmd')) {
-                    return command.length;
-                } else if (node.is('div')) {
-                    col = focus[1];
+                if (node.is('div')) {
+                    col = focus;
                 } else if (node.next().is('.cursor')) {
-                    col = focus[1];
+                    col = focus;
                 } else if (node.is('.cursor')) {
                     return position;
                 } else if (node.prev().is('.cursor')) {
-                    return position + focus[1];
+                    return position + focus;
                 } else {
                     col = 0;
                 }
@@ -1078,7 +1071,6 @@
                 return command.length;
             }
             var lines = get_splited_command_line(command);
-            var line = lines[row];
             var try_pos;
             if (row > 0 && lines.length > 1) {
                 try_pos = col + lines.slice(0, row).reduce(function(sum, line) {
