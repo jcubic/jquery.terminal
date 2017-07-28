@@ -6330,6 +6330,8 @@
                                             $target.is('.terminal-wrapper')) {
                                             var len = self.get_command().length;
                                             self.set_position(len);
+                                        } else if ($target.closest('.prompt').length) {
+                                            self.set_position(0);
                                         }
                                         count = 0;
                                     });

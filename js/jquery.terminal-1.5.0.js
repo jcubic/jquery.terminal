@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 28 Jul 2017 06:52:01 +0000
+ * Date: Fri, 28 Jul 2017 06:54:26 +0000
  */
 
 /* TODO:
@@ -6330,6 +6330,8 @@
                                             $target.is('.terminal-wrapper')) {
                                             var len = self.get_command().length;
                                             self.set_position(len);
+                                        } else if ($target.closest('.prompt').length) {
+                                            self.set_position(0);
                                         }
                                         count = 0;
                                     });
