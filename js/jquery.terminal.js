@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 27 Jul 2017 18:30:06 +0000
+ * Date: Fri, 28 Jul 2017 06:52:01 +0000
  */
 
 /* TODO:
@@ -6300,8 +6300,10 @@
                 (function() {
                     var count = 0;
                     var isDragging = false;
+                    var $target;
                     var name = 'click_' + self.id();
                     self.mousedown(function(e) {
+                        $target = $(e.target);
                         if (e.originalEvent.button === 2) {
                             return;
                         }
@@ -6324,6 +6326,11 @@
                                     count = 0;
                                 } else {
                                     self.oneTime(settings.clickTimeout, name, function() {
+                                        if ($target.is('.terminal') ||
+                                            $target.is('.terminal-wrapper')) {
+                                            var len = self.get_command().length;
+                                            self.set_position(len);
+                                        }
                                         count = 0;
                                     });
                                 }
