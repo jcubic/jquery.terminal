@@ -48,7 +48,7 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
-         setImmediate, IntersectionObserver, MutationObserver */
+         setImmediate, IntersectionObserver, MutationObserver, wcwidth */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -782,22 +782,6 @@
         });
     }
     // -----------------------------------------------------------------------
-    // :: Split string to array of strings with the same length
-    // -----------------------------------------------------------------------
-    function str_parts(str, length) {
-        var result = [];
-        var len = str.length;
-        if (len < length) {
-            return [str];
-        } else if (length < 0) {
-            throw new Error("str_parts: length can't be negative");
-        }
-        for (var i = 0; i < len; i += length) {
-            result.push(str.substring(i, i + length));
-        }
-        return result;
-    }
-    // -----------------------------------------------------------------------
     // :: CYCLE DATA STRUCTURE
     // -----------------------------------------------------------------------
     function Cycle(init) {
@@ -1057,14 +1041,35 @@
             span.remove();
             return rect;
         }
-        function get_char_pos(point) {
-            var prompt_len = self.find('.prompt').text().length;
+        function get_focus_offset() {
+            var sel;
+            if ((sel = window.getSelection()) && (sel.focusNode !== null)) {
+                return sel.focusOffset;
+            }
+        }
+        function get_char_pos(e) {
+            var focus = get_focus_offset();
+            var col;
             var size = get_char_size();
-            var width = size.width;
             var height = size.height;
             var offset = self.offset();
-            var col = Math.floor((point.x - offset.left) / width);
-            var row = Math.floor((point.y - offset.top) / height);
+            var row = Math.floor((e.pageY - offset.top) / height);
+            if ($.isNumeric(focus)) {
+                var node = $(e.target).closest('[role="presentation"]');
+                if (node.is('div')) {
+                    col = focus;
+                } else if (node.next().is('.cursor')) {
+                    col = focus;
+                } else if (node.is('.cursor')) {
+                    return position;
+                } else if (node.prev().is('.cursor')) {
+                    return position + focus;
+                } else {
+                    col = 0;
+                }
+            } else {
+                return command.length;
+            }
             var lines = get_splited_command_line(command);
             var try_pos;
             if (row > 0 && lines.length > 1) {
@@ -1072,13 +1077,14 @@
                     return sum + line.length;
                 }, 0);
             } else {
-                try_pos = col - prompt_len;
+                try_pos = col;
             }
             // tabs are 4 spaces and newline don't show up in results
             var text = command.replace(/\t/g, '\x00\x00\x00\x00').replace(/\n/, '');
             var before = text.slice(0, try_pos);
             var len = before.replace(/\x00{4}/g, '\t').replace(/\x00+/, '').length;
-            return len > command.length ? command.length : len;
+            var command_len = command.length;
+            return len > command_len ? command_len : len;
         }
         function get_key(e) {
             if (e.key) {
@@ -1356,7 +1362,7 @@
                         clip.trigger('focus', [true]);
                     });
                 }
-            } else if (focus) {
+            } else if (focus && is_touch) {
                 clip.blur();
             }
         }
@@ -1472,35 +1478,36 @@
         // :: fit next to prompt (need to have less characters)
         // ---------------------------------------------------------------------
         function get_splited_command_line(string) {
+            function split(string) {
+                return $.terminal.split_equal(string, num_chars);
+            }
+            var prompt = prompt_node.text();
+            var re = new RegExp('^' + $.terminal.escape_regex(prompt));
             var array;
-            // command contains new line characters
             if (string.match(/\n/)) {
                 var tmp = string.split('\n');
                 var first_len = num_chars - prompt_len - 1;
-                // empty character after each line
                 for (var i = 0; i < tmp.length - 1; ++i) {
                     tmp[i] += ' ';
                 }
                 // split first line
-                if (tmp[0].length > first_len) {
-                    array = [tmp[0].substring(0, first_len)];
-                    var str = tmp[0].substring(first_len);
-                    array = array.concat(str_parts(str, num_chars));
+                if (strlen(tmp[0]) > first_len) {
+                    array = split(prompt + tmp[0], num_chars);
+                    array[0] = array[0].replace(re, '');
                 } else {
                     array = [tmp[0]];
                 }
                 // process rest of the lines
                 for (i = 1; i < tmp.length; ++i) {
                     if (tmp[i].length > num_chars) {
-                        array = array.concat(str_parts(tmp[i], num_chars));
+                        array = array.concat(split(tmp[i], num_chars));
                     } else {
                         array.push(tmp[i]);
                     }
                 }
             } else {
-                var first = string.substring(0, num_chars - prompt_len);
-                var rest = string.substring(num_chars - prompt_len);
-                array = [first].concat(str_parts(rest, num_chars));
+                array = split(prompt + string, num_chars);
+                array[0] = array[0].replace(re, '');
             }
             return array;
         }
@@ -1563,7 +1570,7 @@
                 }
             }
             function div(string) {
-                return '<div>' + format(string) + '</div>';
+                return '<div role="presentation">' + format(string) + '</div>';
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -1599,7 +1606,7 @@
                 self.find('div').remove();
                 before.html('');
                 // long line
-                if (string.length > num_chars - prompt_len - 1 ||
+                if (strlen(string) > num_chars - prompt_len - 1 ||
                     string.match(/\n/)) {
                     var tabs = string.match(/\t/g);
                     var tabs_rm = tabs ? tabs.length * 3 : 0;
@@ -1650,10 +1657,14 @@
                                 draw_cursor_line(last, pos);
                             } else if (num_lines === 3) { // in the middle
                                 var str = format(array[0]);
-                                before.before('<div>' + str + '</div>');
+                                before.before('<div role="presentation">' +
+                                              str +
+                                              '</div>');
                                 draw_cursor_line(array[1], position - first_len - 1);
                                 str = format(array[2]);
-                                after.after('<div>' + str + '</div>');
+                                after.after('<div role="presentation">' +
+                                            str +
+                                            '</div>');
                             } else {
                                 // more lines, cursor in the middle
                                 var line_index;
@@ -1699,7 +1710,10 @@
         // ---------------------------------------------------------------------
         var draw_prompt = (function() {
             function set(prompt) {
-                var lines = $.terminal.split_equal($.terminal.encode(prompt));
+                var lines = $.terminal.split_equal(
+                    $.terminal.encode(prompt),
+                    num_chars
+                );
                 var last_line = lines.slice(-1).map($.terminal.format)[0];
                 var formatted = lines.slice(0, -1).map(function(line) {
                     line = $.terminal.format(line);
@@ -1711,7 +1725,7 @@
                 }).concat([last_line]).join('\n');
                 var width = self.width();
                 prompt_node.html(formatted).find('.line').width(width);
-                prompt_len = $('<span>' + last_line + '</span>').text().length;
+                prompt_len = strlen($('<span>' + last_line + '</span>').text());
             }
             return function() {
                 switch (typeof prompt) {
@@ -2004,6 +2018,7 @@
         var no_key = false;
         var no_keydown = true;
         var backspace = false;
+        var process = false;
         var skip_insert;
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
@@ -2013,6 +2028,7 @@
         // ---------------------------------------------------------------------
         function keydown_event(e) {
             debug('keydown "' + e.key + '" ' + e.fake);
+            process = (e.key || '').toLowerCase() === 'process';
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
@@ -2160,16 +2176,19 @@
             }
         }
         function input() {
+            debug('input ' + no_keydown + ' || ((' + no_keypress + ' || ' +
+                  dead_key + ') && !' + skip_insert + ' && (' + single_key +
+                  ' || ' + no_key + ') && !' + backspace + ')');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
-            if (no_keydown || ((no_keypress || dead_key) && !skip_insert &&
-                               (single_key || no_key) && !backspace)) {
+            if (no_keydown || process || ((no_keypress || dead_key) && !skip_insert &&
+                                          (single_key || no_key) && !backspace)) {
                 var pos = position;
                 var val = clip.val();
                 // backspace is set in keydown if no keydown we need to get new one
                 if (no_keydown) {
-                    backspace = val.length < text.length;
+                    backspace = text.substring(0, text.length - 1) === text.length;
                 }
                 if (reverse_search) {
                     rev_search_str = val;
@@ -2240,10 +2259,11 @@
                         if (enabled) {
                             self.oneTime(options.clickTimeout, name, function() {
                                 if (!$(e.target).is('.prompt') && down) {
-                                    self.position(get_char_pos({
-                                        x: e.pageX,
-                                        y: e.pageY
-                                    }));
+                                    if ($(e.target).is('.cmd')) {
+                                        self.position(command.length);
+                                    } else {
+                                        self.position(get_char_pos(e));
+                                    }
                                 }
                                 count = 0;
                             });
@@ -2293,6 +2313,16 @@
     })();
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
+    // -------------------------------------------------------------------------
+    var strlen = (function() {
+        if (typeof wcwidth === 'undefined') {
+            return function(string) {
+                return string.length;
+            };
+        } else {
+            return wcwidth;
+        }
+    })();
     // -------------------------------------------------------------------------
     var is_touch = (function() {
         return 'ontouchstart' in window || !!window.DocumentTouch &&
@@ -2489,6 +2519,9 @@
                     }
                 }
                 if (!braket && not_formatting) {
+                    if (strlen(string[i]) === 2) {
+                        count++;
+                    }
                     var data = {
                         count: count,
                         index: i,
@@ -2594,16 +2627,19 @@
                     var last_bracket = data.index === line_length - 2 &&
                         line[data.index + 1] === ']';
                     var last_iteraction = data.index === line_length - 1 || last_bracket;
-                    if (data.count === length || last_iteraction) {
+                    if (data.count >= length || last_iteraction ||
+                        (data.count === length - 1 &&
+                         strlen(line[data.index + 1]) === 2)) {
                         if (keep_words) {
                             var text = $.terminal.strip(line.substring(data.space));
                             // replace html entities with characters
                             text = $('<span>' + text + '</span>').text();
                             // real length, not counting formatting
                             var text_len = text.length;
-                            text = text.substring(0, data.index + length + 1);
+                            var limit = data.index + length + 1;
+                            text = text.substring(0, limit);
                             var can_break = false;
-                            if (text.match(/\s/) || data.index + length + 1 > text_len) {
+                            if (text.match(/\s/) || limit > text_len) {
                                 can_break = true;
                             }
                         }
@@ -3905,8 +3941,8 @@
                 string = $.terminal.encode(string);
             }
             output_buffer.push(NEW_LINE);
-            if (!options.raw && (string.length > num_chars ||
-                                       string.match(/\n/)) &&
+            if (!options.raw && (strlen(string) > num_chars ||
+                                 string.match(/\n/)) &&
                 ((settings.wrap === true && options.wrap === undefined) ||
                   settings.wrap === false && options.wrap === true)) {
                 var words = options.keepWords;
@@ -4003,7 +4039,7 @@
                 lines.forEach(function(line) {
                     var string = $.type(line[0]) === 'function' ? line[0]() : line[0];
                     string = $.type(string) === 'string' ? string : String(string);
-                    if (string.length > num_chars) {
+                    if (strlen(string) > num_chars) {
                         var options = line[1];
                         var splitted = $.terminal.split_equal(
                             string,
@@ -6264,8 +6300,10 @@
                 (function() {
                     var count = 0;
                     var isDragging = false;
+                    var $target;
                     var name = 'click_' + self.id();
                     self.mousedown(function(e) {
+                        $target = $(e.target);
                         if (e.originalEvent.button === 2) {
                             return;
                         }
@@ -6288,6 +6326,13 @@
                                     count = 0;
                                 } else {
                                     self.oneTime(settings.clickTimeout, name, function() {
+                                        if ($target.is('.terminal') ||
+                                            $target.is('.terminal-wrapper')) {
+                                            var len = self.get_command().length;
+                                            self.set_position(len);
+                                        } else if ($target.closest('.prompt').length) {
+                                            self.set_position(0);
+                                        }
                                         count = 0;
                                     });
                                 }
@@ -6368,8 +6413,8 @@
                 if (visibility_observer) {
                     visibility_observer.unobserve(self[0]);
                 }
-                visibility_observer = new IntersectionObserver(function(entries) {
-                    if (entries[0].intersectionRatio) {
+                visibility_observer = new IntersectionObserver(function() {
+                    if (self.is(':visible')) {
                         self.resizer('unbind').resizer(resize);
                         resize();
                     } else {

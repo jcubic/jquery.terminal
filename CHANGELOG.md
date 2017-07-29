@@ -1,4 +1,9 @@
-## next
+## 1.5.1
+* fix autofocus with position: fixes (reported by @ovk)
+* fix input method using sogou keyboard on windows (reported by @hnujxm)
+* fix long line wrapping and click to move cursor with wider characters like Chinese
+
+## 1.5.0
 ### Features
 * run fake keypress and keydown created in input when not fired by the browser (android)
 * improve perfomance by calculating char size only on resize and init (issue reported
