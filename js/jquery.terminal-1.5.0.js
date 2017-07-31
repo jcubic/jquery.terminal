@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 28 Jul 2017 06:54:26 +0000
+ * Date: Mon, 31 Jul 2017 15:15:39 +0000
  */
 
 /* TODO:
@@ -1512,9 +1512,9 @@
             return array;
         }
         // ---------------------------------------------------------------------
-        // :: format end encode the string
+        // :: use custom formatting
         // ---------------------------------------------------------------------
-        function format(string) {
+        function formatting(string) {
             // we don't want to format command when user type formatting in
             string = $.terminal.escape_formatting(string);
             var formatters = $.terminal.defaults.formatters;
@@ -1531,6 +1531,12 @@
                           (e.stack ? e.stack : e));
                 }
             }
+            return string;
+        }
+        // ---------------------------------------------------------------------
+        // :: format end encode the string
+        // ---------------------------------------------------------------------
+        function format(string) {
             return $.terminal.format($.terminal.encode(string));
         }
         // ---------------------------------------------------------------------
@@ -1543,8 +1549,12 @@
             // -----------------------------------------------------------------
             // :: Draw line with the cursor
             // -----------------------------------------------------------------
+            function slice(string, start, end) {
+                return $.terminal.substring(string, start, end);
+            }
             function draw_cursor_line(string, position) {
                 var len = string.length;
+                string = formatting(string);
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
@@ -1552,25 +1562,27 @@
                 } else if (position === 0) {
                     before.html('');
                     //fix for tilda in IE
-                    cursor.html(format(string.slice(0, 1)));
+                    cursor.html(format(slice(string, 0, 1)));
                     //cursor.html(format(string[0]));
-                    after.html(format(string.slice(1)));
+                    after.html(format(slice(string, 1)));
                 } else {
-                    var before_str = string.slice(0, position);
+                    var before_str = slice(string, 0, position);
                     before.html(format(before_str));
                     //fix for tilda in IE
-                    var c = string.slice(position, position + 1);
+                    var c = slice(string, position, position + 1);
                     //cursor.html(string[position]);
                     cursor.html(format(c));
                     if (position === string.length - 1) {
                         after.html('');
                     } else {
-                        after.html(format(string.slice(position + 1)));
+                        after.html(format(slice(string, position + 1)));
                     }
                 }
             }
             function div(string) {
-                return '<div role="presentation">' + format(string) + '</div>';
+                return '<div role="presentation">' +
+                    format(formatting(string)) +
+                    '</div>';
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -1661,7 +1673,7 @@
                                               str +
                                               '</div>');
                                 draw_cursor_line(array[1], position - first_len - 1);
-                                str = format(array[2]);
+                                str = format(formatting(array[2]));
                                 after.after('<div role="presentation">' +
                                             str +
                                             '</div>');
@@ -1723,8 +1735,7 @@
                         return line.replace(/^<span/, '<span class="line"');
                     }
                 }).concat([last_line]).join('\n');
-                var width = self.width();
-                prompt_node.html(formatted).find('.line').width(width);
+                prompt_node.html(formatted);
                 prompt_len = strlen($('<span>' + last_line + '</span>').text());
             }
             return function() {
@@ -2553,18 +2564,22 @@
             if (!$.terminal.have_formatting(string)) {
                 return string.substring(start_index, end_index);
             }
+            var strip = $('<span>' + $.terminal.strip(string) + '</span>').text();
+            if (strip.substring(start_index, end_index) === '') {
+                return '';
+            }
             var start;
             var end = string.length;
             var start_formatting = '';
             var end_formatting = '';
             $.terminal.iterate_formatting(string, function(data) {
-                if (data.count === start_index + 1) {
-                    start = data.index;
+                if (data.count === start_index) {
+                    start = data.index + 1;
                     if (data.formatting) {
                         start_formatting = data.formatting;
                     }
-                } else if (end_index && data.count === end_index + 1) {
-                    end = data.index;
+                } else if (end_index && data.count === end_index) {
+                    end = data.index + 1;
                     end_formatting = data.formatting;
                 }
             });

@@ -138,6 +138,7 @@
 }
 .cmd .prompt span.line {
     display: block;
+    float: none;
 }
 /* fix double style of selecting text in terminal */
 .terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal td,

@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Thu, 27 Jul 2017 15:15:15 +0000
+ * Date: Mon, 31 Jul 2017 15:15:42 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -138,6 +138,7 @@
 }
 .cmd .prompt span.line {
     display: block;
+    float: none;
 }
 /* fix double style of selecting text in terminal */
 .terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal td,
