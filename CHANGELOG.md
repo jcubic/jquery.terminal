@@ -1,3 +1,7 @@
+## 1.5.2
+* keep formatting when cursor is over one, issue reported by @Oleg on StackOverflow
+* fix jumping prompt when it have newlines
+
 ## 1.5.1
 * fix autofocus with position: fixes (reported by @ovk)
 * fix input method using sogou keyboard on windows (reported by @hnujxm)
