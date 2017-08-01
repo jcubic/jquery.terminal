@@ -2539,8 +2539,6 @@
                     if (strlen(string[i]) === 2) {
                         count++;
                     }
-                    if (string[i] == '&')
-                        console.log(true);
                     var data = {
                         count: count,
                         index: i,

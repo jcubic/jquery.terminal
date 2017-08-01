@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 01 Aug 2017 16:48:38 +0000
+ * Date: Tue, 01 Aug 2017 16:56:16 +0000
  */
 
 /* TODO:
@@ -2539,8 +2539,6 @@
                     if (strlen(string[i]) === 2) {
                         count++;
                     }
-                    if (string[i] == '&')
-                        console.log(true);
                     var data = {
                         count: count,
                         index: i,
