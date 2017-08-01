@@ -1,3 +1,7 @@
+## 1.5.3
+* fix cursor over entity (mainly &nbsp;) issue reported by @ovk
+* fix space scroll page
+
 ## 1.5.2
 * keep formatting when cursor is over one, issue reported by @Oleg on StackOverflow
 * fix jumping prompt when it have newlines

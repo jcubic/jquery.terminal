@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.5.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 31 Jul 2017 17:56:01 +0000
+ * Date: Tue, 01 Aug 2017 07:17:39 +0000
  */
 
 /* TODO:
@@ -2171,6 +2171,9 @@
                     } else {
                         self.insert(key);
                     }
+                    if (key === ' ') {
+                        return false;
+                    }
                 }
             }
         }
@@ -2388,7 +2391,7 @@
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
-        version: '1.5.2',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -2562,7 +2565,7 @@
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
             if (!$.terminal.have_formatting(string)) {
-                return string.substring(start_index, end_index);
+                //return string.substring(start_index, end_index);
             }
             var strip = $('<span>' + $.terminal.strip(string) + '</span>').text();
             if (strip.substring(start_index, end_index) === '') {
@@ -2572,15 +2575,26 @@
             var end = string.length;
             var start_formatting = '';
             var end_formatting = '';
+            function next_index(index) {
+                var m = string.substring(index).match(/^(&[^;]+;)/);
+                if (m) {
+                    return index + m[1].length - 1;
+                } else {
+                    return index + 1;
+                }
+            }
             $.terminal.iterate_formatting(string, function(data) {
                 if (data.count === start_index) {
-                    start = data.index + 1;
+                    start = next_index(data.index);
                     if (data.formatting) {
                         start_formatting = data.formatting;
                     }
-                } else if (end_index && data.count === end_index) {
-                    end = data.index + 1;
-                    end_formatting = data.formatting;
+                }
+                if (end_index) {
+                    if (data.count === end_index) {
+                        end = next_index(data.index);
+                        end_formatting = data.formatting;
+                    }
                 }
             });
             string = start_formatting + string.substring(start, end);
