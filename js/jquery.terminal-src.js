@@ -2171,6 +2171,9 @@
                     } else {
                         self.insert(key);
                     }
+                    if (key === ' ') {
+                        return false;
+                    }
                 }
             }
         }
@@ -2562,7 +2565,7 @@
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
             if (!$.terminal.have_formatting(string)) {
-                return string.substring(start_index, end_index);
+                //return string.substring(start_index, end_index);
             }
             var strip = $('<span>' + $.terminal.strip(string) + '</span>').text();
             if (strip.substring(start_index, end_index) === '') {
@@ -2572,15 +2575,26 @@
             var end = string.length;
             var start_formatting = '';
             var end_formatting = '';
+            function next_index(index) {
+                var m = string.substring(index).match(/^(&[^;]+;)/);
+                if (m) {
+                    return index + m[1].length - 1;
+                } else {
+                    return index + 1;
+                }
+            }
             $.terminal.iterate_formatting(string, function(data) {
                 if (data.count === start_index) {
-                    start = data.index + 1;
+                    start = next_index(data.index);
                     if (data.formatting) {
                         start_formatting = data.formatting;
                     }
-                } else if (end_index && data.count === end_index) {
-                    end = data.index + 1;
-                    end_formatting = data.formatting;
+                }
+                if (end_index) {
+                    if (data.count === end_index) {
+                        end = next_index(data.index);
+                        end_formatting = data.formatting;
+                    }
                 }
             });
             string = start_formatting + string.substring(start, end);
