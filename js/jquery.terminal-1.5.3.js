@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.5.3
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 01 Aug 2017 12:40:07 +0000
+ * Date: Tue, 01 Aug 2017 16:48:38 +0000
  */
 
 /* TODO:
@@ -2391,7 +2391,7 @@
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
-        version: '1.5.3',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -2478,6 +2478,9 @@
                 return string.substring(i - 6, i) === '&nbsp;' ||
                     string.substring(i - 1, i) === ' ';
             }
+            function match_entity(index) {
+                return string.substring(index).match(/^(&[^;]+;)/);
+            }
             var formatting = false;
             var in_text = false;
             var count = 0;
@@ -2508,7 +2511,7 @@
                 var braket = string[i].match(/[[\]]/);
                 if (not_formatting) {
                     if (string[i] === '&') { // treat entity as one character
-                        match = string.substring(i).match(/^(&[^;]+;)/);
+                        match = match_entity(i);
                         if (!match) {
                             // should never happen if used by terminal,
                             // because it always calls $.terminal.encode
@@ -2536,6 +2539,8 @@
                     if (strlen(string[i]) === 2) {
                         count++;
                     }
+                    if (string[i] == '&')
+                        console.log(true);
                     var data = {
                         count: count,
                         index: i,
@@ -2564,9 +2569,6 @@
         // :: formatting aware substring function
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
-            if (!$.terminal.have_formatting(string)) {
-                //return string.substring(start_index, end_index);
-            }
             var strip = $('<span>' + $.terminal.strip(string) + '</span>').text();
             if (strip.substring(start_index, end_index) === '') {
                 return '';
@@ -2575,26 +2577,16 @@
             var end = string.length;
             var start_formatting = '';
             var end_formatting = '';
-            function next_index(index) {
-                var m = string.substring(index).match(/^(&[^;]+;)/);
-                if (m) {
-                    return index + m[1].length - 1;
-                } else {
-                    return index + 1;
-                }
-            }
             $.terminal.iterate_formatting(string, function(data) {
                 if (data.count === start_index) {
-                    start = next_index(data.index);
+                    start = data.index + 1;
                     if (data.formatting) {
                         start_formatting = data.formatting;
                     }
                 }
-                if (end_index) {
-                    if (data.count === end_index) {
-                        end = next_index(data.index);
-                        end_formatting = data.formatting;
-                    }
+                if (end_index && data.count === end_index) {
+                    end = data.index + 1;
+                    end_formatting = data.formatting;
                 }
             });
             string = start_formatting + string.substring(start, end);
