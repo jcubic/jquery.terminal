@@ -1,3 +1,9 @@
+## 1.6.0
+### Features
+* new API method apply_formatters
+### Bugs
+* fix issue that formatters where applied to formatting (discovered by issue from #ovk)
+
 ## 1.5.3
 * fix cursor over entity (mainly &nbsp;) issue reported by @ovk
 * fix space scroll page

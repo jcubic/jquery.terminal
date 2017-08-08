@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 01 Aug 2017 16:56:16 +0000
+ * Date: Tue, 08 Aug 2017 17:11:06 +0000
  */
 
 /* TODO:
@@ -1517,21 +1517,11 @@
         function formatting(string) {
             // we don't want to format command when user type formatting in
             string = $.terminal.escape_formatting(string);
-            var formatters = $.terminal.defaults.formatters;
-            for (var i = 0; i < formatters.length; ++i) {
-                try {
-                    if (typeof formatters[i] === 'function') {
-                        var ret = formatters[i](string);
-                        if (typeof ret === 'string') {
-                            string = ret;
-                        }
-                    }
-                } catch (e) {
-                    alert('formatting error at formatters[' + i + ']\n' +
-                          (e.stack ? e.stack : e));
-                }
+            try {
+                return $.terminal.apply_formatters(string);
+            } catch (e) {
+                alert(e.message + '\n' + (e.stack ? e.stack : e));
             }
-            return string;
         }
         // ---------------------------------------------------------------------
         // :: format end encode the string
@@ -2757,6 +2747,31 @@
             return $.terminal.escape_brackets($.terminal.encode(string));
         },
         // ---------------------------------------------------------------------
+        // :: apply custom formatters only to text
+        // ---------------------------------------------------------------------
+        apply_formatters: function(string) {
+            var formatters = $.terminal.defaults.formatters;
+            return $.terminal.format_split(string).map(function(string) {
+                if ($.terminal.is_formatting(string)) {
+                    return string;
+                } else {
+                    for (var i = 0; i < formatters.length; ++i) {
+                        try {
+                            if (typeof formatters[i] === 'function') {
+                                var ret = formatters[i](string);
+                                if (typeof ret === 'string') {
+                                    string = ret;
+                                }
+                            }
+                        } catch (e) {
+                            throw new Error('Error in formatter [' + i + ']');
+                        }
+                    }
+                    return string;
+                }
+            }).join('');
+        },
+        // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
         format: function format(str, options) {
@@ -3933,27 +3948,17 @@
                 string = string.replace(email_re, '[[!;;]$1]').
                     replace(url_nf_re, '[[!;;]$1]');
             }
-            var formatters = $.terminal.defaults.formatters;
             var i, len;
             if (!options.raw) {
                 if (options.formatters) {
-                    // format using user defined formatters
-                    for (i = 0; i < formatters.length; ++i) {
-                        try {
-                            if (typeof formatters[i] === 'function') {
-                                var ret = formatters[i](string);
-                                if (typeof ret === 'string') {
-                                    string = ret;
-                                }
-                            }
-                        } catch (e) {
-                            // display_exception(e, 'FORMATTING');
-                            if ($.isFunction(settings.exceptionHandler)) {
-                                settings.exceptionHandler.call(self, e, 'FORMATTERS');
-                            } else {
-                                alert('formatting error at formatters[' + i + ']\n' +
-                                      (e.stack ? e.stack : e));
-                            }
+                    try {
+                        string = $.terminal.apply_formatters(string);
+                    } catch (e) {
+                        // display_exception(e, 'FORMATTING');
+                        if ($.isFunction(settings.exceptionHandler)) {
+                            settings.exceptionHandler.call(self, e, 'FORMATTERS');
+                        } else {
+                            alert(e.message + '\n' + (e.stack ? e.stack : e));
                         }
                     }
                 }
