@@ -1,6 +1,7 @@
 ## 1.6.0
 ### Features
 * new API method apply_formatters
+* add UMD (requested by @fazelfarajzade)
 ### Bugs
 * fix issue that formatters where applied to formatting (discovered by issue from #ovk)
 
