@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 08 Aug 2017 17:27:16 +0000
+ * Date: Tue, 08 Aug 2017 17:38:36 +0000
  */
 
 /* TODO:
@@ -3344,6 +3344,8 @@
         onPop: $.noop,
         keypress: $.noop,
         keydown: $.noop,
+        onAfterRedraw: $.noop,
+        onEchoCommand: $.noop,
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
                 ' have two arguments',
@@ -4116,6 +4118,7 @@
                 });
                 command_line.before(detached_output); // reinsert output
                 self.flush();
+                settings.onAfterRedraw.call(self);
             } catch (e) {
                 if ($.isFunction(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
@@ -4166,6 +4169,7 @@
             var options = {
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
+                    settings.onEchoCommand.call(self, div);
                 }
             };
             if ($.isFunction(prompt)) {
@@ -6635,4 +6639,4 @@
         self.data('terminal', self);
         return self;
     }; // terminal plugin
-})(jQuery);
+});
