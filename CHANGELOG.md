@@ -2,7 +2,7 @@
 ### Features
 * new API method apply_formatters
 * add UMD (requested by @fazelfarajzade)
-* add new events: onEchoCommand and onAfterRedraw (requested by #ovk)
+* add new events: onEchoCommand and onAfterRedraw (requested by @ovk)
 ### Bugs
 * fix issue that formatters where applied to formatting (discovered by issue from #ovk)
 
