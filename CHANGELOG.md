@@ -4,7 +4,7 @@
 * add UMD (requested by @fazelfarajzade)
 * add new events: onEchoCommand and onAfterRedraw (requested by @ovk)
 ### Bugs
-* fix issue that formatters where applied to formatting (discovered by issue from #ovk)
+* fix issue that formatters where applied to formatting (discovered by issue from @ovk)
 
 ## 1.5.3
 * fix cursor over entity (mainly &nbsp;) issue reported by @ovk
