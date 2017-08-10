@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.5.3
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 01 Aug 2017 12:40:07 +0000
+ * Date: Tue, 08 Aug 2017 17:38:36 +0000
  */
 
 /* TODO:
@@ -48,7 +48,8 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
-         setImmediate, IntersectionObserver, MutationObserver, wcwidth */
+         setImmediate, IntersectionObserver, MutationObserver, wcwidth,
+         module, require, define */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -183,7 +184,34 @@
     ctx.vsprintf = vsprintf;
 })(typeof global !== "undefined" ? global : window);
 /* eslint-enable */
-(function($, undefined) {
+// UMD taken from https://github.com/umdjs/umd
+(function(factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // Node/CommonJS
+        module.exports = function(root, jQuery) {
+            if (jQuery === undefined) {
+                // require('jQuery') returns a factory that requires window to
+                // build a jQuery instance, we normalize how we use modules
+                // that require this pattern but the window provided is a noop
+                // if it's defined (how jquery works)
+                if (typeof window !== 'undefined') {
+                    jQuery = require('jquery');
+                }
+                else {
+                    jQuery = require('jquery')(root);
+                }
+            }
+            factory(jQuery);
+            return jQuery;
+        };
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+})(function($, undefined) {
     'use strict';
     // -----------------------------------------------------------------------
     // :: Replacemenet for jQuery 2 deferred objects
@@ -1517,21 +1545,11 @@
         function formatting(string) {
             // we don't want to format command when user type formatting in
             string = $.terminal.escape_formatting(string);
-            var formatters = $.terminal.defaults.formatters;
-            for (var i = 0; i < formatters.length; ++i) {
-                try {
-                    if (typeof formatters[i] === 'function') {
-                        var ret = formatters[i](string);
-                        if (typeof ret === 'string') {
-                            string = ret;
-                        }
-                    }
-                } catch (e) {
-                    alert('formatting error at formatters[' + i + ']\n' +
-                          (e.stack ? e.stack : e));
-                }
+            try {
+                return $.terminal.apply_formatters(string);
+            } catch (e) {
+                alert(e.message + '\n' + (e.stack ? e.stack : e));
             }
-            return string;
         }
         // ---------------------------------------------------------------------
         // :: format end encode the string
@@ -2391,7 +2409,7 @@
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
-        version: '1.5.3',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -2478,6 +2496,9 @@
                 return string.substring(i - 6, i) === '&nbsp;' ||
                     string.substring(i - 1, i) === ' ';
             }
+            function match_entity(index) {
+                return string.substring(index).match(/^(&[^;]+;)/);
+            }
             var formatting = false;
             var in_text = false;
             var count = 0;
@@ -2508,7 +2529,7 @@
                 var braket = string[i].match(/[[\]]/);
                 if (not_formatting) {
                     if (string[i] === '&') { // treat entity as one character
-                        match = string.substring(i).match(/^(&[^;]+;)/);
+                        match = match_entity(i);
                         if (!match) {
                             // should never happen if used by terminal,
                             // because it always calls $.terminal.encode
@@ -2564,9 +2585,6 @@
         // :: formatting aware substring function
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
-            if (!$.terminal.have_formatting(string)) {
-                //return string.substring(start_index, end_index);
-            }
             var strip = $('<span>' + $.terminal.strip(string) + '</span>').text();
             if (strip.substring(start_index, end_index) === '') {
                 return '';
@@ -2575,26 +2593,16 @@
             var end = string.length;
             var start_formatting = '';
             var end_formatting = '';
-            function next_index(index) {
-                var m = string.substring(index).match(/^(&[^;]+;)/);
-                if (m) {
-                    return index + m[1].length - 1;
-                } else {
-                    return index + 1;
-                }
-            }
             $.terminal.iterate_formatting(string, function(data) {
                 if (data.count === start_index) {
-                    start = next_index(data.index);
+                    start = data.index + 1;
                     if (data.formatting) {
                         start_formatting = data.formatting;
                     }
                 }
-                if (end_index) {
-                    if (data.count === end_index) {
-                        end = next_index(data.index);
-                        end_formatting = data.formatting;
-                    }
+                if (end_index && data.count === end_index) {
+                    end = data.index + 1;
+                    end_formatting = data.formatting;
                 }
             });
             string = start_formatting + string.substring(start, end);
@@ -2765,6 +2773,31 @@
         // ---------------------------------------------------------------------
         escape_formatting: function escape_formatting(string) {
             return $.terminal.escape_brackets($.terminal.encode(string));
+        },
+        // ---------------------------------------------------------------------
+        // :: apply custom formatters only to text
+        // ---------------------------------------------------------------------
+        apply_formatters: function(string) {
+            var formatters = $.terminal.defaults.formatters;
+            return $.terminal.format_split(string).map(function(string) {
+                if ($.terminal.is_formatting(string)) {
+                    return string;
+                } else {
+                    for (var i = 0; i < formatters.length; ++i) {
+                        try {
+                            if (typeof formatters[i] === 'function') {
+                                var ret = formatters[i](string);
+                                if (typeof ret === 'string') {
+                                    string = ret;
+                                }
+                            }
+                        } catch (e) {
+                            throw new Error('Error in formatter [' + i + ']');
+                        }
+                    }
+                    return string;
+                }
+            }).join('');
         },
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
@@ -3311,6 +3344,8 @@
         onPop: $.noop,
         keypress: $.noop,
         keydown: $.noop,
+        onAfterRedraw: $.noop,
+        onEchoCommand: $.noop,
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
                 ' have two arguments',
@@ -3943,27 +3978,17 @@
                 string = string.replace(email_re, '[[!;;]$1]').
                     replace(url_nf_re, '[[!;;]$1]');
             }
-            var formatters = $.terminal.defaults.formatters;
             var i, len;
             if (!options.raw) {
                 if (options.formatters) {
-                    // format using user defined formatters
-                    for (i = 0; i < formatters.length; ++i) {
-                        try {
-                            if (typeof formatters[i] === 'function') {
-                                var ret = formatters[i](string);
-                                if (typeof ret === 'string') {
-                                    string = ret;
-                                }
-                            }
-                        } catch (e) {
-                            // display_exception(e, 'FORMATTING');
-                            if ($.isFunction(settings.exceptionHandler)) {
-                                settings.exceptionHandler.call(self, e, 'FORMATTERS');
-                            } else {
-                                alert('formatting error at formatters[' + i + ']\n' +
-                                      (e.stack ? e.stack : e));
-                            }
+                    try {
+                        string = $.terminal.apply_formatters(string);
+                    } catch (e) {
+                        // display_exception(e, 'FORMATTING');
+                        if ($.isFunction(settings.exceptionHandler)) {
+                            settings.exceptionHandler.call(self, e, 'FORMATTERS');
+                        } else {
+                            alert(e.message + '\n' + (e.stack ? e.stack : e));
                         }
                     }
                 }
@@ -4093,6 +4118,7 @@
                 });
                 command_line.before(detached_output); // reinsert output
                 self.flush();
+                settings.onAfterRedraw.call(self);
             } catch (e) {
                 if ($.isFunction(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
@@ -4143,6 +4169,7 @@
             var options = {
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
+                    settings.onEchoCommand.call(self, div);
                 }
             };
             if ($.isFunction(prompt)) {
@@ -6612,4 +6639,4 @@
         self.data('terminal', self);
         return self;
     }; // terminal plugin
-})(jQuery);
+});

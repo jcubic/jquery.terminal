@@ -10,7 +10,7 @@ if (typeof window === 'undefined') {
     var navigator = {userAgent: "node-js", platform: "Linux i686"};
     global.window.navigator = global.navigator = navigator;
     global.jQuery = global.$ = require("jquery");
-    require('../js/jquery.terminal-src');
+    require('../js/jquery.terminal-src')(global.$);
     require('../js/unix_formatting');
     global.location = global.window.location = {hash: ''};
     global.window.Element.prototype.getBoundingClientRect = function() {
