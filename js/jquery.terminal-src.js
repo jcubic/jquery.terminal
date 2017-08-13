@@ -2772,7 +2772,7 @@
         // :: safe function that will render text as it is
         // ---------------------------------------------------------------------
         escape_formatting: function escape_formatting(string) {
-            return $.terminal.escape_brackets($.terminal.encode(string));
+            return $.terminal.escape_brackets(string);
         },
         // ---------------------------------------------------------------------
         // :: apply custom formatters only to text

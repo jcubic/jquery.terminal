@@ -1,3 +1,6 @@
+## 1.6.1
+* don't call encode in escape_formatting (requested by @ovk)
+
 ## 1.6.0
 ### Features
 * new API method apply_formatters
