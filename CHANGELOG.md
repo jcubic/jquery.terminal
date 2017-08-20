@@ -1,3 +1,6 @@
+## 1.6.2
+* fix altGr+key issue reported by Erik Lilja
+
 ## 1.6.1
 * don't call encode in escape_formatting (requested by @ovk)
 

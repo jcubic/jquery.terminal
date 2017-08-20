@@ -2139,7 +2139,7 @@
             if (!e.fake) {
                 no_keypress = false;
             }
-            if (e.ctrlKey || e.metaKey) {
+            if ((e.ctrlKey || e.metaKey) && !e.altKey) {
                 return;
             }
             if (prevent_keypress) {
@@ -2204,7 +2204,8 @@
         }
         function debug(str) {
             if (false) {
-                $.terminal.active().echo(str);
+                console.log(str);
+                //$.terminal.active().echo(str);
             }
         }
         function input() {
