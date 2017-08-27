@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.6.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 20 Aug 2017 12:02:08 +0000
+ * Date: Sun, 27 Aug 2017 18:15:54 +0000
  */
 
 /* TODO:
@@ -1908,7 +1908,7 @@
             destroy: function() {
                 doc.unbind('keypress.cmd', keypress_event);
                 doc.unbind('keydown.cmd', keydown_event);
-                doc.unbind('input.cmd', input);
+                doc.unbind('input.cmd', input_event);
                 self.stopTime('blink', blink);
                 self.find('.cursor').next().remove().end().prev().remove().
                     end().remove();
@@ -2128,7 +2128,7 @@
                 }
                 // this will prevent for instance backspace to go back one page
                 //prevent_keypress = true;
-                e.preventDefault();
+                //e.preventDefault();
             }
         }
         var doc = $(document.documentElement || window);
@@ -2203,12 +2203,10 @@
             doc.trigger(event);
         }
         function debug(str) {
-            if (false) {
-                console.log(str);
-                //$.terminal.active().echo(str);
-            }
+            //console.log(str);
+            //$.terminal.active().echo(str);
         }
-        function input() {
+        function input_event() {
             debug('input ' + no_keydown + ' || ((' + no_keypress + ' || ' +
                   dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
@@ -2267,8 +2265,10 @@
             skip_insert = false;
             no_keydown = true;
         }
-        doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
-            bind('input.cmd', input);
+        doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
+            .bind('input.cmd', input_event);
+        console.log('binded');
+        console.log(clip.is(':focus'));
         (function() {
             var isDragging = false;
             var was_down = false;
@@ -2410,7 +2410,7 @@
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     $.terminal = {
-        version: '1.6.2',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6470,11 +6470,16 @@
                 if (visibility_observer) {
                     visibility_observer.unobserve(self[0]);
                 }
+                var was_enabled;
                 visibility_observer = new IntersectionObserver(function() {
                     if (self.is(':visible')) {
                         self.resizer('unbind').resizer(resize);
                         resize();
+                        if (was_enabled) {
+                            self.enabled();
+                        }
                     } else {
+                        was_enabled = self.enabled();
                         self.disable();
                     }
                 }, {
