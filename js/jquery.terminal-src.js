@@ -2189,9 +2189,6 @@
                     } else {
                         self.insert(key);
                     }
-                    if (key === ' ') {
-                        return false;
-                    }
                 }
             }
         }
@@ -2203,7 +2200,7 @@
             doc.trigger(event);
         }
         function debug(str) {
-            //console.log(str);
+            console.log(str);
             //$.terminal.active().echo(str);
         }
         function input_event() {

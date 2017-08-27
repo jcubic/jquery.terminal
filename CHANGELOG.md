@@ -1,5 +1,6 @@
 ## 1.6.3
 * fix issue with auto-enable and insert to DOM after terminal was created
+* fix issue with space and dead keys (reported by David Peter)
 
 ## 1.6.2
 * fix altGr+key issue reported by Erik Lilja
