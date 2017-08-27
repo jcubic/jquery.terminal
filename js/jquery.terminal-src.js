@@ -2200,8 +2200,10 @@
             doc.trigger(event);
         }
         function debug(str) {
-            console.log(str);
-            //$.terminal.active().echo(str);
+            if (false) {
+                console.log(str);
+                //$.terminal.active().echo(str);
+            }
         }
         function input_event() {
             debug('input ' + no_keydown + ' || ((' + no_keypress + ' || ' +
