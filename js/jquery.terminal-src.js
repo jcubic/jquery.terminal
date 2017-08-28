@@ -2266,8 +2266,6 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
             .bind('input.cmd', input_event);
-        console.log('binded');
-        console.log(clip.is(':focus'));
         (function() {
             var isDragging = false;
             var was_down = false;
