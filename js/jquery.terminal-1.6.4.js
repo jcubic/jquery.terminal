@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 31 Aug 2017 18:54:40 +0000
+ * Date: Thu, 31 Aug 2017 19:06:29 +0000
  */
 
 /* TODO:
@@ -2032,7 +2032,7 @@
         }
         draw_prompt();
         if (options.enabled === undefined || options.enabled === true) {
-            self.enable();
+            self.focus();
         }
         if (!options.history) {
             history.disable();
@@ -6476,7 +6476,7 @@
                             self.enabled();
                         }
                     } else {
-                        was_enabled = self.enabled();
+                        was_enabled = $.terminal.active() === self && self.enabled();
                         self.disable();
                     }
                 }, {

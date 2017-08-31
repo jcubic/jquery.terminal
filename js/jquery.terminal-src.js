@@ -2032,7 +2032,7 @@
         }
         draw_prompt();
         if (options.enabled === undefined || options.enabled === true) {
-            self.enable();
+            self.focus();
         }
         if (!options.history) {
             history.disable();
@@ -6476,7 +6476,7 @@
                             self.enabled();
                         }
                     } else {
-                        was_enabled = self.enabled();
+                        was_enabled = $.terminal.active() === self && self.enabled();
                         self.disable();
                     }
                 }, {

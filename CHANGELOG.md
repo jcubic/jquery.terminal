@@ -1,5 +1,6 @@
 ## 1.6.5
-* fix jumping of terminals when created one after another and chaning the that have focus in Edge
+* fix jumping of terminal when created one after another and chaning the that have focus in Edge
+* fix issue that all terminals was enabled not the last one created
 
 ## 1.6.4
 * just missed build
