@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Thu, 31 Aug 2017 10:38:13 +0000
+ * Date: Thu, 31 Aug 2017 18:54:40 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -90,7 +90,6 @@
             animation: terminal-blink 1s infinite steps(1, start);
     border-left: 1px solid transparent;
     margin-left: -1px;
-    margin-top: 1px;
 }
 .bar.terminal .inverted, .bar.cmd .inverted {
     border-left-color: #aaa;
@@ -412,7 +411,6 @@
                 animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
         color: var(--color, #aaa);
         background-color: var(--background, #000);
-        margin-top: calc(var(--size) * 1px);
     }
     .terminal h1::-moz-selection,
     .terminal h2::-moz-selection,

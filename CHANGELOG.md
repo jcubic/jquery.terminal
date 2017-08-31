@@ -1,3 +1,9 @@
+## 1.6.5
+* fix jumping of terminals when created one after another and chaning the that have focus in Edge
+
+## 1.6.4
+* just missed build
+
 ## 1.6.3
 * fix issue with auto-enable and insert to DOM after terminal was created
 * fix issue with space and dead keys (reported by David Peter)
