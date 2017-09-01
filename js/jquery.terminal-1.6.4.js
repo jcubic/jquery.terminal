@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 01 Sep 2017 12:39:43 +0000
+ * Date: Fri, 01 Sep 2017 20:37:32 +0000
  */
 
 /* TODO:
@@ -6271,7 +6271,7 @@
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
                 width: '100%',
-                enabled: enabled && !is_mobile,
+                enabled: false,
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,

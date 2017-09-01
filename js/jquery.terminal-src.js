@@ -6271,7 +6271,7 @@
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
                 width: '100%',
-                enabled: enabled && !is_mobile,
+                enabled: false,
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
