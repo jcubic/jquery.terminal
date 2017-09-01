@@ -2355,8 +2355,9 @@
     })();
     // -------------------------------------------------------------------------
     var is_touch = (function() {
-        return 'ontouchstart' in window || !!window.DocumentTouch &&
-            document instanceof window.DocumentTouch;
+        return (('ontouchstart' in window)
+                || (navigator.MaxTouchPoints > 0)
+                || (navigator.msMaxTouchPoints > 0));
     })();
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
@@ -6334,11 +6335,13 @@
             }
             if (is_touch) {
                 self.click(function() {
-                    if (!self.enabled() && !frozen) {
-                        self.focus();
-                        command_line.enable();
-                    } else {
-                        self.disable();
+                    if (!frozen) {
+                        if (!self.enabled()) {
+                            self.focus();
+                            command_line.enable();
+                        } else {
+                            self.disable();
+                        }
                     }
                 });
             } else {
