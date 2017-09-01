@@ -2131,7 +2131,7 @@
             }
         }
         var doc = $(document.documentElement || window);
-        self.keymap(options.keymap);
+        self.keymap(options.keymap || {});
         function keypress_event(e) {
             debug('keypress "' + e.key + '" ' + e.fake);
             var result;
