@@ -2376,7 +2376,6 @@
     })();
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
-        return false;
         var check = false;
         if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
             check = true;
