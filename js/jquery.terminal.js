@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 31 Aug 2017 19:06:29 +0000
+ * Date: Fri, 01 Sep 2017 07:05:52 +0000
  */
 
 /* TODO:
@@ -5268,17 +5268,9 @@
                 if (terminals.length() === 1) {
                     return self;
                 } else {
-                    /*if (!is_scrolled_into_view(self)) {
-                       self.enable();
-                        $('html,body').animate({
-                            scrollTop: offsetTop-50
-                        }, 500);
-                        return self;
-                    } else {
-                    */
                     terminals.front().disable();
                     var next = terminals.rotate().enable();
-                    // 100 provides buffer in viewport
+                    // 50 provides buffer in viewport
                     var x = next.offset().top - 50;
                     $('html,body').animate({scrollTop: x}, 500);
                     try {
@@ -6346,7 +6338,7 @@
                         self.focus();
                         command_line.enable();
                     } else {
-                        self.focus(false);
+                        self.disable();
                     }
                 });
             } else {
