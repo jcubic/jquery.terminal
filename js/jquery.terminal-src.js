@@ -2031,7 +2031,7 @@
         }
         draw_prompt();
         if (options.enabled === undefined || options.enabled === true) {
-            self.focus();
+            self.enable();
         }
         if (!options.history) {
             history.disable();
