@@ -51,16 +51,19 @@
             });
             visibility_observer.observe(terminal[0]);
         }
-        this.dialog($.extend(options, {
+        this.dialog($.extend({}, options, {
             resizeStop: function() {
                 var content = self.find('.ui-dialog-content');
                 terminal.resize(content.width(), content.height());
             },
-            open: function() {
+            open: function(event, ui) {
                 if (!window.IntersectionObserver) {
                     setTimeout(function() {
                         terminal.enable().resize();
                     }, 100);
+                }
+                if (typeof options.open == 'function') {
+                    options.open(event, ui);
                 }
             },
             show: 'fade',
