@@ -62,7 +62,7 @@
                         terminal.enable().resize();
                     }, 100);
                 }
-                if (typeof options.open == 'function') {
+                if (typeof options.open === 'function') {
                     options.open(event, ui);
                 }
             },
