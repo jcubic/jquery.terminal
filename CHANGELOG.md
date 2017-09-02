@@ -3,6 +3,7 @@
 * fix issue that all terminals was enabled not the last one created
 * fix issue that on click next terminal get focused on desktop with touch screen and on mobile (reported by @itsZN)
 * fix missing default keymap in cmd plugin (found on SO by Arnaldo Montoya)
+* update dterm to enable terminal when is visible (when open) using IntersectionObserver
 
 ## 1.6.4
 * just missed build
