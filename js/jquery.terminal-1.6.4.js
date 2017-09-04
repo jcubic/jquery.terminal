@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 01 Sep 2017 20:37:32 +0000
+ * Date: Mon, 04 Sep 2017 07:48:15 +0000
  */
 
 /* TODO:
@@ -2382,6 +2382,25 @@
         }
         return check;
     })(navigator.userAgent || navigator.vendor || window.opera);
+    var get_selected_text = (function() {
+        if (window.getSelection || document.getSelection) {
+            return function() {
+                var selection = (window.getSelection || document.getSelection)();
+                if (selection.text) {
+                    return selection.text;
+                } else {
+                    return selection.toString();
+                }
+            };
+        } else if (document.selection && document.selection.type != "Control") {
+            return function() {
+                return document.selection.createRange().text;
+            };
+        }
+        return function() {
+            return '';
+        };
+    })();
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
         var array = string.match(command_re) || [];
@@ -6342,7 +6361,6 @@
                 // detect mouse drag
                 (function() {
                     var count = 0;
-                    var isDragging = false;
                     var $target;
                     var name = 'click_' + self.id();
                     self.mousedown(function(e) {
@@ -6350,18 +6368,8 @@
                         if (e.originalEvent.button === 2) {
                             return;
                         }
-                        self.oneTime(1, function() {
-                            $(window).on('mousemove.terminal_' + self.id(), function() {
-                                isDragging = true;
-                                count = 0;
-                                $(window).off('mousemove.terminal_' + self.id());
-                            });
-                        });
                     }).mouseup(function() {
-                        var wasDragging = isDragging;
-                        isDragging = false;
-                        $(window).off('mousemove.terminal_' + self.id());
-                        if (!wasDragging) {
+                        if (get_selected_text() === '') {
                             if (++count === 1) {
                                 if (!self.enabled() && !frozen) {
                                     self.focus();
