@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 04 Sep 2017 07:48:15 +0000
+ * Date: Mon, 04 Sep 2017 07:50:15 +0000
  */
 
 /* TODO:
@@ -2392,7 +2392,7 @@
                     return selection.toString();
                 }
             };
-        } else if (document.selection && document.selection.type != "Control") {
+        } else if (document.selection && document.selection.type !== "Control") {
             return function() {
                 return document.selection.createRange().text;
             };
