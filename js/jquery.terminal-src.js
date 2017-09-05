@@ -1192,7 +1192,6 @@
                 }
                 // for next input after naitve backspace
                 no_keydown = true;
-                return false;
             },
             'TAB': function() {
                 self.insert('\t');
@@ -1403,7 +1402,7 @@
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
-                            //clip.caret(position);
+                            clip.caret(position);
                         } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
                         }
@@ -1769,6 +1768,7 @@
         // ---------------------------------------------------------------------
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
+        var c = 0;
         function paste() {
             if (paste_count++ > 0) {
                 return;
@@ -1778,10 +1778,11 @@
                 if (!clip.is(':focus')) {
                     clip.focus();
                 }
+                var n = c++;
                 //wait until Browser insert text to textarea
                 self.oneTime(100, function() {
                     self.insert(clip.val());
-                    clip.val('');
+                    clip.val(command);
                     fix_textarea();
                 });
             }
@@ -2205,7 +2206,7 @@
             }
         }
         function input_event() {
-            debug('input ' + no_keydown + ' || ((' + no_keypress + ' || ' +
+            debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress + ' || ' +
                   dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
             // Some Androids don't fire keypress - #39
@@ -2265,6 +2266,11 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
             .bind('input.cmd', input_event);
+        clip.on('blur', function() {
+            if (enabled) {
+                return false;
+            }
+        });
         (function() {
             var isDragging = false;
             var was_down = false;
@@ -6251,15 +6257,9 @@
                                 var URL = window.URL || window.webkitURL;
                                 var source = URL.createObjectURL(blob);
                                 self.echo('<img src="' + source + '"/>', {raw: true});
-                            } else if (items[i].type.indexOf('text/plain') !== -1) {
-                                items[i].getAsString(self.insert);
                             }
                         }
-                    } else if (e.clipboardData.getData) {
-                        var text = e.clipboardData.getData('text/plain');
-                        self.insert(text);
                     }
-                    return false;
                 }
             }
         }
