@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 05 Sep 2017 13:59:11 +0000
+ * Date: Tue, 05 Sep 2017 14:13:07 +0000
  */
 
 /* TODO:
@@ -1768,7 +1768,6 @@
         // ---------------------------------------------------------------------
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
-        var c = 0;
         function paste() {
             if (paste_count++ > 0) {
                 return;
@@ -1778,7 +1777,6 @@
                 if (!clip.is(':focus')) {
                     clip.focus();
                 }
-                var n = c++;
                 //wait until Browser insert text to textarea
                 self.oneTime(100, function() {
                     self.insert(clip.val());
@@ -2206,8 +2204,8 @@
             }
         }
         function input_event() {
-            debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress + ' || ' +
-                  dead_key + ') && !' + skip_insert + ' && (' + single_key +
+            debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
+                  ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158

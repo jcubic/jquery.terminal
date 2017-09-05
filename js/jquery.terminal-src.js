@@ -1768,7 +1768,6 @@
         // ---------------------------------------------------------------------
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
-        var c = 0;
         function paste() {
             if (paste_count++ > 0) {
                 return;
@@ -1778,7 +1777,6 @@
                 if (!clip.is(':focus')) {
                     clip.focus();
                 }
-                var n = c++;
                 //wait until Browser insert text to textarea
                 self.oneTime(100, function() {
                     self.insert(clip.val());
@@ -2206,8 +2204,8 @@
             }
         }
         function input_event() {
-            debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress + ' || ' +
-                  dead_key + ') && !' + skip_insert + ' && (' + single_key +
+            debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
+                  ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
