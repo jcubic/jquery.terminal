@@ -5,6 +5,7 @@
 * fix missing default keymap in cmd plugin (found on SO by Arnaldo Montoya)
 * update dterm to enable terminal when is visible (when open) using IntersectionObserver
 * fix issue with focus on click on MacOS (reported by @RomanPerin)
+* fix pasting (reported by @artursOs)
 
 ## 1.6.4
 * just missed build
