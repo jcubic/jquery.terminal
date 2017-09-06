@@ -1398,7 +1398,7 @@
         function fix_textarea() {
             // delay worked while experimenting
             self.oneTime(10, function() {
-                //clip.val(command);
+                clip.val(command);
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
