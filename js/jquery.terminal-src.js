@@ -3274,7 +3274,9 @@
         $div.remove();
     }
     function all(array, fn) {
-        var same = array.filter(function(item) { return item[fn]() === item; });
+        var same = array.filter(function(item) {
+            return item[fn]() === item;
+        });
         return same.length === array.length;
     }
     function string_case(string) {
@@ -4540,7 +4542,6 @@
             if (!array.length) {
                 return '';
             }
-            var found = false;
             var type = string_case(string);
             var result = [];
             loop:
@@ -4551,7 +4552,7 @@
                     if (a !== b) {
                         if (matchCase || type === 'mixed') {
                             break loop;
-                        } else if (a.toLowerCase() == b.toLowerCase()) {
+                        } else if (a.toLowerCase() === b.toLowerCase()) {
                             if (type === 'lower') {
                                 result.push(a.toLowerCase());
                             } else {
@@ -5077,8 +5078,10 @@
                 options = $.extend({
                     word: true,
                     echo: false,
-                    escape: true
+                    escape: true,
+                    caseSensitive: true
                 }, options || {});
+                var sensitive = options.caseSensitive;
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
                 var string = self.before_cursor(options.word).replace(/\\"/g, '"');
@@ -5120,29 +5123,32 @@
                         }
                     });
                 }
-                var flags = options.caseSensitive ? '' : 'i';
-                var regex = new RegExp('^' + safe, flags);
-                var matched = [];
-                for (var i = commands.length; i--;) {
-                    if (regex.test(commands[i])) {
-                        var match = commands[i];
-                        if (quote === '"') {
-                            match = match.replace(/"/g, '\\"');
-                        }
-                        if (!quote && options.escape) {
-                            match = match.replace(/(["'() ])/g, '\\$1');
-                        }
-                        if (!options.caseSensitive && same_case(match)) {
-                            console.log(match);
-                            if (string.toLowerCase() === string) {
-                                match = match.toLowerCase();
-                            } else if (string.toUpperCase() === string) {
-                                match = match.toUpperCase();
+                function matched_strings() {
+                    var matched = [];
+                    for (var i = commands.length; i--;) {
+                        if (regex.test(commands[i])) {
+                            var match = commands[i];
+                            if (quote === '"') {
+                                match = match.replace(/"/g, '\\"');
                             }
+                            if (!quote && options.escape) {
+                                match = match.replace(/(["'() ])/g, '\\$1');
+                            }
+                            if (!sensitive && same_case(match)) {
+                                if (string.toLowerCase() === string) {
+                                    match = match.toLowerCase();
+                                } else if (string.toUpperCase() === string) {
+                                    match = match.toUpperCase();
+                                }
+                            }
+                            matched.push(match);
                         }
-                        matched.push(match);
                     }
+                    return matched;
                 }
+                var flags = sensitive ? '' : 'i';
+                var regex = new RegExp('^' + safe, flags);
+                var matched = matched_strings();
                 function replace(input, replacement) {
                     var text = self.get_command();
                     var pos = self.get_position();
@@ -5173,7 +5179,7 @@
                             return true;
                         }
                     } else {
-                        var common = common_string(string, matched, options.caseSensitive);
+                        var common = common_string(string, matched, sensitive);
                         if (common) {
                             replace(string, common);
                             command = self.before_cursor(options.word);
