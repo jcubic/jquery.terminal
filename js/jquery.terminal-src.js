@@ -3273,6 +3273,23 @@
         } catch (e) {}
         $div.remove();
     }
+    function all(array, fn) {
+        var same = array.filter(function(item) { return item[fn]() === item; });
+        return same.length === array.length;
+    }
+    function string_case(string) {
+        var array = string.split('');
+        if (all(array, 'toLowerCase')) {
+            return 'lower';
+        } else if (all(array, 'toUpperCase')) {
+            return 'upper';
+        } else {
+            return 'mixed';
+        }
+    }
+    function same_case(string) {
+        return string_case(string) !== 'mixed';
+    }
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
@@ -3353,6 +3370,7 @@
         onAjaxError: null,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
+        caseSensitiveAutocomplete: true,
         clickTimeout: 200,
         request: $.noop,
         response: $.noop,
@@ -4518,24 +4536,34 @@
         // ---------------------------------------------------------------------
         // :: return string that are common in all elements of the array
         // ---------------------------------------------------------------------
-        function common_string(string, array) {
+        function common_string(string, array, matchCase) {
             if (!array.length) {
                 return '';
             }
             var found = false;
+            var type = string_case(string);
+            var result = [];
             loop:
             for (var j = string.length; j < array[0].length; ++j) {
                 for (var i = 1; i < array.length; ++i) {
-                    if (array[0].charAt(j) !== array[i].charAt(j)) {
-                        break loop;
+                    var a = array[0].charAt(j);
+                    var b = array[i].charAt(j);
+                    if (a !== b) {
+                        if (matchCase || type === 'mixed') {
+                            break loop;
+                        } else if (a.toLowerCase() == b.toLowerCase()) {
+                            if (type === 'lower') {
+                                result.push(a.toLowerCase());
+                            } else {
+                                result.push(a.toUpperCase());
+                            }
+                        }
+                    } else {
+                        result.push(a);
                     }
                 }
-                found = true;
             }
-            if (found) {
-                return array[0].slice(0, j);
-            }
-            return '';
+            return string + result.join('');
         }
         // ---------------------------------------------------------------------
         // :: Keydown event handler
@@ -4578,7 +4606,12 @@
                 // TODO: move this to cmd plugin
                 //       add completion = array | function
                 //       !!! Problem complete more then one key need terminal
-                var top = interpreters.top(), completion;
+                var top = interpreters.top(), completion, caseSensitive;
+                if (typeof top.caseSensitiveAutocomplete !== 'undefined') {
+                    caseSensitive = top.caseSensitiveAutocomplete;
+                } else {
+                    caseSensitive = settings.caseSensitiveAutocomplete;
+                }
                 if (settings.completion &&
                     $.type(settings.completion) !== 'boolean' &&
                     top.completion === undefined) {
@@ -4602,7 +4635,8 @@
                                 self.complete(commands, {
                                     echo: true,
                                     word: settings.wordAutocomplete,
-                                    escape: settings.completionEscape
+                                    escape: settings.completionEscape,
+                                    caseSensitive: caseSensitive
                                 });
                             });
                             break;
@@ -4610,7 +4644,8 @@
                             self.complete(completion, {
                                 echo: true,
                                 word: settings.wordAutocomplete,
-                                escape: settings.completionEscape
+                                escape: settings.completionEscape,
+                                caseSensitive: caseSensitive
                             });
                             break;
                         default:
@@ -5085,7 +5120,8 @@
                         }
                     });
                 }
-                var regex = new RegExp('^' + safe);
+                var flags = options.caseSensitive ? '' : 'i';
+                var regex = new RegExp('^' + safe, flags);
                 var matched = [];
                 for (var i = commands.length; i--;) {
                     if (regex.test(commands[i])) {
@@ -5095,6 +5131,14 @@
                         }
                         if (!quote && options.escape) {
                             match = match.replace(/(["'() ])/g, '\\$1');
+                        }
+                        if (!options.caseSensitive && same_case(match)) {
+                            console.log(match);
+                            if (string.toLowerCase() === string) {
+                                match = match.toLowerCase();
+                            } else if (string.toUpperCase() === string) {
+                                match = match.toUpperCase();
+                            }
                         }
                         matched.push(match);
                     }
@@ -5129,7 +5173,7 @@
                             return true;
                         }
                     } else {
-                        var common = common_string(string, matched);
+                        var common = common_string(string, matched, options.caseSensitive);
                         if (common) {
                             replace(string, common);
                             command = self.before_cursor(options.word);

@@ -1,7 +1,10 @@
-## 1.6.5
+## 1.7.0
+### Features
+* add option caseSensitiveAutocomplete default to true
+### Bugs
 * fix jumping of terminal when created one after another and chaning the that have focus in Edge
 * fix issue that all terminals was enabled not the last one created
-* fix issue that on click next terminal get focused on desktop with touch screen and on mobile (reported by @itsZN)
+* fix issue that on click next terminal get focused on browsers with touch screen (reported by @itsZN)
 * fix missing default keymap in cmd plugin (found on SO by Arnaldo Montoya)
 * update dterm to enable terminal when is visible (when open) using IntersectionObserver
 * fix issue with focus on click on MacOS (reported by @RomanPerin)
