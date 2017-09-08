@@ -1,15 +1,15 @@
 ## 1.7.0
 ### Features
-* add option caseSensitiveAutocomplete default to true #332
+* add option caseSensitiveAutocomplete default to true (#332)[https://github.com/jcubic/jquery.terminal/issues/332]
 ### Bugs
 * fix jumping of terminal when created one after another and chaning the that have focus in Edge
 * fix issue that all terminals was enabled not the last one created
-* fix issue that on click next terminal get focused on browsers with touch screen (reported by @itsZN #330)
+* fix issue that on click next terminal get focused on browsers with touch screen (reported by @itsZN (#330))[https://github.com/jcubic/jquery.terminal/issues/330])
 * fix missing default keymap in cmd plugin (found on SO by Arnaldo Montoya)
 * update dterm to enable terminal when is visible (when open) using IntersectionObserver
-* fix issue with focus on click on MacOS (reported by @RomanPerin #255)
-* fix pasting (reported by @artursOs #331)
-* fix unescaped entity error (reported by Nikolai Orekhov #333)
+* fix issue with focus on click on MacOS (reported by @RomanPerin (#255))[https://github.com/jcubic/jquery.terminal/issues/255])
+* fix pasting (reported by @artursOs (#331))[https://github.com/jcubic/jquery.terminal/issues/331])
+* fix unescaped entity error (reported by Nikolai Orekhov (#333))[https://github.com/jcubic/jquery.terminal/issues/333])
 
 ## 1.6.4
 * just missed build
