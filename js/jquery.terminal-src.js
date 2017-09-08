@@ -2529,7 +2529,6 @@
             var count = 0;
             var match;
             var space = -1;
-            string = $.terminal.amp(string);
             for (var i = 0; i < string.length; i++) {
                 match = string.substring(i).match(format_start_re);
                 if (match) {
@@ -2556,16 +2555,11 @@
                 if (not_formatting) {
                     if (string[i] === '&') { // treat entity as one character
                         match = match_entity(i);
-                        i += match[1].length - 2; // because continue adds 1 to i
-                        // here was code for issue #77 but it work without it
-                        // after refactoring and it would be hard to run this code
-                        // in this general function, maybe call callback one more time
-                        /*
-                        if (i === string.length - 1) {
-                            result.push(output + m[1]);
+                        if (match) {
+                            i += match[1].length - 2; // because continue adds 1 to i
+                            continue;
                         }
-                        */
-                        continue;
+                        ++count;
                     } else if (string[i] === ']' && string[i - 1] === '\\') {
                         // escape \] counts as one character
                         --count;
