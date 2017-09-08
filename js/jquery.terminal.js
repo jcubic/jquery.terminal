@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 08 Sep 2017 09:51:31 +0000
+ * Date: Fri, 08 Sep 2017 11:20:13 +0000
  */
 
 /* TODO:
@@ -2529,6 +2529,7 @@
             var count = 0;
             var match;
             var space = -1;
+            string = $.terminal.amp(string);
             for (var i = 0; i < string.length; i++) {
                 match = string.substring(i).match(format_start_re);
                 if (match) {
@@ -2555,12 +2556,6 @@
                 if (not_formatting) {
                     if (string[i] === '&') { // treat entity as one character
                         match = match_entity(i);
-                        if (!match) {
-                            // should never happen if used by terminal,
-                            // because it always calls $.terminal.encode
-                            // before this function
-                            throw new Error('Unclosed html entity at char ' + (i + 1));
-                        }
                         i += match[1].length - 2; // because continue adds 1 to i
                         // here was code for issue #77 but it work without it
                         // after refactoring and it would be hard to run this code
@@ -2750,12 +2745,16 @@
             return result;
         },
         // ---------------------------------------------------------------------
+        // :: Escape & that's not part of entity
+        // ---------------------------------------------------------------------
+        amp: function(str) {
+            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
+        },
+        // ---------------------------------------------------------------------
         // :: Encode formating as html for insertion into DOM
         // ---------------------------------------------------------------------
         encode: function encode(str) {
-            // don't escape entities
-            str = str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
-            return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/ /g, '&nbsp;')
                 .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
         },
