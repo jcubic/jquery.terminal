@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 09 Sep 2017 14:44:23 +0000
+ * Date: Sat, 09 Sep 2017 15:24:45 +0000
  */
 
 /* TODO:
@@ -6215,7 +6215,6 @@
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
-                console.log(name, arguments);
                 try {
                     return fun.apply(self, [].slice.apply(arguments));
                 } catch (e) {

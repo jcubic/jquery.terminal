@@ -6215,7 +6215,6 @@
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
-                console.log(name, arguments);
                 try {
                     return fun.apply(self, [].slice.apply(arguments));
                 } catch (e) {
