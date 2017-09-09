@@ -5363,18 +5363,22 @@
                     if (terminals.length() === 1) {
                         if (toggle === false) {
                             try {
-                                ret = settings.onBlur.call(self, self);
+                                if (!silent && self.enabled()) {
+                                    ret = settings.onBlur.call(self, self);
+                                }
                                 if (!silent && ret !== false || silent) {
-                                    self.disable();
+                                    self.disable(true);
                                 }
                             } catch (e) {
                                 display_exception(e, 'onBlur');
                             }
                         } else {
                             try {
-                                ret = settings.onFocus.call(self, self);
+                                if (!silent && !self.enabled()) {
+                                    ret = settings.onFocus.call(self, self);
+                                }
                                 if (!silent && ret !== false || silent) {
-                                    self.enable();
+                                    self.enable(true);
                                 }
                             } catch (e) {
                                 display_exception(e, 'onFocus');
@@ -5390,7 +5394,7 @@
                             // where cursor have blink class
                             terminals.forEach(function(terminal) {
                                 if (terminal !== self && terminal.enabled()) {
-                                    terminal.disable();
+                                    terminal.disable(silent);
                                 }
                             });
                             if (!silent) {
@@ -5402,7 +5406,7 @@
                             }
                         }
                         terminals.set(self);
-                        self.enable();
+                        self.enable(silent);
                     }
                 });
                 return self;
@@ -5430,17 +5434,23 @@
             // -------------------------------------------------------------
             // :: Enable the terminal
             // -------------------------------------------------------------
-            enable: function() {
+            enable: function(silent) {
                 if (!enabled && !frozen) {
                     if (num_chars === undefined) {
                         // enabling first time
                         self.resize();
                     }
                     cmd_ready(function ready() {
-                        if (!self.paused()) {
-                            command_line.enable();
+                        var ret;
+                        if (!silent && !enabled) {
+                            ret = settings.onFocus.call(self, self);
                         }
-                        enabled = true;
+                        if (!silent && ret === undefined || silent) {
+                            if (!self.paused()) {
+                                command_line.enable();
+                            }
+                            enabled = true;
+                        }
                     });
                 }
                 return self;
@@ -5448,10 +5458,16 @@
             // -------------------------------------------------------------
             // :: Disable the terminal
             // -------------------------------------------------------------
-            disable: function() {
+            disable: function(silent) {
                 cmd_ready(function ready() {
-                    enabled = false;
-                    command_line.disable();
+                    var ret;
+                    if (!silent && enabled) {
+                        ret = settings.onBlur.call(self, self);
+                    }
+                    if (!silent && ret === undefined || silent) {
+                        command_line.disable();
+                        enabled = false;
+                    }
                 });
                 return self;
             },
@@ -6199,6 +6215,7 @@
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
+                console.log(name, arguments);
                 try {
                     return fun.apply(self, [].slice.apply(arguments));
                 } catch (e) {
@@ -6368,9 +6385,7 @@
             }
             function disable(e) {
                 var sender = $(e.target);
-                if (!sender.closest('.terminal').length &&
-                    self.enabled() &&
-                    settings.onBlur.call(self, self) !== false) {
+                if (!sender.closest('.terminal').length && self.enabled()) {
                     self.disable();
                 }
             }
