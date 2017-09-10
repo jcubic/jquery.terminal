@@ -1339,7 +1339,7 @@
         function paste_event() {
             clip.val('');
             paste_count = 0;
-            clip.focus();
+            clip.trigger('focus', [true]);
             clip.on('input', function input(e) {
                 paste(e);
                 clip.off('input', input);
@@ -1775,7 +1775,7 @@
             if (self.isenabled()) {
                 var clip = self.find('textarea');
                 if (!clip.is(':focus')) {
-                    clip.focus();
+                    clip.trigger('focus', [true]);
                 }
                 //wait until Browser insert text to textarea
                 self.oneTime(100, function() {
@@ -6284,11 +6284,13 @@
                                                  settings.login);
         }
         terminals.append(self);
-        //terminals.set(self);
         self.on('focus.terminal', 'textarea', function(e, skip) {
-            if (!enabled && !skip) {
-                self.enable();
-            }
+            // for cases when user press tab to focus terminal
+            self.oneTime(1, function() {
+                if (!self.enable() && !skip) {
+                    self.enable();
+                }
+            });
         });
         function focus_terminal() {
             if (old_enabled) {

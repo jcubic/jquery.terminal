@@ -2,7 +2,7 @@
 ### Features
 * add option caseSensitiveAutocomplete default to true [#332](https://github.com/jcubic/jquery.terminal/issues/332)
 ### Bugs
-* fix jumping of terminal when created one after another and chaning the that have focus in Edge
+* fix jumping of terminal when created one after another and changing the one that have focus in Edge
 * fix issue that all terminals was enabled not the last one created
 * fix issue that on click next terminal get focused on browsers with touch screen (reported by @itsZN [#330](https://github.com/jcubic/jquery.terminal/issues/330))
 * fix missing default keymap in cmd plugin (found on SO by Arnaldo Montoya)
