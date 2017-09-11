@@ -2,6 +2,7 @@
 ### Features
 * add option caseSensitiveAutocomplete default to true [#332](https://github.com/jcubic/jquery.terminal/issues/332)
 * expose Stack/Cycle/History in $.terminal so they can be tested
+* make `:focus-within .prompt` selector work with terminal (work also on codepen)
 ### Bugs
 * fix jumping of terminal when created one after another and changing the one that have focus in Edge
 * fix issue that all terminals was enabled not the last one created
