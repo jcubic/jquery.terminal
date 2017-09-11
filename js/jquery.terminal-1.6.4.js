@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 11 Sep 2017 19:41:10 +0000
+ * Date: Mon, 11 Sep 2017 19:50:48 +0000
  */
 
 /* TODO:
@@ -1392,7 +1392,7 @@
             var focus = clip.is(':focus');
             if (enabled) {
                 if (!focus) {
-                    clip.trigger('focus', [true]);
+                    //clip.trigger('focus', [true]);
                 }
                 self.oneTime(10, function() {
                     if (!clip.is(':focus') && enabled) {
@@ -6425,12 +6425,12 @@
                                 if (!frozen) {
                                     if (!enabled) {
                                         self.focus();
+                                        command_line.enable();
                                         count = 0;
                                     } else {
                                         var timeout = settings.clickTimeout;
                                         self.oneTime(timeout, name, position);
                                     }
-                                    command_line.enable();
                                 }
                             } else {
                                 self.stopTime(name);
