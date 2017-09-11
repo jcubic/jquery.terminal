@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 11 Sep 2017 09:06:43 +0000
+ * Date: Mon, 11 Sep 2017 09:15:36 +0000
  */
 
 /* TODO:
@@ -1380,17 +1380,19 @@
         }
         function mobile_focus() {
             //if (is_touch) {
-            var focus = clip.is(':focus');
-            if (enabled) {
-                if (!focus) {
-                    clip.trigger('focus', [true]);
-                    self.oneTime(10, function() {
+            self.oneTime(1, function() {
+                var focus = clip.is(':focus');
+                if (enabled) {
+                    if (!focus) {
                         clip.trigger('focus', [true]);
-                    });
+                        self.oneTime(10, function() {
+                            clip.trigger('focus', [true]);
+                        });
+                    }
+                } else if (focus && (is_mobile || !enabled)) {
+                    clip.blur();
                 }
-            } else if (focus && (is_mobile || !enabled)) {
-                clip.blur();
-            }
+            });
         }
         // on mobile you can't delete character if input is empty (event
         // will not fire) so we fake text entry, we could just put dummy
