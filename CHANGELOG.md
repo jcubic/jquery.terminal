@@ -10,7 +10,8 @@
 * fix issue with focus on click on MacOS (reported by @RomanPerin [#255](https://github.com/jcubic/jquery.terminal/issues/255))
 * fix pasting (reported by @artursOs [#331](https://github.com/jcubic/jquery.terminal/issues/331))
 * fix unescaped entity error (reported by Nikolai Orekhov [#333](https://github.com/jcubic/jquery.terminal/issues/333))
-* fix onFocus and onBlur events [#334](https://github.com/jcubic/jquery.terminal/issues/334)
+* fix onFocus and onBlur events
+* fix blur textarea on disable
 
 ## 1.6.4
 * just missed build

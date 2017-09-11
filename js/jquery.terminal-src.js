@@ -1388,7 +1388,7 @@
                         clip.trigger('focus', [true]);
                     });
                 }
-            } else if (focus && is_mobile) {
+            } else if (focus && (is_mobile || !enabled)) {
                 clip.blur();
             }
         }
