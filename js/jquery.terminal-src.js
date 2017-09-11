@@ -2276,7 +2276,6 @@
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
             .bind('input.cmd', input_event);
         (function() {
-            var isDragging = false;
             var was_down = false;
             var count = 0;
             self.on('mousedown.cmd', function() {
@@ -5360,7 +5359,6 @@
             // -------------------------------------------------------------
             focus: function(toggle, silent) {
                 cmd_ready(function ready() {
-                    var ret;
                     if (terminals.length() === 1) {
                         if (toggle === false) {
                             self.disable(silent);
@@ -6206,10 +6204,6 @@
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
-                //console.log(name + ' ' + terminal_id, [].slice.call(arguments));
-                if (name == 'disable') {
-                    //console.log(new Error().stack);
-                }
                 try {
                     return fun.apply(self, [].slice.apply(arguments));
                 } catch (e) {
@@ -6413,6 +6407,16 @@
                     var count = 0;
                     var $target;
                     var name = 'click_' + self.id();
+                    function position() {
+                        if ($target.is('.terminal') ||
+                            $target.is('.terminal-wrapper')) {
+                            var len = self.get_command().length;
+                            self.set_position(len);
+                        } else if ($target.closest('.prompt').length) {
+                            self.set_position(0);
+                        }
+                        count = 0;
+                    }
                     self.mousedown(function(e) {
                         $target = $(e.target);
                     }).mouseup(function() {
@@ -6423,16 +6427,8 @@
                                         self.focus();
                                         count = 0;
                                     } else {
-                                        self.oneTime(settings.clickTimeout, name, function() {
-                                            if ($target.is('.terminal') ||
-                                                $target.is('.terminal-wrapper')) {
-                                                var len = self.get_command().length;
-                                                self.set_position(len);
-                                            } else if ($target.closest('.prompt').length) {
-                                                self.set_position(0);
-                                            }
-                                            count = 0;
-                                        });
+                                        var timeout = settings.clickTimeout;
+                                        self.oneTime(timeout, name, position);
                                     }
                                     command_line.enable();
                                 }
