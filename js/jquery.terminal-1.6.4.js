@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 11 Sep 2017 09:15:36 +0000
+ * Date: Mon, 11 Sep 2017 19:25:09 +0000
  */
 
 /* TODO:
@@ -812,16 +812,24 @@
     // -----------------------------------------------------------------------
     // :: CYCLE DATA STRUCTURE
     // -----------------------------------------------------------------------
-    function Cycle(init) {
-        var data = init ? [init] : [];
+    function Cycle() {
+        var data = [].slice.call(arguments);
         var pos = 0;
         $.extend(this, {
             get: function() {
                 return data;
             },
-            rotate: function() {
-                if (!data.filter(Boolean).length) {
-                    return;
+            index: function() {
+                return pos;
+            },
+            rotate: function(skip) {
+                if (!skip) {
+                    var defined = data.filter(function(item) {
+                        return typeof item !== 'undefined';
+                    });
+                    if (!defined.length) {
+                        return;
+                    }
                 }
                 if (data.length === 1) {
                     return data[0];
@@ -831,10 +839,10 @@
                     } else {
                         ++pos;
                     }
-                    if (data[pos]) {
+                    if (typeof data[pos] !== 'undefined') {
                         return data[pos];
                     } else {
-                        return this.rotate();
+                        return this.rotate(true);
                     }
                 }
             },
@@ -852,6 +860,7 @@
                     }
                 }
                 this.append(item);
+                pos = data.length - 1;
             },
             front: function() {
                 if (data.length) {
@@ -1380,19 +1389,19 @@
         }
         function mobile_focus() {
             //if (is_touch) {
-            self.oneTime(1, function() {
-                var focus = clip.is(':focus');
-                if (enabled) {
-                    if (!focus) {
-                        clip.trigger('focus', [true]);
-                        self.oneTime(10, function() {
-                            clip.trigger('focus', [true]);
-                        });
-                    }
-                } else if (focus && (is_mobile || !enabled)) {
-                    clip.blur();
+            var focus = clip.is(':focus');
+            if (enabled) {
+                if (!focus) {
+                    clip.trigger('focus', [true]);
                 }
-            });
+                self.oneTime(10, function() {
+                    if (!clip.is(':focus') && enabled) {
+                        clip.trigger('focus', [true]);
+                    }
+                });
+            } else if (focus && (is_mobile || !enabled)) {
+                clip.trigger('blur', [true]);
+            }
         }
         // on mobile you can't delete character if input is empty (event
         // will not fire) so we fake text entry, we could just put dummy
@@ -1995,8 +2004,8 @@
                     }
                     animation(true);
                     draw_prompt();
-                    mobile_focus();
                 }
+                mobile_focus();
                 return self;
             },
             isenabled: function() {
@@ -2266,28 +2275,14 @@
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
             .bind('input.cmd', input_event);
-        clip.on('blur', function() {
-            if (enabled) {
-                return false;
-            }
-        });
         (function() {
             var isDragging = false;
             var was_down = false;
             var count = 0;
             self.on('mousedown.cmd', function() {
                 was_down = true;
-                self.oneTime(1, function() {
-                    $(window).on('mousemove.cmd_' + id, function() {
-                        isDragging = true;
-                        $(window).off('mousemove.cmd_' + id);
-                    });
-                });
             }).on('mouseup.cmd', function(e) {
-                var wasDragging = isDragging;
-                isDragging = false;
-                $(window).off('mousemove.cmd_' + id);
-                if (!wasDragging) {
+                if (get_selected_text() === '') {
                     var name = 'click_' + id;
                     if (++count === 1) {
                         var down = was_down;
@@ -2472,6 +2467,10 @@
             'slategray', 'slategrey', 'snow', 'springgreen', 'steelblue', 'tan',
             'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat',
             'white', 'whitesmoke', 'yellow', 'yellowgreen'],
+        // for unit tests
+        Cycle: Cycle,
+        History: History,
+        Stack: Stack,
         // ---------------------------------------------------------------------
         // :: Validate html color (it can be name or hex)
         // ---------------------------------------------------------------------
@@ -5364,27 +5363,9 @@
                     var ret;
                     if (terminals.length() === 1) {
                         if (toggle === false) {
-                            try {
-                                if (!silent && self.enabled()) {
-                                    ret = settings.onBlur.call(self, self);
-                                }
-                                if (!silent && ret !== false || silent) {
-                                    self.disable(true);
-                                }
-                            } catch (e) {
-                                display_exception(e, 'onBlur');
-                            }
+                            self.disable(silent);
                         } else {
-                            try {
-                                if (!silent && !self.enabled()) {
-                                    ret = settings.onFocus.call(self, self);
-                                }
-                                if (!silent && ret !== false || silent) {
-                                    self.enable(true);
-                                }
-                            } catch (e) {
-                                display_exception(e, 'onFocus');
-                            }
+                            self.enable(silent);
                         }
                     } else if (toggle === false) {
                         self.next();
@@ -5408,8 +5389,8 @@
                             }
                         }
                         terminals.set(self);
-                        self.enable(silent);
                     }
+                    self.enable(silent);
                 });
                 return self;
             },
@@ -5445,13 +5426,17 @@
                     cmd_ready(function ready() {
                         var ret;
                         if (!silent && !enabled) {
-                            ret = settings.onFocus.call(self, self);
+                            try {
+                                ret = settings.onFocus.call(self, self);
+                            } catch (e) {
+                                display_exception(e, 'onFocus');
+                            }
                         }
                         if (!silent && ret === undefined || silent) {
+                            enabled = true;
                             if (!self.paused()) {
                                 command_line.enable();
                             }
-                            enabled = true;
                         }
                     });
                 }
@@ -5464,11 +5449,15 @@
                 cmd_ready(function ready() {
                     var ret;
                     if (!silent && enabled) {
-                        ret = settings.onBlur.call(self, self);
+                        try {
+                            ret = settings.onBlur.call(self, self);
+                        } catch (e) {
+                            display_exception(e, 'onBlur');
+                        }
                     }
                     if (!silent && ret === undefined || silent) {
-                        command_line.disable();
                         enabled = false;
+                        command_line.disable();
                     }
                 });
                 return self;
@@ -6217,6 +6206,10 @@
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
+                //console.log(name + ' ' + terminal_id, [].slice.call(arguments));
+                if (name == 'disable') {
+                    //console.log(new Error().stack);
+                }
                 try {
                     return fun.apply(self, [].slice.apply(arguments));
                 } catch (e) {
@@ -6286,13 +6279,11 @@
                                                  settings.login);
         }
         terminals.append(self);
-        self.on('focus.terminal', 'textarea', function(e, skip) {
+        self.on('focus.terminal', 'textarea', function(e) {
             // for cases when user press tab to focus terminal
-            self.oneTime(1, function() {
-                if (!self.enable() && !skip) {
-                    self.enable();
-                }
-            });
+            if (!self.enabled() && e.originalEvent !== undefined) {
+                self.focus(true);
+            }
         });
         function focus_terminal() {
             if (old_enabled) {
@@ -6301,7 +6292,7 @@
         }
         function blur_terminal() {
             old_enabled = enabled;
-            self.disable();
+            self.disable().find('textarea').trigger('blur', [true]);
         }
         function paste_event(e) {
             e = e.originalEvent;
@@ -6424,27 +6415,26 @@
                     var name = 'click_' + self.id();
                     self.mousedown(function(e) {
                         $target = $(e.target);
-                        if (e.originalEvent.button === 2) {
-                            return;
-                        }
                     }).mouseup(function() {
                         if (get_selected_text() === '') {
                             if (++count === 1) {
-                                if (!self.enabled() && !frozen) {
-                                    self.focus();
-                                    command_line.enable();
-                                    count = 0;
-                                } else {
-                                    self.oneTime(settings.clickTimeout, name, function() {
-                                        if ($target.is('.terminal') ||
-                                            $target.is('.terminal-wrapper')) {
-                                            var len = self.get_command().length;
-                                            self.set_position(len);
-                                        } else if ($target.closest('.prompt').length) {
-                                            self.set_position(0);
-                                        }
+                                if (!frozen) {
+                                    if (!enabled) {
+                                        self.focus();
                                         count = 0;
-                                    });
+                                    } else {
+                                        self.oneTime(settings.clickTimeout, name, function() {
+                                            if ($target.is('.terminal') ||
+                                                $target.is('.terminal-wrapper')) {
+                                                var len = self.get_command().length;
+                                                self.set_position(len);
+                                            } else if ($target.closest('.prompt').length) {
+                                                self.set_position(0);
+                                            }
+                                            count = 0;
+                                        });
+                                    }
+                                    command_line.enable();
                                 }
                             } else {
                                 self.stopTime(name);

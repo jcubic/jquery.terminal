@@ -583,6 +583,262 @@ function tests_on_ready() {
                 });
             });
         });
+        describe('Cycle', function() {
+            describe('create', function() {
+                it('should create Cycle from init values', function() {
+                    var cycle = new $.terminal.Cycle(1, 2, 3);
+                    expect(cycle.get()).toEqual([1, 2, 3]);
+                });
+                it('should create empty Cycle', function() {
+                    var cycle = new $.terminal.Cycle();
+                    expect(cycle.get()).toEqual([]);
+                });
+                it('should start at the begining when called init data', function() {
+                    var cycle = new $.terminal.Cycle(1, 2, 3);
+                    expect(cycle.index()).toEqual(0);
+                    expect(cycle.front()).toEqual(1);
+                });
+                it('should start at the begining when called without data', function() {
+                    var cycle = new $.terminal.Cycle();
+                    expect(cycle.index()).toEqual(0);
+                    expect(cycle.front()).toEqual(undefined);
+                });
+            });
+            describe('index', function() {
+                var a = {a: 1};
+                var b = {a: 2};
+                var c = {a: 3};
+                var d = {a: 4};
+                var cycle;
+                beforeEach(function() {
+                    cycle = new $.terminal.Cycle(a, b, c, d);
+                });
+                it('should return index', function() {
+                    expect(cycle.index()).toEqual(0);
+                    cycle.rotate();
+                    expect(cycle.index()).toEqual(1);
+                });
+                it('should skip index if element removed', function() {
+                    cycle.remove(1);
+                    expect(cycle.index()).toEqual(0);
+                    cycle.rotate();
+                    expect(cycle.index()).toEqual(2);
+                });
+            });
+            describe('rotate', function() {
+                var a = {a: 1};
+                var b = {a: 2};
+                var c = {a: 3};
+                var d = {a: 4};
+                var cycle;
+                beforeEach(function() {
+                    cycle = new $.terminal.Cycle(a, b, c, d);
+                });
+                it('should rotate to next element', function() {
+                    var object = cycle.rotate();
+                    expect(object).toEqual({a:2});
+                    expect(cycle.index()).toEqual(1);
+                    expect(cycle.front()).toEqual({a:2});
+                });
+                it('should rotate to next if item removed', function() {
+                    cycle.remove(1);
+                    var object = cycle.rotate();
+                    expect(object).toEqual({a:3});
+                    expect(cycle.index()).toEqual(2);
+                    expect(cycle.front()).toEqual({a:3});
+                });
+                it('should rotate to first if last is selected', function() {
+                    for (var i = 0; i < 3; ++i) {
+                        cycle.rotate();
+                    }
+                    var object = cycle.rotate();
+                    expect(object).toEqual({a:1});
+                    expect(cycle.index()).toEqual(0);
+                    expect(cycle.front()).toEqual({a:1});
+                });
+            });
+            describe('set', function() {
+                var a = {a: 1};
+                var b = {a: 2};
+                var c = {a: 3};
+                var d = {a: 4};
+                var cycle;
+                beforeEach(function() {
+                    cycle = new $.terminal.Cycle(a, b, c, d);
+                });
+                it('should set existing element', function() {
+                    cycle.set(c);
+                    expect(cycle.front()).toEqual(c);
+                });
+                it('should add new item if not exists', function() {
+                    var e = {a: 5};
+                    cycle.set(e);
+                    expect(cycle.length()).toEqual(5);
+                    expect(cycle.index()).toEqual(4);
+                    expect(cycle.front()).toEqual(e);
+                });
+            });
+            describe('map', function() {
+                var a = {a: 1};
+                var b = {a: 2};
+                var c = {a: 3};
+                var d = {a: 4};
+                var cycle;
+                beforeEach(function() {
+                    cycle = new $.terminal.Cycle(a, b, c, d);
+                });
+                it('should map over cycle', function() {
+                    var array = cycle.map(function(object) {
+                        return object.a;
+                    });
+                    expect(array).toEqual([1,2,3,4]);
+                });
+                it('should skip removed elements', function() {
+                    cycle.remove(1);
+                    cycle.remove(3);
+                    var array = cycle.map(function(object) {
+                        return object.a;
+                    });
+                    expect(array).toEqual([1,3]);
+                });
+            });
+            describe('forEach', function() {
+                var test = {
+                    test: function() {
+                    }
+                };
+                var a = {a: 1};
+                var b = {a: 2};
+                var c = {a: 3};
+                var d = {a: 4};
+                var cycle;
+                beforeEach(function() {
+                    cycle = new $.terminal.Cycle(a, b, c, d);
+                    spy(test, 'test');
+                });
+                it('should execute callback for each item', function() {
+                    cycle.forEach(test.test);
+                    expect(count(test.test)).toBe(4);
+                });
+                it('should skip removed elements', function() {
+                    cycle.remove(1);
+                    cycle.forEach(test.test);
+                    expect(count(test.test)).toBe(3);
+                });
+            });
+            describe('append', function() {
+                it('should add element to cycle', function() {
+                    var cycle = new $.terminal.Cycle(1,2,3,4);
+                    cycle.append(5);
+                    expect(cycle.get()).toEqual([1,2,3,4,5]);
+                });
+                it('should add element to empty cycle', function() {
+                    var cycle = new $.terminal.Cycle();
+                    cycle.append(5);
+                    expect(cycle.get()).toEqual([5]);
+                });
+                it('should add element if cycle at the end', function() {
+                    var cycle = new $.terminal.Cycle(1,2,3);
+                    cycle.set(3);
+                    cycle.append(4);
+                    expect(cycle.get()).toEqual([1,2,3,4]);
+                });
+            });
+        });
+        describe('History', function() {
+            // TODO:
+        });
+        describe('Stack', function() {
+            describe('create', function() {
+                it('should create stack from array', function() {
+                    var stack = new $.terminal.Stack([1, 2, 3]);
+                    expect(stack.data()).toEqual([1, 2, 3]);
+                });
+                it('should create empty stack', function() {
+                    var stack = new $.terminal.Stack();
+                    expect(stack.data()).toEqual([]);
+                });
+                it('should create stack from single element', function() {
+                    var stack = new $.terminal.Stack(100);
+                    expect(stack.data()).toEqual([100]);
+                });
+            });
+            describe('map', function() {
+                it('should map over data', function() {
+                    var stack = new $.terminal.Stack([1,2,3,4]);
+                    var result = stack.map(function(n) { return n + 1; });
+                    expect(result).toEqual([2,3,4,5]);
+                });
+                it('should return empty array if no data on Stack', function() {
+                    var stack = new $.terminal.Stack([]);
+                    var result = stack.map(function(n) { return n + 1; });
+                    expect(result).toEqual([]);
+                });
+            });
+            describe('size', function() {
+                it('should return size', function() {
+                    var stack = new $.terminal.Stack([1,2,3,4]);
+                    expect(stack.size()).toEqual(4);
+                });
+                it('should return 0 for empyt stack', function() {
+                    var stack = new $.terminal.Stack([]);
+                    expect(stack.size()).toEqual(0);
+                });
+            });
+            describe('pop', function() {
+                it('should remove one element from stack', function() {
+                    var stack = new $.terminal.Stack([1,2,3,4]);
+                    var value = stack.pop();
+                    expect(value).toEqual(4);
+                    expect(stack.data()).toEqual([1,2,3]);
+                });
+                it('should return null for last element', function() {
+                    var stack = new $.terminal.Stack([1,2,3,4]);
+                    for (var i = 0; i < 4; ++i) {
+                        stack.pop();
+                    }
+                    expect(stack.pop()).toEqual(null);
+                    expect(stack.data()).toEqual([]);
+                });
+            });
+            describe('push', function() {
+                it('should push into empty stack', function() {
+                    var stack = new $.terminal.Stack();
+                    stack.push(100);
+                    expect(stack.data()).toEqual([100]);
+                });
+                it('should push on top of stack', function() {
+                    var stack = new $.terminal.Stack([1,2,3]);
+                    stack.push(4);
+                    stack.push(5);
+                    expect(stack.data()).toEqual([1,2,3,4,5]);
+                });
+            });
+            describe('top', function() {
+                it('should return value for first element', function() {
+                    var stack = new $.terminal.Stack([1,2,3]);
+                    expect(stack.top()).toEqual(3);
+                    stack.push(10);
+                    expect(stack.top()).toEqual(10);
+                    stack.pop();
+                    expect(stack.top()).toEqual(3);
+                });
+            });
+            describe('clone', function() {
+                it('should clone stack', function() {
+                    var stack = new $.terminal.Stack([1,2,3]);
+                    var stack_clone = stack.clone();
+                    expect(stack).not.toBe(stack_clone);
+                    expect(stack.data()).toEqual(stack_clone.data());
+                });
+                it('should clone empty stack', function() {
+                    var stack = new $.terminal.Stack([]);
+                    var stack_clone = stack.clone();
+                    expect(stack).not.toBe(stack_clone);
+                    expect(stack_clone.data()).toEqual([]);
+                });
+            });
+        });
     });
     describe('Terminal plugin', function() {
         describe('jQuery Terminal options', function() {
@@ -2224,7 +2480,7 @@ function tests_on_ready() {
                 it('should swith to next terminal', function() {
                     term1.focus();
                     term1.next();
-                    expect($.terminal.active()).toBe(term2);
+                    expect($.terminal.active().id()).toBe(term2.id());
                     term1.destroy();
                     term2.destroy();
                 });
@@ -2234,11 +2490,11 @@ function tests_on_ready() {
                 var term2 = $('<div/>').terminal();
                 it('should focus on first terminal', function() {
                     term1.focus();
-                    expect($.terminal.active()).toBe(term1);
+                    expect($.terminal.active().id()).toBe(term1.id());
                 });
                 it('should focus on second terminal', function() {
                     term1.focus(false);
-                    expect($.terminal.active()).toBe(term2);
+                    expect($.terminal.active().id()).toBe(term2.id());
                     term1.destroy();
                     term2.destroy();
                 });
