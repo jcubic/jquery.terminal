@@ -94,8 +94,8 @@ You can also grab the files from CDN:
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/jquery.terminal/1.7.0/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.terminal/1.7.0/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@1.7.0/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@1.7.0/css/jquery.terminal.min.css">
 ```
 
 And you're good to go.
