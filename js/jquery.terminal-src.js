@@ -6378,14 +6378,27 @@
             } else {
                 self.disable();
             }
+            function inside(term, x, y) {
+                var offset = term.offset();
+                var width = term.outerWidth();
+                var height = term.outerHeight();
+                return (x > offset.left && y > offset.top &&
+                        x < (offset.left + width) && y < (offset.top + height));
+            }
+            function outside_terminals(e) {
+                e = e.originalEvent;
+                // e.terget is body when click outside of context menu to close it
+                // even if you click on terminal
+                var outside = terminals.get().filter(function(terminal) {
+                    return !inside(terminal, e.pageX, e.pageY);
+                });
+                return outside.length === terminals.length();
+            }
             function disable(e) {
-                var sender = $(e.target).closest('.terminal');
-                sender = sender.length ? sender.terminal() : null;
-                if (sender !== self && self.enabled()) {
+                if (outside_terminals(e) && self.enabled()) {
+                    // we only need to disable when click outside of terminal
+                    // click on other terminal is handled by focus event
                     self.disable();
-                }
-                if (sender !== null && !sender.enabled()) {
-                    sender.enable();
                 }
             }
             self.oneTime(100, function() {
