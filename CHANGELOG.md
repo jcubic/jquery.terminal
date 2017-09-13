@@ -1,3 +1,7 @@
+## 1.7.1
+* fix blur terminals when open context menu and then click right mouse button (sometime last terminal didn't
+  get disabled)
+
 ## 1.7.0
 ### Features
 * add option caseSensitiveAutocomplete default to true [#332](https://github.com/jcubic/jquery.terminal/issues/332)

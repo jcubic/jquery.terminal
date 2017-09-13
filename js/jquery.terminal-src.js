@@ -4729,7 +4729,11 @@
             };
         }
         function strings() {
-            return $.extend({}, $.terminal.defaults.strings, settings.strings);
+            return $.extend(
+                {},
+                $.terminal.defaults.strings,
+                settings && settings.strings || {}
+            );
         }
         // ---------------------------------------------------------------------
         var self = this;
@@ -6275,8 +6279,11 @@
         terminals.append(self);
         self.on('focus.terminal', 'textarea', function(e) {
             // for cases when user press tab to focus terminal
-            if (!self.enabled() && e.originalEvent !== undefined) {
-                self.focus(true);
+            // this is also called when user open context menu and then click
+            // right mouse button on terminal
+            if (e.originalEvent !== undefined) {
+                // if terminal is enabled we need silent focus for multiple terminals
+                self.focus(true, !self.enabled());
             }
         });
         function focus_terminal() {
@@ -6372,9 +6379,13 @@
                 self.disable();
             }
             function disable(e) {
-                var sender = $(e.target);
-                if (!sender.closest('.terminal').length && self.enabled()) {
+                var sender = $(e.target).closest('.terminal');
+                sender = sender.length ? sender.terminal() : null;
+                if (sender !== self && self.enabled()) {
                     self.disable();
+                }
+                if (sender !== null && !sender.enabled()) {
+                    sender.enable();
                 }
             }
             self.oneTime(100, function() {
@@ -6449,7 +6460,7 @@
                             if (!self.enabled()) {
                                 self.enable();
                             }
-                            e.preventDefault();
+                            //e.preventDefault();
                             var offset = command_line.offset();
                             clip.css({
                                 left: e.pageX - offset.left - 5,

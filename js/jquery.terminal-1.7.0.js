@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.7.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 12 Sep 2017 07:04:06 +0000
+ * Date: Wed, 13 Sep 2017 17:46:51 +0000
  */
 
 /* TODO:
@@ -2430,7 +2430,7 @@
         }
     }
     $.terminal = {
-        version: '1.7.0',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4729,7 +4729,11 @@
             };
         }
         function strings() {
-            return $.extend({}, $.terminal.defaults.strings, settings.strings);
+            return $.extend(
+                {},
+                $.terminal.defaults.strings,
+                settings && settings.strings || {}
+            );
         }
         // ---------------------------------------------------------------------
         var self = this;
@@ -6275,8 +6279,11 @@
         terminals.append(self);
         self.on('focus.terminal', 'textarea', function(e) {
             // for cases when user press tab to focus terminal
-            if (!self.enabled() && e.originalEvent !== undefined) {
-                self.focus(true);
+            // this is also called when user open context menu and then click
+            // right mouse button on terminal
+            if (e.originalEvent !== undefined) {
+                // if terminal is enabled we need silent focus for multiple terminals
+                self.focus(true, !self.enabled());
             }
         });
         function focus_terminal() {
@@ -6372,9 +6379,13 @@
                 self.disable();
             }
             function disable(e) {
-                var sender = $(e.target);
-                if (!sender.closest('.terminal').length && self.enabled()) {
+                var sender = $(e.target).closest('.terminal');
+                sender = sender.length ? sender.terminal() : null;
+                if (sender !== self && self.enabled()) {
                     self.disable();
+                }
+                if (sender !== null && !sender.enabled()) {
+                    sender.enable();
                 }
             }
             self.oneTime(100, function() {
@@ -6449,7 +6460,7 @@
                             if (!self.enabled()) {
                                 self.enable();
                             }
-                            e.preventDefault();
+                            //e.preventDefault();
                             var offset = command_line.offset();
                             clip.css({
                                 left: e.pageX - offset.left - 5,
