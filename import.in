@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@{{VER}}/css/jquery.terminal.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@{{VER}}/js/jquery.terminal.min.js"></script>
+<style>
+body {
+    min-height: 100vh;
+    margin: 0;
+}
+</style>
+<script>
+(function() {
+    var $ = jQuery.noConflict();
+    window.terminal = function(selector) {
+        var args = [].slice.call(arguments, 1);
+        return $.fn.terminal.apply($(selector), args);
+    };
+})();
+</script>
+</head>

@@ -14,7 +14,7 @@ JASMINE=./node_modules/.bin/jasmine-node
 CSSNANO=./node_modules/.bin/cssnano
 SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md www/Makefile
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md import.html www/Makefile
 
 bower.json: bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" bower.in > bower.json
@@ -35,7 +35,7 @@ js/jquery.terminal.min.js: js/jquery.terminal-$(VERSION).min.js
 	$(CP) js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js
 
 css/jquery.terminal-$(VERSION).css: css/jquery.terminal-src.css .$(VERSION)
-	$(GIT) branch | grep devel > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css
+	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css
 
 css/jquery.terminal.css: css/jquery.terminal-$(VERSION).css .$(VERSION)
 	$(CP) css/jquery.terminal-$(VERSION).css css/jquery.terminal.css
@@ -54,6 +54,9 @@ README.md: README.in .$(VERSION)
 
 Makefile: Makefile.in
 	$(SED) -e "s/{{VER""SION}}/"$(VERSION)"/" Makefile.in > Makefile
+
+import.html: import.in
+	$(GIT) branch | grep '* devel' > /dev/null || $(SED) -e "s/{{VER}}/$(VERSION)/g" import.in > import.html
 
 terminal.jquery.json: manifest .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json
