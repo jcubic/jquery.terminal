@@ -2220,7 +2220,7 @@
                 //$.terminal.active().echo(str);
             }
         }
-        function input_event(e) {
+        function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
