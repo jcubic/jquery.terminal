@@ -1200,7 +1200,11 @@
                     self['delete'](-1);
                 }
                 // for next input after naitve backspace
-                no_keydown = true;
+                // we need timeout because we don't want it to trigger
+                // for current input but next one
+                self.oneTime(1, function() {
+                    no_keydown = true;
+                });
             },
             'TAB': function() {
                 self.insert('\t');
@@ -1409,7 +1413,9 @@
         function fix_textarea() {
             // delay worked while experimenting
             self.oneTime(10, function() {
-                clip.val(command);
+                if (clip.val() !== command) {
+                    clip.val(command);
+                }
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
@@ -2214,7 +2220,7 @@
                 //$.terminal.active().echo(str);
             }
         }
-        function input_event() {
+        function input_event(e) {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');

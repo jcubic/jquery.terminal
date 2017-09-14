@@ -1,6 +1,7 @@
 ## 1.7.1
 * fix blur terminals when open context menu and then click right mouse button (sometime last terminal didn't
   get disabled)
+* fix backspase
 
 ## 1.7.0
 ### Features
