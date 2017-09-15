@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.7.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 12 Sep 2017 07:04:06 +0000
+ * Date: Thu, 14 Sep 2017 08:28:13 +0000
  */
 
 /* TODO:
@@ -1200,7 +1200,11 @@
                     self['delete'](-1);
                 }
                 // for next input after naitve backspace
-                no_keydown = true;
+                // we need timeout because we don't want it to trigger
+                // for current input but next one
+                self.oneTime(1, function() {
+                    no_keydown = true;
+                });
             },
             'TAB': function() {
                 self.insert('\t');
@@ -1409,7 +1413,9 @@
         function fix_textarea() {
             // delay worked while experimenting
             self.oneTime(10, function() {
-                clip.val(command);
+                if (clip.val() !== command) {
+                    clip.val(command);
+                }
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
@@ -2430,7 +2436,7 @@
         }
     }
     $.terminal = {
-        version: '1.7.0',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4729,7 +4735,11 @@
             };
         }
         function strings() {
-            return $.extend({}, $.terminal.defaults.strings, settings.strings);
+            return $.extend(
+                {},
+                $.terminal.defaults.strings,
+                settings && settings.strings || {}
+            );
         }
         // ---------------------------------------------------------------------
         var self = this;
@@ -6275,8 +6285,11 @@
         terminals.append(self);
         self.on('focus.terminal', 'textarea', function(e) {
             // for cases when user press tab to focus terminal
-            if (!self.enabled() && e.originalEvent !== undefined) {
-                self.focus(true);
+            // this is also called when user open context menu and then click
+            // right mouse button on terminal
+            if (e.originalEvent !== undefined) {
+                // if terminal is enabled we need silent focus for multiple terminals
+                self.focus(true, !self.enabled());
             }
         });
         function focus_terminal() {
@@ -6371,9 +6384,26 @@
             } else {
                 self.disable();
             }
+            function inside(term, x, y) {
+                var offset = term.offset();
+                var width = term.outerWidth();
+                var height = term.outerHeight();
+                return (x > offset.left && y > offset.top &&
+                        x < (offset.left + width) && y < (offset.top + height));
+            }
+            function outside_terminals(e) {
+                e = e.originalEvent;
+                // e.terget is body when click outside of context menu to close it
+                // even if you click on terminal
+                var outside = terminals.get().filter(function(terminal) {
+                    return !inside(terminal, e.pageX, e.pageY);
+                });
+                return outside.length === terminals.length();
+            }
             function disable(e) {
-                var sender = $(e.target);
-                if (!sender.closest('.terminal').length && self.enabled()) {
+                if (outside_terminals(e) && self.enabled()) {
+                    // we only need to disable when click outside of terminal
+                    // click on other terminal is handled by focus event
                     self.disable();
                 }
             }
@@ -6449,7 +6479,7 @@
                             if (!self.enabled()) {
                                 self.enable();
                             }
-                            e.preventDefault();
+                            //e.preventDefault();
                             var offset = command_line.offset();
                             clip.css({
                                 left: e.pageX - offset.left - 5,
