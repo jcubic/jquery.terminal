@@ -5766,7 +5766,7 @@
                             }
                             output_buffer = [];
                         }
-                        if (typeof arg == 'function') {
+                        if (typeof arg === 'function') {
                             arg = arg.bind(self);
                         }
                         process_line(arg, locals);
