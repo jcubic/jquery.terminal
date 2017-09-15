@@ -1,3 +1,6 @@
+## Next
+* fix blur when click ouside terminal when element you click is on top of terminal
+
 ## 1.7.1
 * fix blur terminals when open context menu and then click right mouse button (sometimes last terminal didn't
   get disabled)

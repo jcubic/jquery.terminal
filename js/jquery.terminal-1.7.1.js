@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.7.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 15 Sep 2017 07:10:07 +0000
+ * Date: Fri, 15 Sep 2017 08:20:04 +0000
  */
 
 /* TODO:
@@ -2436,7 +2436,7 @@
         }
     }
     $.terminal = {
-        version: '1.7.1',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6384,24 +6384,12 @@
             } else {
                 self.disable();
             }
-            function inside(term, x, y) {
-                var offset = term.offset();
-                var width = term.outerWidth();
-                var height = term.outerHeight();
-                return (x > offset.left && y > offset.top &&
-                        x < (offset.left + width) && y < (offset.top + height));
-            }
-            function outside_terminals(e) {
+            function disable(e) {
                 e = e.originalEvent;
                 // e.terget is body when click outside of context menu to close it
                 // even if you click on terminal
-                var outside = terminals.get().filter(function(terminal) {
-                    return !inside(terminal, e.pageX, e.pageY);
-                });
-                return outside.length === terminals.length();
-            }
-            function disable(e) {
-                if (outside_terminals(e) && self.enabled()) {
+                var node = document.elementFromPoint(e.pageX, e.pageY);
+                if (!$(node).closest('.terminal').length && self.enabled()) {
                     // we only need to disable when click outside of terminal
                     // click on other terminal is handled by focus event
                     self.disable();
