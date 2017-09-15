@@ -5742,7 +5742,7 @@
             // :: it use $.when so you can echo a promise
             // -------------------------------------------------------------
             echo: function(string, options) {
-                function echo(string) {
+                function echo(arg) {
                     try {
                         var locals = $.extend({
                             flush: true,
@@ -5766,10 +5766,13 @@
                             }
                             output_buffer = [];
                         }
-                        process_line(string, locals);
+                        if (typeof arg == 'function') {
+                            arg = arg.bind(self);
+                        }
+                        process_line(arg, locals);
                         // extended commands should be processed only
                         // once in echo and not on redraw
-                        lines.push([string, $.extend(locals, {
+                        lines.push([arg, $.extend(locals, {
                             exec: false
                         })]);
                         if (locals.flush) {

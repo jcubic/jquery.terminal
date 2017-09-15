@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 15 Sep 2017 08:20:04 +0000
+ * Date: Fri, 15 Sep 2017 17:39:53 +0000
  */
 
 /* TODO:
@@ -5742,7 +5742,7 @@
             // :: it use $.when so you can echo a promise
             // -------------------------------------------------------------
             echo: function(string, options) {
-                function echo(string) {
+                function echo(arg) {
                     try {
                         var locals = $.extend({
                             flush: true,
@@ -5766,10 +5766,13 @@
                             }
                             output_buffer = [];
                         }
-                        process_line(string, locals);
+                        if (typeof arg == 'function') {
+                            arg = arg.bind(self);
+                        }
+                        process_line(arg, locals);
                         // extended commands should be processed only
                         // once in echo and not on redraw
-                        lines.push([string, $.extend(locals, {
+                        lines.push([arg, $.extend(locals, {
                             exec: false
                         })]);
                         if (locals.flush) {
