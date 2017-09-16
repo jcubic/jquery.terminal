@@ -2,8 +2,7 @@
 <html>
 <head>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@1.7.0/css/jquery.terminal.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@1.7.0/js/jquery.terminal.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@1.7.1/js/jquery.terminal.min.js"></script>
 <style>
 body {
     min-height: 100vh;
@@ -12,7 +11,12 @@ body {
 </style>
 <script>
 (function() {
+    var url = 'https://cdn.jsdelivr.net/npm/jquery.terminal@1.7.1/css/jquery.terminal.min.css';
     var $ = jQuery.noConflict();
+    $('<link href="' + url + '" rel="stylesheet"/>').appendTo('head');
+    var importDoc = document.currentScript.ownerDocument;
+    var style = importDoc.querySelector('style');
+    document.head.appendChild(style);
     window.terminal = function(selector) {
         var args = [].slice.call(arguments, 1);
         return $.fn.terminal.apply($(selector), args);
