@@ -286,14 +286,14 @@
 
     /* eslint-disable */
     var hasLS = function() {
-      var testKey = 'test', storage = window.localStorage;
-      try {
-        storage.setItem(testKey, '1');
-        storage.removeItem(testKey);
-        return true;
-      } catch (error) {
-        return false;
-      }
+        try {
+            var testKey = 'test', storage = window.localStorage;
+            storage.setItem(testKey, '1');
+            storage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            return false;
+        }
     };
 
     // -----------------------------------------------------------------------

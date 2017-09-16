@@ -1,6 +1,7 @@
 ## Next
 * fix blur when click ouside terminal when element you click is on top of terminal
 * this is terminal instance inside echo function
+* fix localStorage exception while creating terminal from data URI
 
 ## 1.7.1
 * fix blur terminals when open context menu and then click right mouse button (sometimes last terminal didn't

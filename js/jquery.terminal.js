@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 15 Sep 2017 18:16:47 +0000
+ * Date: Sat, 16 Sep 2017 14:05:11 +0000
  */
 
 /* TODO:
@@ -286,14 +286,14 @@
 
     /* eslint-disable */
     var hasLS = function() {
-      var testKey = 'test', storage = window.localStorage;
-      try {
-        storage.setItem(testKey, '1');
-        storage.removeItem(testKey);
-        return true;
-      } catch (error) {
-        return false;
-      }
+        try {
+            var testKey = 'test', storage = window.localStorage;
+            storage.setItem(testKey, '1');
+            storage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            return false;
+        }
     };
 
     // -----------------------------------------------------------------------
