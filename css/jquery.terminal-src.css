@@ -121,7 +121,7 @@
 .cmd .prompt + div {
     clear: right;
 }
-.terminal-output > div {
+.terminal-output > div, .terminal-output > div > div {
     /*padding-top: 3px;*/
     min-height: 14px;
 }
@@ -399,6 +399,9 @@
     .terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
         font-size: calc(var(--size, 1) * 12px);
         line-height: calc(var(--size, 1) * 14px);
+    }
+    .terminal .terminal-output div div {
+        min-height: calc(var(--size, 1) * 14px);
     }
     .terminal .inverted, .cmd .inverted {
         background-color: var(--color, #aaa);

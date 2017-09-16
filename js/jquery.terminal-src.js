@@ -286,14 +286,14 @@
 
     /* eslint-disable */
     var hasLS = function() {
-      var testKey = 'test', storage = window.localStorage;
-      try {
-        storage.setItem(testKey, '1');
-        storage.removeItem(testKey);
-        return true;
-      } catch (error) {
-        return false;
-      }
+        try {
+            var testKey = 'test', storage = window.localStorage;
+            storage.setItem(testKey, '1');
+            storage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            return false;
+        }
     };
 
     // -----------------------------------------------------------------------
@@ -5742,7 +5742,7 @@
             // :: it use $.when so you can echo a promise
             // -------------------------------------------------------------
             echo: function(string, options) {
-                function echo(string) {
+                function echo(arg) {
                     try {
                         var locals = $.extend({
                             flush: true,
@@ -5766,10 +5766,13 @@
                             }
                             output_buffer = [];
                         }
-                        process_line(string, locals);
+                        if (typeof arg === 'function') {
+                            arg = arg.bind(self);
+                        }
+                        process_line(arg, locals);
                         // extended commands should be processed only
                         // once in echo and not on redraw
-                        lines.push([string, $.extend(locals, {
+                        lines.push([arg, $.extend(locals, {
                             exec: false
                         })]);
                         if (locals.flush) {
@@ -6188,7 +6191,10 @@
                 return self;
             },
             // -------------------------------------------------------------
-            scroll_to_bottom: scroll_to_bottom,
+            scroll_to_bottom: function() {
+                scroll_to_bottom();
+                return self;
+            },
             // -------------------------------------------------------------
             // :: return true if terminal div or body is at the bottom
             // :: is use scrollBottomOffset option as margin for the check
@@ -6384,24 +6390,12 @@
             } else {
                 self.disable();
             }
-            function inside(term, x, y) {
-                var offset = term.offset();
-                var width = term.outerWidth();
-                var height = term.outerHeight();
-                return (x > offset.left && y > offset.top &&
-                        x < (offset.left + width) && y < (offset.top + height));
-            }
-            function outside_terminals(e) {
+            function disable(e) {
                 e = e.originalEvent;
                 // e.terget is body when click outside of context menu to close it
                 // even if you click on terminal
-                var outside = terminals.get().filter(function(terminal) {
-                    return !inside(terminal, e.pageX, e.pageY);
-                });
-                return outside.length === terminals.length();
-            }
-            function disable(e) {
-                if (outside_terminals(e) && self.enabled()) {
+                var node = document.elementFromPoint(e.pageX, e.pageY);
+                if (!$(node).closest('.terminal').length && self.enabled()) {
                     // we only need to disable when click outside of terminal
                     // click on other terminal is handled by focus event
                     self.disable();
@@ -6453,9 +6447,9 @@
                         if (get_selected_text() === '') {
                             if (++count === 1) {
                                 if (!frozen) {
+                                    command_line.enable();
                                     if (!enabled) {
                                         self.focus();
-                                        command_line.enable();
                                         count = 0;
                                     } else {
                                         var timeout = settings.clickTimeout;
@@ -6707,7 +6701,7 @@
                         delta = e.originalEvent.deltaY || e.originalEvent.detail;
                     }
                     mousewheel(e, -delta);
-                    return false;
+                    e.preventDefault();
                 });
             }
         }); // make_interpreter
