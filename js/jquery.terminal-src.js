@@ -6447,9 +6447,9 @@
                         if (get_selected_text() === '') {
                             if (++count === 1) {
                                 if (!frozen) {
+                                    command_line.enable();
                                     if (!enabled) {
                                         self.focus();
-                                        command_line.enable();
                                         count = 0;
                                     } else {
                                         var timeout = settings.clickTimeout;

@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 16 Sep 2017 14:50:12 +0000
+ * Date: Sat, 16 Sep 2017 14:55:21 +0000
  */
 
 /* TODO:
@@ -6447,9 +6447,9 @@
                         if (get_selected_text() === '') {
                             if (++count === 1) {
                                 if (!frozen) {
+                                    command_line.enable();
                                     if (!enabled) {
                                         self.focus();
-                                        command_line.enable();
                                         count = 0;
                                     } else {
                                         var timeout = settings.clickTimeout;
