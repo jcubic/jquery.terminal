@@ -6191,7 +6191,10 @@
                 return self;
             },
             // -------------------------------------------------------------
-            scroll_to_bottom: scroll_to_bottom,
+            scroll_to_bottom: function() {
+                scroll_to_bottom();
+                return self;
+            },
             // -------------------------------------------------------------
             // :: return true if terminal div or body is at the bottom
             // :: is use scrollBottomOffset option as margin for the check
@@ -6698,7 +6701,7 @@
                         delta = e.originalEvent.deltaY || e.originalEvent.detail;
                     }
                     mousewheel(e, -delta);
-                    return false;
+                    e.preventDefault();
                 });
             }
         }); // make_interpreter

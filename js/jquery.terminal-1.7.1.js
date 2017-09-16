@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 16 Sep 2017 14:05:11 +0000
+ * Date: Sat, 16 Sep 2017 14:50:12 +0000
  */
 
 /* TODO:
@@ -6191,7 +6191,10 @@
                 return self;
             },
             // -------------------------------------------------------------
-            scroll_to_bottom: scroll_to_bottom,
+            scroll_to_bottom: function() {
+                scroll_to_bottom();
+                return self;
+            },
             // -------------------------------------------------------------
             // :: return true if terminal div or body is at the bottom
             // :: is use scrollBottomOffset option as margin for the check
@@ -6698,7 +6701,7 @@
                         delta = e.originalEvent.deltaY || e.originalEvent.detail;
                     }
                     mousewheel(e, -delta);
-                    return false;
+                    e.preventDefault();
                 });
             }
         }); // make_interpreter
