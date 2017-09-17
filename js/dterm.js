@@ -28,14 +28,17 @@
         if (!options.title) {
             options.title = 'JQuery Terminal Emulator';
         }
+        var close = options.close || $.noop;
         if (options.logoutOnClose) {
             options.close = function() {
                 terminal.logout();
                 terminal.clear();
+                close();
             };
         } else {
             options.close = function() {
                 terminal.disable();
+                close();
             };
         }
         var self = this;
