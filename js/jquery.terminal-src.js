@@ -4217,9 +4217,16 @@
                 }
             };
             if ($.isFunction(prompt)) {
-                prompt(function(string) {
+                var ret = prompt(function(string) {
                     self.echo(string + command, options);
                 });
+                if (ret && ret.then) {
+                    ret.then(function(string) {
+                        if (typeof string === 'string') {
+                            self.echo(string + command, options);
+                        }
+                    });
+                }
             } else {
                 self.echo(prompt + command, options);
             }
@@ -4299,8 +4306,7 @@
                 }
             }
             function show(result) {
-                // don't echo result if user echo something
-                if (result && position === lines.length - 1) {
+                if (typeof result !== 'undefined') {
                     display_object(result);
                 }
                 after_exec();
@@ -4358,7 +4364,6 @@
                     self.clear();
                     after_exec();
                 } else {
-                    var position = lines.length - 1;
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
                     if (result !== undefined) {
@@ -4446,8 +4451,15 @@
             }
             command_line.name(name);
             if ($.isFunction(interpreter.prompt)) {
-                command_line.prompt(function(command) {
-                    interpreter.prompt.call(self, command, self);
+                command_line.prompt(function(callback) {
+                    var ret = interpreter.prompt.call(self, callback, self);
+                    if (ret && ret.then) {
+                        ret.then(function(string) {
+                            if (typeof string === 'string') {
+                                callback(string);
+                            }
+                        });
+                    }
                 });
             } else {
                 command_line.prompt(interpreter.prompt);

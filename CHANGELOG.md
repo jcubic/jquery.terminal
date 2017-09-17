@@ -1,3 +1,6 @@
+## Next
+* allow to return promise from prompt + fix promise in echo
+
 ## 1.7.2
 * fix blur when click ouside terminal when element you click is on top of terminal
 * this is terminal instance inside echo function

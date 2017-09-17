@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.7.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -31,7 +31,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 16 Sep 2017 16:31:06 +0000
+ * Date: Sun, 17 Sep 2017 08:49:19 +0000
  */
 
 /* TODO:
@@ -2436,7 +2436,7 @@
         }
     }
     $.terminal = {
-        version: '1.7.2',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4217,9 +4217,16 @@
                 }
             };
             if ($.isFunction(prompt)) {
-                prompt(function(string) {
+                var ret = prompt(function(string) {
                     self.echo(string + command, options);
                 });
+                if (ret && ret.then) {
+                    ret.then(function(string) {
+                        if (typeof string === 'string') {
+                            self.echo(string + command, options);
+                        }
+                    });
+                }
             } else {
                 self.echo(prompt + command, options);
             }
@@ -4299,8 +4306,7 @@
                 }
             }
             function show(result) {
-                // don't echo result if user echo something
-                if (result && position === lines.length - 1) {
+                if (typeof result !== 'undefined') {
                     display_object(result);
                 }
                 after_exec();
@@ -4358,7 +4364,6 @@
                     self.clear();
                     after_exec();
                 } else {
-                    var position = lines.length - 1;
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
                     if (result !== undefined) {
@@ -4446,8 +4451,15 @@
             }
             command_line.name(name);
             if ($.isFunction(interpreter.prompt)) {
-                command_line.prompt(function(command) {
-                    interpreter.prompt.call(self, command, self);
+                command_line.prompt(function(callback) {
+                    var ret = interpreter.prompt.call(self, callback, self);
+                    if (ret && ret.then) {
+                        ret.then(function(string) {
+                            if (typeof string === 'string') {
+                                callback(string);
+                            }
+                        });
+                    }
                 });
             } else {
                 command_line.prompt(interpreter.prompt);
