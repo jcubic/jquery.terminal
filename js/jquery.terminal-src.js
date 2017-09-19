@@ -5186,10 +5186,10 @@
                 function replace(input, replacement) {
                     var text = self.get_command();
                     var pos = self.get_position();
-                    var re = new RegExp(input + '$');
-                    var pre = text.substring(0, pos).replace(re, '');
+                    var re = new RegExp('^' + input, 'i');
+                    var pre = text.substring(0, pos);
                     var post = text.substring(pos);
-                    var to_insert = replacement + (quote || '');
+                    var to_insert = replacement.replace(re, '') + (quote || '');
                     self.set_command(pre + to_insert + post);
                     self.set_position((pre + to_insert).length);
                 }

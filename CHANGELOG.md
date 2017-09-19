@@ -2,6 +2,7 @@
 * allow to return promise from prompt + fix promise in echo
 * add back context menu paste that was removed by mistake
 * make terminal work in Data URI (access to cookies was throwing exception in Chrome)
+* fix case insensitive autocomplete when there is single completion
 
 ## 1.7.2
 * fix blur when click ouside terminal when element you click is on top of terminal
