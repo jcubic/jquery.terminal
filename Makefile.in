@@ -14,7 +14,7 @@ JASMINE=./node_modules/.bin/jasmine-node
 CSSNANO=./node_modules/.bin/cssnano
 SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md import.html terminal.widget.js www/Makefile
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile
 
 bower.json: bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" bower.in > bower.json
@@ -58,8 +58,8 @@ Makefile: Makefile.in
 import.html: import.in
 	$(GIT) branch | grep '* devel' > /dev/null || $(SED) -e "s/{{VER}}/$(VERSION)/g" import.in > import.html
 
-terminal.widget.js: terminal.widget.in
-	$(GIT) branch | grep '* devel' > /dev/null || $(SED) -e "s/{{VER}}/$(VERSION)/g" terminal.widget.in > terminal.widget.js
+js/terminal.widget.js: js/terminal.widget.in
+	$(GIT) branch | grep '* devel' > /dev/null || $(SED) -e "s/{{VER}}/$(VERSION)/g" js/terminal.widget.in > js/terminal.widget.js
 
 terminal.jquery.json: manifest .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json
