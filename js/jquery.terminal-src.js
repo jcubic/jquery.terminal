@@ -1185,7 +1185,7 @@
                 if ($.isFunction(prompt)) {
                     draw_prompt();
                 }
-                $('.clipboard').val('');
+                clip.val('');
                 return false;
             },
             'SHIFT+ENTER': function() {
@@ -1349,10 +1349,12 @@
         function return_true() {
             return true;
         }
-        function paste_event() {
+        function paste_event(e) {
             clip.val('');
             paste_count = 0;
-            clip.trigger('focus', [true]);
+            if (self.isenabled() && !clip.is(':focus')) {
+                clip.trigger('focus', [true]);
+            }
             clip.on('input', function input(e) {
                 paste(e);
                 clip.off('input', input);
@@ -1790,10 +1792,6 @@
                 return;
             }
             if (self.isenabled()) {
-                var clip = self.find('textarea');
-                if (!clip.is(':focus')) {
-                    clip.trigger('focus', [true]);
-                }
                 //wait until Browser insert text to textarea
                 self.oneTime(100, function() {
                     self.insert(clip.val());
@@ -6334,9 +6332,15 @@
                                 var URL = window.URL || window.webkitURL;
                                 var source = URL.createObjectURL(blob);
                                 self.echo('<img src="' + source + '"/>', {raw: true});
+                            }  else if (items[i].type.indexOf('text/plain') !== -1) {
+                                items[i].getAsString(self.insert);
                             }
                         }
+                    } else if (e.clipboardData.getData) {
+                        var text = e.clipboardData.getData('text/plain');
+                        self.insert(text);
                     }
+                    return false;
                 }
             }
         }
