@@ -1370,7 +1370,7 @@
         function return_true() {
             return true;
         }
-        function paste_event(e) {
+        function paste_event() {
             clip.val('');
             paste_count = 0;
             if (self.isenabled() && !clip.is(':focus')) {
@@ -6353,7 +6353,7 @@
                                 var URL = window.URL || window.webkitURL;
                                 var source = URL.createObjectURL(blob);
                                 self.echo('<img src="' + source + '"/>', {raw: true});
-                            }  else if (items[i].type.indexOf('text/plain') !== -1) {
+                            } else if (items[i].type.indexOf('text/plain') !== -1) {
                                 items[i].getAsString(self.insert);
                             }
                         }
