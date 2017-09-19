@@ -14,6 +14,7 @@
  * Contains:
  *
  * Storage plugin Distributed under the MIT License
+ * modified to work from Data URIs that block storage and cookies in Chrome
  * Copyright (c) 2010 Dave Schindler
  *
  * jQuery Timers licenced with the WTFPL
@@ -31,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 19 Sep 2017 10:30:10 +0000
+ * Date: Tue, 19 Sep 2017 10:50:24 +0000
  */
 
 /* TODO:
@@ -285,6 +286,9 @@
     };
 
     /* eslint-disable */
+    // -----------------------------------------------------------------------
+    // :: Storage plugin
+    // -----------------------------------------------------------------------
     var hasLS = function() {
         try {
             var testKey = 'test', storage = window.localStorage;
@@ -295,10 +299,14 @@
             return false;
         }
     };
-
-    // -----------------------------------------------------------------------
-    // :: Storage plugin
-    // -----------------------------------------------------------------------
+    var hasCookies = function() {
+        try {
+            document.cookie.split(';');
+            return true;
+        } catch (e) {
+            return false;
+        }
+    };
     // Private data
     var isLS = hasLS();
     // Private functions
@@ -366,13 +374,26 @@
     * $.Storage.get("name")
     * $.Storage.remove("name")
     */
-    $.extend({
-        Storage: {
-            set: isLS ? wls : wc,
-            get: isLS ? rls : rc,
-            remove: isLS ? dls : dc
-        }
-    });
+    var localStorage;
+    if (!hasCookies() && !isLS) {
+        localStorage = {};
+        $.extend({
+            Storage: {
+                set: wls,
+                get: rls,
+                remove: dls
+            }
+        });
+    } else {
+        localStorage = window.localStorage;
+        $.extend({
+            Storage: {
+                set: isLS ? wls : wc,
+                get: isLS ? rls : rc,
+                remove: isLS ? dls : dc
+            }
+        });
+    }
     // -----------------------------------------------------------------------
     // :: jQuery Timers
     // -----------------------------------------------------------------------
