@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 20 Sep 2017 15:26:51 +0000
+ * Date: Wed, 20 Sep 2017 15:35:07 +0000
  */
 
 /* TODO:
@@ -6476,8 +6476,8 @@
                 });
             } else {
                 // work weird on mobile
-                //$win.on('focus.terminal_' + self.id(), focus_terminal).
-                //    on('blur.terminal_' + self.id(), blur_terminal);
+                $win.on('focus.terminal_' + self.id(), focus_terminal).
+                    on('blur.terminal_' + self.id(), blur_terminal);
                 // detect mouse drag
                 (function() {
                     var count = 0;

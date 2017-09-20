@@ -6476,8 +6476,8 @@
                 });
             } else {
                 // work weird on mobile
-                //$win.on('focus.terminal_' + self.id(), focus_terminal).
-                //    on('blur.terminal_' + self.id(), blur_terminal);
+                $win.on('focus.terminal_' + self.id(), focus_terminal).
+                    on('blur.terminal_' + self.id(), blur_terminal);
                 // detect mouse drag
                 (function() {
                     var count = 0;
