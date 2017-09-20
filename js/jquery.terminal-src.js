@@ -1112,7 +1112,6 @@
             var height = size.height;
             var offset = self.offset();
             var row = Math.floor((e.pageY - offset.top) / height);
-            console.log(focus);
             if ($.isNumeric(focus)) {
                 var node = $(e.target).closest('[role="presentation"]');
                 if (node.is('div')) {
@@ -1377,9 +1376,8 @@
             if (self.isenabled() && !clip.is(':focus')) {
                 clip.trigger('focus', [true]);
             }
-            clip.on('input', function input(e) {
+            clip.one('input', function input(e) {
                 paste(e);
-                clip.off('input', input);
             });
             return true;
         }
@@ -1434,10 +1432,9 @@
         // on mobile you can't delete character if input is empty (event
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
-        function fix_textarea() {
+        function fix_textarea(position_only) {
             // delay worked while experimenting
-            self.oneTime(10, function() {
-                if (clip.val() !== command) {
+                if (clip.val() !== command && !position_only) {
                     clip.val(command);
                 }
                 if (enabled) {
@@ -1449,6 +1446,7 @@
                         }
                     });
                 }
+            self.oneTime(10, function() {
             });
         }
         // terminal animation don't work on andorid because they animate
@@ -1809,6 +1807,7 @@
         // ---------------------------------------------------------------------
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
+        var counter = 0;
         function paste() {
             if (paste_count++ > 0) {
                 return;
@@ -1987,7 +1986,7 @@
                         options.onPositionChange(position);
                     }
                     redraw();
-                    fix_textarea();
+                    fix_textarea(true);
                     return self;
                 } else {
                     return position;
