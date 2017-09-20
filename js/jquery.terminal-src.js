@@ -4543,24 +4543,37 @@
             }
             var type = string_case(string);
             var result = [];
-            loop:
             for (var j = string.length; j < array[0].length; ++j) {
+                var push = false;
+                var candidate = array[0].charAt(j),
+                    candidateLower = candidate.toLowerCase();
+
                 for (var i = 1; i < array.length; ++i) {
-                    var a = array[0].charAt(j);
-                    var b = array[i].charAt(j);
-                    if (a !== b) {
+                    push = true;
+                    var current = array[i].charAt(j),
+                        currentLower = current.toLowerCase();
+
+                    if (candidate !== current) {
                         if (matchCase || type === 'mixed') {
-                            break loop;
-                        } else if (a.toLowerCase() === b.toLowerCase()) {
+                            push = false;
+                            break;
+                        } else if (candidateLower === currentLower) {
                             if (type === 'lower') {
-                                result.push(a.toLowerCase());
+                                candidate = candidate.toLowerCase();
+                            } else if (type === 'upper') {
+                                candidate = candidate.toUpperCase();
                             } else {
-                                result.push(a.toUpperCase());
+                                push = false;
+                                break;
                             }
+                        } else {
+                            push = false;
+                            break;
                         }
-                    } else {
-                        result.push(a);
                     }
+                }
+                if (push) {
+                    result.push(candidate);
                 }
             }
             return string + result.join('');

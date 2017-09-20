@@ -4543,33 +4543,24 @@
             }
             var type = string_case(string);
             var result = [];
+            loop:
                 for (var j = string.length; j < array[0].length; ++j) {
-                    var push = false;
-                    var pushCandidate = array[0].charAt(j);
                     for (var i = 1; i < array.length; ++i) {
-                        var currentChar = array[i].charAt(j);
-                        push = true;
-                        if (pushCandidate !== currentChar) {
+                        var a = array[0].charAt(j);
+                        var b = array[i].charAt(j);
+                        if (a !== b) {
                             if (matchCase || type === 'mixed') {
-                                push = false;
-                                break;
-                            } else if (pushCandidate.toLowerCase() === currentChar.toLowerCase()) {
+                                break loop;
+                            } else if (a.toLowerCase() === b.toLowerCase()) {
                                 if (type === 'lower') {
-                                    pushCandidate = pushCandidate.toLowerCase();
-                                } else if (type === 'upper') {
-                                    pushCandidate = pushCandidate.toUpperCase();
+                                    result.push(a.toLowerCase());
                                 } else {
-                                    push = false;
-                                    break;
+                                    result.push(a.toUpperCase());
                                 }
-                            } else {
-                                push = false;
-                                break;
                             }
+                        } else {
+                            result.push(a);
                         }
-                    }
-                    if (push) {
-                        result.push(pushCandidate);
                     }
                 }
             return string + result.join('');
