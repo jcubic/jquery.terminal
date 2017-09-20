@@ -4575,25 +4575,25 @@
             var type = string_case(string);
             var result = [];
             loop:
-            for (var j = string.length; j < array[0].length; ++j) {
-                for (var i = 1; i < array.length; ++i) {
-                    var a = array[0].charAt(j);
-                    var b = array[i].charAt(j);
-                    if (a !== b) {
-                        if (matchCase || type === 'mixed') {
-                            break loop;
-                        } else if (a.toLowerCase() === b.toLowerCase()) {
-                            if (type === 'lower') {
-                                result.push(a.toLowerCase());
-                            } else {
-                                result.push(a.toUpperCase());
+                for (var j = string.length; j < array[0].length; ++j) {
+                    for (var i = 1; i < array.length; ++i) {
+                        var a = array[0].charAt(j);
+                        var b = array[i].charAt(j);
+                        if (a !== b) {
+                            if (matchCase || type === 'mixed') {
+                                break loop;
+                            } else if (a.toLowerCase() === b.toLowerCase()) {
+                                if (type === 'lower') {
+                                    result.push(a.toLowerCase());
+                                } else {
+                                    result.push(a.toUpperCase());
+                                }
                             }
+                        } else {
+                            result.push(a);
                         }
-                    } else {
-                        result.push(a);
                     }
                 }
-            }
             return string + result.join('');
         }
         // ---------------------------------------------------------------------
