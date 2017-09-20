@@ -340,13 +340,13 @@
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      border-left: none;
+      margin-top: 1px;
   }
   50% {
       border-bottom-color: #000;
       position: relative;
       line-height: 12px;
-      border-left: none;
+      margin-top: 1px;
   }
 }
 @-ms-keyframes terminal-underline {
@@ -354,13 +354,13 @@
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      border-left: none;
+      margin-top: 1px;
   }
   50% {
       border-bottom-color: #000;
       position: relative;
       line-height: 12px;
-      border-left: none;
+      margin-top: 1px;
   }
 }
 @-moz-keyframes terminal-underline {
@@ -368,27 +368,27 @@
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      border-left: none;
+      margin-top: 1px;
   }
   50% {
       border-bottom-color: #000;
       position: relative;
-      line-height: 11px;
-      border-left: none;
+      line-height: 12px;
+      margin-top: 1px;
   }
 }
 @keyframes terminal-underline {
   0%, 100% {
       border-bottom-color: #aaa;
       position: relative;
-      line-height: 11px;
-      border-left: none;
+      line-height: 12px;
+      margin-top: 1px;
   }
   50% {
       border-bottom-color: #000;
       position: relative;
-      line-height: 11px;
-      border-left: none;
+      line-height: 12px;
+      margin-top: 1px;
   }
 }
 @supports (--css: variables) {
@@ -533,13 +533,13 @@
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          border-left: none;
+          margin-top: calc(var(--size) * 1px);
       }
       50% {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          border-left: none;
+          margin-top: calc(var(--size) * 1px);
       }
     }
     @-ms-keyframes terminal-underline {
@@ -547,13 +547,13 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          border-left: none;
+          margin-top: calc(var(--size) * 1px);
       }
       50% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          border-left: none;
+          margin-top: calc(var(--size) * 1px);
       }
     }
     @-moz-keyframes terminal-underline {
@@ -561,13 +561,13 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          border-left: none;
+          margin-top: calc(var(--size) * 1px);
       }
       50% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          border-left: none;
+          margin-top: calc(var(--size) * 1px);
       }
     }
     @keyframes terminal-underline {
@@ -575,13 +575,13 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          border-left: none;
+          margin-top: calc(var(--size) * 1px);
       }
       50% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          border-left: none;
+          margin-top: calc(var(--size) * 1px);
       }
     }
 }

@@ -6,6 +6,7 @@
 * fix completion error when more then one completion (PR by Anton Vasilev) [#337](https://github.com/jcubic/jquery.terminal/pull/337)
 * fix artificialy triggered click (reported by Paul Smirnov) [#338](https://github.com/jcubic/jquery.terminal/issues/338)
 * fix focus issue when you have multiple terminals
+* fix css animations
 
 ## 1.7.2
 * fix blur when click ouside terminal when element you click is on top of terminal
