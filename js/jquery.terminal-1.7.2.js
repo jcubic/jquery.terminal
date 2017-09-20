@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 20 Sep 2017 15:35:07 +0000
+ * Date: Wed, 20 Sep 2017 15:54:57 +0000
  */
 
 /* TODO:
@@ -4610,6 +4610,13 @@
             return string + result.join('');
         }
         // ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------
+        function trigger_terminal_change(next) {
+            terminals.forEach(function(term) {
+                term.settings().onTerminalChange.call(next, next);
+            });
+        }
+        // ---------------------------------------------------------------------
         // :: Keydown event handler
         // ---------------------------------------------------------------------
         function user_key_down(e) {
@@ -5398,7 +5405,7 @@
                     var x = next.offset().top - 50;
                     $('html,body').animate({scrollTop: x}, 500);
                     try {
-                        settings.onTerminalChange.call(next, next);
+                        trigger_terminal_change(next);
                     } catch (e) {
                         display_exception(e, 'onTerminalChange');
                     }
@@ -5434,7 +5441,7 @@
                             });
                             if (!silent) {
                                 try {
-                                    settings.onTerminalChange.call(self, self);
+                                    trigger_terminal_change(self);
                                 } catch (e) {
                                     display_exception(e, 'onTerminalChange');
                                 }
@@ -6333,15 +6340,6 @@
                                                  settings.login);
         }
         terminals.append(self);
-        self.on('focus.terminal', 'textarea', function(e) {
-            // for cases when user press tab to focus terminal
-            // this is also called when user open context menu and then click
-            // right mouse button on terminal
-            if (e.originalEvent !== undefined) {
-                // if terminal is enabled we need silent focus for multiple terminals
-                self.focus(true, !self.enabled());
-            }
-        });
         function focus_terminal() {
             if (old_enabled) {
                 self.focus();
