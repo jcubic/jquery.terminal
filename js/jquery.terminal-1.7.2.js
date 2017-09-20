@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 20 Sep 2017 14:16:50 +0000
+ * Date: Wed, 20 Sep 2017 15:26:51 +0000
  */
 
 /* TODO:
@@ -6445,7 +6445,7 @@
                 if (e) {
                     // e.terget is body when click outside of context menu to close it
                     // even if you click on terminal
-                    var node = document.elementFromPoint(e.pageX, e.pageY);
+                    var node = document.elementFromPoint(e.clientX, e.clientY);
                     if (!$(node).closest('.terminal').length && self.enabled()) {
                         // we only need to disable when click outside of terminal
                         // click on other terminal is handled by focus event
@@ -6476,8 +6476,8 @@
                 });
             } else {
                 // work weird on mobile
-                $win.on('focus.terminal_' + self.id(), focus_terminal).
-                    on('blur.terminal_' + self.id(), blur_terminal);
+                //$win.on('focus.terminal_' + self.id(), focus_terminal).
+                //    on('blur.terminal_' + self.id(), blur_terminal);
                 // detect mouse drag
                 (function() {
                     var count = 0;
