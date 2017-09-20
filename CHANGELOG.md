@@ -3,6 +3,8 @@
 * add back context menu paste that was removed by mistake
 * make terminal work in Data URI (access to cookies was throwing exception in Chrome)
 * fix case insensitive autocomplete when there is single completion
+* fix completion error when more then one completion (PR by Anton Vasilev) [#337](https://github.com/jcubic/jquery.terminal/pull/337)
+* fix artificialy triggered click (reported by Paul Smirnov) [#338](https://github.com/jcubic/jquery.terminal/issues/338)
 
 ## 1.7.2
 * fix blur when click ouside terminal when element you click is on top of terminal

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 19 Sep 2017 21:07:29 +0000
+ * Date: Wed, 20 Sep 2017 14:16:50 +0000
  */
 
 /* TODO:
@@ -4574,26 +4574,39 @@
             }
             var type = string_case(string);
             var result = [];
-            loop:
-                for (var j = string.length; j < array[0].length; ++j) {
-                    for (var i = 1; i < array.length; ++i) {
-                        var a = array[0].charAt(j);
-                        var b = array[i].charAt(j);
-                        if (a !== b) {
-                            if (matchCase || type === 'mixed') {
-                                break loop;
-                            } else if (a.toLowerCase() === b.toLowerCase()) {
-                                if (type === 'lower') {
-                                    result.push(a.toLowerCase());
-                                } else {
-                                    result.push(a.toUpperCase());
-                                }
+            for (var j = string.length; j < array[0].length; ++j) {
+                var push = false;
+                var candidate = array[0].charAt(j),
+                    candidateLower = candidate.toLowerCase();
+
+                for (var i = 1; i < array.length; ++i) {
+                    push = true;
+                    var current = array[i].charAt(j),
+                        currentLower = current.toLowerCase();
+
+                    if (candidate !== current) {
+                        if (matchCase || type === 'mixed') {
+                            push = false;
+                            break;
+                        } else if (candidateLower === currentLower) {
+                            if (type === 'lower') {
+                                candidate = candidate.toLowerCase();
+                            } else if (type === 'upper') {
+                                candidate = candidate.toUpperCase();
+                            } else {
+                                push = false;
+                                break;
                             }
                         } else {
-                            result.push(a);
+                            push = false;
+                            break;
                         }
                     }
                 }
+                if (push) {
+                    result.push(candidate);
+                }
+            }
             return string + result.join('');
         }
         // ---------------------------------------------------------------------
@@ -6429,13 +6442,15 @@
             }
             function disable(e) {
                 e = e.originalEvent;
-                // e.terget is body when click outside of context menu to close it
-                // even if you click on terminal
-                var node = document.elementFromPoint(e.pageX, e.pageY);
-                if (!$(node).closest('.terminal').length && self.enabled()) {
-                    // we only need to disable when click outside of terminal
-                    // click on other terminal is handled by focus event
-                    self.disable();
+                if (e) {
+                    // e.terget is body when click outside of context menu to close it
+                    // even if you click on terminal
+                    var node = document.elementFromPoint(e.pageX, e.pageY);
+                    if (!$(node).closest('.terminal').length && self.enabled()) {
+                        // we only need to disable when click outside of terminal
+                        // click on other terminal is handled by focus event
+                        self.disable();
+                    }
                 }
             }
             self.oneTime(100, function() {

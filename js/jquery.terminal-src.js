@@ -6442,13 +6442,15 @@
             }
             function disable(e) {
                 e = e.originalEvent;
-                // e.terget is body when click outside of context menu to close it
-                // even if you click on terminal
-                var node = document.elementFromPoint(e.pageX, e.pageY);
-                if (!$(node).closest('.terminal').length && self.enabled()) {
-                    // we only need to disable when click outside of terminal
-                    // click on other terminal is handled by focus event
-                    self.disable();
+                if (e) {
+                    // e.terget is body when click outside of context menu to close it
+                    // even if you click on terminal
+                    var node = document.elementFromPoint(e.pageX, e.pageY);
+                    if (!$(node).closest('.terminal').length && self.enabled()) {
+                        // we only need to disable when click outside of terminal
+                        // click on other terminal is handled by focus event
+                        self.disable();
+                    }
                 }
             }
             self.oneTime(100, function() {
