@@ -6497,7 +6497,9 @@
                         if (get_selected_text() === '') {
                             if (++count === 1) {
                                 if (!frozen) {
-                                    command_line.enable();
+                                    self.oneTime(10, function() {
+                                        command_line.enable();
+                                    });
                                     if (!enabled) {
                                         self.focus();
                                         count = 0;

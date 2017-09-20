@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 20 Sep 2017 15:54:57 +0000
+ * Date: Wed, 20 Sep 2017 16:48:02 +0000
  */
 
 /* TODO:
@@ -6497,7 +6497,9 @@
                         if (get_selected_text() === '') {
                             if (++count === 1) {
                                 if (!frozen) {
-                                    command_line.enable();
+                                    self.oneTime(10, function() {
+                                        command_line.enable();
+                                    });
                                     if (!enabled) {
                                         self.focus();
                                         count = 0;
