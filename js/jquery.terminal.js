@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 20 Sep 2017 17:13:46 +0000
+ * Date: Wed, 20 Sep 2017 18:27:53 +0000
  */
 
 /* TODO:
@@ -1434,6 +1434,7 @@
         // data but we put real command and position
         function fix_textarea(position_only) {
             // delay worked while experimenting
+            self.oneTime(10, function() {
                 if (clip.val() !== command && !position_only) {
                     clip.val(command);
                 }
@@ -1446,7 +1447,6 @@
                         }
                     });
                 }
-            self.oneTime(10, function() {
             });
         }
         // terminal animation don't work on andorid because they animate
@@ -1807,7 +1807,6 @@
         // ---------------------------------------------------------------------
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
-        var counter = 0;
         function paste() {
             if (paste_count++ > 0) {
                 return;
