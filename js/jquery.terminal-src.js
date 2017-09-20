@@ -1112,6 +1112,7 @@
             var height = size.height;
             var offset = self.offset();
             var row = Math.floor((e.pageY - offset.top) / height);
+            console.log(focus);
             if ($.isNumeric(focus)) {
                 var node = $(e.target).closest('[role="presentation"]');
                 if (node.is('div')) {
@@ -6497,9 +6498,6 @@
                         if (get_selected_text() === '') {
                             if (++count === 1) {
                                 if (!frozen) {
-                                    self.oneTime(10, function() {
-                                        command_line.enable();
-                                    });
                                     if (!enabled) {
                                         self.focus();
                                         count = 0;
