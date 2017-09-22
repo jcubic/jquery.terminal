@@ -4175,7 +4175,7 @@
             }
             try {
                 output_buffer = [];
-                $.each(lines, function(i, line) {
+                $.each(lines_to_show, function(i, line) {
                     process_line.apply(null, line); // line is an array
                 });
                 command_line.before(detached_output); // reinsert output

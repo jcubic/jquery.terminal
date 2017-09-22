@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 20 Sep 2017 18:27:53 +0000
+ * Date: Fri, 22 Sep 2017 13:17:25 +0000
  */
 
 /* TODO:
@@ -4175,7 +4175,7 @@
             }
             try {
                 output_buffer = [];
-                $.each(lines, function(i, line) {
+                $.each(lines_to_show, function(i, line) {
                     process_line.apply(null, line); // line is an array
                 });
                 command_line.before(detached_output); // reinsert output

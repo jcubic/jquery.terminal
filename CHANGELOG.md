@@ -9,6 +9,7 @@
 * fix css animations
 * fix move cursor on click
 * fix quick click to focus + CTRL+V (reported by @artursOs [#336](https://github.com/jcubic/jquery.terminal/issues/336))
+* fix outputLimit
 
 ## 1.7.2
 * fix blur when click ouside terminal when element you click is on top of terminal
