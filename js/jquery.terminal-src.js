@@ -6488,29 +6488,33 @@
                         } else if ($target.closest('.prompt').length) {
                             self.set_position(0);
                         }
+                        reset();
+                    }
+                    function reset() {
                         count = 0;
+                        $target = null;
                     }
                     self.mousedown(function(e) {
                         $target = $(e.target);
                     }).mouseup(function() {
-                        if (get_selected_text() === '') {
+                        if (get_selected_text() === '' && $target) {
                             if (++count === 1) {
                                 if (!frozen) {
                                     if (!enabled) {
                                         self.focus();
-                                        count = 0;
                                     } else {
                                         var timeout = settings.clickTimeout;
                                         self.oneTime(timeout, name, position);
+                                        return;
                                     }
                                 }
                             } else {
                                 self.stopTime(name);
-                                count = 0;
                             }
                         }
+                        reset();
                     }).dblclick(function() {
-                        count = 0;
+                        reset();
                         self.stopTime(name);
                     });
                 })();
