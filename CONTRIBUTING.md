@@ -31,15 +31,6 @@ Non tech contrubution are also wellcome, if you find a bug in documentation on t
 You should run test to make sure you don't break anything, to run tests from browser you need to run
 
 ```
-bower install --dev
-```
-
-and open SpecRunner.html file in the browser
-
-
-To run tests from command line you need to run this commands:
-
-```
 npm install
 make test
 ```
