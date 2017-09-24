@@ -1,4 +1,4 @@
-## Next
+## 1.8.0
 * allow to return promise from prompt + fix promise in echo
 * add back context menu paste that was removed by mistake
 * make terminal work in Data URI (access to cookies was throwing exception in Chrome)
@@ -10,7 +10,7 @@
 * fix move cursor on click
 * fix quick click to focus + CTRL+V (reported by @artursOs [#336](https://github.com/jcubic/jquery.terminal/issues/336))
 * fix outputLimit
-* fix exception that sometimes happend on mouseup
+* fix exception that sometimes happen on mouseup
 
 ## 1.7.2
 * fix blur when click ouside terminal when element you click is on top of terminal
