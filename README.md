@@ -4,15 +4,15 @@
   __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
-           \/              /____/                              version 1.7.2
+           \/              /____/                              version DEV
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-1.7.2-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-1.7.2-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master)](https://travis-ci.org/jcubic/jquery.terminal)
+[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Known Vulnerabilities](https://snyk.io/test/npm/jquery.terminal/badge.svg)](https://snyk.io/test/npm/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&8bd4e987595cd48fab851a6d1ba8d6d3)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&8bd4e987595cd48fab851a6d1ba8d6d3)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 
@@ -75,11 +75,11 @@ npm install --save jquery.terminal
 Include jQuery library, you can use cdn from http://jquery.com/download/
 
 
-Then include js/jquery.terminal-1.7.2.min.js and css/jquery.terminal-1.7.2.css
+Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.css
 
 ```html
-<script src="js/jquery.terminal-1.7.2.min.js"></script>
-<link href="css/jquery.terminal-1.7.2.css" rel="stylesheet"/>
+<script src="js/jquery.terminal-DEV.min.js"></script>
+<link href="css/jquery.terminal-DEV.css" rel="stylesheet"/>
 ```
 
 **NOTE:** From version 1.0.0 if you want to support old browsers or Safari then you'll need to use [key event property polyfill](https://github.com/cvan/keyboardevent-key-polyfill/)
@@ -87,15 +87,15 @@ Then include js/jquery.terminal-1.7.2.min.js and css/jquery.terminal-1.7.2.css
 You can also grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.7.2/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.7.2/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@1.7.2/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@1.7.2/css/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/css/jquery.terminal.min.css">
 ```
 
 And you're good to go.
@@ -162,13 +162,14 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 
 ### Contributors
 
-<!-- CONTRIBUTORS-START -->
-| [<img src="https://avatars2.githubusercontent.com/u/280241?v=3" width="100px;"/><br /><sub>Jakub Jankiewicz</sub>](http://jcubic.pl/jakub-jankiewicz)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=jcubic) | [<img src="https://avatars2.githubusercontent.com/u/1208327?v=3" width="100px;"/><br /><sub>Zuo Qiyang</sub>](http://zuoqy.com)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=kid1412z) | [<img src="https://avatars2.githubusercontent.com/u/6674275?v=3" width="100px;"/><br /><sub>Sébastien Warin</sub>](http://sebastien.warin.fr)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=sebastienwarin) | [<img src="https://avatars1.githubusercontent.com/u/8646106?v=3" width="100px;"/><br /><sub>Christopher John Ryan</sub>](https://github.com/ChrisJohnRyan)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=ChrisJohnRyan) | [<img src="https://avatars0.githubusercontent.com/u/715580?v=3" width="100px;"/><br /><sub>Johan</sub>](https://github.com/johanjordaan)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=johanjordaan) | [<img src="https://avatars3.githubusercontent.com/u/273194?v=3" width="100px;"/><br /><sub>Florian Schäfer</sub>](https://github.com/fschaefer)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=fschaefer) | [<img src="https://avatars3.githubusercontent.com/u/1751242?v=3" width="100px;"/><br /><sub>Ishan Ratnapala</sub>](https://github.com/IshanRatnapala)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=IshanRatnapala) |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| [<img src="https://avatars1.githubusercontent.com/u/375027?v=3" width="100px;"/><br /><sub>Tomasz Ducin</sub>](http://ducin.it)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=ducin) | [<img src="https://avatars0.githubusercontent.com/u/336727?v=3" width="100px;"/><br /><sub>finlob</sub>](https://github.com/finlob)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=finlob) | [<img src="https://avatars1.githubusercontent.com/u/9531780?v=3" width="100px;"/><br /><sub>Hasan</sub>](https://github.com/JuanPotato)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=JuanPotato) | [<img src="https://avatars2.githubusercontent.com/u/137852?v=3" width="100px;"/><br /><sub>Hraban Luyat</sub>](https://luyat.com)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=hraban) | [<img src="https://avatars3.githubusercontent.com/u/74179?v=3" width="100px;"/><br /><sub>Martin v. Löwis</sub>](https://github.com/loewis)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=loewis) | [<img src="https://avatars1.githubusercontent.com/u/27475?v=3" width="100px;"/><br /><sub>Mateusz Paprocki</sub>](https://github.com/mattpap)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=mattpap) | [<img src="https://avatars1.githubusercontent.com/u/7055377?v=3" width="100px;"/><br /><sub>exit1</sub>](https://github.com/exit1)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=exit1) |
-| [<img src="https://avatars0.githubusercontent.com/u/1263192?v=3" width="100px;"/><br /><sub>Robert Wikman</sub>](https://github.com/rbw0)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=rbw0) | [<img src="https://avatars2.githubusercontent.com/u/139603?v=3" width="100px;"/><br /><sub>Steve Phillips</sub>](https://tryingtobeawesome.com/)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=elimisteve) | [<img src="https://avatars3.githubusercontent.com/u/1833930?v=3" width="100px;"/><br /><sub>Yutong Luo</sub>](https://yutongluo.com)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=yutongluo) | [<img src="https://avatars0.githubusercontent.com/u/1573141?v=3" width="100px;"/><br /><sub>coderaiser</sub>](http://coderaiser.github.io)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=coderaiser) | [<img src="https://avatars1.githubusercontent.com/u/282724?v=3" width="100px;"/><br /><sub>mrkaiser</sub>](https://github.com/mrkaiser)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=mrkaiser) | [<img src="https://avatars1.githubusercontent.com/u/179534?v=3" width="100px;"/><br /><sub>stereobooster</sub>](https://github.com/stereobooster)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=stereobooster) | [<img src="https://avatars2.githubusercontent.com/u/588573?v=3" width="100px;"/><br /><sub>Juraj Vitko</sub>](https://github.com/youurayy)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=youurayy) |
-<!-- CONTRIBUTORS-END -->
+If you want to contrubite read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here are project contributors:
 
+<!-- CONTRIBUTORS-START -->
+| [<img src="https://avatars1.githubusercontent.com/u/280241?v=4" width="100px;"/><br /><sub>Jakub Jankiewicz</sub>](http://jcubic.pl/me)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=jcubic) | [<img src="https://avatars1.githubusercontent.com/u/1208327?v=4" width="100px;"/><br /><sub>Zuo Qiyang</sub>](http://zuoqy.com)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=kid1412z) | [<img src="https://avatars1.githubusercontent.com/u/6674275?v=4" width="100px;"/><br /><sub>Sébastien Warin</sub>](http://sebastien.warin.fr)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=sebastienwarin) | [<img src="https://avatars2.githubusercontent.com/u/8646106?v=4" width="100px;"/><br /><sub>Christopher John Ryan</sub>](https://github.com/ChrisJohnRyan)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=ChrisJohnRyan) | [<img src="https://avatars3.githubusercontent.com/u/715580?v=4" width="100px;"/><br /><sub>Johan</sub>](https://github.com/johanjordaan)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=johanjordaan) | [<img src="https://avatars0.githubusercontent.com/u/273194?v=4" width="100px;"/><br /><sub>Florian Schäfer</sub>](https://github.com/fschaefer)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=fschaefer) | [<img src="https://avatars0.githubusercontent.com/u/1751242?v=4" width="100px;"/><br /><sub>Ishan Ratnapala</sub>](https://github.com/IshanRatnapala)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=IshanRatnapala) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| [<img src="https://avatars2.githubusercontent.com/u/375027?v=4" width="100px;"/><br /><sub>Tomasz Ducin</sub>](http://ducin.it)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=ducin) | [<img src="https://avatars3.githubusercontent.com/u/336727?v=4" width="100px;"/><br /><sub>finlob</sub>](https://github.com/finlob)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=finlob) | [<img src="https://avatars2.githubusercontent.com/u/9531780?v=4" width="100px;"/><br /><sub>Hasan</sub>](https://github.com/JuanPotato)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=JuanPotato) | [<img src="https://avatars1.githubusercontent.com/u/137852?v=4" width="100px;"/><br /><sub>Hraban Luyat</sub>](https://luyat.com)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=hraban) | [<img src="https://avatars0.githubusercontent.com/u/74179?v=4" width="100px;"/><br /><sub>Martin v. Löwis</sub>](https://github.com/loewis)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=loewis) | [<img src="https://avatars2.githubusercontent.com/u/27475?v=4" width="100px;"/><br /><sub>Mateusz Paprocki</sub>](https://github.com/mattpap)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=mattpap) | [<img src="https://avatars2.githubusercontent.com/u/7055377?v=4" width="100px;"/><br /><sub>exit1</sub>](https://github.com/exit1)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=exit1) |
+| [<img src="https://avatars3.githubusercontent.com/u/1263192?v=4" width="100px;"/><br /><sub>Robert Wikman</sub>](https://github.com/rbw0)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=rbw0) | [<img src="https://avatars1.githubusercontent.com/u/139603?v=4" width="100px;"/><br /><sub>Steve Phillips</sub>](https://tryingtobeawesome.com/)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=elimisteve) | [<img src="https://avatars0.githubusercontent.com/u/1833930?v=4" width="100px;"/><br /><sub>Yutong Luo</sub>](https://yutongluo.com)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=yutongluo) | [<img src="https://avatars3.githubusercontent.com/u/1573141?v=4" width="100px;"/><br /><sub>coderaiser</sub>](http://coderaiser.github.io)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=coderaiser) | [<img src="https://avatars2.githubusercontent.com/u/282724?v=4" width="100px;"/><br /><sub>mrkaiser</sub>](https://github.com/mrkaiser)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=mrkaiser) | [<img src="https://avatars2.githubusercontent.com/u/179534?v=4" width="100px;"/><br /><sub>stereobooster</sub>](https://github.com/stereobooster)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=stereobooster) | [<img src="https://avatars1.githubusercontent.com/u/588573?v=4" width="100px;"/><br /><sub>Juraj Vitko</sub>](https://github.com/youurayy)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=youurayy) |
+<!-- CONTRIBUTORS-END -->
 
 ### License
 

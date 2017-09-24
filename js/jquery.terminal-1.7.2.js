@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.7.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -14,6 +14,7 @@
  * Contains:
  *
  * Storage plugin Distributed under the MIT License
+ * modified to work from Data URIs that block storage and cookies in Chrome
  * Copyright (c) 2010 Dave Schindler
  *
  * jQuery Timers licenced with the WTFPL
@@ -31,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 17 Sep 2017 19:54:42 +0000
+ * Date: Fri, 22 Sep 2017 18:21:56 +0000
  */
 
 /* TODO:
@@ -285,6 +286,9 @@
     };
 
     /* eslint-disable */
+    // -----------------------------------------------------------------------
+    // :: Storage plugin
+    // -----------------------------------------------------------------------
     var hasLS = function() {
         try {
             var testKey = 'test', storage = window.localStorage;
@@ -295,10 +299,14 @@
             return false;
         }
     };
-
-    // -----------------------------------------------------------------------
-    // :: Storage plugin
-    // -----------------------------------------------------------------------
+    var hasCookies = function() {
+        try {
+            document.cookie.split(';');
+            return true;
+        } catch (e) {
+            return false;
+        }
+    };
     // Private data
     var isLS = hasLS();
     // Private functions
@@ -366,13 +374,26 @@
     * $.Storage.get("name")
     * $.Storage.remove("name")
     */
-    $.extend({
-        Storage: {
-            set: isLS ? wls : wc,
-            get: isLS ? rls : rc,
-            remove: isLS ? dls : dc
-        }
-    });
+    var localStorage;
+    if (!hasCookies() && !isLS) {
+        localStorage = {};
+        $.extend({
+            Storage: {
+                set: wls,
+                get: rls,
+                remove: dls
+            }
+        });
+    } else {
+        localStorage = window.localStorage;
+        $.extend({
+            Storage: {
+                set: isLS ? wls : wc,
+                get: isLS ? rls : rc,
+                remove: isLS ? dls : dc
+            }
+        });
+    }
     // -----------------------------------------------------------------------
     // :: jQuery Timers
     // -----------------------------------------------------------------------
@@ -1185,7 +1206,7 @@
                 if ($.isFunction(prompt)) {
                     draw_prompt();
                 }
-                $('.clipboard').val('');
+                clip.val('');
                 return false;
             },
             'SHIFT+ENTER': function() {
@@ -1352,10 +1373,11 @@
         function paste_event() {
             clip.val('');
             paste_count = 0;
-            clip.trigger('focus', [true]);
-            clip.on('input', function input(e) {
+            if (self.isenabled() && !clip.is(':focus')) {
+                clip.trigger('focus', [true]);
+            }
+            clip.one('input', function input(e) {
                 paste(e);
-                clip.off('input', input);
             });
             return true;
         }
@@ -1410,10 +1432,10 @@
         // on mobile you can't delete character if input is empty (event
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
-        function fix_textarea() {
+        function fix_textarea(position_only) {
             // delay worked while experimenting
             self.oneTime(10, function() {
-                if (clip.val() !== command) {
+                if (clip.val() !== command && !position_only) {
                     clip.val(command);
                 }
                 if (enabled) {
@@ -1790,10 +1812,6 @@
                 return;
             }
             if (self.isenabled()) {
-                var clip = self.find('textarea');
-                if (!clip.is(':focus')) {
-                    clip.trigger('focus', [true]);
-                }
                 //wait until Browser insert text to textarea
                 self.oneTime(100, function() {
                     self.insert(clip.val());
@@ -1967,7 +1985,7 @@
                         options.onPositionChange(position);
                     }
                     redraw();
-                    fix_textarea();
+                    fix_textarea(true);
                     return self;
                 } else {
                     return position;
@@ -2436,7 +2454,7 @@
         }
     }
     $.terminal = {
-        version: '1.7.2',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4157,7 +4175,7 @@
             }
             try {
                 output_buffer = [];
-                $.each(lines, function(i, line) {
+                $.each(lines_to_show, function(i, line) {
                     process_line.apply(null, line); // line is an array
                 });
                 command_line.before(detached_output); // reinsert output
@@ -4217,9 +4235,16 @@
                 }
             };
             if ($.isFunction(prompt)) {
-                prompt(function(string) {
+                var ret = prompt(function(string) {
                     self.echo(string + command, options);
                 });
+                if (ret && ret.then) {
+                    ret.then(function(string) {
+                        if (typeof string === 'string') {
+                            self.echo(string + command, options);
+                        }
+                    });
+                }
             } else {
                 self.echo(prompt + command, options);
             }
@@ -4299,8 +4324,7 @@
                 }
             }
             function show(result) {
-                // don't echo result if user echo something
-                if (result && position === lines.length - 1) {
+                if (typeof result !== 'undefined') {
                     display_object(result);
                 }
                 after_exec();
@@ -4358,7 +4382,6 @@
                     self.clear();
                     after_exec();
                 } else {
-                    var position = lines.length - 1;
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
                     if (result !== undefined) {
@@ -4446,8 +4469,15 @@
             }
             command_line.name(name);
             if ($.isFunction(interpreter.prompt)) {
-                command_line.prompt(function(command) {
-                    interpreter.prompt.call(self, command, self);
+                command_line.prompt(function(callback) {
+                    var ret = interpreter.prompt.call(self, callback, self);
+                    if (ret && ret.then) {
+                        ret.then(function(string) {
+                            if (typeof string === 'string') {
+                                callback(string);
+                            }
+                        });
+                    }
                 });
             } else {
                 command_line.prompt(interpreter.prompt);
@@ -4543,27 +4573,47 @@
             }
             var type = string_case(string);
             var result = [];
-            loop:
             for (var j = string.length; j < array[0].length; ++j) {
+                var push = false;
+                var candidate = array[0].charAt(j),
+                    candidateLower = candidate.toLowerCase();
+
                 for (var i = 1; i < array.length; ++i) {
-                    var a = array[0].charAt(j);
-                    var b = array[i].charAt(j);
-                    if (a !== b) {
+                    push = true;
+                    var current = array[i].charAt(j),
+                        currentLower = current.toLowerCase();
+
+                    if (candidate !== current) {
                         if (matchCase || type === 'mixed') {
-                            break loop;
-                        } else if (a.toLowerCase() === b.toLowerCase()) {
+                            push = false;
+                            break;
+                        } else if (candidateLower === currentLower) {
                             if (type === 'lower') {
-                                result.push(a.toLowerCase());
+                                candidate = candidate.toLowerCase();
+                            } else if (type === 'upper') {
+                                candidate = candidate.toUpperCase();
                             } else {
-                                result.push(a.toUpperCase());
+                                push = false;
+                                break;
                             }
+                        } else {
+                            push = false;
+                            break;
                         }
-                    } else {
-                        result.push(a);
                     }
+                }
+                if (push) {
+                    result.push(candidate);
                 }
             }
             return string + result.join('');
+        }
+        // ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------
+        function trigger_terminal_change(next) {
+            terminals.forEach(function(term) {
+                term.settings().onTerminalChange.call(next, next);
+            });
         }
         // ---------------------------------------------------------------------
         // :: Keydown event handler
@@ -5155,10 +5205,10 @@
                 function replace(input, replacement) {
                     var text = self.get_command();
                     var pos = self.get_position();
-                    var re = new RegExp(input + '$');
-                    var pre = text.substring(0, pos).replace(re, '');
+                    var re = new RegExp('^' + input, 'i');
+                    var pre = text.substring(0, pos);
                     var post = text.substring(pos);
-                    var to_insert = replacement + (quote || '');
+                    var to_insert = replacement.replace(re, '') + (quote || '');
                     self.set_command(pre + to_insert + post);
                     self.set_position((pre + to_insert).length);
                 }
@@ -5354,7 +5404,7 @@
                     var x = next.offset().top - 50;
                     $('html,body').animate({scrollTop: x}, 500);
                     try {
-                        settings.onTerminalChange.call(next, next);
+                        trigger_terminal_change(next);
                     } catch (e) {
                         display_exception(e, 'onTerminalChange');
                     }
@@ -5390,7 +5440,7 @@
                             });
                             if (!silent) {
                                 try {
-                                    settings.onTerminalChange.call(self, self);
+                                    trigger_terminal_change(self);
                                 } catch (e) {
                                     display_exception(e, 'onTerminalChange');
                                 }
@@ -6289,15 +6339,6 @@
                                                  settings.login);
         }
         terminals.append(self);
-        self.on('focus.terminal', 'textarea', function(e) {
-            // for cases when user press tab to focus terminal
-            // this is also called when user open context menu and then click
-            // right mouse button on terminal
-            if (e.originalEvent !== undefined) {
-                // if terminal is enabled we need silent focus for multiple terminals
-                self.focus(true, !self.enabled());
-            }
-        });
         function focus_terminal() {
             if (old_enabled) {
                 self.focus();
@@ -6322,9 +6363,15 @@
                                 var URL = window.URL || window.webkitURL;
                                 var source = URL.createObjectURL(blob);
                                 self.echo('<img src="' + source + '"/>', {raw: true});
+                            } else if (items[i].type.indexOf('text/plain') !== -1) {
+                                items[i].getAsString(self.insert);
                             }
                         }
+                    } else if (e.clipboardData.getData) {
+                        var text = e.clipboardData.getData('text/plain');
+                        self.insert(text);
                     }
+                    return false;
                 }
             }
         }
@@ -6392,13 +6439,15 @@
             }
             function disable(e) {
                 e = e.originalEvent;
-                // e.terget is body when click outside of context menu to close it
-                // even if you click on terminal
-                var node = document.elementFromPoint(e.pageX, e.pageY);
-                if (!$(node).closest('.terminal').length && self.enabled()) {
-                    // we only need to disable when click outside of terminal
-                    // click on other terminal is handled by focus event
-                    self.disable();
+                if (e) {
+                    // e.terget is body when click outside of context menu to close it
+                    // even if you click on terminal
+                    var node = document.elementFromPoint(e.clientX, e.clientY);
+                    if (!$(node).closest('.terminal').length && self.enabled()) {
+                        // we only need to disable when click outside of terminal
+                        // click on other terminal is handled by focus event
+                        self.disable();
+                    }
                 }
             }
             self.oneTime(100, function() {
@@ -6439,30 +6488,33 @@
                         } else if ($target.closest('.prompt').length) {
                             self.set_position(0);
                         }
+                        reset();
+                    }
+                    function reset() {
                         count = 0;
+                        $target = null;
                     }
                     self.mousedown(function(e) {
                         $target = $(e.target);
                     }).mouseup(function() {
-                        if (get_selected_text() === '') {
+                        if (get_selected_text() === '' && $target) {
                             if (++count === 1) {
                                 if (!frozen) {
-                                    command_line.enable();
                                     if (!enabled) {
                                         self.focus();
-                                        count = 0;
                                     } else {
                                         var timeout = settings.clickTimeout;
                                         self.oneTime(timeout, name, position);
+                                        return;
                                     }
                                 }
                             } else {
                                 self.stopTime(name);
-                                count = 0;
                             }
                         }
+                        reset();
                     }).dblclick(function() {
-                        count = 0;
+                        reset();
                         self.stopTime(name);
                     });
                 })();
