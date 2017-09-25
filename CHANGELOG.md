@@ -1,5 +1,9 @@
 ## Next
+### Features
 * new api util $.terminal.length
+### Bugs
+* add missing --size default for underline animation
+
 
 ## 1.8.0
 * allow to return promise from prompt + fix promise in echo
