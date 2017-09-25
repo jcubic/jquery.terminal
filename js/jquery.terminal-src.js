@@ -4077,26 +4077,7 @@
         var NEW_LINE = 1;
         function buffer_line(string, options) {
             // urls should always have formatting to keep url if split
-            if (settings.convertLinks && !options.raw) {
-                string = string.replace(email_re, '[[!;;]$1]').
-                    replace(url_nf_re, '[[!;;]$1]');
-            }
             var i, len;
-            if (!options.raw) {
-                if (options.formatters) {
-                    try {
-                        string = $.terminal.apply_formatters(string);
-                    } catch (e) {
-                        // display_exception(e, 'FORMATTING');
-                        if ($.isFunction(settings.exceptionHandler)) {
-                            settings.exceptionHandler.call(self, e, 'FORMATTERS');
-                        } else {
-                            alert(e.message + '\n' + (e.stack ? e.stack : e));
-                        }
-                    }
-                }
-                string = $.terminal.encode(string);
-            }
             output_buffer.push(NEW_LINE);
             if (!options.raw && (strlen(string) > num_chars ||
                                  string.match(/\n/)) &&
@@ -4148,7 +4129,7 @@
                     } else if (arg instanceof Array) {
                         string = $.terminal.columns(arg, self.cols(), settings.tabs);
                     } else {
-                        string = String(string);
+                        string = String(arg);
                     }
                 } else {
                     string = arg;
@@ -4173,6 +4154,20 @@
                         }
                     }).join('');
                     if (string !== '') {
+                        if (settings.convertLinks && !options.raw) {
+                            string = string.replace(email_re, '[[!;;]$1]').
+                                replace(url_nf_re, '[[!;;]$1]');
+                        }
+                        if (!options.raw) {
+                            if (options.formatters) {
+                                try {
+                                    string = $.terminal.apply_formatters(string);
+                                } catch (e) {
+                                    display_exception(e, 'FORMATTING');
+                                }
+                            }
+                            string = $.terminal.encode(string);
+                        }
                         // string can be empty after removing extended commands
                         buffer_line(string, line_settings);
                     }
