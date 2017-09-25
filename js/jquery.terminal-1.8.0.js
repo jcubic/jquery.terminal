@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 25 Sep 2017 08:29:36 +0000
+ * Date: Mon, 25 Sep 2017 19:22:27 +0000
  */
 
 /* TODO:
@@ -2962,6 +2962,40 @@
             return $('<span>' + $.terminal.strip(string) + '</span>').text().length;
         },
         // ---------------------------------------------------------------------
+        // :: return string where array items are in columns padded spaces
+        // ---------------------------------------------------------------------
+        columns: function(array, cols, space) {
+            var lengths = array.map(function(string) {
+                return string.length;
+            });
+            var length = Math.max.apply(null, lengths) + space;
+            if (typeof space === 'undefined') {
+                space = 4;
+            }
+            var columns = Math.floor(cols / length);
+            var lines = [];
+            var line;
+            function push(i) {
+                var pad = new Array(length - array[i].length).join(' ');
+                line.push(array[i] + ((i % columns === 0) ? '' : pad));
+            }
+            if (columns < 2) {
+                return array.join('\n');
+            }
+            for (var i = 0; i < array.length; ++i) {
+                if (i % columns === 0) {
+                    if (line) {
+                        push(i);
+                        lines.push(line.join(''));
+                    }
+                    line = [];
+                } else {
+                    push(i);
+                }
+            }
+            return lines.join('\n');
+        },
+        // ---------------------------------------------------------------------
         // :: Remove formatting from text
         // ---------------------------------------------------------------------
         strip: function strip(str) {
@@ -3383,6 +3417,7 @@
         completionEscape: true,
         convertLinks: true,
         extra: {},
+        tabs: 4,
         historySize: 60,
         historyState: false,
         importHistory: false,
@@ -4102,8 +4137,22 @@
                     raw: false,
                     finalize: $.noop
                 }, options || {});
-                var string = $.type(line) === 'function' ? line() : line;
-                string = $.type(string) === 'string' ? string : String(string);
+                var string;
+                var arg = $.type(line) === 'function' ? line() : line;
+                if ($.type(arg) !== 'string') {
+                    if ($.isFunction(settings.parseObject)) {
+                        var ret = settings.parseObject(arg);
+                        if ($.type(ret) === 'string') {
+                            string = ret;
+                        }
+                    } else if (arg instanceof Array) {
+                        string = $.terminal.columns(arg, self.cols(), settings.tabs);
+                    } else {
+                        string = String(string);
+                    }
+                } else {
+                    string = arg;
+                }
                 if (string !== '') {
                     string = $.map(string.split(format_exec_re), function(string) {
                         if (string && string.match(format_exec_re) &&

@@ -1,6 +1,8 @@
 ## Next
 ### Features
-* new api util $.terminal.length
+* new api utils $.terminal.length and $.terminal.columns
+* echo array (resizable in columns that fit the width, using settings.tabs as pad right)
+
 ### Bugs
 * add missing --size default for underline animation
 
