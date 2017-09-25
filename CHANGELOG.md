@@ -7,6 +7,7 @@
 
 ### Bugs
 * add missing --size default for underline animation
+* fix trim of spaces in front of lines when keep words is true
 
 
 ## 1.8.0

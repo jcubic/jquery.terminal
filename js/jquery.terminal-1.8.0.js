@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 25 Sep 2017 20:35:45 +0000
+ * Date: Mon, 25 Sep 2017 20:59:45 +0000
  */
 
 /* TODO:
@@ -2728,7 +2728,7 @@
                             output = line.substring(first_index, data.index + 1);
                         }
                         if (keep_words) {
-                            output = output.replace(/(&nbsp;|\s)+$/g, '');
+                            output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
                         }
                         first_index = (new_index || data.index) + 1;
                         // prev_format added in fix_close function

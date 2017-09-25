@@ -2728,7 +2728,7 @@
                             output = line.substring(first_index, data.index + 1);
                         }
                         if (keep_words) {
-                            output = output.replace(/(&nbsp;|\s)+$/g, '');
+                            output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
                         }
                         first_index = (new_index || data.index) + 1;
                         // prev_format added in fix_close function
