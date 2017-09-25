@@ -2956,6 +2956,12 @@
             return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
         },
         // ---------------------------------------------------------------------
+        // :: return number of characters without formatting
+        // ---------------------------------------------------------------------
+        length: function(string) {
+            return $('<span>' + $.terminal.strip(string) + '</span>').text().length;
+        },
+        // ---------------------------------------------------------------------
         // :: Remove formatting from text
         // ---------------------------------------------------------------------
         strip: function strip(str) {

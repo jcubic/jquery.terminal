@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.8.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 24 Sep 2017 09:14:20 +0000
+ * Date: Mon, 25 Sep 2017 08:29:36 +0000
  */
 
 /* TODO:
@@ -2454,7 +2454,7 @@
         }
     }
     $.terminal = {
-        version: '1.8.0',
+        version: 'DEV',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -2954,6 +2954,12 @@
         // ---------------------------------------------------------------------
         escape_brackets: function escape_brackets(string) {
             return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
+        },
+        // ---------------------------------------------------------------------
+        // :: return number of characters without formatting
+        // ---------------------------------------------------------------------
+        length: function(string) {
+            return $('<span>' + $.terminal.strip(string) + '</span>').text().length;
         },
         // ---------------------------------------------------------------------
         // :: Remove formatting from text

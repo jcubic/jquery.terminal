@@ -1,3 +1,6 @@
+## Next
+* new api util $.terminal.length
+
 ## 1.8.0
 * allow to return promise from prompt + fix promise in echo
 * add back context menu paste that was removed by mistake
