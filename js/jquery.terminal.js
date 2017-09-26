@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 25 Sep 2017 20:59:45 +0000
+ * Date: Tue, 26 Sep 2017 08:41:13 +0000
  */
 
 /* TODO:
@@ -1781,14 +1781,9 @@
                     $.terminal.encode(prompt),
                     num_chars
                 );
-                var last_line = lines.slice(-1).map($.terminal.format)[0];
+                var last_line = $.terminal.format(lines[lines.length - 1]);
                 var formatted = lines.slice(0, -1).map(function(line) {
-                    line = $.terminal.format(line);
-                    if (line.match(/class="/)) {
-                        return line.replace(/class="/, 'class="line ');
-                    } else {
-                        return line.replace(/^<span/, '<span class="line"');
-                    }
+                    return '<span class="line">' + $.terminal.format(line) + '</span>';
                 }).concat([last_line]).join('\n');
                 prompt_node.html(formatted);
                 prompt_len = strlen($('<span>' + last_line + '</span>').text());
@@ -2238,10 +2233,11 @@
                 //$.terminal.active().echo(str);
             }
         }
-        function input_event() {
+        function input_event(e) {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
+            debug(e.originalEvent);
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319

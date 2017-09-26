@@ -8,6 +8,7 @@
 ### Bugs
 * add missing --size default for underline animation
 * fix trim of spaces in front of lines when keep words is true
+* fix newline in prompt found while [answering question on SO](https://stackoverflow.com/a/46399564/387194)
 
 
 ## 1.8.0
