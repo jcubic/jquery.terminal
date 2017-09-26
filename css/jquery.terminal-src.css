@@ -55,6 +55,7 @@
     resize: none;
     z-index: 0;
     overflow: hidden;
+    white-space: pre;
 }
 .terminal .error {
     color: #f00;

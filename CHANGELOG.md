@@ -9,6 +9,8 @@
 * add missing --size default for underline animation
 * fix trim of spaces in front of lines when keep words is true
 * fix newline in prompt found while [answering question on SO](https://stackoverflow.com/a/46399564/387194)
+* fix insert of newline in the middle of the command line if there is "word space word" and you
+  press space after space
 
 
 ## 1.8.0
