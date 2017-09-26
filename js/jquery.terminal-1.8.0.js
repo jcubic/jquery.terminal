@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 26 Sep 2017 17:16:18 +0000
+ * Date: Tue, 26 Sep 2017 17:33:21 +0000
  */
 
 /* TODO:
@@ -3445,6 +3445,7 @@
         keydown: $.noop,
         onAfterRedraw: $.noop,
         onEchoCommand: $.noop,
+        onFlush: $.noop,
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
                 ' have two arguments',
@@ -5782,6 +5783,11 @@
                                 }
                             });
                         }
+                    }
+                    try {
+                        settings.onFlush.apply(self, self);
+                    } catch (e) {
+                        display_exception(e, 'onFlush');
                     }
                     //num_rows = get_num_rows(self, char_size);
                     if (settings.scrollOnEcho || bottom) {
