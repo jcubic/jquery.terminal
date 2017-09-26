@@ -6206,6 +6206,9 @@
                     }
                 } else {
                     settings[object_or_name] = value;
+                    if (object_or_name.match(/^num(Chars|Rows)$/)) {
+                        redraw();
+                    }
                 }
                 return self;
             },

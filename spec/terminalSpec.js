@@ -2676,6 +2676,23 @@ function tests_on_ready() {
                     term.clear().echo(line, {keepWords: true});
                     expect(output()).toEqual(lines);
                 });
+                it('should strip whitespace', function() {
+                    var words = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
+                    var input = [];
+                    var i;
+                    for (i = 0; i < 30; i++) {
+                        input.push(words[Math.floor(Math.random() * words.length)]);
+                    }
+                    term.clear();
+                    term.echo(input.join('\t'), {keepWords: true});
+                    for (i = 80; i < 200; i+=10) {
+                        term.option('numChars', i);
+                        output().forEach(function(line) {
+                            expect(line.match(/^\s+|\s+$/)).toBeFalsy();
+                        });
+                    }
+                    term.option('numChars', numChars);
+                });
                 it('should break words if words are longer then the line', function() {
                     var line = 'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM';
                     var lines = ['MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM', 'MMMMMMMMMMMMMMMMMMMM'];
@@ -2692,6 +2709,7 @@ function tests_on_ready() {
                     term.destroy().remove();
                 });
             });
+            return;
             describe('error', function() {
                 var term = $('<div/>').terminal($.noop, {
                     greetings: false

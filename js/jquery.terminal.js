@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 26 Sep 2017 11:04:54 +0000
+ * Date: Tue, 26 Sep 2017 17:16:18 +0000
  */
 
 /* TODO:
@@ -6206,6 +6206,9 @@
                     }
                 } else {
                     settings[object_or_name] = value;
+                    if (object_or_name.match(/^num(Chars|Rows)$/)) {
+                        redraw();
+                    }
                 }
                 return self;
             },

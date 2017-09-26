@@ -4,6 +4,7 @@
 * new api utils $.terminal.length and $.terminal.columns
 * echo array (resizable in columns that fit the width, using settings.tabs as pad right)
 * callback function parseObject that's called on object different then string (on render)
+* calling option method with numRows or numChars redraw terminal output (for testing)
 
 ### Bugs
 * add missing --size default for underline animation
