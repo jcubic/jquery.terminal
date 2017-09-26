@@ -13,6 +13,8 @@
 * fix newline in prompt found while [answering question on SO](https://stackoverflow.com/a/46399564/387194)
 * fix insert of newline in the middle of the command line if there is "word space word" and you
   press space after space
+* fix `iterate_formatting` reset index that was causing `split_equal` with keep words when word is longer
+  then the limit
 
 
 ## 1.8.0

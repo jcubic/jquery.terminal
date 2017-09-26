@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 26 Sep 2017 17:33:21 +0000
+ * Date: Tue, 26 Sep 2017 21:09:42 +0000
  */
 
 /* TODO:
@@ -2609,7 +2609,7 @@
                             space = ret.space;
                         }
                         if (ret.index !== undefined) {
-                            i = ret.index;
+                            i = ret.index + 1;
                         }
                     }
                 }
@@ -2701,6 +2701,7 @@
                     if (data.count >= length || last_iteraction ||
                         (data.count === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
+                        var can_break = false;
                         if (keep_words) {
                             var text = $.terminal.strip(line.substring(data.space));
                             // replace html entities with characters
@@ -2709,8 +2710,7 @@
                             var text_len = text.length;
                             var limit = data.index + length + 1;
                             text = text.substring(0, limit);
-                            var can_break = false;
-                            if (text.match(/\s/) || limit > text_len) {
+                            if (text.match(/\s|&nbsp;/) || limit > text_len) {
                                 can_break = true;
                             }
                         }
@@ -5716,6 +5716,8 @@
                     height = self.height();
                     if (typeof settings.numChars !== 'undefined' &&
                         typeof settings.numRows !== 'undefined') {
+                        redraw();
+                        scroll_to_bottom();
                         return;
                     }
                     char_size = get_char_size();
