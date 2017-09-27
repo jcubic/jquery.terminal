@@ -3129,6 +3129,9 @@
                 this[Symbol.split] = function(string) {
                     return $.terminal.format_split(string);
                 };
+                this[Symbol.match] = function(string) {
+                    return string.match(format_full_re);
+                };
                 this[Symbol.replace] = function(string, replacer) {
                     return string.replace(format_parts_re, replacer);
                 };
