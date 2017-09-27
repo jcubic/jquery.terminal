@@ -2394,6 +2394,9 @@
             return wcwidth;
         }
     })();
+    function text(string) {
+        return $('<span>' + $.terminal.strip(string) + '</span>').text();
+    }
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
         var check = false;
@@ -2537,9 +2540,9 @@
         // :: string and execute callback with text count and other data
         // ---------------------------------------------------------------------
         iterate_formatting: function iterate_formatting(string, callback) {
-            function is_space() {
+            function is_space(i) {
                 return string.substring(i - 6, i) === '&nbsp;' ||
-                    string.substring(i - 1, i) === ' ';
+                    string.substring(i - 1, i).match(/\s/);
             }
             function match_entity(index) {
                 return string.substring(index).match(/^(&[^;]+;)/);
@@ -2549,7 +2552,13 @@
             var count = 0;
             var match;
             var space = -1;
+            //var limit = 10000;
             for (var i = 0; i < string.length; i++) {
+                /*
+                if (--limit === 0) {
+                    break;
+                }
+                */
                 match = string.substring(i).match(format_start_re);
                 if (match) {
                     formatting = match[1];
@@ -2568,15 +2577,16 @@
                 }
                 var not_formatting = (formatting && in_text) || !formatting;
                 var opening = string[i] === '[' && string[i + 1] === '[';
-                if (is_space() && (not_formatting || opening)) {
+                if (is_space(i) && (not_formatting || opening)) {
                     space = i;
                 }
                 var braket = string[i].match(/[[\]]/);
                 if (not_formatting) {
-                    if (string[i] === '&') { // treat entity as one character
+                    // treat entity as one character
+                    if (string[i] === '&') {
                         match = match_entity(i);
                         if (match) {
-                            i += match[1].length - 2; // because continue adds 1 to i
+                            i += match[1].length - 2; // 2 because continue adds 1 to i
                             continue;
                         }
                         ++count;
@@ -2609,7 +2619,8 @@
                             space = ret.space;
                         }
                         if (ret.index !== undefined) {
-                            i = ret.index + 1;
+                            i = ret.index;
+
                         }
                     }
                 }
@@ -2702,21 +2713,22 @@
                         (data.count === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
-                        if (keep_words) {
-                            var text = $.terminal.strip(line.substring(data.space));
+                        if (keep_words && data.space >= first_index + 1) {
+                            var stripped = $.terminal.strip(line.substring(data.space));
                             // replace html entities with characters
-                            text = $('<span>' + text + '</span>').text();
+                            stripped = $('<span>' + stripped + '</span>').text();
                             // real length, not counting formatting
-                            var text_len = text.length;
+                            var text_len = stripped.length;
                             var limit = data.index + length + 1;
-                            text = text.substring(0, limit);
-                            if (text.match(/\s|&nbsp;/) || limit > text_len) {
+                            stripped = stripped.substring(0, limit);
+                            if (stripped.match(/\s|&nbsp;/) || limit > text_len) {
                                 can_break = true;
                             }
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
-                        if (keep_words && !last_bracket && data.space !== -1 &&
+                        if (keep_words && !last_bracket &&
+                            data.space >= first_index + 1 &&
                             data.index !== line_length - 1 && can_break) {
                             output = line.substring(first_index, data.space);
                             var new_index = data.space - 1;
@@ -2955,7 +2967,7 @@
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
         length: function(string) {
-            return $('<span>' + $.terminal.strip(string) + '</span>').text().length;
+            return text(string).length;
         },
         // ---------------------------------------------------------------------
         // :: return string where array items are in columns padded spaces
