@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 27 Sep 2017 09:24:51 +0000
+ * Date: Wed, 27 Sep 2017 12:35:25 +0000
  */
 
 /* TODO:
@@ -2552,6 +2552,7 @@
             var count = 0;
             var match;
             var space = -1;
+            var prev_space;
             //var limit = 10000;
             for (var i = 0; i < string.length; i++) {
                 /*
@@ -2578,7 +2579,9 @@
                 var not_formatting = (formatting && in_text) || !formatting;
                 var opening = string[i] === '[' && string[i + 1] === '[';
                 if (is_space(i) && (not_formatting || opening)) {
-                    space = i;
+                    if (space === -1 && prev_space !== i || space !== -1) {
+                        space = i;
+                    }
                 }
                 var braket = string[i].match(/[[\]]/);
                 if (not_formatting) {
@@ -2616,6 +2619,7 @@
                             count = ret.count;
                         }
                         if (ret.space !== undefined) {
+                            prev_space = space;
                             space = ret.space;
                         }
                         if (ret.index !== undefined) {
@@ -2713,7 +2717,7 @@
                         (data.count === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
-                        if (keep_words && data.space >= first_index + 1) {
+                        if (keep_words && data.space !== -1) {
                             var stripped = $.terminal.strip(line.substring(data.space));
                             // replace html entities with characters
                             stripped = $('<span>' + stripped + '</span>').text();
@@ -2727,8 +2731,7 @@
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
-                        if (keep_words && !last_bracket &&
-                            data.space >= first_index + 1 &&
+                        if (keep_words && !last_bracket && data.space !== -1 &&
                             data.index !== line_length - 1 && can_break) {
                             output = line.substring(first_index, data.space);
                             var new_index = data.space - 1;
