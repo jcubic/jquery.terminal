@@ -3136,9 +3136,8 @@
                     return string.search(format_full_re);
                 };
             } catch (e) {
-                console.log('Error in Formatter', e);
             }
-        })
+        })()
     };
     // -----------------------------------------------------------------------
     // Helper plugins and functions

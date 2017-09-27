@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 27 Sep 2017 21:07:29 +0000
+ * Date: Wed, 27 Sep 2017 21:10:23 +0000
  */
 
 /* TODO:
@@ -3136,9 +3136,8 @@
                     return string.search(format_full_re);
                 };
             } catch (e) {
-                console.log('Error in Formatter', e);
             }
-        })
+        })()
     };
     // -----------------------------------------------------------------------
     // Helper plugins and functions

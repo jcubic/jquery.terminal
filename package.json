@@ -136,7 +136,8 @@
     "globals": {
       "jQuery": true,
       "sprintf": true,
-      "$": true
+      "$": true,
+      "Symbol": true
     },
     "rules": {
       "eqeqeq": "error",
