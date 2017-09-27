@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 27 Sep 2017 21:16:37 +0000
+ * Date: Wed, 27 Sep 2017 21:19:50 +0000
  */
 
 /* TODO:
@@ -3130,13 +3130,13 @@
                     return $.terminal.format_split(string);
                 };
                 this[Symbol.match] = function(string) {
-                    return string.match(format_full_re);
+                    return string.match(format_re);
                 };
                 this[Symbol.replace] = function(string, replacer) {
                     return string.replace(format_parts_re, replacer);
                 };
                 this[Symbol.search] = function(string) {
-                    return string.search(format_full_re);
+                    return string.search(format_re);
                 };
             } catch (e) {
             }

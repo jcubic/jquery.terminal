@@ -3130,13 +3130,13 @@
                     return $.terminal.format_split(string);
                 };
                 this[Symbol.match] = function(string) {
-                    return string.match(format_full_re);
+                    return string.match(format_re);
                 };
                 this[Symbol.replace] = function(string, replacer) {
                     return string.replace(format_parts_re, replacer);
                 };
                 this[Symbol.search] = function(string) {
-                    return string.search(format_full_re);
+                    return string.search(format_re);
                 };
             } catch (e) {
             }
