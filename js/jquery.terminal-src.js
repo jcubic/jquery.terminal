@@ -3123,7 +3123,22 @@
             } catch (e) {
                 // error is process in exec
             }
-        }
+        },
+        formatter: new (function() {
+            try {
+                this[Symbol.split] = function(string) {
+                    return $.terminal.format_split(string);
+                };
+                this[Symbol.replace] = function(string, replacer) {
+                    return string.replace(format_parts_re, replacer);
+                };
+                this[Symbol.search] = function(string) {
+                    return string.search(format_full_re);
+                };
+            } catch (e) {
+                console.log('Error in Formatter', e);
+            }
+        })
     };
     // -----------------------------------------------------------------------
     // Helper plugins and functions

@@ -6,6 +6,7 @@
 * callback function parseObject that's called on object different then string (on render)
 * calling option method with numRows or numChars redraw terminal output (for testing)
 * onFlush callback (called when text is rendered on screen in flush method)
+* regex helper `$.terminal.formatter` created using Symbols can be use instead of regex
 
 ### Bugs
 * add missing --size default for underline animation

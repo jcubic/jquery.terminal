@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 27 Sep 2017 12:35:25 +0000
+ * Date: Wed, 27 Sep 2017 21:07:29 +0000
  */
 
 /* TODO:
@@ -3123,7 +3123,22 @@
             } catch (e) {
                 // error is process in exec
             }
-        }
+        },
+        formatter: new (function() {
+            try {
+                this[Symbol.split] = function(string) {
+                    return $.terminal.format_split(string);
+                };
+                this[Symbol.replace] = function(string, replacer) {
+                    return string.replace(format_parts_re, replacer);
+                };
+                this[Symbol.search] = function(string) {
+                    return string.search(format_full_re);
+                };
+            } catch (e) {
+                console.log('Error in Formatter', e);
+            }
+        })
     };
     // -----------------------------------------------------------------------
     // Helper plugins and functions
