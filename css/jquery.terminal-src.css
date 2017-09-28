@@ -32,7 +32,7 @@
     z-index: 100;
 }
 */
-.cmd .clipboard {
+.cmd .clipboard, .cmd .clipboard:focus {
     position: absolute;
     left: -16px;
     top: 0;
@@ -42,11 +42,10 @@
     /*left: -99999px;
     clip: rect(1px,1px,1px,1px);
     /* on desktop textarea appear when paste */
-    /*
+    /* opacity is needed for Edge and IE */
     opacity: 0.01;
     filter: alpha(opacity = 0.01);
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
-    */
     background: transparent;
     border: none;
     color: transparent;
@@ -57,6 +56,7 @@
     overflow: hidden;
     white-space: pre;
 }
+
 .terminal .error {
     color: #f00;
 }

@@ -17,6 +17,7 @@
 * fix  infinite loop in `split_equal` with keep words when word is longer than the limit and
   there is space before long word
 * fix paste on MacOS - regresion after adding context menu paste (reported by Ravi Teja Mamidipaka [#340](https://github.com/jcubic/jquery.terminal/issues/340))
+* fix cursor in textarea in Edge and IE (reported by Tejaswi Rohit Anupindi [#344](https://github.com/jcubic/jquery.terminal/issues/344))
 
 
 ## 1.8.0
