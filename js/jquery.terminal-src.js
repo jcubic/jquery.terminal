@@ -1376,9 +1376,7 @@
             if (self.isenabled() && !clip.is(':focus')) {
                 clip.trigger('focus', [true]);
             }
-            clip.one('input', function input(e) {
-                paste(e);
-            });
+            clip.one('input', paste);
             return true;
         }
         function prev_history() {
@@ -1920,6 +1918,7 @@
                 }
                 redraw();
                 fire_change_command();
+                fix_textarea();
                 return self;
             },
             get: function() {
@@ -2109,6 +2108,9 @@
                 no_keypress = true;
                 no_keydown = false;
             }
+            // Meta+V did bind input but it didin't happen because terminal paste
+            // prevent native insert action
+            clip.off('input', paste);
             var key = get_key(e);
             if ($.isFunction(options.keydown)) {
                 result = options.keydown(e);
