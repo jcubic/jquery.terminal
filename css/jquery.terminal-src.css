@@ -66,6 +66,10 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
+body.terminal {
+    height: 100vh;
+    margin: 0;
+}
 .terminal > div {
     height: 100%;
 }

@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Tue, 26 Sep 2017 11:04:55 +0000
+ * Date: Thu, 28 Sep 2017 07:07:26 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -65,6 +65,10 @@
     /*overflow: hidden;*/
     overflow-y: auto;
     overflow-x: hidden;
+}
+body.terminal {
+    height: 100vh;
+    margin: 0;
 }
 .terminal > div {
     height: 100%;
