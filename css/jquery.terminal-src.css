@@ -622,3 +622,28 @@ body.terminal {
       }
     }
 }
+/*
+ * overwrite css variables that don't work with selection in Edge
+ */
+@supports (-ms-ime-align:auto) {
+    .terminal h1::selection,
+    .terminal h2::selection,
+    .terminal h3::selection,
+    .terminal h4::selection,
+    .terminal h5::selection,
+    .terminal h6::selection,
+    .terminal pre::selection,
+    .terminal td::selection,
+    .terminal .terminal-output div div::selection,
+    .terminal .terminal-output div div a::selection,
+    .terminal .terminal-output div span::selection,
+    .cmd div::selection,
+    .cmd > span::selection,
+    .cmd > span span::selection,
+    .cmd > div::selection,
+    .cmd > div span::selection,
+    .cmd .prompt span::selection {
+        background-color: rgba(170, 170, 170, 0.99);
+        color: #000;
+    }
+}
