@@ -7,6 +7,7 @@
 * calling option method with numRows or numChars redraw terminal output (for testing)
 * onFlush callback (called when text is rendered on screen in flush method)
 * regex helper `$.terminal.formatter` created using Symbols can be use instead of regex
+* new option pasteImage (default true) requested by @ssv1000 [#342](https://github.com/jcubic/jquery.terminal/issues/342)
 
 ### Bugs
 * add missing --size default for underline animation

@@ -3462,6 +3462,7 @@
         outputLimit: -1,
         formatters: [$.terminal.nested_formatting],
         onAjaxError: null,
+        pasteImage: true,
         scrollBottomOffset: 20,
         wordAutocomplete: true,
         caseSensitiveAutocomplete: true,
@@ -6448,17 +6449,20 @@
             // we don't care about browser that don't support clipboard data
             // those browser simple will not have this feature normal paste
             // is cross-browser and it's handled by cmd plugin
+            function is_type(item, type) {
+                return item.type.indexOf(type) !== -1;
+            }
             if (e.clipboardData) {
                 if (self.enabled()) {
                     var items = e.clipboardData.items;
                     if (items) {
                         for (var i = 0; i < items.length; i++) {
-                            if (items[i].type.indexOf('image') !== -1) {
+                            if (is_type(items[i], 'image') && settings.pasteImage) {
                                 var blob = items[i].getAsFile();
                                 var URL = window.URL || window.webkitURL;
                                 var source = URL.createObjectURL(blob);
                                 self.echo('<img src="' + source + '"/>', {raw: true});
-                            } else if (items[i].type.indexOf('text/plain') !== -1) {
+                            } else if (is_type(items[i], 'text/plain')) {
                                 items[i].getAsString(self.insert);
                             }
                         }
