@@ -32,7 +32,7 @@
     z-index: 100;
 }
 */
-.cmd .clipboard, .cmd .clipboard:focus {
+.cmd .clipboard {
     position: absolute;
     left: -16px;
     top: 0;

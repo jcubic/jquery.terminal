@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Thu, 28 Sep 2017 18:43:56 +0000
+ * Date: Fri, 29 Sep 2017 18:51:15 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -32,7 +32,7 @@
     z-index: 100;
 }
 */
-.cmd .clipboard, .cmd .clipboard:focus {
+.cmd .clipboard {
     position: absolute;
     left: -16px;
     top: 0;

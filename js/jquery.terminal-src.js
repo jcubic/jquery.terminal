@@ -2083,8 +2083,8 @@
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
         function keydown_event(e) {
-            debug('keydown "' + e.key + '" ' + e.fake);
-            process = (e.key || '').toLowerCase() === 'process';
+            debug('keydown "' + e.key + '" ' + e.fake + ' ' + e.which);
+            process = (e.key || '').toLowerCase() === 'process' || e.which === 0;
             var result;
             dead_key = no_keypress && single_key;
             // special keys don't trigger keypress fix #293
@@ -2239,14 +2239,18 @@
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
-            debug(e.originalEvent);
+            debug(JSON.stringify({
+                data: e.originalEvent.data,
+                inputType: e.originalEvent.data
+            }));
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
-            if (no_keydown || process || ((no_keypress || dead_key) && !skip_insert &&
-                                          (single_key || no_key) && !backspace)) {
+            var val = clip.val();
+            if ((no_keydown || process || ((no_keypress || dead_key) && !skip_insert &&
+                                          (single_key || no_key) && !backspace)) &&
+                val !== command) {
                 var pos = position;
-                var val = clip.val();
                 // backspace is set in keydown if no keydown we need to get new one
                 if (no_keydown) {
                     backspace = text.substring(0, text.length - 1) === text.length;

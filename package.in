@@ -222,7 +222,7 @@
       "space-in-parens": ["error", "never"],
       "space-infix-ops": "error",
       "space-before-function-paren": ["error", "never"],
-      "complexity": ["error", {"max": 25}],
+      "complexity": ["error", {"max": 26}],
       "indent": ["error", 4, {"SwitchCase": 1}],
       "linebreak-style": ["error", "unix"],
       "semi": ["error", "always"]
