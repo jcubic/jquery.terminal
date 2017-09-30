@@ -3646,14 +3646,14 @@
                     params: params,
                     request: function(jxhr, request) {
                         try {
-                            settings.request.apply(self, jxhr, request, self);
+                            settings.request.call(self, jxhr, request, self);
                         } catch (e) {
                             display_exception(e, 'USER');
                         }
                     },
                     response: function(jxhr, response) {
                         try {
-                            settings.response.apply(self, jxhr, response, self);
+                            settings.response.call(self, jxhr, response, self);
                         } catch (e) {
                             display_exception(e, 'USER');
                         }
@@ -5826,7 +5826,7 @@
                         }
                     }
                     try {
-                        settings.onFlush.apply(self, self);
+                        settings.onFlush.call(self, self);
                     } catch (e) {
                         display_exception(e, 'onFlush');
                     }

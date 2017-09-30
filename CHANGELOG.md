@@ -21,6 +21,7 @@
 * fix cursor in textarea in Edge and IE (reported by Tejaswi Rohit Anupindi [#344](https://github.com/jcubic/jquery.terminal/issues/344))
 * fix input for Android 4.4 in emulator (tested on saucelabs.com)
 * fix selection + css variables (know bug in MS Edge)
+* fix apply/call issue that was causing Android 2.3 to crash
 
 
 ## 1.8.0
