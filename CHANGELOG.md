@@ -22,6 +22,7 @@
 * fix input for Android 4.4 in emulator (tested on saucelabs.com)
 * fix selection + css variables (know bug in MS Edge)
 * fix apply/call issue that was causing Android 2.3 to crash
+* fix context menu on selected text (the selected text was cleared)
 
 
 ## 1.8.0

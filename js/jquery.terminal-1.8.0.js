@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 30 Sep 2017 09:32:09 +0000
+ * Date: Sun, 01 Oct 2017 10:04:46 +0000
  */
 
 /* TODO:
@@ -6620,7 +6620,7 @@
                 (function() {
                     var clip = self.find('textarea');
                     self.on('mousedown.terminal', function(e) {
-                        if (e.originalEvent.button === 2) {
+                        if (e.originalEvent.button === 2 && get_selected_text() === '') {
                             if (!self.enabled()) {
                                 self.enable();
                             }
