@@ -4735,6 +4735,12 @@
                 }
                 return false;
             },
+            'CTRL+C': function() {
+                if (get_selected_text() === '') {
+                    echo_command(self.get_command() + '^C');
+                    self.set_command('');
+                }
+            },
             'CTRL+L': function() {
                 self.clear();
             },
