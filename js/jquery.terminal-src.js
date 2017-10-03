@@ -6489,7 +6489,16 @@
                 // so we are able to change it using option API method
                 itrp.completion = 'settings';
             }
-            var new_keymap = $.extend({}, keymap, settings.keymap || {});
+            var new_keymap = $.extend(
+                {},
+                keymap,
+                $.omap(settings.keymap || {}, function(key, fn) {
+                    return function(e) {
+                        // new keymap function will get default as 2nd argument
+                        return fn(e, keymap[key]);
+                    };
+                })
+            );
             interpreters = new Stack($.extend({}, settings.extra, {
                 name: settings.name,
                 prompt: settings.prompt,
