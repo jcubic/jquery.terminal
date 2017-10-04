@@ -5783,7 +5783,7 @@
                         num_chars = new_num_chars;
                         num_rows = new_num_rows;
                         command_line.resize(num_chars);
-                        redraw();
+                        self.refresh();
                         var top = interpreters.top();
                         if ($.isFunction(top.resize)) {
                             top.resize.call(self, self);
@@ -5795,6 +5795,10 @@
                 }
                 return self;
             },
+            // -------------------------------------------------------------
+            // :: redraw the terminal
+            // -------------------------------------------------------------
+            refresh: redraw,
             // -------------------------------------------------------------
             // :: Flush the output to the terminal
             // -------------------------------------------------------------

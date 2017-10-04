@@ -9,6 +9,7 @@
 * regex helper `$.terminal.formatter` created using Symbols can be use instead of regex
 * new option pasteImage (default true) - requested by @ssv1000 [#342](https://github.com/jcubic/jquery.terminal/issues/342)
 * CTRL+C cancel command like in bash if no selection - requested by @abhiks19 [#343](https://github.com/jcubic/jquery.terminal/issues/343)
+* refresh API method
 
 ### Bugs
 * add missing --size default for underline animation

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 04 Oct 2017 19:18:34 +0000
+ * Date: Wed, 04 Oct 2017 19:48:04 +0000
  */
 
 /* TODO:
@@ -5783,7 +5783,7 @@
                         num_chars = new_num_chars;
                         num_rows = new_num_rows;
                         command_line.resize(num_chars);
-                        redraw();
+                        self.refresh();
                         var top = interpreters.top();
                         if ($.isFunction(top.resize)) {
                             top.resize.call(self, self);
@@ -5795,6 +5795,10 @@
                 }
                 return self;
             },
+            // -------------------------------------------------------------
+            // :: redraw the terminal
+            // -------------------------------------------------------------
+            refresh: redraw,
             // -------------------------------------------------------------
             // :: Flush the output to the terminal
             // -------------------------------------------------------------
