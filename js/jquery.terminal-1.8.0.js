@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Oct 2017 18:37:51 +0000
+ * Date: Wed, 04 Oct 2017 07:07:59 +0000
  */
 
 /* TODO:
@@ -6489,7 +6489,19 @@
                 // so we are able to change it using option API method
                 itrp.completion = 'settings';
             }
-            var new_keymap = $.extend({}, keymap, settings.keymap || {});
+            var new_keymap = $.extend(
+                {},
+                keymap,
+                $.omap(settings.keymap || {}, function(key, fn) {
+                    if (!keymap[key]) {
+                        return fn;
+                    }
+                    return function(e) {
+                        // new keymap function will get default as 2nd argument
+                        return fn(e, keymap[key]);
+                    };
+                })
+            );
             interpreters = new Stack($.extend({}, settings.extra, {
                 name: settings.name,
                 prompt: settings.prompt,

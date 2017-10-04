@@ -6493,6 +6493,9 @@
                 {},
                 keymap,
                 $.omap(settings.keymap || {}, function(key, fn) {
+                    if (!keymap[key]) {
+                        return fn;
+                    }
                     return function(e) {
                         // new keymap function will get default as 2nd argument
                         return fn(e, keymap[key]);
