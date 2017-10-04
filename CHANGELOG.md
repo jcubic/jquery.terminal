@@ -24,7 +24,8 @@
 * fix selection + css variables (know bug in MS Edge)
 * fix apply/call issue that was causing Android 2.3 to crash
 * fix context menu on selected text (the selected text was cleared)
-* allow to overwrite keymap defined in terminal (not only the ones defined in cmd).
+* allow to overwrite keymap defined in terminal (not only the ones defined in cmd)
+* escape `<` and `>` issue reported by @itsZN [#345](https://github.com/jcubic/jquery.terminal/issues/345)
 
 
 ## 1.8.0

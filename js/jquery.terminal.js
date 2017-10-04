@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 04 Oct 2017 07:07:59 +0000
+ * Date: Wed, 04 Oct 2017 07:21:50 +0000
  */
 
 /* TODO:
@@ -1667,6 +1667,7 @@
                         string = command.replace(/./g, mask);
                         break;
                 }
+                string = string.replace(/</g, '&#60;').replace(/>/g, '&#62;');
                 var i;
                 self.find('div').remove();
                 before.html('');

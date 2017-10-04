@@ -1667,6 +1667,7 @@
                         string = command.replace(/./g, mask);
                         break;
                 }
+                string = string.replace(/</g, '&#60;').replace(/>/g, '&#62;');
                 var i;
                 self.find('div').remove();
                 before.html('');
