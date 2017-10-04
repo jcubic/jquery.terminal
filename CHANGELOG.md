@@ -26,7 +26,7 @@
 * fix context menu on selected text (the selected text was cleared)
 * allow to overwrite keymap defined in terminal (not only the ones defined in cmd)
 * escape `<` and `>` issue reported by @itsZN [#345](https://github.com/jcubic/jquery.terminal/issues/345)
-
+* fix moving cursor when formatting change size of text (found when creating emoji demo)
 
 ## 1.8.0
 * allow to return promise from prompt + fix promise in echo

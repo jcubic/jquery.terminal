@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 04 Oct 2017 07:21:50 +0000
+ * Date: Wed, 04 Oct 2017 19:18:34 +0000
  */
 
 /* TODO:
@@ -1606,8 +1606,16 @@
                 return $.terminal.substring(string, start, end);
             }
             function draw_cursor_line(string, position) {
-                var len = string.length;
+                var original = string;
                 string = formatting(string);
+                var len = $.terminal.length(string);
+                var original_len = $.terminal.length(original);
+                if (len < original_len) {
+                    position -= original_len - len;
+                }
+                if (position < 0) {
+                    position = 0;
+                }
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');

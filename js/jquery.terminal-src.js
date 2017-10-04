@@ -1606,8 +1606,16 @@
                 return $.terminal.substring(string, start, end);
             }
             function draw_cursor_line(string, position) {
-                var len = string.length;
+                var original = string;
                 string = formatting(string);
+                var len = $.terminal.length(string);
+                var original_len = $.terminal.length(original);
+                if (len < original_len) {
+                    position -= original_len - len;
+                }
+                if (position < 0) {
+                    position = 0;
+                }
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
