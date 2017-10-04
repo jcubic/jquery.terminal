@@ -1593,6 +1593,22 @@
             return $.terminal.format($.terminal.encode(string));
         }
         // ---------------------------------------------------------------------
+        // :: Position with fix for formatting that make text shorter
+        // ---------------------------------------------------------------------
+        function corrected_position() {
+            var string = formatting(command);
+            var len = $.terminal.length(string);
+            var original_len = $.terminal.length(command);
+            var pos = position;
+            if (len < original_len) {
+                pos -= original_len - len;
+            }
+            if (pos < 0) {
+                pos = 0;
+            }
+            return pos;
+        }
+        // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
         // :: place cursor in the right place
         // ---------------------------------------------------------------------
@@ -1609,13 +1625,6 @@
                 var original = string;
                 string = formatting(string);
                 var len = $.terminal.length(string);
-                var original_len = $.terminal.length(original);
-                if (len < original_len) {
-                    position -= original_len - len;
-                }
-                if (position < 0) {
-                    position = 0;
-                }
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
@@ -1675,6 +1684,7 @@
                         string = command.replace(/./g, mask);
                         break;
                 }
+                var pos = corrected_position();
                 string = string.replace(/</g, '&#60;').replace(/>/g, '&#62;');
                 var i;
                 self.find('div').remove();
@@ -1698,10 +1708,10 @@
                     //cursor in first line
                     if (first_len === 0 && array.length === 1) {
                         // skip empty line
-                    } else if (position < first_len) {
-                        draw_cursor_line(array[0], position);
+                    } else if (pos < first_len) {
+                        draw_cursor_line(array[0], pos);
                         lines_after(array.slice(1));
-                    } else if (position === first_len) {
+                    } else if (pos === first_len) {
                         before.before(div(array[0]));
                         draw_cursor_line(array[1] || '', 0);
                         if (array.length > 1) {
@@ -1709,10 +1719,10 @@
                         }
                     } else {
                         var num_lines = array.length;
-                        if (position < first_len) {
-                            draw_cursor_line(array[0], position);
+                        if (pos < first_len) {
+                            draw_cursor_line(array[0], pos);
                             lines_after(array.slice(1));
-                        } else if (position === first_len) {
+                        } else if (pos === first_len) {
                             before.before(div(array[0]));
                             draw_cursor_line(array[1], 0);
                             lines_after(array.slice(2));
@@ -1720,21 +1730,21 @@
                             var last = array.slice(-1)[0];
                             var from_last = string.length - position - tabs_rm;
                             var last_len = last.length;
-                            var pos = 0;
+                            var new_pos = 0;
                             if (from_last <= last_len) { // in last line
                                 lines_before(array.slice(0, -1));
                                 if (last_len === from_last) {
-                                    pos = 0;
+                                    new_pos = 0;
                                 } else {
-                                    pos = last_len - from_last;
+                                    new_pos = last_len - from_last;
                                 }
-                                draw_cursor_line(last, pos);
+                                draw_cursor_line(last, new_pos);
                             } else if (num_lines === 3) { // in the middle
                                 var str = format(array[0]);
                                 before.before('<div role="presentation">' +
                                               str +
                                               '</div>');
-                                draw_cursor_line(array[1], position - first_len - 1);
+                                draw_cursor_line(array[1], pos - first_len - 1);
                                 str = format(formatting(array[2]));
                                 after.after('<div role="presentation">' +
                                             str +
@@ -1743,11 +1753,11 @@
                                 // more lines, cursor in the middle
                                 var line_index;
                                 var current;
-                                pos = position;
+                                new_pos = pos;
                                 for (i = 0; i < array.length; ++i) {
                                     var current_len = array[i].length;
-                                    if (pos > current_len) {
-                                        pos -= current_len;
+                                    if (new_pos > current_len) {
+                                        new_pos -= current_len;
                                     } else {
                                         break;
                                     }
@@ -1755,8 +1765,8 @@
                                 current = array[i];
                                 line_index = i;
                                 // cursor on first character in line
-                                if (pos === current.length) {
-                                    pos = 0;
+                                if (new_pos === current.length) {
+                                    new_pos = 0;
                                     current = array[++line_index];
                                     if (current === undefined) {
                                         //should never happen
@@ -1764,7 +1774,7 @@
                                         throw new Error(msg);
                                     }
                                 }
-                                draw_cursor_line(current, pos);
+                                draw_cursor_line(current, new_pos);
                                 lines_before(array.slice(0, line_index));
                                 lines_after(array.slice(line_index + 1));
                             }
