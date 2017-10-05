@@ -1987,6 +1987,8 @@
                     var sub_len = $.terminal.length(sub);
                     if (orig_len > sub_len) {
                         formatted_position -= orig_len - sub_len;
+                    } else if (orig_len < sub_len) {
+                        formatted_position += sub_len - orig_len;
                     }
                     if (formatted_position > len) {
                         formatted_position = len;

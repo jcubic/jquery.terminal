@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 05 Oct 2017 13:18:25 +0000
+ * Date: Thu, 05 Oct 2017 13:51:36 +0000
  */
 
 /* TODO:
@@ -1987,6 +1987,8 @@
                     var sub_len = $.terminal.length(sub);
                     if (orig_len > sub_len) {
                         formatted_position -= orig_len - sub_len;
+                    } else if (orig_len < sub_len) {
+                        formatted_position += sub_len - orig_len;
                     }
                     if (formatted_position > len) {
                         formatted_position = len;
