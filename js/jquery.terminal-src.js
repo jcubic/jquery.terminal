@@ -1088,6 +1088,7 @@
         var position = 0;
         var prompt;
         var enabled;
+        var formatted_position = 0;
         var historySize = options.historySize || 60;
         var name, history;
         var cursor = self.find('.cursor');
@@ -1128,7 +1129,7 @@
             } else {
                 return command.length;
             }
-            var lines = get_splited_command_line(command);
+            var lines = get_splitted_command_line(command);
             var try_pos;
             if (row > 0 && lines.length > 1) {
                 try_pos = col + lines.slice(0, row).reduce(function(sum, line) {
@@ -1540,7 +1541,7 @@
         // :: Split String that fit into command line where first line need to
         // :: fit next to prompt (need to have less characters)
         // ---------------------------------------------------------------------
-        function get_splited_command_line(string) {
+        function get_splitted_command_line(string) {
             function split(string) {
                 return $.terminal.split_equal(string, num_chars);
             }
@@ -1593,22 +1594,6 @@
             return $.terminal.format($.terminal.encode(string));
         }
         // ---------------------------------------------------------------------
-        // :: Position with fix for formatting that make text shorter
-        // ---------------------------------------------------------------------
-        function corrected_position() {
-            var string = formatting(command);
-            var len = $.terminal.length(string);
-            var original_len = $.terminal.length(command);
-            var pos = position;
-            if (len < original_len) {
-                pos -= original_len - len;
-            }
-            if (pos < 0) {
-                pos = 0;
-            }
-            return pos;
-        }
-        // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
         // :: place cursor in the right place
         // ---------------------------------------------------------------------
@@ -1648,9 +1633,7 @@
                 }
             }
             function div(string) {
-                return '<div role="presentation">' +
-                    format(formatting(string)) +
-                    '</div>';
+                return '<div role="presentation">' + format(string) + '</div>';
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -1682,7 +1665,7 @@
                         string = command.replace(/./g, mask);
                         break;
                 }
-                var pos = corrected_position();
+                var pos = formatted_position;
                 string = formatting(string.replace(/</g, '&#60;').replace(/>/g, '&#62;'));
                 var i;
                 self.find('div').remove();
@@ -1696,13 +1679,13 @@
                     if (tabs) {
                         string = string.replace(/\t/g, '\x00\x00\x00\x00');
                     }
-                    var array = get_splited_command_line(string);
+                    var array = get_splitted_command_line(string);
                     if (tabs) {
                         array = $.map(array, function(line) {
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
                         });
                     }
-                    var first_len = array[0].length;
+                    var first_len = $.terminal.length(array[0]);
                     //cursor in first line
                     if (first_len === 0 && array.length === 1) {
                         // skip empty line
@@ -1726,9 +1709,13 @@
                             lines_after(array.slice(2));
                         } else {
                             var last = array.slice(-1)[0];
-                            var from_last = string.length - position - tabs_rm;
-                            var last_len = last.length;
+                            var len = $.terminal.length(string);
+                            var from_last = len - pos - tabs_rm;
+                            var last_len = $.terminal.length(last);
                             var new_pos = 0;
+                            if (from_last === -1) {
+                                from_last = 0;
+                            }
                             if (from_last <= last_len) { // in last line
                                 lines_before(array.slice(0, -1));
                                 if (last_len === from_last) {
@@ -1753,7 +1740,7 @@
                                 var current;
                                 new_pos = pos;
                                 for (i = 0; i < array.length; ++i) {
-                                    var current_len = array[i].length;
+                                    var current_len = $.terminal.length(array[i]);
                                     if (new_pos > current_len) {
                                         new_pos -= current_len;
                                     } else {
@@ -1783,7 +1770,7 @@
                     cursor.html('&nbsp;');
                     after.html('');
                 } else {
-                    draw_cursor_line(string, position);
+                    draw_cursor_line(string, pos);
                 }
             };
         })();
@@ -1982,15 +1969,29 @@
             },
             position: function(n, relative) {
                 if (typeof n === 'number') {
-                    // if (position !== n) { this don't work, don't know why
                     if (relative) {
                         position += n;
                     } else if (n < 0) {
                         position = 0;
-                    } else if (n > command.length) {
+                    } else if (position > command.length) {
                         position = command.length;
                     } else {
                         position = n;
+                    }
+                    formatted_position = position;
+                    var string = formatting(command);
+                    var len = $.terminal.length(string);
+                    var orig_sub = $.terminal.substring(command, 0, position);
+                    var orig_len = $.terminal.length(orig_sub);
+                    var sub = formatting(orig_sub);
+                    var sub_len = $.terminal.length(sub);
+                    if (orig_len > sub_len) {
+                        formatted_position -= orig_len - sub_len;
+                    }
+                    if (formatted_position > len) {
+                        formatted_position = len;
+                    } else if (formatted_position < 0) {
+                        formatted_position = 0;
                     }
                     if ($.isFunction(options.onPositionChange)) {
                         options.onPositionChange(position);
@@ -2577,6 +2578,7 @@
             var match;
             var space = -1;
             var prev_space;
+            var length = 0;
             //var limit = 10000;
             for (var i = 0; i < string.length; i++) {
                 /*
@@ -2617,21 +2619,25 @@
                             continue;
                         }
                         ++count;
+                        ++length;
                     } else if (string[i] === ']' && string[i - 1] === '\\') {
                         // escape \] counts as one character
                         --count;
+                        --length;
                     } else if (!braket) {
                         ++count;
+                        ++length;
                     }
                 }
                 if (!braket && not_formatting) {
                     if (strlen(string[i]) === 2) {
-                        count++;
+                        length++;
                     }
                     var data = {
                         count: count,
                         index: i,
                         formatting: formatting,
+                        length: length,
                         text: in_text,
                         space: space
                     };
@@ -2737,8 +2743,8 @@
                     var last_bracket = data.index === line_length - 2 &&
                         line[data.index + 1] === ']';
                     var last_iteraction = data.index === line_length - 1 || last_bracket;
-                    if (data.count >= length || last_iteraction ||
-                        (data.count === length - 1 &&
+                    if (data.length >= length || last_iteraction ||
+                        (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
                         if (keep_words && data.space !== -1) {
