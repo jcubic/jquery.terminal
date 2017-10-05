@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 05 Oct 2017 14:28:04 +0000
+ * Date: Thu, 05 Oct 2017 15:28:59 +0000
  */
 
 /* TODO:
@@ -1981,19 +1981,35 @@
                     formatted_position = position;
                     var string = formatting(command);
                     var len = $.terminal.length(string);
-                    var orig_sub = $.terminal.substring(command, 0, position);
-                    var orig_len = $.terminal.length(orig_sub);
-                    var sub = formatting(orig_sub);
-                    var sub_len = $.terminal.length(sub);
-                    if (orig_len > sub_len) {
-                        formatted_position -= orig_len - sub_len;
-                    } else if (orig_len < sub_len) {
-                        formatted_position += sub_len - orig_len;
-                    }
-                    if (formatted_position > len) {
-                        formatted_position = len;
-                    } else if (formatted_position < 0) {
-                        formatted_position = 0;
+                    var command_len = $.terminal.length(command);
+                    if (len !== command_len) {
+                        var orig_sub = $.terminal.substring(command, 0, position);
+                        var orig_len = $.terminal.length(orig_sub);
+                        var sub = formatting(orig_sub);
+                        var sub_len = $.terminal.length(sub);
+                        if (orig_len > sub_len) {
+                            formatted_position -= orig_len - sub_len;
+                        } else if (orig_len < sub_len) {
+                            formatted_position += sub_len - orig_len;
+                        } else if (len < command_len) {
+                            for (var i = position; i < command_len - 1; ++i) {
+                                var substr = $.terminal.substring(command, 0, i);
+                                var next_substr = $.terminal.substring(command, 0, i + 1);
+                                var formatted = formatting(next_substr);
+                                var substr_len = $.terminal.length(substr);
+                                var formatted_len = $.terminal.length(formatted);
+                                var diff = substr_len - formatted_len;
+                                if (diff > 1) {
+                                    formatted_position -= diff;
+                                    break;
+                                }
+                            }
+                        }
+                        if (formatted_position > len) {
+                            formatted_position = len;
+                        } else if (formatted_position < 0) {
+                            formatted_position = 0;
+                        }
                     }
                     if ($.isFunction(options.onPositionChange)) {
                         options.onPositionChange(position);
