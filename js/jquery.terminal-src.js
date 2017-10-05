@@ -1196,7 +1196,7 @@
                 history.reset();
 
                 // for next input event on firefox/android with google keyboard
-                text = '';
+                prev_command = '';
                 no_keydown = true;
 
                 self.set('');
@@ -1622,8 +1622,6 @@
                 return $.terminal.substring(string, start, end);
             }
             function draw_cursor_line(string, position) {
-                var original = string;
-                string = formatting(string);
                 var len = $.terminal.length(string);
                 if (position === len) {
                     before.html(format(string));
@@ -1685,12 +1683,12 @@
                         break;
                 }
                 var pos = corrected_position();
-                string = string.replace(/</g, '&#60;').replace(/>/g, '&#62;');
+                string = formatting(string.replace(/</g, '&#60;').replace(/>/g, '&#62;'));
                 var i;
                 self.find('div').remove();
                 before.html('');
                 // long line
-                if (strlen(string) > num_chars - prompt_len - 1 ||
+                if (strlen(text(string)) > num_chars - prompt_len - 1 ||
                     string.match(/\n/)) {
                     var tabs = string.match(/\t/g);
                     var tabs_rm = tabs ? tabs.length * 3 : 0;
@@ -2097,7 +2095,7 @@
         var skip_insert;
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
-        var text = '';
+        var prev_command = '';
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
@@ -2272,7 +2270,8 @@
                 var pos = position;
                 // backspace is set in keydown if no keydown we need to get new one
                 if (no_keydown) {
-                    backspace = text.substring(0, text.length - 1) === text.length;
+                    var cmd = prev_command;
+                    backspace = cmd.substring(0, cmd.length - 1).length === val.length;
                 }
                 if (reverse_search) {
                     rev_search_str = val;
@@ -2296,7 +2295,7 @@
                         }
                     }
                     if (backspace) {
-                        text = command;
+                        prev_command = command;
                         return;
                     }
                     // if user return false in keydown we don't want to insert text
@@ -2311,10 +2310,10 @@
                 } else {
                     // user enter more then one character if click on complete word
                     // on android
-                    self.position(pos + Math.abs(val.length - text.length));
+                    self.position(pos + Math.abs(val.length - prev_command.length));
                 }
             }
-            text = command;
+            prev_command = command;
             skip_insert = false;
             no_keydown = true;
         }
