@@ -1594,6 +1594,102 @@
             return $.terminal.format($.terminal.encode(string));
         }
         // ---------------------------------------------------------------------
+        // :: shortcut helper
+        // ---------------------------------------------------------------------
+        function length(str) {
+            return $.terminal.length(str);
+        }
+        // ---------------------------------------------------------------------
+        // :: functions used to calculate position of cursor when formatting
+        // :: change length of output text like with emoji demo
+        // ---------------------------------------------------------------------
+        function split(formatted, normal) {
+            function longer(str) {
+                return found && length(str) > length(found) || !found;
+            }
+            var formatted_len = $.terminal.length(formatted);
+            var normal_len = $.terminal.length(normal);
+            var found;
+            for (var i = normal_len; i > 1; i--) {
+                var test_normal = $.terminal.substring(normal, 0, i);
+                var formatted_normal = formatting(test_normal);
+                for (var j = formatted_len; j > 1; j--) {
+                    var test_formatted = $.terminal.substring(formatted, 0, j);
+                    if (test_formatted === formatted_normal &&
+                        longer(test_normal)) {
+                        found = test_normal;
+                    }
+                }
+            }
+            return found || '';
+        }
+        // ---------------------------------------------------------------------
+        // :: return index after next word that got replaced by formatting
+        // :: and change length of text
+        // ---------------------------------------------------------------------
+        function index_after_formatting() {
+            var start = position === 0 ? 0 : position - 1;
+            var command_len = $.terminal.length(command);
+            for (var i = start; i < command_len - 1; ++i) {
+                var substr = $.terminal.substring(command, 0, i);
+                var next_substr = $.terminal.substring(command, 0, i + 1);
+                var formatted_substr = formatting(substr);
+                var formatted_next = formatting(next_substr);
+                var substr_len = length(formatted_substr);
+                var next_len = length(formatted_next);
+                var test_diff = Math.abs(next_len - substr_len);
+                if (test_diff > 1) {
+                    return i;
+                }
+            }
+        }
+        // ---------------------------------------------------------------------
+        // :: main function that return corrected cursor position on display
+        // :: if cursor is in the middle of the word that is shorter the before
+        // :: applying formatting then the corrected position is after the word
+        // :: so it stay in place when you move real cursor in the middle
+        // :: of the word
+        // ---------------------------------------------------------------------
+        function get_formatted_position() {
+            var formatted_position = position;
+            var string = formatting(command);
+            var len = $.terminal.length(string);
+            var command_len = $.terminal.length(command);
+            if (len !== command_len) {
+                var orig_sub = $.terminal.substring(command, 0, position);
+                var orig_len = $.terminal.length(orig_sub);
+                var sub = formatting(orig_sub);
+                var sub_len = $.terminal.length(sub);
+                var diff = Math.abs(orig_len - sub_len);
+                if (false && orig_len > sub_len) {
+                    formatted_position -= diff;
+                } else if (false && orig_len < sub_len) {
+                    formatted_position += diff;
+                } else {
+                    var index = index_after_formatting();
+                    var to_end = $.terminal.substring(command, 0, index + 1);
+                    formatted_position -= orig_len - sub_len;
+                    if (orig_sub && orig_sub !== to_end) {
+                        var formatted_to_end = formatting(to_end);
+                        var common = split(formatted_to_end, orig_sub);
+                        if (common && orig_sub !== common) {
+                            var re = new RegExp('^' + $.terminal.escape_regex(common));
+                            var to_end_rest = to_end.replace(re, '');
+                            var to_end_rest_len = length(formatting(to_end_rest));
+                            var commnon_len = length(formatting(common));
+                            formatted_position = commnon_len + to_end_rest_len;
+                        }
+                    }
+                }
+                if (formatted_position > len) {
+                    formatted_position = len;
+                } else if (formatted_position < 0) {
+                    formatted_position = 0;
+                }
+            }
+            return formatted_position;
+        }
+        // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
         // :: place cursor in the right place
         // ---------------------------------------------------------------------
@@ -1978,39 +2074,7 @@
                     } else {
                         position = n;
                     }
-                    formatted_position = position;
-                    var string = formatting(command);
-                    var len = $.terminal.length(string);
-                    var command_len = $.terminal.length(command);
-                    if (len !== command_len) {
-                        var orig_sub = $.terminal.substring(command, 0, position);
-                        var orig_len = $.terminal.length(orig_sub);
-                        var sub = formatting(orig_sub);
-                        var sub_len = $.terminal.length(sub);
-                        if (orig_len > sub_len) {
-                            formatted_position -= orig_len - sub_len;
-                        } else if (orig_len < sub_len) {
-                            formatted_position += sub_len - orig_len;
-                        } else if (len < command_len) {
-                            for (var i = position; i < command_len - 1; ++i) {
-                                var substr = $.terminal.substring(command, 0, i);
-                                var next_substr = $.terminal.substring(command, 0, i + 1);
-                                var formatted = formatting(next_substr);
-                                var substr_len = $.terminal.length(substr);
-                                var formatted_len = $.terminal.length(formatted);
-                                var diff = substr_len - formatted_len;
-                                if (diff > 1) {
-                                    formatted_position -= diff;
-                                    break;
-                                }
-                            }
-                        }
-                        if (formatted_position > len) {
-                            formatted_position = len;
-                        } else if (formatted_position < 0) {
-                            formatted_position = 0;
-                        }
-                    }
+                    formatted_position = get_formatted_position();
                     if ($.isFunction(options.onPositionChange)) {
                         options.onPositionChange(position);
                     }
@@ -2020,6 +2084,9 @@
                 } else {
                     return position;
                 }
+            },
+            display_position: function() {
+                return formatted_position;
             },
             visible: (function() {
                 var visible = self.visible;
