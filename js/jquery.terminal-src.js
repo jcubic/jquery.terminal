@@ -242,6 +242,13 @@
         });
         return result;
     };
+    $.fn.text_length = function() {
+        return this.map(function() {
+            return $(this).text().length;
+        }).get().reduce(function(a, b) {
+            return a + b;
+        }, 0);
+    };
     // -----------------------------------------------------------------------
     // :: Deep clone of objects and arrays
     // -----------------------------------------------------------------------
@@ -1094,12 +1101,14 @@
         var cursor = self.find('.cursor');
         var animation;
         var paste_count = 0;
+        /*
         function get_char_size() {
             var span = $('<span>&nbsp;</span>').appendTo(self);
             var rect = span[0].getBoundingClientRect();
             span.remove();
             return rect;
         }
+        */
         function get_focus_offset() {
             var sel;
             if ((sel = window.getSelection()) && (sel.focusNode !== null)) {
@@ -1108,42 +1117,14 @@
         }
         function get_char_pos(e) {
             var focus = get_focus_offset();
-            var col;
-            var size = get_char_size();
-            var height = size.height;
-            var offset = self.offset();
-            var row = Math.floor((e.pageY - offset.top) / height);
             if ($.isNumeric(focus)) {
-                var node = $(e.target).closest('[role="presentation"]');
-                if (node.is('div')) {
-                    col = focus;
-                } else if (node.next().is('.cursor')) {
-                    col = focus;
-                } else if (node.is('.cursor')) {
-                    return position;
-                } else if (node.prev().is('.cursor')) {
-                    return position + focus;
-                } else {
-                    col = 0;
-                }
+                var node = $(e.target);
+                var parent = node.closest('[role="presentation"]');
+                return focus + parent.prevUntil('.prompt').text_length() +
+                    node.prevAll().text_length();
             } else {
                 return command.length;
             }
-            var lines = get_splitted_command_line(command);
-            var try_pos;
-            if (row > 0 && lines.length > 1) {
-                try_pos = col + lines.slice(0, row).reduce(function(sum, line) {
-                    return sum + line.length;
-                }, 0);
-            } else {
-                try_pos = col;
-            }
-            // tabs are 4 spaces and newline don't show up in results
-            var text = command.replace(/\t/g, '\x00\x00\x00\x00').replace(/\n/, '');
-            var before = text.slice(0, try_pos);
-            var len = before.replace(/\x00{4}/g, '\t').replace(/\x00+/, '').length;
-            var command_len = command.length;
-            return len > command_len ? command_len : len;
         }
         function get_key(e) {
             if (e.key) {
@@ -1627,7 +1608,7 @@
         // :: return index after next word that got replaced by formatting
         // :: and change length of text
         // ---------------------------------------------------------------------
-        function index_after_formatting() {
+        function index_after_formatting(position) {
             var start = position === 0 ? 0 : position - 1;
             var command_len = $.terminal.length(command);
             for (var i = start; i < command_len - 1; ++i) {
@@ -1650,7 +1631,7 @@
         // :: so it stay in place when you move real cursor in the middle
         // :: of the word
         // ---------------------------------------------------------------------
-        function get_formatted_position() {
+        function get_formatted_position(position) {
             var formatted_position = position;
             var string = formatting(command);
             var len = $.terminal.length(string);
@@ -1666,7 +1647,7 @@
                 } else if (false && orig_len < sub_len) {
                     formatted_position += diff;
                 } else {
-                    var index = index_after_formatting();
+                    var index = index_after_formatting(position);
                     var to_end = $.terminal.substring(command, 0, index + 1);
                     formatted_position -= orig_len - sub_len;
                     if (orig_sub && orig_sub !== to_end) {
@@ -2074,7 +2055,7 @@
                     } else {
                         position = n;
                     }
-                    formatted_position = get_formatted_position();
+                    formatted_position = get_formatted_position(position);
                     if ($.isFunction(options.onPositionChange)) {
                         options.onPositionChange(position);
                     }
@@ -2085,8 +2066,32 @@
                     return position;
                 }
             },
-            display_position: function() {
-                return formatted_position;
+            display_position: function(n, relative) {
+                if (n === undefined) {
+                    return formatted_position;
+                } else {
+                    var string = formatting(command);
+                    var len = $.terminal.length(string);
+                    var command_len = $.terminal.length(command);
+                    if (len === command_len) {
+                        return self.position(n);
+                    } else {
+                        var new_formatted_pos;
+                        if (relative) {
+                            new_formatted_pos = formatted_position + n;
+                        } else if (n > len) {
+                            new_formatted_pos = len;
+                        } else {
+                            new_formatted_pos = n;
+                        }
+                        // it's faster then reverse algorithm
+                        for (var i = 0; i < command_len; ++i) {
+                            if (new_formatted_pos === get_formatted_position(i)) {
+                                return self.position(i);
+                            }
+                        }
+                    }
+                }
             },
             visible: (function() {
                 var visible = self.visible;
@@ -2151,6 +2156,7 @@
                 }
             }
         });
+        //debug_object(self, 'cmd')('display_position');
         // ---------------------------------------------------------------------
         // :: INIT
         // ---------------------------------------------------------------------
@@ -2421,7 +2427,7 @@
                                     if ($(e.target).is('.cmd')) {
                                         self.position(command.length);
                                     } else {
-                                        self.position(get_char_pos(e));
+                                        self.display_position(get_char_pos(e));
                                     }
                                 }
                                 count = 0;
