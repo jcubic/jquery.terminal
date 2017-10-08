@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 06 Oct 2017 21:55:52 +0000
+ * Date: Sun, 08 Oct 2017 10:31:59 +0000
  */
 
 /* TODO:
@@ -2424,10 +2424,12 @@
                         if (enabled) {
                             self.oneTime(options.clickTimeout, name, function() {
                                 if (!$(e.target).is('.prompt') && down) {
-                                    if ($(e.target).is('.cmd')) {
-                                        self.position(command.length);
-                                    } else {
-                                        self.display_position(get_char_pos(e));
+                                    if (enabled) {
+                                        if ($(e.target).is('.cmd')) {
+                                            self.position(command.length);
+                                        } else {
+                                            self.display_position(get_char_pos(e));
+                                        }
                                     }
                                 }
                                 count = 0;

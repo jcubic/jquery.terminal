@@ -2424,10 +2424,12 @@
                         if (enabled) {
                             self.oneTime(options.clickTimeout, name, function() {
                                 if (!$(e.target).is('.prompt') && down) {
-                                    if ($(e.target).is('.cmd')) {
-                                        self.position(command.length);
-                                    } else {
-                                        self.display_position(get_char_pos(e));
+                                    if (enabled) {
+                                        if ($(e.target).is('.cmd')) {
+                                            self.position(command.length);
+                                        } else {
+                                            self.display_position(get_char_pos(e));
+                                        }
                                     }
                                 }
                                 count = 0;
