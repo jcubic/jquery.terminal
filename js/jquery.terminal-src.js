@@ -1101,31 +1101,11 @@
         var cursor = self.find('.cursor');
         var animation;
         var paste_count = 0;
-        /*
-        function get_char_size() {
-            var span = $('<span>&nbsp;</span>').appendTo(self);
-            var rect = span[0].getBoundingClientRect();
-            span.remove();
-            return rect;
-        }
-        */
-        function get_focus_offset() {
-            var sel;
-            if ((sel = window.getSelection()) && (sel.focusNode !== null)) {
-                return sel.focusOffset;
-            }
-        }
         function get_char_pos(e) {
-            var focus = get_focus_offset();
-            if ($.isNumeric(focus)) {
-                var node = $(e.target);
-                var parent = node.closest('[role="presentation"]');
-                var len = node.text().length;
-                focus = len === 1 ? 0 : Math.min(focus, len);
-                return focus + parent.prevUntil('.prompt').text_length() +
-                    node.prevAll().text_length();
-            } else {
-                return command.length;
+            var node = $(e.target);
+            if (node.is('span')) {
+                return node.index() + node.closest('[role="presentation"]')
+                    .prevUntil('.prompt').text_length();
             }
         }
         function get_key(e) {
@@ -1574,7 +1554,25 @@
         // :: format end encode the string
         // ---------------------------------------------------------------------
         function format(string) {
-            return $.terminal.format($.terminal.encode(string));
+            return $.terminal.format($.terminal.encode(wrap(string)));
+        }
+        // ---------------------------------------------------------------------
+        // :: function create new string with all characters in it's own
+        // :: formatting - it will only have style if the input is formatting
+        // :: this function is not very usefull so it's not in $.terminal
+        // ---------------------------------------------------------------------
+        function wrap(string) {
+            var result = [];
+            var len = $.terminal.length(string);
+            for (var i = 0; i < len; ++i) {
+                var text = $.terminal.substring(string, i, i + 1);
+                if ($.terminal.is_formatting(text)) {
+                    result.push(text);
+                } else {
+                    result.push('[[;;]' + text + ']');
+                }
+            }
+            return result.join('');
         }
         // ---------------------------------------------------------------------
         // :: shortcut helper
@@ -2674,13 +2672,7 @@
             var space = -1;
             var prev_space;
             var length = 0;
-            //var limit = 10000;
             for (var i = 0; i < string.length; i++) {
-                /*
-                if (--limit === 0) {
-                    break;
-                }
-                */
                 match = string.substring(i).match(format_start_re);
                 if (match) {
                     formatting = match[1];
@@ -2770,20 +2762,30 @@
             var end = string.length;
             var start_formatting = '';
             var end_formatting = '';
+            var prev_index;
             $.terminal.iterate_formatting(string, function(data) {
-                if (data.count === start_index) {
-                    start = data.index + 1;
+                if (start_index) {
+                    if (data.count === start_index + 1) {
+                        start = data.index;
+                        if (data.formatting) {
+                            start_formatting = data.formatting;
+                        }
+                    }
+                }
+                if (end_index && data.count === end_index + 1) {
+                    end = data.index;
                     if (data.formatting) {
-                        start_formatting = data.formatting;
+                        end = prev_index + 1;
                     }
                 }
                 if (end_index && data.count === end_index) {
-                    end = data.index + 1;
                     end_formatting = data.formatting;
+                    prev_index = data.index;
                 }
             });
             string = start_formatting + string.substring(start, end);
             if (end_formatting) {
+                string = string.replace(/(\[\[^\]]+)?\]$/, '');
                 string += ']';
             }
             return string;

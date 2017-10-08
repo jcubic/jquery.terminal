@@ -30,8 +30,10 @@
 * allow to call original terminal keymap for overwrites defined in terminal (not only the ones defined in cmd)
 * escape `<` and `>` issue reported by @itsZN [#345](https://github.com/jcubic/jquery.terminal/issues/345)
 * fix moving cursor when formatting change size of text (found when creating emoji demo)
+  the click was rewritten using span for each character
 * fix command line when for wide characters
 * don't move the cursor on click when cmd disabled
+* fix substring
 
 ## 1.8.0
 * allow to return promise from prompt + fix promise in echo
