@@ -1120,6 +1120,8 @@
             if ($.isNumeric(focus)) {
                 var node = $(e.target);
                 var parent = node.closest('[role="presentation"]');
+                var len = node.text().length;
+                focus = len === 1 ? 0 : Math.min(focus, len);
                 return focus + parent.prevUntil('.prompt').text_length() +
                     node.prevAll().text_length();
             } else {

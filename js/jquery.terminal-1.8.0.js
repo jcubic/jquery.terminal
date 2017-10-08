@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 08 Oct 2017 10:31:59 +0000
+ * Date: Sun, 08 Oct 2017 15:17:06 +0000
  */
 
 /* TODO:
@@ -1120,6 +1120,8 @@
             if ($.isNumeric(focus)) {
                 var node = $(e.target);
                 var parent = node.closest('[role="presentation"]');
+                var len = node.text().length;
+                focus = len === 1 ? 0 : Math.min(focus, len);
                 return focus + parent.prevUntil('.prompt').text_length() +
                     node.prevAll().text_length();
             } else {
