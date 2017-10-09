@@ -1,5 +1,4 @@
-## Next
-
+## 1.9.0
 ### Features
 * new api utils $.terminal.length and $.terminal.columns
 * echo array (resizable in columns that fit the width, using settings.tabs as pad right)
@@ -12,7 +11,6 @@
 * refresh API method
 * new api method display_position in cmd plugin that return corrected position of the cursor if cursor in the middle
   of the word that got replaced by longer or shorter string in formatting function (fix for emoji demo)
-
 ### Bugs
 * add missing --size default for underline animation
 * fix trim of spaces in front of lines when keep words is true
