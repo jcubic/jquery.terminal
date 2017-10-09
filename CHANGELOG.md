@@ -1,3 +1,40 @@
+## Next
+
+### Features
+* new api utils $.terminal.length and $.terminal.columns
+* echo array (resizable in columns that fit the width, using settings.tabs as pad right)
+* callback function parseObject that's called on object different then string (on render)
+* calling option method with numRows or numChars redraw terminal output (for testing)
+* onFlush callback (called when text is rendered on screen in flush method)
+* regex helper `$.terminal.formatter` created using Symbols can be use instead of regex
+* new option pasteImage (default true) - requested by @ssv1000 [#342](https://github.com/jcubic/jquery.terminal/issues/342)
+* CTRL+C cancel command like in bash if no selection - requested by @abhiks19 [#343](https://github.com/jcubic/jquery.terminal/issues/343)
+* refresh API method
+* new api method display_position in cmd plugin that return corrected position of the cursor if cursor in the middle
+  of the word that got replaced by longer or shorter string in formatting function (fix for emoji demo)
+
+### Bugs
+* add missing --size default for underline animation
+* fix trim of spaces in front of lines when keep words is true
+* fix newline in prompt found while [answering question on SO](https://stackoverflow.com/a/46399564/387194)
+* fix insert of newline in the middle of the command line if there is "word space word" and you
+  press space after space
+* fix  infinite loop in `split_equal` with keep words when word is longer than the limit and
+  there is space before long word
+* fix paste on MacOS - regresion after adding context menu paste (reported by Ravi Teja Mamidipaka [#340](https://github.com/jcubic/jquery.terminal/issues/340))
+* fix cursor in textarea in Edge and IE (reported by Tejaswi Rohit Anupindi [#344](https://github.com/jcubic/jquery.terminal/issues/344))
+* fix input for Android 4.4 in emulator (tested on saucelabs.com)
+* fix selection + css variables (know bug in MS Edge)
+* fix apply/call issue that was causing Android 2.3 to crash
+* fix context menu on selected text (the selected text was cleared)
+* allow to call original terminal keymap for overwrites defined in terminal (not only the ones defined in cmd)
+* escape `<` and `>` issue reported by @itsZN [#345](https://github.com/jcubic/jquery.terminal/issues/345)
+* fix moving cursor when formatting change size of text (found when creating emoji demo)
+  the click was rewritten using span for each character
+* fix command line when for wide characters
+* don't move the cursor on click when cmd disabled
+* fix substring
+
 ## 1.8.0
 * allow to return promise from prompt + fix promise in echo
 * add back context menu paste that was removed by mistake

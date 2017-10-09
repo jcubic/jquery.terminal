@@ -42,11 +42,10 @@
     /*left: -99999px;
     clip: rect(1px,1px,1px,1px);
     /* on desktop textarea appear when paste */
-    /*
+    /* opacity is needed for Edge and IE */
     opacity: 0.01;
     filter: alpha(opacity = 0.01);
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
-    */
     background: transparent;
     border: none;
     color: transparent;
@@ -55,7 +54,9 @@
     resize: none;
     z-index: 0;
     overflow: hidden;
+    white-space: pre;
 }
+
 .terminal .error {
     color: #f00;
 }
@@ -64,6 +65,10 @@
     /*overflow: hidden;*/
     overflow-y: auto;
     overflow-x: hidden;
+}
+body.terminal {
+    height: 100vh;
+    margin: 0;
 }
 .terminal > div {
     height: 100%;
@@ -557,7 +562,7 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size) * 1px);
+          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -575,7 +580,7 @@
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size) * 1px);
+          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -585,7 +590,7 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size) * 1px);
+          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -593,7 +598,7 @@
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size) * 1px);
+          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -603,7 +608,7 @@
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size) * 1px);
+          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -611,9 +616,34 @@
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size) * 1px);
+          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
+    }
+}
+/*
+ * overwrite css variables that don't work with selection in Edge
+ */
+@supports (-ms-ime-align:auto) {
+    .terminal h1::selection,
+    .terminal h2::selection,
+    .terminal h3::selection,
+    .terminal h4::selection,
+    .terminal h5::selection,
+    .terminal h6::selection,
+    .terminal pre::selection,
+    .terminal td::selection,
+    .terminal .terminal-output div div::selection,
+    .terminal .terminal-output div div a::selection,
+    .terminal .terminal-output div span::selection,
+    .cmd div::selection,
+    .cmd > span::selection,
+    .cmd > span span::selection,
+    .cmd > div::selection,
+    .cmd > div span::selection,
+    .cmd .prompt span::selection {
+        background-color: rgba(170, 170, 170, 0.99);
+        color: #000;
     }
 }
