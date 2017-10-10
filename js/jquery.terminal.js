@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 10 Oct 2017 20:48:06 +0000
+ * Date: Tue, 10 Oct 2017 21:00:15 +0000
  */
 
 /* TODO:
@@ -2697,7 +2697,6 @@
                     }
                 }
                 var braket = string[i].match(/[[\]]/);
-                var next;
                 if (not_formatting) {
                     // treat entity as one character
                     if (string[i] === '&') {

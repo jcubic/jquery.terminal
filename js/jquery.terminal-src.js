@@ -2697,7 +2697,6 @@
                     }
                 }
                 var braket = string[i].match(/[[\]]/);
-                var next;
                 if (not_formatting) {
                     // treat entity as one character
                     if (string[i] === '&') {
