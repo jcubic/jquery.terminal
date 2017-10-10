@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 10 Oct 2017 16:24:11 +0000
+ * Date: Tue, 10 Oct 2017 20:48:06 +0000
  */
 
 /* TODO:
@@ -2697,6 +2697,7 @@
                     }
                 }
                 var braket = string[i].match(/[[\]]/);
+                var next;
                 if (not_formatting) {
                     // treat entity as one character
                     if (string[i] === '&') {
@@ -2763,10 +2764,16 @@
             var start_formatting = '';
             var end_formatting = '';
             var prev_index;
+            var re = /(&[^;]+);$/;
             $.terminal.iterate_formatting(string, function(data) {
+                var m;
                 if (start_index) {
                     if (data.count === start_index + 1) {
                         start = data.index;
+                        m = string.substring(0, start + 1).match(re);
+                        if (m) {
+                            start -= m[1].length;
+                        }
                         if (data.formatting) {
                             start_formatting = data.formatting;
                         }
@@ -2774,6 +2781,10 @@
                 }
                 if (end_index && data.count === end_index + 1) {
                     end = data.index;
+                    m = string.substring(0, end + 1).match(re);
+                    if (m) {
+                        end -= m[1].length;
+                    }
                     if (data.formatting) {
                         end = prev_index + 1;
                     }

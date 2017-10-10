@@ -1,6 +1,7 @@
 ## 1.9.1
 * fix cursor in IE and iOS/Safari reported by @RinaVladimyrovna [#350](https://github.com/jcubic/jquery.terminal/issues/350)
 * don't apply formatters in echo commands for completion (found by applying completion to emoji demo)
+* fix substring and html entity (entering < & > in command line was showing entity not character)
 
 ## 1.9.0
 ### Features
