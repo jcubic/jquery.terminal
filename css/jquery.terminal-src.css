@@ -55,8 +55,13 @@
     z-index: 0;
     overflow: hidden;
     white-space: pre;
+    text-indent: -9999em\0;
 }
-
+@media all and (-ms-high-contrast:none) {
+    .cmd .clipboard {
+        text-indent: -9999em;
+    }
+}
 .terminal .error {
     color: #f00;
 }
