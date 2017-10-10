@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 10 Oct 2017 10:53:55 +0000
+ * Date: Tue, 10 Oct 2017 16:24:11 +0000
  */
 
 /* TODO:
@@ -5443,7 +5443,8 @@
                             echo_command();
                             var text = matched.reverse().join('\t');
                             self.echo($.terminal.escape_brackets(text), {
-                                keepWords: true
+                                keepWords: true,
+                                formatters: false
                             });
                             return true;
                         }

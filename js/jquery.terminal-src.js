@@ -5443,7 +5443,8 @@
                             echo_command();
                             var text = matched.reverse().join('\t');
                             self.echo($.terminal.escape_brackets(text), {
-                                keepWords: true
+                                keepWords: true,
+                                formatters: false
                             });
                             return true;
                         }
