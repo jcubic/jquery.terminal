@@ -55,12 +55,7 @@
     z-index: 0;
     overflow: hidden;
     white-space: pre;
-    text-indent: -9999em\0;
-}
-@media all and (-ms-high-contrast:none) {
-    .cmd .clipboard {
-        text-indent: -9999em;
-    }
+    text-indent: -9999em; /* better cursor hiding for Safari and IE */
 }
 .terminal .error {
     color: #f00;
