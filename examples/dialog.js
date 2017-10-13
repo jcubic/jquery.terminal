@@ -1,6 +1,7 @@
 /**
  * jQuery Plugin for text based dialogs that look
- * like dialog linux command
+ * like dialog linux command it use cmd plugin from
+ * jQuery Terminal
  *
  * Copyright (c) 2017 Jakub Jankiewicz <http://jcubic.pl/me>
  *

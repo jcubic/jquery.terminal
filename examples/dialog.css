@@ -1,3 +1,12 @@
+/**
+ * jQuery Plugin for text based dialogs that look
+ * like dialog linux command it use cmd plugin from
+ * jQuery Terminal
+ *
+ * Copyright (c) 2017 Jakub Jankiewicz <http://jcubic.pl/me>
+ *
+ * Linceses under MIT license
+ */
 .dialog {
     background-color: #00a;
     position: relatieve;
@@ -42,16 +51,23 @@
 .dialog .line {
     float: left;
     clear: both;
+    white-space: nowrap;
 }
 .dialog .box > .input .left,
-.dialog .box > .buttons-line .left,
-.dialog .box > .buttons-line .buttons,
-.dialog .box > .buttons-line .right,
 .dialog .box > .input .top,
 .dialog .box > .input .bottom,
 .dialog .box > .input .cmd,
 .dialog .box > .input .right {
+    display: inline-block;
+}
+.dialog .box > .buttons-line .left,
+.dialog .box > .buttons-line .buttons,
+.dialog .box > .buttons-line .right {
     float: left;
+}
+.dialog .box > .input .cmd {
+    float: none;
+    margin-top: -4px;
 }
 .dialog .box .title {
     position: absolute;
@@ -78,7 +94,8 @@
     color: #555;
     min-width: 87px;
 }
-.dialog .box button:active, .dialog .box button {
+.dialog .box button:active,
+.dialog .box button {
     outline: none;
 }
 
@@ -90,23 +107,29 @@
     content: '>';
     float: right;
 }
-.dialog .box button:before, .dialog .box button:after {
+.dialog .box button:before,
+.dialog .box button:after {
     display: inline-block;
     color: #000;
 }
-.dialog .box button, .dialog .box button:before, .dialog .box button:after {
+.dialog .box button,
+.dialog .box button:before,
+.dialog .box button:after {
     background-color: transparent;
 }
 .dialog .box button:not(.active) .mark {
     color: #a00;
 }
-.dialog .box button.active, .dialog .box button.active:before, .dialog .box button.active:after {
+.dialog .box button.active,
+.dialog .box button.active:before,
+.dialog .box button.active:after {
     background-color: #00a;
 }
 .dialog .box button.active {
     color: #ff5;
 }
-.dialog .box button.active:before, .dialog .box button.active:after {
+.dialog .box button.active:before,
+.dialog .box button.active:after {
     color: #fff;
 }
 .dialog .box button.active.selected .mark {
