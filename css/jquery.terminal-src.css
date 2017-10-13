@@ -79,6 +79,7 @@ body.terminal {
     /*margin-top: 3px; */
     float: left;
     overflow: hidden;
+    padding-bottom: 3px;
 }
 .terminal .inverted, .cmd .inverted {
     background-color: #aaa;
