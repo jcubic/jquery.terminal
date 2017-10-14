@@ -20,7 +20,9 @@
 .dialog > :not(.box) {
     display: none;
 }
-.dialog .cmd {
+.dialog .box > .input .cmd {
+    float: none;
+    margin-bottom: -4px;
     --color: #000;
     --background: #aaa;
     padding: 0;
@@ -64,10 +66,6 @@
 .dialog .box > .buttons-line .buttons,
 .dialog .box > .buttons-line .right {
     float: left;
-}
-.dialog .box > .input .cmd {
-    float: none;
-    margin-top: -4px;
 }
 .dialog .box .title {
     position: absolute;
