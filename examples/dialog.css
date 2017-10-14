@@ -43,6 +43,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    -webkit-box-shadow: calc(var(--char-width) * 2px) calc(var(--char-width) * 2px) black;
+    box-shadow: calc(var(--char-width) * 2px) calc(var(--char-width) * 2px) black;
 }
 .dialog .box .light {
     color: #fff;
