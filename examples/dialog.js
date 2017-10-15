@@ -286,7 +286,7 @@
         }
         $(document).on('keydown', keydown);
         var bottom = $('<div class="bottom"/>').appendTo(box);
-        line(bottom, chars.sw, chars.se, {botton: true});
+        line(bottom, chars.sw, chars.se, {bottom: true});
 
         box.appendTo(self);
 

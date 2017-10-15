@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 10 Oct 2017 21:00:15 +0000
+ * Date: Sun, 15 Oct 2017 16:54:24 +0000
  */
 
 /* TODO:
@@ -1584,47 +1584,6 @@
         // :: functions used to calculate position of cursor when formatting
         // :: change length of output text like with emoji demo
         // ---------------------------------------------------------------------
-        function split(formatted, normal) {
-            function longer(str) {
-                return found && length(str) > length(found) || !found;
-            }
-            var formatted_len = $.terminal.length(formatted);
-            var normal_len = $.terminal.length(normal);
-            var found;
-            for (var i = normal_len; i > 1; i--) {
-                var test_normal = $.terminal.substring(normal, 0, i);
-                var formatted_normal = formatting(test_normal);
-                for (var j = formatted_len; j > 1; j--) {
-                    var test_formatted = $.terminal.substring(formatted, 0, j);
-                    if (test_formatted === formatted_normal &&
-                        longer(test_normal)) {
-                        found = test_normal;
-                    }
-                }
-            }
-            return found || '';
-        }
-        // ---------------------------------------------------------------------
-        // :: return index after next word that got replaced by formatting
-        // :: and change length of text
-        // ---------------------------------------------------------------------
-        function index_after_formatting(position) {
-            var start = position === 0 ? 0 : position - 1;
-            var command_len = $.terminal.length(command);
-            for (var i = start; i < command_len - 1; ++i) {
-                var substr = $.terminal.substring(command, 0, i);
-                var next_substr = $.terminal.substring(command, 0, i + 1);
-                var formatted_substr = formatting(substr);
-                var formatted_next = formatting(next_substr);
-                var substr_len = length(formatted_substr);
-                var next_len = length(formatted_next);
-                var test_diff = Math.abs(next_len - substr_len);
-                if (test_diff > 1) {
-                    return i;
-                }
-            }
-        }
-        // ---------------------------------------------------------------------
         // :: main function that return corrected cursor position on display
         // :: if cursor is in the middle of the word that is shorter the before
         // :: applying formatting then the corrected position is after the word
@@ -1632,43 +1591,63 @@
         // :: of the word
         // ---------------------------------------------------------------------
         function get_formatted_position(position) {
-            var formatted_position = position;
-            var string = formatting(command);
-            var len = $.terminal.length(string);
-            var command_len = $.terminal.length(command);
-            if (len !== command_len) {
-                var orig_sub = $.terminal.substring(command, 0, position);
-                var orig_len = $.terminal.length(orig_sub);
-                var sub = formatting(orig_sub);
-                var sub_len = $.terminal.length(sub);
-                var diff = Math.abs(orig_len - sub_len);
-                if (false && orig_len > sub_len) {
-                    formatted_position -= diff;
-                } else if (false && orig_len < sub_len) {
-                    formatted_position += diff;
-                } else {
-                    var index = index_after_formatting(position);
-                    var to_end = $.terminal.substring(command, 0, index + 1);
-                    formatted_position -= orig_len - sub_len;
-                    if (orig_sub && orig_sub !== to_end) {
-                        var formatted_to_end = formatting(to_end);
-                        var common = split(formatted_to_end, orig_sub);
-                        if (common && orig_sub !== common) {
-                            var re = new RegExp('^' + $.terminal.escape_regex(common));
-                            var to_end_rest = to_end.replace(re, '');
-                            var to_end_rest_len = length(formatting(to_end_rest));
-                            var commnon_len = length(formatting(common));
-                            formatted_position = commnon_len + to_end_rest_len;
-                        }
+            // only regex formatters can change length of output string
+            var formatters = $.terminal.defaults.formatters.filter(function(formatter) {
+                return formatter instanceof Array;
+            });
+            if (formatters.length) {
+                return formatters.reduce(function(position, frmt) {
+                    return tracking_replace(command, frmt[0], frmt[1], position)[1];
+                }, position);
+            }
+            return position;
+        }
+        // ---------------------------------------------------------------------
+        // :: source https://stackoverflow.com/a/46756077/387194
+        // ---------------------------------------------------------------------
+        function tracking_replace(string, rex, replacement, position) {
+            var new_string = "";
+            var match;
+            var index = 0;
+            var rep_string;
+            var new_position = position;
+            var start;
+            rex.lastIndex = 0; // Just to be sure
+            while (match = rex.exec(string)) {
+                // Add any of the original string we just skipped
+                start = rex.lastIndex - length(match[0]);
+                if (index < start) {
+                    new_string += $.terminal.substring(string, index, start);
+                    index = rex.lastIndex;
+                }
+                // Build the replacement string. This just handles $$ and $n,
+                // you may want to add handling for $`, $', and $&.
+                rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
+                    if (c0 === "$") {
+                        return "$";
+                    }
+                    return match[c0];
+                });
+                // Add on the replacement
+                new_string += rep_string;
+                // If the position is affected...
+                if (start < position) {
+                    // ... update it:
+                    if (rex.lastIndex < position) {
+                        // It's after the replacement, move it
+                        new_position += length(rep_string) - length(match[0]);
+                    } else {
+                        // It's *in* the replacement, put it just after
+                        new_position += length(rep_string) - (position - start);
                     }
                 }
-                if (formatted_position > len) {
-                    formatted_position = len;
-                } else if (formatted_position < 0) {
-                    formatted_position = 0;
-                }
             }
-            return formatted_position;
+            // Add on any trailing text in the string
+            if (index < string.length) {
+                new_string += $.terminal.substring(string, index);
+            }
+            // Return the string and the updated position
+            return [new_string, new_position];
         }
         // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
@@ -2978,8 +2957,12 @@
                 } else {
                     for (var i = 0; i < formatters.length; ++i) {
                         try {
-                            if (typeof formatters[i] === 'function') {
-                                var ret = formatters[i](string);
+                            var frm = formatters[i];
+                            var ret;
+                            if (frm instanceof Array) {
+                                string = string.replace(frm[0], frm[1]);
+                            } else if (typeof frm === 'function') {
+                                ret = frm(string);
                                 if (typeof ret === 'string') {
                                     string = ret;
                                 }
