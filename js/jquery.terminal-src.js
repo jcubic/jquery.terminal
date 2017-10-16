@@ -1580,6 +1580,9 @@
         function length(str) {
             return $.terminal.length(str);
         }
+        function substring(str, start, end) {
+            return $.terminal.substring(str, start, end);
+        }
         // ---------------------------------------------------------------------
         // :: functions used to calculate position of cursor when formatting
         // :: change length of output text like with emoji demo
@@ -1595,10 +1598,15 @@
             var formatters = $.terminal.defaults.formatters.filter(function(formatter) {
                 return formatter instanceof Array;
             });
+            if (position === 0) {
+                return position;
+            }
             if (formatters.length) {
-                return formatters.reduce(function(position, frmt) {
-                    return tracking_replace(command, frmt[0], frmt[1], position)[1];
-                }, position);
+                return formatters.reduce(function(result, frmt) {
+                    var command = result[0];
+                    var position = result[1];
+                    return tracking_replace(command, frmt[0], frmt[1], position);
+                }, [command, position])[1];
             }
             return position;
         }
@@ -1615,11 +1623,12 @@
             rex.lastIndex = 0; // Just to be sure
             while (match = rex.exec(string)) {
                 // Add any of the original string we just skipped
-                start = rex.lastIndex - length(match[0]);
+                var last_index = length(substring(string, 0, rex.lastIndex));
+                start = last_index - length(match[0]);
                 if (index < start) {
-                    new_string += $.terminal.substring(string, index, start);
+                    new_string += substring(string, index, start);
                 }
-                index = rex.lastIndex;
+                index = last_index;
                 // Build the replacement string. This just handles $$ and $n,
                 // you may want to add handling for $`, $', and $&.
                 rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
@@ -1631,9 +1640,9 @@
                 // Add on the replacement
                 new_string += rep_string;
                 // If the position is affected...
-                if (start <= position) {
+                if (start < position) {
                     // ... update it:
-                    if (rex.lastIndex < position) {
+                    if (last_index < position) {
                         // It's after the replacement, move it
                         new_position = Math.max(0,
                                                 new_position +
@@ -1647,7 +1656,7 @@
             }
             // Add on any trailing text in the string
             if (index < length(string)) {
-                new_string += $.terminal.substring(string, index);
+                new_string += substring(string, index);
             }
             // Return the string and the updated position
             return [new_string, new_position];
