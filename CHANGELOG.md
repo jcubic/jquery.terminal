@@ -1,6 +1,7 @@
 ## Next
 ### Features
-* new api for formatters Array with 2 elements regex and replacement string
+* new api for formatters Array with 2 elements regex and replacement string (it fix issue when formatters change
+  length of string - emoji demo)
 ### Bugs
 * fix cursor in IE and iOS/Safari reported by @RinaVladimyrovna [#350](https://github.com/jcubic/jquery.terminal/issues/350)
 * don't apply formatters in echo commands for completion (found by applying completion to emoji demo)

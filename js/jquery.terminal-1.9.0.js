@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 15 Oct 2017 16:54:24 +0000
+ * Date: Mon, 16 Oct 2017 07:51:33 +0000
  */
 
 /* TODO:
@@ -1618,8 +1618,8 @@
                 start = rex.lastIndex - length(match[0]);
                 if (index < start) {
                     new_string += $.terminal.substring(string, index, start);
-                    index = rex.lastIndex;
                 }
+                index = rex.lastIndex;
                 // Build the replacement string. This just handles $$ and $n,
                 // you may want to add handling for $`, $', and $&.
                 rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
@@ -1631,11 +1631,14 @@
                 // Add on the replacement
                 new_string += rep_string;
                 // If the position is affected...
-                if (start < position) {
+                if (start <= position) {
                     // ... update it:
                     if (rex.lastIndex < position) {
                         // It's after the replacement, move it
-                        new_position += length(rep_string) - length(match[0]);
+                        new_position = Math.max(0,
+                                                new_position +
+                                                length(rep_string) -
+                                                length(match[0]));
                     } else {
                         // It's *in* the replacement, put it just after
                         new_position += length(rep_string) - (position - start);
@@ -1643,7 +1646,7 @@
                 }
             }
             // Add on any trailing text in the string
-            if (index < string.length) {
+            if (index < length(string)) {
                 new_string += $.terminal.substring(string, index);
             }
             // Return the string and the updated position
