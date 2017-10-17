@@ -556,7 +556,7 @@ body.terminal {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size) * 1px);
+          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -574,7 +574,7 @@ body.terminal {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size) * 1px);
+          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
