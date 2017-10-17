@@ -4599,7 +4599,7 @@
                 } else {
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
-                    if (result !== undefined) {
+                    if (result) {
                         // auto pause/resume when user return promises
                         self.pause(settings.softPause);
                         // when for native Promise object work only in jQuery 3.x

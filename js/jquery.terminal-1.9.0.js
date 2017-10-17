@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 16 Oct 2017 10:28:59 +0000
+ * Date: Tue, 17 Oct 2017 08:14:26 +0000
  */
 
 /* TODO:
@@ -4599,7 +4599,7 @@
                 } else {
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
-                    if (result !== undefined) {
+                    if (result) {
                         // auto pause/resume when user return promises
                         self.pause(settings.softPause);
                         // when for native Promise object work only in jQuery 3.x
