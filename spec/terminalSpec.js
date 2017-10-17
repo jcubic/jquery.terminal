@@ -211,6 +211,13 @@ function tests_on_ready() {
                 expect($.terminal.escape_brackets(string)).toEqual(result);
             });
         });
+        describe('$.terminal.nested_formatting', function() {
+            var string = '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]';
+            var result = '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]';
+            it('should create list of formatting', function() {
+                expect($.terminal.nested_formatting(string)).toEqual(result);
+            });
+        });
         describe('$.terminal.encode', function() {
             var tags = '<hello> </hello>\t<world> </world>';
             var tags_result = '&lt;hello&gt;&nbsp;&lt;/hello&gt;&nbsp;&nbsp;&nbsp;'+

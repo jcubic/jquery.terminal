@@ -7,6 +7,7 @@
 * don't apply formatters in echo commands for completion (found by applying completion to emoji demo)
 * fix substring and html entity (entering < & > in command line was showing entity not character)
 * paste context menu only for command line (to allow to have image context menu)
+* fix nested formatting (by introducing __meta__ on formatter function that apply the function to whole string)
 
 ## 1.9.0
 ### Features

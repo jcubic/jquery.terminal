@@ -2927,7 +2927,7 @@
                 return string;
             }
             var stack = [];
-            var re = /(\[\[(?:[^\]]|\\\])+\](?:[^\][]|\\\])*\]?)/;
+            var re = /((?:\[\[(?:[^\]]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
             var format_re = /(\[\[(?:[^\]]|\\\])+\])[\s\S]*/;
             return string.split(re).filter(Boolean).map(function(string) {
                 if (string.match(/^\[\[/)) {
@@ -2963,29 +2963,37 @@
         // ---------------------------------------------------------------------
         apply_formatters: function(string) {
             var formatters = $.terminal.defaults.formatters;
-            return $.terminal.format_split(string).map(function(string) {
-                if ($.terminal.is_formatting(string)) {
-                    return string;
-                } else {
-                    for (var i = 0; i < formatters.length; ++i) {
-                        try {
-                            var frm = formatters[i];
-                            var ret;
-                            if (frm instanceof Array) {
-                                string = string.replace(frm[0], frm[1]);
-                            } else if (typeof frm === 'function') {
-                                ret = frm(string);
-                                if (typeof ret === 'string') {
-                                    string = ret;
-                                }
-                            }
-                        } catch (e) {
-                            throw new Error('Error in formatter [' + i + ']');
+            var i = 0;
+            try {
+                return formatters.reduce(function(string, formatter) {
+                    i++;
+                    if (typeof formatter === 'function' && formatter.__meta__) {
+                        var ret = formatter(string);
+                        if (typeof ret === 'string') {
+                            return ret;
                         }
+                    } else {
+                        return $.terminal.format_split(string).map(function(string) {
+                            if ($.terminal.is_formatting(string)) {
+                                return string;
+                            } else {
+                                if (formatter instanceof Array) {
+                                    return string.replace(formatter[0], formatter[1]);
+                                } else if (typeof formatter === 'function') {
+                                    var ret = formatter(string);
+                                    if (typeof ret === 'string') {
+                                        return ret;
+                                    }
+                                }
+                                return string;
+                            }
+                        }).join('');
                     }
                     return string;
-                }
-            }).join('');
+                }, string);
+            } catch (e) {
+                throw new Error('Error in formatter [' + (i - 1) + ']');
+            }
         },
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
@@ -3559,6 +3567,7 @@
     // -----------------------------------------------------------------------
     // :: Default options
     // -----------------------------------------------------------------------
+    $.terminal.nested_formatting.__meta__ = true;
     $.terminal.defaults = {
         prompt: '> ',
         history: true,
