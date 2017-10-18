@@ -4435,7 +4435,7 @@
         function show_greetings() {
             if (settings.greetings === undefined) {
                 // signature have ascii art so it's not suite for screen readers
-                self.echo(self.signature, {finalize: a11y_hide});
+                self.echo(self.signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
                 if (type === 'string') {

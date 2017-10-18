@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 17 Oct 2017 20:19:11 +0000
+ * Date: Wed, 18 Oct 2017 16:00:08 +0000
  */
 
 /* TODO:
@@ -4435,7 +4435,7 @@
         function show_greetings() {
             if (settings.greetings === undefined) {
                 // signature have ascii art so it's not suite for screen readers
-                self.echo(self.signature, {finalize: a11y_hide});
+                self.echo(self.signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
                 if (type === 'string') {
