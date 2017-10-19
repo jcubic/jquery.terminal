@@ -1900,6 +1900,9 @@
                 options.onCommandChange(command);
             }
         }
+        function crlf(string) {
+            return string.replace(/[\r\n]{2}/g, '\n');
+        }
         // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
@@ -1957,7 +1960,7 @@
             },
             set: function(string, stay) {
                 if (string !== undefined) {
-                    command = string;
+                    command = crlf(string);
                     if (!stay) {
                         self.position(command.length);
                     }
@@ -1985,6 +1988,7 @@
                 }
             },
             insert: function(string, stay) {
+                string = crlf(string);
                 if (position === command.length) {
                     command += string;
                 } else if (position === 0) {
