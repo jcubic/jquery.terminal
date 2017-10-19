@@ -10,6 +10,8 @@
 * paste context menu only for command line (to allow to have image context menu)
 * fix nested formatting (by introducing __meta__ on formatter function that apply the function to whole string)
 * fix format_split when text have \\ character before ]
+* fix line ending on windows in command line (CRLF)
+* fix copy from command line
 
 ## 1.9.0
 ### Features
