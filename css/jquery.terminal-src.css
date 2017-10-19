@@ -119,7 +119,6 @@ body.terminal {
     box-sizing: border-box;
 }
 .cmd div {
-    float: left;
     clear: both;
 }
 .cmd div + span {
