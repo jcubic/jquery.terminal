@@ -963,7 +963,8 @@ function tests_on_ready() {
             });
             describe('maskChar', function() {
                 function text(term) {
-                    return term.find('.cmd > span:not(.prompt,.cursor)').text();
+                    // without [data-text] is select before cursor span and spans inside
+                    return term.find('.cmd .cursor-line span[data-text]:not(.cursor)').text();
                 }
                 it('should use specified character for mask', function() {
                     var mask = '-';
@@ -1216,19 +1217,20 @@ function tests_on_ready() {
             });
             it('cmd plugin moving cursor', function() {
                 cmd.position(-8, true);
-                var before = cmd.find('.prompt').next();
+                var cursor_line = cmd.find('.cursor-line');
                 var cursor = cmd.find('.cursor');
+                var before = cursor.prev();
                 var after = cursor.next();
                 expect(before.is('span')).toBe(true);
                 expect(before.text().length).toBe(term.cols()-8);
-                expect(after.next().text().length).toBe(2);
+                expect(cursor_line.next().text().length).toBe(2);
                 expect(after.text().length).toBe(5);
                 expect(cursor.text()).toBe('M');
             });
             it('should remove characters', function() {
                 cmd['delete'](-10);
-                var before = cmd.find('.prompt').next();
                 var cursor = cmd.find('.cursor');
+                var before = cursor.prev();
                 var after = cursor.next();
                 expect(before.text().length).toEqual(term.cols()-8-10);
                 cmd['delete'](8);
@@ -1276,7 +1278,7 @@ function tests_on_ready() {
             it('should set and remove mask', function() {
                 cmd.mask('•');
                 cmd.position(6);
-                var before = cmd.find('.prompt').next();
+                var before = cmd.find('.cursor').prev();
                 expect(before.text()).toEqual('••••••');
                 expect(cmd.get()).toEqual('foobar');
                 cmd.mask(false);
