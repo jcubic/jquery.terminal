@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 19 Oct 2017 10:25:26 +0000
+ * Date: Fri, 20 Oct 2017 08:02:57 +0000
  */
 
 /* TODO:
@@ -1681,11 +1681,8 @@
             // -----------------------------------------------------------------
             // :: Draw line with the cursor
             // -----------------------------------------------------------------
-            function slice(string, start, end) {
-                return $.terminal.substring(string, start, end);
-            }
             function draw_cursor_line(string, position) {
-                var len = $.terminal.length(string);
+                var len = length(string);
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
@@ -1693,20 +1690,20 @@
                 } else if (position === 0) {
                     before.html('');
                     //fix for tilda in IE
-                    cursor.html(format(slice(string, 0, 1)));
+                    cursor.html(format(substring(string, 0, 1)));
                     //cursor.html(format(string[0]));
-                    after.html(format(slice(string, 1)));
+                    after.html(format(substring(string, 1)));
                 } else {
-                    var before_str = slice(string, 0, position);
+                    var before_str = substring(string, 0, position);
                     before.html(format(before_str));
                     //fix for tilda in IE
-                    var c = slice(string, position, position + 1);
+                    var c = substring(string, position, position + 1);
                     //cursor.html(string[position]);
                     cursor.html(format(c));
-                    if (position === string.length - 1) {
+                    if (position === len - 1) {
                         after.html('');
                     } else {
-                        after.html(format(slice(string, position + 1)));
+                        after.html(format(substring(string, position + 1)));
                     }
                 }
             }
@@ -1763,7 +1760,7 @@
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
                         });
                     }
-                    var first_len = $.terminal.length(array[0]);
+                    var first_len = length(array[0]);
                     //cursor in first line
                     if (first_len === 0 && array.length === 1) {
                         // skip empty line
@@ -1787,9 +1784,9 @@
                             lines_after(array.slice(2));
                         } else {
                             var last = array.slice(-1)[0];
-                            var len = $.terminal.length(string);
+                            var len = length(string);
                             var from_last = len - pos - tabs_rm;
-                            var last_len = $.terminal.length(last);
+                            var last_len = length(last);
                             var new_pos = 0;
                             if (from_last === -1) {
                                 from_last = 0;
@@ -1828,7 +1825,7 @@
                                 current = array[i];
                                 line_index = i;
                                 // cursor on first character in line
-                                if (new_pos === current.length) {
+                                if (new_pos === length(current)) {
                                     new_pos = 0;
                                     current = array[++line_index];
                                     if (current === undefined) {
@@ -1900,6 +1897,9 @@
                 options.onCommandChange(command);
             }
         }
+        function crlf(string) {
+            return string.replace(/[\r\n]{2}/g, '\n');
+        }
         // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
@@ -1957,7 +1957,7 @@
             },
             set: function(string, stay) {
                 if (string !== undefined) {
-                    command = string;
+                    command = crlf(string);
                     if (!stay) {
                         self.position(command.length);
                     }
@@ -1985,6 +1985,7 @@
                 }
             },
             insert: function(string, stay) {
+                string = crlf(string);
                 if (position === command.length) {
                     command += string;
                 } else if (position === 0) {

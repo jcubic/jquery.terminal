@@ -12,6 +12,7 @@
 * fix format_split when text have \\ character before ]
 * fix line ending on windows in command line (CRLF)
 * fix copy from command line
+* fix cursor position when command line have formatting (using formatters)
 
 ## 1.9.0
 ### Features
