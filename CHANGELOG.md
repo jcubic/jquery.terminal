@@ -15,6 +15,7 @@
 * fix copy from command line
 * fix cursor position when command line have formatting (using formatters)
 * fix cursor position when command line have 3 lines
+* don't apply formatters for greetings not only for signture (user can use formatting because he control the string)
 
 ## 1.9.0
 ### Features

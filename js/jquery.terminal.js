@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 20 Oct 2017 18:32:58 +0000
+ * Date: Fri, 20 Oct 2017 18:37:43 +0000
  */
 
 /* TODO:
@@ -4444,15 +4444,18 @@
         // :: Display user greetings or terminal signature
         // ---------------------------------------------------------------------
         function show_greetings() {
+            function echo(string) {
+                self.echo(string, {finalize: a11y_hide, formatters: false});
+            }
             if (settings.greetings === undefined) {
                 // signature have ascii art so it's not suite for screen readers
-                self.echo(self.signature, {finalize: a11y_hide, formatters: false});
+                echo(self.signature);
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
                 if (type === 'string') {
-                    self.echo(settings.greetings);
+                    echo(settings.greetings);
                 } else if (type === 'function') {
-                    settings.greetings.call(self, self.echo);
+                    settings.greetings.call(self, echo);
                 } else {
                     self.error(strings().wrongGreetings);
                 }
