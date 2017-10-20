@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 20 Oct 2017 15:08:45 +0000
+ * Date: Fri, 20 Oct 2017 16:52:35 +0000
  */
 
 /* TODO:
@@ -1108,7 +1108,8 @@
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
-                return node.index() + node.closest('[role="presentation"]')
+                return node.index() + node.parents('span').prevAll().text_length() +
+                    node.closest('[role="presentation"]')
                     .prevUntil('.prompt').text_length();
             }
         }
@@ -1573,21 +1574,29 @@
         // :: this function is not very usefull so it's not in $.terminal
         // ---------------------------------------------------------------------
         function wrap(string) {
+            function formatting(string) {
+                if ($.terminal.is_formatting(string)) {
+                    if (string.match(/\]\\\]/)) {
+                        string = string.replace(/\]\\\]/g, ']\\\\]');
+                    }
+                } else {
+                    if (string.match(/\\$/)) {
+                        string += '\\';
+                    }
+                    string = '[[;;]' + string + ']';
+                }
+                return string;
+            }
+            var len = length(string);
+            if (len === 1) {
+                return formatting(string);
+            }
             var result = [];
-            var len = $.terminal.length(string);
+            // len - 1 break the command line $.terminal.substring will return
+            // empty string for out of bound indexes
             for (var i = 0; i < len; ++i) {
                 var text = $.terminal.substring(string, i, i + 1);
-                if ($.terminal.is_formatting(text)) {
-                    if (text.match(/\]\\\]/)) {
-                        text = text.replace(/\]\\\]/g, ']\\\\]');
-                    }
-                    result.push(text);
-                } else {
-                    if (text.match(/\\$/)) {
-                        text += '\\';
-                    }
-                    result.push('[[;;]' + text + ']');
-                }
+                result.push(formatting(text));
             }
             return result.join('');
         }
@@ -1697,16 +1706,12 @@
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
-                    //fix for tilda in IE
                     cursor.html(format(substring(string, 0, 1)));
-                    //cursor.html(format(string[0]));
                     after.html(format(substring(string, 1)));
                 } else {
-                    var before_str = substring(string, 0, position);
+                    var before_str = $.terminal.substring(string, 0, position);
                     before.html(format(before_str));
-                    //fix for tilda in IE
                     var c = substring(string, position, position + 1);
-                    //cursor.html(string[position]);
                     cursor.html(format(c));
                     if (position === len - 1) {
                         after.html('');
@@ -2776,16 +2781,14 @@
             var re = /(&[^;]+);$/;
             $.terminal.iterate_formatting(string, function(data) {
                 var m;
-                if (start_index) {
-                    if (data.count === start_index + 1) {
-                        start = data.index;
-                        m = string.substring(0, start + 1).match(re);
-                        if (m) {
-                            start -= m[1].length;
-                        }
-                        if (data.formatting) {
-                            start_formatting = data.formatting;
-                        }
+                if (start_index && data.count === start_index + 1) {
+                    start = data.index;
+                    m = string.substring(0, start + 1).match(re);
+                    if (m) {
+                        start -= m[1].length;
+                    }
+                    if (data.formatting) {
+                        start_formatting = data.formatting;
                     }
                 }
                 if (end_index && data.count === end_index + 1) {
@@ -2803,6 +2806,9 @@
                     prev_index = data.index;
                 }
             });
+            if (start_index && !start) {
+                return '';
+            }
             string = start_formatting + string.substring(start, end);
             if (end_formatting) {
                 string = string.replace(/(\[\[^\]]+)?\]$/, '');
