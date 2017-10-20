@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Fri, 20 Oct 2017 15:08:45 +0000
+ * Date: Fri, 20 Oct 2017 18:32:59 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -117,6 +117,7 @@ body.terminal {
     font-size: 12px;
     line-height: 14px;
     box-sizing: border-box;
+    cursor: text;
 }
 .cmd div {
     clear: both;

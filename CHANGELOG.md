@@ -3,6 +3,7 @@
 * new api for formatters Array with 2 elements regex and replacement string (it fix issue when formatters change
   length of string - emoji demo)
 * normalize IE key property for keymap + always use +SPACEBAR if there is any control key
+* cursor text for terminal and cmd
 ### Bugs
 * fix cursor in IE and iOS/Safari reported by @RinaVladimyrovna [#350](https://github.com/jcubic/jquery.terminal/issues/350)
 * don't apply formatters in echo commands for completion (found by applying completion to emoji demo)
@@ -13,6 +14,7 @@
 * fix line ending on windows in command line (CRLF)
 * fix copy from command line
 * fix cursor position when command line have formatting (using formatters)
+* fix cursor position when command line have 3 lines
 
 ## 1.9.0
 ### Features

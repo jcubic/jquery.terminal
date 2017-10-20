@@ -117,6 +117,7 @@ body.terminal {
     font-size: 12px;
     line-height: 14px;
     box-sizing: border-box;
+    cursor: text;
 }
 .cmd div {
     clear: both;

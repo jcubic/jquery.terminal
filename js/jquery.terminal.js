@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 20 Oct 2017 16:52:35 +0000
+ * Date: Fri, 20 Oct 2017 18:32:58 +0000
  */
 
 /* TODO:
@@ -1111,6 +1111,12 @@
                 return node.index() + node.parents('span').prevAll().text_length() +
                     node.closest('[role="presentation"]')
                     .prevUntil('.prompt').text_length();
+            } else if (node.is('div[role="presentation"]')) {
+                var index = node.index();
+                var lines = command.split(/\n/).slice(0, index);
+                return lines.reduce(function(pos, line) {
+                    return pos + length(line);
+                }, 0) + (lines.length - 1);
             }
         }
         // ie mapping
@@ -1721,7 +1727,9 @@
                 }
             }
             function div(string) {
-                return '<div role="presentation">' + format(string) + '</div>';
+                return '<div role="presentation" aria-hidden="true">' +
+                    format(string) +
+                    '</div>';
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -1786,71 +1794,58 @@
                         if (array.length > 1) {
                             lines_after(array.slice(2));
                         }
+                    } else if (pos < first_len) {
+                        draw_cursor_line(array[0], pos);
+                        lines_after(array.slice(1));
+                    } else if (pos === first_len) {
+                        cursor_line.before(div(array[0]));
+                        draw_cursor_line(array[1], 0);
+                        lines_after(array.slice(2));
                     } else {
-                        var num_lines = array.length;
-                        if (pos < first_len) {
-                            draw_cursor_line(array[0], pos);
-                            lines_after(array.slice(1));
-                        } else if (pos === first_len) {
-                            cursor_line.before(div(array[0]));
-                            draw_cursor_line(array[1], 0);
-                            lines_after(array.slice(2));
-                        } else {
-                            var last = array.slice(-1)[0];
-                            var len = length(string);
-                            var from_last = len - pos - tabs_rm;
-                            var last_len = length(last);
-                            var new_pos = 0;
-                            if (from_last === -1) {
-                                from_last = 0;
-                            }
-                            if (from_last <= last_len) { // in last line
-                                lines_before(array.slice(0, -1));
-                                if (last_len === from_last) {
-                                    new_pos = 0;
-                                } else {
-                                    new_pos = last_len - from_last;
-                                }
-                                draw_cursor_line(last, new_pos);
-                            } else if (num_lines === 3) { // in the middle
-                                var str = format(array[0]);
-                                cursor_line.before('<div role="presentation">' +
-                                                   str +
-                                                   '</div>');
-                                draw_cursor_line(array[1], pos - first_len - 1);
-                                str = format(formatting(array[2]));
-                                cursor_line.after('<div role="presentation">' +
-                                                  str +
-                                                  '</div>');
+                        var last = array.slice(-1)[0];
+                        var len = length(string);
+                        var from_last = len - pos - tabs_rm;
+                        var last_len = length(last);
+                        var new_pos = 0;
+                        if (from_last === -1) {
+                            from_last = 0;
+                        }
+                        if (from_last <= last_len) { // in last line
+                            lines_before(array.slice(0, -1));
+                            if (last_len === from_last) {
+                                new_pos = 0;
                             } else {
-                                // more lines, cursor in the middle
-                                var line_index;
-                                var current;
-                                new_pos = pos;
-                                for (i = 0; i < array.length; ++i) {
-                                    var current_len = $.terminal.length(array[i]);
-                                    if (new_pos > current_len) {
-                                        new_pos -= current_len;
-                                    } else {
-                                        break;
-                                    }
-                                }
-                                current = array[i];
-                                line_index = i;
-                                // cursor on first character in line
-                                if (new_pos === length(current)) {
-                                    new_pos = 0;
-                                    current = array[++line_index];
-                                    if (current === undefined) {
-                                        //should never happen
-                                        var msg = $.terminal.defaults.strings.redrawError;
-                                        throw new Error(msg);
-                                    }
-                                }
-                                draw_cursor_line(current, new_pos);
-                                lines_before(array.slice(0, line_index));
-                                lines_after(array.slice(line_index + 1));
+                                new_pos = last_len - from_last;
                             }
+                            draw_cursor_line(last, new_pos);
+                        } else {
+                            // more lines, cursor in the middle
+                            var line_index;
+                            var current;
+                            new_pos = pos;
+                            for (i = 0; i < array.length; ++i) {
+                                var current_len = $.terminal.length(array[i]);
+                                if (new_pos > current_len) {
+                                    new_pos -= current_len;
+                                } else {
+                                    break;
+                                }
+                            }
+                            current = array[i];
+                            line_index = i;
+                            // cursor on first character in line
+                            if (new_pos === length(current)) {
+                                new_pos = 0;
+                                current = array[++line_index];
+                                if (current === undefined) {
+                                    //should never happen
+                                    var msg = $.terminal.defaults.strings.redrawError;
+                                    throw new Error(msg);
+                                }
+                            }
+                            draw_cursor_line(current, new_pos);
+                            lines_before(array.slice(0, line_index));
+                            lines_after(array.slice(line_index + 1));
                         }
                     }
                 } else if (string === '') {
@@ -2438,9 +2433,10 @@
                         var down = was_down;
                         if (enabled) {
                             self.oneTime(options.clickTimeout, name, function() {
-                                if (!$(e.target).is('.prompt') && down) {
+                                var $target = $(e.target);
+                                if (!$target.is('.prompt') && down) {
                                     if (enabled) {
-                                        if ($(e.target).is('.cmd')) {
+                                        if ($target.is('.cmd')) {
                                             self.position(command.length);
                                         } else {
                                             self.display_position(get_char_pos(e));
