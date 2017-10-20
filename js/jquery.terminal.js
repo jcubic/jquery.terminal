@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 20 Oct 2017 08:02:57 +0000
+ * Date: Fri, 20 Oct 2017 15:08:45 +0000
  */
 
 /* TODO:
@@ -1062,10 +1062,14 @@
         }
         var id = cmd_index++;
         self.addClass('cmd');
-        self.append('<span class="prompt"></span><span></span>' +
-                    '<span class="cursor">&nbsp;</span><span></span>');
+        self.append('<span class="prompt"></span>');
+        self.append('<div class="cursor-line">' +
+                    '<span></span>' +
+                    '<span class="cursor">&nbsp;</span>' +
+                    '<span></span>' +
+                    '</div>');
         // a11y: don't read command it's in textarea that's in focus
-        a11y_hide(self.find('span').not(':eq(0)'));
+        a11y_hide(self.find('.cursor-line'));
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
@@ -1574,6 +1578,9 @@
             for (var i = 0; i < len; ++i) {
                 var text = $.terminal.substring(string, i, i + 1);
                 if ($.terminal.is_formatting(text)) {
+                    if (text.match(/\]\\\]/)) {
+                        text = text.replace(/\]\\\]/g, ']\\\\]');
+                    }
                     result.push(text);
                 } else {
                     if (text.match(/\\$/)) {
@@ -1678,6 +1685,7 @@
         var redraw = (function() {
             var before = cursor.prev();
             var after = cursor.next();
+            var cursor_line = cursor.parent();
             // -----------------------------------------------------------------
             // :: Draw line with the cursor
             // -----------------------------------------------------------------
@@ -1714,7 +1722,7 @@
             // :: Display lines after the cursor
             // -----------------------------------------------------------------
             function lines_after(lines) {
-                var last_ins = after;
+                var last_ins = cursor_line;
                 $.each(lines, function(i, line) {
                     last_ins = $(div(line)).insertAfter(last_ins);
                 });
@@ -1724,7 +1732,7 @@
             // -----------------------------------------------------------------
             function lines_before(lines) {
                 $.each(lines, function(i, line) {
-                    before.before(div(line));
+                    cursor_line.before(div(line));
                 });
             }
             // -----------------------------------------------------------------
@@ -1743,7 +1751,7 @@
                 var pos = formatted_position;
                 string = formatting(string.replace(/</g, '&#60;').replace(/>/g, '&#62;'));
                 var i;
-                self.find('div').remove();
+                self.find('div:not(.cursor-line)').remove();
                 before.html('');
                 // long line
                 if (strlen(text(string)) > num_chars - prompt_len - 1 ||
@@ -1768,7 +1776,7 @@
                         draw_cursor_line(array[0], pos);
                         lines_after(array.slice(1));
                     } else if (pos === first_len) {
-                        before.before(div(array[0]));
+                        cursor_line.before(div(array[0]));
                         draw_cursor_line(array[1] || '', 0);
                         if (array.length > 1) {
                             lines_after(array.slice(2));
@@ -1779,7 +1787,7 @@
                             draw_cursor_line(array[0], pos);
                             lines_after(array.slice(1));
                         } else if (pos === first_len) {
-                            before.before(div(array[0]));
+                            cursor_line.before(div(array[0]));
                             draw_cursor_line(array[1], 0);
                             lines_after(array.slice(2));
                         } else {
@@ -1801,14 +1809,14 @@
                                 draw_cursor_line(last, new_pos);
                             } else if (num_lines === 3) { // in the middle
                                 var str = format(array[0]);
-                                before.before('<div role="presentation">' +
-                                              str +
-                                              '</div>');
+                                cursor_line.before('<div role="presentation">' +
+                                                   str +
+                                                   '</div>');
                                 draw_cursor_line(array[1], pos - first_len - 1);
                                 str = format(formatting(array[2]));
-                                after.after('<div role="presentation">' +
-                                            str +
-                                            '</div>');
+                                cursor_line.after('<div role="presentation">' +
+                                                  str +
+                                                  '</div>');
                             } else {
                                 // more lines, cursor in the middle
                                 var line_index;
@@ -3106,7 +3114,7 @@
                                 result += '>' + text + '</a>';
                             } else {
                                 result += ' data-text="' +
-                                    data.replace('"', '&quote;') + '">' +
+                                    data.replace(/"/g, '&quote;') + '">' +
                                     text + '</span>';
                             }
                             return result;

@@ -121,9 +121,6 @@ body.terminal {
 .cmd div {
     clear: both;
 }
-.cmd div + span {
-    clear: both;
-}
 .cmd .prompt + div {
     clear: right;
 }

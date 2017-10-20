@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Fri, 20 Oct 2017 08:02:58 +0000
+ * Date: Fri, 20 Oct 2017 15:08:45 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -119,9 +119,6 @@ body.terminal {
     box-sizing: border-box;
 }
 .cmd div {
-    clear: both;
-}
-.cmd div + span {
     clear: both;
 }
 .cmd .prompt + div {
