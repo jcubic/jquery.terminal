@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 21 Oct 2017 14:16:35 +0000
+ * Date: Sat, 21 Oct 2017 14:31:27 +0000
  */
 
 /* TODO:
@@ -1998,19 +1998,30 @@
                 }
                 return self;
             },
-            keymap: function(new_keymap) {
+            keymap: function(new_keymap, value) {
+                function wrap(key, fn) {
+                    return function(e) {
+                        // new keymap function will get default as 2nd argument
+                        return fn(e, default_keymap[key]);
+                    };
+                }
                 if (typeof new_keymap === 'undefined') {
                     return keymap;
+                } else if (typeof new_keymap === 'string') {
+                    if (typeof value === 'undefined') {
+                        if (keymap[new_keymap]) {
+                            return keymap[new_keymap];
+                        } else if (default_keymap[new_keymap]) {
+                            return default_keymap[new_keymap];
+                        }
+                    } else {
+                        keymap[new_keymap] = wrap(new_keymap, value);
+                    }
                 } else {
                     keymap = $.extend(
                         {},
                         default_keymap,
-                        $.omap(new_keymap || {}, function(key, fn) {
-                            return function(e) {
-                                // new keymap function will get default as 2nd argument
-                                return fn(e, default_keymap[key]);
-                            };
-                        })
+                        $.omap(new_keymap || {}, wrap)
                     );
                     return self;
                 }
@@ -4495,11 +4506,7 @@
             var options = {
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
-                    try {
-                        settings.onEchoCommand.call(self, div, command);
-                    } catch(e) {
-                        console.log(e.stack);
-                    }
+                    settings.onEchoCommand.call(self, div, command);
                 }
             };
             if ($.isFunction(prompt)) {

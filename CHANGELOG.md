@@ -5,6 +5,7 @@
 * normalize IE key property for keymap + always use +SPACEBAR if there is any control key
 * cursor text for terminal and cmd
 * onEchoCommand callback gets second argument `command`
+* cmd keymap api function, along with object and no arguments, accept string as first argument and function as second
 ### Bugs
 * fix cursor in IE and iOS/Safari reported by @RinaVladimyrovna [#350](https://github.com/jcubic/jquery.terminal/issues/350)
 * don't apply formatters in echo commands for completion (found by applying completion to emoji demo)
