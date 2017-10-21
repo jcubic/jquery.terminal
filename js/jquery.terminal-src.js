@@ -3892,8 +3892,7 @@
                         interpreter(command.name, [token].concat(command.args));
                     } else {
                         // should never happen
-                        terminal.error('&#91;AUTH&#93; ' +
-                                       strings().noTokenError);
+                        terminal.error('&#91;AUTH&#93; ' + strings().noTokenError);
                     }
                 }
             };
@@ -4258,6 +4257,9 @@
                 settings.exceptionHandler.call(self, e, label);
             } else {
                 self.exception(e, label);
+                setTimeout(function() {
+                    throw e;
+                }, 0);
             }
         }
         // ---------------------------------------------------------------------
@@ -4506,7 +4508,12 @@
             var options = {
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
-                    settings.onEchoCommand.call(self, div, command);
+                    try {
+                        settings.onEchoCommand.call(self, div, command);
+                    } catch (e) {
+                        settings.onEchoCommand = $.noop;
+                        self.exception(e);
+                    }
                 }
             };
             if ($.isFunction(prompt)) {
@@ -4681,9 +4688,6 @@
             } catch (e) {
                 display_exception(e, 'USER');
                 self.resume();
-                if (!settings.exceptionHandler) {
-                    throw e;
-                }
             }
         }
         // ---------------------------------------------------------------------
@@ -4765,9 +4769,6 @@
                             return fun.apply(self, args);
                         } catch (e) {
                             display_exception(e, 'USER KEYMAP');
-                            if (!settings.exceptionHandler) {
-                                throw e;
-                            }
                         }
                     };
                 }));
@@ -5182,6 +5183,7 @@
                     try {
                         settings.onImport.call(self, view);
                     } catch (e) {
+                        settings.onImport = $.noop;
                         display_exception(e, 'onImport');
                     }
                 }
@@ -5769,6 +5771,7 @@
                             try {
                                 ret = settings.onFocus.call(self, self);
                             } catch (e) {
+                                settings.onFocus = $.noop;
                                 display_exception(e, 'onFocus');
                             }
                         }
@@ -5792,6 +5795,7 @@
                         try {
                             ret = settings.onBlur.call(self, self);
                         } catch (e) {
+                            settings.onBlur = $.noop;
                             display_exception(e, 'onBlur');
                         }
                     }
@@ -6028,6 +6032,7 @@
                     try {
                         settings.onFlush.call(self, self);
                     } catch (e) {
+                        settings.onFlush = $.noop;
                         display_exception(e, 'onFlush');
                     }
                     //num_rows = get_num_rows(self, char_size);
@@ -6405,6 +6410,7 @@
                             try {
                                 settings.onExit.call(self, self);
                             } catch (e) {
+                                settings.onExit = $.noop;
                                 display_exception(e, 'onExit');
                             }
                         }
@@ -6429,6 +6435,7 @@
                         try {
                             current.onExit.call(self, self);
                         } catch (e) {
+                            current.onExit = $.noop;
                             display_exception(e, 'onExit');
                         }
                     }
@@ -6571,9 +6578,6 @@
                     if (name !== 'exec' && name !== 'resume') {
                         display_exception(e, 'TERMINAL');
                     }
-                    if (!settings.exceptionHandler) {
-                        throw e;
-                    }
                 }
             };
         }));
@@ -6608,10 +6612,8 @@
                     autologin = false;
                 }
             } catch (e) {
+                settings.onBeforeLogin = $.noop;
                 display_exception(e, 'onBeforeLogin');
-                if (!settings.exceptionHandler) {
-                    throw e;
-                }
             }
         }
         // create json-rpc authentication function
@@ -6730,10 +6732,8 @@
                         try {
                             settings.onCommandChange.call(self, command, self);
                         } catch (e) {
+                            settings.onCommandChange = $.noop;
                             display_exception(e, 'onCommandChange');
-                            if (!settings.exceptionHandler) {
-                                throw e;
-                            }
                         }
                     }
                     scroll_to_bottom();

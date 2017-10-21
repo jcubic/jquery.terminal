@@ -6,6 +6,7 @@
 * cursor text for terminal and cmd
 * onEchoCommand callback gets second argument `command`
 * cmd keymap api function, along with object and no arguments, accept string as first argument and function as second
+* only one exception per callback event
 ### Bugs
 * fix cursor in IE and iOS/Safari reported by @RinaVladimyrovna [#350](https://github.com/jcubic/jquery.terminal/issues/350)
 * don't apply formatters in echo commands for completion (found by applying completion to emoji demo)
@@ -18,6 +19,7 @@
 * fix cursor position when command line have formatting (using formatters)
 * fix cursor position when command line have 3 lines
 * don't apply formatters for greetings not only for signture (user can use formatting because he control the string)
+* fix max call stack exception when error happen in onEchoCommand
 
 ## 1.9.0
 ### Features
