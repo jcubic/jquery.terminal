@@ -837,6 +837,29 @@
             'aria-hidden': 'true'
         });
     }
+    // ---------------------------------------------------------------------
+    // alert only first exception of type
+    // ---------------------------------------------------------------------
+    var excepctions = [];
+    function alert_exception(e, label) {
+        var message = (label ? label + ': ' : '') + exception_message(e);
+        if (excepctions.indexOf(message) === -1) {
+            excepctions.push(message);
+            alert(message + '\n' + e.stack);
+        }
+    }
+    // ---------------------------------------------------------------------
+    // :: Return exception message as string
+    // ---------------------------------------------------------------------
+    function exception_message(e) {
+        if (typeof e === 'string') {
+            return e;
+        } else if (typeof e.fileName === 'string') {
+            return e.fileName + ': ' + e.message;
+        } else {
+            return e.message;
+        }
+    }
     // -----------------------------------------------------------------------
     // :: CYCLE DATA STRUCTURE
     // -----------------------------------------------------------------------
@@ -1565,7 +1588,7 @@
             try {
                 return $.terminal.apply_formatters(string);
             } catch (e) {
-                alert(e.message + '\n' + (e.stack ? e.stack : e));
+                alert_exception('[Formatting]', e);
             }
         }
         // ---------------------------------------------------------------------
@@ -4217,18 +4240,6 @@
             // default name is login so you can pass true
         }
         // ---------------------------------------------------------------------
-        // :: Return exception message as string
-        // ---------------------------------------------------------------------
-        function exception_message(e) {
-            if (typeof e === 'string') {
-                return e;
-            } else if (typeof e.fileName === 'string') {
-                return e.fileName + ': ' + e.message;
-            } else {
-                return e.message;
-            }
-        }
-        // ---------------------------------------------------------------------
         // :: display Exception on terminal
         // ---------------------------------------------------------------------
         function display_exception(e, label) {
@@ -4379,8 +4390,7 @@
                 if ($.isFunction(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL');
                 } else {
-                    alert('[Internal Exception(process_line)]:' +
-                          exception_message(e) + '\n' + e.stack);
+                    alert_exception('[Internal Exception(process_line)]', e);
                 }
             }
         }
@@ -4436,7 +4446,7 @@
                 if ($.isFunction(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
                 } else {
-                    alert('Exception in redraw\n' + e.stack);
+                    alert_exception('[redraw]', e);
                 }
             }
         }
@@ -6018,8 +6028,7 @@
                     if ($.isFunction(settings.exceptionHandler)) {
                         settings.exceptionHandler.call(self, e, 'TERMINAL (Flush)');
                     } else {
-                        alert('[Flush] ' + exception_message(e) + '\n' +
-                              e.stack);
+                        alert_exception('[Flush]', e);
                     }
                 }
                 return self;
@@ -6106,8 +6115,7 @@
                         if ($.isFunction(settings.exceptionHandler)) {
                             settings.exceptionHandler.call(self, e, 'TERMINAL (echo)');
                         } else {
-                            alert('[Terminal.echo] ' + exception_message(e) +
-                              '\n' + e.stack);
+                            alert_exception('[Terminal.echo]', e);
                         }
                     }
                 }
