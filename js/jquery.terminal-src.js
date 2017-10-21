@@ -4252,14 +4252,16 @@
         // ---------------------------------------------------------------------
         // :: display Exception on terminal
         // ---------------------------------------------------------------------
-        function display_exception(e, label) {
+        function display_exception(e, label, silent) {
             if ($.isFunction(settings.exceptionHandler)) {
                 settings.exceptionHandler.call(self, e, label);
             } else {
                 self.exception(e, label);
-                setTimeout(function() {
-                    throw e;
-                }, 0);
+                if (!silent) {
+                    setTimeout(function() {
+                        throw e;
+                    }, 0);
+                }
             }
         }
         // ---------------------------------------------------------------------
@@ -6576,7 +6578,10 @@
                 } catch (e) {
                     // exec catch by command (resume call exec)
                     if (name !== 'exec' && name !== 'resume') {
-                        display_exception(e, 'TERMINAL');
+                        display_exception(e, 'TERMINAL', true);
+                    }
+                    if (!settings.exceptionHandler) {
+                        throw e;
                     }
                 }
             };
