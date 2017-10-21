@@ -841,11 +841,11 @@
     // alert only first exception of type
     // ---------------------------------------------------------------------
     var excepctions = [];
-    function alert_exception(e, label) {
+    function alert_exception(label, e) {
         var message = (label ? label + ': ' : '') + exception_message(e);
         if (excepctions.indexOf(message) === -1) {
             excepctions.push(message);
-            alert(message + '\n' + e.stack);
+            alert(message + (e.stack ? '\n' + e.stack : ''));
         }
     }
     // ---------------------------------------------------------------------
@@ -4495,7 +4495,11 @@
             var options = {
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
-                    settings.onEchoCommand.call(self, div);
+                    try {
+                        settings.onEchoCommand.call(self, div, command);
+                    } catch(e) {
+                        console.log(e.stack);
+                    }
                 }
             };
             if ($.isFunction(prompt)) {
