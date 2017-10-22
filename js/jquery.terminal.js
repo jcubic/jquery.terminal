@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 22 Oct 2017 20:40:19 +0000
+ * Date: Sun, 22 Oct 2017 20:57:47 +0000
  */
 
 /* TODO:
@@ -2551,14 +2551,19 @@
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
             return function(string) {
-                return string.length;
+                return bare_text(string).length;
             };
         } else {
-            return wcwidth;
+            return function(string) {
+                return wcwidth(bare_text(string));
+            };
         }
     })();
+    function bare_text(string) {
+        return $('<span>' + string + '</span>').text();
+    }
     function text(string) {
-        return $('<span>' + $.terminal.strip(string) + '</span>').text();
+        return bare_text($.terminal.strip(string));
     }
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
@@ -3107,8 +3112,12 @@
                             if (style.indexOf('i') !== -1) {
                                 style_str += 'font-style:italic;';
                             }
-                            var len = strlen($('<span>' + text + '</span>').text());
-                            style_str += '--length: ' + len + ';';
+                            if (typeof wcwidth !== 'undefined') {
+                                var len = strlen(text);
+                                if (len !== 1) {
+                                    style_str += '--length: ' + len + ';';
+                                }
+                            }
                             if ($.terminal.valid_color(color)) {
                                 style_str += 'color:' + color + ';';
                                 if (style.indexOf('g') !== -1) {
@@ -3158,7 +3167,14 @@
                             return result;
                         });
                     } else {
-                        return '<span>' + text.replace(/\\\]/g, ']') + '</span>';
+                        text = text.replace(/\\\]/g, ']');
+                        if (typeof wcwidth !== 'undefined') {
+                            var len = strlen(text);
+                            var style = len !== 1 ? ' style="--length: ' + len + '"' : '';
+                        } else {
+                            style = '';
+                        }
+                        return '<span' + style + '>' + text + '</span>';
                     }
                 }).join('');
                 return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');

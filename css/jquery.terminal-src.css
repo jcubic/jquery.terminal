@@ -417,7 +417,7 @@ body.terminal {
         background-color: var(--background, #000);
     }
     .terminal span[style*="--length"] {
-        width: calc(var(--length) * var(--char-width) * 1px);
+        width: calc(var(--length, 1) * var(--char-width) * 1px);
         display: inline-block;
     }
     .terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {

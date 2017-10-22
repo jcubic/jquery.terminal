@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 22 Oct 2017 20:40:20 +0000
+ * Date: Sun, 22 Oct 2017 20:57:47 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -417,7 +417,7 @@ body.terminal {
         background-color: var(--background, #000);
     }
     .terminal span[style*="--length"] {
-        width: calc(var(--length) * var(--char-width) * 1px);
+        width: calc(var(--length, 1) * var(--char-width) * 1px);
         display: inline-block;
     }
     .terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
