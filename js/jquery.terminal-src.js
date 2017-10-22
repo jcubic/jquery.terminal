@@ -3107,6 +3107,8 @@
                             if (style.indexOf('i') !== -1) {
                                 style_str += 'font-style:italic;';
                             }
+                            var len = strlen($('<span>' + text + '</span>').text());
+                            style_str += '--length: ' + len + ';';
                             if ($.terminal.valid_color(color)) {
                                 style_str += 'color:' + color + ';';
                                 if (style.indexOf('g') !== -1) {
@@ -5962,6 +5964,7 @@
                         return;
                     }
                     char_size = get_char_size();
+                    self[0].style.setProperty('--char-width', char_size.width);
                     var new_num_chars = get_num_chars(self, char_size);
                     var new_num_rows = get_num_rows(self, char_size);
                     // only if number of chars changed
