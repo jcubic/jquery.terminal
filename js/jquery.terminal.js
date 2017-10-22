@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 22 Oct 2017 20:57:47 +0000
+ * Date: Sun, 22 Oct 2017 21:23:32 +0000
  */
 
 /* TODO:
@@ -2560,6 +2560,7 @@
         }
     })();
     function bare_text(string) {
+        string = string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
         return $('<span>' + string + '</span>').text();
     }
     function text(string) {
@@ -2804,8 +2805,7 @@
         // :: formatting aware substring function
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
-            var strip = $('<span>' + $.terminal.strip(string) + '</span>').text();
-            if (strip.substring(start_index, end_index) === '') {
+            if (text(string).substring(start_index, end_index) === '') {
                 return '';
             }
             var start;
@@ -3090,7 +3090,7 @@
                                 } else {
                                     return slashes.replace(/../, '\\');
                                 }
-                            });
+                            }).replace(/>/g, '&gt;').replace(/</g, '&lt;');
                             var style_str = '';
                             if (style.indexOf('b') !== -1) {
                                 style_str += 'font-weight:bold;';
@@ -3131,7 +3131,8 @@
                             if (data_text === '') {
                                 data = text;
                             } else {
-                                data = data_text.replace(/&#93;/g, ']');
+                                data = data_text.replace(/&#93;/g, ']')
+                                    .replace(/>/g, '&gt;').replace(/</g, '&lt;');
                             }
                             var result;
                             if (style.indexOf('!') !== -1) {
@@ -3167,7 +3168,8 @@
                             return result;
                         });
                     } else {
-                        text = text.replace(/\\\]/g, ']');
+                        text = text.replace(/\\\]/g, ']')
+                            .replace(/>/g, '&gt;').replace(/</g, '&lt;');
                         if (typeof wcwidth !== 'undefined') {
                             var len = strlen(text);
                             var style = len !== 1 ? ' style="--length: ' + len + '"' : '';
