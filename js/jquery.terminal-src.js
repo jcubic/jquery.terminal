@@ -2551,12 +2551,10 @@
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
             return function(string) {
-                return bare_text(string).length;
+                return string.length;
             };
         } else {
-            return function(string) {
-                return wcwidth(bare_text(string));
-            };
+            return wcwidth;
         }
     })();
     function bare_text(string) {
@@ -3113,7 +3111,7 @@
                                 style_str += 'font-style:italic;';
                             }
                             if (typeof wcwidth !== 'undefined') {
-                                var len = strlen(text);
+                                var len = strlen(bare_text(text));
                                 if (len !== 1) {
                                     style_str += '--length: ' + len + ';';
                                 }
@@ -3171,7 +3169,7 @@
                         text = text.replace(/\\\]/g, ']')
                             .replace(/>/g, '&gt;').replace(/</g, '&lt;');
                         if (typeof wcwidth !== 'undefined') {
-                            var len = strlen(text);
+                            var len = strlen(bare_text(text));
                             var style = len !== 1 ? ' style="--length: ' + len + '"' : '';
                         } else {
                             style = '';
@@ -5982,7 +5980,6 @@
                         return;
                     }
                     char_size = get_char_size();
-                    self[0].style.setProperty('--char-width', char_size.width);
                     var new_num_chars = get_num_chars(self, char_size);
                     var new_num_rows = get_num_rows(self, char_size);
                     // only if number of chars changed
@@ -6006,7 +6003,11 @@
             // -------------------------------------------------------------
             // :: redraw the terminal
             // -------------------------------------------------------------
-            refresh: redraw,
+            refresh: function() {
+                self[0].style.setProperty('--char-width', char_size.width);
+                redraw();
+                return self;
+            },
             // -------------------------------------------------------------
             // :: Flush the output to the terminal
             // -------------------------------------------------------------
