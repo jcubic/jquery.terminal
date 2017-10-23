@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 23 Oct 2017 16:26:48 +0000
+ * Date: Mon, 23 Oct 2017 16:53:39 +0000
  */
 
 /* TODO:
@@ -1549,6 +1549,12 @@
             function split(string) {
                 return $.terminal.split_equal(string, num_chars);
             }
+            function skip_empty(array) {
+                // we remove lines that are left overs after adding space at the end
+                return array.filter(function(line) {
+                    return !$.terminal.strip(line).match(/^ $/);
+                });
+            }
             var prompt = prompt_node.text();
             var re = new RegExp('^' + $.terminal.escape_regex(prompt));
             var array;
@@ -1560,15 +1566,20 @@
                 }
                 // split first line
                 if (strlen(tmp[0]) > first_len) {
-                    array = split(prompt + tmp[0], num_chars);
+                    array = split(prompt + tmp[0]);
                     array[0] = array[0].replace(re, '');
+                    array = skip_empty(array);
                 } else {
                     array = [tmp[0]];
                 }
                 // process rest of the lines
                 for (i = 1; i < tmp.length; ++i) {
-                    if (tmp[i].length > num_chars) {
-                        array = array.concat(split(tmp[i], num_chars));
+                    if (strlen(tmp[i]) > num_chars) {
+                        var splitted = split(tmp[i]);
+                        if (i < tmp.length - 1) {
+                            splitted = skip_empty(splitted);
+                        }
+                        array = array.concat(splitted);
                     } else {
                         array.push(tmp[i]);
                     }
@@ -1579,6 +1590,7 @@
             }
             return array;
         }
+        window.get_splitted_command_line = get_splitted_command_line;
         // ---------------------------------------------------------------------
         // :: use custom formatting
         // ---------------------------------------------------------------------
@@ -2944,11 +2956,9 @@
                         }
                         first_index = (new_index || data.index) + 1;
                         var start_formatting = output.match(format_begin_re);
-                        console.log(start_formatting);
                         // prev_format added in fix_close function
                         if (prev_format) {
                             var closed_formatting = output.match(/^[^\]]*\]/);
-                            console.log(closed_formatting);
                             if (!start_formatting) {
                                 output = prev_format + output;
                             }
