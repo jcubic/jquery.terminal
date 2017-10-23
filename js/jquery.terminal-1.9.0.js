@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 22 Oct 2017 21:35:46 +0000
+ * Date: Mon, 23 Oct 2017 07:29:29 +0000
  */
 
 /* TODO:
@@ -2596,7 +2596,14 @@
         var array = string.match(command_re) || [];
         if (array.length) {
             var name = array.shift();
-            var args = $.map(array, fn);
+            var args = $.map(array, function(arg) {
+                if (arg.match(/^["']/)) {
+                    arg = arg.replace(/\n/g, '\\u0000\\u0000\\u0000\\u0000');
+                    arg = fn(arg);
+                    return arg.replace(/\x00\x00\x00\x00/g, '\n');
+                }
+                return fn(arg);
+            });
             var quotes = $.map(array, function(arg) {
                 var m = arg.match(/^(['"]).*\1$/);
                 return m && m[1] || '';

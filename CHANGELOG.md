@@ -22,6 +22,7 @@
 * fix max call stack exception when error happen in onEchoCommand
 * Chinese character occupy 2 characters same as in linux terminal (requirement wcwidth and css variables)
 * fix substring and string like '<a' that was breaking command line
+* fix newlines in string when do parse/split _command (used by command line)
 
 
 ## 1.9.0

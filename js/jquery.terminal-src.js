@@ -2596,7 +2596,14 @@
         var array = string.match(command_re) || [];
         if (array.length) {
             var name = array.shift();
-            var args = $.map(array, fn);
+            var args = $.map(array, function(arg) {
+                if (arg.match(/^["']/)) {
+                    arg = arg.replace(/\n/g, '\\u0000\\u0000\\u0000\\u0000');
+                    arg = fn(arg);
+                    return arg.replace(/\x00\x00\x00\x00/g, '\n');
+                }
+                return fn(arg);
+            });
             var quotes = $.map(array, function(arg) {
                 var m = arg.match(/^(['"]).*\1$/);
                 return m && m[1] || '';
