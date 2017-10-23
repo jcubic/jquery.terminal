@@ -471,7 +471,9 @@ function tests_on_ready() {
                              "ucibus euismod nulla, ac auctor diam rutrum sit amet. Nulla "+
                              "vel odio erat]m rutrum sit amet. Nulla vel odio erat], ac ma"+
                              "ttis enim."];
-                expect($.terminal.split_equal(text, 100)).toEqual(array);
+                $.terminal.split_equal(text, 100).forEach(function(line, i) {
+                    expect(line).toEqual(array[i]);
+                });
             });
             it("should keep formatting if span across line with newline characters", function() {
                 var text = ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
@@ -502,16 +504,21 @@ function tests_on_ready() {
                             return line.length;
                         });
                     }
-                    lengths.slice(0, -1).forEach(function(length) {
-                        if (length != cols[i]) {
-                            throw new Error('Lines count is ' + JSON.stringify(lengths) +
-                                           ' but it should have ' + cols[i]);
+                    lengths.forEach(function(length, j) {
+                        if (j < lengths - 1) {
+                            if (length != cols[i]) {
+                                throw new Error('Lines count is ' + JSON.stringify(lengths) +
+                                                ' but it should have ' + cols[i] +
+                                                ' line ' + JSON.stringify(lines[j]));
+                            }
+                        } else {
+                            if (length > cols[i]) {
+                                throw new Error('Lines count is ' + JSON.stringify(lengths) +
+                                                ' but it should have ' + cols[i] +
+                                                ' line ' + JSON.stringify(lines[j]));
+                            }
                         }
                     });
-                    if (lengths[lengths-1] > cols[i]) {
-                        throw new Error('Lines count is ' + JSON.stringify(lengths) +
-                                        ' but it should have ' + cols[i]);
-                    }
                     expect(true).toEqual(true);
                 }
             }

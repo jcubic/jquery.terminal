@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 23 Oct 2017 16:53:39 +0000
+ * Date: Mon, 23 Oct 2017 18:53:34 +0000
  */
 
 /* TODO:
@@ -2951,25 +2951,16 @@
                         if (keep_words) {
                             output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
                         }
-                        if (output.match(/^]/)) {
-                            output = output.substring(1);
-                        }
                         first_index = (new_index || data.index) + 1;
-                        var start_formatting = output.match(format_begin_re);
-                        // prev_format added in fix_close function
                         if (prev_format) {
                             var closed_formatting = output.match(/^[^\]]*\]/);
-                            if (!start_formatting) {
-                                output = prev_format + output;
-                            }
+                            output = prev_format + output;
                             if (closed_formatting) {
                                 prev_format = '';
                             }
                         }
                         if (last_bracket) {
-                            if (!start_formatting) {
-                                output += ']';
-                            }
+                            output += ']';
                             prev_format = '';
                         }
                         var matched = output.match(format_re);
@@ -2983,6 +2974,7 @@
                                 prev_format = last.match(format_begin_re)[1];
                             }
                         }
+                        output = output.replace(/^(\[\[[^\]]+\])?\]/, '');
                         result.push(output);
                         // modify loop by returing new data
                         return {index: new_index, length: 0, space: -1};
