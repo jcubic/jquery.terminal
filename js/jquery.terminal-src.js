@@ -1785,7 +1785,8 @@
                         break;
                 }
                 var pos = formatted_position;
-                string = formatting(string.replace(/</g, '&#60;').replace(/>/g, '&#62;'));
+                string = formatting(safe(string.replace(/&/g, '&amp;')));
+                console.log(string);
                 var i;
                 self.find('div:not(.cursor-line)').remove();
                 before.html('');
@@ -2558,11 +2559,13 @@
         }
     })();
     function bare_text(string) {
-        string = string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
-        return $('<span>' + string + '</span>').text();
+        return $('<span>' + safe(string) + '</span>').text();
     }
     function text(string) {
         return bare_text($.terminal.strip(string));
+    }
+    function safe(string) {
+        return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
@@ -3064,6 +3067,15 @@
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
         format: function format(str, options) {
+            function safe_text(string) {
+                return safe(string.replace(/(\\+)]/g, function(_, slashes) {
+                    if (slashes.length % 2 === 1) {
+                        return ']';
+                    } else {
+                        return slashes.replace(/../, '\\');
+                    }
+                }));
+            }
             var settings = $.extend({}, {
                 linksNoReferrer: false
             }, options || {});
@@ -3089,13 +3101,7 @@
                             if (text === '') {
                                 return ''; //'<span>&nbsp;</span>';
                             }
-                            text = text.replace(/(\\+)]/g, function(_, slashes) {
-                                if (slashes.length % 2 === 1) {
-                                    return ']';
-                                } else {
-                                    return slashes.replace(/../, '\\');
-                                }
-                            }).replace(/>/g, '&gt;').replace(/</g, '&lt;');
+                            text = safe_text(text);
                             var style_str = '';
                             if (style.indexOf('b') !== -1) {
                                 style_str += 'font-weight:bold;';
@@ -3173,8 +3179,7 @@
                             return result;
                         });
                     } else {
-                        text = text.replace(/\\\]/g, ']')
-                            .replace(/>/g, '&gt;').replace(/</g, '&lt;');
+                        text = safe_text(text);
                         if (typeof wcwidth !== 'undefined') {
                             var len = strlen(bare_text(text));
                             var style = len !== 1 ? ' style="--length: ' + len + '"' : '';
