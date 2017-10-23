@@ -1786,7 +1786,6 @@
                 }
                 var pos = formatted_position;
                 string = formatting(safe(string.replace(/&/g, '&amp;')));
-                console.log(string);
                 var i;
                 self.find('div:not(.cursor-line)').remove();
                 before.html('');
@@ -2940,17 +2939,25 @@
                         if (keep_words) {
                             output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
                         }
+                        if (output.match(/^]/)) {
+                            output = output.substring(1);
+                        }
                         first_index = (new_index || data.index) + 1;
+                        var start_formatting = output.match(format_begin_re);
                         // prev_format added in fix_close function
                         if (prev_format) {
                             var closed_formatting = output.match(/^[^\]]*\]/);
-                            output = prev_format + output;
+                            if (!start_formatting) {
+                                output = prev_format + output;
+                            }
                             if (closed_formatting) {
                                 prev_format = '';
                             }
                         }
                         if (last_bracket) {
-                            output += ']';
+                            if (!start_formatting) {
+                                output += ']';
+                            }
                             prev_format = '';
                         }
                         var matched = output.match(format_re);
