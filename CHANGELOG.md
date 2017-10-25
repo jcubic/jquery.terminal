@@ -24,7 +24,8 @@
 * fix substring and string like '<a' that was breaking command line
 * fix newlines in string when do parse/split _command (used by command line)
 * fix split equal and command line splitting
-
+* fix exception in keymap when calling original in the one that was overwriten by terminal like CTRL+V (reported by Ravi Teja Mamidipaka [#351](https://github.com/jcubic/jquery.terminal/issues/351))
+* not all keymaps had terminal as this context
 
 ## 1.9.0
 ### Features

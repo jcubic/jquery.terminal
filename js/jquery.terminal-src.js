@@ -6738,11 +6738,13 @@
                 keymap,
                 $.omap(settings.keymap || {}, function(key, fn) {
                     if (!keymap[key]) {
-                        return fn;
+                        return fn.bind(self);
                     }
-                    return function(e) {
+                    return function(e, original) {
                         // new keymap function will get default as 2nd argument
-                        return fn(e, keymap[key]);
+                        return fn.call(self, e, function() {
+                            return keymap[key](e, original);
+                        });
                     };
                 })
             );

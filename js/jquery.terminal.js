@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 23 Oct 2017 18:53:34 +0000
+ * Date: Wed, 25 Oct 2017 07:24:40 +0000
  */
 
 /* TODO:
@@ -6738,11 +6738,13 @@
                 keymap,
                 $.omap(settings.keymap || {}, function(key, fn) {
                     if (!keymap[key]) {
-                        return fn;
+                        return fn.bind(self);
                     }
-                    return function(e) {
+                    return function(e, original) {
                         // new keymap function will get default as 2nd argument
-                        return fn(e, keymap[key]);
+                        return fn.call(self, e, function() {
+                            return keymap[key](e, original);
+                        });
                     };
                 })
             );
