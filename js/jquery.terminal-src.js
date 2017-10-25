@@ -6883,7 +6883,6 @@
                         if (e.originalEvent.button === 2 && get_selected_text() === '') {
                             if (!$(e.target).is('img,value,audio,object,canvas')) {
                                 if (!self.enabled()) {
-                                    console.log('disabled');
                                     self.enable();
                                 }
                                 var offset = command_line.offset();
@@ -6892,7 +6891,6 @@
                                     top: e.pageY - offset.top - 20
                                 });
                                 if (!clip.is(':focus')) {
-                                    console.log('not in focus');
                                     clip.focus();
                                 }
                                 self.oneTime(100, function() {
