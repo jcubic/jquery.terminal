@@ -1101,9 +1101,7 @@
             spellcheck: 'false',
             tabindex: 1
         }).addClass('clipboard').appendTo(self);
-        // we don't need this but leave it as a comment just in case
-        //var contentEditable = $('<div contentEditable></div>')
-        //$(document.body).append(contentEditable);
+
         if (options.width) {
             self.width(options.width);
         }
@@ -1799,7 +1797,7 @@
                 var pos = formatted_position;
                 string = formatting(safe(string.replace(/&/g, '&amp;')));
                 var i;
-                self.find('div:not(.cursor-line)').remove();
+                self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
                 before.html('');
                 // long line
                 if (strlen(text(string)) > num_chars - prompt_len - 1 ||
@@ -2473,7 +2471,7 @@
             self.on('mousedown.cmd', function() {
                 was_down = true;
             }).on('mouseup.cmd', function(e) {
-                if (get_selected_text() === '') {
+                if (e.originalEvent.button === 0 && get_selected_text() === '') {
                     var name = 'click_' + id;
                     if (++count === 1) {
                         var down = was_down;
@@ -6883,25 +6881,25 @@
                     var clip = self.find('textarea');
                     self.on('mousedown.terminal', function(e) {
                         if (e.originalEvent.button === 2 && get_selected_text() === '') {
-                            if (!self.enabled()) {
-                                self.enable();
-                            }
-                            var target = $(e.target);
-                            if (!target.is('img')) {
-                                //e.preventDefault();
+                            if (!$(e.target).is('img,value,audio,object,canvas')) {
+                                if (!self.enabled()) {
+                                    console.log('disabled');
+                                    self.enable();
+                                }
                                 var offset = command_line.offset();
                                 clip.css({
-                                    left: e.pageX - offset.left - 5,
-                                    top: e.pageY - offset.top - 5
+                                    left: e.pageX - offset.left - 20,
+                                    top: e.pageY - offset.top - 20
+                                });
+                                if (!clip.is(':focus')) {
+                                    console.log('not in focus');
+                                    clip.focus();
+                                }
+                                self.oneTime(100, function() {
+                                    clip.css({left: '', top: ''});
                                 });
                             }
                         }
-                    });
-                    // contextmenu is fired after mousedown
-                    self.bind('contextmenu', function() {
-                        self.oneTime(100, function() {
-                            clip.css({left: '', top: ''});
-                        });
                     });
                 })();
             }

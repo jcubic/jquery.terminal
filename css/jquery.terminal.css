@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Wed, 25 Oct 2017 14:55:24 +0000
+ * Date: Wed, 25 Oct 2017 17:19:19 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -36,26 +36,29 @@
     position: absolute;
     left: -16px;
     top: 0;
-    width: 20px;
-    height: 16px;
+    width: 5em;
+    height: 4em;
     /* this seems to work after all on Android */
     /*left: -99999px;
     clip: rect(1px,1px,1px,1px);
     /* on desktop textarea appear when paste */
-    /* opacity is needed for Edge and IE */
+    /* opacity is needed for Edge and IE
     opacity: 0.01;
     filter: alpha(opacity = 0.01);
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
-    background: transparent;
+    background: transparent;*/
     border: none;
     color: transparent;
     outline: none;
     padding: 0;
     resize: none;
     z-index: 0;
-    overflow: hidden;
+    /*overflow: hidden;*/
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
+}
+.terminal img, .terminal value, .terminal audio, .terminal object, .terminal canvas {
+    cursor: default;
 }
 .terminal .error {
     color: #f00;
