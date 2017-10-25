@@ -6886,12 +6886,15 @@
                             if (!self.enabled()) {
                                 self.enable();
                             }
-                            //e.preventDefault();
-                            var offset = command_line.offset();
-                            clip.css({
-                                left: e.pageX - offset.left - 5,
-                                top: e.pageY - offset.top - 5
-                            });
+                            var target = $(e.target);
+                            if (!target.is('img')) {
+                                //e.preventDefault();
+                                var offset = command_line.offset();
+                                clip.css({
+                                    left: e.pageX - offset.left - 5,
+                                    top: e.pageY - offset.top - 5
+                                });
+                            }
                         }
                     });
                     // contextmenu is fired after mousedown

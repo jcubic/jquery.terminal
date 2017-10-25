@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 25 Oct 2017 07:24:40 +0000
+ * Date: Wed, 25 Oct 2017 14:55:23 +0000
  */
 
 /* TODO:
@@ -6886,12 +6886,15 @@
                             if (!self.enabled()) {
                                 self.enable();
                             }
-                            //e.preventDefault();
-                            var offset = command_line.offset();
-                            clip.css({
-                                left: e.pageX - offset.left - 5,
-                                top: e.pageY - offset.top - 5
-                            });
+                            var target = $(e.target);
+                            if (!target.is('img')) {
+                                //e.preventDefault();
+                                var offset = command_line.offset();
+                                clip.css({
+                                    left: e.pageX - offset.left - 5,
+                                    top: e.pageY - offset.top - 5
+                                });
+                            }
                         }
                     });
                     // contextmenu is fired after mousedown

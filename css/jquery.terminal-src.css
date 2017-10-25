@@ -78,7 +78,6 @@ body.terminal {
     position: relative;
     /*margin-top: 3px; */
     float: left;
-    overflow: hidden;
     padding-bottom: 3px;
 }
 .terminal .inverted, .cmd .inverted {
