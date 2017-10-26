@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 26 Oct 2017 09:46:39 +0000
+ * Date: Thu, 26 Oct 2017 11:00:17 +0000
  */
 
 /* TODO:
@@ -2139,14 +2139,17 @@
                             new_formatted_pos = n;
                         }
                         // it's faster then reverse algorithm
-                        var pos;
-                        for (var i = 0; i < command_len; ++i) {
-                            if (new_formatted_pos === get_formatted_position(i)) {
-                                pos = self.position(i);
+                        if (new_formatted_pos === len) {
+                            self.position($.terminal.length(command));
+                        } else {
+                            for (var i = 0; i < command_len; ++i) {
+                                if (new_formatted_pos === get_formatted_position(i)) {
+                                    self.position(i);
+                                }
                             }
                         }
-                        return pos;
                     }
+                    return self;
                 }
             },
             visible: (function() {
