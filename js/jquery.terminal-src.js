@@ -3665,8 +3665,8 @@
                 '/ /__',
             '\\___//____ \\\\___//____//_/ _\\_  / /_//____//_/ /_/ /_//_//_/ /_/ \\' +
                 '__\\_\\___/',
-            ('          \\/              /____/                                      ' +
-             '    ').replace(reg, '') + version_string,
+            ('          \\/              /____/                                     ' +
+             '     ').replace(reg, '') + version_string,
             copyright
         ]
     ];
@@ -6885,8 +6885,8 @@
                 })();
                 (function() {
                     var clip = self.find('textarea');
-                    self.on('mousedown.terminal', function(e) {
-                        if (e.originalEvent.button === 2 && get_selected_text() === '') {
+                    self.on('contextmenu.terminal', function(e) {
+                        if (get_selected_text() === '') {
                             if (!$(e.target).is('img,value,audio,object,canvas')) {
                                 if (!self.enabled()) {
                                     self.enable();
@@ -6899,7 +6899,8 @@
                                 if (!clip.is(':focus')) {
                                     clip.focus();
                                 }
-                                self.oneTime(100, function() {
+                                self.stopTime('textarea');
+                                self.oneTime(100, 'textarea', function() {
                                     clip.css({left: '', top: ''});
                                 });
                             }
