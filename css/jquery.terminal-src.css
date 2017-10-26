@@ -45,8 +45,8 @@
     /* opacity is needed for Edge and IE
     opacity: 0.01;
     filter: alpha(opacity = 0.01);
-    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
-    background: transparent;*/
+    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);*/
+    background: transparent;
     border: none;
     color: transparent;
     outline: none;

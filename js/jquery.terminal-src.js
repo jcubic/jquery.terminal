@@ -2139,11 +2139,13 @@
                             new_formatted_pos = n;
                         }
                         // it's faster then reverse algorithm
+                        var pos;
                         for (var i = 0; i < command_len; ++i) {
                             if (new_formatted_pos === get_formatted_position(i)) {
-                                return self.position(i);
+                                pos = self.position(i);
                             }
                         }
+                        return pos;
                     }
                 }
             },

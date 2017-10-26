@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Wed, 25 Oct 2017 17:19:19 +0000
+ * Date: Thu, 26 Oct 2017 09:46:39 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -45,8 +45,8 @@
     /* opacity is needed for Edge and IE
     opacity: 0.01;
     filter: alpha(opacity = 0.01);
-    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
-    background: transparent;*/
+    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);*/
+    background: transparent;
     border: none;
     color: transparent;
     outline: none;
