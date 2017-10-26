@@ -2645,6 +2645,7 @@
     }
     $.terminal = {
         version: '{{VER}}',
+        date: '{{DATE}}',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
