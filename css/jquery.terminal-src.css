@@ -34,10 +34,10 @@
 */
 .cmd .clipboard {
     position: absolute;
-    left: -4em;
-    top: -4em;
-    width: 5em;
-    height: 4em;
+    left: -16px;
+    top: 0;
+    width: 20px;
+    height: 16px;
     /* this seems to work after all on Android */
     /*left: -99999px;
     clip: rect(1px,1px,1px,1px);
@@ -53,7 +53,7 @@
     padding: 0;
     resize: none;
     z-index: 1000;
-    /*overflow: hidden;*/
+    overflow: hidden;
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
 }

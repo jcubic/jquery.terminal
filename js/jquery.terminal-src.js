@@ -838,7 +838,7 @@
         });
     }
     // ---------------------------------------------------------------------
-    // alert only first exception of type
+    // :: alert only first exception of type
     // ---------------------------------------------------------------------
     var excepctions = [];
     function alert_exception(label, e) {
@@ -1100,7 +1100,7 @@
             autocapitalize: 'off',
             spellcheck: 'false',
             tabindex: 1
-        }).addClass('clipboard').appendTo(self);
+        }).addClass('clipboard').appendTo(self).val(' ');
 
         if (options.width) {
             self.width(options.width);
@@ -1436,13 +1436,15 @@
         function fix_textarea(position_only) {
             // delay worked while experimenting
             self.oneTime(10, function() {
+                // we use space before command to show select all context menu
+                // idea taken from CodeMirror
                 if (clip.val() !== command && !position_only) {
-                    clip.val(command);
+                    clip.val(' ' + command);
                 }
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
-                            clip.caret(position);
+                            clip.caret(position + 1);
                         } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
                         }
@@ -2558,6 +2560,7 @@
                 }
             }
         }
+        elm = null;
         return animation;
     })();
     // -------------------------------------------------------------------------
@@ -2589,6 +2592,9 @@
         }
         return check;
     })(navigator.userAgent || navigator.vendor || window.opera);
+    // ---------------------------------------------------------------------
+    // :: Cross-Browser selection utils
+    // ---------------------------------------------------------------------
     var get_selected_text = (function() {
         if (window.getSelection || document.getSelection) {
             return function() {
@@ -2608,6 +2614,72 @@
             return '';
         };
     })();
+    // ---------------------------------------------------------------------
+    function text_to_clipboard(container, text) {
+        var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
+        select_all($div[0]);
+        try {
+            document.execCommand('copy');
+        } catch (e) {}
+        $div.remove();
+    }
+    // ---------------------------------------------------------------------
+    var get_textarea_selection = (function() {
+        var textarea = document.createElement('textarea');
+        var selectionStart = 'selectionStart' in textarea;
+        textarea = null;
+        if (selectionStart) {
+            return function(textarea) {
+                var length = textarea.selectionEnd - textarea.selectionStart;
+                return textarea.value.substr(textarea.selectionStart, length);
+            };
+        } else if (document.selection) {
+            return function() {
+                var range = document.selection.createRange();
+                return range.text();
+            };
+        } else {
+            return function() {
+                return '';
+            };
+        }
+    })();
+    var select = (function() {
+        if (window.getSelection) {
+            var selection = window.getSelection();
+            if (selection.setBaseAndExtent) {
+                return function(start, end) {
+                    var selection = window.getSelection();
+                    selection.setBaseAndExtent(start, 0, end, 1);
+                };
+            } else {
+                return function(start, end) {
+                    var selection = window.getSelection();
+                    var range = document.createRange();
+                    range.setStart(start, 0);
+                    range.setEnd(end, end.childNodes.length);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                };
+            }
+        } else {
+            return $.noop;
+        }
+    })();
+    // ---------------------------------------------------------------------
+    function select_all(element) {
+        if (window.getSelection) {
+            var selection = window.getSelection();
+            if (selection.setBaseAndExtent) {
+                selection.setBaseAndExtent(element, 0, element, 1);
+            } else if (document.createRange) {
+                var range = document.createRange();
+                range.selectNodeContents(element);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+    }
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
         var array = string.match(command_re) || [];
@@ -3583,30 +3655,6 @@
     // -----------------------------------------------------------------------
     // :: try to copy given DOM element text to clipboard
     // -----------------------------------------------------------------------
-    function text_to_clipboard(container, text) {
-        var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
-        var range;
-        container.append($div);
-        if (document.body.createTextRange) {
-            range = document.body.createTextRange();
-            range.moveToElementText($div[0]);
-            range.select();
-        } else if (window.getSelection) {
-            var selection = window.getSelection();
-            if (selection.setBaseAndExtent) {
-                selection.setBaseAndExtent($div[0], 0, $div[0], 1);
-            } else if (document.createRange) {
-                range = document.createRange();
-                range.selectNodeContents($div[0]);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-        }
-        try {
-            document.execCommand('copy');
-        } catch (e) {}
-        $div.remove();
-    }
     function all(array, fn) {
         var same = array.filter(function(item) {
             return item[fn]() === item;
@@ -6578,6 +6626,7 @@
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
                     self.find('.terminal-fill').remove();
+                    self.stopTime();
                     terminals.remove(terminal_id);
                     if (visibility_observer) {
                         visibility_observer.unobserve(self[0]);
@@ -6894,14 +6943,33 @@
                                 var offset = command_line.offset();
                                 clip.css({
                                     left: e.pageX - offset.left - 20,
-                                    top: e.pageY - offset.top - 20
+                                    top: e.pageY - offset.top - 20,
+                                    width: '5em',
+                                    height: '4em'
                                 });
                                 if (!clip.is(':focus')) {
                                     clip.focus();
                                 }
                                 self.stopTime('textarea');
                                 self.oneTime(100, 'textarea', function() {
-                                    clip.css({left: '', top: ''});
+                                    clip.css({
+                                        left: '',
+                                        top: '',
+                                        width: '',
+                                        height: ''
+                                    });
+                                });
+                                self.stopTime('selection');
+                                self.everyTime(20, 'selection', function() {
+                                    if (clip[0].selection !== clip[0].value) {
+                                        if (get_textarea_selection(clip[0])) {
+                                            select(
+                                                self.find('.terminal-output')[0],
+                                                self.find('.cmd div:last-of-type')[0]
+                                            );
+                                            self.stopTime('selection');
+                                        }
+                                    }
                                 });
                             }
                         }
@@ -7104,7 +7172,8 @@
                 // detection take from:
                 // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
                 var event;
-                if ("onwheel" in document.createElement("div")) {
+                var div = document.createElement("div");
+                if ("onwheel" in div) {
                     event = "wheel"; // Modern browsers support "wheel"
                 } else if (document.onmousewheel !== undefined) {
                     event = "mousewheel"; // Webkit and IE support at least "mousewheel"
@@ -7112,6 +7181,7 @@
                     // let's assume that remaining browsers are older Firefox
                     event = "DOMMouseScroll";
                 }
+                div = null;
                 self.on(event, function(e) {
                     var delta;
                     if (event === 'mousewheel') {

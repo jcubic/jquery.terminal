@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Thu, 26 Oct 2017 11:51:44 +0000
+ * Date: Fri, 27 Oct 2017 15:05:54 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -34,10 +34,10 @@
 */
 .cmd .clipboard {
     position: absolute;
-    left: -4em;
-    top: -4em;
-    width: 5em;
-    height: 4em;
+    left: -16px;
+    top: 0;
+    width: 20px;
+    height: 16px;
     /* this seems to work after all on Android */
     /*left: -99999px;
     clip: rect(1px,1px,1px,1px);
@@ -52,8 +52,8 @@
     outline: none;
     padding: 0;
     resize: none;
-    z-index: 0;
-    /*overflow: hidden;*/
+    z-index: 1000;
+    overflow: hidden;
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
 }
