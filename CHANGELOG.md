@@ -7,6 +7,7 @@
 * onEchoCommand callback gets second argument `command`
 * cmd keymap api function, along with object and no arguments, accept string as first argument and function as second
 * only one exception per callback event
+* select all context menu (based on idea from CodeMirror)x
 ### Bugs
 * fix cursor in IE and iOS/Safari reported by @RinaVladimyrovna [#350](https://github.com/jcubic/jquery.terminal/issues/350)
 * don't apply formatters in echo commands for completion (found by applying completion to emoji demo)
