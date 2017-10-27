@@ -2644,6 +2644,10 @@
             };
         }
     })();
+    function clear_textarea_selection(textarea) {
+        textarea.selectionStart = textarea.selectionEnd = 0;
+    }
+    // ---------------------------------------------------------------------
     var select = (function() {
         if (window.getSelection) {
             var selection = window.getSelection();
@@ -6963,6 +6967,7 @@
                                 self.everyTime(20, 'selection', function() {
                                     if (clip[0].selection !== clip[0].value) {
                                         if (get_textarea_selection(clip[0])) {
+                                            clear_textarea_selection(clip[0]);
                                             select(
                                                 self.find('.terminal-output')[0],
                                                 self.find('.cmd div:last-of-type')[0]

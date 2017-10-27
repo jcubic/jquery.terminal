@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 27 Oct 2017 15:05:53 +0000
+ * Date: Fri, 27 Oct 2017 16:19:02 +0000
  */
 
 /* TODO:
@@ -2644,6 +2644,10 @@
             };
         }
     })();
+    function clear_textarea_selection(textarea) {
+        textarea.selectionStart = textarea.selectionEnd = 0;
+    }
+    // ---------------------------------------------------------------------
     var select = (function() {
         if (window.getSelection) {
             var selection = window.getSelection();
@@ -2717,7 +2721,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 27 Oct 2017 15:05:53 +0000',
+        date: 'Fri, 27 Oct 2017 16:19:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6963,6 +6967,7 @@
                                 self.everyTime(20, 'selection', function() {
                                     if (clip[0].selection !== clip[0].value) {
                                         if (get_textarea_selection(clip[0])) {
+                                            clear_textarea_selection(clip[0]);
                                             select(
                                                 self.find('.terminal-output')[0],
                                                 self.find('.cmd div:last-of-type')[0]
