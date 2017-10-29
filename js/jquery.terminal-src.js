@@ -2617,6 +2617,7 @@
     // ---------------------------------------------------------------------
     function text_to_clipboard(container, text) {
         var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
+        $div.appendTo('body');
         select_all($div[0]);
         try {
             document.execCommand('copy');

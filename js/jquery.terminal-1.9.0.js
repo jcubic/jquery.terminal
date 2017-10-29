@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 27 Oct 2017 16:19:02 +0000
+ * Date: Sun, 29 Oct 2017 19:39:16 +0000
  */
 
 /* TODO:
@@ -2617,6 +2617,7 @@
     // ---------------------------------------------------------------------
     function text_to_clipboard(container, text) {
         var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
+        $div.appendTo('body');
         select_all($div[0]);
         try {
             document.execCommand('copy');
@@ -2721,7 +2722,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 27 Oct 2017 16:19:02 +0000',
+        date: 'Sun, 29 Oct 2017 19:39:16 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
