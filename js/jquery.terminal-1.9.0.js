@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 02 Nov 2017 16:48:06 +0000
+ * Date: Thu, 02 Nov 2017 17:33:43 +0000
  */
 
 /* TODO:
@@ -2722,7 +2722,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 02 Nov 2017 16:48:06 +0000',
+        date: 'Thu, 02 Nov 2017 17:33:43 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6643,6 +6643,7 @@
                         mutation_observer.disconnect();
                     }
                     self.resizer('unbind');
+                    font_resizer.resizer('unbind');
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
@@ -6712,6 +6713,7 @@
             requests.push(xhr);
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
+        var font_resizer = $('<div class="font"/>').appendTo(self);
         $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
@@ -7022,8 +7024,12 @@
                     old_width = width;
                 }
             }
+            function create_resizers() {
+                self.resizer('unbind').resizer(resize);
+                font_resizer.resizer('unbind').resizer(self.resize);
+            }
             if (self.is(':visible')) {
-                self.resizer(resize);
+                create_resizers();
             }
             function observe_visibility() {
                 if (visibility_observer) {
@@ -7032,7 +7038,7 @@
                 var was_enabled;
                 visibility_observer = new IntersectionObserver(function() {
                     if (self.is(':visible')) {
-                        self.resizer('unbind').resizer(resize);
+                        create_resizers();
                         resize();
                         if (was_enabled) {
                             self.enabled();

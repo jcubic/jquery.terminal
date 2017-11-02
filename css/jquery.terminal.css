@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Thu, 02 Nov 2017 10:26:53 +0000
+ * Date: Thu, 02 Nov 2017 17:33:44 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -139,6 +139,14 @@ body.terminal {
 .terminal-output > div > div * {
     overflow-wrap: break-word; /* when echo html */
     word-wrap: break-word;
+}
+.terminal .font {
+    position: absolute;
+    font-size: inherit;
+    width: 1em;
+    height: 1em;
+    top: 0;
+    left: 0;
 }
 .terminal .terminal-output div span {
     display: inline-block;
