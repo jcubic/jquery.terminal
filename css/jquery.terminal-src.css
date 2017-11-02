@@ -83,6 +83,11 @@ body.terminal {
     float: left;
     padding-bottom: 3px;
 }
+.terminal a[tabindex="1000"],
+.terminal a[tabindex="1000"]:active,
+.terminal a[tabindex="1000"]:focus {
+    outline: none;
+}
 .terminal .inverted, .cmd .inverted {
     background-color: #aaa;
     color: #000;
