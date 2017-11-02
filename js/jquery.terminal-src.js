@@ -6941,7 +6941,7 @@
                     var clip = self.find('textarea');
                     self.on('contextmenu.terminal', function(e) {
                         if (get_selected_text() === '') {
-                            if (!$(e.target).is('img,value,audio,object,canvas')) {
+                            if (!$(e.target).is('img,value,audio,object,canvas,a')) {
                                 if (!self.enabled()) {
                                     self.enable();
                                 }

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 29 Oct 2017 19:39:16 +0000
+ * Date: Thu, 02 Nov 2017 08:23:54 +0000
  */
 
 /* TODO:
@@ -2722,7 +2722,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 29 Oct 2017 19:39:16 +0000',
+        date: 'Thu, 02 Nov 2017 08:23:54 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6941,7 +6941,7 @@
                     var clip = self.find('textarea');
                     self.on('contextmenu.terminal', function(e) {
                         if (get_selected_text() === '') {
-                            if (!$(e.target).is('img,value,audio,object,canvas')) {
+                            if (!$(e.target).is('img,value,audio,object,canvas,a')) {
                                 if (!self.enabled()) {
                                     self.enable();
                                 }
