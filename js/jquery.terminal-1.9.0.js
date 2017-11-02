@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 02 Nov 2017 17:47:39 +0000
+ * Date: Thu, 02 Nov 2017 18:48:08 +0000
  */
 
 /* TODO:
@@ -750,7 +750,7 @@
         var unbind = arguments[0] === "unbind";
         if (!unbind && !$.isFunction(callback)) {
             throw new Error(
-                'Invalid argument, it need to a function of string "unbind".'
+                'Invalid argument, it need to a function or string "unbind".'
             );
         }
         return this.each(function() {
@@ -2722,7 +2722,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 02 Nov 2017 17:47:39 +0000',
+        date: 'Thu, 02 Nov 2017 18:48:08 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

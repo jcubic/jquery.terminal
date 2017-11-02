@@ -750,7 +750,7 @@
         var unbind = arguments[0] === "unbind";
         if (!unbind && !$.isFunction(callback)) {
             throw new Error(
-                'Invalid argument, it need to a function of string "unbind".'
+                'Invalid argument, it need to a function or string "unbind".'
             );
         }
         return this.each(function() {
