@@ -3631,9 +3631,12 @@
     // :: DOM at init like with:
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
-    function get_char_size() {
+    function get_char_size(div) {
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
+        if (div) {
+            temp.attr('style', div.attr('style'));
+        }
         var rect = temp.find('span')[0].getBoundingClientRect();
         var result = {
             width: rect.width,
@@ -5207,7 +5210,7 @@
         var command_queue = new DelayQueue();
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
-        var char_size = get_char_size();
+        var char_size = get_char_size(self);
         var cmd_ready = ready(command_queue);
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
@@ -6053,13 +6056,13 @@
                     }
                     width = self.width();
                     height = self.height();
-                    if (typeof settings.numChars !== 'undefined' &&
+                    if (typeof settings.numChars !== 'undefined' ||
                         typeof settings.numRows !== 'undefined') {
                         redraw();
                         scroll_to_bottom();
                         return;
                     }
-                    char_size = get_char_size();
+                    char_size = get_char_size(self);
                     var new_num_chars = get_num_chars(self, char_size);
                     var new_num_rows = get_num_rows(self, char_size);
                     // only if number of chars changed
@@ -6995,7 +6998,7 @@
                 num_chars = self.cols();
                 command_line.resize(num_chars);
                 if (!char_size) {
-                    char_size = get_char_size();
+                    char_size = get_char_size(self);
                 }
                 num_rows = get_num_rows(self, char_size);
             }
