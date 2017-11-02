@@ -6643,7 +6643,7 @@
                         mutation_observer.disconnect();
                     }
                     self.resizer('unbind');
-                    font_resizer.resizer('unbind');
+                    font_resizer.resizer('unbind').remove();
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }

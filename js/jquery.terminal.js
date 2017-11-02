@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 02 Nov 2017 17:33:43 +0000
+ * Date: Thu, 02 Nov 2017 17:47:39 +0000
  */
 
 /* TODO:
@@ -2722,7 +2722,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 02 Nov 2017 17:33:43 +0000',
+        date: 'Thu, 02 Nov 2017 17:47:39 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6643,7 +6643,7 @@
                         mutation_observer.disconnect();
                     }
                     self.resizer('unbind');
-                    font_resizer.resizer('unbind');
+                    font_resizer.resizer('unbind').remove();
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }

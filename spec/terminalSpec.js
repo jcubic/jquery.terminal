@@ -3326,7 +3326,7 @@ function tests_on_ready() {
                     expect(term.find('.terminal-output').length).toEqual(0);
                     expect(term.find('.cmd').length).toEqual(0);
                 });
-                it('should leave span that intact', function() {
+                it('should leave span intact', function() {
                     term.destroy();
                     expect(term.html()).toEqual(element);
                 });
