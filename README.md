@@ -12,7 +12,7 @@ http://terminal.jcubic.pl
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
 [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Known Vulnerabilities](https://snyk.io/test/npm/jquery.terminal/badge.svg)](https://snyk.io/test/npm/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&e6b4b5850ac531b55d841041c06fdea8)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&b43824efa1a7f6caa5d8d630e24fd6e6)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 
@@ -82,7 +82,7 @@ Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.css
 <link href="css/jquery.terminal-DEV.css" rel="stylesheet"/>
 ```
 
-**NOTE:** From version 1.0.0 if you want to support old browsers or Safari then you'll need to use [key event property polyfill](https://github.com/cvan/keyboardevent-key-polyfill/)
+**NOTE:** From version 1.0.0 if you want to support old browsers or Safari then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js)
 
 You can also grab the files from CDN:
 
