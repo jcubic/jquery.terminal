@@ -1,5 +1,7 @@
 VERSION=1.9.0
 SED=sed
+CD=cd
+NPM=npm
 CP=cp
 RM=rm
 CAT=cat
@@ -13,6 +15,7 @@ ISTANBUL=./node_modules/.bin/istanbul
 JASMINE=./node_modules/.bin/jasmine-node
 CSSNANO=./node_modules/.bin/cssnano
 SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
+URL=`git config --get remote.origin.url`
 
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile
 
@@ -85,5 +88,10 @@ eslint:
 jsonlint: package.json bower.json
 	$(JSONLINT) package.json > /dev/null
 	$(JSONLINT) bower.json > /dev/null
+
+publish:
+	$(GIT) clone $(URL) npm
+	$(CD) npm && $(NPM) publish
+	$(RM) -r npm
 
 lint: eslint jsonlint
