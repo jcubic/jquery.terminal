@@ -82,7 +82,7 @@ Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.css
 <link href="css/jquery.terminal-DEV.css" rel="stylesheet"/>
 ```
 
-**NOTE:** From version 1.0.0 if you want to support old browsers or Safari then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js)
+**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js)
 
 You can also grab the files from CDN:
 
