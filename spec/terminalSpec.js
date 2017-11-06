@@ -10,6 +10,25 @@ if (typeof window === 'undefined') {
     var navigator = {userAgent: "node-js", platform: "Linux i686"};
     global.window.navigator = global.navigator = navigator;
     global.jQuery = global.$ = require("jquery");
+    function Storage() {}
+    Storage.prototype.getItem = function(name) {
+        return this[name];
+    };
+    Storage.prototype.setItem = function(name, value) {
+        return this[name] = value;
+    };
+    Storage.prototype.removeItem = function(name) {
+        var value = this[name];
+        delete this[name];
+        return value;
+    };
+    Storage.prototype.clear = function() {
+        var self = this;
+        Object.getOwnPropertyNames(this).forEach(function(name) {
+            delete self[name];
+        });
+    };
+    window.localStorage = new Storage();
     require('../js/jquery.terminal-src')(global.$);
     require('../js/unix_formatting');
     global.location = global.window.location = {hash: ''};
@@ -21,6 +40,21 @@ if (typeof window === 'undefined') {
         var self = $(this);
         return [{width: self.width(), height: self.height()}];
     };
+    // https://github.com/tmpvar/jsdom/issues/135
+    Object.defineProperties(window.HTMLElement.prototype, {
+        offsetLeft: {
+            get: function() { return parseFloat(window.getComputedStyle(this).marginLeft) || 0; }
+        },
+        offsetTop: {
+            get: function() { return parseFloat(window.getComputedStyle(this).marginTop) || 0; }
+        },
+        offsetHeight: {
+            get: function() { return parseFloat(window.getComputedStyle(this).height) || 0; }
+        },
+        offsetWidth: {
+            get: function() { return parseFloat(window.getComputedStyle(this).width) || 0; }
+        }
+    });
     tests_on_ready();
 } else {
     $(tests_on_ready);
@@ -760,7 +794,90 @@ function tests_on_ready() {
             });
         });
         describe('History', function() {
-            // TODO:
+            function history_commands(name) {
+                return JSON.parse(window.localStorage.getItem(name));
+            }
+            it('should create commands key', function() {
+                window.localStorage.clear();
+                var history = new $.terminal.History('foo');
+                history.append('item');
+                expect(Object.keys(window.localStorage)).toEqual(['foo_commands']);
+            });
+            it('should put items to localStorage', function() {
+                window.localStorage.clear();
+                var history = new $.terminal.History('foo');
+                var commands = ['lorem', 'ipsum'];
+                commands.forEach(function(command) {
+                    history.append(command);
+                });
+                expect(history_commands('foo_commands')).toEqual(commands);
+            });
+            it('should add only one commands if adding the same command', function() {
+                window.localStorage.clear();
+                var history = new $.terminal.History('foo');
+                for (var i = 0; i < 10; ++i) {
+                    history.append('command');
+                }
+                expect(history_commands('foo_commands')).toEqual(['command']);
+            });
+            it('shound not add more commands then the limit', function() {
+                window.localStorage.clear();
+                var history = new $.terminal.History('foo', 30);
+                for (var i = 0; i < 40; ++i) {
+                    history.append('command ' + i);
+                }
+                expect(history_commands('foo_commands').length).toEqual(30);
+            });
+            it('should create commands in memory', function() {
+                window.localStorage.clear();
+                var history = new $.terminal.History('foo', 10, true);
+                for (var i = 0; i < 40; ++i) {
+                    history.append('command ' + i);
+                }
+                var data = history.data();
+                expect(data instanceof Array).toBeTruthy();
+                expect(data.length).toEqual(10);
+                expect(window.localStorage.getItem('foo_commands')).not.toBeDefined();
+            });
+            it('should clear localStorage', function() {
+                window.localStorage.clear();
+                var history = new $.terminal.History('foo');
+                for (var i = 0; i < 40; ++i) {
+                    history.append('command ' + i);
+                }
+                history.purge();
+                expect(window.localStorage.getItem('foo_commands')).not.toBeDefined();
+            });
+            it('should iterate over commands', function() {
+                var commands = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
+                window.localStorage.clear();
+                var history = new $.terminal.History('foo');
+                commands.forEach(function(command) {
+                    history.append(command);
+                });
+                var i;
+                for (i=commands.length; i--;) {
+                    expect(history.current()).toEqual(commands[i]);
+                    expect(history.previous()).toEqual(commands[i-1]);
+                }
+                for (i=0; i<commands.length; ++i) {
+                    expect(history.current()).toEqual(commands[i]);
+                    expect(history.next()).toEqual(commands[i+1]);
+                }
+            });
+            it('should not add commands when disabled', function() {
+                var commands = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
+                window.localStorage.clear();
+                var history = new $.terminal.History('foo');
+                commands.forEach(function(command) {
+                    history.append(command);
+                });
+                history.disable();
+                history.append('foo');
+                history.enable();
+                history.append('bar');
+                expect(history_commands('foo_commands')).toEqual(commands.concat(['bar']));
+            });
         });
         describe('Stack', function() {
             describe('create', function() {
@@ -851,6 +968,47 @@ function tests_on_ready() {
                     expect(stack).not.toBe(stack_clone);
                     expect(stack_clone.data()).toEqual([]);
                 });
+            });
+        });
+    });
+    describe('sub plugins', function() {
+        describe('resizer', function() {
+            it('should create html', function() {
+                var div = $('<div/>').resizer($.noop);
+                expect(div.find('.resize-sensor-expand').length).toEqual(1);
+                expect(div.find('.resize-sensor-shrink').length).toEqual(1);
+                expect(div.find('.resizer').length).toEqual(1);
+            });
+            it('should remove html', function() {
+                var div = $('<div/>').resizer($.noop);
+                div.resizer('unbind');
+                expect(div.find('.resize-sensor-expand').length).toEqual(0);
+                expect(div.find('.resize-sensor-shrink').length).toEqual(0);
+                expect(div.find('.resizer').length).toEqual(0);
+            });
+            it('should fire event on scroll event', function(done) {
+                var test = {
+                    test: function() {}
+                };
+                spy(test, 'test');
+                var div = $('<div/>').css({
+                    width: 100,
+                    height: 100
+                }).appendTo('body').resizer(test.test);
+                div.css({
+                    width: 200
+                });
+                div.find('.resize-sensor-shrink').trigger('scroll');
+                setTimeout(function() {
+                    expect(test.test).toHaveBeenCalled();
+                    done();
+                }, 100);
+            });
+        });
+        describe('text_length', function() {
+            it('should return length of the text in div', function() {
+                var elements = $('<div><span>hello</span><span>world</span>');
+                expect(elements.find('span').text_length()).toEqual(10);
             });
         });
     });

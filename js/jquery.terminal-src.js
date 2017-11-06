@@ -739,7 +739,7 @@
         window.mozRequestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         function(fn) {
-            return window.setTimeout(fn, 20);
+            return setTimeout(fn, 20);
         };
     // -----------------------------------------------------------------------
     // :: Cross-browser resize element plugin
@@ -1037,10 +1037,11 @@
                 return data[pos];
             },
             next: function() {
+                var old = pos;
                 if (pos < data.length - 1) {
                     ++pos;
                 }
-                if (pos !== -1) {
+                if (old !== pos) {
                     return data[pos];
                 }
             },
@@ -1049,7 +1050,7 @@
                 if (pos > 0) {
                     --pos;
                 }
-                if (old !== -1) {
+                if (old !== pos) {
                     return data[pos];
                 }
             },
