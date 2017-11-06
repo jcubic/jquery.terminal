@@ -60,31 +60,27 @@ users. It can also be used to debug your application.
   are in the interpreter function)
 
 ### Installation
-You can install jQuery Terminal from bower:
-
-```
-bower install jquery.terminal
-```
-
-or npm:
-
-```
-npm install --save jquery.terminal
-```
 
 Include jQuery library, you can use cdn from http://jquery.com/download/
 
 
-Then include js/jquery.terminal-{{VER}}.min.js and css/jquery.terminal-{{VER}}.css
+```html
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+```
+
+
+Then include js/jquery.terminal-{{VER}}.min.js and css/jquery.terminal-{{VER}}.min.css
+
 
 ```html
 <script src="js/jquery.terminal-{{VER}}.min.js"></script>
 <link href="css/jquery.terminal-{{VER}}.css" rel="stylesheet"/>
 ```
 
-**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js)
+**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key)
 
-You can also grab the files from CDN:
+You can grab the files from CDN:
 
 ```html
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/{{VER}}/js/jquery.terminal.min.js"></script>
@@ -98,7 +94,19 @@ or
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@{{VER}}/css/jquery.terminal.min.css">
 ```
 
-And you're good to go.
+
+
+You can also install jQuery Terminal using command line, from [bower repository](https://bower.io/):
+
+```
+bower install jquery.terminal
+```
+
+or [npm repository](https://www.npmjs.com/):
+
+```
+npm install --save jquery.terminal
+```
 
 
 ### Example of usage
