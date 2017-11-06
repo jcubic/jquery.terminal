@@ -88,6 +88,10 @@ or
 
 **NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key).
 
+```html
+<script src="https://cdn.rawgit.com/inexorabletash/polyfill/master/keyboard.js"></script>
+```
+
 
 You can also install jQuery Terminal using command line, from [bower repository](https://bower.io/):
 
