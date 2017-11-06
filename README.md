@@ -72,14 +72,6 @@ Include jQuery library, you can use cdn from http://jquery.com/download/
 
 Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.min.css
 
-
-```html
-<script src="js/jquery.terminal-DEV.min.js"></script>
-<link href="css/jquery.terminal-DEV.css" rel="stylesheet"/>
-```
-
-**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key)
-
 You can grab the files from CDN:
 
 ```html
@@ -94,6 +86,7 @@ or
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/css/jquery.terminal.min.css">
 ```
 
+**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key).
 
 
 You can also install jQuery Terminal using command line, from [bower repository](https://bower.io/):
@@ -105,9 +98,8 @@ bower install jquery.terminal
 or [npm repository](https://www.npmjs.com/):
 
 ```
-npm install --save jquery.terminal
+npm install jquery.terminal
 ```
-
 
 ### Example of usage
 
