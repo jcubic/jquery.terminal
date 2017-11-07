@@ -1,4 +1,4 @@
-## Next
+## 1.10.0
 ### Features
 * new api for formatters Array with 2 elements regex and replacement string (it fix issue when formatters change
   length of string - emoji demo)
