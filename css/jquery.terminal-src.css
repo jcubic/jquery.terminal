@@ -261,9 +261,13 @@ body.terminal {
 }
 .terminal a {
     color: #0F60FF;
+    color: var(--link-color, #0F60FF);
 }
 .terminal a:hover {
-    color: red;
+    background: #0F60FF;
+    background: var(--link-color, #0F60FF);
+    color: var(--background, #aaa);
+    text-decoration: none;
 }
 .terminal .terminal-fill {
     position: absolute;
