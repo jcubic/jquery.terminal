@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.9.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 09 Oct 2017 15:32:46 +0000
+ * Date: Tue, 07 Nov 2017 09:30:12 +0000
  */
 
 /* TODO:
@@ -739,7 +739,7 @@
         window.mozRequestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         function(fn) {
-            return window.setTimeout(fn, 20);
+            return setTimeout(fn, 20);
         };
     // -----------------------------------------------------------------------
     // :: Cross-browser resize element plugin
@@ -750,7 +750,7 @@
         var unbind = arguments[0] === "unbind";
         if (!unbind && !$.isFunction(callback)) {
             throw new Error(
-                'Invalid argument, it need to a function of string "unbind".'
+                'Invalid argument, it need to a function or string "unbind".'
             );
         }
         return this.each(function() {
@@ -836,6 +836,29 @@
             role: 'presentation',
             'aria-hidden': 'true'
         });
+    }
+    // ---------------------------------------------------------------------
+    // :: alert only first exception of type
+    // ---------------------------------------------------------------------
+    var excepctions = [];
+    function alert_exception(label, e) {
+        var message = (label ? label + ': ' : '') + exception_message(e);
+        if (excepctions.indexOf(message) === -1) {
+            excepctions.push(message);
+            alert(message + (e.stack ? '\n' + e.stack : ''));
+        }
+    }
+    // ---------------------------------------------------------------------
+    // :: Return exception message as string
+    // ---------------------------------------------------------------------
+    function exception_message(e) {
+        if (typeof e === 'string') {
+            return e;
+        } else if (typeof e.fileName === 'string') {
+            return e.fileName + ': ' + e.message;
+        } else {
+            return e.message;
+        }
     }
     // -----------------------------------------------------------------------
     // :: CYCLE DATA STRUCTURE
@@ -1014,10 +1037,11 @@
                 return data[pos];
             },
             next: function() {
+                var old = pos;
                 if (pos < data.length - 1) {
                     ++pos;
                 }
-                if (pos !== -1) {
+                if (old !== pos) {
                     return data[pos];
                 }
             },
@@ -1026,7 +1050,7 @@
                 if (pos > 0) {
                     --pos;
                 }
-                if (old !== -1) {
+                if (old !== pos) {
                     return data[pos];
                 }
             },
@@ -1062,10 +1086,14 @@
         }
         var id = cmd_index++;
         self.addClass('cmd');
-        self.append('<span class="prompt"></span><span></span>' +
-                    '<span class="cursor">&nbsp;</span><span></span>');
+        self.append('<span class="prompt"></span>');
+        self.append('<div class="cursor-line">' +
+                    '<span></span>' +
+                    '<span class="cursor">&nbsp;</span>' +
+                    '<span></span>' +
+                    '</div>');
         // a11y: don't read command it's in textarea that's in focus
-        a11y_hide(self.find('span').not(':eq(0)'));
+        a11y_hide(self.find('.cursor-line'));
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
@@ -1073,10 +1101,8 @@
             autocapitalize: 'off',
             spellcheck: 'false',
             tabindex: 1
-        }).addClass('clipboard').appendTo(self);
-        // we don't need this but leave it as a comment just in case
-        //var contentEditable = $('<div contentEditable></div>')
-        //$(document.body).append(contentEditable);
+        }).addClass('clipboard').appendTo(self).val(' ');
+
         if (options.width) {
             self.width(options.width);
         }
@@ -1104,13 +1130,32 @@
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
-                return node.index() + node.closest('[role="presentation"]')
+                return node.index() + node.parents('span').prevAll().text_length() +
+                    node.closest('[role="presentation"]')
                     .prevUntil('.prompt').text_length();
+            } else if (node.is('div[role="presentation"]')) {
+                var index = node.index();
+                var lines = command.split(/\n/).slice(0, index);
+                return lines.reduce(function(pos, line) {
+                    return pos + length(line);
+                }, 0) + (lines.length - 1);
             }
         }
+        // ie mapping
+        var key_mapping = {
+            'SPACEBAR': ' ',
+            'UP': 'ARROWUP',
+            'DOWN': 'ARROWDOWN',
+            'LEFT': 'ARROWLEFT',
+            'RIGHT': 'ARROWRIGHT',
+            'DEL': 'DELETE'
+        };
         function get_key(e) {
             if (e.key) {
                 var key = e.key.toUpperCase();
+                if (key_mapping[key]) {
+                    key = key_mapping[key];
+                }
                 if (key === 'CONTROL') {
                     return 'CTRL';
                 } else {
@@ -1127,12 +1172,11 @@
                     if (e.altKey && key !== 'ALT') {
                         combo.push('ALT');
                     }
+                    if (combo.length && key === ' ') {
+                        key = 'SPACEBAR';
+                    }
                     if (e.key) {
-                        if (key === 'DEL') { // IE11
-                            combo.push('DELETE');
-                        } else {
-                            combo.push(key);
-                        }
+                        combo.push(key);
                     }
                     return combo.join('+');
                 }
@@ -1203,13 +1247,10 @@
                 return true;
             },
             'ARROWUP': prev_history,
-            'UP': prev_history, // IE
             'CTRL+P': prev_history,
             'ARROWDOWN': next_history,
-            'DOWN': next_history, // IE
             'CTRL+N': next_history,
             'ARROWLEFT': left,
-            'LEFT': left, // IE
             'CTRL+B': left,
             'CTRL+ARROWLEFT': function() {
                 // jump to one character after last space before prevoius word
@@ -1256,7 +1297,6 @@
             },
             'ARROWRIGHT': right,
             'CTRL+F': right,
-            'RIGHT': right, // IE
             'CTRL+ARROWRIGHT': function() {
                 // jump to beginning or end of the word
                 if (command[position] === ' ') {
@@ -1397,13 +1437,15 @@
         function fix_textarea(position_only) {
             // delay worked while experimenting
             self.oneTime(10, function() {
+                // we use space before command to show select all context menu
+                // idea taken from CodeMirror
                 if (clip.val() !== command && !position_only) {
-                    clip.val(command);
+                    clip.val(' ' + command);
                 }
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
-                            clip.caret(position);
+                            clip.caret(position + 1);
                         } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
                         }
@@ -1508,6 +1550,12 @@
             function split(string) {
                 return $.terminal.split_equal(string, num_chars);
             }
+            function skip_empty(array) {
+                // we remove lines that are left overs after adding space at the end
+                return array.filter(function(line) {
+                    return !$.terminal.strip(line).match(/^ $/);
+                });
+            }
             var prompt = prompt_node.text();
             var re = new RegExp('^' + $.terminal.escape_regex(prompt));
             var array;
@@ -1519,15 +1567,20 @@
                 }
                 // split first line
                 if (strlen(tmp[0]) > first_len) {
-                    array = split(prompt + tmp[0], num_chars);
+                    array = split(prompt + tmp[0]);
                     array[0] = array[0].replace(re, '');
+                    array = skip_empty(array);
                 } else {
                     array = [tmp[0]];
                 }
                 // process rest of the lines
                 for (i = 1; i < tmp.length; ++i) {
-                    if (tmp[i].length > num_chars) {
-                        array = array.concat(split(tmp[i], num_chars));
+                    if (strlen(tmp[i]) > num_chars) {
+                        var splitted = split(tmp[i]);
+                        if (i < tmp.length - 1) {
+                            splitted = skip_empty(splitted);
+                        }
+                        array = array.concat(splitted);
                     } else {
                         array.push(tmp[i]);
                     }
@@ -1538,6 +1591,7 @@
             }
             return array;
         }
+        window.get_splitted_command_line = get_splitted_command_line;
         // ---------------------------------------------------------------------
         // :: use custom formatting
         // ---------------------------------------------------------------------
@@ -1547,7 +1601,7 @@
             try {
                 return $.terminal.apply_formatters(string);
             } catch (e) {
-                alert(e.message + '\n' + (e.stack ? e.stack : e));
+                alert_exception('[Formatting]', e);
             }
         }
         // ---------------------------------------------------------------------
@@ -1562,15 +1616,29 @@
         // :: this function is not very usefull so it's not in $.terminal
         // ---------------------------------------------------------------------
         function wrap(string) {
+            function formatting(string) {
+                if ($.terminal.is_formatting(string)) {
+                    if (string.match(/\]\\\]/)) {
+                        string = string.replace(/\]\\\]/g, ']\\\\]');
+                    }
+                } else {
+                    if (string.match(/\\$/)) {
+                        string += '\\';
+                    }
+                    string = '[[;;]' + string + ']';
+                }
+                return string;
+            }
+            var len = length(string);
+            if (len === 1) {
+                return formatting(string);
+            }
             var result = [];
-            var len = $.terminal.length(string);
+            // len - 1 break the command line $.terminal.substring will return
+            // empty string for out of bound indexes
             for (var i = 0; i < len; ++i) {
                 var text = $.terminal.substring(string, i, i + 1);
-                if ($.terminal.is_formatting(text)) {
-                    result.push(text);
-                } else {
-                    result.push('[[;;]' + text + ']');
-                }
+                result.push(formatting(text));
             }
             return result.join('');
         }
@@ -1580,50 +1648,12 @@
         function length(str) {
             return $.terminal.length(str);
         }
+        function substring(str, start, end) {
+            return $.terminal.substring(str, start, end);
+        }
         // ---------------------------------------------------------------------
         // :: functions used to calculate position of cursor when formatting
         // :: change length of output text like with emoji demo
-        // ---------------------------------------------------------------------
-        function split(formatted, normal) {
-            function longer(str) {
-                return found && length(str) > length(found) || !found;
-            }
-            var formatted_len = $.terminal.length(formatted);
-            var normal_len = $.terminal.length(normal);
-            var found;
-            for (var i = normal_len; i > 1; i--) {
-                var test_normal = $.terminal.substring(normal, 0, i);
-                var formatted_normal = formatting(test_normal);
-                for (var j = formatted_len; j > 1; j--) {
-                    var test_formatted = $.terminal.substring(formatted, 0, j);
-                    if (test_formatted === formatted_normal &&
-                        longer(test_normal)) {
-                        found = test_normal;
-                    }
-                }
-            }
-            return found || '';
-        }
-        // ---------------------------------------------------------------------
-        // :: return index after next word that got replaced by formatting
-        // :: and change length of text
-        // ---------------------------------------------------------------------
-        function index_after_formatting(position) {
-            var start = position === 0 ? 0 : position - 1;
-            var command_len = $.terminal.length(command);
-            for (var i = start; i < command_len - 1; ++i) {
-                var substr = $.terminal.substring(command, 0, i);
-                var next_substr = $.terminal.substring(command, 0, i + 1);
-                var formatted_substr = formatting(substr);
-                var formatted_next = formatting(next_substr);
-                var substr_len = length(formatted_substr);
-                var next_len = length(formatted_next);
-                var test_diff = Math.abs(next_len - substr_len);
-                if (test_diff > 1) {
-                    return i;
-                }
-            }
-        }
         // ---------------------------------------------------------------------
         // :: main function that return corrected cursor position on display
         // :: if cursor is in the middle of the word that is shorter the before
@@ -1632,43 +1662,72 @@
         // :: of the word
         // ---------------------------------------------------------------------
         function get_formatted_position(position) {
-            var formatted_position = position;
-            var string = formatting(command);
-            var len = $.terminal.length(string);
-            var command_len = $.terminal.length(command);
-            if (len !== command_len) {
-                var orig_sub = $.terminal.substring(command, 0, position);
-                var orig_len = $.terminal.length(orig_sub);
-                var sub = formatting(orig_sub);
-                var sub_len = $.terminal.length(sub);
-                var diff = Math.abs(orig_len - sub_len);
-                if (false && orig_len > sub_len) {
-                    formatted_position -= diff;
-                } else if (false && orig_len < sub_len) {
-                    formatted_position += diff;
-                } else {
-                    var index = index_after_formatting(position);
-                    var to_end = $.terminal.substring(command, 0, index + 1);
-                    formatted_position -= orig_len - sub_len;
-                    if (orig_sub && orig_sub !== to_end) {
-                        var formatted_to_end = formatting(to_end);
-                        var common = split(formatted_to_end, orig_sub);
-                        if (common && orig_sub !== common) {
-                            var re = new RegExp('^' + $.terminal.escape_regex(common));
-                            var to_end_rest = to_end.replace(re, '');
-                            var to_end_rest_len = length(formatting(to_end_rest));
-                            var commnon_len = length(formatting(common));
-                            formatted_position = commnon_len + to_end_rest_len;
-                        }
+            // only regex formatters can change length of output string
+            var formatters = $.terminal.defaults.formatters.filter(function(formatter) {
+                return formatter instanceof Array;
+            });
+            if (position === 0) {
+                return position;
+            }
+            if (formatters.length) {
+                return formatters.reduce(function(result, frmt) {
+                    var command = result[0];
+                    var position = result[1];
+                    return tracking_replace(command, frmt[0], frmt[1], position);
+                }, [command, position])[1];
+            }
+            return position;
+        }
+        // ---------------------------------------------------------------------
+        // :: source https://stackoverflow.com/a/46756077/387194
+        // ---------------------------------------------------------------------
+        function tracking_replace(string, rex, replacement, position) {
+            var new_string = "";
+            var match;
+            var index = 0;
+            var rep_string;
+            var new_position = position;
+            var start;
+            rex.lastIndex = 0; // Just to be sure
+            while (match = rex.exec(string)) {
+                // Add any of the original string we just skipped
+                var last_index = length(substring(string, 0, rex.lastIndex));
+                start = last_index - length(match[0]);
+                if (index < start) {
+                    new_string += substring(string, index, start);
+                }
+                index = last_index;
+                // Build the replacement string. This just handles $$ and $n,
+                // you may want to add handling for $`, $', and $&.
+                rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
+                    if (c0 === "$") {
+                        return "$";
+                    }
+                    return match[c0];
+                });
+                // Add on the replacement
+                new_string += rep_string;
+                // If the position is affected...
+                if (start < position) {
+                    // ... update it:
+                    if (last_index < position) {
+                        // It's after the replacement, move it
+                        new_position = Math.max(0,
+                                                new_position +
+                                                length(rep_string) -
+                                                length(match[0]));
+                    } else {
+                        // It's *in* the replacement, put it just after
+                        new_position += length(rep_string) - (position - start);
                     }
                 }
-                if (formatted_position > len) {
-                    formatted_position = len;
-                } else if (formatted_position < 0) {
-                    formatted_position = 0;
-                }
             }
-            return formatted_position;
+            // Add on any trailing text in the string
+            if (index < length(string)) {
+                new_string += substring(string, index);
+            }
+            // Return the string and the updated position
+            return [new_string, new_position];
         }
         // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
@@ -1677,46 +1736,42 @@
         var redraw = (function() {
             var before = cursor.prev();
             var after = cursor.next();
+            var cursor_line = cursor.parent();
             // -----------------------------------------------------------------
             // :: Draw line with the cursor
             // -----------------------------------------------------------------
-            function slice(string, start, end) {
-                return $.terminal.substring(string, start, end);
-            }
             function draw_cursor_line(string, position) {
-                var len = $.terminal.length(string);
+                var len = length(string);
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
-                    //fix for tilda in IE
-                    cursor.html(format(slice(string, 0, 1)));
-                    //cursor.html(format(string[0]));
-                    after.html(format(slice(string, 1)));
+                    cursor.html(format(substring(string, 0, 1)));
+                    after.html(format(substring(string, 1)));
                 } else {
-                    var before_str = slice(string, 0, position);
+                    var before_str = $.terminal.substring(string, 0, position);
                     before.html(format(before_str));
-                    //fix for tilda in IE
-                    var c = slice(string, position, position + 1);
-                    //cursor.html(string[position]);
+                    var c = substring(string, position, position + 1);
                     cursor.html(format(c));
-                    if (position === string.length - 1) {
+                    if (position === len - 1) {
                         after.html('');
                     } else {
-                        after.html(format(slice(string, position + 1)));
+                        after.html(format(substring(string, position + 1)));
                     }
                 }
             }
             function div(string) {
-                return '<div role="presentation">' + format(string) + '</div>';
+                return '<div role="presentation" aria-hidden="true">' +
+                    format(string) +
+                    '</div>';
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
             // -----------------------------------------------------------------
             function lines_after(lines) {
-                var last_ins = after;
+                var last_ins = cursor_line;
                 $.each(lines, function(i, line) {
                     last_ins = $(div(line)).insertAfter(last_ins);
                 });
@@ -1726,7 +1781,7 @@
             // -----------------------------------------------------------------
             function lines_before(lines) {
                 $.each(lines, function(i, line) {
-                    before.before(div(line));
+                    cursor_line.before(div(line));
                 });
             }
             // -----------------------------------------------------------------
@@ -1743,9 +1798,9 @@
                         break;
                 }
                 var pos = formatted_position;
-                string = formatting(string.replace(/</g, '&#60;').replace(/>/g, '&#62;'));
+                string = formatting(safe(string.replace(/&/g, '&amp;')));
                 var i;
-                self.find('div').remove();
+                self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
                 before.html('');
                 // long line
                 if (strlen(text(string)) > num_chars - prompt_len - 1 ||
@@ -1762,7 +1817,7 @@
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
                         });
                     }
-                    var first_len = $.terminal.length(array[0]);
+                    var first_len = length(array[0]);
                     //cursor in first line
                     if (first_len === 0 && array.length === 1) {
                         // skip empty line
@@ -1770,76 +1825,63 @@
                         draw_cursor_line(array[0], pos);
                         lines_after(array.slice(1));
                     } else if (pos === first_len) {
-                        before.before(div(array[0]));
+                        cursor_line.before(div(array[0]));
                         draw_cursor_line(array[1] || '', 0);
                         if (array.length > 1) {
                             lines_after(array.slice(2));
                         }
+                    } else if (pos < first_len) {
+                        draw_cursor_line(array[0], pos);
+                        lines_after(array.slice(1));
+                    } else if (pos === first_len) {
+                        cursor_line.before(div(array[0]));
+                        draw_cursor_line(array[1], 0);
+                        lines_after(array.slice(2));
                     } else {
-                        var num_lines = array.length;
-                        if (pos < first_len) {
-                            draw_cursor_line(array[0], pos);
-                            lines_after(array.slice(1));
-                        } else if (pos === first_len) {
-                            before.before(div(array[0]));
-                            draw_cursor_line(array[1], 0);
-                            lines_after(array.slice(2));
-                        } else {
-                            var last = array.slice(-1)[0];
-                            var len = $.terminal.length(string);
-                            var from_last = len - pos - tabs_rm;
-                            var last_len = $.terminal.length(last);
-                            var new_pos = 0;
-                            if (from_last === -1) {
-                                from_last = 0;
-                            }
-                            if (from_last <= last_len) { // in last line
-                                lines_before(array.slice(0, -1));
-                                if (last_len === from_last) {
-                                    new_pos = 0;
-                                } else {
-                                    new_pos = last_len - from_last;
-                                }
-                                draw_cursor_line(last, new_pos);
-                            } else if (num_lines === 3) { // in the middle
-                                var str = format(array[0]);
-                                before.before('<div role="presentation">' +
-                                              str +
-                                              '</div>');
-                                draw_cursor_line(array[1], pos - first_len - 1);
-                                str = format(formatting(array[2]));
-                                after.after('<div role="presentation">' +
-                                            str +
-                                            '</div>');
+                        var last = array.slice(-1)[0];
+                        var len = length(string);
+                        var from_last = len - pos - tabs_rm;
+                        var last_len = length(last);
+                        var new_pos = 0;
+                        if (from_last === -1) {
+                            from_last = 0;
+                        }
+                        if (from_last <= last_len) { // in last line
+                            lines_before(array.slice(0, -1));
+                            if (last_len === from_last) {
+                                new_pos = 0;
                             } else {
-                                // more lines, cursor in the middle
-                                var line_index;
-                                var current;
-                                new_pos = pos;
-                                for (i = 0; i < array.length; ++i) {
-                                    var current_len = $.terminal.length(array[i]);
-                                    if (new_pos > current_len) {
-                                        new_pos -= current_len;
-                                    } else {
-                                        break;
-                                    }
-                                }
-                                current = array[i];
-                                line_index = i;
-                                // cursor on first character in line
-                                if (new_pos === current.length) {
-                                    new_pos = 0;
-                                    current = array[++line_index];
-                                    if (current === undefined) {
-                                        //should never happen
-                                        var msg = $.terminal.defaults.strings.redrawError;
-                                        throw new Error(msg);
-                                    }
-                                }
-                                draw_cursor_line(current, new_pos);
-                                lines_before(array.slice(0, line_index));
-                                lines_after(array.slice(line_index + 1));
+                                new_pos = last_len - from_last;
                             }
+                            draw_cursor_line(last, new_pos);
+                        } else {
+                            // more lines, cursor in the middle
+                            var line_index;
+                            var current;
+                            new_pos = pos;
+                            for (i = 0; i < array.length; ++i) {
+                                var current_len = $.terminal.length(array[i]);
+                                if (new_pos > current_len) {
+                                    new_pos -= current_len;
+                                } else {
+                                    break;
+                                }
+                            }
+                            current = array[i];
+                            line_index = i;
+                            // cursor on first character in line
+                            if (new_pos === length(current)) {
+                                new_pos = 0;
+                                current = array[++line_index];
+                                if (current === undefined) {
+                                    //should never happen
+                                    var msg = $.terminal.defaults.strings.redrawError;
+                                    throw new Error(msg);
+                                }
+                            }
+                            draw_cursor_line(current, new_pos);
+                            lines_before(array.slice(0, line_index));
+                            lines_after(array.slice(line_index + 1));
                         }
                     }
                 } else if (string === '') {
@@ -1899,6 +1941,9 @@
                 options.onCommandChange(command);
             }
         }
+        function crlf(string) {
+            return string.replace(/[\r\n]{2}/g, '\n');
+        }
         // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
@@ -1956,7 +2001,7 @@
             },
             set: function(string, stay) {
                 if (string !== undefined) {
-                    command = string;
+                    command = crlf(string);
                     if (!stay) {
                         self.position(command.length);
                     }
@@ -1966,24 +2011,36 @@
                 }
                 return self;
             },
-            keymap: function(new_keymap) {
+            keymap: function(new_keymap, value) {
+                function wrap(key, fn) {
+                    return function(e) {
+                        // new keymap function will get default as 2nd argument
+                        return fn(e, default_keymap[key]);
+                    };
+                }
                 if (typeof new_keymap === 'undefined') {
                     return keymap;
+                } else if (typeof new_keymap === 'string') {
+                    if (typeof value === 'undefined') {
+                        if (keymap[new_keymap]) {
+                            return keymap[new_keymap];
+                        } else if (default_keymap[new_keymap]) {
+                            return default_keymap[new_keymap];
+                        }
+                    } else {
+                        keymap[new_keymap] = wrap(new_keymap, value);
+                    }
                 } else {
                     keymap = $.extend(
                         {},
                         default_keymap,
-                        $.omap(new_keymap || {}, function(key, fn) {
-                            return function(e) {
-                                // new keymap function will get default as 2nd argument
-                                return fn(e, default_keymap[key]);
-                            };
-                        })
+                        $.omap(new_keymap || {}, wrap)
                     );
                     return self;
                 }
             },
             insert: function(string, stay) {
+                string = crlf(string);
                 if (position === command.length) {
                     command += string;
                 } else if (position === 0) {
@@ -2085,12 +2142,17 @@
                             new_formatted_pos = n;
                         }
                         // it's faster then reverse algorithm
-                        for (var i = 0; i < command_len; ++i) {
-                            if (new_formatted_pos === get_formatted_position(i)) {
-                                return self.position(i);
+                        if (new_formatted_pos === len) {
+                            self.position($.terminal.length(command));
+                        } else {
+                            for (var i = 0; i < command_len; ++i) {
+                                if (new_formatted_pos === get_formatted_position(i)) {
+                                    self.position(i);
+                                }
                             }
                         }
                     }
+                    return self;
                 }
             },
             visible: (function() {
@@ -2308,7 +2370,7 @@
                 if (!key || no_key) {
                     key = String.fromCharCode(e.which);
                 }
-                if (key.toUpperCase() === 'SPACEBAR') { // fix IE issue
+                if (key.toUpperCase() === 'SPACEBAR') {
                     key = ' ';
                 }
                 if ($.inArray(e.which, [13, 0, 8]) > -1) {
@@ -2417,15 +2479,16 @@
             self.on('mousedown.cmd', function() {
                 was_down = true;
             }).on('mouseup.cmd', function(e) {
-                if (get_selected_text() === '') {
+                if (e.originalEvent.button === 0 && get_selected_text() === '') {
                     var name = 'click_' + id;
                     if (++count === 1) {
                         var down = was_down;
                         if (enabled) {
                             self.oneTime(options.clickTimeout, name, function() {
-                                if (!$(e.target).is('.prompt') && down) {
+                                var $target = $(e.target);
+                                if (!$target.is('.prompt') && down) {
                                     if (enabled) {
-                                        if ($(e.target).is('.cmd')) {
+                                        if ($target.is('.cmd')) {
                                             self.position(command.length);
                                         } else {
                                             self.display_position(get_char_pos(e));
@@ -2459,7 +2522,7 @@
     // https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
     var mobile_re = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i;
     var tablet_re = /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i;
-    var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?)/i;
+    var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*[^\\](\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?)/i;
     var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
     var format_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
     var format_exist_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]/gi;
@@ -2498,6 +2561,7 @@
                 }
             }
         }
+        elm = null;
         return animation;
     })();
     // -------------------------------------------------------------------------
@@ -2512,8 +2576,14 @@
             return wcwidth;
         }
     })();
+    function bare_text(string) {
+        return $('<span>' + safe(string) + '</span>').text();
+    }
     function text(string) {
-        return $('<span>' + $.terminal.strip(string) + '</span>').text();
+        return bare_text($.terminal.strip(string));
+    }
+    function safe(string) {
+        return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
@@ -2523,6 +2593,9 @@
         }
         return check;
     })(navigator.userAgent || navigator.vendor || window.opera);
+    // ---------------------------------------------------------------------
+    // :: Cross-Browser selection utils
+    // ---------------------------------------------------------------------
     var get_selected_text = (function() {
         if (window.getSelection || document.getSelection) {
             return function() {
@@ -2542,12 +2615,90 @@
             return '';
         };
     })();
+    // ---------------------------------------------------------------------
+    function text_to_clipboard(container, text) {
+        var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
+        $div.appendTo('body');
+        select_all($div[0]);
+        try {
+            document.execCommand('copy');
+        } catch (e) {}
+        $div.remove();
+    }
+    // ---------------------------------------------------------------------
+    var get_textarea_selection = (function() {
+        var textarea = document.createElement('textarea');
+        var selectionStart = 'selectionStart' in textarea;
+        textarea = null;
+        if (selectionStart) {
+            return function(textarea) {
+                var length = textarea.selectionEnd - textarea.selectionStart;
+                return textarea.value.substr(textarea.selectionStart, length);
+            };
+        } else if (document.selection) {
+            return function() {
+                var range = document.selection.createRange();
+                return range.text();
+            };
+        } else {
+            return function() {
+                return '';
+            };
+        }
+    })();
+    function clear_textarea_selection(textarea) {
+        textarea.selectionStart = textarea.selectionEnd = 0;
+    }
+    // ---------------------------------------------------------------------
+    var select = (function() {
+        if (window.getSelection) {
+            var selection = window.getSelection();
+            if (selection.setBaseAndExtent) {
+                return function(start, end) {
+                    var selection = window.getSelection();
+                    selection.setBaseAndExtent(start, 0, end, 1);
+                };
+            } else {
+                return function(start, end) {
+                    var selection = window.getSelection();
+                    var range = document.createRange();
+                    range.setStart(start, 0);
+                    range.setEnd(end, end.childNodes.length);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                };
+            }
+        } else {
+            return $.noop;
+        }
+    })();
+    // ---------------------------------------------------------------------
+    function select_all(element) {
+        if (window.getSelection) {
+            var selection = window.getSelection();
+            if (selection.setBaseAndExtent) {
+                selection.setBaseAndExtent(element, 0, element, 1);
+            } else if (document.createRange) {
+                var range = document.createRange();
+                range.selectNodeContents(element);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+    }
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
         var array = string.match(command_re) || [];
         if (array.length) {
             var name = array.shift();
-            var args = $.map(array, fn);
+            var args = $.map(array, function(arg) {
+                if (arg.match(/^["']/)) {
+                    arg = arg.replace(/\n/g, '\\u0000\\u0000\\u0000\\u0000');
+                    arg = fn(arg);
+                    return arg.replace(/\x00\x00\x00\x00/g, '\n');
+                }
+                return fn(arg);
+            });
             var quotes = $.map(array, function(arg) {
                 var m = arg.match(/^(['"]).*\1$/);
                 return m && m[1] || '';
@@ -2571,7 +2722,8 @@
         }
     }
     $.terminal = {
-        version: '1.9.0',
+        version: 'DEV',
+        date: 'Tue, 07 Nov 2017 09:30:12 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -2754,8 +2906,7 @@
         // :: formatting aware substring function
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
-            var strip = $('<span>' + $.terminal.strip(string) + '</span>').text();
-            if (strip.substring(start_index, end_index) === '') {
+            if (text(string).substring(start_index, end_index) === '') {
                 return '';
             }
             var start;
@@ -2763,17 +2914,25 @@
             var start_formatting = '';
             var end_formatting = '';
             var prev_index;
+            var re = /(&[^;]+);$/;
             $.terminal.iterate_formatting(string, function(data) {
-                if (start_index) {
-                    if (data.count === start_index + 1) {
-                        start = data.index;
-                        if (data.formatting) {
-                            start_formatting = data.formatting;
-                        }
+                var m;
+                if (start_index && data.count === start_index + 1) {
+                    start = data.index;
+                    m = string.substring(0, start + 1).match(re);
+                    if (m) {
+                        start -= m[1].length;
+                    }
+                    if (data.formatting) {
+                        start_formatting = data.formatting;
                     }
                 }
                 if (end_index && data.count === end_index + 1) {
                     end = data.index;
+                    m = string.substring(0, end + 1).match(re);
+                    if (m) {
+                        end -= m[1].length;
+                    }
                     if (data.formatting) {
                         end = prev_index + 1;
                     }
@@ -2783,6 +2942,9 @@
                     prev_index = data.index;
                 }
             });
+            if (start_index && !start) {
+                return '';
+            }
             string = start_formatting + string.substring(start, end);
             if (end_formatting) {
                 string = string.replace(/(\[\[^\]]+)?\]$/, '');
@@ -2872,7 +3034,6 @@
                             output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
                         }
                         first_index = (new_index || data.index) + 1;
-                        // prev_format added in fix_close function
                         if (prev_format) {
                             var closed_formatting = output.match(/^[^\]]*\]/);
                             output = prev_format + output;
@@ -2895,6 +3056,7 @@
                                 prev_format = last.match(format_begin_re)[1];
                             }
                         }
+                        output = output.replace(/^(\[\[[^\]]+\])?\]/, '');
                         result.push(output);
                         // modify loop by returing new data
                         return {index: new_index, length: 0, space: -1};
@@ -2926,7 +3088,7 @@
                 return string;
             }
             var stack = [];
-            var re = /(\[\[(?:[^\]]|\\\])+\](?:[^\][]|\\\])*\]?)/;
+            var re = /((?:\[\[(?:[^\]]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
             var format_re = /(\[\[(?:[^\]]|\\\])+\])[\s\S]*/;
             return string.split(re).filter(Boolean).map(function(string) {
                 if (string.match(/^\[\[/)) {
@@ -2962,30 +3124,51 @@
         // ---------------------------------------------------------------------
         apply_formatters: function(string) {
             var formatters = $.terminal.defaults.formatters;
-            return $.terminal.format_split(string).map(function(string) {
-                if ($.terminal.is_formatting(string)) {
-                    return string;
-                } else {
-                    for (var i = 0; i < formatters.length; ++i) {
-                        try {
-                            if (typeof formatters[i] === 'function') {
-                                var ret = formatters[i](string);
-                                if (typeof ret === 'string') {
-                                    string = ret;
-                                }
-                            }
-                        } catch (e) {
-                            throw new Error('Error in formatter [' + i + ']');
+            var i = 0;
+            try {
+                return formatters.reduce(function(string, formatter) {
+                    i++;
+                    if (typeof formatter === 'function' && formatter.__meta__) {
+                        var ret = formatter(string);
+                        if (typeof ret === 'string') {
+                            return ret;
                         }
+                    } else {
+                        return $.terminal.format_split(string).map(function(string) {
+                            if ($.terminal.is_formatting(string)) {
+                                return string;
+                            } else {
+                                if (formatter instanceof Array) {
+                                    return string.replace(formatter[0], formatter[1]);
+                                } else if (typeof formatter === 'function') {
+                                    var ret = formatter(string);
+                                    if (typeof ret === 'string') {
+                                        return ret;
+                                    }
+                                }
+                                return string;
+                            }
+                        }).join('');
                     }
                     return string;
-                }
-            }).join('');
+                }, string);
+            } catch (e) {
+                throw new Error('Error in formatter [' + (i - 1) + ']');
+            }
         },
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
         format: function format(str, options) {
+            function safe_text(string) {
+                return safe(string.replace(/(\\+)]/g, function(_, slashes) {
+                    if (slashes.length % 2 === 1) {
+                        return ']';
+                    } else {
+                        return slashes.replace(/../, '\\');
+                    }
+                }));
+            }
             var settings = $.extend({}, {
                 linksNoReferrer: false
             }, options || {});
@@ -3011,7 +3194,7 @@
                             if (text === '') {
                                 return ''; //'<span>&nbsp;</span>';
                             }
-                            text = text.replace(/\\]/g, ']');
+                            text = safe_text(text);
                             var style_str = '';
                             if (style.indexOf('b') !== -1) {
                                 style_str += 'font-weight:bold;';
@@ -3033,6 +3216,12 @@
                             if (style.indexOf('i') !== -1) {
                                 style_str += 'font-style:italic;';
                             }
+                            if (typeof wcwidth !== 'undefined') {
+                                var len = strlen(bare_text(text));
+                                if (len !== 1) {
+                                    style_str += '--length: ' + len + ';';
+                                }
+                            }
                             if ($.terminal.valid_color(color)) {
                                 style_str += 'color:' + color + ';';
                                 if (style.indexOf('g') !== -1) {
@@ -3046,7 +3235,8 @@
                             if (data_text === '') {
                                 data = text;
                             } else {
-                                data = data_text.replace(/&#93;/g, ']');
+                                data = data_text.replace(/&#93;/g, ']')
+                                    .replace(/>/g, '&gt;').replace(/</g, '&lt;');
                             }
                             var result;
                             if (style.indexOf('!') !== -1) {
@@ -3076,13 +3266,20 @@
                                 result += '>' + text + '</a>';
                             } else {
                                 result += ' data-text="' +
-                                    data.replace('"', '&quote;') + '">' +
+                                    data.replace(/"/g, '&quote;') + '">' +
                                     text + '</span>';
                             }
                             return result;
                         });
                     } else {
-                        return '<span>' + text.replace(/\\\]/g, ']') + '</span>';
+                        text = safe_text(text);
+                        if (typeof wcwidth !== 'undefined') {
+                            var len = strlen(bare_text(text));
+                            var style = len !== 1 ? ' style="--length: ' + len + '"' : '';
+                        } else {
+                            style = '';
+                        }
+                        return '<span' + style + '>' + text + '</span>';
                     }
                 }).join('');
                 return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');
@@ -3435,9 +3632,12 @@
     // :: DOM at init like with:
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
-    function get_char_size() {
+    function get_char_size(div) {
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
+        if (div) {
+            temp.attr('style', div.attr('style'));
+        }
         var rect = temp.find('span')[0].getBoundingClientRect();
         var result = {
             width: rect.width,
@@ -3464,30 +3664,6 @@
     // -----------------------------------------------------------------------
     // :: try to copy given DOM element text to clipboard
     // -----------------------------------------------------------------------
-    function text_to_clipboard(container, text) {
-        var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
-        var range;
-        container.append($div);
-        if (document.body.createTextRange) {
-            range = document.body.createTextRange();
-            range.moveToElementText($div[0]);
-            range.select();
-        } else if (window.getSelection) {
-            var selection = window.getSelection();
-            if (selection.setBaseAndExtent) {
-                selection.setBaseAndExtent($div[0], 0, $div[0], 1);
-            } else if (document.createRange) {
-                range = document.createRange();
-                range.selectNodeContents($div[0]);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-        }
-        try {
-            document.execCommand('copy');
-        } catch (e) {}
-        $div.remove();
-    }
     function all(array, fn) {
         var same = array.filter(function(item) {
             return item[fn]() === item;
@@ -3546,14 +3722,15 @@
                 '/ /__',
             '\\___//____ \\\\___//____//_/ _\\_  / /_//____//_/ /_/ /_//_//_/ /_/ \\' +
                 '__\\_\\___/',
-            ('          \\/              /____/                                      ' +
-             '    ').replace(reg, '') + version_string,
+            ('          \\/              /____/                                     ' +
+             '     ').replace(reg, '') + version_string,
             copyright
         ]
     ];
     // -----------------------------------------------------------------------
     // :: Default options
     // -----------------------------------------------------------------------
+    $.terminal.nested_formatting.__meta__ = true;
     $.terminal.defaults = {
         prompt: '> ',
         history: true,
@@ -3817,8 +3994,7 @@
                         interpreter(command.name, [token].concat(command.args));
                     } else {
                         // should never happen
-                        terminal.error('&#91;AUTH&#93; ' +
-                                       strings().noTokenError);
+                        terminal.error('&#91;AUTH&#93; ' + strings().noTokenError);
                     }
                 }
             };
@@ -4176,25 +4352,18 @@
             // default name is login so you can pass true
         }
         // ---------------------------------------------------------------------
-        // :: Return exception message as string
-        // ---------------------------------------------------------------------
-        function exception_message(e) {
-            if (typeof e === 'string') {
-                return e;
-            } else if (typeof e.fileName === 'string') {
-                return e.fileName + ': ' + e.message;
-            } else {
-                return e.message;
-            }
-        }
-        // ---------------------------------------------------------------------
         // :: display Exception on terminal
         // ---------------------------------------------------------------------
-        function display_exception(e, label) {
+        function display_exception(e, label, silent) {
             if ($.isFunction(settings.exceptionHandler)) {
                 settings.exceptionHandler.call(self, e, label);
             } else {
                 self.exception(e, label);
+                if (!silent) {
+                    setTimeout(function() {
+                        throw e;
+                    }, 0);
+                }
             }
         }
         // ---------------------------------------------------------------------
@@ -4338,8 +4507,7 @@
                 if ($.isFunction(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL');
                 } else {
-                    alert('[Internal Exception(process_line)]:' +
-                          exception_message(e) + '\n' + e.stack);
+                    alert_exception('[Internal Exception(process_line)]', e);
                 }
             }
         }
@@ -4395,7 +4563,7 @@
                 if ($.isFunction(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
                 } else {
-                    alert('Exception in redraw\n' + e.stack);
+                    alert_exception('[redraw]', e);
                 }
             }
         }
@@ -4403,15 +4571,18 @@
         // :: Display user greetings or terminal signature
         // ---------------------------------------------------------------------
         function show_greetings() {
+            function echo(string) {
+                self.echo(string, {finalize: a11y_hide, formatters: false});
+            }
             if (settings.greetings === undefined) {
                 // signature have ascii art so it's not suite for screen readers
-                self.echo(self.signature, {finalize: a11y_hide});
+                echo(self.signature);
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
                 if (type === 'string') {
-                    self.echo(settings.greetings);
+                    echo(settings.greetings);
                 } else if (type === 'function') {
-                    settings.greetings.call(self, self.echo);
+                    settings.greetings.call(self, echo);
                 } else {
                     self.error(strings().wrongGreetings);
                 }
@@ -4441,7 +4612,12 @@
             var options = {
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
-                    settings.onEchoCommand.call(self, div);
+                    try {
+                        settings.onEchoCommand.call(self, div, command);
+                    } catch (e) {
+                        settings.onEchoCommand = $.noop;
+                        self.exception(e);
+                    }
                 }
             };
             if ($.isFunction(prompt)) {
@@ -4594,7 +4770,7 @@
                 } else {
                     // Call user interpreter function
                     var result = interpreter.interpreter.call(self, command, self);
-                    if (result !== undefined) {
+                    if (result) {
                         // auto pause/resume when user return promises
                         self.pause(settings.softPause);
                         // when for native Promise object work only in jQuery 3.x
@@ -4616,9 +4792,6 @@
             } catch (e) {
                 display_exception(e, 'USER');
                 self.resume();
-                if (!settings.exceptionHandler) {
-                    throw e;
-                }
             }
         }
         // ---------------------------------------------------------------------
@@ -4700,9 +4873,6 @@
                             return fun.apply(self, args);
                         } catch (e) {
                             display_exception(e, 'USER KEYMAP');
-                            if (!settings.exceptionHandler) {
-                                throw e;
-                            }
                         }
                     };
                 }));
@@ -5041,7 +5211,7 @@
         var command_queue = new DelayQueue();
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
-        var char_size = get_char_size();
+        var char_size = get_char_size(self);
         var cmd_ready = ready(command_queue);
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
@@ -5117,6 +5287,7 @@
                     try {
                         settings.onImport.call(self, view);
                     } catch (e) {
+                        settings.onImport = $.noop;
                         display_exception(e, 'onImport');
                     }
                 }
@@ -5443,7 +5614,8 @@
                             echo_command();
                             var text = matched.reverse().join('\t');
                             self.echo($.terminal.escape_brackets(text), {
-                                keepWords: true
+                                keepWords: true,
+                                formatters: false
                             });
                             return true;
                         }
@@ -5703,6 +5875,7 @@
                             try {
                                 ret = settings.onFocus.call(self, self);
                             } catch (e) {
+                                settings.onFocus = $.noop;
                                 display_exception(e, 'onFocus');
                             }
                         }
@@ -5726,6 +5899,7 @@
                         try {
                             ret = settings.onBlur.call(self, self);
                         } catch (e) {
+                            settings.onBlur = $.noop;
                             display_exception(e, 'onBlur');
                         }
                     }
@@ -5883,13 +6057,13 @@
                     }
                     width = self.width();
                     height = self.height();
-                    if (typeof settings.numChars !== 'undefined' &&
+                    if (typeof settings.numChars !== 'undefined' ||
                         typeof settings.numRows !== 'undefined') {
                         redraw();
                         scroll_to_bottom();
                         return;
                     }
-                    char_size = get_char_size();
+                    char_size = get_char_size(self);
                     var new_num_chars = get_num_chars(self, char_size);
                     var new_num_rows = get_num_rows(self, char_size);
                     // only if number of chars changed
@@ -5913,7 +6087,11 @@
             // -------------------------------------------------------------
             // :: redraw the terminal
             // -------------------------------------------------------------
-            refresh: redraw,
+            refresh: function() {
+                self[0].style.setProperty('--char-width', char_size.width);
+                redraw();
+                return self;
+            },
             // -------------------------------------------------------------
             // :: Flush the output to the terminal
             // -------------------------------------------------------------
@@ -5962,6 +6140,7 @@
                     try {
                         settings.onFlush.call(self, self);
                     } catch (e) {
+                        settings.onFlush = $.noop;
                         display_exception(e, 'onFlush');
                     }
                     //num_rows = get_num_rows(self, char_size);
@@ -5973,8 +6152,7 @@
                     if ($.isFunction(settings.exceptionHandler)) {
                         settings.exceptionHandler.call(self, e, 'TERMINAL (Flush)');
                     } else {
-                        alert('[Flush] ' + exception_message(e) + '\n' +
-                              e.stack);
+                        alert_exception('[Flush]', e);
                     }
                 }
                 return self;
@@ -6061,8 +6239,7 @@
                         if ($.isFunction(settings.exceptionHandler)) {
                             settings.exceptionHandler.call(self, e, 'TERMINAL (echo)');
                         } else {
-                            alert('[Terminal.echo] ' + exception_message(e) +
-                              '\n' + e.stack);
+                            alert_exception('[Terminal.echo]', e);
                         }
                     }
                 }
@@ -6341,6 +6518,7 @@
                             try {
                                 settings.onExit.call(self, self);
                             } catch (e) {
+                                settings.onExit = $.noop;
                                 display_exception(e, 'onExit');
                             }
                         }
@@ -6365,6 +6543,7 @@
                         try {
                             current.onExit.call(self, self);
                         } catch (e) {
+                            current.onExit = $.noop;
                             display_exception(e, 'onExit');
                         }
                     }
@@ -6456,6 +6635,7 @@
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
                     self.find('.terminal-fill').remove();
+                    self.stopTime();
                     terminals.remove(terminal_id);
                     if (visibility_observer) {
                         visibility_observer.unobserve(self[0]);
@@ -6464,6 +6644,7 @@
                         mutation_observer.disconnect();
                     }
                     self.resizer('unbind');
+                    font_resizer.resizer('unbind').remove();
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
@@ -6505,7 +6686,7 @@
                 } catch (e) {
                     // exec catch by command (resume call exec)
                     if (name !== 'exec' && name !== 'resume') {
-                        display_exception(e, 'TERMINAL');
+                        display_exception(e, 'TERMINAL', true);
                     }
                     if (!settings.exceptionHandler) {
                         throw e;
@@ -6533,6 +6714,7 @@
             requests.push(xhr);
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
+        var font_resizer = $('<div class="font"/>').appendTo(self);
         $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
@@ -6544,10 +6726,8 @@
                     autologin = false;
                 }
             } catch (e) {
+                settings.onBeforeLogin = $.noop;
                 display_exception(e, 'onBeforeLogin');
-                if (!settings.exceptionHandler) {
-                    throw e;
-                }
             }
         }
         // create json-rpc authentication function
@@ -6622,11 +6802,13 @@
                 keymap,
                 $.omap(settings.keymap || {}, function(key, fn) {
                     if (!keymap[key]) {
-                        return fn;
+                        return fn.bind(self);
                     }
-                    return function(e) {
+                    return function(e, original) {
                         // new keymap function will get default as 2nd argument
-                        return fn(e, keymap[key]);
+                        return fn.call(self, e, function() {
+                            return keymap[key](e, original);
+                        });
                     };
                 })
             );
@@ -6666,10 +6848,8 @@
                         try {
                             settings.onCommandChange.call(self, command, self);
                         } catch (e) {
+                            settings.onCommandChange = $.noop;
                             display_exception(e, 'onCommandChange');
-                            if (!settings.exceptionHandler) {
-                                throw e;
-                            }
                         }
                     }
                     scroll_to_bottom();
@@ -6765,24 +6945,46 @@
                 })();
                 (function() {
                     var clip = self.find('textarea');
-                    self.on('mousedown.terminal', function(e) {
-                        if (e.originalEvent.button === 2 && get_selected_text() === '') {
-                            if (!self.enabled()) {
-                                self.enable();
+                    self.on('contextmenu.terminal', function(e) {
+                        if (get_selected_text() === '') {
+                            if (!$(e.target).is('img,value,audio,object,canvas,a')) {
+                                if (!self.enabled()) {
+                                    self.enable();
+                                }
+                                var offset = command_line.offset();
+                                clip.css({
+                                    left: e.pageX - offset.left - 20,
+                                    top: e.pageY - offset.top - 20,
+                                    width: '5em',
+                                    height: '4em'
+                                });
+                                if (!clip.is(':focus')) {
+                                    clip.focus();
+                                }
+                                self.stopTime('textarea');
+                                self.oneTime(100, 'textarea', function() {
+                                    clip.css({
+                                        left: '',
+                                        top: '',
+                                        width: '',
+                                        height: ''
+                                    });
+                                });
+                                self.stopTime('selection');
+                                self.everyTime(20, 'selection', function() {
+                                    if (clip[0].selection !== clip[0].value) {
+                                        if (get_textarea_selection(clip[0])) {
+                                            clear_textarea_selection(clip[0]);
+                                            select(
+                                                self.find('.terminal-output')[0],
+                                                self.find('.cmd div:last-of-type')[0]
+                                            );
+                                            self.stopTime('selection');
+                                        }
+                                    }
+                                });
                             }
-                            //e.preventDefault();
-                            var offset = command_line.offset();
-                            clip.css({
-                                left: e.pageX - offset.left - 5,
-                                top: e.pageY - offset.top - 5
-                            });
                         }
-                    });
-                    // contextmenu is fired after mousedown
-                    self.bind('contextmenu', function() {
-                        self.oneTime(100, function() {
-                            clip.css({left: '', top: ''});
-                        });
                     });
                 })();
             }
@@ -6799,7 +7001,7 @@
                 num_chars = self.cols();
                 command_line.resize(num_chars);
                 if (!char_size) {
-                    char_size = get_char_size();
+                    char_size = get_char_size(self);
                 }
                 num_rows = get_num_rows(self, char_size);
             }
@@ -6823,8 +7025,12 @@
                     old_width = width;
                 }
             }
+            function create_resizers() {
+                self.resizer('unbind').resizer(resize);
+                font_resizer.resizer('unbind').resizer(self.resize);
+            }
             if (self.is(':visible')) {
-                self.resizer(resize);
+                create_resizers();
             }
             function observe_visibility() {
                 if (visibility_observer) {
@@ -6833,7 +7039,7 @@
                 var was_enabled;
                 visibility_observer = new IntersectionObserver(function() {
                     if (self.is(':visible')) {
-                        self.resizer('unbind').resizer(resize);
+                        create_resizers();
                         resize();
                         if (was_enabled) {
                             self.enabled();
@@ -6982,7 +7188,8 @@
                 // detection take from:
                 // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
                 var event;
-                if ("onwheel" in document.createElement("div")) {
+                var div = document.createElement("div");
+                if ("onwheel" in div) {
                     event = "wheel"; // Modern browsers support "wheel"
                 } else if (document.onmousewheel !== undefined) {
                     event = "mousewheel"; // Webkit and IE support at least "mousewheel"
@@ -6990,6 +7197,7 @@
                     // let's assume that remaining browsers are older Firefox
                     event = "DOMMouseScroll";
                 }
+                div = null;
                 self.on(event, function(e) {
                     var delta;
                     if (event === 'mousewheel') {

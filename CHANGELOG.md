@@ -1,3 +1,33 @@
+## Next
+### Features
+* new api for formatters Array with 2 elements regex and replacement string (it fix issue when formatters change
+  length of string - emoji demo)
+* normalize IE key property for keymap + always use +SPACEBAR if there is any control key
+* cursor text for terminal and cmd
+* onEchoCommand callback gets second argument `command`
+* cmd keymap api function, along with object and no arguments, accept string as first argument and function as second
+* only one exception per callback event
+* select all context menu (based on idea from CodeMirror)x
+### Bugs
+* fix cursor in IE and iOS/Safari reported by @RinaVladimyrovna [#350](https://github.com/jcubic/jquery.terminal/issues/350)
+* don't apply formatters in echo commands for completion (found by applying completion to emoji demo)
+* fix substring and html entity (entering < & > in command line was showing entity not character)
+* paste context menu not for img tag to allow to save as
+* fix nested formatting (by introducing __meta__ on formatter function that apply the function to whole string)
+* fix format_split when text have \\ character before ]
+* fix line ending on windows in command line (CRLF)
+* fix copy from command line
+* fix cursor position when command line have formatting (using formatters)
+* fix cursor position when command line have 3 lines
+* don't apply formatters for greetings not only for signture (user can use formatting because he control the string)
+* fix max call stack exception when error happen in onEchoCommand
+* Chinese character occupy 2 characters same as in linux terminal (requirement wcwidth and css variables)
+* fix substring and string like '<a' that was breaking command line
+* fix newlines in string when do parse/split _command (used by command line)
+* fix split equal and command line splitting
+* fix exception in keymap when calling original in the one that was overwriten by terminal like CTRL+V (reported by Ravi Teja Mamidipaka [#351](https://github.com/jcubic/jquery.terminal/issues/351))
+* not all keymaps had terminal as this context
+
 ## 1.9.0
 ### Features
 * new api utils $.terminal.length and $.terminal.columns
