@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Tue, 07 Nov 2017 09:55:48 +0000
+ * Date: Tue, 07 Nov 2017 11:14:45 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -135,6 +135,9 @@ body.terminal {
 .terminal-output > div, .terminal-output > div > div {
     /*padding-top: 3px;*/
     min-height: 14px;
+}
+terminal .terminal-output > div {
+    margin-top: -1px;
 }
 .terminal-output > div > div * {
     overflow-wrap: break-word; /* when echo html */

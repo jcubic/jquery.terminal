@@ -136,6 +136,9 @@ body.terminal {
     /*padding-top: 3px;*/
     min-height: 14px;
 }
+terminal .terminal-output > div {
+    margin-top: -1px;
+}
 .terminal-output > div > div * {
     overflow-wrap: break-word; /* when echo html */
     word-wrap: break-word;
