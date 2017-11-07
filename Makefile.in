@@ -92,6 +92,6 @@ jsonlint: package.json bower.json
 publish:
 	$(GIT) clone $(URL) npm
 	$(CD) npm && $(NPM) publish
-	$(RM) -r npm
+	$(RM) -rf npm
 
 lint: eslint jsonlint
