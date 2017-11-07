@@ -266,7 +266,7 @@ body.terminal {
 .terminal a:hover {
     background: #0F60FF;
     background: var(--link-color, #0F60FF);
-    color: var(--background, #aaa);
+    color: var(--background, #000);
     text-decoration: none;
 }
 .terminal .terminal-fill {
