@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.10.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 07 Nov 2017 19:45:46 +0000
+ * Date: Wed, 08 Nov 2017 17:13:17 +0000
  */
 
 /* TODO:
@@ -847,6 +847,13 @@
             excepctions.push(message);
             alert(message + (e.stack ? '\n' + e.stack : ''));
         }
+    }
+    // ---------------------------------------------------------------------
+    // :; detect if mouse event happen on scrollbar
+    // ---------------------------------------------------------------------
+    function scrollbar_event(e, node) {
+        var left = node.offset().left;
+        return node.outerWidth() <= e.clientX - left;
     }
     // ---------------------------------------------------------------------
     // :: Return exception message as string
@@ -2722,8 +2729,8 @@
         }
     }
     $.terminal = {
-        version: '1.10.0',
-        date: 'Tue, 07 Nov 2017 19:45:46 +0000',
+        version: 'DEV',
+        date: 'Wed, 08 Nov 2017 17:13:17 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6919,8 +6926,11 @@
                         count = 0;
                         $target = null;
                     }
+                    var resizer = self.find('.terminal-fill');
                     self.mousedown(function(e) {
-                        $target = $(e.target);
+                        if (!scrollbar_event(e, resizer)) {
+                            $target = $(e.target);
+                        }
                     }).mouseup(function() {
                         if (get_selected_text() === '' && $target) {
                             if (++count === 1) {
