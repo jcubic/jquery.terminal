@@ -1,3 +1,6 @@
+## 1.10.1
+* fix scroll to bottom on scrolling when terminal is disabled (reported by @RomanPerin [#355](https://github.com/jcubic/jquery.terminal/issues/355))
+
 ## 1.10.0
 ### Features
 * new api for formatters Array with 2 elements regex and replacement string (it fix issue when formatters change
