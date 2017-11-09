@@ -849,6 +849,13 @@
         }
     }
     // ---------------------------------------------------------------------
+    // :; detect if mouse event happen on scrollbar
+    // ---------------------------------------------------------------------
+    function scrollbar_event(e, node) {
+        var left = node.offset().left;
+        return node.outerWidth() <= e.clientX - left;
+    }
+    // ---------------------------------------------------------------------
     // :: Return exception message as string
     // ---------------------------------------------------------------------
     function exception_message(e) {
@@ -6919,8 +6926,11 @@
                         count = 0;
                         $target = null;
                     }
+                    var resizer = self.find('.terminal-fill');
                     self.mousedown(function(e) {
-                        $target = $(e.target);
+                        if (!scrollbar_event(e, resizer)) {
+                            $target = $(e.target);
+                        }
                     }).mouseup(function() {
                         if (get_selected_text() === '' && $target) {
                             if (++count === 1) {
