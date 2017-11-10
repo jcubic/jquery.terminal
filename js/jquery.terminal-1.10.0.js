@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 08 Nov 2017 17:13:17 +0000
+ * Date: Fri, 10 Nov 2017 10:28:14 +0000
  */
 
 /* TODO:
@@ -2730,7 +2730,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 08 Nov 2017 17:13:17 +0000',
+        date: 'Fri, 10 Nov 2017 10:28:14 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4641,6 +4641,9 @@
             } else {
                 self.echo(prompt + command, options);
             }
+        }
+        function have_scrollbar() {
+            return fill.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
         // :: Helper function that restore state. Call import_view or exec
@@ -6722,7 +6725,7 @@
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
         var font_resizer = $('<div class="font"/>').appendTo(self);
-        $('<div class="terminal-fill"/>').appendTo(self);
+        var fill = $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
@@ -6926,9 +6929,8 @@
                         count = 0;
                         $target = null;
                     }
-                    var resizer = self.find('.terminal-fill');
                     self.mousedown(function(e) {
-                        if (!scrollbar_event(e, resizer)) {
+                        if (!scrollbar_event(e, fill)) {
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
@@ -7186,14 +7188,14 @@
                     } else {
                         self.scroll(40);
                     }
+                    if (have_scrollbar()) {
+                        event.preventDefault();
+                    }
                 }
             }
             if ($.event.special.mousewheel) {
                 // we keep mousewheel plugin just in case
-                self.on('mousewheel', function(event, delta) {
-                    mousewheel(event, delta);
-                    event.preventDefault();
-                });
+                self.on('mousewheel', mousewheel);
             } else {
                 // detection take from:
                 // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
@@ -7216,7 +7218,6 @@
                         delta = e.originalEvent.deltaY || e.originalEvent.detail;
                     }
                     mousewheel(e, -delta);
-                    e.preventDefault();
                 });
             }
         }); // make_interpreter

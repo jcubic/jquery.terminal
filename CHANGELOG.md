@@ -1,3 +1,6 @@
+## Next
+* don't prevent default scroll when terminal have no scrollbar
+
 ## 1.10.1
 * fix scroll to bottom on scrolling when terminal is disabled (reported by @RomanPerin [#355](https://github.com/jcubic/jquery.terminal/issues/355))
 
