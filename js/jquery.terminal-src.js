@@ -7174,22 +7174,19 @@
                     var ret;
                     if ($.isFunction(interpreter.mousewheel)) {
                         ret = interpreter.mousewheel(event, delta, self);
-                        if (ret === false) {
-                            return;
-                        }
                     } else if ($.isFunction(settings.mousewheel)) {
                         ret = settings.mousewheel(event, delta, self);
-                        if (ret === false) {
-                            return;
-                        }
+                    }
+                    if (have_scrollbar() || ret === false) {
+                        event.preventDefault();
+                    }
+                    if (ret === false) {
+                        return;
                     }
                     if (delta > 0) {
                         self.scroll(-40);
                     } else {
                         self.scroll(40);
-                    }
-                    if (have_scrollbar()) {
-                        event.preventDefault();
                     }
                 }
             }
