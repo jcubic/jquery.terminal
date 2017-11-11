@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 10 Nov 2017 10:28:14 +0000
+ * Date: Sat, 11 Nov 2017 10:52:22 +0000
  */
 
 /* TODO:
@@ -2730,7 +2730,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 10 Nov 2017 10:28:14 +0000',
+        date: 'Sat, 11 Nov 2017 10:52:22 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7174,22 +7174,19 @@
                     var ret;
                     if ($.isFunction(interpreter.mousewheel)) {
                         ret = interpreter.mousewheel(event, delta, self);
-                        if (ret === false) {
-                            return;
-                        }
                     } else if ($.isFunction(settings.mousewheel)) {
                         ret = settings.mousewheel(event, delta, self);
-                        if (ret === false) {
-                            return;
-                        }
+                    }
+                    if (have_scrollbar() || ret === false) {
+                        event.preventDefault();
+                    }
+                    if (ret === false) {
+                        return;
                     }
                     if (delta > 0) {
                         self.scroll(-40);
                     } else {
                         self.scroll(40);
-                    }
-                    if (have_scrollbar()) {
-                        event.preventDefault();
                     }
                 }
             }
