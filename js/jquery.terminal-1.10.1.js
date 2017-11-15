@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 11 Nov 2017 10:52:22 +0000
+ * Date: Wed, 15 Nov 2017 18:55:35 +0000
  */
 
 /* TODO:
@@ -392,7 +392,9 @@
             }
         });
     } else {
-        localStorage = window.localStorage;
+        if (isLS) {
+            localStorage = window.localStorage;
+        }
         $.extend({
             Storage: {
                 set: isLS ? wls : wc,
@@ -2730,7 +2732,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 11 Nov 2017 10:52:22 +0000',
+        date: 'Wed, 15 Nov 2017 18:55:35 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4521,7 +4523,7 @@
         // ---------------------------------------------------------------------
         // :: Redraw all lines
         // ---------------------------------------------------------------------
-        function redraw() {
+        function redraw(update) {
             command_line.resize(num_chars);
             // we don't want reflow while processing lines
             var detached_output = output.empty().detach();
@@ -6185,7 +6187,7 @@
                         }
                         // it would be hard to figure out which div need to be
                         // updated so we update everything
-                        redraw();
+                        redraw(true);
                     }
                 });
                 return self;

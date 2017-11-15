@@ -392,7 +392,9 @@
             }
         });
     } else {
-        localStorage = window.localStorage;
+        if (isLS) {
+            localStorage = window.localStorage;
+        }
         $.extend({
             Storage: {
                 set: isLS ? wls : wc,
@@ -4521,7 +4523,7 @@
         // ---------------------------------------------------------------------
         // :: Redraw all lines
         // ---------------------------------------------------------------------
-        function redraw() {
+        function redraw(update) {
             command_line.resize(num_chars);
             // we don't want reflow while processing lines
             var detached_output = output.empty().detach();
@@ -6185,7 +6187,7 @@
                         }
                         // it would be hard to figure out which div need to be
                         // updated so we update everything
-                        redraw();
+                        redraw(true);
                     }
                 });
                 return self;
