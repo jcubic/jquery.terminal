@@ -1135,6 +1135,7 @@
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
+        var restart_animation;
         var paste_count = 0;
         function get_char_pos(e) {
             var node = $(e.target);
@@ -1472,6 +1473,12 @@
                     cursor.removeClass('blink');
                 }
             };
+            restart_animation = function() {
+              var new_cursor = cursor.clone();
+              new_cursor.insertBefore(cursor);
+              cursor.remove();
+              cursor = new_cursor;
+            };
         } else {
             var animating = false;
             animation = function(toggle) {
@@ -1484,6 +1491,10 @@
                     self.stopTime('blink', blink);
                     cursor.removeClass('inverted blink');
                 }
+            };
+            restart_animation = function() {
+                animation(false);
+                animation(true);
             };
         }
         // ---------------------------------------------------------------------
@@ -2303,6 +2314,7 @@
                 }
             }
             if (enabled) {
+                restart_animation();
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
