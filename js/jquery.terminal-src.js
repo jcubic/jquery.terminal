@@ -1474,10 +1474,10 @@
                 }
             };
             restart_animation = function() {
-              var new_cursor = cursor.clone();
-              new_cursor.insertBefore(cursor);
-              cursor.remove();
-              cursor = new_cursor;
+                var new_cursor = cursor.clone();
+                new_cursor.insertBefore(cursor);
+                cursor.remove();
+                cursor = new_cursor;
             };
         } else {
             var animating = false;
