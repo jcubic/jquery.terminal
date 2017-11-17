@@ -59,7 +59,7 @@ Makefile: Makefile.in
 	$(SED) -e "s/{{VER""SION}}/"$(VERSION)"/" Makefile.in > Makefile
 
 import.html: import.in
-	$(GIT) branch | grep '* devel' > /dev/null || $(SED) -e "s/{{VER}}/$(VERSION)/g" import.in > import.html
+	$(SED) -e "s/{{BRANCH}}/$(BRANCH)/g" import.in > import.html
 
 js/terminal.widget.js: js/terminal.widget.in
 	$(GIT) branch | grep '* devel' > /dev/null || $(SED) -e "s/{{VER}}/$(VERSION)/g" js/terminal.widget.in > js/terminal.widget.js
