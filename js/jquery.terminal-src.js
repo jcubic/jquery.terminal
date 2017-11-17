@@ -4523,7 +4523,7 @@
         // ---------------------------------------------------------------------
         // :: Redraw all lines
         // ---------------------------------------------------------------------
-        function redraw(update) {
+        function redraw() {
             command_line.resize(num_chars);
             // we don't want reflow while processing lines
             var detached_output = output.empty().detach();
