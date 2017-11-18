@@ -6122,7 +6122,8 @@
                     height = self.height();
                     if (typeof settings.numChars !== 'undefined' ||
                         typeof settings.numRows !== 'undefined') {
-                        redraw();
+                        command_line.resize(settings.numChars);
+                        self.refresh();
                         scroll_to_bottom();
                         return;
                     }
