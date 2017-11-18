@@ -1,6 +1,7 @@
 ## Next
 * don't prevent default scroll when terminal have no scrollbar
-* resart cursor animation on keydown (requested by @theMeow on chat)
+* restart cursor animation on keydown (requested by @theMeow on chat)
+* don't redraw whole terminal in update api method
 
 ## 1.10.1
 * fix scroll to bottom on scrolling when terminal is disabled (reported by @RomanPerin [#355](https://github.com/jcubic/jquery.terminal/issues/355))

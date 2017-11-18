@@ -4535,10 +4535,12 @@
         // ---------------------------------------------------------------------
         // :: Redraw all lines
         // ---------------------------------------------------------------------
-        function redraw() {
-            command_line.resize(num_chars);
-            // we don't want reflow while processing lines
-            var detached_output = output.empty().detach();
+        function redraw(update) {
+            if (!update) {
+                command_line.resize(num_chars);
+                // we don't want reflow while processing lines
+                var detached_output = output.empty().detach();
+            }
             var lines_to_show = [];
             // Dead code
             if (settings.outputLimit >= 0) {
@@ -4560,10 +4562,10 @@
                             string,
                             num_chars,
                             options.keepWords
-                        );
-                        lines_to_show = lines_to_show.concat(splitted.map(function(line) {
+                        ).map(function(line) {
                             return [line, options];
-                        }));
+                        });
+                        lines_to_show = lines_to_show.concat(splitted);
                     } else {
                         lines_to_show.push(line);
                     }
@@ -4577,14 +4579,51 @@
                 $.each(lines_to_show, function(i, line) {
                     process_line.apply(null, line); // line is an array
                 });
-                command_line.before(detached_output); // reinsert output
-                self.flush();
-                settings.onAfterRedraw.call(self);
+                if (!update) {
+                    command_line.before(detached_output); // reinsert output
+                }
+                self.flush(update);
+                try {
+                    settings.onAfterRedraw.call(self);
+                } catch (e) {
+                    settings.onAfterRedraw = $.noop;
+                    display_exception(e, 'onAfterRedraw');
+                }
             } catch (e) {
                 if ($.isFunction(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
                 } else {
                     alert_exception('[redraw]', e);
+                }
+            }
+        }
+        // ---------------------------------------------------------------------
+        // :: Function limit output lines based on outputLimit option
+        // ---------------------------------------------------------------------
+        function limit_lines() {
+            if (settings.outputLimit >= 0) {
+                var limit;
+                if (settings.outputLimit === 0) {
+                    limit = self.rows();
+                } else {
+                    limit = settings.outputLimit;
+                }
+                var $lines = output.find('div div');
+                if ($lines.length + 1 > limit) {
+                    var max = $lines.length - limit + 1;
+                    var for_remove = $lines.slice(0, max);
+                    // you can't get parent if you remove the
+                    // element so we first get the parent
+                    var parents = for_remove.parent();
+                    for_remove.remove();
+                    parents.each(function() {
+                        var $self = $(this);
+                        if ($self.is(':empty')) {
+                            // there can be divs inside parent that
+                            // was not removed
+                            $self.remove();
+                        }
+                    });
                 }
             }
         }
@@ -6119,48 +6158,32 @@
             // -------------------------------------------------------------
             // :: Flush the output to the terminal
             // -------------------------------------------------------------
-            flush: function() {
+            flush: function(update) {
                 try {
                     var bottom = self.is_bottom();
                     var wrapper;
                     // print all lines
+                    var index = 0;
                     $.each(output_buffer, function(i, line) {
                         if (line === NEW_LINE) {
                             wrapper = $('<div></div>');
                         } else if ($.isFunction(line)) {
                             // this is finalize function from echo
-                            wrapper.appendTo(output);
+                            if (update) {
+                                var node = output.find('> div').eq(index++);
+                                if (node.html() !== wrapper.html()) {
+                                    node.replaceWith(wrapper);
+                                }
+                            } else {
+                                wrapper.appendTo(output);
+                            }
                             line(wrapper);
                         } else {
                             $('<div/>').html(line)
                                 .appendTo(wrapper).width('100%');
                         }
                     });
-                    if (settings.outputLimit >= 0) {
-                        var limit;
-                        if (settings.outputLimit === 0) {
-                            limit = self.rows();
-                        } else {
-                            limit = settings.outputLimit;
-                        }
-                        var $lines = output.find('div div');
-                        if ($lines.length + 1 > limit) {
-                            var max = $lines.length - limit + 1;
-                            var for_remove = $lines.slice(0, max);
-                            // you can't get parent if you remove the
-                            // element so we first get the parent
-                            var parents = for_remove.parent();
-                            for_remove.remove();
-                            parents.each(function() {
-                                var $self = $(this);
-                                if ($self.is(':empty')) {
-                                    // there can be divs inside parent that
-                                    // was not removed
-                                    $self.remove();
-                                }
-                            });
-                        }
-                    }
+                    limit_lines();
                     try {
                         settings.onFlush.call(self, self);
                     } catch (e) {
@@ -6184,7 +6207,7 @@
             // -------------------------------------------------------------
             // :: Update the output line - line number can be negative
             // -------------------------------------------------------------
-            update: function(line, string) {
+            update: function(line, string, options) {
                 when_ready(function ready() {
                     if (line < 0) {
                         line = lines.length + line; // yes +
@@ -6196,6 +6219,9 @@
                             lines.splice(line, 1);
                         } else {
                             lines[line][0] = string;
+                            if (options) {
+                                lines[line][1] = options;
+                            }
                         }
                         // it would be hard to figure out which div need to be
                         // updated so we update everything
