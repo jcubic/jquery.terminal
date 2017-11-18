@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 17 Nov 2017 18:08:55 +0000
+ * Date: Sat, 18 Nov 2017 09:07:58 +0000
  */
 
 /* TODO:
@@ -1463,7 +1463,7 @@
                 }
             });
         }
-        // terminal animation don't work on andorid because they animate
+        // terminal animation don't work on android because they animate
         // 2 properties
         if (support_animations && !is_android) {
             animation = function(toggle) {
@@ -2744,7 +2744,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 17 Nov 2017 18:08:55 +0000',
+        date: 'Sat, 18 Nov 2017 09:07:58 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

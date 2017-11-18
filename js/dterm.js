@@ -10,7 +10,7 @@
  * Released under the MIT license
  *
  */
-/* global jQuery setTimeout IntersectionObserver */
+/* global jQuery, setTimeout, IntersectionObserver */
 (function($) {
     $.extend_if_has = function(desc, source, array) {
         for (var i = array.length; i--;) {
@@ -55,10 +55,6 @@
             visibility_observer.observe(terminal[0]);
         }
         this.dialog($.extend({}, options, {
-            resizeStop: function() {
-                var content = self.find('.ui-dialog-content');
-                terminal.resize(content.width(), content.height());
-            },
             open: function(event, ui) {
                 if (!window.IntersectionObserver) {
                     setTimeout(function() {

@@ -1463,7 +1463,7 @@
                 }
             });
         }
-        // terminal animation don't work on andorid because they animate
+        // terminal animation don't work on android because they animate
         // 2 properties
         if (support_animations && !is_android) {
             animation = function(toggle) {
