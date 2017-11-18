@@ -6126,7 +6126,6 @@
                         scroll_to_bottom();
                         return;
                     }
-                    char_size = get_char_size(self);
                     var new_num_chars = get_num_chars(self, char_size);
                     var new_num_rows = get_num_rows(self, char_size);
                     // only if number of chars changed
@@ -7079,7 +7078,10 @@
             }
             function create_resizers() {
                 self.resizer('unbind').resizer(resize);
-                font_resizer.resizer('unbind').resizer(self.resize);
+                font_resizer.resizer('unbind').resizer(function() {
+                    char_size = get_char_size(self);
+                    resize();
+                });
             }
             if (self.is(':visible')) {
                 create_resizers();

@@ -1,6 +1,7 @@
 ## Next
 ### Features
 * update API method accept options 3rd argument
+* speed up refresh on resize by checking character size in font resizer (reported by @artursOs)
 ### Bugs
 * don't prevent default scroll when terminal have no scrollbar
 * restart cursor animation on keydown (requested by @theMeow on chat)
