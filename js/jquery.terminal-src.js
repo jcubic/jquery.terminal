@@ -4535,8 +4535,12 @@
         // ---------------------------------------------------------------------
         // :: Redraw all lines
         // ---------------------------------------------------------------------
-        function redraw(update) {
-            if (!update) {
+        function redraw(options) {
+            options = $.extend({}, {
+                update: false,
+                scroll: true
+            }, options || {});
+            if (!options.update) {
                 command_line.resize(num_chars);
                 // we don't want reflow while processing lines
                 var detached_output = output.empty().detach();
@@ -4579,10 +4583,10 @@
                 $.each(lines_to_show, function(i, line) {
                     process_line.apply(null, line); // line is an array
                 });
-                if (!update) {
+                if (!options.update) {
                     command_line.before(detached_output); // reinsert output
                 }
-                self.flush(update);
+                self.flush(options);
                 try {
                     settings.onAfterRedraw.call(self);
                 } catch (e) {
@@ -6124,7 +6128,6 @@
                         typeof settings.numRows !== 'undefined') {
                         command_line.resize(settings.numChars);
                         self.refresh();
-                        scroll_to_bottom();
                         return;
                     }
                     var new_num_chars = get_num_chars(self, char_size);
@@ -6142,7 +6145,6 @@
                         } else if ($.isFunction(settings.onResize)) {
                             settings.onResize.call(self, self);
                         }
-                        scroll_to_bottom();
                     }
                 }
                 return self;
@@ -6152,13 +6154,20 @@
             // -------------------------------------------------------------
             refresh: function() {
                 self[0].style.setProperty('--char-width', char_size.width);
-                redraw();
+                redraw({
+                    scroll: false,
+                    update: true
+                });
                 return self;
             },
             // -------------------------------------------------------------
             // :: Flush the output to the terminal
             // -------------------------------------------------------------
-            flush: function(update) {
+            flush: function(options) {
+                options = $.extend({}, {
+                    update: false,
+                    scroll: true
+                }, options || {});
                 try {
                     var bottom = self.is_bottom();
                     var wrapper;
@@ -6169,7 +6178,7 @@
                             wrapper = $('<div></div>');
                         } else if ($.isFunction(line)) {
                             // this is finalize function from echo
-                            if (update) {
+                            if (options.update) {
                                 var node = output.find('> div').eq(index++);
                                 if (node.html() !== wrapper.html()) {
                                     node.replaceWith(wrapper);
@@ -6191,7 +6200,7 @@
                         display_exception(e, 'onFlush');
                     }
                     //num_rows = get_num_rows(self, char_size);
-                    if (settings.scrollOnEcho || bottom) {
+                    if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         scroll_to_bottom();
                     }
                     output_buffer = [];
@@ -6225,7 +6234,10 @@
                         }
                         // it would be hard to figure out which div need to be
                         // updated so we update everything
-                        redraw(true);
+                        redraw({
+                            scroll: false,
+                            update: true
+                        });
                     }
                 });
                 return self;
