@@ -1,7 +1,11 @@
 ## Next
+### Features
+* update API method accept options 3rd argument
+### Bugs
 * don't prevent default scroll when terminal have no scrollbar
 * restart cursor animation on keydown (requested by @theMeow on chat)
 * don't redraw whole terminal in update api method
+* show exception from onAfterRedraw on terminal
 
 ## 1.10.1
 * fix scroll to bottom on scrolling when terminal is disabled (reported by @RomanPerin [#355](https://github.com/jcubic/jquery.terminal/issues/355))
