@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 18 Nov 2017 12:16:38 +0000
+ * Date: Sun, 19 Nov 2017 08:42:11 +0000
  */
 
 /* TODO:
@@ -2744,7 +2744,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 18 Nov 2017 12:16:38 +0000',
+        date: 'Sun, 19 Nov 2017 08:42:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6236,11 +6236,17 @@
                         // updated so we update everything
                         redraw({
                             scroll: false,
-                            update: true
+                            update: string !== null
                         });
                     }
                 });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: convenience method that remove the line
+            // -------------------------------------------------------------
+            remove: function(line, options) {
+                return self.update(line, null, options);
             },
             // -------------------------------------------------------------
             // :: return index of last line in case when you need to update

@@ -4,6 +4,7 @@
 * speed up refresh on resize by checking character size in font resizer (reported by @artursOs)
 * change command line num chars on resize + settings.numChars (reported by @artursOs [#353](https://github.com/jcubic/jquery.terminal/issues/353))
 * don't call scroll to bottom on resize/refresh/update
+* add remove api method that call update(line, null);
 ### Bugs
 * don't prevent default scroll when terminal have no scrollbar
 * restart cursor animation on keydown (requested by @theMeow on chat)

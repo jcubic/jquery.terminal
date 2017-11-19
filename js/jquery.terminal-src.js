@@ -6236,11 +6236,17 @@
                         // updated so we update everything
                         redraw({
                             scroll: false,
-                            update: true
+                            update: string !== null
                         });
                     }
                 });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: convenience method that remove the line
+            // -------------------------------------------------------------
+            remove: function(line, options) {
+                return self.update(line, null, options);
             },
             // -------------------------------------------------------------
             // :: return index of last line in case when you need to update
