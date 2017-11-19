@@ -2604,11 +2604,10 @@
         }
     })();
     function bare_text(string) {
-        string = safe(string);
         if (!string.match(/&/)) {
             return string;
         }
-        return $('<span>' + string + '</span>').text();
+        return $('<span>' + safe(string) + '</span>').text();
     }
     function text(string) {
         return bare_text($.terminal.strip(string));
