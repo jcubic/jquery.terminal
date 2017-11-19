@@ -438,6 +438,10 @@ terminal .terminal-output > div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
+    .terminal .font {
+        width: calc(var(--size) * 1em);
+        height: calc(var(--size) * 1em);
+    }
     .terminal span[style*="--length"] {
         width: calc(var(--length, 1) * var(--char-width) * 1px);
         display: inline-block;

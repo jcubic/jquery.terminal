@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 19 Nov 2017 08:42:11 +0000
+ * Date: Sun, 19 Nov 2017 20:45:04 +0000
  */
 
 /* TODO:
@@ -731,8 +731,9 @@
             range.collapse(true);
             range.select();
         }
-        if (!isContentEditable)
+        if (!isContentEditable && !this.is(':focus')) {
             target.focus();
+        }
         return pos;
     };
     /* eslint-enable */
@@ -1455,7 +1456,10 @@
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
-                            clip.caret(position + 1);
+                            // we check first to improve performance
+                            if (clip.caret() !== position + 1) {
+                                clip.caret(position + 1);
+                            }
                         } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
                         }
@@ -1926,8 +1930,10 @@
                 var formatted = lines.slice(0, -1).map(function(line) {
                     return '<span class="line">' + $.terminal.format(line) + '</span>';
                 }).concat([last_line]).join('\n');
-                prompt_node.html(formatted);
-                prompt_len = strlen($('<span>' + last_line + '</span>').text());
+                if (prompt_node.html() !== formatted) {
+                    prompt_node.html(formatted);
+                    prompt_len = strlen($('<span>' + last_line + '</span>').text());
+                }
             }
             return function() {
                 switch (typeof prompt) {
@@ -2598,12 +2604,19 @@
         }
     })();
     function bare_text(string) {
-        return $('<span>' + safe(string) + '</span>').text();
+        string = safe(string);
+        if (!string.match(/&/)) {
+            return string;
+        }
+        return $('<span>' + string + '</span>').text();
     }
     function text(string) {
         return bare_text($.terminal.strip(string));
     }
     function safe(string) {
+        if (!string.match(/[<>]/)) {
+            return string;
+        }
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
@@ -2744,7 +2757,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 19 Nov 2017 08:42:11 +0000',
+        date: 'Sun, 19 Nov 2017 20:45:04 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3182,13 +3195,16 @@
         // ---------------------------------------------------------------------
         format: function format(str, options) {
             function safe_text(string) {
-                return safe(string.replace(/(\\+)]/g, function(_, slashes) {
-                    if (slashes.length % 2 === 1) {
-                        return ']';
-                    } else {
-                        return slashes.replace(/../, '\\');
-                    }
-                }));
+                if (string.match(/\\]/)) {
+                    string = string.replace(/(\\+)]/g, function(_, slashes) {
+                        if (slashes.length % 2 === 1) {
+                            return ']';
+                        } else {
+                            return slashes.replace(/../, '\\');
+                        }
+                    });
+                }
+                return safe(string);
             }
             var settings = $.extend({}, {
                 linksNoReferrer: false
@@ -3673,7 +3689,8 @@
     function get_num_chars(terminal, char_size) {
         var width = terminal.find('.terminal-fill').width();
         var result = Math.floor(width / char_size.width);
-        // random number to not get NaN in node but big enough to not wrap exception
+        // random number to not get NaN in node.js but big enough to
+        // not wrap exception
         return result || 1000;
     }
     // -----------------------------------------------------------------------
@@ -4425,7 +4442,7 @@
         // ---------------------------------------------------------------------
         var output_buffer = [];
         var NEW_LINE = 1;
-        function buffer_line(string, options) {
+        function buffer_line(string, index, options) {
             // urls should always have formatting to keep url if split
             var i, len;
             output_buffer.push(NEW_LINE);
@@ -4457,19 +4474,25 @@
             } else {
                 output_buffer.push(string);
             }
-            output_buffer.push(options.finalize);
+            output_buffer.push({
+                finalize: options.finalize,
+                index: index
+            });
         }
         // ---------------------------------------------------------------------
-        function process_line(line, options) {
+        function process_line(line) {
             // prevent exception in display exception
             try {
                 var line_settings = $.extend({
                     exec: true,
                     raw: false,
                     finalize: $.noop
-                }, options || {});
+                }, line.options || {});
                 var string;
-                var arg = $.type(line) === 'function' ? line() : line;
+                var arg = line.string;
+                if ($.type(arg) === 'function') {
+                    arg = arg();
+                }
                 if ($.type(arg) !== 'string') {
                     if ($.isFunction(settings.parseObject)) {
                         var ret = settings.parseObject(arg);
@@ -4504,12 +4527,12 @@
                         }
                     }).join('');
                     if (string !== '') {
-                        if (settings.convertLinks && !options.raw) {
-                            string = string.replace(email_re, '[[!;;]$1]').
-                                replace(url_nf_re, '[[!;;]$1]');
-                        }
-                        if (!options.raw) {
-                            if (options.formatters) {
+                        if (!line_settings.raw) {
+                            if (settings.convertLinks) {
+                                string = string.replace(email_re, '[[!;;]$1]').
+                                    replace(url_nf_re, '[[!;;]$1]');
+                            }
+                            if (line_settings.formatters) {
                                 try {
                                     string = $.terminal.apply_formatters(string);
                                 } catch (e) {
@@ -4519,7 +4542,7 @@
                             string = $.terminal.encode(string);
                         }
                         // string can be empty after removing extended commands
-                        buffer_line(string, line_settings);
+                        buffer_line(string, line.index, line_settings);
                     }
                 }
             } catch (e) {
@@ -4533,7 +4556,7 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: Redraw all lines
+        // :: Update terminal lines
         // ---------------------------------------------------------------------
         function redraw(options) {
             options = $.extend({}, {
@@ -4557,17 +4580,26 @@
                 } else {
                     limit = settings.outputLimit;
                 }
-                lines.forEach(function(line) {
-                    var string = $.type(line[0]) === 'function' ? line[0]() : line[0];
-                    string = $.type(string) === 'string' ? string : String(string);
+                lines.forEach(function(line, index) {
+                    var string = line[0];
+                    if ($.type(string) === 'function') {
+                        string = string();
+                    }
+                    if ($.type(string) !== 'string') {
+                        string = String(string);
+                    }
                     if (strlen(string) > num_chars) {
                         var options = line[1];
                         var splitted = $.terminal.split_equal(
                             string,
                             num_chars,
                             options.keepWords
-                        ).map(function(line) {
-                            return [line, options];
+                        ).map(function(string) {
+                            return {
+                                string: string,
+                                index: index,
+                                options: options
+                            };
                         });
                         lines_to_show = lines_to_show.concat(splitted);
                     } else {
@@ -4576,12 +4608,18 @@
                 });
                 lines_to_show = lines_to_show.slice(lines_to_show.length - limit - 1);
             } else {
-                lines_to_show = lines;
+                lines_to_show = lines.map(function(line, index) {
+                    return {
+                        string: line[0],
+                        index: index,
+                        options: line[1]
+                    };
+                });
             }
             try {
                 output_buffer = [];
                 $.each(lines_to_show, function(i, line) {
-                    process_line.apply(null, line); // line is an array
+                    process_line(line);
                 });
                 if (!options.update) {
                     command_line.before(detached_output); // reinsert output
@@ -4612,7 +4650,7 @@
                 } else {
                     limit = settings.outputLimit;
                 }
-                var $lines = output.find('div div');
+                var $lines = output.find('> div > div');
                 if ($lines.length + 1 > limit) {
                     var max = $lines.length - limit + 1;
                     var for_remove = $lines.slice(0, max);
@@ -6172,21 +6210,21 @@
                     var bottom = self.is_bottom();
                     var wrapper;
                     // print all lines
-                    var index = 0;
                     $.each(output_buffer, function(i, line) {
                         if (line === NEW_LINE) {
                             wrapper = $('<div></div>');
-                        } else if ($.isFunction(line)) {
+                        } else if ($.isPlainObject(line) && $.isFunction(line.finalize)) {
                             // this is finalize function from echo
                             if (options.update) {
-                                var node = output.find('> div').eq(index++);
+                                var selector = '> div[data-index=' + line.index + ']';
+                                var node = output.find(selector);
                                 if (node.html() !== wrapper.html()) {
                                     node.replaceWith(wrapper);
                                 }
                             } else {
                                 wrapper.appendTo(output);
                             }
-                            line(wrapper);
+                            line.finalize(wrapper.attr('data-index', line.index));
                         } else {
                             $('<div/>').html(line)
                                 .appendTo(wrapper).width('100%');
@@ -6223,27 +6261,29 @@
                     }
                     if (!lines[line]) {
                         self.error('Invalid line number ' + line);
+                    } else if (string === null) {
+                        lines.splice(line, 1);
+                        output.find('[data-index=' + line + ']').remove();
                     } else {
-                        if (string === null) {
-                            lines.splice(line, 1);
-                        } else {
-                            lines[line][0] = string;
-                            if (options) {
-                                lines[line][1] = options;
-                            }
+                        lines[line][0] = string;
+                        if (options) {
+                            lines[line][1] = options;
                         }
-                        // it would be hard to figure out which div need to be
-                        // updated so we update everything
-                        redraw({
+                        process_line({
+                            string: string,
+                            index: line,
+                            options: options
+                        });
+                        self.flush({
                             scroll: false,
-                            update: string !== null
+                            update: true
                         });
                     }
                 });
                 return self;
             },
             // -------------------------------------------------------------
-            // :: convenience method that remove the line
+            // :: convenience method for removing selected line
             // -------------------------------------------------------------
             remove: function(line, options) {
                 return self.update(line, null, options);
@@ -6292,7 +6332,11 @@
                         if (typeof arg === 'function') {
                             arg = arg.bind(self);
                         }
-                        process_line(arg, locals);
+                        process_line({
+                            string: arg,
+                            options: locals,
+                            index: lines.length
+                        });
                         // extended commands should be processed only
                         // once in echo and not on redraw
                         lines.push([arg, $.extend(locals, {
@@ -7099,7 +7143,7 @@
                 self.resizer('unbind').resizer(resize);
                 font_resizer.resizer('unbind').resizer(function() {
                     char_size = get_char_size(self);
-                    resize();
+                    self.resize();
                 });
             }
             if (self.is(':visible')) {
