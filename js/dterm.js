@@ -24,7 +24,8 @@
     $.fn.dterm = function(interpreter, options) {
         var op = $.extend_if_has({}, options, defaults);
         op.enabled = false;
-        var terminal = this.terminal(interpreter, op).css('overflow', 'hidden');
+        var terminal = $('<div/>').appendTo(this).css('overflow', 'hidden')
+                .terminal(interpreter, op);
         if (!options.title) {
             options.title = 'JQuery Terminal Emulator';
         }
