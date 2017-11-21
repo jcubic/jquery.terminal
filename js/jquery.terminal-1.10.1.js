@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 21 Nov 2017 18:40:04 +0000
+ * Date: Tue, 21 Nov 2017 20:13:14 +0000
  */
 
 /* TODO:
@@ -2756,7 +2756,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 21 Nov 2017 18:40:04 +0000',
+        date: 'Tue, 21 Nov 2017 20:13:14 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4591,6 +4591,7 @@
                 }
                 lines.forEach(function(line, index) {
                     var string = line[0];
+                    var options = line[1];
                     if ($.type(string) === 'function') {
                         string = string();
                     }
@@ -4598,7 +4599,6 @@
                         string = String(string);
                     }
                     if (strlen(string) > num_chars) {
-                        var options = line[1];
                         var splitted = $.terminal.split_equal(
                             string,
                             num_chars,
@@ -4612,7 +4612,11 @@
                         });
                         lines_to_show = lines_to_show.concat(splitted);
                     } else {
-                        lines_to_show.push(line);
+                        lines_to_show.push({
+                            string: string,
+                            index: index,
+                            options: options
+                        });
                     }
                 });
                 lines_to_show = lines_to_show.slice(lines_to_show.length - limit - 1);
