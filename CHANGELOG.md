@@ -5,6 +5,7 @@
 * change command line num chars on resize + settings.numChars (reported by @artursOs [#353](https://github.com/jcubic/jquery.terminal/issues/353))
 * add remove api method that call update(line, null);
 * don't call scroll to bottom on resize/refresh/update/remove
+* improve scroll_element plugin by using document.scrollingElement is present and cache
 ### Bugs
 * don't prevent default scroll when terminal have no scrollbar
 * restart cursor animation on keydown (requested by @theMeow on chat)

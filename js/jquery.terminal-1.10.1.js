@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 19 Nov 2017 20:54:02 +0000
+ * Date: Tue, 21 Nov 2017 14:32:31 +0000
  */
 
 /* TODO:
@@ -2756,7 +2756,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 19 Nov 2017 20:54:02 +0000',
+        date: 'Tue, 21 Nov 2017 14:32:31 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3525,11 +3525,16 @@
         return this.map(function() {
             var $this = $(this);
             if ($this.is('body')) {
+                if ('scrollingElement' in document) {
+                    return document.scrollingElement;
+                }
+                if ($.fn.scroll_element.cache) {
+                    return $.fn.scroll_element.cache;
+                }
                 var html = $('html');
                 var body = $('body');
                 var scrollTop = body.scrollTop() || html.scrollTop();
                 var pre = $('<pre/>').css(defaults.pre).appendTo('body');
-                pre.html(new Array(defaults.lines).join('\n'));
                 $('body,html').scrollTop(10);
                 var scroll_object;
                 if (body.scrollTop() === 10) {
@@ -3540,6 +3545,7 @@
                     scroll_object = html[0];
                 }
                 pre.remove();
+                $.fn.scroll_element.cache = scroll_object;
                 return scroll_object;
             } else {
                 return this;
@@ -3549,10 +3555,10 @@
     $.fn.scroll_element.defaults = {
         lines: 2000,
         pre: {
-            'font-size': '100px',
-            'white-space': 'pre' // just in case if user overwrite css for pre tag
+            'height': '99999em'
         }
     };
+    $.fn.scroll_element.cache;
     // -----------------------------------------------------------------------
     function is_key_native() {
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
