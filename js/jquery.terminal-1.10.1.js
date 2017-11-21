@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 21 Nov 2017 14:32:31 +0000
+ * Date: Tue, 21 Nov 2017 18:18:07 +0000
  */
 
 /* TODO:
@@ -2756,7 +2756,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 21 Nov 2017 14:32:31 +0000',
+        date: 'Tue, 21 Nov 2017 18:18:07 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3310,8 +3310,12 @@
                     } else {
                         text = safe_text(text);
                         if (typeof wcwidth !== 'undefined') {
-                            var len = strlen(bare_text(text));
-                            var style = len !== 1 ? ' style="--length: ' + len + '"' : '';
+                            var t = bare_text(text);
+                            var len = strlen(t);
+                            var style = '';
+                            if (t.length < len) {
+                                style = ' style="--length: ' + len + '"';
+                            }
                         } else {
                             style = '';
                         }
@@ -7158,10 +7162,11 @@
                 if (visibility_observer) {
                     visibility_observer.unobserve(self[0]);
                 }
-                var was_enabled;
+                var was_enabled = enabled;
                 visibility_observer = new IntersectionObserver(function() {
                     if (self.is(':visible')) {
                         create_resizers();
+                        char_size = get_char_size(self);
                         resize();
                         if (was_enabled) {
                             self.enabled();
