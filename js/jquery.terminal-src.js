@@ -6977,12 +6977,6 @@
                 },
                 commands: commands
             });
-            // touch devices need touch event to get virtual keyboard
-            if (enabled && self.is(':visible') && !is_mobile) {
-                self.focus(undefined, true);
-            } else {
-                self.disable();
-            }
             function disable(e) {
                 e = e.originalEvent;
                 if (e) {
@@ -7128,14 +7122,6 @@
                 }
                 num_rows = get_num_rows(self, char_size);
             }
-            // -------------------------------------------------------------
-            // Run Login
-            command_queue.resolve();
-            if (settings.login) {
-                self.login(settings.login, true, initialize);
-            } else {
-                initialize();
-            }
             function resize() {
                 if (self.is(':visible')) {
                     var width = self.width();
@@ -7162,14 +7148,14 @@
                 if (visibility_observer) {
                     visibility_observer.unobserve(self[0]);
                 }
-                var was_enabled = enabled;
+                var was_enabled = self.enabled();
                 visibility_observer = new IntersectionObserver(function() {
                     if (self.is(':visible')) {
                         create_resizers();
                         char_size = get_char_size(self);
                         resize();
                         if (was_enabled) {
-                            self.enabled();
+                            self.enable();
                         }
                     } else {
                         was_enabled = $.terminal.active() === self && self.enabled();
@@ -7202,7 +7188,20 @@
                 if (in_dom) {
                     observe_visibility();
                 }
-
+            }
+            // touch devices need touch event to get virtual keyboard
+            if (enabled && self.is(':visible') && !is_mobile) {
+                self.focus(undefined, true);
+            } else {
+                self.disable();
+            }
+            // -------------------------------------------------------------
+            // Run Login
+            command_queue.resolve();
+            if (settings.login) {
+                self.login(settings.login, true, initialize);
+            } else {
+                initialize();
             }
             // -------------------------------------------------------------
             // :: helper

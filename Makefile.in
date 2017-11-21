@@ -79,6 +79,9 @@ cover:
 coveralls:
 	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js --captureExceptions; cat ./coverage/lcov.info | ./node_modules/.bin/coveralls -v
 
+lint.src:
+	$(ESLINT) js/jquery.terminal-src.js
+
 eslint:
 	$(ESLINT) js/jquery.terminal-src.js
 	$(ESLINT) js/dterm.js
