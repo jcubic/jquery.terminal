@@ -6,6 +6,7 @@
 * add remove api method that call update(line, null);
 * don't call scroll to bottom on resize/refresh/update/remove
 * improve scroll_element plugin by using document.scrollingElement if present and cache the vale
+* resizer plugin use ResizeObserver if defined
 ### Bugs
 * don't prevent default scroll when terminal have no scrollbar
 * restart cursor animation on keydown (requested by @theMeow on chat)

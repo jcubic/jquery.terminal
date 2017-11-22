@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 21 Nov 2017 20:13:14 +0000
+ * Date: Wed, 22 Nov 2017 11:49:23 +0000
  */
 
 /* TODO:
@@ -49,8 +49,8 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
-         setImmediate, IntersectionObserver, MutationObserver, wcwidth,
-         module, require, define */
+         setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
+         wcwidth, module, require, define */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -756,16 +756,52 @@
                 'Invalid argument, it need to a function or string "unbind".'
             );
         }
+        if (unbind) {
+            callback = $.isFunction(arguments[1]) ? arguments[1] : null;
+        }
         return this.each(function() {
             var $this = $(this);
+            var callbacks;
             if (unbind) {
-                $(this).removeData('callbacks').find('.resizer').remove();
+                callbacks = $this.data('callbacks');
+                if (callback && callbacks) {
+                    callbacks.remove(callback);
+                    if (!callbacks.has()) {
+                        callbacks = null;
+                    }
+                } else {
+                    callbacks = null;
+                }
+                if (!callbacks) {
+                    $this.removeData('callbacks');
+                    if (window.ResizeObserver) {
+                        var observer = $this.data('observer');
+                        if (observer) {
+                            observer.unobserve(this);
+                            $this.removeData('observer');
+                        }
+                    } else {
+                        $this.find('.resizer').remove();
+                    }
+                }
             } else if ($this.data('callbacks')) {
-                $(this).data('callbacks').push(callback);
+                $(this).data('callbacks').add(callback);
             } else {
-                $this.data('callbacks', [callback]);
+                callbacks = $.Callbacks();
+                callbacks.add(callback);
+                $this.data('callbacks', callbacks);
+                var resizer;
+                if (window.ResizeObserver) {
+                    resizer = new ResizeObserver(function() {
+                        var callbacks = $this.data('callbacks');
+                        callbacks.fire();
+                    });
+                    resizer.observe(this);
+                    $this.data('observer', resizer);
+                    return;
+                }
                 var self = this;
-                var resizer = $('<div/>').addClass('resizer').appendTo(this)[0];
+                resizer = $('<div/>').addClass('resizer').appendTo(this)[0];
                 var style =
                     'position: absolute; left: 0; top: 0; right: 0; bottom: 0; ' +
                     'overflow: hidden; z-index: -1; visibility: hidden;';
@@ -807,12 +843,7 @@
 
                     lastWidth = newWidth;
                     lastHeight = newHeight;
-                    var callbacks = $this.data('callbacks');
-                    if (callbacks && callbacks.length) {
-                        callbacks.forEach(function(fn) {
-                            fn();
-                        });
-                    }
+                    callbacks.fire();
                 };
 
                 var onScroll = function() {
@@ -2756,7 +2787,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 21 Nov 2017 20:13:14 +0000',
+        date: 'Wed, 22 Nov 2017 11:49:23 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
