@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 28 Nov 2017 08:25:01 +0000
+ * Date: Wed, 29 Nov 2017 19:46:03 +0000
  */
 
 /* TODO:
@@ -2787,7 +2787,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 28 Nov 2017 08:25:01 +0000',
+        date: 'Wed, 29 Nov 2017 19:46:03 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5141,7 +5141,7 @@
         // ---------------------------------------------------------------------
         function trigger_terminal_change(next) {
             terminals.forEach(function(term) {
-                term.settings().onTerminalChange.call(next, next);
+                term.settings().onTerminalChange.call(term, next);
             });
         }
         // ---------------------------------------------------------------------
@@ -7184,15 +7184,18 @@
                     visibility_observer.unobserve(self[0]);
                 }
                 var was_enabled = self.enabled();
+                var visible = self.is(':visible');
                 visibility_observer = new IntersectionObserver(function() {
-                    if (self.is(':visible')) {
+                    if (self.is(':visible') && !visible) {
+                        visible = true;
                         create_resizers();
                         char_size = get_char_size(self);
                         resize();
                         if (was_enabled) {
                             self.enable();
                         }
-                    } else {
+                    } else if (visible && !self.is(':visible')) {
+                        visible = false;
                         was_enabled = $.terminal.active() === self && self.enabled();
                         self.disable();
                     }
@@ -7224,6 +7227,7 @@
                     observe_visibility();
                 }
             }
+            command_queue.resolve();
             // touch devices need touch event to get virtual keyboard
             if (enabled && self.is(':visible') && !is_mobile) {
                 self.focus(undefined, true);
@@ -7232,7 +7236,6 @@
             }
             // -------------------------------------------------------------
             // Run Login
-            command_queue.resolve();
             if (settings.login) {
                 self.login(settings.login, true, initialize);
             } else {
