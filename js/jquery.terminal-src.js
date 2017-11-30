@@ -4229,6 +4229,7 @@
                             }
                         };
                     });
+                    console.log(interpreter_object.help);
                     interpreter_object.help = interpreter_object.help || function(fn) {
                         if (typeof fn === 'undefined') {
                             var names = response.procs.map(function(proc) {
@@ -4239,11 +4240,16 @@
                             var found = false;
                             $.each(procs, function(_, proc) {
                                 if (proc.name === fn) {
+                                    console.log(proc.name);
                                     found = true;
                                     var msg = '';
-                                    msg += '[[bu;#fff;]' + proc.name + ']';
+                                    msg += '[[bu;;]' + proc.name + ']';
                                     if (proc.params) {
-                                        msg += ' ' + proc.params.join(' ');
+                                        var params = proc.params;
+                                        if (auth) {
+                                            params = params.slice(1);
+                                        }
+                                        msg += ' ' + params.join(' ');
                                     }
                                     if (proc.help) {
                                         msg += '\n' + proc.help;
@@ -4254,7 +4260,7 @@
                             });
                             if (!found) {
                                 if (fn === 'help') {
-                                    self.echo('[[bu;#fff;]help] [method]\ndisplay help ' +
+                                    self.echo('[[bu;;]help] [method]\ndisplay help ' +
                                               'for the method or list of methods if not' +
                                               ' specified');
                                 } else {
