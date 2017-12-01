@@ -16,9 +16,6 @@ http://terminal.jcubic.pl
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 
-
-<a href="https://app.codesponsor.io/link/mm9ExaTRnnyn4TH8MFkSL6zG/jcubic/jquery.terminal" rel="nofollow"><img src="https://app.codesponsor.io/embed/mm9ExaTRnnyn4TH8MFkSL6zG/jcubic/jquery.terminal.svg" style="width: 888px; height: 68px;" alt="Sponsor" /></a>
-
 ### Summary
 
 jQuery Terminal Emulator is a plugin for creating command line interpreters in
