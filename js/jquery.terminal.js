@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 30 Nov 2017 19:44:47 +0000
+ * Date: Sun, 03 Dec 2017 11:08:28 +0000
  */
 
 /* TODO:
@@ -560,9 +560,8 @@
             }
         }
     });
-
     if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
-        jQuery(window).one('unload', function() {
+        $(window).one('unload', function() {
             var global = jQuery.timer.global;
             for (var label in global) {
                 if (global.hasOwnProperty(label)) {
@@ -2787,7 +2786,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 30 Nov 2017 19:44:47 +0000',
+        date: 'Sun, 03 Dec 2017 11:08:28 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4229,7 +4228,7 @@
                             }
                         };
                     });
-                    console.log(interpreter_object.help);
+                    var login = typeof auth === 'string' ? auth : 'login';
                     interpreter_object.help = interpreter_object.help || function(fn) {
                         if (typeof fn === 'undefined') {
                             var names = response.procs.map(function(proc) {
@@ -4240,13 +4239,12 @@
                             var found = false;
                             $.each(procs, function(_, proc) {
                                 if (proc.name === fn) {
-                                    console.log(proc.name);
                                     found = true;
                                     var msg = '';
                                     msg += '[[bu;;]' + proc.name + ']';
                                     if (proc.params) {
                                         var params = proc.params;
-                                        if (auth) {
+                                        if (auth && proc.name !== login) {
                                             params = params.slice(1);
                                         }
                                         msg += ' ' + params.join(' ');
@@ -4972,7 +4970,7 @@
                     display_exception(e, 'onAfterlogout');
                 }
             }
-            self.login(settings.login, true, initialize);
+            self.login(global_login_fn, true, initialize);
         }
         // ---------------------------------------------------------------------
         function clear_loging_storage() {
@@ -5172,7 +5170,7 @@
                 if (!in_login) {
                     if (command_line.get() === '') {
                         if (interpreters.size() > 1 ||
-                            settings.login !== undefined) {
+                            $.isFunction(global_login_fn)) {
                             self.pop('');
                         } else {
                             self.resume();
@@ -5796,7 +5794,7 @@
             set_interpreter: function(user_intrp, login) {
                 function overwrite_interpreter() {
                     self.pause(settings.softPause);
-                    make_interpreter(user_intrp, !!login, function(result) {
+                    make_interpreter(user_intrp, login, function(result) {
                         self.resume();
                         var top = interpreters.top();
                         $.extend(top, result);
@@ -6354,7 +6352,7 @@
             // :: redraw.
             // :: it use $.when so you can echo a promise
             // -------------------------------------------------------------
-            echo: function(string, options) {
+            echo: function(arg, options) {
                 function echo(arg) {
                     try {
                         var locals = $.extend({
@@ -6364,14 +6362,21 @@
                             keepWords: false,
                             formatters: true
                         }, options || {});
-                        if (locals.raw) {
-                            (function(finalize) {
-                                locals.finalize = function(div) {
+                        (function(finalize) {
+                            locals.finalize = function(div) {
+                                if (locals.raw) {
                                     div.addClass('raw');
-                                    finalize(div);
-                                };
-                            })(locals.finalize);
-                        }
+                                }
+                                try {
+                                    if ($.isFunction(finalize)) {
+                                        finalize(div);
+                                    }
+                                } catch (e) {
+                                    display_exception(e, 'USER:echo(finalize)');
+                                    finalize = null;
+                                }
+                            };
+                        })(locals.finalize);
                         if (locals.flush) {
                             // flush buffer if there was no flush after previous echo
                             if (output_buffer.length) {
@@ -6405,17 +6410,10 @@
                         }
                     }
                 }
-                try {
-                    if (options && $.isFunction(options.finalize)) {
-                        options.finalize($('<div/>'));
-                    }
-                    if ($.isFunction(string.then)) {
-                        $.when(string).done(echo);
-                    } else {
-                        echo(string);
-                    }
-                } catch (e) {
-                    display_exception(e, 'USER:echo(finalize)');
+                if ($.isFunction(arg.then)) {
+                    $.when(arg).done(echo);
+                } else {
+                    echo(arg);
                 }
                 return self;
             },
@@ -6622,7 +6620,7 @@
                         prepare_top_interpreter();
                     }
                     // self.pause();
-                    make_interpreter(interpreter, !!options.login, function(ret) {
+                    make_interpreter(interpreter, options.login, function(ret) {
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
                         if (push_settings.completion === true) {
@@ -6905,10 +6903,12 @@
                 }
             }
         }
-        if (base_interpreter &&
+        var global_login_fn;
+        if ($.isFunction(settings.login)) {
+            global_login_fn = settings.login;
+        } else if (base_interpreter &&
             (typeof settings.login === 'string' || settings.login === true)) {
-            settings.login = make_json_rpc_login(base_interpreter,
-                                                 settings.login);
+            global_login_fn = make_json_rpc_login(base_interpreter, settings.login);
         }
         terminals.append(self);
         function focus_terminal() {
@@ -6951,7 +6951,7 @@
             }
         }
         $(document).on('paste.terminal_' + self.id(), paste_event);
-        make_interpreter(init_interpreter, !!settings.login, function(itrp) {
+        make_interpreter(init_interpreter, settings.login, function(itrp) {
             if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
                 // overwrite interpreter completion by global setting #224
@@ -7242,8 +7242,8 @@
             }
             // -------------------------------------------------------------
             // Run Login
-            if (settings.login) {
-                self.login(settings.login, true, initialize);
+            if ($.isFunction(global_login_fn)) {
+                self.login(global_login_fn, true, initialize);
             } else {
                 initialize();
             }

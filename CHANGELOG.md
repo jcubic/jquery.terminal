@@ -7,11 +7,13 @@
 * don't call scroll to bottom on resize/refresh/update/remove
 * improve scroll_element plugin by using document.scrollingElement if present and cache the vale
 * resizer plugin use ResizeObserver if defined
+* remove fake call to finalize in echo to catch potential the error
 ### Bugs
 * don't prevent default scroll when terminal have no scrollbar
 * restart cursor animation on keydown (requested by @theMeow on chat)
 * don't redraw whole terminal in update api method
 * show exception from onAfterRedraw on terminal
+* don't show first argument to method in help command when login is used
 
 ## 1.10.1
 * fix scroll to bottom on scrolling when terminal is disabled (reported by @RomanPerin [#355](https://github.com/jcubic/jquery.terminal/issues/355))
