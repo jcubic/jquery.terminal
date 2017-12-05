@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 03 Dec 2017 11:08:28 +0000
+ * Date: Tue, 05 Dec 2017 21:13:18 +0000
  */
 
 /* TODO:
@@ -2055,7 +2055,7 @@
                 fix_textarea();
                 return removed;
             },
-            set: function(string, stay) {
+            set: function(string, stay, silent) {
                 if (string !== undefined) {
                     command = crlf(string);
                     if (!stay) {
@@ -2063,7 +2063,9 @@
                     }
                     redraw();
                     fix_textarea();
-                    fire_change_command();
+                    if (!silent) {
+                        fire_change_command();
+                    }
                 }
                 return self;
             },
@@ -2786,7 +2788,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 03 Dec 2017 11:08:28 +0000',
+        date: 'Tue, 05 Dec 2017 21:13:18 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6106,9 +6108,10 @@
             // -------------------------------------------------------------
             // :: Change the command line to the new one
             // -------------------------------------------------------------
-            set_command: function(command) {
+            set_command: function(command, silent) {
                 when_ready(function ready() {
-                    command_line.set(command);
+                    // TODO: refactor to use options - breaking change
+                    command_line.set(command, undefined, silent);
                 });
                 return self;
             },

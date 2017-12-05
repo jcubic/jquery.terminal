@@ -2055,7 +2055,7 @@
                 fix_textarea();
                 return removed;
             },
-            set: function(string, stay) {
+            set: function(string, stay, silent) {
                 if (string !== undefined) {
                     command = crlf(string);
                     if (!stay) {
@@ -2063,7 +2063,9 @@
                     }
                     redraw();
                     fix_textarea();
-                    fire_change_command();
+                    if (!silent) {
+                        fire_change_command();
+                    }
                 }
                 return self;
             },
@@ -6106,9 +6108,10 @@
             // -------------------------------------------------------------
             // :: Change the command line to the new one
             // -------------------------------------------------------------
-            set_command: function(command) {
+            set_command: function(command, silent) {
                 when_ready(function ready() {
-                    command_line.set(command);
+                    // TODO: refactor to use options - breaking change
+                    command_line.set(command, undefined, silent);
                 });
                 return self;
             },

@@ -8,6 +8,7 @@
 * improve scroll_element plugin by using document.scrollingElement if present and cache the vale
 * resizer plugin use ResizeObserver if defined
 * remove fake call to finalize in echo to catch potential the error
+* silent boolean 3rd argument to cmd::set and 2nd to terminal::set_command
 ### Bugs
 * don't prevent default scroll when terminal have no scrollbar
 * restart cursor animation on keydown (requested by @theMeow on chat)
