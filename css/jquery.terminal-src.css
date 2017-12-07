@@ -442,6 +442,7 @@ terminal .terminal-output > div {
   }
 }
 .terminal.underline-animation .cursor.blink {
+    border-left: none;
     -webkit-animation-name: terminal-underline;
             animation-name: terminal-underline;
 }
