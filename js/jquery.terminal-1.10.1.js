@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 05 Dec 2017 21:13:18 +0000
+ * Date: Thu, 07 Dec 2017 18:10:11 +0000
  */
 
 /* TODO:
@@ -2788,7 +2788,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 05 Dec 2017 21:13:18 +0000',
+        date: 'Thu, 07 Dec 2017 18:10:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

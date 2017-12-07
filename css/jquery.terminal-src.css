@@ -441,6 +441,14 @@ terminal .terminal-output > div {
       margin-left: 0;
   }
 }
+.terminal.underline-animation .cursor.blink {
+    -webkit-animation-name: terminal-underline;
+            animation-name: terminal-underline;
+}
+.terminal.bar-animation .cursor.blink {
+    -webkit-animation-name: terminal-bar;
+            animation-name: terminal-bar;
+}
 @supports (--css: variables) {
     .terminal, .cmd {
         color: var(--color, #aaa);

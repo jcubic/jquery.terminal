@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 03 Dec 2017 10:32:14 +0000
+ * Date: Thu, 07 Dec 2017 18:10:12 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -440,6 +440,14 @@ terminal .terminal-output > div {
       border-left: none;
       margin-left: 0;
   }
+}
+.terminal.underline-animation .cursor.blink {
+    -webkit-animation-name: terminal-underline;
+            animation-name: terminal-underline;
+}
+.terminal.bar-animation .cursor.blink {
+    -webkit-animation-name: terminal-bar;
+            animation-name: terminal-bar;
 }
 @supports (--css: variables) {
     .terminal, .cmd {
