@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 07 Dec 2017 18:10:11 +0000
+ * Date: Fri, 08 Dec 2017 16:02:22 +0000
  */
 
 /* TODO:
@@ -1476,6 +1476,9 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         function fix_textarea(position_only) {
+            if (!self.isenabled()) {
+                return;
+            }
             // delay worked while experimenting
             self.oneTime(10, function() {
                 // we use space before command to show select all context menu
@@ -2788,7 +2791,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 07 Dec 2017 18:10:11 +0000',
+        date: 'Fri, 08 Dec 2017 16:02:22 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5990,8 +5993,8 @@
                             }
                         }
                         terminals.set(self);
+                        self.enable(silent);
                     }
-                    self.enable(silent);
                 });
                 return self;
             },

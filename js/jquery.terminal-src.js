@@ -1476,6 +1476,9 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         function fix_textarea(position_only) {
+            if (!self.isenabled()) {
+                return;
+            }
             // delay worked while experimenting
             self.oneTime(10, function() {
                 // we use space before command to show select all context menu
@@ -5990,8 +5993,8 @@
                             }
                         }
                         terminals.set(self);
+                        self.enable(silent);
                     }
-                    self.enable(silent);
                 });
                 return self;
             },
