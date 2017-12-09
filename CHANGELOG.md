@@ -5,9 +5,9 @@
 * change command line num chars on resize + settings.numChars (reported by @artursOs [#353](https://github.com/jcubic/jquery.terminal/issues/353))
 * add remove api method that call update(line, null);
 * don't call scroll to bottom on resize/refresh/update/remove
-* improve scroll_element plugin by using document.scrollingElement if present and cache the vale
+* improve scroll_element plugin by using document.scrollingElement if present and cache the value
 * resizer plugin use ResizeObserver if defined
-* remove fake call to finalize in echo to catch potential the error
+* remove fake call to finalize in echo to catch potential error
 * silent boolean 3rd argument to cmd::set and 2nd to terminal::set_command
 * handy classed to change cursor animation in IE
 ### Bugs
