@@ -18,6 +18,7 @@
 * don't show first argument to method in help command when login is used
 * allow to call disable/focus(false) from command + fix focus(false) with single terminal
   (reported by Eric Lindgren [#359](https://github.com/jcubic/jquery.terminal/issues/359))
+* fix autofocus on init
 
 ## 1.10.1
 * fix scroll to bottom on scrolling when terminal is disabled (reported by @RomanPerin [#355](https://github.com/jcubic/jquery.terminal/issues/355))
