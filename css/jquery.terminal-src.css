@@ -263,6 +263,7 @@ terminal .terminal-output > div {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
+    padding: 0;
 }
 .ui-dialog-content .terminal, .ui-dialog-content .terminal .terminal-fill {
     padding: 0;

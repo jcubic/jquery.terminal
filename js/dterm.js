@@ -46,9 +46,9 @@
         if (window.IntersectionObserver) {
             var visibility_observer = new IntersectionObserver(function() {
                 if (self.is(':visible')) {
-                    terminal.enable().resize();
+                    terminal.focus().resize();
                 } else {
-                    self.disable();
+                    terminal.disable();
                 }
             }, {
                 root: document.body
