@@ -1,4 +1,4 @@
-## Next
+## 1.11.0
 ### Features
 * update API method accept options 3rd argument
 * speed up refresh on resize by checking character size in font resizer (reported by @artursOs)
