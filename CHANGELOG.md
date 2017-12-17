@@ -1,3 +1,25 @@
+## Next
+### Features
+* update API method accept options 3rd argument
+* speed up refresh on resize by checking character size in font resizer (reported by @artursOs)
+* change command line num chars on resize + settings.numChars (reported by @artursOs [#353](https://github.com/jcubic/jquery.terminal/issues/353))
+* add remove api method that call update(line, null);
+* don't call scroll to bottom on resize/refresh/update/remove
+* improve scroll_element plugin by using document.scrollingElement if present and cache the value
+* resizer plugin use ResizeObserver if defined
+* remove fake call to finalize in echo to catch potential error
+* silent boolean 3rd argument to cmd::set and 2nd to terminal::set_command
+* handy classed to change cursor animation in IE
+### Bugs
+* don't prevent default scroll when terminal have no scrollbar
+* restart cursor animation on keydown (requested by @theMeow on chat)
+* don't redraw whole terminal in update api method
+* show exception from onAfterRedraw on terminal
+* don't show first argument to method in help command when login is used
+* allow to call disable/focus(false) from command + fix focus(false) with single terminal
+  (reported by Eric Lindgren [#359](https://github.com/jcubic/jquery.terminal/issues/359))
+* fix autofocus on init
+
 ## 1.10.1
 * fix scroll to bottom on scrolling when terminal is disabled (reported by @RomanPerin [#355](https://github.com/jcubic/jquery.terminal/issues/355))
 

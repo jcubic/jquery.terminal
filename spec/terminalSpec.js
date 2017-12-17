@@ -55,6 +55,9 @@ if (typeof window === 'undefined') {
             get: function() { return parseFloat(window.getComputedStyle(this).width) || 0; }
         }
     });
+    global.alert = window.alert = function(string) {
+        console.log(string);
+    };
     tests_on_ready();
 } else {
     $(tests_on_ready);
@@ -2156,10 +2159,10 @@ function tests_on_ready() {
                 expect(term.get_command()).toEqual(command);
                 expect(term.get_prompt()).toEqual(prompt);
                 expect(cmd.position()).toEqual(position);
-                var html = '<div class="command" role="presentation" aria-hidden="true">'+
+                var html = '<div data-index="0" class="command" role="presentation" aria-hidden="true">'+
                                '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
                            '</div>'+
-                           '<div class="command" role="presentation" aria-hidden="true">'+
+                           '<div data-index="1" class="command" role="presentation" aria-hidden="true">'+
                                '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
                            '</div>';
                 expect(term.find('.terminal-output').html()).toEqual(html);

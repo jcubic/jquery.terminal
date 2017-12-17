@@ -10,7 +10,7 @@
  * Released under the MIT license
  *
  */
-/* global jQuery setTimeout IntersectionObserver */
+/* global jQuery, setTimeout, IntersectionObserver */
 (function($) {
     $.extend_if_has = function(desc, source, array) {
         for (var i = array.length; i--;) {
@@ -24,7 +24,8 @@
     $.fn.dterm = function(interpreter, options) {
         var op = $.extend_if_has({}, options, defaults);
         op.enabled = false;
-        var terminal = this.terminal(interpreter, op).css('overflow', 'hidden');
+        var terminal = $('<div/>').appendTo(this).css('overflow', 'hidden')
+                .terminal(interpreter, op);
         if (!options.title) {
             options.title = 'JQuery Terminal Emulator';
         }
@@ -45,9 +46,9 @@
         if (window.IntersectionObserver) {
             var visibility_observer = new IntersectionObserver(function() {
                 if (self.is(':visible')) {
-                    terminal.enable().resize();
+                    terminal.focus().resize();
                 } else {
-                    self.disable();
+                    terminal.disable();
                 }
             }, {
                 root: document.body
@@ -55,10 +56,6 @@
             visibility_observer.observe(terminal[0]);
         }
         this.dialog($.extend({}, options, {
-            resizeStop: function() {
-                var content = self.find('.ui-dialog-content');
-                terminal.resize(content.width(), content.height());
-            },
             open: function(event, ui) {
                 if (!window.IntersectionObserver) {
                     setTimeout(function() {

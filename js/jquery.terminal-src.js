@@ -49,8 +49,8 @@
  *       exec can call it and exec call interpreter that work with resume/pause
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
-         setImmediate, IntersectionObserver, MutationObserver, wcwidth,
-         module, require, define */
+         setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
+         wcwidth, module, require, define */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
@@ -392,7 +392,9 @@
             }
         });
     } else {
-        localStorage = window.localStorage;
+        if (isLS) {
+            localStorage = window.localStorage;
+        }
         $.extend({
             Storage: {
                 set: isLS ? wls : wc,
@@ -558,9 +560,8 @@
             }
         }
     });
-
     if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
-        jQuery(window).one('unload', function() {
+        $(window).one('unload', function() {
             var global = jQuery.timer.global;
             for (var label in global) {
                 if (global.hasOwnProperty(label)) {
@@ -729,8 +730,9 @@
             range.collapse(true);
             range.select();
         }
-        if (!isContentEditable)
+        if (!isContentEditable && !this.is(':focus')) {
             target.focus();
+        }
         return pos;
     };
     /* eslint-enable */
@@ -753,16 +755,52 @@
                 'Invalid argument, it need to a function or string "unbind".'
             );
         }
+        if (unbind) {
+            callback = $.isFunction(arguments[1]) ? arguments[1] : null;
+        }
         return this.each(function() {
             var $this = $(this);
+            var callbacks;
             if (unbind) {
-                $(this).removeData('callbacks').find('.resizer').remove();
+                callbacks = $this.data('callbacks');
+                if (callback && callbacks) {
+                    callbacks.remove(callback);
+                    if (!callbacks.has()) {
+                        callbacks = null;
+                    }
+                } else {
+                    callbacks = null;
+                }
+                if (!callbacks) {
+                    $this.removeData('callbacks');
+                    if (window.ResizeObserver) {
+                        var observer = $this.data('observer');
+                        if (observer) {
+                            observer.unobserve(this);
+                            $this.removeData('observer');
+                        }
+                    } else {
+                        $this.find('.resizer').remove();
+                    }
+                }
             } else if ($this.data('callbacks')) {
-                $(this).data('callbacks').push(callback);
+                $(this).data('callbacks').add(callback);
             } else {
-                $this.data('callbacks', [callback]);
+                callbacks = $.Callbacks();
+                callbacks.add(callback);
+                $this.data('callbacks', callbacks);
+                var resizer;
+                if (window.ResizeObserver) {
+                    resizer = new ResizeObserver(function() {
+                        var callbacks = $this.data('callbacks');
+                        callbacks.fire();
+                    });
+                    resizer.observe(this);
+                    $this.data('observer', resizer);
+                    return;
+                }
                 var self = this;
-                var resizer = $('<div/>').addClass('resizer').appendTo(this)[0];
+                resizer = $('<div/>').addClass('resizer').appendTo(this)[0];
                 var style =
                     'position: absolute; left: 0; top: 0; right: 0; bottom: 0; ' +
                     'overflow: hidden; z-index: -1; visibility: hidden;';
@@ -804,12 +842,7 @@
 
                     lastWidth = newWidth;
                     lastHeight = newHeight;
-                    var callbacks = $this.data('callbacks');
-                    if (callbacks && callbacks.length) {
-                        callbacks.forEach(function(fn) {
-                            fn();
-                        });
-                    }
+                    callbacks.fire();
                 };
 
                 var onScroll = function() {
@@ -1133,6 +1166,7 @@
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
+        var restart_animation;
         var paste_count = 0;
         function get_char_pos(e) {
             var node = $(e.target);
@@ -1442,6 +1476,9 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         function fix_textarea(position_only) {
+            if (!self.isenabled()) {
+                return;
+            }
             // delay worked while experimenting
             self.oneTime(10, function() {
                 // we use space before command to show select all context menu
@@ -1452,7 +1489,10 @@
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
-                            clip.caret(position + 1);
+                            // we check first to improve performance
+                            if (clip.caret() !== position + 1) {
+                                clip.caret(position + 1);
+                            }
                         } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
                         }
@@ -1460,7 +1500,7 @@
                 }
             });
         }
-        // terminal animation don't work on andorid because they animate
+        // terminal animation don't work on android because they animate
         // 2 properties
         if (support_animations && !is_android) {
             animation = function(toggle) {
@@ -1469,6 +1509,12 @@
                 } else {
                     cursor.removeClass('blink');
                 }
+            };
+            restart_animation = function() {
+                var new_cursor = cursor.clone();
+                new_cursor.insertBefore(cursor);
+                cursor.remove();
+                cursor = new_cursor;
             };
         } else {
             var animating = false;
@@ -1482,6 +1528,10 @@
                     self.stopTime('blink', blink);
                     cursor.removeClass('inverted blink');
                 }
+            };
+            restart_animation = function() {
+                animation(false);
+                animation(true);
             };
         }
         // ---------------------------------------------------------------------
@@ -1913,8 +1963,10 @@
                 var formatted = lines.slice(0, -1).map(function(line) {
                     return '<span class="line">' + $.terminal.format(line) + '</span>';
                 }).concat([last_line]).join('\n');
-                prompt_node.html(formatted);
-                prompt_len = strlen($('<span>' + last_line + '</span>').text());
+                if (prompt_node.html() !== formatted) {
+                    prompt_node.html(formatted);
+                    prompt_len = strlen($('<span>' + last_line + '</span>').text());
+                }
             }
             return function() {
                 switch (typeof prompt) {
@@ -2006,7 +2058,7 @@
                 fix_textarea();
                 return removed;
             },
-            set: function(string, stay) {
+            set: function(string, stay, silent) {
                 if (string !== undefined) {
                     command = crlf(string);
                     if (!stay) {
@@ -2014,7 +2066,9 @@
                     }
                     redraw();
                     fix_textarea();
-                    fire_change_command();
+                    if (!silent) {
+                        fire_change_command();
+                    }
                 }
                 return self;
             },
@@ -2301,6 +2355,7 @@
                 }
             }
             if (enabled) {
+                restart_animation();
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
@@ -2584,12 +2639,18 @@
         }
     })();
     function bare_text(string) {
+        if (!string.match(/&/)) {
+            return string;
+        }
         return $('<span>' + safe(string) + '</span>').text();
     }
     function text(string) {
         return bare_text($.terminal.strip(string));
     }
     function safe(string) {
+        if (!string.match(/[<>]/)) {
+            return string;
+        }
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
@@ -3168,13 +3229,16 @@
         // ---------------------------------------------------------------------
         format: function format(str, options) {
             function safe_text(string) {
-                return safe(string.replace(/(\\+)]/g, function(_, slashes) {
-                    if (slashes.length % 2 === 1) {
-                        return ']';
-                    } else {
-                        return slashes.replace(/../, '\\');
-                    }
-                }));
+                if (string.match(/\\]/)) {
+                    string = string.replace(/(\\+)]/g, function(_, slashes) {
+                        if (slashes.length % 2 === 1) {
+                            return ']';
+                        } else {
+                            return slashes.replace(/../, '\\');
+                        }
+                    });
+                }
+                return safe(string);
             }
             var settings = $.extend({}, {
                 linksNoReferrer: false
@@ -3281,8 +3345,12 @@
                     } else {
                         text = safe_text(text);
                         if (typeof wcwidth !== 'undefined') {
-                            var len = strlen(bare_text(text));
-                            var style = len !== 1 ? ' style="--length: ' + len + '"' : '';
+                            var t = bare_text(text);
+                            var len = strlen(t);
+                            var style = '';
+                            if (t.length < len) {
+                                style = ' style="--length: ' + len + '"';
+                            }
                         } else {
                             style = '';
                         }
@@ -3496,11 +3564,16 @@
         return this.map(function() {
             var $this = $(this);
             if ($this.is('body')) {
+                if ('scrollingElement' in document) {
+                    return document.scrollingElement;
+                }
+                if ($.fn.scroll_element.cache) {
+                    return $.fn.scroll_element.cache;
+                }
                 var html = $('html');
                 var body = $('body');
                 var scrollTop = body.scrollTop() || html.scrollTop();
                 var pre = $('<pre/>').css(defaults.pre).appendTo('body');
-                pre.html(new Array(defaults.lines).join('\n'));
                 $('body,html').scrollTop(10);
                 var scroll_object;
                 if (body.scrollTop() === 10) {
@@ -3511,6 +3584,7 @@
                     scroll_object = html[0];
                 }
                 pre.remove();
+                $.fn.scroll_element.cache = scroll_object;
                 return scroll_object;
             } else {
                 return this;
@@ -3520,10 +3594,10 @@
     $.fn.scroll_element.defaults = {
         lines: 2000,
         pre: {
-            'font-size': '100px',
-            'white-space': 'pre' // just in case if user overwrite css for pre tag
+            'height': '99999em'
         }
     };
+    $.fn.scroll_element.cache;
     // -----------------------------------------------------------------------
     function is_key_native() {
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
@@ -3659,7 +3733,8 @@
     function get_num_chars(terminal, char_size) {
         var width = terminal.find('.terminal-fill').width();
         var result = Math.floor(width / char_size.width);
-        // random number to not get NaN in node but big enough to not wrap exception
+        // random number to not get NaN in node.js but big enough to
+        // not wrap exception
         return result || 1000;
     }
     // -----------------------------------------------------------------------
@@ -4158,6 +4233,7 @@
                             }
                         };
                     });
+                    var login = typeof auth === 'string' ? auth : 'login';
                     interpreter_object.help = interpreter_object.help || function(fn) {
                         if (typeof fn === 'undefined') {
                             var names = response.procs.map(function(proc) {
@@ -4170,9 +4246,13 @@
                                 if (proc.name === fn) {
                                     found = true;
                                     var msg = '';
-                                    msg += '[[bu;#fff;]' + proc.name + ']';
+                                    msg += '[[bu;;]' + proc.name + ']';
                                     if (proc.params) {
-                                        msg += ' ' + proc.params.join(' ');
+                                        var params = proc.params;
+                                        if (auth && proc.name !== login) {
+                                            params = params.slice(1);
+                                        }
+                                        msg += ' ' + params.join(' ');
                                     }
                                     if (proc.help) {
                                         msg += '\n' + proc.help;
@@ -4183,7 +4263,7 @@
                             });
                             if (!found) {
                                 if (fn === 'help') {
-                                    self.echo('[[bu;#fff;]help] [method]\ndisplay help ' +
+                                    self.echo('[[bu;;]help] [method]\ndisplay help ' +
                                               'for the method or list of methods if not' +
                                               ' specified');
                                 } else {
@@ -4411,7 +4491,7 @@
         // ---------------------------------------------------------------------
         var output_buffer = [];
         var NEW_LINE = 1;
-        function buffer_line(string, options) {
+        function buffer_line(string, index, options) {
             // urls should always have formatting to keep url if split
             var i, len;
             output_buffer.push(NEW_LINE);
@@ -4443,19 +4523,25 @@
             } else {
                 output_buffer.push(string);
             }
-            output_buffer.push(options.finalize);
+            output_buffer.push({
+                finalize: options.finalize,
+                index: index
+            });
         }
         // ---------------------------------------------------------------------
-        function process_line(line, options) {
+        function process_line(line) {
             // prevent exception in display exception
             try {
                 var line_settings = $.extend({
                     exec: true,
                     raw: false,
                     finalize: $.noop
-                }, options || {});
+                }, line.options || {});
                 var string;
-                var arg = $.type(line) === 'function' ? line() : line;
+                var arg = line.string;
+                if ($.type(arg) === 'function') {
+                    arg = arg();
+                }
                 if ($.type(arg) !== 'string') {
                     if ($.isFunction(settings.parseObject)) {
                         var ret = settings.parseObject(arg);
@@ -4490,12 +4576,12 @@
                         }
                     }).join('');
                     if (string !== '') {
-                        if (settings.convertLinks && !options.raw) {
-                            string = string.replace(email_re, '[[!;;]$1]').
-                                replace(url_nf_re, '[[!;;]$1]');
-                        }
-                        if (!options.raw) {
-                            if (options.formatters) {
+                        if (!line_settings.raw) {
+                            if (settings.convertLinks) {
+                                string = string.replace(email_re, '[[!;;]$1]').
+                                    replace(url_nf_re, '[[!;;]$1]');
+                            }
+                            if (line_settings.formatters) {
                                 try {
                                     string = $.terminal.apply_formatters(string);
                                 } catch (e) {
@@ -4505,7 +4591,7 @@
                             string = $.terminal.encode(string);
                         }
                         // string can be empty after removing extended commands
-                        buffer_line(string, line_settings);
+                        buffer_line(string, line.index, line_settings);
                     }
                 }
             } catch (e) {
@@ -4519,12 +4605,18 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: Redraw all lines
+        // :: Update terminal lines
         // ---------------------------------------------------------------------
-        function redraw() {
-            command_line.resize(num_chars);
-            // we don't want reflow while processing lines
-            var detached_output = output.empty().detach();
+        function redraw(options) {
+            options = $.extend({}, {
+                update: false,
+                scroll: true
+            }, options || {});
+            if (!options.update) {
+                command_line.resize(num_chars);
+                // we don't want reflow while processing lines
+                var detached_output = output.empty().detach();
+            }
             var lines_to_show = [];
             // Dead code
             if (settings.outputLimit >= 0) {
@@ -4537,40 +4629,96 @@
                 } else {
                     limit = settings.outputLimit;
                 }
-                lines.forEach(function(line) {
-                    var string = $.type(line[0]) === 'function' ? line[0]() : line[0];
-                    string = $.type(string) === 'string' ? string : String(string);
+                lines.forEach(function(line, index) {
+                    var string = line[0];
+                    var options = line[1];
+                    if ($.type(string) === 'function') {
+                        string = string();
+                    }
+                    if ($.type(string) !== 'string') {
+                        string = String(string);
+                    }
                     if (strlen(string) > num_chars) {
-                        var options = line[1];
                         var splitted = $.terminal.split_equal(
                             string,
                             num_chars,
                             options.keepWords
-                        );
-                        lines_to_show = lines_to_show.concat(splitted.map(function(line) {
-                            return [line, options];
-                        }));
+                        ).map(function(string) {
+                            return {
+                                string: string,
+                                index: index,
+                                options: options
+                            };
+                        });
+                        lines_to_show = lines_to_show.concat(splitted);
                     } else {
-                        lines_to_show.push(line);
+                        lines_to_show.push({
+                            string: string,
+                            index: index,
+                            options: options
+                        });
                     }
                 });
                 lines_to_show = lines_to_show.slice(lines_to_show.length - limit - 1);
             } else {
-                lines_to_show = lines;
+                lines_to_show = lines.map(function(line, index) {
+                    return {
+                        string: line[0],
+                        index: index,
+                        options: line[1]
+                    };
+                });
             }
             try {
                 output_buffer = [];
                 $.each(lines_to_show, function(i, line) {
-                    process_line.apply(null, line); // line is an array
+                    process_line(line);
                 });
-                command_line.before(detached_output); // reinsert output
-                self.flush();
-                settings.onAfterRedraw.call(self);
+                if (!options.update) {
+                    command_line.before(detached_output); // reinsert output
+                }
+                self.flush(options);
+                try {
+                    settings.onAfterRedraw.call(self);
+                } catch (e) {
+                    settings.onAfterRedraw = $.noop;
+                    display_exception(e, 'onAfterRedraw');
+                }
             } catch (e) {
                 if ($.isFunction(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
                 } else {
                     alert_exception('[redraw]', e);
+                }
+            }
+        }
+        // ---------------------------------------------------------------------
+        // :: Function limit output lines based on outputLimit option
+        // ---------------------------------------------------------------------
+        function limit_lines() {
+            if (settings.outputLimit >= 0) {
+                var limit;
+                if (settings.outputLimit === 0) {
+                    limit = self.rows();
+                } else {
+                    limit = settings.outputLimit;
+                }
+                var $lines = output.find('> div > div');
+                if ($lines.length + 1 > limit) {
+                    var max = $lines.length - limit + 1;
+                    var for_remove = $lines.slice(0, max);
+                    // you can't get parent if you remove the
+                    // element so we first get the parent
+                    var parents = for_remove.parent();
+                    for_remove.remove();
+                    parents.each(function() {
+                        var $self = $(this);
+                        if ($self.is(':empty')) {
+                            // there can be divs inside parent that
+                            // was not removed
+                            $self.remove();
+                        }
+                    });
                 }
             }
         }
@@ -4641,6 +4789,9 @@
             } else {
                 self.echo(prompt + command, options);
             }
+        }
+        function have_scrollbar() {
+            return fill.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
         // :: Helper function that restore state. Call import_view or exec
@@ -4824,7 +4975,7 @@
                     display_exception(e, 'onAfterlogout');
                 }
             }
-            self.login(settings.login, true, initialize);
+            self.login(global_login_fn, true, initialize);
         }
         // ---------------------------------------------------------------------
         function clear_loging_storage() {
@@ -4999,7 +5150,7 @@
         // ---------------------------------------------------------------------
         function trigger_terminal_change(next) {
             terminals.forEach(function(term) {
-                term.settings().onTerminalChange.call(next, next);
+                term.settings().onTerminalChange.call(term, next);
             });
         }
         // ---------------------------------------------------------------------
@@ -5024,7 +5175,7 @@
                 if (!in_login) {
                     if (command_line.get() === '') {
                         if (interpreters.size() > 1 ||
-                            settings.login !== undefined) {
+                            $.isFunction(global_login_fn)) {
                             self.pop('');
                         } else {
                             self.resume();
@@ -5648,7 +5799,7 @@
             set_interpreter: function(user_intrp, login) {
                 function overwrite_interpreter() {
                     self.pause(settings.softPause);
-                    make_interpreter(user_intrp, !!login, function(result) {
+                    make_interpreter(user_intrp, login, function(result) {
                         self.resume();
                         var top = interpreters.top();
                         $.extend(top, result);
@@ -5842,8 +5993,8 @@
                             }
                         }
                         terminals.set(self);
+                        self.enable(silent);
                     }
-                    self.enable(silent);
                 });
                 return self;
             },
@@ -5960,9 +6111,10 @@
             // -------------------------------------------------------------
             // :: Change the command line to the new one
             // -------------------------------------------------------------
-            set_command: function(command) {
+            set_command: function(command, silent) {
                 when_ready(function ready() {
-                    command_line.set(command);
+                    // TODO: refactor to use options - breaking change
+                    command_line.set(command, undefined, silent);
                 });
                 return self;
             },
@@ -6066,11 +6218,10 @@
                     height = self.height();
                     if (typeof settings.numChars !== 'undefined' ||
                         typeof settings.numRows !== 'undefined') {
-                        redraw();
-                        scroll_to_bottom();
+                        command_line.resize(settings.numChars);
+                        self.refresh();
                         return;
                     }
-                    char_size = get_char_size(self);
                     var new_num_chars = get_num_chars(self, char_size);
                     var new_num_rows = get_num_rows(self, char_size);
                     // only if number of chars changed
@@ -6086,7 +6237,6 @@
                         } else if ($.isFunction(settings.onResize)) {
                             settings.onResize.call(self, self);
                         }
-                        scroll_to_bottom();
                     }
                 }
                 return self;
@@ -6096,13 +6246,20 @@
             // -------------------------------------------------------------
             refresh: function() {
                 self[0].style.setProperty('--char-width', char_size.width);
-                redraw();
+                redraw({
+                    scroll: false,
+                    update: true
+                });
                 return self;
             },
             // -------------------------------------------------------------
             // :: Flush the output to the terminal
             // -------------------------------------------------------------
-            flush: function() {
+            flush: function(options) {
+                options = $.extend({}, {
+                    update: false,
+                    scroll: true
+                }, options || {});
                 try {
                     var bottom = self.is_bottom();
                     var wrapper;
@@ -6110,40 +6267,24 @@
                     $.each(output_buffer, function(i, line) {
                         if (line === NEW_LINE) {
                             wrapper = $('<div></div>');
-                        } else if ($.isFunction(line)) {
+                        } else if ($.isPlainObject(line) && $.isFunction(line.finalize)) {
                             // this is finalize function from echo
-                            wrapper.appendTo(output);
-                            line(wrapper);
+                            if (options.update) {
+                                var selector = '> div[data-index=' + line.index + ']';
+                                var node = output.find(selector);
+                                if (node.html() !== wrapper.html()) {
+                                    node.replaceWith(wrapper);
+                                }
+                            } else {
+                                wrapper.appendTo(output);
+                            }
+                            line.finalize(wrapper.attr('data-index', line.index));
                         } else {
                             $('<div/>').html(line)
                                 .appendTo(wrapper).width('100%');
                         }
                     });
-                    if (settings.outputLimit >= 0) {
-                        var limit;
-                        if (settings.outputLimit === 0) {
-                            limit = self.rows();
-                        } else {
-                            limit = settings.outputLimit;
-                        }
-                        var $lines = output.find('div div');
-                        if ($lines.length + 1 > limit) {
-                            var max = $lines.length - limit + 1;
-                            var for_remove = $lines.slice(0, max);
-                            // you can't get parent if you remove the
-                            // element so we first get the parent
-                            var parents = for_remove.parent();
-                            for_remove.remove();
-                            parents.each(function() {
-                                var $self = $(this);
-                                if ($self.is(':empty')) {
-                                    // there can be divs inside parent that
-                                    // was not removed
-                                    $self.remove();
-                                }
-                            });
-                        }
-                    }
+                    limit_lines();
                     try {
                         settings.onFlush.call(self, self);
                     } catch (e) {
@@ -6151,7 +6292,7 @@
                         display_exception(e, 'onFlush');
                     }
                     //num_rows = get_num_rows(self, char_size);
-                    if (settings.scrollOnEcho || bottom) {
+                    if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         scroll_to_bottom();
                     }
                     output_buffer = [];
@@ -6167,25 +6308,39 @@
             // -------------------------------------------------------------
             // :: Update the output line - line number can be negative
             // -------------------------------------------------------------
-            update: function(line, string) {
+            update: function(line, string, options) {
                 when_ready(function ready() {
                     if (line < 0) {
                         line = lines.length + line; // yes +
                     }
                     if (!lines[line]) {
                         self.error('Invalid line number ' + line);
+                    } else if (string === null) {
+                        lines.splice(line, 1);
+                        output.find('[data-index=' + line + ']').remove();
                     } else {
-                        if (string === null) {
-                            lines.splice(line, 1);
-                        } else {
-                            lines[line][0] = string;
+                        lines[line][0] = string;
+                        if (options) {
+                            lines[line][1] = options;
                         }
-                        // it would be hard to figure out which div need to be
-                        // updated so we update everything
-                        redraw();
+                        process_line({
+                            string: string,
+                            index: line,
+                            options: options
+                        });
+                        self.flush({
+                            scroll: false,
+                            update: true
+                        });
                     }
                 });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: convenience method for removing selected line
+            // -------------------------------------------------------------
+            remove: function(line, options) {
+                return self.update(line, null, options);
             },
             // -------------------------------------------------------------
             // :: return index of last line in case when you need to update
@@ -6203,7 +6358,7 @@
             // :: redraw.
             // :: it use $.when so you can echo a promise
             // -------------------------------------------------------------
-            echo: function(string, options) {
+            echo: function(arg, options) {
                 function echo(arg) {
                     try {
                         var locals = $.extend({
@@ -6213,14 +6368,21 @@
                             keepWords: false,
                             formatters: true
                         }, options || {});
-                        if (locals.raw) {
-                            (function(finalize) {
-                                locals.finalize = function(div) {
+                        (function(finalize) {
+                            locals.finalize = function(div) {
+                                if (locals.raw) {
                                     div.addClass('raw');
-                                    finalize(div);
-                                };
-                            })(locals.finalize);
-                        }
+                                }
+                                try {
+                                    if ($.isFunction(finalize)) {
+                                        finalize(div);
+                                    }
+                                } catch (e) {
+                                    display_exception(e, 'USER:echo(finalize)');
+                                    finalize = null;
+                                }
+                            };
+                        })(locals.finalize);
                         if (locals.flush) {
                             // flush buffer if there was no flush after previous echo
                             if (output_buffer.length) {
@@ -6231,7 +6393,11 @@
                         if (typeof arg === 'function') {
                             arg = arg.bind(self);
                         }
-                        process_line(arg, locals);
+                        process_line({
+                            string: arg,
+                            options: locals,
+                            index: lines.length
+                        });
                         // extended commands should be processed only
                         // once in echo and not on redraw
                         lines.push([arg, $.extend(locals, {
@@ -6250,17 +6416,10 @@
                         }
                     }
                 }
-                try {
-                    if (options && $.isFunction(options.finalize)) {
-                        options.finalize($('<div/>'));
-                    }
-                    if ($.isFunction(string.then)) {
-                        $.when(string).done(echo);
-                    } else {
-                        echo(string);
-                    }
-                } catch (e) {
-                    display_exception(e, 'USER:echo(finalize)');
+                if ($.isFunction(arg.then)) {
+                    $.when(arg).done(echo);
+                } else {
+                    echo(arg);
                 }
                 return self;
             },
@@ -6467,7 +6626,7 @@
                         prepare_top_interpreter();
                     }
                     // self.pause();
-                    make_interpreter(interpreter, !!options.login, function(ret) {
+                    make_interpreter(interpreter, options.login, function(ret) {
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
                         if (push_settings.completion === true) {
@@ -6722,7 +6881,7 @@
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
         var font_resizer = $('<div class="font"/>').appendTo(self);
-        $('<div class="terminal-fill"/>').appendTo(self);
+        var fill = $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
@@ -6750,10 +6909,12 @@
                 }
             }
         }
-        if (base_interpreter &&
+        var global_login_fn;
+        if ($.isFunction(settings.login)) {
+            global_login_fn = settings.login;
+        } else if (base_interpreter &&
             (typeof settings.login === 'string' || settings.login === true)) {
-            settings.login = make_json_rpc_login(base_interpreter,
-                                                 settings.login);
+            global_login_fn = make_json_rpc_login(base_interpreter, settings.login);
         }
         terminals.append(self);
         function focus_terminal() {
@@ -6796,7 +6957,7 @@
             }
         }
         $(document).on('paste.terminal_' + self.id(), paste_event);
-        make_interpreter(init_interpreter, !!settings.login, function(itrp) {
+        make_interpreter(init_interpreter, settings.login, function(itrp) {
             if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
                 // overwrite interpreter completion by global setting #224
@@ -6863,12 +7024,6 @@
                 },
                 commands: commands
             });
-            // touch devices need touch event to get virtual keyboard
-            if (enabled && self.is(':visible') && !is_mobile) {
-                self.focus(undefined, true);
-            } else {
-                self.disable();
-            }
             function disable(e) {
                 e = e.originalEvent;
                 if (e) {
@@ -6926,9 +7081,8 @@
                         count = 0;
                         $target = null;
                     }
-                    var resizer = self.find('.terminal-fill');
                     self.mousedown(function(e) {
-                        if (!scrollbar_event(e, resizer)) {
+                        if (!scrollbar_event(e, fill)) {
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
@@ -7015,14 +7169,6 @@
                 }
                 num_rows = get_num_rows(self, char_size);
             }
-            // -------------------------------------------------------------
-            // Run Login
-            command_queue.resolve();
-            if (settings.login) {
-                self.login(settings.login, true, initialize);
-            } else {
-                initialize();
-            }
             function resize() {
                 if (self.is(':visible')) {
                     var width = self.width();
@@ -7037,7 +7183,10 @@
             }
             function create_resizers() {
                 self.resizer('unbind').resizer(resize);
-                font_resizer.resizer('unbind').resizer(self.resize);
+                font_resizer.resizer('unbind').resizer(function() {
+                    char_size = get_char_size(self);
+                    self.resize();
+                });
             }
             if (self.is(':visible')) {
                 create_resizers();
@@ -7046,15 +7195,19 @@
                 if (visibility_observer) {
                     visibility_observer.unobserve(self[0]);
                 }
-                var was_enabled;
+                var was_enabled = self.enabled();
+                var visible = self.is(':visible');
                 visibility_observer = new IntersectionObserver(function() {
-                    if (self.is(':visible')) {
+                    if (self.is(':visible') && !visible) {
+                        visible = true;
                         create_resizers();
+                        char_size = get_char_size(self);
                         resize();
                         if (was_enabled) {
-                            self.enabled();
+                            self.enable();
                         }
-                    } else {
+                    } else if (visible && !self.is(':visible')) {
+                        visible = false;
                         was_enabled = $.terminal.active() === self && self.enabled();
                         self.disable();
                     }
@@ -7085,7 +7238,20 @@
                 if (in_dom) {
                     observe_visibility();
                 }
-
+            }
+            command_queue.resolve();
+            // touch devices need touch event to get virtual keyboard
+            if (enabled && self.is(':visible') && !is_mobile) {
+                self.focus(undefined, true);
+            } else {
+                self.disable();
+            }
+            // -------------------------------------------------------------
+            // Run Login
+            if ($.isFunction(global_login_fn)) {
+                self.login(global_login_fn, true, initialize);
+            } else {
+                initialize();
             }
             // -------------------------------------------------------------
             // :: helper
@@ -7172,14 +7338,14 @@
                     var ret;
                     if ($.isFunction(interpreter.mousewheel)) {
                         ret = interpreter.mousewheel(event, delta, self);
-                        if (ret === false) {
-                            return;
-                        }
                     } else if ($.isFunction(settings.mousewheel)) {
                         ret = settings.mousewheel(event, delta, self);
-                        if (ret === false) {
-                            return;
-                        }
+                    }
+                    if (have_scrollbar() || ret === false) {
+                        event.preventDefault();
+                    }
+                    if (ret === false) {
+                        return;
                     }
                     if (delta > 0) {
                         self.scroll(-40);
@@ -7190,10 +7356,7 @@
             }
             if ($.event.special.mousewheel) {
                 // we keep mousewheel plugin just in case
-                self.on('mousewheel', function(event, delta) {
-                    mousewheel(event, delta);
-                    event.preventDefault();
-                });
+                self.on('mousewheel', mousewheel);
             } else {
                 // detection take from:
                 // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
@@ -7216,7 +7379,6 @@
                         delta = e.originalEvent.deltaY || e.originalEvent.detail;
                     }
                     mousewheel(e, -delta);
-                    e.preventDefault();
                 });
             }
         }); // make_interpreter

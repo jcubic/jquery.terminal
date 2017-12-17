@@ -259,6 +259,15 @@ terminal .terminal-output > div {
     width: 100%;
     z-index: 1100;
 }
+.ui-dialog-content .terminal {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0;
+}
+.ui-dialog-content .terminal, .ui-dialog-content .terminal .terminal-fill {
+    padding: 0;
+}
 .clear {
     clear: both;
 }
@@ -433,10 +442,28 @@ terminal .terminal-output > div {
       margin-left: 0;
   }
 }
+/* shorthand classes for IE */
+.underline-animation .cursor.blink {
+    border-left: none;
+    -webkit-animation-name: terminal-underline;
+       -moz-animation-name: terminal-underline;
+        -ms-animation-name: terminal-underline;
+            animation-name: terminal-underline;
+}
+.bar-animation .cursor.blink {
+    -webkit-animation-name: terminal-bar;
+       -moz-animation-name: terminal-bar;
+        -ms-animation-name: terminal-bar;
+            animation-name: terminal-bar;
+}
 @supports (--css: variables) {
     .terminal, .cmd {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
+    }
+    .terminal .font {
+        width: calc(var(--size) * 1em);
+        height: calc(var(--size) * 1em);
     }
     .terminal span[style*="--length"] {
         width: calc(var(--length, 1) * var(--char-width) * 1px);
