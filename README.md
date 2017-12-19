@@ -83,6 +83,14 @@ or
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@1.11.0/css/jquery.terminal.min.css">
 ```
 
+If you always want latest version, you can grab the files directly from github using rawgit.com (that service grab the files from github and use propert MIME type so you can use it in your page, you can also grab from devel branch):
+
+```
+<script src="https://cdn.rawgit.com/jcubic/jquery.terminal/master/js/jquery.terminal.min.js"></script>
+<link href="https://cdn.rawgit.com/jcubic/jquery.terminal/master/css/jquery.terminal.min.css" rel="stylesheet"/>
+
+```
+
 **NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key).
 
 ```html
@@ -101,6 +109,7 @@ or [npm repository](https://www.npmjs.com/):
 ```
 npm install jquery.terminal
 ```
+
 
 ### Example of usage
 
