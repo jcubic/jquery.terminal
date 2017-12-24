@@ -1182,14 +1182,18 @@
                 }, 0) + (lines.length - 1);
             }
         }
-        // ie mapping
+        // IE mapping
         var key_mapping = {
             'SPACEBAR': ' ',
             'UP': 'ARROWUP',
             'DOWN': 'ARROWDOWN',
             'LEFT': 'ARROWLEFT',
             'RIGHT': 'ARROWRIGHT',
-            'DEL': 'DELETE'
+            'DEL': 'DELETE',
+            'MULTIPLY': '*',
+            'DIVIDE': '/',
+            'SUBTRACT': '-',
+            'ADD': '+'
         };
         function get_key(e) {
             if (e.key) {
@@ -2428,12 +2432,14 @@
                 var key;
                 if (is_key_native() || e.fake) {
                     key = e.key;
+                    // fixing IE inconsistency #362
+                    var normalized = key.toUpperCase();
+                    if (key_mapping[normalized]) {
+                        key = key_mapping[normalized];
+                    }
                 }
                 if (!key || no_key) {
                     key = String.fromCharCode(e.which);
-                }
-                if (key.toUpperCase() === 'SPACEBAR') {
-                    key = ' ';
                 }
                 if ($.inArray(e.which, [13, 0, 8]) > -1) {
                     if (e.keyCode === 123) { // for F12 which === 0
