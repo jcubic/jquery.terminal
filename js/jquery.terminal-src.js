@@ -5121,12 +5121,10 @@
                 var push = false;
                 var candidate = array[0].charAt(j),
                     candidateLower = candidate.toLowerCase();
-
                 for (var i = 1; i < array.length; ++i) {
                     push = true;
                     var current = array[i].charAt(j),
                         currentLower = current.toLowerCase();
-
                     if (candidate !== current) {
                         if (matchCase || type === 'mixed') {
                             push = false;
@@ -5148,6 +5146,8 @@
                 }
                 if (push) {
                     result.push(candidate);
+                } else {
+                    break;
                 }
             }
             return string + result.join('');
