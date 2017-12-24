@@ -2942,7 +2942,7 @@
                         ++length;
                     }
                 }
-                if (!braket && not_formatting) {
+                if (not_formatting && string[i] !== ']' && !opening) {
                     if (strlen(string[i]) === 2) {
                         length++;
                     }

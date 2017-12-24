@@ -1,6 +1,7 @@
 ## Next
 * fix IE inconsistency in key property for numpad calc keys (reported by @ovk [#362](https://github.com/jcubic/jquery.terminal/issues/362)
 * fix completion skipping letters (reported by @ovk [#361](https://github.com/jcubic/jquery.terminal/issues/361))
+* fix issue with last character in line beeing closing braket (reported by @arucil [#358](https://github.com/jcubic/jquery.terminal/issues/358))
 
 ## 1.11.0
 ### Features
