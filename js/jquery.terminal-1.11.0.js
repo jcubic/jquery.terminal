@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.11.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 17 Dec 2017 14:45:52 +0000
+ * Date: Sun, 24 Dec 2017 10:31:37 +0000
  */
 
 /* TODO:
@@ -1182,14 +1182,18 @@
                 }, 0) + (lines.length - 1);
             }
         }
-        // ie mapping
+        // IE mapping
         var key_mapping = {
             'SPACEBAR': ' ',
             'UP': 'ARROWUP',
             'DOWN': 'ARROWDOWN',
             'LEFT': 'ARROWLEFT',
             'RIGHT': 'ARROWRIGHT',
-            'DEL': 'DELETE'
+            'DEL': 'DELETE',
+            'MULTIPLY': '*',
+            'DIVIDE': '/',
+            'SUBTRACT': '-',
+            'ADD': '+'
         };
         function get_key(e) {
             if (e.key) {
@@ -2428,12 +2432,14 @@
                 var key;
                 if (is_key_native() || e.fake) {
                     key = e.key;
+                    // fixing IE inconsistency #362
+                    var normalized = key.toUpperCase();
+                    if (key_mapping[normalized]) {
+                        key = key_mapping[normalized];
+                    }
                 }
                 if (!key || no_key) {
                     key = String.fromCharCode(e.which);
-                }
-                if (key.toUpperCase() === 'SPACEBAR') {
-                    key = ' ';
                 }
                 if ($.inArray(e.which, [13, 0, 8]) > -1) {
                     if (e.keyCode === 123) { // for F12 which === 0
@@ -2790,8 +2796,8 @@
         }
     }
     $.terminal = {
-        version: '1.11.0',
-        date: 'Sun, 17 Dec 2017 14:45:52 +0000',
+        version: 'DEV',
+        date: 'Sun, 24 Dec 2017 10:31:37 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -2936,7 +2942,7 @@
                         ++length;
                     }
                 }
-                if (!braket && not_formatting) {
+                if (not_formatting && string[i] !== ']' && !opening) {
                     if (strlen(string[i]) === 2) {
                         length++;
                     }
@@ -5115,12 +5121,10 @@
                 var push = false;
                 var candidate = array[0].charAt(j),
                     candidateLower = candidate.toLowerCase();
-
                 for (var i = 1; i < array.length; ++i) {
                     push = true;
                     var current = array[i].charAt(j),
                         currentLower = current.toLowerCase();
-
                     if (candidate !== current) {
                         if (matchCase || type === 'mixed') {
                             push = false;
@@ -5142,6 +5146,8 @@
                 }
                 if (push) {
                     result.push(candidate);
+                } else {
+                    break;
                 }
             }
             return string + result.join('');
