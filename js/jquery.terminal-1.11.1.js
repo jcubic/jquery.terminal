@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.11.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 26 Dec 2017 14:15:11 +0000
+ * Date: Wed, 27 Dec 2017 14:27:57 +0000
  */
 
 /* TODO:
@@ -2796,8 +2796,8 @@
         }
     }
     $.terminal = {
-        version: '1.11.1',
-        date: 'Tue, 26 Dec 2017 14:15:11 +0000',
+        version: 'DEV',
+        date: 'Wed, 27 Dec 2017 14:27:57 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6251,7 +6251,9 @@
             // :: redraw the terminal
             // -------------------------------------------------------------
             refresh: function() {
-                self[0].style.setProperty('--char-width', char_size.width);
+                if (char_size.width !== 0) {
+                    self[0].style.setProperty('--char-width', char_size.width);
+                }
                 redraw({
                     scroll: false,
                     update: true

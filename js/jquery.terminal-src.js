@@ -6251,7 +6251,9 @@
             // :: redraw the terminal
             // -------------------------------------------------------------
             refresh: function() {
-                self[0].style.setProperty('--char-width', char_size.width);
+                if (char_size.width !== 0) {
+                    self[0].style.setProperty('--char-width', char_size.width);
+                }
                 redraw({
                     scroll: false,
                     update: true
