@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 27 Dec 2017 16:15:42 +0000
+ * Date: Wed, 27 Dec 2017 16:49:48 +0000
  */
 
 /* TODO:
@@ -2455,7 +2455,7 @@
                         rev_search_str += key;
                         reverse_history_search();
                         draw_reverse_prompt();
-                    } else {
+                    } else if (key.length === 1) {
                         self.insert(key);
                     }
                 }
@@ -2797,7 +2797,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 27 Dec 2017 16:15:42 +0000',
+        date: 'Wed, 27 Dec 2017 16:49:48 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3723,10 +3723,13 @@
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
         if (div) {
-            var style = div.attr('style').split(/\s*;\s*/).filter(function(s) {
-                return !s.match(/display\s*:\s*none/i);
-            }).join(';');
-            temp.attr('style', style);
+            var style = div.attr('style');
+            if (style) {
+                style = style.split(/\s*;\s*/).filter(function(s) {
+                    return !s.match(/display\s*:\s*none/i);
+                }).join(';');
+                temp.attr('style', style);
+            }
         }
         var rect = temp.find('span')[0].getBoundingClientRect();
         var result = {

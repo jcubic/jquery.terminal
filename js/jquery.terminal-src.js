@@ -2455,7 +2455,7 @@
                         rev_search_str += key;
                         reverse_history_search();
                         draw_reverse_prompt();
-                    } else {
+                    } else if (key.length === 1) {
                         self.insert(key);
                     }
                 }
@@ -3723,10 +3723,13 @@
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
         if (div) {
-            var style = div.attr('style').split(/\s*;\s*/).filter(function(s) {
-                return !s.match(/display\s*:\s*none/i);
-            }).join(';');
-            temp.attr('style', style);
+            var style = div.attr('style');
+            if (style) {
+                style = style.split(/\s*;\s*/).filter(function(s) {
+                    return !s.match(/display\s*:\s*none/i);
+                }).join(';');
+                temp.attr('style', style);
+            }
         }
         var rect = temp.find('span')[0].getBoundingClientRect();
         var result = {

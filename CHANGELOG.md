@@ -1,5 +1,6 @@
 ## Next
 * fix issue with --char-width == 0 if terminal have display:none
+* fix DELETE numpad key on IE
 
 ## 1.11.1
 * fix IE inconsistency in key property for numpad calc keys (reported by @ovk [#362](https://github.com/jcubic/jquery.terminal/issues/362)
