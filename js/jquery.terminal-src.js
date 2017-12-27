@@ -3723,7 +3723,7 @@
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
         if (div) {
-            temp.attr('style', div.attr('style'));
+            temp.attr('style', div.attr('style').replace(/display\s*:\s*none;?/, ''));
         }
         var rect = temp.find('span')[0].getBoundingClientRect();
         var result = {
