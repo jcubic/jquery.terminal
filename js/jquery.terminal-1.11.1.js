@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 27 Dec 2017 16:49:48 +0000
+ * Date: Wed, 27 Dec 2017 20:33:43 +0000
  */
 
 /* TODO:
@@ -2797,7 +2797,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 27 Dec 2017 16:49:48 +0000',
+        date: 'Wed, 27 Dec 2017 20:33:43 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4211,39 +4211,41 @@
                 if (procs && procs.length) {
                     var interpreter_object = {};
                     $.each(procs, function(_, proc) {
-                        interpreter_object[proc.name] = function() {
-                            var append = auth && proc.name !== 'help';
-                            var args = Array.prototype.slice.call(arguments);
-                            var args_len = args.length + (append ? 1 : 0);
-                            if (settings.checkArity && proc.params &&
-                                proc.params.length !== args_len) {
-                                self.error('&#91;Arity&#93; ' +
-                                           sprintf(strings().wrongArity,
-                                                   proc.name,
-                                                   proc.params.length,
-                                                   args_len));
-                            } else {
-                                self.pause(settings.softPause);
-                                if (append) {
-                                    var token = self.token(true);
-                                    if (token) {
-                                        args = [token].concat(args);
-                                    } else {
-                                        self.error('&#91;AUTH&#93; ' +
-                                                   strings().noTokenError);
+                        if ($.isPlainObject(proc) && typeof proc.name === 'string') {
+                            interpreter_object[proc.name] = function() {
+                                var append = auth && proc.name !== 'help';
+                                var args = Array.prototype.slice.call(arguments);
+                                var args_len = args.length + (append ? 1 : 0);
+                                if (settings.checkArity && proc.params &&
+                                    proc.params.length !== args_len) {
+                                    self.error('&#91;Arity&#93; ' +
+                                               sprintf(strings().wrongArity,
+                                                       proc.name,
+                                                       proc.params.length,
+                                                       args_len));
+                                } else {
+                                    self.pause(settings.softPause);
+                                    if (append) {
+                                        var token = self.token(true);
+                                        if (token) {
+                                            args = [token].concat(args);
+                                        } else {
+                                            self.error('&#91;AUTH&#93; ' +
+                                                       strings().noTokenError);
+                                        }
                                     }
+                                    $.jrpc({
+                                        url: url,
+                                        method: proc.name,
+                                        params: args,
+                                        request: jrpc_request,
+                                        response: jrpc_response,
+                                        success: jrpc_success,
+                                        error: ajax_error
+                                    });
                                 }
-                                $.jrpc({
-                                    url: url,
-                                    method: proc.name,
-                                    params: args,
-                                    request: jrpc_request,
-                                    response: jrpc_response,
-                                    success: jrpc_success,
-                                    error: ajax_error
-                                });
-                            }
-                        };
+                            };
+                        }
                     });
                     var login = typeof auth === 'string' ? auth : 'login';
                     interpreter_object.help = interpreter_object.help || function(fn) {
