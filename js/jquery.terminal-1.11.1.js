@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.11.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 26 Dec 2017 14:15:11 +0000
+ * Date: Thu, 28 Dec 2017 08:36:01 +0000
  */
 
 /* TODO:
@@ -2455,7 +2455,7 @@
                         rev_search_str += key;
                         reverse_history_search();
                         draw_reverse_prompt();
-                    } else {
+                    } else if (key.length === 1) {
                         self.insert(key);
                     }
                 }
@@ -2796,8 +2796,8 @@
         }
     }
     $.terminal = {
-        version: '1.11.1',
-        date: 'Tue, 26 Dec 2017 14:15:11 +0000',
+        version: 'DEV',
+        date: 'Thu, 28 Dec 2017 08:36:01 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3723,7 +3723,13 @@
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
         if (div) {
-            temp.attr('style', div.attr('style'));
+            var style = div.attr('style');
+            if (style) {
+                style = style.split(/\s*;\s*/).filter(function(s) {
+                    return !s.match(/display\s*:\s*none/i);
+                }).join(';');
+                temp.attr('style', style);
+            }
         }
         var rect = temp.find('span')[0].getBoundingClientRect();
         var result = {
@@ -4205,39 +4211,41 @@
                 if (procs && procs.length) {
                     var interpreter_object = {};
                     $.each(procs, function(_, proc) {
-                        interpreter_object[proc.name] = function() {
-                            var append = auth && proc.name !== 'help';
-                            var args = Array.prototype.slice.call(arguments);
-                            var args_len = args.length + (append ? 1 : 0);
-                            if (settings.checkArity && proc.params &&
-                                proc.params.length !== args_len) {
-                                self.error('&#91;Arity&#93; ' +
-                                           sprintf(strings().wrongArity,
-                                                   proc.name,
-                                                   proc.params.length,
-                                                   args_len));
-                            } else {
-                                self.pause(settings.softPause);
-                                if (append) {
-                                    var token = self.token(true);
-                                    if (token) {
-                                        args = [token].concat(args);
-                                    } else {
-                                        self.error('&#91;AUTH&#93; ' +
-                                                   strings().noTokenError);
+                        if ($.isPlainObject(proc) && typeof proc.name === 'string') {
+                            interpreter_object[proc.name] = function() {
+                                var append = auth && proc.name !== 'help';
+                                var args = Array.prototype.slice.call(arguments);
+                                var args_len = args.length + (append ? 1 : 0);
+                                if (settings.checkArity && proc.params &&
+                                    proc.params.length !== args_len) {
+                                    self.error('&#91;Arity&#93; ' +
+                                               sprintf(strings().wrongArity,
+                                                       proc.name,
+                                                       proc.params.length,
+                                                       args_len));
+                                } else {
+                                    self.pause(settings.softPause);
+                                    if (append) {
+                                        var token = self.token(true);
+                                        if (token) {
+                                            args = [token].concat(args);
+                                        } else {
+                                            self.error('&#91;AUTH&#93; ' +
+                                                       strings().noTokenError);
+                                        }
                                     }
+                                    $.jrpc({
+                                        url: url,
+                                        method: proc.name,
+                                        params: args,
+                                        request: jrpc_request,
+                                        response: jrpc_response,
+                                        success: jrpc_success,
+                                        error: ajax_error
+                                    });
                                 }
-                                $.jrpc({
-                                    url: url,
-                                    method: proc.name,
-                                    params: args,
-                                    request: jrpc_request,
-                                    response: jrpc_response,
-                                    success: jrpc_success,
-                                    error: ajax_error
-                                });
-                            }
-                        };
+                            };
+                        }
                     });
                     var login = typeof auth === 'string' ? auth : 'login';
                     interpreter_object.help = interpreter_object.help || function(fn) {
@@ -4510,8 +4518,6 @@
                 for (i = 0, len = array.length; i < len; ++i) {
                     if (array[i] === '' || array[i] === '\r') {
                         output_buffer.push('<span></span>');
-                    } else if (options.raw) {
-                        output_buffer.push(array[i]);
                     } else {
                         output_buffer.push($.terminal.format(array[i], {
                             linksNoReferrer: settings.linksNoReferrer
@@ -4581,6 +4587,7 @@
                             return string;
                         }
                     }).join('');
+                    // string can be empty after removing extended commands
                     if (string !== '') {
                         if (!line_settings.raw) {
                             if (settings.convertLinks) {
@@ -4596,7 +4603,6 @@
                             }
                             string = $.terminal.encode(string);
                         }
-                        // string can be empty after removing extended commands
                         buffer_line(string, line.index, line_settings);
                     }
                 }
@@ -4615,7 +4621,9 @@
         // ---------------------------------------------------------------------
         function redraw(options) {
             options = $.extend({}, {
+                // should be used when single line is updated
                 update: false,
+                // should be used if you want to scroll to bottom after redraw
                 scroll: true
             }, options || {});
             if (!options.update) {
@@ -4644,26 +4652,11 @@
                     if ($.type(string) !== 'string') {
                         string = String(string);
                     }
-                    if (strlen(string) > num_chars) {
-                        var splitted = $.terminal.split_equal(
-                            string,
-                            num_chars,
-                            options.keepWords
-                        ).map(function(string) {
-                            return {
-                                string: string,
-                                index: index,
-                                options: options
-                            };
-                        });
-                        lines_to_show = lines_to_show.concat(splitted);
-                    } else {
-                        lines_to_show.push({
-                            string: string,
-                            index: index,
-                            options: options
-                        });
-                    }
+                    lines_to_show.push({
+                        string: string,
+                        index: index,
+                        options: options
+                    });
                 });
                 lines_to_show = lines_to_show.slice(lines_to_show.length - limit - 1);
             } else {
@@ -6251,7 +6244,9 @@
             // :: redraw the terminal
             // -------------------------------------------------------------
             refresh: function() {
-                self[0].style.setProperty('--char-width', char_size.width);
+                if (char_size.width !== 0) {
+                    self[0].style.setProperty('--char-width', char_size.width);
+                }
                 redraw({
                     scroll: false,
                     update: true
@@ -7203,6 +7198,9 @@
                 }
                 var was_enabled = self.enabled();
                 var visible = self.is(':visible');
+                if (visible) {
+                    create_resizers();
+                }
                 visibility_observer = new IntersectionObserver(function() {
                     if (self.is(':visible') && !visible) {
                         visible = true;

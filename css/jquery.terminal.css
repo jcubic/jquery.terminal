@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.11.1
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Tue, 26 Dec 2017 14:15:13 +0000
+ * Date: Thu, 28 Dec 2017 08:36:02 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -462,8 +462,8 @@ terminal .terminal-output > div {
         background-color: var(--background, #000);
     }
     .terminal .font {
-        width: calc(var(--size) * 1em);
-        height: calc(var(--size) * 1em);
+        width: calc(var(--size, 1) * 1em);
+        height: calc(var(--size, 1) * 1em);
     }
     .terminal span[style*="--length"] {
         width: calc(var(--length, 1) * var(--char-width) * 1px);
