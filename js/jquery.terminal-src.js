@@ -4518,8 +4518,6 @@
                 for (i = 0, len = array.length; i < len; ++i) {
                     if (array[i] === '' || array[i] === '\r') {
                         output_buffer.push('<span></span>');
-                    } else if (options.raw) {
-                        output_buffer.push(array[i]);
                     } else {
                         output_buffer.push($.terminal.format(array[i], {
                             linksNoReferrer: settings.linksNoReferrer
@@ -4589,6 +4587,7 @@
                             return string;
                         }
                     }).join('');
+                    // string can be empty after removing extended commands
                     if (string !== '') {
                         if (!line_settings.raw) {
                             if (settings.convertLinks) {
@@ -4604,7 +4603,6 @@
                             }
                             string = $.terminal.encode(string);
                         }
-                        // string can be empty after removing extended commands
                         buffer_line(string, line.index, line_settings);
                     }
                 }
@@ -4623,7 +4621,9 @@
         // ---------------------------------------------------------------------
         function redraw(options) {
             options = $.extend({}, {
+                // should be used when single line is updated
                 update: false,
+                // should be used if you want to scroll to bottom after redraw
                 scroll: true
             }, options || {});
             if (!options.update) {
@@ -4652,26 +4652,11 @@
                     if ($.type(string) !== 'string') {
                         string = String(string);
                     }
-                    if (strlen(string) > num_chars) {
-                        var splitted = $.terminal.split_equal(
-                            string,
-                            num_chars,
-                            options.keepWords
-                        ).map(function(string) {
-                            return {
-                                string: string,
-                                index: index,
-                                options: options
-                            };
-                        });
-                        lines_to_show = lines_to_show.concat(splitted);
-                    } else {
-                        lines_to_show.push({
-                            string: string,
-                            index: index,
-                            options: options
-                        });
-                    }
+                    lines_to_show.push({
+                        string: string,
+                        index: index,
+                        options: options
+                    });
                 });
                 lines_to_show = lines_to_show.slice(lines_to_show.length - limit - 1);
             } else {
@@ -7213,6 +7198,9 @@
                 }
                 var was_enabled = self.enabled();
                 var visible = self.is(':visible');
+                if (visible) {
+                    create_resizers();
+                }
                 visibility_observer = new IntersectionObserver(function() {
                     if (self.is(':visible') && !visible) {
                         visible = true;
