@@ -790,10 +790,14 @@
                 callbacks.add(callback);
                 $this.data('callbacks', callbacks);
                 var resizer;
+                var first = true;
                 if (window.ResizeObserver) {
                     resizer = new ResizeObserver(function() {
-                        var callbacks = $this.data('callbacks');
-                        callbacks.fire();
+                        if (!first) {
+                            var callbacks = $this.data('callbacks');
+                            callbacks.fire();
+                        }
+                        first = false;
                     });
                     resizer.observe(this);
                     $this.data('observer', resizer);
@@ -4509,29 +4513,31 @@
             // urls should always have formatting to keep url if split
             var i, len;
             output_buffer.push(NEW_LINE);
-            if (!options.raw && (strlen(string) > num_chars ||
-                                 string.match(/\n/)) &&
-                ((settings.wrap === true && options.wrap === undefined) ||
-                  settings.wrap === false && options.wrap === true)) {
-                var words = options.keepWords;
-                var array = $.terminal.split_equal(string, num_chars, words);
-                for (i = 0, len = array.length; i < len; ++i) {
-                    if (array[i] === '' || array[i] === '\r') {
-                        output_buffer.push('<span></span>');
-                    } else {
-                        output_buffer.push($.terminal.format(array[i], {
-                            linksNoReferrer: settings.linksNoReferrer
-                        }));
+            if (!options.raw) {
+                if ((strlen(string) > num_chars ||
+                     string.match(/\n/)) &&
+                    ((settings.wrap === true && options.wrap === undefined) ||
+                     settings.wrap === false && options.wrap === true)) {
+                    var words = options.keepWords;
+                    var array = $.terminal.split_equal(string, num_chars, words);
+                    for (i = 0, len = array.length; i < len; ++i) {
+                        if (array[i] === '' || array[i] === '\r') {
+                            output_buffer.push('<span></span>');
+                        } else {
+                            output_buffer.push($.terminal.format(array[i], {
+                                linksNoReferrer: settings.linksNoReferrer
+                            }));
+                        }
                     }
+                } else {
+                    string = $.terminal.normalize(string);
+                    string = $.terminal.format(string, {
+                        linksNoReferrer: settings.linksNoReferrer
+                    });
+                    string.split(/\n/).forEach(function(string) {
+                        output_buffer.push(string);
+                    });
                 }
-            } else if (!options.raw) {
-                string = $.terminal.normalize(string);
-                string = $.terminal.format(string, {
-                    linksNoReferrer: settings.linksNoReferrer
-                });
-                string.split(/\n/).forEach(function(string) {
-                    output_buffer.push(string);
-                });
             } else {
                 output_buffer.push(string);
             }
@@ -4725,18 +4731,22 @@
         // :: Display user greetings or terminal signature
         // ---------------------------------------------------------------------
         function show_greetings() {
-            function echo(string) {
-                self.echo(string, {finalize: a11y_hide, formatters: false});
-            }
             if (settings.greetings === undefined) {
                 // signature have ascii art so it's not suite for screen readers
-                echo(self.signature);
+                self.echo(self.signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
                 if (type === 'string') {
-                    echo(settings.greetings);
+                    self.echo(settings.greetings);
                 } else if (type === 'function') {
-                    settings.greetings.call(self, echo);
+                    self.echo(function() {
+                        try {
+                            return settings.greetings.call(self);
+                        } catch (e) {
+                            settings.greetings = null;
+                            display_exception(e, 'greetings');
+                        }
+                    });
                 } else {
                     self.error(strings().wrongGreetings);
                 }
@@ -5065,7 +5075,7 @@
             prepare_top_interpreter();
             show_greetings();
             if (lines.length) {
-                redraw(); // for case when showing long error before init
+                self.refresh(); // for case when showing long error before init
             }
             // was_paused flag is workaround for case when user call exec before
             // login and pause in onInit, 3rd exec will have proper timing (will
@@ -6086,7 +6096,7 @@
                         return signatures[i].join('\n') + '\n';
                     }
                 }
-                return '';
+                return ' ';
             },
             // -------------------------------------------------------------
             // :: Return the version number
