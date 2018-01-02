@@ -2736,8 +2736,8 @@ function tests_on_ready() {
                         return line.length;
                     }));
                 }
-                it('should return empty string', function() {
-                    expect(term.signature()).toEqual('');
+                it('should return space', function() {
+                    expect(term.signature()).toEqual(' ');
                 });
                 it('should return proper max length of signature', function() {
                     var numbers = {20: 20, 36: 30, 60: 52, 70: 64, 100: 75};
