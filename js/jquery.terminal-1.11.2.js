@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 02 Jan 2018 18:12:01 +0000
+ * Date: Tue, 02 Jan 2018 18:27:57 +0000
  */
 
 /* TODO:
@@ -2801,7 +2801,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 02 Jan 2018 18:12:01 +0000',
+        date: 'Tue, 02 Jan 2018 18:27:57 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3726,6 +3726,7 @@
     function get_char_size(div) {
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
+        temp.addClass(div.attr('class'));
         if (div) {
             var style = div.attr('style');
             if (style) {
@@ -4739,14 +4740,12 @@
                 if (type === 'string') {
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
-                    self.echo(function() {
-                        try {
-                            return settings.greetings.call(self);
-                        } catch (e) {
-                            settings.greetings = null;
-                            display_exception(e, 'greetings');
-                        }
-                    });
+                    try {
+                        settings.greetings.call(self, self.echo);
+                    } catch (e) {
+                        settings.greetings = null;
+                        display_exception(e, 'greetings');
+                    }
                 } else {
                     self.error(strings().wrongGreetings);
                 }

@@ -1,5 +1,6 @@
 ## Next
 * fix issue with not working greetings + update [#363](https://github.com/jcubic/jquery.terminal/issues/363)
+* set classes from terminal to fake terminal that is used to calculate character size
 
 ## 1.11.2
 * fix issue with --char-width == 0 if terminal have display:none

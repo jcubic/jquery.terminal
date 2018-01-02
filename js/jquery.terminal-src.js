@@ -3726,6 +3726,7 @@
     function get_char_size(div) {
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
+        temp.addClass(div.attr('class'));
         if (div) {
             var style = div.attr('style');
             if (style) {
@@ -4739,14 +4740,12 @@
                 if (type === 'string') {
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
-                    self.echo(function() {
-                        try {
-                            return settings.greetings.call(self);
-                        } catch (e) {
-                            settings.greetings = null;
-                            display_exception(e, 'greetings');
-                        }
-                    });
+                    try {
+                        settings.greetings.call(self, self.echo);
+                    } catch (e) {
+                        settings.greetings = null;
+                        display_exception(e, 'greetings');
+                    }
                 } else {
                     self.error(strings().wrongGreetings);
                 }
