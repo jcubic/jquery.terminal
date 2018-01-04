@@ -3359,7 +3359,7 @@
                         if (typeof wcwidth !== 'undefined') {
                             var bare = bare_text(text);
                             var len = strlen(bare);
-                            if (bare.length != len) {
+                            if (bare.length !== len) {
                                 style = ' style="--length: ' + len + '"';
                             }
                         }
