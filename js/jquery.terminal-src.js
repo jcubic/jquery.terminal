@@ -3298,8 +3298,9 @@
                                 style_str += 'font-style:italic;';
                             }
                             if (typeof wcwidth !== 'undefined') {
-                                var len = strlen(bare_text(text));
-                                if (len !== 1) {
+                                var bare = bare_text(text);
+                                var len = strlen(bare);
+                                if (len !== bare.length) {
                                     style_str += '--length: ' + len + ';';
                                 }
                             }
@@ -3354,15 +3355,13 @@
                         });
                     } else {
                         text = safe_text(text);
+                        var style = '';
                         if (typeof wcwidth !== 'undefined') {
-                            var t = bare_text(text);
-                            var len = strlen(t);
-                            var style = '';
-                            if (t.length < len) {
+                            var bare = bare_text(text);
+                            var len = strlen(bare);
+                            if (bare.length != len) {
                                 style = ' style="--length: ' + len + '"';
                             }
-                        } else {
-                            style = '';
                         }
                         return '<span' + style + '>' + text + '</span>';
                     }

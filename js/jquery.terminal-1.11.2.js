@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 02 Jan 2018 18:27:57 +0000
+ * Date: Thu, 04 Jan 2018 17:35:02 +0000
  */
 
 /* TODO:
@@ -2801,7 +2801,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 02 Jan 2018 18:27:57 +0000',
+        date: 'Thu, 04 Jan 2018 17:35:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3298,8 +3298,9 @@
                                 style_str += 'font-style:italic;';
                             }
                             if (typeof wcwidth !== 'undefined') {
-                                var len = strlen(bare_text(text));
-                                if (len !== 1) {
+                                var bare = bare_text(text);
+                                var len = strlen(bare);
+                                if (len !== bare.length) {
                                     style_str += '--length: ' + len + ';';
                                 }
                             }
@@ -3354,15 +3355,13 @@
                         });
                     } else {
                         text = safe_text(text);
+                        var style = '';
                         if (typeof wcwidth !== 'undefined') {
-                            var t = bare_text(text);
-                            var len = strlen(t);
-                            var style = '';
-                            if (t.length < len) {
+                            var bare = bare_text(text);
+                            var len = strlen(bare);
+                            if (bare.length != len) {
                                 style = ' style="--length: ' + len + '"';
                             }
-                        } else {
-                            style = '';
                         }
                         return '<span' + style + '>' + text + '</span>';
                     }
