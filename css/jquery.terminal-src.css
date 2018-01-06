@@ -113,6 +113,9 @@ body.terminal {
     line-height: 14px;
     height: auto;
 }
+.terminal .terminal-output > div:not(.raw) div {
+    white-space: nowrap;
+}
 .cmd .prompt > span {
     float: left;
 }
@@ -139,8 +142,8 @@ body.terminal {
 terminal .terminal-output > div {
     margin-top: -1px;
 }
-.terminal-output > div > div * {
-    overflow-wrap: break-word; /* when echo html */
+.terminal-output > div.raw > div * {
+    overflow-wrap: break-word;
     word-wrap: break-word;
 }
 .terminal .font {
@@ -267,6 +270,10 @@ terminal .terminal-output > div {
 }
 .ui-dialog-content .terminal, .ui-dialog-content .terminal .terminal-fill {
     padding: 0;
+}
+.terminal.ui-dialog-content {
+    width: 100% !important;
+    height: calc(100% - 2.6em) !important;
 }
 .clear {
     clear: both;

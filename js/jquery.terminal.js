@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 04 Jan 2018 17:35:02 +0000
+ * Date: Sat, 06 Jan 2018 21:52:50 +0000
  */
 
 /* TODO:
@@ -2801,7 +2801,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 04 Jan 2018 17:35:02 +0000',
+        date: 'Sat, 06 Jan 2018 21:52:50 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3359,7 +3359,7 @@
                         if (typeof wcwidth !== 'undefined') {
                             var bare = bare_text(text);
                             var len = strlen(bare);
-                            if (bare.length != len) {
+                            if (bare.length !== len) {
                                 style = ' style="--length: ' + len + '"';
                             }
                         }
