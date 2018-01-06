@@ -266,14 +266,9 @@ terminal .terminal-output > div {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    padding: 0;
 }
-.ui-dialog-content .terminal, .ui-dialog-content .terminal .terminal-fill {
+.ui-dialog .ui-dialog-content.dterm {
     padding: 0;
-}
-.terminal.ui-dialog-content {
-    width: 100% !important;
-    height: calc(100% - 2.6em) !important;
 }
 .clear {
     clear: both;

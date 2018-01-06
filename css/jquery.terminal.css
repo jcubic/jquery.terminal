@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sat, 06 Jan 2018 21:52:51 +0000
+ * Date: Sat, 06 Jan 2018 22:22:12 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -266,14 +266,9 @@ terminal .terminal-output > div {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    padding: 0;
 }
-.ui-dialog-content .terminal, .ui-dialog-content .terminal .terminal-fill {
+.ui-dialog .ui-dialog-content.dterm {
     padding: 0;
-}
-.terminal.ui-dialog-content {
-    width: 100% !important;
-    height: calc(100% - 2.6em) !important;
 }
 .clear {
     clear: both;
