@@ -135,8 +135,7 @@ body.terminal {
 .cmd .prompt + div {
     clear: right;
 }
-.terminal-output > div, .terminal-output > div > div {
-    /*padding-top: 3px;*/
+.terminal-output > div > div {
     min-height: 14px;
 }
 terminal .terminal-output > div {
@@ -471,11 +470,11 @@ terminal .terminal-output > div {
         width: calc(var(--length, 1) * var(--char-width) * 1px);
         display: inline-block;
     }
-    .terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
+    .terminal, .cmd, .terminal .terminal-output > div > div, .cmd .prompt {
         font-size: calc(var(--size, 1) * 12px);
         line-height: calc(var(--size, 1) * 14px);
     }
-    .terminal .terminal-output div div {
+    .terminal .terminal-output > div > div {
         min-height: calc(var(--size, 1) * 14px);
     }
     .terminal .inverted, .cmd .inverted {
