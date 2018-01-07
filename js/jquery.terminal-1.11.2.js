@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 07 Jan 2018 08:27:00 +0000
+ * Date: Sun, 07 Jan 2018 08:28:38 +0000
  */
 
 /* TODO:
@@ -2801,7 +2801,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 07 Jan 2018 08:27:00 +0000',
+        date: 'Sun, 07 Jan 2018 08:28:38 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4513,7 +4513,7 @@
             // urls should always have formatting to keep url if split
             var i, len;
             output_buffer.push(NEW_LINE);
-            if (string == '') {
+            if (string === '') {
                 // ignore empty string, it can happen if line was a function
                 // that returned empty string in this case whe need to add container
                 // because on update/resize it can return content
@@ -4617,7 +4617,7 @@
                         buffer_line(string, line.index, line_settings);
                     }
                 }
-                if (string == '' && is_function) {
+                if (string === '' && is_function) {
                     buffer_line(string, line.index, line_settings);
                 }
             } catch (e) {

@@ -4513,7 +4513,7 @@
             // urls should always have formatting to keep url if split
             var i, len;
             output_buffer.push(NEW_LINE);
-            if (string == '') {
+            if (string === '') {
                 // ignore empty string, it can happen if line was a function
                 // that returned empty string in this case whe need to add container
                 // because on update/resize it can return content
@@ -4617,7 +4617,7 @@
                         buffer_line(string, line.index, line_settings);
                     }
                 }
-                if (string == '' && is_function) {
+                if (string === '' && is_function) {
                     buffer_line(string, line.index, line_settings);
                 }
             } catch (e) {
