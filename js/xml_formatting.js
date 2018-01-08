@@ -9,7 +9,7 @@
  *
  * This is example of how to create custom formatter for jQuery Terminal
  *
- * Copyright (c) 2014-2017 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2014-2018 Jakub Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  */

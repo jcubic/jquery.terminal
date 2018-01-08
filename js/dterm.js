@@ -6,7 +6,7 @@
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
  *           \/              /____/
  * Example plugin using JQuery Terminal Emulator
- * Copyright (c) 2014-2017 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2014-2018 Jakub Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  */
@@ -24,7 +24,8 @@
     $.fn.dterm = function(interpreter, options) {
         var op = $.extend_if_has({}, options, defaults);
         op.enabled = false;
-        var terminal = this.terminal(interpreter, op);
+        this.addClass('dterm');
+        var terminal = $('<div/>').appendTo(this).terminal(interpreter, op);
         if (!options.title) {
             options.title = 'JQuery Terminal Emulator';
         }

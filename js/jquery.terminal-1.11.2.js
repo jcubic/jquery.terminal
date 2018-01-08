@@ -4,11 +4,11 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.11.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2017 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2018 Jakub Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 28 Dec 2017 08:38:48 +0000
+ * Date: Sun, 07 Jan 2018 08:28:38 +0000
  */
 
 /* TODO:
@@ -790,10 +790,14 @@
                 callbacks.add(callback);
                 $this.data('callbacks', callbacks);
                 var resizer;
+                var first = true;
                 if (window.ResizeObserver) {
                     resizer = new ResizeObserver(function() {
-                        var callbacks = $this.data('callbacks');
-                        callbacks.fire();
+                        if (!first) {
+                            var callbacks = $this.data('callbacks');
+                            callbacks.fire();
+                        }
+                        first = false;
                     });
                     resizer.observe(this);
                     $this.data('observer', resizer);
@@ -2796,8 +2800,8 @@
         }
     }
     $.terminal = {
-        version: '1.11.2',
-        date: 'Thu, 28 Dec 2017 08:38:48 +0000',
+        version: 'DEV',
+        date: 'Sun, 07 Jan 2018 08:28:38 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3294,8 +3298,9 @@
                                 style_str += 'font-style:italic;';
                             }
                             if (typeof wcwidth !== 'undefined') {
-                                var len = strlen(bare_text(text));
-                                if (len !== 1) {
+                                var bare = bare_text(text);
+                                var len = strlen(bare);
+                                if (len !== bare.length) {
                                     style_str += '--length: ' + len + ';';
                                 }
                             }
@@ -3350,15 +3355,13 @@
                         });
                     } else {
                         text = safe_text(text);
+                        var style = '';
                         if (typeof wcwidth !== 'undefined') {
-                            var t = bare_text(text);
-                            var len = strlen(t);
-                            var style = '';
-                            if (t.length < len) {
+                            var bare = bare_text(text);
+                            var len = strlen(bare);
+                            if (bare.length !== len) {
                                 style = ' style="--length: ' + len + '"';
                             }
-                        } else {
-                            style = '';
                         }
                         return '<span' + style + '>' + text + '</span>';
                     }
@@ -3722,6 +3725,7 @@
     function get_char_size(div) {
         var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
                      'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
+        temp.addClass(div.attr('class'));
         if (div) {
             var style = div.attr('style');
             if (style) {
@@ -4509,29 +4513,35 @@
             // urls should always have formatting to keep url if split
             var i, len;
             output_buffer.push(NEW_LINE);
-            if (!options.raw && (strlen(string) > num_chars ||
-                                 string.match(/\n/)) &&
-                ((settings.wrap === true && options.wrap === undefined) ||
-                  settings.wrap === false && options.wrap === true)) {
-                var words = options.keepWords;
-                var array = $.terminal.split_equal(string, num_chars, words);
-                for (i = 0, len = array.length; i < len; ++i) {
-                    if (array[i] === '' || array[i] === '\r') {
-                        output_buffer.push('<span></span>');
-                    } else {
-                        output_buffer.push($.terminal.format(array[i], {
-                            linksNoReferrer: settings.linksNoReferrer
-                        }));
-                    }
-                }
+            if (string === '') {
+                // ignore empty string, it can happen if line was a function
+                // that returned empty string in this case whe need to add container
+                // because on update/resize it can return content
             } else if (!options.raw) {
-                string = $.terminal.normalize(string);
-                string = $.terminal.format(string, {
-                    linksNoReferrer: settings.linksNoReferrer
-                });
-                string.split(/\n/).forEach(function(string) {
-                    output_buffer.push(string);
-                });
+                if ((strlen(string) > num_chars ||
+                     string.match(/\n/)) &&
+                    ((settings.wrap === true && options.wrap === undefined) ||
+                     settings.wrap === false && options.wrap === true)) {
+                    var words = options.keepWords;
+                    var array = $.terminal.split_equal(string, num_chars, words);
+                    for (i = 0, len = array.length; i < len; ++i) {
+                        if (array[i] === '' || array[i] === '\r') {
+                            output_buffer.push('<span></span>');
+                        } else {
+                            output_buffer.push($.terminal.format(array[i], {
+                                linksNoReferrer: settings.linksNoReferrer
+                            }));
+                        }
+                    }
+                } else {
+                    string = $.terminal.normalize(string);
+                    string = $.terminal.format(string, {
+                        linksNoReferrer: settings.linksNoReferrer
+                    });
+                    string.split(/\n/).forEach(function(string) {
+                        output_buffer.push(string);
+                    });
+                }
             } else {
                 output_buffer.push(string);
             }
@@ -4551,7 +4561,8 @@
                 }, line.options || {});
                 var string;
                 var arg = line.string;
-                if ($.type(arg) === 'function') {
+                var is_function = $.type(arg) === 'function';
+                if (is_function) {
                     arg = arg();
                 }
                 if ($.type(arg) !== 'string') {
@@ -4605,6 +4616,9 @@
                         }
                         buffer_line(string, line.index, line_settings);
                     }
+                }
+                if (string === '' && is_function) {
+                    buffer_line(string, line.index, line_settings);
                 }
             } catch (e) {
                 output_buffer = [];
@@ -4725,18 +4739,20 @@
         // :: Display user greetings or terminal signature
         // ---------------------------------------------------------------------
         function show_greetings() {
-            function echo(string) {
-                self.echo(string, {finalize: a11y_hide, formatters: false});
-            }
             if (settings.greetings === undefined) {
                 // signature have ascii art so it's not suite for screen readers
-                echo(self.signature);
+                self.echo(self.signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
                 if (type === 'string') {
-                    echo(settings.greetings);
+                    self.echo(settings.greetings);
                 } else if (type === 'function') {
-                    settings.greetings.call(self, echo);
+                    try {
+                        settings.greetings.call(self, self.echo);
+                    } catch (e) {
+                        settings.greetings = null;
+                        display_exception(e, 'greetings');
+                    }
                 } else {
                     self.error(strings().wrongGreetings);
                 }
@@ -5065,7 +5081,7 @@
             prepare_top_interpreter();
             show_greetings();
             if (lines.length) {
-                redraw(); // for case when showing long error before init
+                self.refresh(); // for case when showing long error before init
             }
             // was_paused flag is workaround for case when user call exec before
             // login and pause in onInit, 3rd exec will have proper timing (will

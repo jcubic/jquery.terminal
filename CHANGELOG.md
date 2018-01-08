@@ -1,3 +1,10 @@
+## Next
+* create empty div for function line that return empty string, that was causing issues with update
+  [#363](https://github.com/jcubic/jquery.terminal/issues/363)
+* set classes from terminal to fake terminal that is used to calculate character size
+* don't use length css variable on formatting when length is the same as wcwidth
+* css fixes for terminal in jQuery UI dialog (dterm)
+
 ## 1.11.2
 * fix issue with --char-width == 0 if terminal have display:none
 * fix DELETE numpad key on IE
