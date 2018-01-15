@@ -6445,11 +6445,22 @@
             // -------------------------------------------------------------
             error: function(message, options) {
                 options = $.extend({}, options, {raw: false, formatters: false});
-                // quick hack to fix trailing backslash
-                var str = $.terminal.escape_brackets(message).
-                    replace(/\\$/, '&#92;').
-                    replace(url_re, ']$1[[;;;error]');
-                return self.echo('[[;;;error]' + str + ']', options);
+                function format(string) {
+                    if (typeof string !== 'string') {
+                        string = String(string);
+                    }
+                    // quick hack to fix trailing backslash
+                    var str = $.terminal.escape_brackets(string).
+                        replace(/\\$/, '&#92;').
+                        replace(url_re, ']$1[[;;;error]');
+                    return '[[;;;error]' + str + ']';
+                }
+                if (typeof message === 'function') {
+                    return self.echo(function() {
+                        return format(message.call(self));
+                    }, options);
+                }
+                return self.echo(format(message), options);
             },
             // -------------------------------------------------------------
             // :: Display Exception on terminal

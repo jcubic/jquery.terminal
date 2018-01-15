@@ -1,3 +1,6 @@
+## Next
+* handle non string and functions in error the same as in echo
+
 ## 1.11.3
 * create empty div for function line that return empty string, that was causing issues with update
   [#363](https://github.com/jcubic/jquery.terminal/issues/363)
