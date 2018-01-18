@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 15 Jan 2018 19:00:54 +0000
+ * Date: Thu, 18 Jan 2018 17:37:29 +0000
  */
 
 /* TODO:
@@ -2801,7 +2801,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 15 Jan 2018 19:00:54 +0000',
+        date: 'Thu, 18 Jan 2018 17:37:29 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3785,7 +3785,7 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic' +
+    var copyright = 'Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic' +
         '.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
@@ -3796,7 +3796,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2017 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2018 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         [
