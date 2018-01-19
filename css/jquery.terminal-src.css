@@ -150,8 +150,9 @@ terminal .terminal-output > div {
     font-size: inherit;
     width: 1em;
     height: 1em;
-    top: 0;
+    top: -100%;
     left: 0;
+    margin-bottom: 1px;
 }
 .terminal .terminal-output div span {
     display: inline-block;
@@ -163,17 +164,6 @@ terminal .terminal-output > div {
     display: block;
     float: none;
 }
-/* fix double style of selecting text in terminal */
-.terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal td,
-.terminal pre, .terminal h1, .terminal h2, .terminal h3, .terminal h4,
-.terminal h5, .terminal h6 {
-    -webkit-touch-callout: initial;
-    -webkit-user-select: text;
-    -khtml-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-}
 .terminal, .terminal-output, .terminal-output div {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -181,6 +171,15 @@ terminal .terminal-output > div {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+/* fix double style of selecting text in terminal */
+.terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal .raw > div {
+    -webkit-touch-callout: initial;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
 }
 /* firefox hack */
 @-moz-document url-prefix() {

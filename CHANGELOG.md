@@ -1,5 +1,7 @@
 ## Next
 * handle non string and functions in error the same as in echo
+* apply selection for `.raw div` instead of list of tags (reported by @ovk)
+* hide font resizer so you actually can select text starting from to left
 
 ## 1.11.3
 * create empty div for function line that return empty string, that was causing issues with update
