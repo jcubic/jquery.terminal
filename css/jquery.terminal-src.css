@@ -150,8 +150,9 @@ terminal .terminal-output > div {
     font-size: inherit;
     width: 1em;
     height: 1em;
-    top: 0;
+    top: -100%;
     left: 0;
+    margin-bottom: 1px;
 }
 .terminal .terminal-output div span {
     display: inline-block;
@@ -162,36 +163,6 @@ terminal .terminal-output > div {
 .cmd .prompt span.line {
     display: block;
     float: none;
-}
-/* fix double style of selecting text in terminal */
-.terminal-output span, .terminal-output a, .cmd div, .cmd span, .terminal td,
-.terminal pre, .terminal h1, .terminal h2, .terminal h3, .terminal h4,
-.terminal h5, .terminal h6 {
-    -webkit-touch-callout: initial;
-    -webkit-user-select: text;
-    -khtml-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-}
-.terminal, .terminal-output, .terminal-output div {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-/* firefox hack */
-@-moz-document url-prefix() {
-    .terminal, .terminal-output, .terminal-output div {
-        -webkit-touch-callout: initial;
-        -webkit-user-select: initial;
-        -khtml-user-select: initial;
-        -moz-user-select: initial;
-        -ms-user-select: initial;
-        user-select: initial;
-    }
 }
 .terminal table {
     border-collapse: collapse;
@@ -210,6 +181,7 @@ terminal .terminal-output > div {
 .terminal .terminal-output div div::-moz-selection,
 .terminal .terminal-output div span::-moz-selection,
 .terminal .terminal-output div div a::-moz-selection,
+.terminal .terminal-output .raw div::-moz-selection,
 .cmd div::-moz-selection,
 .cmd > span::-moz-selection,
 .cmd > span span::-moz-selection,
@@ -238,6 +210,7 @@ terminal .terminal-output > div {
 .terminal .terminal-output div div::selection,
 .terminal .terminal-output div div a::selection,
 .terminal .terminal-output div span::selection,
+.terminal .terminal-output .raw div::selection,
 .cmd div::selection,
 .cmd > span::selection,
 .cmd > span span::selection,

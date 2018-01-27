@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.11.3
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 08 Jan 2018 17:19:46 +0000
+ * Date: Thu, 18 Jan 2018 17:37:29 +0000
  */
 
 /* TODO:
@@ -2800,8 +2800,8 @@
         }
     }
     $.terminal = {
-        version: '1.11.3',
-        date: 'Mon, 08 Jan 2018 17:19:46 +0000',
+        version: 'DEV',
+        date: 'Thu, 18 Jan 2018 17:37:29 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3785,7 +3785,7 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic' +
+    var copyright = 'Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic' +
         '.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
@@ -3796,7 +3796,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2017 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2018 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         [
@@ -6445,11 +6445,22 @@
             // -------------------------------------------------------------
             error: function(message, options) {
                 options = $.extend({}, options, {raw: false, formatters: false});
-                // quick hack to fix trailing backslash
-                var str = $.terminal.escape_brackets(message).
-                    replace(/\\$/, '&#92;').
-                    replace(url_re, ']$1[[;;;error]');
-                return self.echo('[[;;;error]' + str + ']', options);
+                function format(string) {
+                    if (typeof string !== 'string') {
+                        string = String(string);
+                    }
+                    // quick hack to fix trailing backslash
+                    var str = $.terminal.escape_brackets(string).
+                        replace(/\\$/, '&#92;').
+                        replace(url_re, ']$1[[;;;error]');
+                    return '[[;;;error]' + str + ']';
+                }
+                if (typeof message === 'function') {
+                    return self.echo(function() {
+                        return format(message.call(self));
+                    }, options);
+                }
+                return self.echo(format(message), options);
             },
             // -------------------------------------------------------------
             // :: Display Exception on terminal

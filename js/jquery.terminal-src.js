@@ -3785,7 +3785,7 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2017 Jakub Jankiewicz <http://jcubic' +
+    var copyright = 'Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic' +
         '.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
@@ -3796,7 +3796,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2017 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2018 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         [
@@ -6445,11 +6445,22 @@
             // -------------------------------------------------------------
             error: function(message, options) {
                 options = $.extend({}, options, {raw: false, formatters: false});
-                // quick hack to fix trailing backslash
-                var str = $.terminal.escape_brackets(message).
-                    replace(/\\$/, '&#92;').
-                    replace(url_re, ']$1[[;;;error]');
-                return self.echo('[[;;;error]' + str + ']', options);
+                function format(string) {
+                    if (typeof string !== 'string') {
+                        string = String(string);
+                    }
+                    // quick hack to fix trailing backslash
+                    var str = $.terminal.escape_brackets(string).
+                        replace(/\\$/, '&#92;').
+                        replace(url_re, ']$1[[;;;error]');
+                    return '[[;;;error]' + str + ']';
+                }
+                if (typeof message === 'function') {
+                    return self.echo(function() {
+                        return format(message.call(self));
+                    }, options);
+                }
+                return self.echo(format(message), options);
             },
             // -------------------------------------------------------------
             // :: Display Exception on terminal
