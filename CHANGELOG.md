@@ -1,7 +1,7 @@
-## Next
+## 1.11.4
 * handle non string and functions in error the same as in echo
 * fix selection for raw output (reported by @ovk)
-* hide font resizer so you actually can select text starting from to left
+* hide font resizer so you actually can select text starting from top left
 
 ## 1.11.3
 * create empty div for function line that return empty string, that was causing issues with update
