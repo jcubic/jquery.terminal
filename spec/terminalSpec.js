@@ -2815,13 +2815,14 @@ function tests_on_ready() {
                 }
                 it('should echo format urls', function() {
                     term.clear();
-                    term.echo('foo http://jcubic.pl bar');
+                    term.echo('foo http://jcubic.pl bar http://jcubic.pl/');
                     var div = term.find('.terminal-output > div div');
-                    expect(div.children().length).toEqual(3);
+                    expect(div.children().length).toEqual(4);
                     var link = div.find('a');
-                    expect(link.length).toEqual(1);
-                    expect(link.attr('href')).toEqual('http://jcubic.pl');
-                    expect(link.attr('target')).toEqual('_blank');
+                    expect(link.length).toEqual(2);
+                    expect(link.eq(0).attr('target')).toEqual('_blank');
+                    expect(link.eq(0).attr('href')).toEqual('http://jcubic.pl');
+                    expect(link.eq(1).attr('href')).toEqual('http://jcubic.pl/');
                 });
                 it('should echo html', function() {
                     var html = [
