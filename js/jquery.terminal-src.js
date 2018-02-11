@@ -1122,7 +1122,19 @@
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
     var cmd_index = 0;
+    $.cmd = {
+        defaults: {
+            mask: false,
+            caseSensitiveSearch: true,
+            historySize: 60,
+            prompt: '> ',
+            enabled: true,
+            history: true,
+            onPositionChange: $.noop
+        }
+    };
     $.fn.cmd = function(options) {
+        var settings = $.extend({}, $.cmd.defaults, options);
         var self = this;
         var maybe_data = self.data('cmd');
         if (maybe_data) {
@@ -1146,9 +1158,8 @@
             spellcheck: 'false',
             tabindex: 1
         }).addClass('clipboard').appendTo(self).val(' ');
-
-        if (options.width) {
-            self.width(options.width);
+        if (settings.width) {
+            self.width(settings.width);
         }
         var num_chars; // calculated by draw_prompt
         var prompt_len;
@@ -1157,7 +1168,7 @@
         var rev_search_str = '';
         var reverse_search_position = null;
         var backup_prompt;
-        var mask = options.mask || false;
+        var mask = settings.mask;
         var command = '';
         var last_command;
         // text from selection using CTRL+SHIFT+C (as in Xterm)
@@ -1166,7 +1177,7 @@
         var prompt;
         var enabled;
         var formatted_position = 0;
-        var historySize = options.historySize || 60;
+        var historySize = settings.historySize;
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
@@ -1241,7 +1252,7 @@
                 return false;
             },
             'ENTER': function() {
-                if (history && command && !mask &&
+                if (history && command && !settings.mask &&
                     ($.isFunction(options.historyFilter) &&
                      options.historyFilter(command)) ||
                     (options.historyFilter instanceof RegExp &&
@@ -1579,7 +1590,11 @@
             if (rev_search_str.length > 0) {
                 for (var j = rev_search_str.length; j > 0; j--) {
                     save_string = $.terminal.escape_regex(rev_search_str.substring(0, j));
-                    regex = new RegExp(save_string);
+                    if (settings.caseSensitiveSearch) {
+                        regex = new RegExp(save_string);
+                    } else {
+                        regex = new RegExp(save_string, 'i');
+                    }
                     for (var i = len; i--;) {
                         if (regex.test(history_data[i])) {
                             reverse_search_position = history_data.length - i;
@@ -1854,12 +1869,12 @@
             // -----------------------------------------------------------------
             return function() {
                 var string;
-                switch (typeof mask) {
+                switch (typeof settings.mask) {
                     case 'boolean':
-                        string = mask ? command.replace(/./g, '*') : command;
+                        string = settings.mask ? command.replace(/./g, '*') : command;
                         break;
                     case 'string':
-                        string = command.replace(/./g, mask);
+                        string = command.replace(/./g, settings.mask);
                         break;
                 }
                 var pos = formatted_position;
@@ -2021,8 +2036,8 @@
                     var enabled = history && history.enabled() || !history;
                     history = new History(
                         string,
-                        historySize,
-                        options.history === 'memory'
+                        settings.historySize,
+                        settings.history === 'memory'
                     );
                     // disable new history if old was disabled
                     if (!enabled) {
@@ -2133,7 +2148,7 @@
             },
             commands: function(commands) {
                 if (commands) {
-                    options.commands = commands;
+                    settings.commands = commands;
                     return self;
                 } else {
                     return commands;
@@ -2182,8 +2197,8 @@
                         position = n;
                     }
                     formatted_position = get_formatted_position(position);
-                    if ($.isFunction(options.onPositionChange)) {
-                        options.onPositionChange(position);
+                    if ($.isFunction(settings.onPositionChange)) {
+                        settings.onPositionChange(position);
                     }
                     redraw();
                     fix_textarea(true);
@@ -2279,9 +2294,9 @@
             },
             mask: function(new_mask) {
                 if (typeof new_mask === 'undefined') {
-                    return mask;
+                    return settings.mask;
                 } else {
-                    mask = new_mask;
+                    settings.mask = new_mask;
                     redraw();
                     return self;
                 }
@@ -2291,17 +2306,17 @@
         // ---------------------------------------------------------------------
         // :: INIT
         // ---------------------------------------------------------------------
-        self.name(options.name || options.prompt || '');
-        if (typeof options.prompt === 'string') {
-            prompt = options.prompt;
+        self.name(settings.name || settings.prompt || '');
+        if (typeof settings.prompt === 'string') {
+            prompt = settings.prompt;
         } else {
             prompt = '> ';
         }
         draw_prompt();
-        if (options.enabled === undefined || options.enabled === true) {
+        if (settings.enabled === true) {
             self.enable();
         }
-        if (!options.history) {
+        if (!settings.history) {
             history.disable();
         }
         var first_up_history = true;
@@ -2352,8 +2367,8 @@
             // prevent native insert action
             clip.off('input', paste);
             var key = get_key(e);
-            if ($.isFunction(options.keydown)) {
-                result = options.keydown(e);
+            if ($.isFunction(settings.keydown)) {
+                result = settings.keydown(e);
                 if (result !== undefined) {
                     //prevent_keypress = true;
                     if (!result) {
@@ -2403,7 +2418,7 @@
             }
         }
         var doc = $(document.documentElement || window);
-        self.keymap(options.keymap || {});
+        self.keymap(settings.keymap || {});
         function keypress_event(e) {
             debug('keypress "' + e.key + '" ' + e.fake);
             var result;
@@ -2416,8 +2431,8 @@
             if (prevent_keypress) {
                 return;
             }
-            if ($.isFunction(options.keypress)) {
-                result = options.keypress(e);
+            if ($.isFunction(settings.keypress)) {
+                result = settings.keypress(e);
                 if (result !== undefined) {
                     if (!result) {
                         skip_insert = true;
@@ -2556,7 +2571,7 @@
                     if (++count === 1) {
                         var down = was_down;
                         if (enabled) {
-                            self.oneTime(options.clickTimeout, name, function() {
+                            self.oneTime(settings.clickTimeout, name, function() {
                                 var $target = $(e.target);
                                 if (!$target.is('.prompt') && down) {
                                     if (enabled) {
@@ -3865,6 +3880,7 @@
         scrollBottomOffset: 20,
         wordAutocomplete: true,
         caseSensitiveAutocomplete: true,
+        caseSensitiveSearch: true,
         clickTimeout: 200,
         request: $.noop,
         response: $.noop,
@@ -7024,6 +7040,7 @@
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
+                caseSensitiveSearch: settings.caseSensitiveSearch,
                 width: '100%',
                 enabled: false,
                 keydown: key_down,

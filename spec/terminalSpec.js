@@ -1,6 +1,18 @@
+/**@license
+ *       __ _____                     ________                              __
+ *      / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___  / /
+ *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
+ * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
+ * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
+ *           \/              /____/                              version {{VER}}
+ *
+ * This file is part of jQuery Terminal. http://terminal.jcubic.pl
+ * Copyright (c) 2010-2018 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Released under the MIT license
+ */
 /* global jasmine, global, it, expect, describe, require, spyOn, setTimeout, location,
           beforeEach, afterEach, sprintf, jQuery, $ */
-
+/* TODO: test caseSensitivity */
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 var loaded;
 if (typeof window === 'undefined') {
