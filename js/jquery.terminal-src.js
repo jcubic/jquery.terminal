@@ -1168,7 +1168,6 @@
         var rev_search_str = '';
         var reverse_search_position = null;
         var backup_prompt;
-        var mask = settings.mask;
         var command = '';
         var last_command;
         // text from selection using CTRL+SHIFT+C (as in Xterm)
@@ -1177,7 +1176,6 @@
         var prompt;
         var enabled;
         var formatted_position = 0;
-        var historySize = settings.historySize;
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
@@ -7043,6 +7041,7 @@
                 caseSensitiveSearch: settings.caseSensitiveSearch,
                 width: '100%',
                 enabled: false,
+
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,

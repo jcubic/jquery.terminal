@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 11 Feb 2018 13:42:57 +0000
+ * Date: Sun, 11 Feb 2018 17:32:49 +0000
  */
 
 /* TODO:
@@ -1168,7 +1168,6 @@
         var rev_search_str = '';
         var reverse_search_position = null;
         var backup_prompt;
-        var mask = settings.mask;
         var command = '';
         var last_command;
         // text from selection using CTRL+SHIFT+C (as in Xterm)
@@ -1177,7 +1176,6 @@
         var prompt;
         var enabled;
         var formatted_position = 0;
-        var historySize = settings.historySize;
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
@@ -2816,7 +2814,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 11 Feb 2018 13:42:57 +0000',
+        date: 'Sun, 11 Feb 2018 17:32:49 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7043,6 +7041,7 @@
                 caseSensitiveSearch: settings.caseSensitiveSearch,
                 width: '100%',
                 enabled: false,
+
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
