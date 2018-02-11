@@ -1,7 +1,11 @@
 ## Next
-* fix urls ending with slash [#365](https://github.com/jcubic/jquery.terminal/issues/365)
+
+### Features
 * default options for cmd plugin
 * caseSensitiveSearch option for terminal and cmd plugins
+
+### Bugfixes
+* fix urls ending with slash [#365](https://github.com/jcubic/jquery.terminal/issues/365)
 
 ## 1.11.4
 * handle non string and functions in error the same as in echo
