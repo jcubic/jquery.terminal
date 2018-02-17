@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 17 Feb 2018 18:20:04 +0000
+ * Date: Sat, 17 Feb 2018 21:01:21 +0000
  */
 
 /* TODO:
@@ -2814,7 +2814,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 17 Feb 2018 18:20:04 +0000',
+        date: 'Sat, 17 Feb 2018 21:01:21 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3575,51 +3575,6 @@
     $.fn.hidden = function() {
         return this.css('visibility', 'hidden');
     };
-    // -----------------------------------------------------------------------
-    // :: hack to get scroll element if terminal attached to the body
-    // :: is better then userAgent sniffing because other browsers beside
-    // :: chrome may use body as scroll element instead of html like
-    // :: IE and FireFox
-    // -----------------------------------------------------------------------
-    $.fn.scroll_element = function() {
-        var defaults = $.fn.scroll_element.defaults;
-        return this.map(function() {
-            var $this = $(this);
-            if ($this.is('body')) {
-                if ('scrollingElement' in document) {
-                    return document.scrollingElement;
-                }
-                if ($.fn.scroll_element.cache) {
-                    return $.fn.scroll_element.cache;
-                }
-                var html = $('html');
-                var body = $('body');
-                var scrollTop = body.scrollTop() || html.scrollTop();
-                var pre = $('<pre/>').css(defaults.pre).appendTo('body');
-                $('body,html').scrollTop(10);
-                var scroll_object;
-                if (body.scrollTop() === 10) {
-                    body.scrollTop(scrollTop);
-                    scroll_object = body[0];
-                } else if (html.scrollTop() === 10) {
-                    html.scrollTop(scrollTop);
-                    scroll_object = html[0];
-                }
-                pre.remove();
-                $.fn.scroll_element.cache = scroll_object;
-                return scroll_object;
-            } else {
-                return this;
-            }
-        });
-    };
-    $.fn.scroll_element.defaults = {
-        lines: 2000,
-        pre: {
-            'height': '99999em'
-        }
-    };
-    $.fn.scroll_element.cache;
     // -----------------------------------------------------------------------
     function is_key_native() {
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
@@ -4819,7 +4774,30 @@
                 self.echo(prompt + command, options);
             }
         }
+        // ---------------------------------------------------------------------
+        // source: https://stackoverflow.com/a/6639405/387194
+        function get_scrollbar_state() {
+            var result = {
+                vScrollbar: true,
+                hScrollbar: true
+            };
+            try {
+                var root;
+                if (document.compatMode === 'BackCompat') {
+                    root = document.body;
+                } else {
+                    root = document.documentElement;
+                }
+                result.vScrollbar = root.scrollHeight > root.clientHeight;
+                result.hScrollbar = root.scrollWidth > root.clientWidth;
+            } catch (e) {}
+            return result;
+        }
+        // ---------------------------------------------------------------------
         function have_scrollbar() {
+            if (self.is('body')) {
+                return get_scrollbar_state().vScrollbar;
+            }
             return fill.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
@@ -6919,7 +6897,12 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        scroll_object = self.scroll_element();
+        // Some browser use html for scrolling
+        if (self.is('body,html')) {
+            scroll_object = $('body,html');
+        } else {
+            scroll_object = self;
+        }
         // register ajaxSend for cancel requests on CTRL+D
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
@@ -7398,6 +7381,7 @@
                         ret = settings.mousewheel(event, delta, self);
                     }
                     if (have_scrollbar() || ret === false) {
+                        event.stopPropagation();
                         event.preventDefault();
                     }
                     if (ret === false) {
