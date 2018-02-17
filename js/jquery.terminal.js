@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 11 Feb 2018 17:32:49 +0000
+ * Date: Sat, 17 Feb 2018 15:53:32 +0000
  */
 
 /* TODO:
@@ -2814,7 +2814,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 11 Feb 2018 17:32:49 +0000',
+        date: 'Sat, 17 Feb 2018 15:53:32 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6143,6 +6143,9 @@
             set_command: function(command, silent) {
                 when_ready(function ready() {
                     // TODO: refactor to use options - breaking change
+                    if (typeof command !== 'string') {
+                        command = JSON.stringify(command);
+                    }
                     command_line.set(command, undefined, silent);
                 });
                 return self;

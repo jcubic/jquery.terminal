@@ -6143,6 +6143,9 @@
             set_command: function(command, silent) {
                 when_ready(function ready() {
                     // TODO: refactor to use options - breaking change
+                    if (typeof command !== 'string') {
+                        command = JSON.stringify(command);
+                    }
                     command_line.set(command, undefined, silent);
                 });
                 return self;
