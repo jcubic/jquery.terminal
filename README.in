@@ -91,6 +91,17 @@ If you always want latest version, you can grab the files directly from github u
 
 ```
 
+or get it from [unpkg](https://unpkg.com/) without specifying version, it will redirect
+to the latest version:
+
+
+```
+<script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.min.js"></script>
+<link href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
+
+```
+
+
 **NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key).
 
 ```html
