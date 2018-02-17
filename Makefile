@@ -97,4 +97,4 @@ publish:
 	$(CD) npm && $(NPM) publish
 	$(RM) -rf npm
 
-lint: eslint jsonlint
+lint: eslint
