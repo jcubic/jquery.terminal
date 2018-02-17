@@ -7,6 +7,7 @@
 ### Bugfixes
 * fix urls ending with slash [#365](https://github.com/jcubic/jquery.terminal/issues/365)
 * stringify non string commands in set_command
+* fix scrolling of the page after you click on the link
 
 ## 1.11.4
 * handle non string and functions in error the same as in echo

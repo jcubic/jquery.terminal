@@ -7199,14 +7199,20 @@
                     });
                 })();
             }
-            self.delegate('.exception a', 'click', function(e) {
-                // .on('click', '.exception a', function(e) {
-                // in new jquery .delegate just call .on
-                var href = $(this).attr('href');
-                if (href.match(/:[0-9]+$/)) { // display line if specified
-                    e.preventDefault();
-                    print_line(href);
+            // .on('mouseup', 'a', function(e) {
+            // in new jquery .delegate just call .on
+            self.delegate('a', 'mouseup', function(e) {
+                var self = $(this);
+                if (self.closest('.exception').length) {
+                    var href = $(this).attr('href');
+                    if (href.match(/:[0-9]+$/)) { // display line if specified
+                        e.preventDefault();
+                        print_line(href);
+                    }
                 }
+                // refocus because links have tabindex in case where user want
+                // tab change urls, we can ignore this function on click
+                self.find('textarea').focus();
             });
             if (self.is(':visible')) {
                 num_chars = self.cols();
