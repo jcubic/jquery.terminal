@@ -70,11 +70,13 @@
     overflow-x: hidden;
 }
 body.terminal {
-    height: 100vh;
+    height: 100%;
+    min-height: 100vh;
     margin: 0;
 }
 .terminal > div {
     height: 100%;
+    overflow: hidden;
 }
 .cmd {
     padding: 0;

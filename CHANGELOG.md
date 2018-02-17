@@ -9,6 +9,7 @@
 * stringify non string commands in set_command
 * fix scrolling of the page, when press space, after you click on the link
 * fix scrolling flicker when terminal added to body
+* small css fixes for element containers when terminal added to body
 
 ## 1.11.4
 * handle non string and functions in error the same as in echo
