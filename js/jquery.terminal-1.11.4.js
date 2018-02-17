@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 17 Feb 2018 21:01:21 +0000
+ * Date: Sat, 17 Feb 2018 21:31:28 +0000
  */
 
 /* TODO:
@@ -2814,7 +2814,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 17 Feb 2018 21:01:21 +0000',
+        date: 'Sat, 17 Feb 2018 21:31:28 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4775,28 +4775,11 @@
             }
         }
         // ---------------------------------------------------------------------
-        // source: https://stackoverflow.com/a/6639405/387194
-        function get_scrollbar_state() {
-            var result = {
-                vScrollbar: true,
-                hScrollbar: true
-            };
-            try {
-                var root;
-                if (document.compatMode === 'BackCompat') {
-                    root = document.body;
-                } else {
-                    root = document.documentElement;
-                }
-                result.vScrollbar = root.scrollHeight > root.clientHeight;
-                result.hScrollbar = root.scrollWidth > root.clientWidth;
-            } catch (e) {}
-            return result;
-        }
-        // ---------------------------------------------------------------------
         function have_scrollbar() {
             if (self.is('body')) {
-                return get_scrollbar_state().vScrollbar;
+                // source: https://stackoverflow.com/a/6639405/387194
+                // from comment by Šime Vidas
+                return window.innerWidth - document.documentElement.clientWidth > 0;
             }
             return fill.outerWidth() !== self.outerWidth();
         }

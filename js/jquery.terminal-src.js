@@ -4775,28 +4775,11 @@
             }
         }
         // ---------------------------------------------------------------------
-        // source: https://stackoverflow.com/a/6639405/387194
-        function get_scrollbar_state() {
-            var result = {
-                vScrollbar: true,
-                hScrollbar: true
-            };
-            try {
-                var root;
-                if (document.compatMode === 'BackCompat') {
-                    root = document.body;
-                } else {
-                    root = document.documentElement;
-                }
-                result.vScrollbar = root.scrollHeight > root.clientHeight;
-                result.hScrollbar = root.scrollWidth > root.clientWidth;
-            } catch (e) {}
-            return result;
-        }
-        // ---------------------------------------------------------------------
         function have_scrollbar() {
             if (self.is('body')) {
-                return get_scrollbar_state().vScrollbar;
+                // source: https://stackoverflow.com/a/6639405/387194
+                // from comment by Šime Vidas
+                return window.innerWidth - document.documentElement.clientWidth > 0;
             }
             return fill.outerWidth() !== self.outerWidth();
         }
