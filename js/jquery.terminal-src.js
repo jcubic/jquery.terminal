@@ -7202,9 +7202,9 @@
             // .on('mouseup', 'a', function(e) {
             // in new jquery .delegate just call .on
             self.delegate('a', 'mouseup', function(e) {
-                var self = $(this);
-                if (self.closest('.exception').length) {
-                    var href = $(this).attr('href');
+                var $this = $(this);
+                if ($this.closest('.exception').length) {
+                    var href = $this.attr('href');
                     if (href.match(/:[0-9]+$/)) { // display line if specified
                         e.preventDefault();
                         print_line(href);

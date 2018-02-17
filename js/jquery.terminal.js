@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 17 Feb 2018 17:27:39 +0000
+ * Date: Sat, 17 Feb 2018 18:20:04 +0000
  */
 
 /* TODO:
@@ -2814,7 +2814,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 17 Feb 2018 17:27:39 +0000',
+        date: 'Sat, 17 Feb 2018 18:20:04 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7202,9 +7202,9 @@
             // .on('mouseup', 'a', function(e) {
             // in new jquery .delegate just call .on
             self.delegate('a', 'mouseup', function(e) {
-                var self = $(this);
-                if (self.closest('.exception').length) {
-                    var href = $(this).attr('href');
+                var $this = $(this);
+                if ($this.closest('.exception').length) {
+                    var href = $this.attr('href');
                     if (href.match(/:[0-9]+$/)) { // display line if specified
                         e.preventDefault();
                         print_line(href);
