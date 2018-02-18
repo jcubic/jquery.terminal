@@ -20,7 +20,7 @@
   "author": {
     "name": "Jakub Jankiewicz",
     "email": "jcubic@onet.pl",
-    "url": "http://jcubic.pl/me"
+    "url": "https://jcubic.pl/me"
   },
   "contributors": [
     {
@@ -121,7 +121,7 @@
   "bugs": {
     "url": "https://github.com/jcubic/jquery.terminal/issues"
   },
-  "homepage": "http://terminal.jcubic.pl",
+  "homepage": "https://terminal.jcubic.pl",
   "eslintConfig": {
     "parserOptions": {
       "ecmaVersion": 3,
