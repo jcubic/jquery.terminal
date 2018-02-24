@@ -2661,20 +2661,70 @@
             return wcwidth;
         }
     })();
+    // -------------------------------------------------------------------------
     function bare_text(string) {
         if (!string.match(/&/)) {
             return string;
         }
         return $('<span>' + safe(string) + '</span>').text();
     }
+    // -------------------------------------------------------------------------
     function text(string) {
         return bare_text($.terminal.strip(string));
     }
+    // -------------------------------------------------------------------------
     function safe(string) {
         if (!string.match(/[<>]/)) {
             return string;
         }
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
+    }
+    // -------------------------------------------------------------------------
+    function custom_props(text) {
+        if (typeof wcwidth !== 'undefined') {
+            var bare = bare_text(text);
+            var len = strlen(bare);
+            return len !== bare.length ? '--length: ' + len : '';
+        }
+        return '';
+    }
+    // -------------------------------------------------------------------------
+    function wide_characters(text) {
+        if (typeof wcwidth !== 'undefined') {
+            var specs = bare_text(text).split('').map(function(chr) {
+                return {len: strlen(chr), chr: chr};
+            }).reduce(function(arr, spec) {
+                var last = arr[arr.length - 1];
+                if (last) {
+                    if (last.len !== spec.len) {
+                        return arr.concat([{
+                            sum: spec.len,
+                            len: spec.len,
+                            str: spec.chr
+                        }]);
+                    } else {
+                        arr.pop();
+                        return arr.concat([{
+                            sum: last.sum + spec.len,
+                            len: last.len,
+                            str: last.str + spec.chr
+                        }]);
+                    }
+                }
+                return [{
+                    sum: spec.len,
+                    str: spec.chr,
+                    len: spec.len
+                }];
+            }, []);
+            return specs.map(function(spec) {
+                if (spec.len === 1) {
+                    return spec.str;
+                }
+                return '<span style="--length: ' + spec.sum + '">' + spec.str + '</span>';
+            }).join('');
+        }
+        return text;
     }
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
@@ -3310,13 +3360,6 @@
                             if (style.indexOf('i') !== -1) {
                                 style_str += 'font-style:italic;';
                             }
-                            if (typeof wcwidth !== 'undefined') {
-                                var bare = bare_text(text);
-                                var len = strlen(bare);
-                                if (len !== bare.length) {
-                                    style_str += '--length: ' + len + ';';
-                                }
-                            }
                             if ($.terminal.valid_color(color)) {
                                 style_str += 'color:' + color + ';';
                                 if (style.indexOf('g') !== -1) {
@@ -3326,6 +3369,7 @@
                             if ($.terminal.valid_color(background)) {
                                 style_str += 'background-color:' + background;
                             }
+                            style_str += custom_props(text);
                             var data;
                             if (data_text === '') {
                                 data = text;
@@ -3357,6 +3401,9 @@
                             if (_class !== '') {
                                 result += ' class="' + _class + '"';
                             }
+                            if (style_str.match(/--length/)) {
+                                text = wide_characters(text);
+                            }
                             if (style.indexOf('!') !== -1) {
                                 result += '>' + text + '</a>';
                             } else {
@@ -3368,15 +3415,13 @@
                         });
                     } else {
                         text = safe_text(text);
-                        var style = '';
-                        if (typeof wcwidth !== 'undefined') {
-                            var bare = bare_text(text);
-                            var len = strlen(bare);
-                            if (bare.length !== len) {
-                                style = ' style="--length: ' + len + '"';
-                            }
+                        var props = custom_props(text);
+                        if (props.length) {
+                            text = wide_characters(text);
+                            return '<span style="' + props + '">' + text + '</span>';
+                        } else {
+                            return '<span>' + text + '</span>';
                         }
-                        return '<span' + style + '>' + text + '</span>';
                     }
                 }).join('');
                 return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');

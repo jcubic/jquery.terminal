@@ -35,10 +35,10 @@ npm install
 make test
 ```
 
-(You don't need to run npm again if you did it when buuilding the files)
+(You don't need to run npm again if you did it when building the files)
 
 you can also run test covarage using
 
 ```
-make cover
+make coverage
 ```

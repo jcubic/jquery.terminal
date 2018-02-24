@@ -1,3 +1,5 @@
+.PHONY: coverage
+
 VERSION=1.11.4
 SED=sed
 CD=cd
@@ -73,7 +75,7 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 test:
 	$(JASMINE) --captureExceptions --verbose --junitreport --color --forceexit spec
 
-cover:
+coverage:
 	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js
 
 coveralls:
@@ -97,4 +99,4 @@ publish:
 	$(CD) npm && $(NPM) publish
 	$(RM) -rf npm
 
-lint: eslint
+lint: eslint jsonlint
