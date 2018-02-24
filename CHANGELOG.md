@@ -2,7 +2,7 @@
 
 ### Features
 * default options for cmd plugin
-* caseSensitiveSearch option for terminal and cmd plugins
+* caseSensitiveSearch option for both terminal and cmd plugins
 
 ### Bugfixes
 * fix urls ending with slash [#365](https://github.com/jcubic/jquery.terminal/issues/365)
@@ -10,6 +10,9 @@
 * fix scrolling of the page, when press space, after you click on the link
 * fix scrolling flicker when terminal added to body
 * small css fixes for element containers when terminal added to body
+* fix for wide characters inside bigger text [#369](https://github.com/jcubic/jquery.terminal/issues/369)
+* when clicking on terminal and it already had focus the textarea was blured
+  [#370](https://github.com/jcubic/jquery.terminal/issues/370)
 
 ## 1.11.4
 * handle non string and functions in error the same as in echo

@@ -7125,13 +7125,17 @@
                     var count = 0;
                     var $target;
                     var name = 'click_' + self.id();
-                    function position() {
+                    var textarea = self.find('textarea');
+                    function click() {
                         if ($target.is('.terminal') ||
                             $target.is('.terminal-wrapper')) {
                             var len = self.get_command().length;
                             self.set_position(len);
                         } else if ($target.closest('.prompt').length) {
                             self.set_position(0);
+                        }
+                        if (!textarea.is(':focus')) {
+                            textarea.focus();
                         }
                         reset();
                     }
@@ -7151,7 +7155,7 @@
                                         self.focus();
                                     } else {
                                         var timeout = settings.clickTimeout;
-                                        self.oneTime(timeout, name, position);
+                                        self.oneTime(timeout, name, click);
                                         return;
                                     }
                                 }

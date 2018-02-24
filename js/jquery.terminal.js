@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 24 Feb 2018 10:00:14 +0000
+ * Date: Sat, 24 Feb 2018 10:40:25 +0000
  */
 
 /* TODO:
@@ -2864,7 +2864,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 24 Feb 2018 10:00:14 +0000',
+        date: 'Sat, 24 Feb 2018 10:40:25 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7125,13 +7125,17 @@
                     var count = 0;
                     var $target;
                     var name = 'click_' + self.id();
-                    function position() {
+                    var textarea = self.find('textarea');
+                    function click() {
                         if ($target.is('.terminal') ||
                             $target.is('.terminal-wrapper')) {
                             var len = self.get_command().length;
                             self.set_position(len);
                         } else if ($target.closest('.prompt').length) {
                             self.set_position(0);
+                        }
+                        if (!textarea.is(':focus')) {
+                            textarea.focus();
                         }
                         reset();
                     }
@@ -7151,7 +7155,7 @@
                                         self.focus();
                                     } else {
                                         var timeout = settings.clickTimeout;
-                                        self.oneTime(timeout, name, position);
+                                        self.oneTime(timeout, name, click);
                                         return;
                                     }
                                 }
