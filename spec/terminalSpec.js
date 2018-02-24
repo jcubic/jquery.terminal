@@ -172,8 +172,8 @@ var support_animations = (function() {
 })();
 function tests_on_ready() {
     describe('Terminal utils', function() {
-        var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10';
-        var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10';
+        var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10 ""';
+        var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 ""';
         describe('$.terminal.split_arguments', function() {
             it('should create array of arguments', function() {
                 expect($.terminal.split_arguments(args)).toEqual([
@@ -182,7 +182,8 @@ function tests_on_ready() {
                     '/^asd [x]/',
                     'str str',
                     '10',
-                    '1e10'
+                    '1e10',
+                    ''
                 ]);
             });
         });
@@ -194,7 +195,8 @@ function tests_on_ready() {
                         /^asd [x]/,
                     'str str',
                     10,
-                    1e10
+                    1e10,
+                    ''
                 ]);
             });
         });
@@ -210,10 +212,11 @@ function tests_on_ready() {
                         '/^asd [x]/',
                         'str str',
                         '10',
-                        '1e10'
+                        '1e10',
+                        ''
                     ],
-                    args_quotes: ['"', '', '', '', '', ''],
-                    rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10'
+                    args_quotes: ['"', '', '', '', '', '', '"'],
+                    rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 ""'
                 });
             });
         });
@@ -229,10 +232,11 @@ function tests_on_ready() {
                             /^asd [x]/,
                         'str str',
                         10,
-                        1e10
+                        1e10,
+                        ''
                     ],
-                    args_quotes: ['"', '', '', '', '', ''],
-                    rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10'
+                    args_quotes: ['"', '', '', '', '', '', '"'],
+                    rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 ""'
                 });
             });
         });

@@ -13,6 +13,7 @@
 * fix for wide characters inside bigger text [#369](https://github.com/jcubic/jquery.terminal/issues/369)
 * when clicking on terminal and it already had focus the textarea was blured
   [#370](https://github.com/jcubic/jquery.terminal/issues/370)
+* fix parsing empty strings "" or ''
 
 ## 1.11.4
 * handle non string and functions in error the same as in echo

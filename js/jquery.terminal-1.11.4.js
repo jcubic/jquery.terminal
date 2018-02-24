@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 24 Feb 2018 10:40:25 +0000
+ * Date: Sat, 24 Feb 2018 11:08:16 +0000
  */
 
 /* TODO:
@@ -2864,7 +2864,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 24 Feb 2018 10:40:25 +0000',
+        date: 'Sat, 24 Feb 2018 11:08:16 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3516,6 +3516,10 @@
                 // we don't remove slases becuase they are handled by JSON.parse
                 //string = string.replace(/([^\\])['"]$/, '$1');
                 if (string.match(/^['"]/)) {
+                    // fixing regex to match empty string is not worth it
+                    if (string === '""' || string === "''") {
+                        return '';
+                    }
                     var quote = string[0];
                     var re = new RegExp("((^|[^\\\\])(?:\\\\\\\\)*)" + quote, "g");
                     string = string.replace(re, "$1");
