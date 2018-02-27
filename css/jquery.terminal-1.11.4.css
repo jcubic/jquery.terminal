@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sat, 24 Feb 2018 18:38:29 +0000
+ * Date: Tue, 27 Feb 2018 17:26:26 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -442,7 +442,11 @@ terminal .terminal-output > div {
         height: calc(var(--size, 1) * 1em);
     }
     .terminal span[style*="--length"] {
-        width: calc(var(--length, 1) * var(--char-width) * 1px);
+        /*
+         * default value for char-width taken from Google Chrome for default font
+         * to silence warning in webpack #371
+         */
+        width: calc(var(--length, 1) * var(--char-width, 7.23438) * 1px);
         display: inline-block;
     }
     .terminal, .cmd, .terminal .terminal-output > div > div, .cmd .prompt {

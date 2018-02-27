@@ -1,5 +1,3 @@
-.PHONY: coverage
-
 VERSION=1.11.4
 SED=sed
 CD=cd
@@ -17,6 +15,7 @@ ISTANBUL=./node_modules/.bin/istanbul
 JASMINE=./node_modules/.bin/jasmine-node
 CSSNANO=./node_modules/.bin/cssnano
 SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
+COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
 
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile
@@ -49,10 +48,14 @@ css/jquery.terminal.min.css: css/jquery.terminal-$(VERSION).min.css
 	$(CP) css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css
 
 css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
-	$(CSSNANO) css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css --no-discardUnused --safe
+	$(CSSNANO) --no-discardUnused css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css
 
 README.md: README.in .$(VERSION)
-	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" < README.in > README.md || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" < README.in > README.md
+	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e \
+	"s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" \
+	-e "s/{{COMMIT}}/$(COMMIT)/g" < README.in > README.md || $(SED) -e \
+	"s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH)/g" -e \
+	"s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" -e "s/{{COMMIT}}/$(COMMIT)/g" < README.in > README.md
 
 .$(VERSION): Makefile
 	touch .$(VERSION)
@@ -75,7 +78,7 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 test:
 	$(JASMINE) --captureExceptions --verbose --junitreport --color --forceexit spec
 
-coverage:
+cover:
 	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js
 
 coveralls:
