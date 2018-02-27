@@ -14,6 +14,8 @@
 * when clicking on terminal and it already had focus the textarea was blured
   [#370](https://github.com/jcubic/jquery.terminal/issues/370)
 * fix parsing empty strings "" or ''
+* fix warning from webpack about --char-width without default
+  [#371](https://github.com/jcubic/jquery.terminal/issues/371)
 
 ## 1.11.4
 * handle non string and functions in error the same as in echo
