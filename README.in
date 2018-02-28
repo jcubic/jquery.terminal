@@ -85,20 +85,18 @@ or
 
 If you always want latest version, you can grab the files directly from github using rawgit.com (that service grab the files from github and use propert MIME type so you can use it in your page, you can also grab from devel branch):
 
-```
+```html
 <script src="https://cdn.rawgit.com/jcubic/jquery.terminal/master/js/jquery.terminal.min.js"></script>
 <link href="https://cdn.rawgit.com/jcubic/jquery.terminal/master/css/jquery.terminal.min.css" rel="stylesheet"/>
-
 ```
 
 or get it from [unpkg](https://unpkg.com/) without specifying version, it will redirect
 to the latest version:
 
 
-```
+```html
 <script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.min.js"></script>
 <link href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
-
 ```
 
 
