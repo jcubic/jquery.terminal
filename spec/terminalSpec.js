@@ -274,10 +274,18 @@ function tests_on_ready() {
             });
         });
         describe('$.terminal.nested_formatting', function() {
-            var string = '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]';
-            var result = '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]';
-            it('should create list of formatting', function() {
-                expect($.terminal.nested_formatting(string)).toEqual(result);
+            var specs = [
+                [
+                    '[[;red;]foo[[;blue;]bar]baz]',
+                    '[[;red;]foo][[;blue;]bar][[;red;]red]'
+                ],
+                [
+                    '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]',
+                    '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]'
+                ]
+            ];
+            specs.forEach(function(spec) {
+                expect($.terminal.nested_formatting(spec[0])).toEqual(spec[1]);
             });
         });
         describe('$.terminal.encode', function() {
