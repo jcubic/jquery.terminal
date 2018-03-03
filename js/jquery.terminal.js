@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 03 Mar 2018 20:33:15 +0000
+ * Date: Sat, 03 Mar 2018 20:42:51 +0000
  */
 
 /* TODO:
@@ -2491,7 +2491,7 @@
                 //$.terminal.active().echo(str);
             }
         }
-        function input_event(e) {
+        function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
@@ -2860,7 +2860,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 03 Mar 2018 20:33:15 +0000',
+        date: 'Sat, 03 Mar 2018 20:42:51 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7408,7 +7408,7 @@
                 }
             });
             // this could work without calling scroll on wheel event but we
-            // need to for cases where you have mouse wheel work differently
+            // need it for cases where you have mouse wheel work differently
             // like with less command that scroll text
             function mousewheel(event, delta) {
                 if (!shift) {

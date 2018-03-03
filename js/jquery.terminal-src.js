@@ -2491,7 +2491,7 @@
                 //$.terminal.active().echo(str);
             }
         }
-        function input_event(e) {
+        function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
@@ -7408,7 +7408,7 @@
                 }
             });
             // this could work without calling scroll on wheel event but we
-            // need to for cases where you have mouse wheel work differently
+            // need it for cases where you have mouse wheel work differently
             // like with less command that scroll text
             function mousewheel(event, delta) {
                 if (!shift) {
