@@ -18,6 +18,8 @@ SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
 
+.PHONY: coverage
+
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile
 
 bower.json: bower.in .$(VERSION)
@@ -78,7 +80,7 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 test:
 	$(JASMINE) --captureExceptions --verbose --junitreport --color --forceexit spec
 
-cover:
+coverage:
 	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js
 
 coveralls:
