@@ -277,7 +277,7 @@ function tests_on_ready() {
             var specs = [
                 [
                     '[[;red;]foo[[;blue;]bar]baz]',
-                    '[[;red;]foo][[;blue;]bar][[;red;]red]'
+                    '[[;red;]foo][[;blue;]bar][[;red;]baz]'
                 ],
                 [
                     '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]',
