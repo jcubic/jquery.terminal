@@ -1,3 +1,6 @@
+## 1.12.1
+* fix minified css file + fix scrollbar
+
 ## 1.12.0
 
 ### Features

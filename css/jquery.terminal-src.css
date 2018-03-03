@@ -74,10 +74,6 @@ body.terminal {
     min-height: 100vh;
     margin: 0;
 }
-.terminal > div {
-    height: 100%;
-    overflow: hidden;
-}
 .cmd {
     padding: 0;
     position: relative;
