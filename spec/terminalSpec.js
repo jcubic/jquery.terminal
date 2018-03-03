@@ -250,7 +250,9 @@ function tests_on_ready() {
         });
         describe('$.terminal.from_ansi', function() {
             it('should convert ansi to terminal formatting and escape the remaining brackets', function() {
-                var string = $.terminal.from_ansi(ansi_string, true);
+                var string = $.terminal.from_ansi(ansi_string, {
+                    unixFormattingEscapeBrackets: true
+                });
                 expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
                                         'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz]');
             });

@@ -246,14 +246,19 @@
             }
             return [styles.join(''), color, background];
         }
-        return function from_ansi(input, escapeBrackets) {
+        return function from_ansi(input, options) {
+
+            var settings = $.extend({
+                unixFormattingEscapeBrackets: false
+            }, options);
+
             //merge multiple codes
             /*input = input.replace(/((?:\x1B\[[0-9;]*[A-Za-z])*)/g, function(group) {
               return group.replace(/m\x1B\[/g, ';');
               });*/
             var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
             if (splitted.length === 1) {
-                if (escapeBrackets) {
+                if (settings.unixFormattingEscapeBrackets) {
                     return $.terminal.escape_brackets(input);
                 }
                 return input;
@@ -310,7 +315,7 @@
                             }
                             break;
                     }
-                } else if (escapeBrackets) {
+                } else if (settings.unixFormattingEscapeBrackets) {
                     output.push($.terminal.escape_brackets(splitted[i]));
                 } else {
                     output.push(splitted[i]);
@@ -323,10 +328,6 @@
         };
     })();
 
-    function from_ansi_formatting(input, settings) {
-        return $.terminal.from_ansi(input, settings.unixFormattingEscapeBrackets);
-    }
-
     $.terminal.defaults.formatters.unshift($.terminal.overtyping);
-    $.terminal.defaults.formatters.unshift(from_ansi_formatting);
+    $.terminal.defaults.formatters.unshift($.terminal.from_ansi);
 })(jQuery);
