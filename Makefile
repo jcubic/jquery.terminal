@@ -48,7 +48,7 @@ css/jquery.terminal.min.css: css/jquery.terminal-$(VERSION).min.css
 	$(CP) css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css
 
 css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
-	$(CSSNANO) --no-discardUnused css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css
+	$(CSSNANO) css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css --no-discardUnused --safe
 
 README.md: README.in .$(VERSION)
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e \
