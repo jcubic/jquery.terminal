@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.12.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 02 Mar 2018 20:25:14 +0000
+ * Date: Sat, 03 Mar 2018 10:36:50 +0000
  */
 
 /* TODO:
@@ -1677,7 +1677,7 @@
             // we don't want to format command when user type formatting in
             string = $.terminal.escape_formatting(string);
             try {
-                return $.terminal.apply_formatters(string);
+                return $.terminal.apply_formatters(string, settings);
             } catch (e) {
                 alert_exception('[Formatting]', e);
             }
@@ -2863,8 +2863,8 @@
         }
     }
     $.terminal = {
-        version: '1.12.0',
-        date: 'Fri, 02 Mar 2018 20:25:14 +0000',
+        version: 'DEV',
+        date: 'Sat, 03 Mar 2018 10:36:50 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3263,14 +3263,14 @@
         // ---------------------------------------------------------------------
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
-        apply_formatters: function(string) {
+        apply_formatters: function(string, settings) {
             var formatters = $.terminal.defaults.formatters;
             var i = 0;
             try {
                 return formatters.reduce(function(string, formatter) {
                     i++;
                     if (typeof formatter === 'function' && formatter.__meta__) {
-                        var ret = formatter(string);
+                        var ret = formatter(string, settings);
                         if (typeof ret === 'string') {
                             return ret;
                         }
@@ -3282,7 +3282,7 @@
                                 if (formatter instanceof Array) {
                                     return string.replace(formatter[0], formatter[1]);
                                 } else if (typeof formatter === 'function') {
-                                    var ret = formatter(string);
+                                    var ret = formatter(string, settings);
                                     if (typeof ret === 'string') {
                                         return ret;
                                     }
@@ -4625,7 +4625,10 @@
                             }
                             if (line_settings.formatters) {
                                 try {
-                                    string = $.terminal.apply_formatters(string);
+                                    string = $.terminal.apply_formatters(
+                                        string,
+                                        settings
+                                    );
                                 } catch (e) {
                                     display_exception(e, 'FORMATTING');
                                 }

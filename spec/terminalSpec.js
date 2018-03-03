@@ -240,12 +240,21 @@ function tests_on_ready() {
                 });
             });
         });
-        var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mBar\x1b[0m\x1b[7mBaz';
+        var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz';
         describe('$.terminal.from_ansi', function() {
             it('should convert ansi to terminal formatting', function() {
                 var string = $.terminal.from_ansi(ansi_string);
                 expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
-                                       'Bar][[;#000;#AAA]Baz]');
+                                        'B[[sb;;]a]r][[;#000;#AAA]Baz]');
+            });
+        });
+        describe('$.terminal.from_ansi', function() {
+            it('should convert ansi to terminal formatting and escape the remaining brackets', function() {
+                var string = $.terminal.from_ansi(ansi_string, {
+                    unixFormattingEscapeBrackets: true
+                });
+                expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
+                                        'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz]');
             });
         });
         describe('$.terminal.overtyping', function() {

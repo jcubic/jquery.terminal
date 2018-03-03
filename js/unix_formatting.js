@@ -18,6 +18,9 @@
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');
     }
+
+    $.terminal.defaults.unixFormattingEscapeBrackets = false;
+
     // ---------------------------------------------------------------------
     // :: Replace overtyping (from man) formatting with terminal formatting
     // ---------------------------------------------------------------------
@@ -243,13 +246,21 @@
             }
             return [styles.join(''), color, background];
         }
-        return function from_ansi(input) {
+        return function from_ansi(input, options) {
+
+            var settings = $.extend({
+                unixFormattingEscapeBrackets: false
+            }, options);
+
             //merge multiple codes
             /*input = input.replace(/((?:\x1B\[[0-9;]*[A-Za-z])*)/g, function(group) {
               return group.replace(/m\x1B\[/g, ';');
               });*/
             var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
             if (splitted.length === 1) {
+                if (settings.unixFormattingEscapeBrackets) {
+                    return $.terminal.escape_brackets(input);
+                }
                 return input;
             }
             var output = [];
@@ -304,6 +315,8 @@
                             }
                             break;
                     }
+                } else if (settings.unixFormattingEscapeBrackets) {
+                    output.push($.terminal.escape_brackets(splitted[i]));
                 } else {
                     output.push(splitted[i]);
                 }
@@ -314,6 +327,7 @@
             return output.join(''); //.replace(/\[\[[^\]]+\]\]/g, '');
         };
     })();
+
     $.terminal.defaults.formatters.unshift($.terminal.overtyping);
     $.terminal.defaults.formatters.unshift($.terminal.from_ansi);
 })(jQuery);
