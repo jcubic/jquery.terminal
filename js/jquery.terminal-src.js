@@ -3269,6 +3269,10 @@
             try {
                 return formatters.reduce(function(string, formatter) {
                     i++;
+                    // __meta__ is for safe formatter that can handle formatters
+                    // inside formatters. for other usage we use format_split so one
+                    // formatter don't mess with formatter that was previous
+                    // on the list
                     if (typeof formatter === 'function' && formatter.__meta__) {
                         var ret = formatter(string, settings);
                         if (typeof ret === 'string') {
