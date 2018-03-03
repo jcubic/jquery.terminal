@@ -22,3 +22,4 @@ options
 files
 contributors
 update-contributors
+*.in

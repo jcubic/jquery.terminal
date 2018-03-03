@@ -75,7 +75,6 @@ body.terminal {
     margin: 0;
 }
 .terminal > div {
-    height: 100%;
     overflow: hidden;
 }
 .cmd {
