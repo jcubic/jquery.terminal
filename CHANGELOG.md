@@ -1,3 +1,12 @@
+## 1.14.0
+
+### Features
+* pass options for formatters and accept option unixFormattingEscapeBrackets in unix_formatting
+  (PR by [Marcel Link](https://github.com/ml1nk)
+
+### Bugs
+* fix newline as first character in formatting [#375](https://github.com/jcubic/jquery.terminal/pull/375).
+
 ## 1.12.1
 * fix minified css file + fix scrollbar
 
