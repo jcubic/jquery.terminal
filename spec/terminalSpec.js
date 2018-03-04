@@ -666,6 +666,15 @@ function tests_on_ready() {
                     expect(array).toEqual(test.output);
                 });
             });
+            it('should handle new line as first character of formatting #375', function() {
+                var specs = [
+                    ['A[[;;]\n]B', ['A', 'B']],
+                    ['A[[;;]\nB]C', ['A', '[[;;;;\\nB]B]C']]
+                ];
+                specs.forEach(function(spec) {
+                    expect($.terminal.split_equal(spec[0])).toEqual(spec[1]);
+                });
+            });
         });
         describe('Cycle', function() {
             describe('create', function() {

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 04 Mar 2018 07:04:31 +0000
+ * Date: Sun, 04 Mar 2018 08:06:04 +0000
  */
 
 /* TODO:
@@ -2860,7 +2860,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 04 Mar 2018 07:04:31 +0000',
+        date: 'Sun, 04 Mar 2018 08:06:04 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3036,6 +3036,15 @@
 
                         }
                     }
+                } else if (i === string.length - 1) {
+                    callback({
+                        count: count,
+                        index: i,
+                        formatting: formatting,
+                        length: 0,
+                        text: in_text,
+                        space: space
+                    });
                 }
             }
         },
@@ -3138,10 +3147,7 @@
                 var output;
                 var line_length = line.length;
                 $.terminal.iterate_formatting(line, function(data) {
-                    // we don't iterate over last closing bracket
-                    var last_bracket = data.index === line_length - 2 &&
-                        line[data.index + 1] === ']';
-                    var last_iteraction = data.index === line_length - 1 || last_bracket;
+                    var last_iteraction = data.index === line_length - 1;
                     if (data.length >= length || last_iteraction ||
                         (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
@@ -3160,7 +3166,7 @@
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
-                        if (keep_words && !last_bracket && data.space !== -1 &&
+                        if (keep_words && data.space !== -1 &&
                             data.index !== line_length - 1 && can_break) {
                             output = line.substring(first_index, data.space);
                             var new_index = data.space - 1;
@@ -3177,10 +3183,6 @@
                             if (closed_formatting) {
                                 prev_format = '';
                             }
-                        }
-                        if (last_bracket) {
-                            output += ']';
-                            prev_format = '';
                         }
                         var matched = output.match(format_re);
                         if (matched) {
