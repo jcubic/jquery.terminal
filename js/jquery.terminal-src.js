@@ -3136,12 +3136,30 @@
                 var line = array[i];
                 var first_index = 0;
                 var output;
+
+                // $.terminal.iterate_formatting won't trigger an
+                // callback after the last bracket of a line when
+                // there is no character following
+                // like: "A[[;;]\n]B" => ["A[[;;;;\\n]","]B"]
+                // => first line gets ignored
+                // Fix: we add a character if necessary and remove it later
+                var addchar = false;
+                if(
+                    line[line.length-1] === "]" &&
+                    i<array.length-1 &&
+                    array[i+1][0] !== "[" // differentiate ]\n[ from ]\n]
+                )
+                {
+                    addchar = true;
+                }
+
                 var line_length = line.length;
-                $.terminal.iterate_formatting(line, function(data) {
+
+                $.terminal.iterate_formatting(addchar ? line + " " : line, function(data) {
                     // we don't iterate over last closing bracket
                     var last_bracket = data.index === line_length - 2 &&
                         line[data.index + 1] === ']';
-                    var last_iteraction = data.index === line_length - 1 || last_bracket;
+                    var last_iteraction = data.index === line_length - (addchar ? 0 : 1)  || last_bracket;
                     if (data.length >= length || last_iteraction ||
                         (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
