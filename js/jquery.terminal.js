@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 03 Mar 2018 22:50:58 +0000
+ * Date: Sun, 04 Mar 2018 07:04:31 +0000
  */
 
 /* TODO:
@@ -2592,7 +2592,7 @@
         self.data('cmd', self);
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             setTimeout(function() {
-                throw new Error('key event property not supported try https://github.'+
+                throw new Error('key event property not supported try https://github.' +
                                 'com/inexorabletash/polyfill/blob/master/keyboard.js');
             }, 0);
         }
@@ -2860,7 +2860,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 03 Mar 2018 22:50:58 +0000',
+        date: 'Sun, 04 Mar 2018 07:04:31 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

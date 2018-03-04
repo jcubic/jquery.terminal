@@ -2592,7 +2592,7 @@
         self.data('cmd', self);
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             setTimeout(function() {
-                throw new Error('key event property not supported try https://github.'+
+                throw new Error('key event property not supported try https://github.' +
                                 'com/inexorabletash/polyfill/blob/master/keyboard.js');
             }, 0);
         }
