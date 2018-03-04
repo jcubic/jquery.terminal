@@ -2912,6 +2912,16 @@ function tests_on_ready() {
                     term.clear().echo(line, {keepWords: true});
                     expect(output()).toEqual(lines);
                 });
+                // in cases where no formatter intervenes
+                it('input minus line breaks should be equal text()', function() {
+                    term.clear().echo('A[[;;]B\nC]D');
+                    expect(term.find('.terminal-output').text()).toEqual('ABCD');
+                    term.clear().echo('A[[;;]\nC]D');
+                    expect(term.find('.terminal-output').text()).toEqual('ACD');
+                    term.clear().echo('A[[;;]\n]D');
+                    expect(term.find('.terminal-output').text()).toEqual('AD');
+                    term.clear();
+                });
                 it('should echo both lines if one was not flushed', function() {
                     term.clear();
                     term.echo('foo', {flush: false});
