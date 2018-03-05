@@ -2704,7 +2704,7 @@
     function wide_characters(text) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
-            if (bare.length == 1) {
+            if (bare.length === 1) {
                 return text;
             }
             var specs = bare.split('').map(function(chr) {

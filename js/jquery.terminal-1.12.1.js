@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 05 Mar 2018 19:12:10 +0000
+ * Date: Mon, 05 Mar 2018 19:31:31 +0000
  */
 
 /* TODO:
@@ -2704,7 +2704,7 @@
     function wide_characters(text) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
-            if (bare.length == 1) {
+            if (bare.length === 1) {
                 return text;
             }
             var specs = bare.split('').map(function(chr) {
@@ -2886,7 +2886,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 05 Mar 2018 19:12:10 +0000',
+        date: 'Mon, 05 Mar 2018 19:31:31 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
