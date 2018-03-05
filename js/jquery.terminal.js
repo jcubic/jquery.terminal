@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 04 Mar 2018 08:06:04 +0000
+ * Date: Mon, 05 Mar 2018 19:12:10 +0000
  */
 
 /* TODO:
@@ -1519,7 +1519,7 @@
         }
         // terminal animation don't work on android because they animate
         // 2 properties
-        if (support_animations && !is_android) {
+        if (animation_supported && !is_android) {
             animation = function(toggle) {
                 if (toggle) {
                     cursor.addClass('blink');
@@ -2626,7 +2626,7 @@
     // -------------------------------------------------------------------------
     // taken from https://hacks.mozilla.org/2011/09/detecting-and-generating-
     // css-animations-in-javascript/
-    var support_animations = (function() {
+    var animation_supported = (function() {
         var animation = false,
             domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
             elm = document.createElement('div');
@@ -2644,6 +2644,16 @@
         }
         elm = null;
         return animation;
+    })();
+    // -------------------------------------------------------------------------
+    var ch_unit_supported = (function() {
+        var agent = window.navigator.userAgent;
+        if (agent.match(/MSIE|Trident/) && !agent.match(/IEMobile/)) {
+            return false;
+        }
+        var div = document.createElement('div');
+        div.style.width = '1ch';
+        return div.style.width === '1ch';
     })();
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
@@ -2676,18 +2686,28 @@
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
-    function custom_props(text) {
+    function extra_css(text) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
-            return len !== bare.length ? '--length: ' + len : '';
+            if (len !== bare.length) {
+                if (ch_unit_supported) {
+                    return 'width: ' + len + 'ch';
+                } else {
+                    return '--length: ' + len;
+                }
+            }
         }
         return '';
     }
     // -------------------------------------------------------------------------
     function wide_characters(text) {
         if (typeof wcwidth !== 'undefined') {
-            var specs = bare_text(text).split('').map(function(chr) {
+            var bare = bare_text(text);
+            if (bare.length == 1) {
+                return text;
+            }
+            var specs = bare.split('').map(function(chr) {
                 return {len: strlen(chr), chr: chr};
             }).reduce(function(arr, spec) {
                 var last = arr[arr.length - 1];
@@ -2717,7 +2737,13 @@
                 if (spec.len === 1) {
                     return spec.str;
                 }
-                return '<span style="--length: ' + spec.sum + '">' + spec.str + '</span>';
+                var style = '';
+                if (ch_unit_supported) {
+                    style = 'width: ' + spec.sum + 'ch';
+                } else {
+                    style = '--length: ' + spec.sum;
+                }
+                return '<span style="' + style + '">' + spec.str + '</span>';
             }).join('');
         }
         return text;
@@ -2860,7 +2886,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 04 Mar 2018 08:06:04 +0000',
+        date: 'Mon, 05 Mar 2018 19:12:10 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3371,13 +3397,17 @@
                             if ($.terminal.valid_color(background)) {
                                 style_str += 'background-color:' + background;
                             }
-                            style_str += custom_props(text);
                             var data;
                             if (data_text === '') {
                                 data = text;
                             } else {
                                 data = data_text.replace(/&#93;/g, ']')
                                     .replace(/>/g, '&gt;').replace(/</g, '&lt;');
+                            }
+                            var extra = extra_css(text);
+                            if (extra) {
+                                text = wide_characters(text);
+                                style_str += extra;
                             }
                             var result;
                             if (style.indexOf('!') !== -1) {
@@ -3403,9 +3433,6 @@
                             if (_class !== '') {
                                 result += ' class="' + _class + '"';
                             }
-                            if (style_str.match(/--length/)) {
-                                text = wide_characters(text);
-                            }
                             if (style.indexOf('!') !== -1) {
                                 result += '>' + text + '</a>';
                             } else {
@@ -3417,10 +3444,10 @@
                         });
                     } else {
                         text = safe_text(text);
-                        var props = custom_props(text);
-                        if (props.length) {
+                        var extra = extra_css(text);
+                        if (extra.length) {
                             text = wide_characters(text);
-                            return '<span style="' + props + '">' + text + '</span>';
+                            return '<span style="' + extra + '">' + text + '</span>';
                         } else {
                             return '<span>' + text + '</span>';
                         }
