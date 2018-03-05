@@ -68,6 +68,7 @@
     /*overflow: hidden;*/
     overflow-y: auto;
     overflow-x: hidden;
+    contain: content;
 }
 body.terminal {
     height: 100%;
