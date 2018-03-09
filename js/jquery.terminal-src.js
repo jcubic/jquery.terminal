@@ -3124,8 +3124,6 @@
             string = start_formatting + string.substring(start, end);
             if (end_formatting) {
                 string = string.replace(/(\[\[^\]]+)?\]$/, '');
-                if (string[string.length - 1] !== ']') {
-                }
                 string += ']';
             }
             return string;
