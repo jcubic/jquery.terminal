@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 05 Mar 2018 19:31:31 +0000
+ * Date: Fri, 09 Mar 2018 13:34:12 +0000
  */
 
 /* TODO:
@@ -2886,7 +2886,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 05 Mar 2018 19:31:31 +0000',
+        date: 'Fri, 09 Mar 2018 13:34:12 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3064,7 +3064,7 @@
                     }
                 } else if (i === string.length - 1) {
                     callback({
-                        count: count,
+                        count: count + 1,
                         index: i,
                         formatting: formatting,
                         length: 0,
@@ -3081,8 +3081,8 @@
             if (text(string).substring(start_index, end_index) === '') {
                 return '';
             }
-            var start;
-            var end = string.length;
+            var start = 0;
+            var end;
             var start_formatting = '';
             var end_formatting = '';
             var prev_index;
@@ -3091,6 +3091,7 @@
                 var m;
                 if (start_index && data.count === start_index + 1) {
                     start = data.index;
+                    // correct index for html entity
                     m = string.substring(0, start + 1).match(re);
                     if (m) {
                         start -= m[1].length;
@@ -3099,7 +3100,11 @@
                         start_formatting = data.formatting;
                     }
                 }
-                if (end_index && data.count === end_index + 1) {
+                if (end_index && data.count === end_index) {
+                    end_formatting = data.formatting;
+                    prev_index = data.index;
+                }
+                if (data.count === end_index + 1) {
                     end = data.index;
                     m = string.substring(0, end + 1).match(re);
                     if (m) {
@@ -3109,17 +3114,18 @@
                         end = prev_index + 1;
                     }
                 }
-                if (end_index && data.count === end_index) {
-                    end_formatting = data.formatting;
-                    prev_index = data.index;
-                }
             });
             if (start_index && !start) {
                 return '';
             }
+            if (end === undefined) {
+                end = string.length;
+            }
             string = start_formatting + string.substring(start, end);
             if (end_formatting) {
                 string = string.replace(/(\[\[^\]]+)?\]$/, '');
+                if (string[string.length - 1] !== ']') {
+                }
                 string += ']';
             }
             return string;

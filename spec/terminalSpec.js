@@ -284,8 +284,10 @@ function tests_on_ready() {
                     '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]'
                 ]
             ];
-            specs.forEach(function(spec) {
-                expect($.terminal.nested_formatting(spec[0])).toEqual(spec[1]);
+            it('should create list of formatting', function() {
+                specs.forEach(function(spec) {
+                    expect($.terminal.nested_formatting(spec[0])).toEqual(spec[1]);
+                });
             });
         });
         describe('$.terminal.encode', function() {
@@ -328,6 +330,22 @@ function tests_on_ready() {
                 tests.forEach(function(spec) {
                     expect($.terminal.substring(input, 0, spec[0])).toEqual(spec[1]);
                 });
+            });
+            it('should create formatting for each character', function() {
+                var formatting = '[[b;;;token number]10][[b;;;token operator]+][[b;;;token number]10]';
+
+                var len = $.terminal.strip(formatting).length;
+                var result = [];
+                for (var i = 0; i < len; ++i) {
+                    result.push($.terminal.substring(formatting, i,i+1));
+                }
+                expect(result).toEqual([
+                    '[[b;;;token number]1]',
+                    '[[b;;;token number]0]',
+                    '[[b;;;token operator]+]',
+                    '[[b;;;token number]1]',
+                    '[[b;;;token number]0]'
+                ]);
             });
             it('should return substring when ending at length or larger', function() {
                 var tests = [
@@ -468,6 +486,43 @@ function tests_on_ready() {
             var result = '-_-Foo-_-Bar-_-Baz-_-';
             it('should remove formatting', function() {
                 expect($.terminal.strip(formatting)).toEqual(result);
+            });
+        });
+        describe('$.terminal.apply_formatters', function() {
+            var formatters;
+            beforeEach(function() {
+                formatters = $.terminal.defaults.formatters;
+            });
+            afterEach(function() {
+                $.terminal.defaults.formatters = formatters;
+            });
+            it('should apply function formatters', function() {
+                $.terminal.defaults.formatters = [
+                    function(str) {
+                        return str.replace(/a/g, '[[;;;A]a]');
+                    },
+                    function(str) {
+                        return str.replace(/b/g, '[[;;;B]b]');
+                    }
+                ];
+                var input = 'aaa bbb';
+                var output = '[[;;;A]a][[;;;A]a][[;;;A]a] [[;;;B]b][[;;;B]b][[;;;B]b]';
+                expect($.terminal.apply_formatters(input)).toEqual(output);
+            });
+            it('should apply __meta__ and array formatter', function() {
+                var input = 'lorem ipsum';
+                var output = '[[;;]lorem] ipsum';
+                var test = {
+                    formatter: function(string) {
+                        expect(string).toEqual(output);
+                        return string.replace(/ipsum/g, '[[;;]ipsum]');
+                    }
+                };
+                spy(test, 'formatter');
+                test.formatter.__meta__ = true;
+                $.terminal.defaults.formatters = [[/lorem/, '[[;;]lorem]'], test.formatter];
+                expect($.terminal.apply_formatters(input)).toEqual('[[;;]lorem] [[;;]ipsum]');
+                expect(test.formatter).toHaveBeenCalled();
             });
         });
         describe('$.terminal.split_equal', function() {
