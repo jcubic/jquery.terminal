@@ -1,14 +1,14 @@
 ## 1.14.0
 
 ### Features
-* pass options for formatters and accept option unixFormattingEscapeBrackets in unix_formatting
+* pass options to formatters and accept option unixFormattingEscapeBrackets in unix_formatting
   (PR by [Marcel Link](https://github.com/ml1nk)
 * improve performance of repaint and layout whole page when changing content of the terminal
 * use ch unit for wide characters if browser support it (it have wide support then css variables)
 
 ### Bugs
 * fix newline as first character in formatting [#375](https://github.com/jcubic/jquery.terminal/pull/375).
-* fix error when echo undefined (it not echo string undefined since it's coverted to string)
+* fix error when echo undefined (it will echo string undefined since it's coverted to string)
 
 ## 1.12.1
 * fix minified css file + fix scrollbar
