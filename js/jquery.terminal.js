@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 09 Mar 2018 14:54:07 +0000
+ * Date: Sun, 11 Mar 2018 13:34:45 +0000
  */
 
 /* TODO:
@@ -2886,7 +2886,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 09 Mar 2018 14:54:07 +0000',
+        date: 'Sun, 11 Mar 2018 13:34:45 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6496,7 +6496,7 @@
                         }
                     }
                 }
-                if ($.isFunction(arg.then)) {
+                if (arg !== undefined && $.isFunction(arg.then)) {
                     $.when(arg).done(echo);
                 } else {
                     echo(arg);

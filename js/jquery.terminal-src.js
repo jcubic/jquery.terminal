@@ -6496,7 +6496,7 @@
                         }
                     }
                 }
-                if ($.isFunction(arg.then)) {
+                if (arg !== undefined && $.isFunction(arg.then)) {
                     $.when(arg).done(echo);
                 } else {
                     echo(arg);

@@ -8,6 +8,7 @@
 
 ### Bugs
 * fix newline as first character in formatting [#375](https://github.com/jcubic/jquery.terminal/pull/375).
+* fix error when echo undefined (it not echo string undefined since it's coverted to string)
 
 ## 1.12.1
 * fix minified css file + fix scrollbar
