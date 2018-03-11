@@ -68,6 +68,8 @@
     /*overflow: hidden;*/
     overflow-y: auto;
     overflow-x: hidden;
+}
+.terminal, .cmd {
     contain: content;
 }
 body.terminal {
