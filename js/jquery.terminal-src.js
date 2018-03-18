@@ -7121,7 +7121,7 @@
                 name: settings.name,
                 prompt: settings.prompt,
                 keypress: function keypress(e) {
-                    // resize event is not triggered on keypress when scrollbar appear #378
+                    // resize event don't fire on keypress when scrollbar appear #378
                     setTimeout(resize, 0);
                     return settings.keypress(e);
                 },
