@@ -1075,34 +1075,12 @@ function tests_on_ready() {
         describe('resizer', function() {
             it('should create html', function() {
                 var div = $('<div/>').resizer($.noop);
-                expect(div.find('.resize-sensor-expand').length).toEqual(1);
-                expect(div.find('.resize-sensor-shrink').length).toEqual(1);
-                expect(div.find('.resizer').length).toEqual(1);
+                expect(div.find('iframe').length).toEqual(1);
             });
             it('should remove html', function() {
                 var div = $('<div/>').resizer($.noop);
                 div.resizer('unbind');
-                expect(div.find('.resize-sensor-expand').length).toEqual(0);
-                expect(div.find('.resize-sensor-shrink').length).toEqual(0);
-                expect(div.find('.resizer').length).toEqual(0);
-            });
-            it('should fire event on scroll event', function(done) {
-                var test = {
-                    test: function() {}
-                };
-                spy(test, 'test');
-                var div = $('<div/>').css({
-                    width: 100,
-                    height: 100
-                }).appendTo('body').resizer(test.test);
-                div.css({
-                    width: 200
-                });
-                div.find('.resize-sensor-shrink').trigger('scroll');
-                setTimeout(function() {
-                    expect(test.test).toHaveBeenCalled();
-                    done();
-                }, 100);
+                expect(div.find('iframe').length).toEqual(0);
             });
         });
         describe('text_length', function() {

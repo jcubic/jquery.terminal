@@ -11,7 +11,7 @@
 * fix newline as first character in formatting [#375](https://github.com/jcubic/jquery.terminal/pull/375).
 * fix error when echo undefined (it will echo string undefined since it's converted to string)
 * fix first argument to keymap function, it's now keypress event
-* trigger resize handler on keypress so it's resizing when scrollbar appear/disappear
+* fix resizing issue when scrollbar appear/disappear while you type
   [#378](https://github.com/jcubic/jquery.terminal/issues/378)
 
 ## 1.12.1
