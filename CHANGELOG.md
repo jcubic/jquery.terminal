@@ -5,10 +5,12 @@
   (PR by [Marcel Link](https://github.com/ml1nk)
 * improve performance of repaint and layout whole page when changing content of the terminal
 * use ch unit for wide characters if browser support it (it have wide support then css variables)
+* keymap terminal method and allow to set shortcuts on runtime
 
 ### Bugs
 * fix newline as first character in formatting [#375](https://github.com/jcubic/jquery.terminal/pull/375).
-* fix error when echo undefined (it will echo string undefined since it's coverted to string)
+* fix error when echo undefined (it will echo string undefined since it's converted to string)
+* fix first argument to keymap function, it's now keypress event
 
 ## 1.12.1
 * fix minified css file + fix scrollbar

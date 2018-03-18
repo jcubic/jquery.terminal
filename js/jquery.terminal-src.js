@@ -2115,7 +2115,7 @@
                 } else {
                     keymap = $.extend(
                         {},
-                        default_keymap,
+                        keymap ? keymap : default_keymap,
                         $.omap(new_keymap || {}, wrap)
                     );
                     return self;
@@ -2397,7 +2397,7 @@
                     /* jshint validthis:true */
                     keydown_event.call(this, e);
                 } else if ($.isFunction(keymap[key])) {
-                    result = keymap[key]();
+                    result = keymap[key](e);
                     if (result === true) {
                         return;
                     }
@@ -6830,6 +6830,44 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: change terminal keymap at runtime
+            // -------------------------------------------------------------
+            keymap: function(keymap, fn) {
+                if (arguments.length === 0) {
+                    return command_line.keymap();
+                }
+                if (typeof fn === 'undefined') {
+                    if (typeof keymap === 'string') {
+                        return command_line.keymapmap(keymap);
+                    } else if ($.isPlainObject(keymap)) {
+                        // argument is an object
+                        keymap = $.omap(keymap || {}, function(key, fn) {
+                            if (!new_keymap[key]) {
+                                return fn.bind(self);
+                            }
+                            return function(e, original) {
+                                // new keymap function will get default as 2nd argument
+                                return fn.call(self, e, function() {
+                                    return new_keymap[key](e, original);
+                                });
+                            };
+                        });
+                        command_line.keymap(keymap);
+                    }
+                } else if (typeof fn === 'function') {
+                    var key = keymap;
+                    if (!new_keymap[key]) {
+                        command_line.keymap(key, fn.bind(self));
+                    } else {
+                        command_line.keymap(key, function(e, original) {
+                            return fn.call(self, e, function() {
+                                return new_keymap[key](e, original);
+                            });
+                        });
+                    }
+                }
+            },
+            // -------------------------------------------------------------
             // :: Return how deep you are in nested interpreters
             // -------------------------------------------------------------
             level: function() {
@@ -7053,6 +7091,21 @@
             }
         }
         $(document).on('paste.terminal_' + self.id(), paste_event);
+        var new_keymap = $.extend(
+            {},
+            keymap,
+            $.omap(settings.keymap || {}, function(key, fn) {
+                if (!keymap[key]) {
+                    return fn.bind(self);
+                }
+                return function(e, original) {
+                    // new keymap function will get default as 2nd argument
+                    return fn.call(self, e, function() {
+                        return keymap[key](e, original);
+                    });
+                };
+            })
+        );
         make_interpreter(init_interpreter, settings.login, function(itrp) {
             if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
@@ -7061,21 +7114,6 @@
                 // so we are able to change it using option API method
                 itrp.completion = 'settings';
             }
-            var new_keymap = $.extend(
-                {},
-                keymap,
-                $.omap(settings.keymap || {}, function(key, fn) {
-                    if (!keymap[key]) {
-                        return fn.bind(self);
-                    }
-                    return function(e, original) {
-                        // new keymap function will get default as 2nd argument
-                        return fn.call(self, e, function() {
-                            return keymap[key](e, original);
-                        });
-                    };
-                })
-            );
             interpreters = new Stack($.extend({}, settings.extra, {
                 name: settings.name,
                 prompt: settings.prompt,
