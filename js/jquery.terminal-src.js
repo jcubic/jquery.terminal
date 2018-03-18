@@ -803,6 +803,7 @@
                     $this.data('observer', resizer);
                     return;
                 }
+                //var iframe = $('<iframe/>').addClass('resizer').appendTo(this)[0];
                 var self = this;
                 resizer = $('<div/>').addClass('resizer').appendTo(this)[0];
                 var style =
@@ -810,6 +811,7 @@
                     'overflow: hidden; z-index: -1; visibility: hidden;';
                 var styleChild = 'position: absolute; left: 0; top: 0; transition: 0s;';
                 resizer.style.cssText = style;
+                //iframe.style.cssText = style;
                 resizer.innerHTML =
                     '<div class="resize-sensor-expand" style="' + style + '">' +
                     '<div style="' + styleChild + '"></div>' + "</div>" +
@@ -848,6 +850,7 @@
                     lastHeight = newHeight;
                     callbacks.fire();
                 };
+                //$(iframe.contentWindow).on('resize', onResized);
 
                 var onScroll = function() {
                     newWidth = self.offsetWidth;
@@ -7117,7 +7120,10 @@
             interpreters = new Stack($.extend({}, settings.extra, {
                 name: settings.name,
                 prompt: settings.prompt,
-                keypress: settings.keypress,
+                keypress: function keypress(e) {
+                    setTimeout(resize, 0);
+                    return settings.keypress(e);
+                },
                 keydown: settings.keydown,
                 resize: settings.onResize,
                 greetings: settings.greetings,
@@ -7317,8 +7323,8 @@
             }
             function resize() {
                 if (self.is(':visible')) {
-                    var width = self.width();
-                    var height = self.height();
+                    var width = fill.width();
+                    var height = fill.height();
                     // prevent too many calculations in IE
                     if (old_height !== height || old_width !== width) {
                         self.resize();
