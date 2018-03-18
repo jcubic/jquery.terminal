@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 18 Mar 2018 11:23:42 +0000
+ * Date: Sun, 18 Mar 2018 11:32:06 +0000
  */
 
 /* TODO:
@@ -2889,7 +2889,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 18 Mar 2018 11:23:42 +0000',
+        date: 'Sun, 18 Mar 2018 11:32:06 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7121,6 +7121,7 @@
                 name: settings.name,
                 prompt: settings.prompt,
                 keypress: function keypress(e) {
+                    // resize event is not triggered on keypress when scrollbar appear #378
                     setTimeout(resize, 0);
                     return settings.keypress(e);
                 },
