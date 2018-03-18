@@ -13,6 +13,8 @@
 * fix first argument to keymap function, it's now keypress event
 * fix resizing issue when scrollbar appear/disappear while you type
   [#378](https://github.com/jcubic/jquery.terminal/issues/378)
+* fix cut of cursor when command line had full length lines and it was at the end
+  [#379](https://github.com/jcubic/jquery.terminal/issues/379)
 
 ## 1.12.1
 * fix minified css file + fix scrollbar

@@ -1611,9 +1611,12 @@
                 array = split(prompt + string, num_chars);
                 array[0] = array[0].replace(re, '');
             }
+            // fix issue with cursor that was cut off #379
+            if (array.length > 1 && array[array.length - 1].length === num_chars) {
+                array.push('');
+            }
             return array;
         }
-        window.get_splitted_command_line = get_splitted_command_line;
         // ---------------------------------------------------------------------
         // :: use custom formatting
         // ---------------------------------------------------------------------

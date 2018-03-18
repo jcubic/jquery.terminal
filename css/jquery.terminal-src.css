@@ -80,7 +80,7 @@ body.terminal {
 .terminal > div {
     overflow: hidden;
 }
-.terminal > iframe, .terminal .font iframe {
+.terminal > .resizer, .terminal > .font .resizer{
     position: absolute;
     left: 0;
     top: 0;

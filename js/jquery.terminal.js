@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 18 Mar 2018 19:28:14 +0000
+ * Date: Sun, 18 Mar 2018 20:09:36 +0000
  */
 
 /* TODO:
@@ -1611,9 +1611,12 @@
                 array = split(prompt + string, num_chars);
                 array[0] = array[0].replace(re, '');
             }
+            // fix issue with cursor that was cut off #379
+            if (array.length > 1 && array[array.length - 1].length === num_chars) {
+                array.push('');
+            }
             return array;
         }
-        window.get_splitted_command_line = get_splitted_command_line;
         // ---------------------------------------------------------------------
         // :: use custom formatting
         // ---------------------------------------------------------------------
@@ -2830,7 +2833,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 18 Mar 2018 19:28:14 +0000',
+        date: 'Sun, 18 Mar 2018 20:09:36 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
