@@ -22,11 +22,11 @@ URL=`git config --get remote.origin.url`
 
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile
 
-bower.json: bower.in .$(VERSION)
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" bower.in > bower.json
+bower.json: templates/bower.in .$(VERSION)
+	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
 
-package.json: package.in .$(VERSION)
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" package.in > package.json
+package.json: templates/package.in .$(VERSION)
+	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/package.in > package.json
 
 js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js
@@ -52,21 +52,21 @@ css/jquery.terminal.min.css: css/jquery.terminal-$(VERSION).min.css
 css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 	$(CSSNANO) css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css --no-discardUnused --safe
 
-README.md: README.in .$(VERSION)
+README.md: templates/README.in .$(VERSION)
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e \
 	"s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" \
-	-e "s/{{COMMIT}}/$(COMMIT)/g" < README.in > README.md || $(SED) -e \
+	-e "s/{{COMMIT}}/$(COMMIT)/g" < templates/README.in > README.md || $(SED) -e \
 	"s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH)/g" -e \
-	"s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" -e "s/{{COMMIT}}/$(COMMIT)/g" < README.in > README.md
+	"s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" -e "s/{{COMMIT}}/$(COMMIT)/g" < templates/README.in > README.md
 
 .$(VERSION): Makefile
 	touch .$(VERSION)
 
-Makefile: Makefile.in
-	$(SED) -e "s/{{VER""SION}}/"$(VERSION)"/" Makefile.in > Makefile
+Makefile: templates/Makefile.in
+	$(SED) -e "s/{{VER""SION}}/"$(VERSION)"/" templates/Makefile.in > Makefile
 
-import.html: import.in
-	$(SED) -e "s/{{BRANCH}}/$(BRANCH)/g" import.in > import.html
+import.html: templates/import.in
+	$(SED) -e "s/{{BRANCH}}/$(BRANCH)/g" templates/import.in > import.html
 
 js/terminal.widget.js: js/terminal.widget.in
 	$(GIT) branch | grep '* devel' > /dev/null || $(SED) -e "s/{{VER}}/$(VERSION)/g" js/terminal.widget.in > js/terminal.widget.js
