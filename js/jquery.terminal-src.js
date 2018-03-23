@@ -6785,7 +6785,7 @@
                 }
                 if (typeof fn === 'undefined') {
                     if (typeof keymap === 'string') {
-                        return command_line.keymapmap(keymap);
+                        return command_line.keymap(keymap);
                     } else if ($.isPlainObject(keymap)) {
                         // argument is an object
                         keymap = $.omap(keymap || {}, function(key, fn) {

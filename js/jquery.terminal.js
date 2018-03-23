@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 19 Mar 2018 17:12:40 +0000
+ * Date: Fri, 23 Mar 2018 20:04:16 +0000
  */
 
 /* TODO:
@@ -2833,7 +2833,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 19 Mar 2018 17:12:40 +0000',
+        date: 'Fri, 23 Mar 2018 20:04:16 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6785,7 +6785,7 @@
                 }
                 if (typeof fn === 'undefined') {
                     if (typeof keymap === 'string') {
-                        return command_line.keymapmap(keymap);
+                        return command_line.keymap(keymap);
                     } else if ($.isPlainObject(keymap)) {
                         // argument is an object
                         keymap = $.omap(keymap || {}, function(key, fn) {
