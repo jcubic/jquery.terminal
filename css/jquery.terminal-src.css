@@ -67,7 +67,10 @@
     position: relative;
     /*overflow: hidden;*/
     overflow-y: auto;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
+}
+.terminal, .cmd {
+    contain: content;
 }
 body.terminal {
     height: 100%;
@@ -76,6 +79,20 @@ body.terminal {
 }
 .terminal > div {
     overflow: hidden;
+}
+.terminal > .resizer, .terminal > .font .resizer{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: -1;
+    visibility: hidden;
+    height: 100%;
+    border: none;
+    padding: 0;
+    width: 100%
 }
 .cmd {
     padding: 0;

@@ -736,17 +736,9 @@
         return pos;
     };
     /* eslint-enable */
-    var requestAnimationFrame =
-        window.requestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        function(fn) {
-            return setTimeout(fn, 20);
-        };
     // -----------------------------------------------------------------------
-    // :: Cross-browser resize element plugin
-    // :: Taken from ResizeSensor.js file from marcj/css-element-queries (MIT license)
-    // :: not all jQuerifided
+    // :: Cross-browser resize element plugin using sentinel iframe or
+    // :: resizeObserver
     // -----------------------------------------------------------------------
     $.fn.resizer = function(callback) {
         var unbind = arguments[0] === "unbind";
@@ -760,6 +752,7 @@
         }
         return this.each(function() {
             var $this = $(this);
+            var iframe;
             var callbacks;
             if (unbind) {
                 callbacks = $this.data('callbacks');
@@ -780,7 +773,12 @@
                             $this.removeData('observer');
                         }
                     } else {
-                        $this.find('.resizer').remove();
+                        iframe = $this.find('> iframe');
+                        if (iframe.length) {
+                            // just in case of memory leaks in IE
+                            $(iframe[0].contentWindow).off('resize').remove();
+                            iframe.remove();
+                        }
                     }
                 }
             } else if ($this.data('callbacks')) {
@@ -801,67 +799,13 @@
                     });
                     resizer.observe(this);
                     $this.data('observer', resizer);
-                    return;
+                } else {
+                    iframe = $('<iframe/>').addClass('resizer').appendTo(this)[0];
+
+                    $(iframe.contentWindow).on('resize', function() {
+                        callbacks.fire();
+                    });
                 }
-                var self = this;
-                resizer = $('<div/>').addClass('resizer').appendTo(this)[0];
-                var style =
-                    'position: absolute; left: 0; top: 0; right: 0; bottom: 0; ' +
-                    'overflow: hidden; z-index: -1; visibility: hidden;';
-                var styleChild = 'position: absolute; left: 0; top: 0; transition: 0s;';
-                resizer.style.cssText = style;
-                resizer.innerHTML =
-                    '<div class="resize-sensor-expand" style="' + style + '">' +
-                    '<div style="' + styleChild + '"></div>' + "</div>" +
-                    '<div class="resize-sensor-shrink" style="' + style + '">' +
-                    '<div style="' + styleChild + ' width: 200%; height: 200%"></div>' +
-                    "</div>";
-
-                var expand = resizer.childNodes[0];
-                var expandChild = expand.childNodes[0];
-                var shrink = resizer.childNodes[1];
-                var dirty, rafId, newWidth, newHeight;
-                var lastWidth = self.offsetWidth;
-                var lastHeight = self.offsetHeight;
-
-                var reset = function() {
-                    expandChild.style.width = '100000px';
-                    expandChild.style.height = '100000px';
-
-                    expand.scrollLeft = 100000;
-                    expand.scrollTop = 100000;
-
-                    shrink.scrollLeft = 100000;
-                    shrink.scrollTop = 100000;
-                };
-
-                reset();
-
-                var onResized = function() {
-                    rafId = 0;
-
-                    if (!dirty) {
-                        return;
-                    }
-
-                    lastWidth = newWidth;
-                    lastHeight = newHeight;
-                    callbacks.fire();
-                };
-
-                var onScroll = function() {
-                    newWidth = self.offsetWidth;
-                    newHeight = self.offsetHeight;
-                    dirty = newWidth !== lastWidth || newHeight !== lastHeight;
-
-                    if (dirty && !rafId) {
-                        rafId = requestAnimationFrame(onResized);
-                    }
-
-                    reset();
-                };
-                $(expand).on("scroll", onScroll);
-                $(shrink).on("scroll", onScroll);
             }
         });
     };
@@ -1519,7 +1463,7 @@
         }
         // terminal animation don't work on android because they animate
         // 2 properties
-        if (support_animations && !is_android) {
+        if (animation_supported && !is_android) {
             animation = function(toggle) {
                 if (toggle) {
                     cursor.addClass('blink');
@@ -1667,9 +1611,12 @@
                 array = split(prompt + string, num_chars);
                 array[0] = array[0].replace(re, '');
             }
+            // fix issue with cursor that was cut off #379
+            if (array.length > 1 && array[array.length - 1].length === num_chars) {
+                array.push('');
+            }
             return array;
         }
-        window.get_splitted_command_line = get_splitted_command_line;
         // ---------------------------------------------------------------------
         // :: use custom formatting
         // ---------------------------------------------------------------------
@@ -1677,7 +1624,7 @@
             // we don't want to format command when user type formatting in
             string = $.terminal.escape_formatting(string);
             try {
-                return $.terminal.apply_formatters(string);
+                return $.terminal.apply_formatters(string, settings);
             } catch (e) {
                 alert_exception('[Formatting]', e);
             }
@@ -2115,7 +2062,7 @@
                 } else {
                     keymap = $.extend(
                         {},
-                        default_keymap,
+                        keymap ? keymap : default_keymap,
                         $.omap(new_keymap || {}, wrap)
                     );
                     return self;
@@ -2397,7 +2344,7 @@
                     /* jshint validthis:true */
                     keydown_event.call(this, e);
                 } else if ($.isFunction(keymap[key])) {
-                    result = keymap[key]();
+                    result = keymap[key](e);
                     if (result === true) {
                         return;
                     }
@@ -2491,14 +2438,10 @@
                 //$.terminal.active().echo(str);
             }
         }
-        function input_event(e) {
+        function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
-            debug(JSON.stringify({
-                data: e.originalEvent.data,
-                inputType: e.originalEvent.data
-            }));
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
@@ -2596,8 +2539,8 @@
         self.data('cmd', self);
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             setTimeout(function() {
-                throw new Error('key event property not supported try ' +
-                                'https://github.com/cvan/keyboardevent-key-polyfill');
+                throw new Error('key event property not supported try https://github.' +
+                                'com/inexorabletash/polyfill/blob/master/keyboard.js');
             }, 0);
         }
         return self;
@@ -2630,7 +2573,7 @@
     // -------------------------------------------------------------------------
     // taken from https://hacks.mozilla.org/2011/09/detecting-and-generating-
     // css-animations-in-javascript/
-    var support_animations = (function() {
+    var animation_supported = (function() {
         var animation = false,
             domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
             elm = document.createElement('div');
@@ -2648,6 +2591,16 @@
         }
         elm = null;
         return animation;
+    })();
+    // -------------------------------------------------------------------------
+    var ch_unit_supported = (function() {
+        var agent = window.navigator.userAgent;
+        if (agent.match(/MSIE|Trident/) && !agent.match(/IEMobile/)) {
+            return false;
+        }
+        var div = document.createElement('div');
+        div.style.width = '1ch';
+        return div.style.width === '1ch';
     })();
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
@@ -2680,18 +2633,28 @@
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
-    function custom_props(text) {
+    function extra_css(text) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
-            return len !== bare.length ? '--length: ' + len : '';
+            if (len !== bare.length) {
+                if (ch_unit_supported) {
+                    return 'width: ' + len + 'ch';
+                } else {
+                    return '--length: ' + len;
+                }
+            }
         }
         return '';
     }
     // -------------------------------------------------------------------------
     function wide_characters(text) {
         if (typeof wcwidth !== 'undefined') {
-            var specs = bare_text(text).split('').map(function(chr) {
+            var bare = bare_text(text);
+            if (bare.length === 1) {
+                return text;
+            }
+            var specs = bare.split('').map(function(chr) {
                 return {len: strlen(chr), chr: chr};
             }).reduce(function(arr, spec) {
                 var last = arr[arr.length - 1];
@@ -2721,7 +2684,13 @@
                 if (spec.len === 1) {
                     return spec.str;
                 }
-                return '<span style="--length: ' + spec.sum + '">' + spec.str + '</span>';
+                var style = '';
+                if (ch_unit_supported) {
+                    style = 'width: ' + spec.sum + 'ch';
+                } else {
+                    style = '--length: ' + spec.sum;
+                }
+                return '<span style="' + style + '">' + spec.str + '</span>';
             }).join('');
         }
         return text;
@@ -3040,6 +3009,15 @@
 
                         }
                     }
+                } else if (i === string.length - 1) {
+                    callback({
+                        count: count + 1,
+                        index: i,
+                        formatting: formatting,
+                        length: 0,
+                        text: in_text,
+                        space: space
+                    });
                 }
             }
         },
@@ -3050,8 +3028,8 @@
             if (text(string).substring(start_index, end_index) === '') {
                 return '';
             }
-            var start;
-            var end = string.length;
+            var start = 0;
+            var end;
             var start_formatting = '';
             var end_formatting = '';
             var prev_index;
@@ -3060,6 +3038,7 @@
                 var m;
                 if (start_index && data.count === start_index + 1) {
                     start = data.index;
+                    // correct index for html entity
                     m = string.substring(0, start + 1).match(re);
                     if (m) {
                         start -= m[1].length;
@@ -3068,7 +3047,11 @@
                         start_formatting = data.formatting;
                     }
                 }
-                if (end_index && data.count === end_index + 1) {
+                if (end_index && data.count === end_index) {
+                    end_formatting = data.formatting;
+                    prev_index = data.index;
+                }
+                if (data.count === end_index + 1) {
                     end = data.index;
                     m = string.substring(0, end + 1).match(re);
                     if (m) {
@@ -3078,13 +3061,12 @@
                         end = prev_index + 1;
                     }
                 }
-                if (end_index && data.count === end_index) {
-                    end_formatting = data.formatting;
-                    prev_index = data.index;
-                }
             });
             if (start_index && !start) {
                 return '';
+            }
+            if (end === undefined) {
+                end = string.length;
             }
             string = start_formatting + string.substring(start, end);
             if (end_formatting) {
@@ -3142,10 +3124,7 @@
                 var output;
                 var line_length = line.length;
                 $.terminal.iterate_formatting(line, function(data) {
-                    // we don't iterate over last closing bracket
-                    var last_bracket = data.index === line_length - 2 &&
-                        line[data.index + 1] === ']';
-                    var last_iteraction = data.index === line_length - 1 || last_bracket;
+                    var last_iteraction = data.index === line_length - 1;
                     if (data.length >= length || last_iteraction ||
                         (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
@@ -3164,7 +3143,7 @@
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
-                        if (keep_words && !last_bracket && data.space !== -1 &&
+                        if (keep_words && data.space !== -1 &&
                             data.index !== line_length - 1 && can_break) {
                             output = line.substring(first_index, data.space);
                             var new_index = data.space - 1;
@@ -3181,10 +3160,6 @@
                             if (closed_formatting) {
                                 prev_format = '';
                             }
-                        }
-                        if (last_bracket) {
-                            output += ']';
-                            prev_format = '';
                         }
                         var matched = output.match(format_re);
                         if (matched) {
@@ -3263,14 +3238,18 @@
         // ---------------------------------------------------------------------
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
-        apply_formatters: function(string) {
+        apply_formatters: function(string, settings) {
             var formatters = $.terminal.defaults.formatters;
             var i = 0;
             try {
                 return formatters.reduce(function(string, formatter) {
                     i++;
+                    // __meta__ is for safe formatter that can handle formatters
+                    // inside formatters. for other usage we use format_split so one
+                    // formatter don't mess with formatter that was previous
+                    // on the list
                     if (typeof formatter === 'function' && formatter.__meta__) {
-                        var ret = formatter(string);
+                        var ret = formatter(string, settings);
                         if (typeof ret === 'string') {
                             return ret;
                         }
@@ -3282,7 +3261,7 @@
                                 if (formatter instanceof Array) {
                                     return string.replace(formatter[0], formatter[1]);
                                 } else if (typeof formatter === 'function') {
-                                    var ret = formatter(string);
+                                    var ret = formatter(string, settings);
                                     if (typeof ret === 'string') {
                                         return ret;
                                     }
@@ -3369,13 +3348,17 @@
                             if ($.terminal.valid_color(background)) {
                                 style_str += 'background-color:' + background;
                             }
-                            style_str += custom_props(text);
                             var data;
                             if (data_text === '') {
                                 data = text;
                             } else {
                                 data = data_text.replace(/&#93;/g, ']')
                                     .replace(/>/g, '&gt;').replace(/</g, '&lt;');
+                            }
+                            var extra = extra_css(text);
+                            if (extra) {
+                                text = wide_characters(text);
+                                style_str += extra;
                             }
                             var result;
                             if (style.indexOf('!') !== -1) {
@@ -3401,9 +3384,6 @@
                             if (_class !== '') {
                                 result += ' class="' + _class + '"';
                             }
-                            if (style_str.match(/--length/)) {
-                                text = wide_characters(text);
-                            }
                             if (style.indexOf('!') !== -1) {
                                 result += '>' + text + '</a>';
                             } else {
@@ -3415,10 +3395,10 @@
                         });
                     } else {
                         text = safe_text(text);
-                        var props = custom_props(text);
-                        if (props.length) {
+                        var extra = extra_css(text);
+                        if (extra.length) {
                             text = wide_characters(text);
-                            return '<span style="' + props + '">' + text + '</span>';
+                            return '<span style="' + extra + '">' + text + '</span>';
                         } else {
                             return '<span>' + text + '</span>';
                         }
@@ -4625,7 +4605,10 @@
                             }
                             if (line_settings.formatters) {
                                 try {
-                                    string = $.terminal.apply_formatters(string);
+                                    string = $.terminal.apply_formatters(
+                                        string,
+                                        settings
+                                    );
                                 } catch (e) {
                                     display_exception(e, 'FORMATTING');
                                 }
@@ -6460,7 +6443,7 @@
                         }
                     }
                 }
-                if ($.isFunction(arg.then)) {
+                if (arg !== undefined && $.isFunction(arg.then)) {
                     $.when(arg).done(echo);
                 } else {
                     echo(arg);
@@ -6794,6 +6777,44 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: change terminal keymap at runtime
+            // -------------------------------------------------------------
+            keymap: function(keymap, fn) {
+                if (arguments.length === 0) {
+                    return command_line.keymap();
+                }
+                if (typeof fn === 'undefined') {
+                    if (typeof keymap === 'string') {
+                        return command_line.keymap(keymap);
+                    } else if ($.isPlainObject(keymap)) {
+                        // argument is an object
+                        keymap = $.omap(keymap || {}, function(key, fn) {
+                            if (!new_keymap[key]) {
+                                return fn.bind(self);
+                            }
+                            return function(e, original) {
+                                // new keymap function will get default as 2nd argument
+                                return fn.call(self, e, function() {
+                                    return new_keymap[key](e, original);
+                                });
+                            };
+                        });
+                        command_line.keymap(keymap);
+                    }
+                } else if (typeof fn === 'function') {
+                    var key = keymap;
+                    if (!new_keymap[key]) {
+                        command_line.keymap(key, fn.bind(self));
+                    } else {
+                        command_line.keymap(key, function(e, original) {
+                            return fn.call(self, e, function() {
+                                return new_keymap[key](e, original);
+                            });
+                        });
+                    }
+                }
+            },
+            // -------------------------------------------------------------
             // :: Return how deep you are in nested interpreters
             // -------------------------------------------------------------
             level: function() {
@@ -7017,6 +7038,21 @@
             }
         }
         $(document).on('paste.terminal_' + self.id(), paste_event);
+        var new_keymap = $.extend(
+            {},
+            keymap,
+            $.omap(settings.keymap || {}, function(key, fn) {
+                if (!keymap[key]) {
+                    return fn.bind(self);
+                }
+                return function(e, original) {
+                    // new keymap function will get default as 2nd argument
+                    return fn.call(self, e, function() {
+                        return keymap[key](e, original);
+                    });
+                };
+            })
+        );
         make_interpreter(init_interpreter, settings.login, function(itrp) {
             if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
@@ -7025,21 +7061,6 @@
                 // so we are able to change it using option API method
                 itrp.completion = 'settings';
             }
-            var new_keymap = $.extend(
-                {},
-                keymap,
-                $.omap(settings.keymap || {}, function(key, fn) {
-                    if (!keymap[key]) {
-                        return fn.bind(self);
-                    }
-                    return function(e, original) {
-                        // new keymap function will get default as 2nd argument
-                        return fn.call(self, e, function() {
-                            return keymap[key](e, original);
-                        });
-                    };
-                })
-            );
             interpreters = new Stack($.extend({}, settings.extra, {
                 name: settings.name,
                 prompt: settings.prompt,
@@ -7243,8 +7264,8 @@
             }
             function resize() {
                 if (self.is(':visible')) {
-                    var width = self.width();
-                    var height = self.height();
+                    var width = fill.width();
+                    var height = fill.height();
                     // prevent too many calculations in IE
                     if (old_height !== height || old_width !== width) {
                         self.resize();
@@ -7405,7 +7426,7 @@
                 }
             });
             // this could work without calling scroll on wheel event but we
-            // need to for cases where you have mouse wheel work differently
+            // need it for cases where you have mouse wheel work differently
             // like with less command that scroll text
             function mousewheel(event, delta) {
                 if (!shift) {

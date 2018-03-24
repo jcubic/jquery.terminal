@@ -240,12 +240,21 @@ function tests_on_ready() {
                 });
             });
         });
-        var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mBar\x1b[0m\x1b[7mBaz';
+        var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz';
         describe('$.terminal.from_ansi', function() {
             it('should convert ansi to terminal formatting', function() {
                 var string = $.terminal.from_ansi(ansi_string);
                 expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
-                                       'Bar][[;#000;#AAA]Baz]');
+                                        'B[[sb;;]a]r][[;#000;#AAA]Baz]');
+            });
+        });
+        describe('$.terminal.from_ansi', function() {
+            it('should convert ansi to terminal formatting and escape the remaining brackets', function() {
+                var string = $.terminal.from_ansi(ansi_string, {
+                    unixFormattingEscapeBrackets: true
+                });
+                expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
+                                        'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz]');
             });
         });
         describe('$.terminal.overtyping', function() {
@@ -265,10 +274,20 @@ function tests_on_ready() {
             });
         });
         describe('$.terminal.nested_formatting', function() {
-            var string = '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]';
-            var result = '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]';
+            var specs = [
+                [
+                    '[[;red;]foo[[;blue;]bar]baz]',
+                    '[[;red;]foo][[;blue;]bar][[;red;]baz]'
+                ],
+                [
+                    '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]',
+                    '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]'
+                ]
+            ];
             it('should create list of formatting', function() {
-                expect($.terminal.nested_formatting(string)).toEqual(result);
+                specs.forEach(function(spec) {
+                    expect($.terminal.nested_formatting(spec[0])).toEqual(spec[1]);
+                });
             });
         });
         describe('$.terminal.encode', function() {
@@ -311,6 +330,22 @@ function tests_on_ready() {
                 tests.forEach(function(spec) {
                     expect($.terminal.substring(input, 0, spec[0])).toEqual(spec[1]);
                 });
+            });
+            it('should create formatting for each character', function() {
+                var formatting = '[[b;;;token number]10][[b;;;token operator]+][[b;;;token number]10]';
+
+                var len = $.terminal.strip(formatting).length;
+                var result = [];
+                for (var i = 0; i < len; ++i) {
+                    result.push($.terminal.substring(formatting, i,i+1));
+                }
+                expect(result).toEqual([
+                    '[[b;;;token number]1]',
+                    '[[b;;;token number]0]',
+                    '[[b;;;token operator]+]',
+                    '[[b;;;token number]1]',
+                    '[[b;;;token number]0]'
+                ]);
             });
             it('should return substring when ending at length or larger', function() {
                 var tests = [
@@ -451,6 +486,43 @@ function tests_on_ready() {
             var result = '-_-Foo-_-Bar-_-Baz-_-';
             it('should remove formatting', function() {
                 expect($.terminal.strip(formatting)).toEqual(result);
+            });
+        });
+        describe('$.terminal.apply_formatters', function() {
+            var formatters;
+            beforeEach(function() {
+                formatters = $.terminal.defaults.formatters;
+            });
+            afterEach(function() {
+                $.terminal.defaults.formatters = formatters;
+            });
+            it('should apply function formatters', function() {
+                $.terminal.defaults.formatters = [
+                    function(str) {
+                        return str.replace(/a/g, '[[;;;A]a]');
+                    },
+                    function(str) {
+                        return str.replace(/b/g, '[[;;;B]b]');
+                    }
+                ];
+                var input = 'aaa bbb';
+                var output = '[[;;;A]a][[;;;A]a][[;;;A]a] [[;;;B]b][[;;;B]b][[;;;B]b]';
+                expect($.terminal.apply_formatters(input)).toEqual(output);
+            });
+            it('should apply __meta__ and array formatter', function() {
+                var input = 'lorem ipsum';
+                var output = '[[;;]lorem] ipsum';
+                var test = {
+                    formatter: function(string) {
+                        expect(string).toEqual(output);
+                        return string.replace(/ipsum/g, '[[;;]ipsum]');
+                    }
+                };
+                spy(test, 'formatter');
+                test.formatter.__meta__ = true;
+                $.terminal.defaults.formatters = [[/lorem/, '[[;;]lorem]'], test.formatter];
+                expect($.terminal.apply_formatters(input)).toEqual('[[;;]lorem] [[;;]ipsum]');
+                expect(test.formatter).toHaveBeenCalled();
             });
         });
         describe('$.terminal.split_equal', function() {
@@ -647,6 +719,15 @@ function tests_on_ready() {
                 test.forEach(function(test) {
                     var array = $.terminal.split_equal(test.input, test.split || 100);
                     expect(array).toEqual(test.output);
+                });
+            });
+            it('should handle new line as first character of formatting #375', function() {
+                var specs = [
+                    ['A[[;;]\n]B', ['A', 'B']],
+                    ['A[[;;]\nB]C', ['A', '[[;;;;\\nB]B]C']]
+                ];
+                specs.forEach(function(spec) {
+                    expect($.terminal.split_equal(spec[0])).toEqual(spec[1]);
                 });
             });
         });
@@ -994,34 +1075,12 @@ function tests_on_ready() {
         describe('resizer', function() {
             it('should create html', function() {
                 var div = $('<div/>').resizer($.noop);
-                expect(div.find('.resize-sensor-expand').length).toEqual(1);
-                expect(div.find('.resize-sensor-shrink').length).toEqual(1);
-                expect(div.find('.resizer').length).toEqual(1);
+                expect(div.find('iframe').length).toEqual(1);
             });
             it('should remove html', function() {
                 var div = $('<div/>').resizer($.noop);
                 div.resizer('unbind');
-                expect(div.find('.resize-sensor-expand').length).toEqual(0);
-                expect(div.find('.resize-sensor-shrink').length).toEqual(0);
-                expect(div.find('.resizer').length).toEqual(0);
-            });
-            it('should fire event on scroll event', function(done) {
-                var test = {
-                    test: function() {}
-                };
-                spy(test, 'test');
-                var div = $('<div/>').css({
-                    width: 100,
-                    height: 100
-                }).appendTo('body').resizer(test.test);
-                div.css({
-                    width: 200
-                });
-                div.find('.resize-sensor-shrink').trigger('scroll');
-                setTimeout(function() {
-                    expect(test.test).toHaveBeenCalled();
-                    done();
-                }, 100);
+                expect(div.find('iframe').length).toEqual(0);
             });
         });
         describe('text_length', function() {
@@ -2140,6 +2199,22 @@ function tests_on_ready() {
                 term.clear();
                 expect(term.find('.terminal-output').html()).toEqual('');
             });
+            it('should save commands in hash', function() {
+                location.hash = '';
+                term.save_state(); // initial state
+                term.save_state('foo');
+                term.save_state('bar');
+                var id = term.id();
+                var hash = '#' + JSON.stringify([[id,1,"foo"],[id,2,"bar"]]);
+                expect(decodeURIComponent(location.hash)).toEqual(hash);
+                term.destroy().remove();
+            });
+            describe('import/export view', function() {
+                var term = $('<div/>').appendTo('body').terminal($.noop, {
+                    name: terminal_name,
+                    greetings: greetings,
+                    completion: completion
+                });
             it('should export view', function() {
                 enter(term, 'foo');
                 enter(term, 'bar');
@@ -2149,17 +2224,17 @@ function tests_on_ready() {
                 position = term.cmd().position();
                 exported_view = term.export_view();
                 expect(exported_view.prompt).toEqual(prompt);
-                expect(exported_view.position).toEqual(command.length);
+                expect(exported_view.position).toEqual(position);
                 expect(exported_view.focus).toEqual(true);
                 expect(exported_view.mask).toEqual(mask);
                 expect(exported_view.command).toEqual(command);
-                expect(exported_view.lines[0][0]).toEqual('> foo');
-                expect(exported_view.lines[1][0]).toEqual('> bar');
+                expect(exported_view.lines[0][0]).toEqual('Hello World!');
+                expect(exported_view.lines[1][0]).toEqual('> foo');
+                expect(exported_view.lines[2][0]).toEqual('> bar');
                 expect(exported_view.interpreters.size()).toEqual(1);
                 var top = exported_view.interpreters.top();
                 expect(top.interpreter).toEqual($.noop);
                 expect(top.name).toEqual(terminal_name);
-                expect(top.prompt).toEqual(prompt);
                 expect(top.prompt).toEqual(prompt);
                 expect(top.greetings).toEqual(greetings);
                 expect(top.completion).toEqual('settings');
@@ -2175,23 +2250,15 @@ function tests_on_ready() {
                 expect(term.get_command()).toEqual(command);
                 expect(term.get_prompt()).toEqual(prompt);
                 expect(cmd.position()).toEqual(position);
-                var html = '<div data-index="0" class="command" role="presentation" aria-hidden="true">'+
-                               '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
-                           '</div>'+
-                           '<div data-index="1" class="command" role="presentation" aria-hidden="true">'+
-                               '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
-                           '</div>';
+                var html = '<div data-index="0"><div style="width: 100%;"><span>Hello&nbsp;World!</span></div></div>'+
+                        '<div data-index="1" class="command" role="presentation" aria-hidden="true">'+
+                        '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
+                        '</div>'+
+                        '<div data-index="2" class="command" role="presentation" aria-hidden="true">'+
+                        '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
+                        '</div>';
                 expect(term.find('.terminal-output').html()).toEqual(html);
             });
-            it('should save commands in hash', function() {
-                location.hash = '';
-                term.save_state(); // initial state
-                term.save_state('foo');
-                term.save_state('bar');
-                var id = term.id();
-                var hash = '#' + JSON.stringify([[id,1,"foo"],[id,2,"bar"]]);
-                expect(decodeURIComponent(location.hash)).toEqual(hash);
-                term.destroy().remove();
             });
             describe('exec', function() {
                 var counter = 0;
@@ -3563,6 +3630,176 @@ function tests_on_ready() {
                     expect(term.before_cursor()).toEqual(command);
                     cmd.position(-2, true);
                     expect(term.before_cursor()).toEqual('foo bar b');
+                });
+            });
+            describe('set_command/get_command', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    prompt: 'foo> '
+                });
+                it('should return init prompt', function() {
+                    expect(term.get_prompt()).toEqual('foo> ');
+                });
+                it('should return new prompt', function() {
+                    var prompt = 'bar> ';
+                    term.set_prompt(prompt);
+                    expect(term.get_prompt()).toEqual(prompt);
+                });
+            });
+            describe('complete', function() {
+                var term = $('<div/>').terminal();
+                function test(specs, options) {
+                    specs.forEach(function(spec) {
+                        term.focus();
+                        // complete method resets tab count when you press non-tab
+                        shortcut(false, false, false, 37, 'arrowleft');
+                        term.set_command(spec[0]);
+                        expect(term.complete(spec[1], options)).toBe(spec[2]);
+                        expect(term.get_command()).toEqual(spec[3]);
+                    });
+                }
+                it('should complete whole word', function() {
+                    test([
+                        ['f', ['foo', 'bar'], true, 'foo'],
+                        ['b', ['foo', 'bar'], true, 'bar'],
+                        ['F', ['FOO', 'BAR'], true, 'FOO'],
+                        ['f', ['FOO', 'BAR'], undefined, 'f']
+                    ]);
+                });
+                it('should complete common string', function() {
+                    test([
+                        ['f', ['foo-bar', 'foo-baz'], true, 'foo-ba'],
+                        ['f', ['fooBar', 'fooBaz'], true, 'fooBa']
+                    ]);
+                });
+                it("should complete word that don't match case", function() {
+                    test([
+                        ['f', ['FOO-BAZ', 'FOO-BAR'], true, 'foo-ba'],
+                        ['f', ['FooBar', 'FooBaz'], true, 'fooBa'],
+                        ['Foo', ['FOO-BAZ', 'FOO-BAR'], true, 'Foo-BA'],
+                        ['FOO', ['FOO-BAZ', 'FOO-BAR'], true, 'FOO-BA'],
+                    ], {
+                        caseSensitive: false
+                    });
+                });
+                it('should complete whole line', function() {
+                    var completion = ['lorem ipsum dolor sit amet', 'foo bar baz'];
+                    test([
+                        ['"lorem ipsum', completion, true, '"lorem ipsum dolor sit amet"'],
+                        ['lorem\\ ipsum', completion, true, 'lorem\\ ipsum\\ dolor\\ sit\\ amet'],
+                    ]);
+                    test([
+                        ['lorem', completion, true, completion[0]],
+                        ['lorem ipsum', completion, true, completion[0]]
+                    ], {
+                        word: false,
+                        escape: false
+                    });
+                });
+                it('should echo all matched strings', function() {
+                    var completion = ['foo-bar', 'foo-baz', 'foo-quux'];
+                    term.clear().focus();
+                    term.set_command('f');
+                    term.complete(completion, {echo: true});
+                    term.complete(completion, {echo: true});
+                    var re = new RegExp('^>\\sfoo-\\n' + completion.join('\\s+') + '$');
+                    var output = term.find('.terminal-output > div').map(function() {
+                        return $(this).text();
+                    }).get().join('\n');
+                    expect(output.match(re)).toBeTruthy();
+                });
+            });
+            describe('get_output', function() {
+                var term = $('<div/>').terminal($.noop, {greetings: false});
+                it('should return string out of all lines', function() {
+                    term.echo('foo');
+                    term.echo('bar');
+                    term.focus().set_command('quux');
+                    enter_key();
+                    expect(term.get_output()).toEqual('foo\nbar\n> quux');
+                });
+            });
+            describe('update', function() {
+                var term = $('<div/>').terminal();
+                function last_line() {
+                    return last_div().find('div');
+                }
+                function last_div() {
+                    return term.find('.terminal-output > div:last-child');
+                }
+                it('should update last line', function() {
+                    term.echo('foo');
+                    expect(last_line().text()).toEqual('foo');
+                    term.update(-1, 'bar');
+                    expect(last_line().text()).toEqual('bar');
+                });
+                it('should remove last line', function() {
+                    var index = term.last_index();
+                    term.echo('quux');
+                    expect(term.last_index()).toEqual(index + 1);
+                    term.update(index + 1, null);
+                    expect(term.last_index()).toEqual(index);
+                });
+                it('should call finalize', function() {
+                    var options = {
+                        finalize: function() {}
+                    };
+                    spy(options, 'finalize');
+                    term.update(-1, 'baz', options);
+                    expect(options.finalize).toHaveBeenCalled();
+                });
+            });
+            describe('keymap', function() {
+                var term;
+                var test;
+                beforeEach(function() {
+                    term = $('<div/>').terminal();
+                    test = {
+                        empty: function() {},
+                        original: function(e, original) {
+                            original();
+                        }
+                    };
+                    spy(test, 'empty');
+                    spy(test, 'original');
+                });
+                it('should set and call keymap shortcut', function() {
+                    term.keymap('CTRL+T', test.empty);
+                    shortcut(true, false, false, 84, 't');
+                    expect(test.empty).toHaveBeenCalled();
+                });
+                it('should create keymap from object', function() {
+                    term.keymap({
+                        'CTRL+T': test.empty
+                    });
+                    shortcut(true, false, false, 84, 't');
+                    expect(test.empty).toHaveBeenCalled();
+                });
+                it('should overwrite terminal keymap', function() {
+                    term.echo('foo');
+                    shortcut(true, false, false, 76, 'l');
+                    expect(term.get_output()).toEqual('');
+                    term.echo('bar');
+                    term.keymap('CTRL+L', test.empty);
+                    shortcut(true, false, false, 76, 'l');
+                    expect(term.get_output()).not.toEqual('');
+                });
+                it('should call default terminal keymap', function() {
+                    term.echo('foo');
+                    term.keymap('CTRL+L', test.original);
+                    shortcut(true, false, false, 76, 'l');
+                    expect(term.get_output()).toEqual('');
+                });
+                it('should overwrite cmd keymap', function() {
+                    term.set_command('foo');
+                    term.keymap('ENTER', test.empty);
+                    enter_key();
+                    expect(term.get_command()).toEqual('foo');
+                });
+                it('should call default cmd keymap', function() {
+                    term.set_command('foo');
+                    term.keymap('ENTER', test.original);
+                    enter_key();
+                    expect(term.get_command()).toEqual('');
                 });
             });
         });
