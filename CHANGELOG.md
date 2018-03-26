@@ -1,3 +1,9 @@
+## Next (1.15.0)
+
+### Features
+* allow to invoke terminal and cmd methods from extended commands (`[[ terminal::set_prompt(">>> ") ]]`)
+* new API method invoke_key that allow to invoke shortcut `terminal.invoke_key('CTRL+L')` will clear the terminal
+
 ## 1.14.0
 
 ### Features
