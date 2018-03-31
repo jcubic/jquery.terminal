@@ -7,8 +7,8 @@
 ## 1.14.0
 
 ### Features
-* pass options to formatters and accept option unixFormattingEscapeBrackets in unix_formatting
-  (PR by [Marcel Link](https://github.com/ml1nk)
+* pass options to formatters and accept option `unixFormattingEscapeBrackets` in `unix_formatting`
+  (PR by [Marcel Link](https://github.com/ml1nk))
 * improve performance of repaint and layout whole page when changing content of the terminal
 * use ch unit for wide characters if browser support it (it have wide support then css variables)
 * keymap terminal method and allow to set shortcuts on runtime
