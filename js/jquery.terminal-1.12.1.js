@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 26 Mar 2018 16:42:13 +0000
+ * Date: Sun, 01 Apr 2018 18:48:26 +0000
  */
 
 /* TODO:
@@ -1223,20 +1223,8 @@
                 self.insert('\n');
                 return true;
             },
-            'BACKSPACE': function() {
-                if (reverse_search) {
-                    rev_search_str = rev_search_str.slice(0, -1);
-                    draw_reverse_prompt();
-                } else if (command !== '' && position > 0) {
-                    self['delete'](-1);
-                }
-                // for next input after naitve backspace
-                // we need timeout because we don't want it to trigger
-                // for current input but next one
-                self.oneTime(1, function() {
-                    no_keydown = true;
-                });
-            },
+            'BACKSPACE': backspace_key,
+            'SHIFT+BACKSPACE': backspace_key,
             'TAB': function() {
                 self.insert('\t');
             },
@@ -1398,6 +1386,20 @@
         function next_history() {
             self.set(history.end() ? last_command : history.next());
             return false;
+        }
+        function backspace_key() {
+            if (reverse_search) {
+                rev_search_str = rev_search_str.slice(0, -1);
+                draw_reverse_prompt();
+            } else if (command !== '' && position > 0) {
+                self['delete'](-1);
+            }
+            // for next input after naitve backspace
+            // we need timeout because we don't want it to trigger
+            // for current input but next one
+            self.oneTime(1, function() {
+                no_keydown = true;
+            });
         }
         function left() {
             if (position > 0) {
@@ -2834,7 +2836,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 26 Mar 2018 16:42:13 +0000',
+        date: 'Sun, 01 Apr 2018 18:48:26 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

@@ -1223,20 +1223,8 @@
                 self.insert('\n');
                 return true;
             },
-            'BACKSPACE': function() {
-                if (reverse_search) {
-                    rev_search_str = rev_search_str.slice(0, -1);
-                    draw_reverse_prompt();
-                } else if (command !== '' && position > 0) {
-                    self['delete'](-1);
-                }
-                // for next input after naitve backspace
-                // we need timeout because we don't want it to trigger
-                // for current input but next one
-                self.oneTime(1, function() {
-                    no_keydown = true;
-                });
-            },
+            'BACKSPACE': backspace_key,
+            'SHIFT+BACKSPACE': backspace_key,
             'TAB': function() {
                 self.insert('\t');
             },
@@ -1398,6 +1386,20 @@
         function next_history() {
             self.set(history.end() ? last_command : history.next());
             return false;
+        }
+        function backspace_key() {
+            if (reverse_search) {
+                rev_search_str = rev_search_str.slice(0, -1);
+                draw_reverse_prompt();
+            } else if (command !== '' && position > 0) {
+                self['delete'](-1);
+            }
+            // for next input after naitve backspace
+            // we need timeout because we don't want it to trigger
+            // for current input but next one
+            self.oneTime(1, function() {
+                no_keydown = true;
+            });
         }
         function left() {
             if (position > 0) {

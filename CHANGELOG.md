@@ -3,6 +3,7 @@
 ### Features
 * allow to invoke terminal and cmd methods from extended commands (`[[ terminal::set_prompt(">>> ") ]]`)
 * new API method invoke_key that allow to invoke shortcut `terminal.invoke_key('CTRL+L')` will clear the terminal
+* shift+backspace now do the same thing as backspace
 
 ## 1.14.0
 
