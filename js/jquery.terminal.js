@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Apr 2018 16:54:31 +0000
+ * Date: Mon, 02 Apr 2018 17:35:18 +0000
  */
 
 /* TODO:
@@ -2867,7 +2867,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 02 Apr 2018 16:54:31 +0000',
+        date: 'Mon, 02 Apr 2018 17:35:18 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5958,7 +5958,7 @@
                 if (settings.numChars) {
                     return settings.numChars;
                 }
-                if (typeof num_chars === 'undefined') {
+                if (typeof num_chars === 'undefined' || num_chars === 1000) {
                     num_chars = get_num_chars(self, char_size);
                 }
                 return num_chars;
@@ -7178,7 +7178,7 @@
         }
         function blur_terminal() {
             old_enabled = enabled;
-            self.disable().find('textarea').trigger('blur', [true]);
+            self.disable().find('.cmd textarea').trigger('blur', [true]);
         }
         function paste_event(e) {
             e = e.originalEvent;
@@ -7323,7 +7323,7 @@
                     var count = 0;
                     var $target;
                     var name = 'click_' + self.id();
-                    var textarea = self.find('textarea');
+                    var textarea = self.find('.cmd textarea');
                     function click() {
                         if ($target.is('.terminal') ||
                             $target.is('.terminal-wrapper')) {
@@ -7368,7 +7368,7 @@
                     });
                 })();
                 (function() {
-                    var clip = self.find('textarea');
+                    var clip = self.find('.cmd textarea');
                     self.on('contextmenu.terminal', function(e) {
                         if (get_selected_text() === '') {
                             if (!$(e.target).is('img,value,audio,object,canvas,a')) {
@@ -7425,7 +7425,7 @@
                 }
                 // refocus because links have tabindex in case where user want
                 // tab change urls, we can ignore this function on click
-                self.find('textarea').focus();
+                self.find('.cmd textarea').focus();
             });
             function calculate_char_size() {
                 var width = char_size.width;
@@ -7487,22 +7487,24 @@
             }
             var in_dom = !!self.closest('body').length;
             var MutationObsrv = window.MutationObserver || window.WebKitMutationObserver;
-            if (window.IntersectionObserver) {
-                if (MutationObsrv) {
-                    mutation_observer = new MutationObsrv(function() {
-                        if (self.closest('body').length) {
-                            if (!in_dom) {
-                                self.scroll_to_bottom();
+            if (MutationObsrv) {
+                mutation_observer = new MutationObsrv(function() {
+                    if (self.closest('body').length) {
+                        if (!in_dom) {
+                            self.scroll_to_bottom();
+                            if (window.IntersectionObserver) {
                                 observe_visibility();
-                                resize();
                             }
-                            in_dom = true;
-                        } else if (in_dom) {
-                            in_dom = false;
+                            resize();
                         }
-                    });
-                    mutation_observer.observe(document.body, {childList: true});
-                }
+                        in_dom = true;
+                    } else if (in_dom) {
+                        in_dom = false;
+                    }
+                });
+                mutation_observer.observe(document.body, {childList: true});
+            }
+            if (window.IntersectionObserver) {
                 // check if element is in the DOM if not running IntersectionObserver
                 // don't make sense
                 if (in_dom) {

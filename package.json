@@ -165,7 +165,6 @@
       "guard-for-in": "error",
       "no-caller": "error",
       "no-empty-function": "error",
-      "no-eval": "error",
       "no-extend-native": "error",
       "no-extra-bind": "error",
       "no-fallthrough": "error",
