@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Apr 2018 13:24:02 +0000
+ * Date: Mon, 02 Apr 2018 16:54:31 +0000
  */
 
 /* TODO:
@@ -2582,7 +2582,7 @@
     var url_nf_re = /\b(?![^\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
-    var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([^)]*)\))\s*$/;
+    var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
@@ -2867,7 +2867,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 02 Apr 2018 13:24:02 +0000',
+        date: 'Mon, 02 Apr 2018 16:54:31 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3610,7 +3610,7 @@
                     var obj = m[2] === 'terminal' ? term : term.cmd();
                     var fn = m[3];
                     try {
-                        var args = JSON.parse('[' + m[4] + ']');
+                        var args = eval('[' + m[4] + ']');
                         if (!obj[fn]) {
                             term.error('Unknow function ' + fn);
                         } else {
@@ -4572,12 +4572,13 @@
                     linksNoReferrer: settings.linksNoReferrer,
                     char_width: char_size.width
                 };
-                if ((strlen(string) > num_chars ||
+                var cols = self.cols();
+                if ((strlen(string) > cols ||
                      string.match(/\n/)) &&
                     ((settings.wrap === true && options.wrap === undefined) ||
                      settings.wrap === false && options.wrap === true)) {
                     var words = options.keepWords;
-                    var array = $.terminal.split_equal(string, num_chars, words);
+                    var array = $.terminal.split_equal(string, cols, words);
                     for (i = 0, len = array.length; i < len; ++i) {
                         if (array[i] === '' || array[i] === '\r') {
                             output_buffer.push('<span></span>');
@@ -6254,7 +6255,7 @@
             get_prompt: function() {
                 return interpreters.top().prompt;
                 // command_line.prompt(); - can be a wrapper
-                // return command_line.prompt();
+                //return command_line.prompt();
             },
             // -------------------------------------------------------------
             // :: Enable or Disable mask depedning on the passed argument
@@ -7433,14 +7434,7 @@
                     command_line.option('char_width', char_size.width).refresh();
                 }
             }
-            if (self.is(':visible')) {
-                num_chars = self.cols();
-                command_line.resize(num_chars);
-                if (!char_size) {
-                    calculate_char_size();
-                }
-                num_rows = get_num_rows(self, char_size);
-            }
+            resize();
             function resize() {
                 if (self.is(':visible')) {
                     var width = fill.width();
@@ -7500,6 +7494,7 @@
                             if (!in_dom) {
                                 self.scroll_to_bottom();
                                 observe_visibility();
+                                resize();
                             }
                             in_dom = true;
                         } else if (in_dom) {

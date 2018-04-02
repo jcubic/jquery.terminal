@@ -33,7 +33,7 @@ users. It can also be used to debug your application.
 
 * Support for authentication (you can provide functions when users enter
   login and password or if you use JSON-RPC it can automatically call
-  login function on the server and pass token to all functions)
+  login function on the server and pass token to all functions).
 
 * Stack of interpreters - you can create commands that trigger additional
   interpreters (eg. you can use couple of JSON-RPC service and run them
@@ -45,18 +45,23 @@ users. It can also be used to debug your application.
   object/commands as you like. If the value is a string it will create
   JSON-RPC service.
 
-* Support for command line history, it uses Local Storage if possible
+* Support for command line history, it uses Local Storage if possible.
 
-* Support for tab completion
+* Support for tab completion.
 
 * Includes keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
 
 * Multiply terminals on one page (every terminal can have different
-  command, it's own authentication function and it's own command history)
+  command, it's own authentication function and it's own command history).
 
 * It catches all exceptions and displays error messages in the terminal
   (you can see errors in your javascript and php code in terminal if they
-  are in the interpreter function)
+  are in the interpreter function).
+
+* Using extended commands you can change working of the terminal without
+  touching the front-end code (using echo method and terminal formatting
+  like syntax). Read more in
+  [docs](https::/terminal.jcubic.pl/api_reference.php#extended_commands)
 
 ### Installation
 

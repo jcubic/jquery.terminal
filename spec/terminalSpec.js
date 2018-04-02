@@ -2215,50 +2215,50 @@ function tests_on_ready() {
                     greetings: greetings,
                     completion: completion
                 });
-            it('should export view', function() {
-                enter(term, 'foo');
-                enter(term, 'bar');
-                term.insert(command);
-                term.set_prompt(prompt);
-                term.set_mask(mask);
-                position = term.cmd().position();
-                exported_view = term.export_view();
-                expect(exported_view.prompt).toEqual(prompt);
-                expect(exported_view.position).toEqual(position);
-                expect(exported_view.focus).toEqual(true);
-                expect(exported_view.mask).toEqual(mask);
-                expect(exported_view.command).toEqual(command);
-                expect(exported_view.lines[0][0]).toEqual('Hello World!');
-                expect(exported_view.lines[1][0]).toEqual('> foo');
-                expect(exported_view.lines[2][0]).toEqual('> bar');
-                expect(exported_view.interpreters.size()).toEqual(1);
-                var top = exported_view.interpreters.top();
-                expect(top.interpreter).toEqual($.noop);
-                expect(top.name).toEqual(terminal_name);
-                expect(top.prompt).toEqual(prompt);
-                expect(top.greetings).toEqual(greetings);
-                expect(top.completion).toEqual('settings');
-            });
-            it('should import view', function() {
-                term.clear().push($.noop).set_prompt('# ')
-                    .set_mask(false)
-                    .set_command('foo');
-                var cmd = term.cmd();
-                cmd.position(0);
-                term.import_view(exported_view);
-                expect(cmd.mask()).toEqual(mask);
-                expect(term.get_command()).toEqual(command);
-                expect(term.get_prompt()).toEqual(prompt);
-                expect(cmd.position()).toEqual(position);
-                var html = '<div data-index="0"><div style="width: 100%;"><span>Hello&nbsp;World!</span></div></div>'+
-                        '<div data-index="1" class="command" role="presentation" aria-hidden="true">'+
-                        '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
-                        '</div>'+
-                        '<div data-index="2" class="command" role="presentation" aria-hidden="true">'+
-                        '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
-                        '</div>';
-                expect(term.find('.terminal-output').html()).toEqual(html);
-            });
+                it('should export view', function() {
+                    enter(term, 'foo');
+                    enter(term, 'bar');
+                    term.insert(command);
+                    term.set_prompt(prompt);
+                    term.set_mask(mask);
+                    position = term.cmd().position();
+                    exported_view = term.export_view();
+                    expect(exported_view.prompt).toEqual(prompt);
+                    expect(exported_view.position).toEqual(position);
+                    expect(exported_view.focus).toEqual(true);
+                    expect(exported_view.mask).toEqual(mask);
+                    expect(exported_view.command).toEqual(command);
+                    expect(exported_view.lines[0][0]).toEqual('Hello World!');
+                    expect(exported_view.lines[1][0]).toEqual('> foo');
+                    expect(exported_view.lines[2][0]).toEqual('> bar');
+                    expect(exported_view.interpreters.size()).toEqual(1);
+                    var top = exported_view.interpreters.top();
+                    expect(top.interpreter).toEqual($.noop);
+                    expect(top.name).toEqual(terminal_name);
+                    expect(top.prompt).toEqual(prompt);
+                    expect(top.greetings).toEqual(greetings);
+                    expect(top.completion).toEqual('settings');
+                });
+                it('should import view', function() {
+                    term.clear().push($.noop).set_prompt('# ')
+                        .set_mask(false)
+                        .set_command('foo');
+                    var cmd = term.cmd();
+                    cmd.position(0);
+                    term.import_view(exported_view);
+                    expect(cmd.mask()).toEqual(mask);
+                    expect(term.get_command()).toEqual(command);
+                    expect(term.get_prompt()).toEqual(prompt);
+                    expect(cmd.position()).toEqual(position);
+                    var html = '<div data-index="0"><div style="width: 100%;"><span>Hello&nbsp;World!</span></div></div>'+
+                            '<div data-index="1" class="command" role="presentation" aria-hidden="true">'+
+                            '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
+                            '</div>'+
+                            '<div data-index="2" class="command" role="presentation" aria-hidden="true">'+
+                            '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
+                            '</div>';
+                    expect(term.find('.terminal-output').html()).toEqual(html);
+                });
             });
             describe('exec', function() {
                 var counter = 0;
@@ -2967,8 +2967,54 @@ function tests_on_ready() {
                     term.echo('foo', {flush: false});
                     term.echo('bar');
                     expect(term.find('.terminal-output').text()).toEqual('foobar');
-                    term.destroy().remove();
                 });
+                describe('extended commands', function() {
+                    var term = $('<div/>').terminal($.noop, {checkArity: false});
+                    var interpreter;
+                    beforeEach(function() {
+                        interpreter = {
+                            foo: function(a, b) {
+                            }
+                        };
+                        spy(interpreter, 'foo');
+                        term.push(interpreter);
+                    });
+                    afterEach(function() {
+                        term.pop();
+                    });
+                    it('should invoke command', function() {
+                        term.echo('[[ foo ]]]');
+                        expect(interpreter.foo).toHaveBeenCalled();
+                    });
+                    it('should invoke command with arguments', function() {
+                        term.echo('[[ foo "a" /xxx/g ]]]');
+                        expect(interpreter.foo).toHaveBeenCalledWith("a", /xxx/g);
+                    });
+                    it('should invoke terminal method', function() {
+                        spy(term, 'clear');
+                        term.echo('[[ terminal::clear() ]]');
+                        expect(term.clear).toHaveBeenCalled();
+                    });
+                    it('should invoke terminal method with arguments', function() {
+                        global.foo = 10;
+                        term.echo('[[ terminal::echo("xxx", {finalize: function() { foo = 20; }}) ]]');
+                        expect(global.foo).toEqual(20);
+                    });
+                    it('should invoke terminal method where arguments have newlines', function() {
+                        global.foo = 10;
+                        term.echo(`[[ terminal::echo("xxx", {
+                                           finalize: function() {
+                                               foo = 20;
+                                           }
+                                      }) ]]`);
+                        expect(global.foo).toEqual(20);
+                    });
+                    it('should invoke cmd method', function() {
+                        term.echo('[[ cmd::prompt(">>>") ]]');
+                        expect(term.cmd().prompt()).toEqual('>>>');
+                    });
+                });
+
             });
             describe('error', function() {
                 var term = $('<div/>').terminal($.noop, {
