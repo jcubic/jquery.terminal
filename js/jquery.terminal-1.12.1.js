@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Apr 2018 17:35:18 +0000
+ * Date: Mon, 02 Apr 2018 17:52:17 +0000
  */
 
 /* TODO:
@@ -2867,7 +2867,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 02 Apr 2018 17:35:18 +0000',
+        date: 'Mon, 02 Apr 2018 17:52:17 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7487,6 +7487,7 @@
             }
             var in_dom = !!self.closest('body').length;
             var MutationObsrv = window.MutationObserver || window.WebKitMutationObserver;
+            console.log(MutationObsrv);
             if (MutationObsrv) {
                 mutation_observer = new MutationObsrv(function() {
                     if (self.closest('body').length) {
@@ -7504,12 +7505,10 @@
                 });
                 mutation_observer.observe(document.body, {childList: true});
             }
-            if (window.IntersectionObserver) {
+            if (window.IntersectionObserver && in_dom) {
                 // check if element is in the DOM if not running IntersectionObserver
                 // don't make sense
-                if (in_dom) {
-                    observe_visibility();
-                }
+                observe_visibility();
             }
             command_queue.resolve();
             // touch devices need touch event to get virtual keyboard
