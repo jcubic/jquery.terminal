@@ -1635,7 +1635,9 @@
         // :: format end encode the string
         // ---------------------------------------------------------------------
         function format(string) {
-            return $.terminal.format($.terminal.encode(wrap(string)));
+            return $.terminal.format($.terminal.encode(wrap(string)), {
+                char_width: settings.char_width
+            });
         }
         // ---------------------------------------------------------------------
         // :: function create new string with all characters in it's own
@@ -1929,9 +1931,14 @@
                     $.terminal.encode(prompt),
                     num_chars
                 );
-                var last_line = $.terminal.format(lines[lines.length - 1]);
+                var options = {
+                    char_width: settings.char_width
+                };
+                var last_line = $.terminal.format(lines[lines.length - 1], options);
                 var formatted = lines.slice(0, -1).map(function(line) {
-                    return '<span class="line">' + $.terminal.format(line) + '</span>';
+                    return '<span class="line">' +
+                        $.terminal.format(line, options) +
+                        '</span>';
                 }).concat([last_line]).join('\n');
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
@@ -1977,6 +1984,14 @@
         // :: Command Line Methods
         // ---------------------------------------------------------------------
         $.extend(self, {
+            option: function(name, value) {
+                if (typeof value === 'undefined') {
+                    return settings[name];
+                } else {
+                    settings[name] = value;
+                }
+                return self;
+            },
             name: function(string) {
                 if (string !== undefined) {
                     name = string;
@@ -2153,6 +2168,11 @@
                 } else {
                     return position;
                 }
+            },
+            refresh: function() {
+                draw_prompt();
+                redraw();
+                return self;
             },
             display_position: function(n, relative) {
                 if (n === undefined) {
@@ -2606,6 +2626,9 @@
         return div.style.width === '1ch';
     })();
     // -------------------------------------------------------------------------
+    var css_variables_supported = window.CSS && window.CSS.supports &&
+            window.CSS.supports('--fake-var', 0);
+    // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
     var strlen = (function() {
@@ -2636,22 +2659,31 @@
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
-    function extra_css(text) {
+    function char_width_prop(len, options) {
+        if (ch_unit_supported) {
+            return 'width: ' + len + 'ch';
+        } else if (!css_variables_supported) {
+            if (options.char_width) {
+                return 'width: ' + (options.char_width * len) + 'px';
+            }
+        } else {
+            return '--length: ' + len;
+        }
+        return '';
+    }
+    // -------------------------------------------------------------------------
+    function extra_css(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
             if (len !== bare.length) {
-                if (ch_unit_supported) {
-                    return 'width: ' + len + 'ch';
-                } else {
-                    return '--length: ' + len;
-                }
+                return char_width_prop(len, options);
             }
         }
         return '';
     }
     // -------------------------------------------------------------------------
-    function wide_characters(text) {
+    function wide_characters(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             if (bare.length === 1) {
@@ -2687,13 +2719,12 @@
                 if (spec.len === 1) {
                     return spec.str;
                 }
-                var style = '';
-                if (ch_unit_supported) {
-                    style = 'width: ' + spec.sum + 'ch';
+                var style = char_width_prop(spec.sum, options);
+                if (style.length) {
+                    return '<span style="' + style + '">' + spec.str + '</span>';
                 } else {
-                    style = '--length: ' + spec.sum;
+                    return '<span>' + spec.str + '</span>';
                 }
-                return '<span style="' + style + '">' + spec.str + '</span>';
             }).join('');
         }
         return text;
@@ -3358,9 +3389,9 @@
                                 data = data_text.replace(/&#93;/g, ']')
                                     .replace(/>/g, '&gt;').replace(/</g, '&lt;');
                             }
-                            var extra = extra_css(text);
+                            var extra = extra_css(text, options);
                             if (extra) {
-                                text = wide_characters(text);
+                                text = wide_characters(text, options);
                                 style_str += extra;
                             }
                             var result;
@@ -3398,9 +3429,9 @@
                         });
                     } else {
                         text = safe_text(text);
-                        var extra = extra_css(text);
+                        var extra = extra_css(text, options);
                         if (extra.length) {
-                            text = wide_characters(text);
+                            text = wide_characters(text, options);
                             return '<span style="' + extra + '">' + text + '</span>';
                         } else {
                             return '<span>' + text + '</span>';
@@ -4537,6 +4568,10 @@
                 // that returned empty string in this case whe need to add container
                 // because on update/resize it can return content
             } else if (!options.raw) {
+                var format_options = {
+                    linksNoReferrer: settings.linksNoReferrer,
+                    char_width: char_size.width
+                };
                 if ((strlen(string) > num_chars ||
                      string.match(/\n/)) &&
                     ((settings.wrap === true && options.wrap === undefined) ||
@@ -4547,16 +4582,12 @@
                         if (array[i] === '' || array[i] === '\r') {
                             output_buffer.push('<span></span>');
                         } else {
-                            output_buffer.push($.terminal.format(array[i], {
-                                linksNoReferrer: settings.linksNoReferrer
-                            }));
+                            output_buffer.push($.terminal.format(array[i], format_options));
                         }
                     }
                 } else {
                     string = $.terminal.normalize(string);
-                    string = $.terminal.format(string, {
-                        linksNoReferrer: settings.linksNoReferrer
-                    });
+                    string = $.terminal.format(string, format_options);
                     string.split(/\n/).forEach(function(string) {
                         output_buffer.push(string);
                     });
@@ -7218,7 +7249,7 @@
                 caseSensitiveSearch: settings.caseSensitiveSearch,
                 width: '100%',
                 enabled: false,
-
+                char_width: char_size.width,
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
@@ -7392,11 +7423,18 @@
                 // tab change urls, we can ignore this function on click
                 self.find('textarea').focus();
             });
+            function calculate_char_size() {
+                var width = char_size.width;
+                char_size = get_char_size(self);
+                if (width !== char_size.width) {
+                    command_line.option('char_width', char_size.width).refresh();
+                }
+            }
             if (self.is(':visible')) {
                 num_chars = self.cols();
                 command_line.resize(num_chars);
                 if (!char_size) {
-                    char_size = get_char_size(self);
+                    calculate_char_size();
                 }
                 num_rows = get_num_rows(self, char_size);
             }
@@ -7415,7 +7453,7 @@
             function create_resizers() {
                 self.resizer('unbind').resizer(resize);
                 font_resizer.resizer('unbind').resizer(function() {
-                    char_size = get_char_size(self);
+                    calculate_char_size();
                     self.resize();
                 });
             }
@@ -7435,7 +7473,7 @@
                     if (self.is(':visible') && !visible) {
                         visible = true;
                         create_resizers();
-                        char_size = get_char_size(self);
+                        calculate_char_size();
                         resize();
                         if (was_enabled) {
                             self.enable();

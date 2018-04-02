@@ -5,6 +5,9 @@
 * new API method invoke_key that allow to invoke shortcut `terminal.invoke_key('CTRL+L')` will clear the terminal
 * shift+backspace now do the same thing as backspace
 
+### Bugs
+* fix wider characters in IE (#380)[https://github.com/jcubic/jquery.terminal/issues/380]
+
 ## 1.14.0
 
 ### Features
