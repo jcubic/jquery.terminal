@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Apr 2018 17:52:17 +0000
+ * Date: Mon, 02 Apr 2018 18:08:01 +0000
  */
 
 /* TODO:
@@ -2867,7 +2867,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 02 Apr 2018 17:52:17 +0000',
+        date: 'Mon, 02 Apr 2018 18:08:01 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7487,7 +7487,6 @@
             }
             var in_dom = !!self.closest('body').length;
             var MutationObsrv = window.MutationObserver || window.WebKitMutationObserver;
-            console.log(MutationObsrv);
             if (MutationObsrv) {
                 mutation_observer = new MutationObsrv(function() {
                     if (self.closest('body').length) {

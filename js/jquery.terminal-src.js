@@ -7487,7 +7487,6 @@
             }
             var in_dom = !!self.closest('body').length;
             var MutationObsrv = window.MutationObserver || window.WebKitMutationObserver;
-            console.log(MutationObsrv);
             if (MutationObsrv) {
                 mutation_observer = new MutationObsrv(function() {
                     if (self.closest('body').length) {
