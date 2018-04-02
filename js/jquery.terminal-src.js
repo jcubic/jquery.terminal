@@ -4582,7 +4582,10 @@
                         if (array[i] === '' || array[i] === '\r') {
                             output_buffer.push('<span></span>');
                         } else {
-                            output_buffer.push($.terminal.format(array[i], format_options));
+                            output_buffer.push($.terminal.format(
+                                array[i],
+                                format_options
+                            ));
                         }
                     }
                 } else {

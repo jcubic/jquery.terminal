@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Apr 2018 12:07:58 +0000
+ * Date: Mon, 02 Apr 2018 13:24:02 +0000
  */
 
 /* TODO:
@@ -2867,7 +2867,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 02 Apr 2018 12:07:58 +0000',
+        date: 'Mon, 02 Apr 2018 13:24:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4582,7 +4582,10 @@
                         if (array[i] === '' || array[i] === '\r') {
                             output_buffer.push('<span></span>');
                         } else {
-                            output_buffer.push($.terminal.format(array[i], format_options));
+                            output_buffer.push($.terminal.format(
+                                array[i],
+                                format_options
+                            ));
                         }
                     }
                 } else {
