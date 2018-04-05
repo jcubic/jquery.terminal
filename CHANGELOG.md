@@ -8,6 +8,7 @@
 ### Bugs
 * fix wider characters in IE (#380)[https://github.com/jcubic/jquery.terminal/issues/380]
 * fix issue with number of characters when terminal is added to DOM after creation in IE
+* fix scrolling on body in Safari
 
 ## 1.14.0
 

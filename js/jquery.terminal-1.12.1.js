@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 02 Apr 2018 18:08:01 +0000
+ * Date: Thu, 05 Apr 2018 15:42:16 +0000
  */
 
 /* TODO:
@@ -2867,7 +2867,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 02 Apr 2018 18:08:01 +0000',
+        date: 'Thu, 05 Apr 2018 15:42:16 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7123,8 +7123,8 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        // Some browser use html for scrolling
-        if (self.is('body,html')) {
+        // Old Chrome used html for scrolling, but we can't use body,html on Safari
+        if (self.is('body') && !!window.chrome && !!window.chrome.webstore) {
             scroll_object = $('body,html');
         } else {
             scroll_object = self;

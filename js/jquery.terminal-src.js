@@ -7123,8 +7123,8 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        // Some browser use html for scrolling
-        if (self.is('body,html')) {
+        // Old Chrome used html for scrolling, but we can't use body,html on Safari
+        if (self.is('body') && !!window.chrome && !!window.chrome.webstore) {
             scroll_object = $('body,html');
         } else {
             scroll_object = self;
