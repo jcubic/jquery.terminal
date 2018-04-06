@@ -138,7 +138,7 @@ body.terminal {
     float: left;
 }
 .terminal, .cmd {
-    font-family: monospace;
+    font-family: Consolas,monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     color: #aaa;
     background-color: #000;
