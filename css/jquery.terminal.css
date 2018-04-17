@@ -244,6 +244,7 @@ terminal .terminal-output > div {
 }
 .terminal .terminal-output div.error, .terminal .terminal-output div.error div {
     color: red;
+    color: var(--error-color, red);
 }
 .tilda {
     position: fixed;
