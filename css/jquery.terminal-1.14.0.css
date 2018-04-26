@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Thu, 05 Apr 2018 15:44:14 +0000
+ * Date: Thu, 26 Apr 2018 08:59:58 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -244,6 +244,7 @@ terminal .terminal-output > div {
 }
 .terminal .terminal-output div.error, .terminal .terminal-output div.error div {
     color: red;
+    color: var(--error-color, red);
 }
 .tilda {
     position: fixed;

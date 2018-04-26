@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 05 Apr 2018 15:44:13 +0000
+ * Date: Thu, 26 Apr 2018 09:27:11 +0000
  */
 
 /* TODO:
@@ -2589,6 +2589,7 @@
     var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
+    var string_re = /("(?:[^"\\]|\\(?:\\\\)*")*"|'(?:[^'\\]|\\(?:\\\\)*')*')/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     // -------------------------------------------------------------------------
@@ -2867,7 +2868,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 05 Apr 2018 15:44:13 +0000',
+        date: 'Thu, 26 Apr 2018 09:27:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3526,20 +3527,23 @@
         // ---------------------------------------------------------------------
         parse_argument: function parse_argument(arg, strict) {
             function parse_string(string) {
-                // remove quotes if before are even number of slashes
-                // we don't remove slases becuase they are handled by JSON.parse
-                //string = string.replace(/([^\\])['"]$/, '$1');
-                if (string.match(/^['"]/)) {
-                    // fixing regex to match empty string is not worth it
-                    if (string === '""' || string === "''") {
-                        return '';
+                // split string to string literals and non-strings
+                return string.split(string_re).map(function(string) {
+                    // remove quotes if before are even number of slashes
+                    // we don't remove slases becuase they are handled by JSON.parse
+                    if (string.match(/^['"]/)) {
+                        // fixing regex to match empty string is not worth it
+                        if (string === '""' || string === "''") {
+                            return '';
+                        }
+                        var quote = string[0];
+                        var re = new RegExp("(^|(?:\\\\(?:\\\\)*)?)" + quote, "g");
+                        string = string.replace(re, "$1");
                     }
-                    var quote = string[0];
-                    var re = new RegExp("((^|[^\\\\])(?:\\\\\\\\)*)" + quote, "g");
-                    string = string.replace(re, "$1");
-                }
-                // use build in function to parse rest of escaped characters
-                return JSON.parse('"' + string + '"');
+                    string = '"' + string + '"';
+                    // use build in function to parse rest of escaped characters
+                    return JSON.parse(string);
+                }).join('');
             }
             if (strict === false) {
                 if (arg[0] === "'" && arg[arg.length - 1] === "'") {

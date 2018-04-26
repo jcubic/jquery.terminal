@@ -239,6 +239,16 @@ function tests_on_ready() {
                     rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 ""'
                 });
             });
+            it('should handle JSON string', function() {
+                var cmd = jQuery.terminal.parse_command('{"demo": ["error"]}');
+                expect(cmd).toEqual({
+                    command: '{"demo": ["error"]}',
+                    name: '{"demo":',
+                    args: ['[error]}'],
+                    args_quotes: [""],
+                    rest: '["error"]}'
+                });
+            });
         });
         var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz';
         describe('$.terminal.from_ansi', function() {
