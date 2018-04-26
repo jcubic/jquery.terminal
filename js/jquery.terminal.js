@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 26 Apr 2018 09:27:11 +0000
+ * Date: Thu, 26 Apr 2018 16:34:14 +0000
  */
 
 /* TODO:
@@ -2868,7 +2868,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 26 Apr 2018 09:27:11 +0000',
+        date: 'Thu, 26 Apr 2018 16:34:14 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3207,7 +3207,6 @@
                                 prev_format = last.match(format_begin_re)[1];
                             }
                         }
-                        output = output.replace(/^(\[\[[^\]]+\])?\]/, '');
                         result.push(output);
                         // modify loop by returing new data
                         return {index: new_index, length: 0, space: -1};

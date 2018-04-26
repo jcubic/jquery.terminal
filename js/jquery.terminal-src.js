@@ -3207,7 +3207,6 @@
                                 prev_format = last.match(format_begin_re)[1];
                             }
                         }
-                        output = output.replace(/^(\[\[[^\]]+\])?\]/, '');
                         result.push(output);
                         // modify loop by returing new data
                         return {index: new_index, length: 0, space: -1};

@@ -733,7 +733,7 @@ function tests_on_ready() {
             });
             it('should handle new line as first character of formatting #375', function() {
                 var specs = [
-                    ['A[[;;]\n]B', ['A', 'B']],
+                    ['A[[;;]\n]B', ['A', '[[;;;;\\n]]B']],
                     ['A[[;;]\nB]C', ['A', '[[;;;;\\nB]B]C']]
                 ];
                 specs.forEach(function(spec) {
@@ -2978,6 +2978,11 @@ function tests_on_ready() {
                     term.echo('bar');
                     expect(term.find('.terminal-output').text()).toEqual('foobar');
                 });
+                it('should render multiline JSON array #375', function() {
+                    var input = JSON.stringify([{"error": "bug"}], null, 2);
+                    term.clear().echo(input);
+                    expect(output().join('\n')).toEqual(input);
+                });
                 describe('extended commands', function() {
                     var term = $('<div/>').terminal($.noop, {checkArity: false});
                     var interpreter;
@@ -3024,7 +3029,6 @@ function tests_on_ready() {
                         expect(term.cmd().prompt()).toEqual('>>>');
                     });
                 });
-
             });
             describe('error', function() {
                 var term = $('<div/>').terminal($.noop, {
