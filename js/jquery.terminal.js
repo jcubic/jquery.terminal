@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 29 Apr 2018 07:55:11 +0000
+ * Date: Sun, 29 Apr 2018 08:25:28 +0000
  */
 
 /* TODO:
@@ -2632,6 +2632,8 @@
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
+    var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    // -------------------------------------------------------------------------
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
             return function(string) {
@@ -2868,7 +2870,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 29 Apr 2018 07:55:11 +0000',
+        date: 'Sun, 29 Apr 2018 08:25:28 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7126,7 +7128,6 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         // scrollTop need be on html but scrollHeight taken from body
         // on Safari both on body it's easier to just put both in selector and it works
         if (self.is('body') && !is_safari) {

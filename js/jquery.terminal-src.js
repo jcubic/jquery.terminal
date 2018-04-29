@@ -2632,6 +2632,8 @@
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
+    var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    // -------------------------------------------------------------------------
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
             return function(string) {
@@ -7126,7 +7128,6 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         // scrollTop need be on html but scrollHeight taken from body
         // on Safari both on body it's easier to just put both in selector and it works
         if (self.is('body') && !is_safari) {
