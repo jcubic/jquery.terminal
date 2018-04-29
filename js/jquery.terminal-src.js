@@ -7126,9 +7126,11 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        // Old Chrome used html for scrolling, but we can't use body,html on Safari
-        if (self.is('body') && !!window.chrome && !!window.chrome.webstore) {
-            scroll_object = $('body,html');
+        var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        // scrollTop need be on html but scrollHeight taken from body
+        // on Safari both on body it's easier to just put both in selector and it works
+        if (self.is('body') && !is_safari) {
+            scroll_object = $('html,body');
         } else {
             scroll_object = self;
         }

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 26 Apr 2018 16:34:14 +0000
+ * Date: Sun, 29 Apr 2018 07:55:11 +0000
  */
 
 /* TODO:
@@ -2868,7 +2868,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 26 Apr 2018 16:34:14 +0000',
+        date: 'Sun, 29 Apr 2018 07:55:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7126,9 +7126,11 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        // Old Chrome used html for scrolling, but we can't use body,html on Safari
-        if (self.is('body') && !!window.chrome && !!window.chrome.webstore) {
-            scroll_object = $('body,html');
+        var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        // scrollTop need be on html but scrollHeight taken from body
+        // on Safari both on body it's easier to just put both in selector and it works
+        if (self.is('body') && !is_safari) {
+            scroll_object = $('html,body');
         } else {
             scroll_object = self;
         }
