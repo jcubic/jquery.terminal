@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 29 Apr 2018 08:25:28 +0000
+ * Date: Thu, 03 May 2018 15:38:02 +0000
  */
 
 /* TODO:
@@ -2243,6 +2243,7 @@
                     }
                     animation(true);
                     draw_prompt();
+                    fix_textarea();
                 }
                 mobile_focus();
                 return self;
@@ -2457,17 +2458,18 @@
         function debug(str) {
             if (false) {
                 console.log(str);
-                //$.terminal.active().echo(str);
+                $.terminal.active().echo(str);
             }
         }
         function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
+            // correct for fake space used for select all context menu hack
+            var val = clip.val().replace(/^ /, '');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
-            var val = clip.val();
             if ((no_keydown || process || ((no_keypress || dead_key) && !skip_insert &&
                                           (single_key || no_key) && !backspace)) &&
                 val !== command) {
@@ -2870,7 +2872,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 29 Apr 2018 08:25:28 +0000',
+        date: 'Thu, 03 May 2018 15:38:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

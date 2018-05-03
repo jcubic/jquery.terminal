@@ -2243,6 +2243,7 @@
                     }
                     animation(true);
                     draw_prompt();
+                    fix_textarea();
                 }
                 mobile_focus();
                 return self;
@@ -2457,17 +2458,18 @@
         function debug(str) {
             if (false) {
                 console.log(str);
-                //$.terminal.active().echo(str);
+                $.terminal.active().echo(str);
             }
         }
         function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
+            // correct for fake space used for select all context menu hack
+            var val = clip.val().replace(/^ /, '');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
-            var val = clip.val();
             if ((no_keydown || process || ((no_keypress || dead_key) && !skip_insert &&
                                           (single_key || no_key) && !backspace)) &&
                 val !== command) {
