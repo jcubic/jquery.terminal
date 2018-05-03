@@ -11,6 +11,7 @@
 * fix scrolling on body in Safari
 * fix exception when entering JSON with literal strings (#389)[https://github.com/jcubic/jquery.terminal/issues/389]
 * fix orphaned closing bracket on multiline echo (#390)[https://github.com/jcubic/jquery.terminal/issues/390]
+* fix whitespace insert after first character after first focus (#391)[https://github.com/jcubic/jquery.terminal/issues/391]
 
 ## 1.14.0
 
