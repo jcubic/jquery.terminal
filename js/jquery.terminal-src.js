@@ -7420,9 +7420,7 @@
                     });
                 })();
             }
-            // .on('mouseup', 'a', function(e) {
-            // in new jquery .delegate just call .on
-            self.delegate('a', 'mouseup', function(e) {
+            self.on('click', 'a', function(e) {
                 var $this = $(this);
                 if ($this.closest('.exception').length) {
                     var href = $this.attr('href');
@@ -7433,7 +7431,9 @@
                 }
                 // refocus because links have tabindex in case where user want
                 // tab change urls, we can ignore this function on click
-                self.find('.cmd textarea').focus();
+                if (enabled) {
+                    self.find('.cmd textarea').focus();
+                }
             });
             function calculate_char_size() {
                 var width = char_size.width;

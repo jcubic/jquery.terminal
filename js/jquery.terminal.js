@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 03 May 2018 15:38:02 +0000
+ * Date: Sat, 12 May 2018 08:39:19 +0000
  */
 
 /* TODO:
@@ -2872,7 +2872,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 03 May 2018 15:38:02 +0000',
+        date: 'Sat, 12 May 2018 08:39:19 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7420,9 +7420,7 @@
                     });
                 })();
             }
-            // .on('mouseup', 'a', function(e) {
-            // in new jquery .delegate just call .on
-            self.delegate('a', 'mouseup', function(e) {
+            self.on('click', 'a', function(e) {
                 var $this = $(this);
                 if ($this.closest('.exception').length) {
                     var href = $this.attr('href');
@@ -7433,7 +7431,9 @@
                 }
                 // refocus because links have tabindex in case where user want
                 // tab change urls, we can ignore this function on click
-                self.find('.cmd textarea').focus();
+                if (enabled) {
+                    self.find('.cmd textarea').focus();
+                }
             });
             function calculate_char_size() {
                 var width = char_size.width;
