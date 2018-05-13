@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version DEV
+ *           \/              /____/                              version 1.15.0
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 12 May 2018 08:39:19 +0000
+ * Date: Sun, 13 May 2018 09:34:11 +0000
  */
 
 /* TODO:
@@ -2871,8 +2871,8 @@
         }
     }
     $.terminal = {
-        version: 'DEV',
-        date: 'Sat, 12 May 2018 08:39:19 +0000',
+        version: '1.15.0',
+        date: 'Sun, 13 May 2018 09:34:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
