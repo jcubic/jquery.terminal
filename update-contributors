@@ -1,13 +1,22 @@
 #!/bin/bash
 
-CONTRIBUTORS=`./contributors -u jcubic -r jquery.terminal -m $@  | tr '\n' '☺'`
 
-if echo "$CONTRIBUTORS" | grep ERROR > /dev/null; then
-    echo "$CONTRIBUTORS" | tr '☺' '\n'
-else
-    cat README.in | sed -n "/CONTRIBUTORS-START/{p;:a;N;/CONTRIBUTORS-END/!ba;s%.*\n%${CONTRIBUTORS}%};p" | tr '☺' '\n' > README.tmp
-    cp README.tmp README.in
-    rm README.tmp
-fi
+function contributors() {
+    user=$1
+    repo=$2
+    marker=$3
+    file=$4
 
+    CONTRIBUTORS=`./contributors -u $user -r $repo -m  | tr '\n' '☺'`
+    if echo "$CONTRIBUTORS" | grep ERROR > /dev/null; then
+        echo "$CONTRIBUTORS" | tr '☺' '\n'
+    else
+        cat $file | sed -n "/${marker}-START/{p;:a;N;/${marker}-END/!ba;s%.*\n%${CONTRIBUTORS}%};p" | tr '☺' '\n' > README.tmp
+        cp README.tmp $file
+        rm README.tmp
+    fi
+}
 
+contributors jcubic jquery.terminal "CONTRIBUTORS" templates/README.in
+contributors jcubic jquery.terminal-www "CONTRIBUTORS-WWW" templates/README.in
+contributors jcubic jquery.terminal-www "CONTRIBUTORS" www/README.md
