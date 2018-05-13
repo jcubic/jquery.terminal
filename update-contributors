@@ -7,7 +7,7 @@ function contributors() {
     marker=$3
     file=$4
 
-    CONTRIBUTORS=`./contributors -u $user -r $repo -m  | tr '\n' '☺'`
+    CONTRIBUTORS=`./contributors -u $user -r $repo -m | tr '\n' '☺'`
     if echo "$CONTRIBUTORS" | grep ERROR > /dev/null; then
         echo "$CONTRIBUTORS" | tr '☺' '\n'
     else

@@ -56,8 +56,8 @@ if (argv.u && argv.r) {
         "per_page": 100
     };
     if (argv.t) {
+        query['access_token'] = argv.t;
     }
-    query['access_token'] = '158f7eadac269522ce16c805e238612a125e8277';
     get('https://api.github.com' + path, query).then(function(contributors) {
         return Promise.all(contributors.map(function(contributor) {
             var path = contributor.url.replace(/https:\/\/[^\/]+/, '');
