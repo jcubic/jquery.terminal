@@ -1,4 +1,4 @@
-## Next (1.15.0)
+## 1.15.0
 
 ### Features
 * allow to invoke terminal and cmd methods from extended commands (`[[ terminal::set_prompt(">>> ") ]]`)
