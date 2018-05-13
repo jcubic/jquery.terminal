@@ -100,7 +100,7 @@ jsonlint: package.json bower.json
 	$(JSONLINT) bower.json > /dev/null
 
 publish:
-	$(GIT) clone $(URL) npm
+	$(GIT) clone $(URL) --depth 1 npm
 	$(CD) npm && $(NPM) publish
 	$(RM) -rf npm
 
