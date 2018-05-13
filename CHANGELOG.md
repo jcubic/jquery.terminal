@@ -1,8 +1,24 @@
+## Next (1.15.0)
+
+### Features
+* allow to invoke terminal and cmd methods from extended commands (`[[ terminal::set_prompt(">>> ") ]]`)
+* new API method invoke_key that allow to invoke shortcut `terminal.invoke_key('CTRL+L')` will clear the terminal
+* shift+backspace now do the same thing as backspace
+
+### Bugs
+* fix wider characters in IE (#380)[https://github.com/jcubic/jquery.terminal/issues/380]
+* fix issue with number of characters when terminal is added to DOM after creation in IE
+* fix scrolling on body in Safari
+* fix exception when entering JSON with literal strings (#389)[https://github.com/jcubic/jquery.terminal/issues/389]
+* fix orphaned closing bracket on multiline echo (#390)[https://github.com/jcubic/jquery.terminal/issues/390]
+* fix whitespace insert after first character after first focus (#391)[https://github.com/jcubic/jquery.terminal/issues/391]
+* fix open link when click on url from exception
+
 ## 1.14.0
 
 ### Features
-* pass options to formatters and accept option unixFormattingEscapeBrackets in unix_formatting
-  (PR by [Marcel Link](https://github.com/ml1nk)
+* pass options to formatters and accept option `unixFormattingEscapeBrackets` in `unix_formatting`
+  (PR by [Marcel Link](https://github.com/ml1nk))
 * improve performance of repaint and layout whole page when changing content of the terminal
 * use ch unit for wide characters if browser support it (it have wide support then css variables)
 * keymap terminal method and allow to set shortcuts on runtime

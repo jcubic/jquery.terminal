@@ -1223,20 +1223,8 @@
                 self.insert('\n');
                 return true;
             },
-            'BACKSPACE': function() {
-                if (reverse_search) {
-                    rev_search_str = rev_search_str.slice(0, -1);
-                    draw_reverse_prompt();
-                } else if (command !== '' && position > 0) {
-                    self['delete'](-1);
-                }
-                // for next input after naitve backspace
-                // we need timeout because we don't want it to trigger
-                // for current input but next one
-                self.oneTime(1, function() {
-                    no_keydown = true;
-                });
-            },
+            'BACKSPACE': backspace_key,
+            'SHIFT+BACKSPACE': backspace_key,
             'TAB': function() {
                 self.insert('\t');
             },
@@ -1398,6 +1386,20 @@
         function next_history() {
             self.set(history.end() ? last_command : history.next());
             return false;
+        }
+        function backspace_key() {
+            if (reverse_search) {
+                rev_search_str = rev_search_str.slice(0, -1);
+                draw_reverse_prompt();
+            } else if (command !== '' && position > 0) {
+                self['delete'](-1);
+            }
+            // for next input after naitve backspace
+            // we need timeout because we don't want it to trigger
+            // for current input but next one
+            self.oneTime(1, function() {
+                no_keydown = true;
+            });
         }
         function left() {
             if (position > 0) {
@@ -1633,7 +1635,9 @@
         // :: format end encode the string
         // ---------------------------------------------------------------------
         function format(string) {
-            return $.terminal.format($.terminal.encode(wrap(string)));
+            return $.terminal.format($.terminal.encode(wrap(string)), {
+                char_width: settings.char_width
+            });
         }
         // ---------------------------------------------------------------------
         // :: function create new string with all characters in it's own
@@ -1927,9 +1931,14 @@
                     $.terminal.encode(prompt),
                     num_chars
                 );
-                var last_line = $.terminal.format(lines[lines.length - 1]);
+                var options = {
+                    char_width: settings.char_width
+                };
+                var last_line = $.terminal.format(lines[lines.length - 1], options);
                 var formatted = lines.slice(0, -1).map(function(line) {
-                    return '<span class="line">' + $.terminal.format(line) + '</span>';
+                    return '<span class="line">' +
+                        $.terminal.format(line, options) +
+                        '</span>';
                 }).concat([last_line]).join('\n');
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
@@ -1975,6 +1984,14 @@
         // :: Command Line Methods
         // ---------------------------------------------------------------------
         $.extend(self, {
+            option: function(name, value) {
+                if (typeof value === 'undefined') {
+                    return settings[name];
+                } else {
+                    settings[name] = value;
+                }
+                return self;
+            },
             name: function(string) {
                 if (string !== undefined) {
                     name = string;
@@ -2152,6 +2169,11 @@
                     return position;
                 }
             },
+            refresh: function() {
+                draw_prompt();
+                redraw();
+                return self;
+            },
             display_position: function(n, relative) {
                 if (n === undefined) {
                     return formatted_position;
@@ -2221,6 +2243,7 @@
                     }
                     animation(true);
                     draw_prompt();
+                    fix_textarea();
                 }
                 mobile_focus();
                 return self;
@@ -2435,17 +2458,18 @@
         function debug(str) {
             if (false) {
                 console.log(str);
-                //$.terminal.active().echo(str);
+                $.terminal.active().echo(str);
             }
         }
         function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
+            // correct for fake space used for select all context menu hack
+            var val = clip.val().replace(/^ /, '');
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
-            var val = clip.val();
             if ((no_keydown || process || ((no_keypress || dead_key) && !skip_insert &&
                                           (single_key || no_key) && !backspace)) &&
                 val !== command) {
@@ -2560,12 +2584,14 @@
     var url_nf_re = /\b(?![^\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
+    var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
+    var string_re = /("(?:[^"\\]|\\(?:\\\\)*")*"|'(?:[^'\\]|\\(?:\\\\)*')*')/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     // -------------------------------------------------------------------------
@@ -2603,7 +2629,12 @@
         return div.style.width === '1ch';
     })();
     // -------------------------------------------------------------------------
+    var css_variables_supported = window.CSS && window.CSS.supports &&
+            window.CSS.supports('--fake-var', 0);
+    // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
+    // -------------------------------------------------------------------------
+    var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     // -------------------------------------------------------------------------
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
@@ -2633,22 +2664,31 @@
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
-    function extra_css(text) {
+    function char_width_prop(len, options) {
+        if (ch_unit_supported) {
+            return 'width: ' + len + 'ch';
+        } else if (!css_variables_supported) {
+            if (options.char_width) {
+                return 'width: ' + (options.char_width * len) + 'px';
+            }
+        } else {
+            return '--length: ' + len;
+        }
+        return '';
+    }
+    // -------------------------------------------------------------------------
+    function extra_css(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
             if (len !== bare.length) {
-                if (ch_unit_supported) {
-                    return 'width: ' + len + 'ch';
-                } else {
-                    return '--length: ' + len;
-                }
+                return char_width_prop(len, options);
             }
         }
         return '';
     }
     // -------------------------------------------------------------------------
-    function wide_characters(text) {
+    function wide_characters(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             if (bare.length === 1) {
@@ -2684,13 +2724,12 @@
                 if (spec.len === 1) {
                     return spec.str;
                 }
-                var style = '';
-                if (ch_unit_supported) {
-                    style = 'width: ' + spec.sum + 'ch';
+                var style = char_width_prop(spec.sum, options);
+                if (style.length) {
+                    return '<span style="' + style + '">' + spec.str + '</span>';
                 } else {
-                    style = '--length: ' + spec.sum;
+                    return '<span>' + spec.str + '</span>';
                 }
-                return '<span style="' + style + '">' + spec.str + '</span>';
             }).join('');
         }
         return text;
@@ -3172,7 +3211,6 @@
                                 prev_format = last.match(format_begin_re)[1];
                             }
                         }
-                        output = output.replace(/^(\[\[[^\]]+\])?\]/, '');
                         result.push(output);
                         // modify loop by returing new data
                         return {index: new_index, length: 0, space: -1};
@@ -3355,9 +3393,9 @@
                                 data = data_text.replace(/&#93;/g, ']')
                                     .replace(/>/g, '&gt;').replace(/</g, '&lt;');
                             }
-                            var extra = extra_css(text);
+                            var extra = extra_css(text, options);
                             if (extra) {
-                                text = wide_characters(text);
+                                text = wide_characters(text, options);
                                 style_str += extra;
                             }
                             var result;
@@ -3395,9 +3433,9 @@
                         });
                     } else {
                         text = safe_text(text);
-                        var extra = extra_css(text);
+                        var extra = extra_css(text, options);
                         if (extra.length) {
-                            text = wide_characters(text);
+                            text = wide_characters(text, options);
                             return '<span style="' + extra + '">' + text + '</span>';
                         } else {
                             return '<span>' + text + '</span>';
@@ -3492,20 +3530,23 @@
         // ---------------------------------------------------------------------
         parse_argument: function parse_argument(arg, strict) {
             function parse_string(string) {
-                // remove quotes if before are even number of slashes
-                // we don't remove slases becuase they are handled by JSON.parse
-                //string = string.replace(/([^\\])['"]$/, '$1');
-                if (string.match(/^['"]/)) {
-                    // fixing regex to match empty string is not worth it
-                    if (string === '""' || string === "''") {
-                        return '';
+                // split string to string literals and non-strings
+                return string.split(string_re).map(function(string) {
+                    // remove quotes if before are even number of slashes
+                    // we don't remove slases becuase they are handled by JSON.parse
+                    if (string.match(/^['"]/)) {
+                        // fixing regex to match empty string is not worth it
+                        if (string === '""' || string === "''") {
+                            return '';
+                        }
+                        var quote = string[0];
+                        var re = new RegExp("(^|(?:\\\\(?:\\\\)*)?)" + quote, "g");
+                        string = string.replace(re, "$1");
                     }
-                    var quote = string[0];
-                    var re = new RegExp("((^|[^\\\\])(?:\\\\\\\\)*)" + quote, "g");
-                    string = string.replace(re, "$1");
-                }
-                // use build in function to parse rest of escaped characters
-                return JSON.parse('"' + string + '"');
+                    string = '"' + string + '"';
+                    // use build in function to parse rest of escaped characters
+                    return JSON.parse(string);
+                }).join('');
             }
             if (strict === false) {
                 if (arg[0] === "'" && arg[arg.length - 1] === "'") {
@@ -3570,9 +3611,27 @@
         extended_command: function extended_command(term, string) {
             try {
                 change_hash = false;
-                term.exec(string, true).done(function() {
-                    change_hash = true;
-                });
+                var m = string.match(extended_command_re);
+                if (m) {
+                    string = m[1];
+                    var obj = m[2] === 'terminal' ? term : term.cmd();
+                    var fn = m[3];
+                    try {
+                        var args = eval('[' + m[4] + ']');
+                        if (!obj[fn]) {
+                            term.error('Unknow function ' + fn);
+                        } else {
+                            obj[fn].apply(term, args);
+                        }
+                    } catch (e) {
+                        term.error('Invalid invocation in ' +
+                                   $.terminal.escape_brackets(string));
+                    }
+                } else {
+                    term.exec(string, true).done(function() {
+                        change_hash = true;
+                    });
+                }
             } catch (e) {
                 // error is process in exec
             }
@@ -4516,26 +4575,30 @@
                 // that returned empty string in this case whe need to add container
                 // because on update/resize it can return content
             } else if (!options.raw) {
-                if ((strlen(string) > num_chars ||
+                var format_options = {
+                    linksNoReferrer: settings.linksNoReferrer,
+                    char_width: char_size.width
+                };
+                var cols = self.cols();
+                if ((strlen(string) > cols ||
                      string.match(/\n/)) &&
                     ((settings.wrap === true && options.wrap === undefined) ||
                      settings.wrap === false && options.wrap === true)) {
                     var words = options.keepWords;
-                    var array = $.terminal.split_equal(string, num_chars, words);
+                    var array = $.terminal.split_equal(string, cols, words);
                     for (i = 0, len = array.length; i < len; ++i) {
                         if (array[i] === '' || array[i] === '\r') {
                             output_buffer.push('<span></span>');
                         } else {
-                            output_buffer.push($.terminal.format(array[i], {
-                                linksNoReferrer: settings.linksNoReferrer
-                            }));
+                            output_buffer.push($.terminal.format(
+                                array[i],
+                                format_options
+                            ));
                         }
                     }
                 } else {
                     string = $.terminal.normalize(string);
-                    string = $.terminal.format(string, {
-                        linksNoReferrer: settings.linksNoReferrer
-                    });
+                    string = $.terminal.format(string, format_options);
                     string.split(/\n/).forEach(function(string) {
                         output_buffer.push(string);
                     });
@@ -5902,7 +5965,7 @@
                 if (settings.numChars) {
                     return settings.numChars;
                 }
-                if (typeof num_chars === 'undefined') {
+                if (typeof num_chars === 'undefined' || num_chars === 1000) {
                     num_chars = get_num_chars(self, char_size);
                 }
                 return num_chars;
@@ -6199,7 +6262,7 @@
             get_prompt: function() {
                 return interpreters.top().prompt;
                 // command_line.prompt(); - can be a wrapper
-                // return command_line.prompt();
+                //return command_line.prompt();
             },
             // -------------------------------------------------------------
             // :: Enable or Disable mask depedning on the passed argument
@@ -6777,6 +6840,32 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: invoke keydown shorcut
+            // -------------------------------------------------------------
+            invoke_key: function(shortcut) {
+                var keys = shortcut.toUpperCase().split('+');
+                var key = keys.pop();
+                var ctrl = keys.indexOf('CTRL') !== -1;
+                var shift = keys.indexOf('SHIFT') !== -1;
+                var alt = keys.indexOf('ALT') !== -1;
+                var meta = keys.indexOf('META') !== -1;
+                var e = $.Event("keydown", {
+                    ctrlKey: ctrl,
+                    shiftKey: shift,
+                    altKey: alt,
+                    metaKey: meta,
+                    which: reversed_keycodes[key],
+                    key: key
+                });
+                var doc = $(document.documentElement || window);
+                doc.trigger(e);
+                e = $.Event("keypress");
+                e.key = key;
+                e.which = e.keyCode = 0;
+                doc.trigger(e);
+                return self;
+            },
+            // -------------------------------------------------------------
             // :: change terminal keymap at runtime
             // -------------------------------------------------------------
             keymap: function(keymap, fn) {
@@ -6936,6 +7025,97 @@
                 }
             };
         }));
+        // for invoking shortcuts using terminal::keydown
+        // taken from https://github.com/cvan/keyboardevent-key-polyfill/
+        var keycodes = {
+            3: 'Cancel',
+            6: 'Help',
+            8: 'Backspace',
+            9: 'Tab',
+            12: 'Clear',
+            13: 'Enter',
+            16: 'Shift',
+            17: 'Control',
+            18: 'Alt',
+            19: 'Pause',
+            20: 'CapsLock',
+            27: 'Escape',
+            28: 'Convert',
+            29: 'NonConvert',
+            30: 'Accept',
+            31: 'ModeChange',
+            32: ' ',
+            33: 'PageUp',
+            34: 'PageDown',
+            35: 'End',
+            36: 'Home',
+            37: 'ArrowLeft',
+            38: 'ArrowUp',
+            39: 'ArrowRight',
+            40: 'ArrowDown',
+            41: 'Select',
+            42: 'Print',
+            43: 'Execute',
+            44: 'PrintScreen',
+            45: 'Insert',
+            46: 'Delete',
+            48: ['0', ')'],
+            49: ['1', '!'],
+            50: ['2', '@'],
+            51: ['3', '#'],
+            52: ['4', '$'],
+            53: ['5', '%'],
+            54: ['6', '^'],
+            55: ['7', '&'],
+            56: ['8', '*'],
+            57: ['9', '('],
+            91: 'OS',
+            93: 'ContextMenu',
+            144: 'NumLock',
+            145: 'ScrollLock',
+            181: 'VolumeMute',
+            182: 'VolumeDown',
+            183: 'VolumeUp',
+            186: [';', ':'],
+            187: ['=', '+'],
+            188: [',', '<'],
+            189: ['-', '_'],
+            190: ['.', '>'],
+            191: ['/', '?'],
+            192: ['`', '~'],
+            219: ['[', '{'],
+            220: ['\\', '|'],
+            221: [']', '}'],
+            222: ["'", '"'],
+            224: 'Meta',
+            225: 'AltGraph',
+            246: 'Attn',
+            247: 'CrSel',
+            248: 'ExSel',
+            249: 'EraseEof',
+            250: 'Play',
+            251: 'ZoomOut'
+        };
+        // Function keys (F1-24).
+        for (i = 1; i < 25; i++) {
+            keycodes[111 + i] = 'F' + i;
+        }
+        // Printable ASCII characters.
+        var letter = '';
+        for (i = 65; i < 91; i++) {
+            letter = String.fromCharCode(i);
+            keycodes[i] = [letter.toLowerCase(), letter.toUpperCase()];
+        }
+        var reversed_keycodes = {};
+        Object.keys(keycodes).forEach(function(which) {
+            if (keycodes[which] instanceof Array) {
+                keycodes[which].forEach(function(key) {
+                    reversed_keycodes[key.toUpperCase()] = which;
+                });
+            } else {
+                reversed_keycodes[keycodes[which].toUpperCase()] = which;
+            }
+        });
 
         // -----------------------------------------------------------------
         // INIT CODE
@@ -6950,9 +7130,10 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        // Some browser use html for scrolling
-        if (self.is('body,html')) {
-            scroll_object = $('body,html');
+        // scrollTop need be on html but scrollHeight taken from body
+        // on Safari both on body it's easier to just put both in selector and it works
+        if (self.is('body') && !is_safari) {
+            scroll_object = $('html,body');
         } else {
             scroll_object = self;
         }
@@ -7005,7 +7186,7 @@
         }
         function blur_terminal() {
             old_enabled = enabled;
-            self.disable().find('textarea').trigger('blur', [true]);
+            self.disable().find('.cmd textarea').trigger('blur', [true]);
         }
         function paste_event(e) {
             e = e.originalEvent;
@@ -7080,7 +7261,7 @@
                 caseSensitiveSearch: settings.caseSensitiveSearch,
                 width: '100%',
                 enabled: false,
-
+                char_width: char_size.width,
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
@@ -7150,7 +7331,7 @@
                     var count = 0;
                     var $target;
                     var name = 'click_' + self.id();
-                    var textarea = self.find('textarea');
+                    var textarea = self.find('.cmd textarea');
                     function click() {
                         if ($target.is('.terminal') ||
                             $target.is('.terminal-wrapper')) {
@@ -7195,7 +7376,7 @@
                     });
                 })();
                 (function() {
-                    var clip = self.find('textarea');
+                    var clip = self.find('.cmd textarea');
                     self.on('contextmenu.terminal', function(e) {
                         if (get_selected_text() === '') {
                             if (!$(e.target).is('img,value,audio,object,canvas,a')) {
@@ -7239,9 +7420,7 @@
                     });
                 })();
             }
-            // .on('mouseup', 'a', function(e) {
-            // in new jquery .delegate just call .on
-            self.delegate('a', 'mouseup', function(e) {
+            self.on('click', 'a', function(e) {
                 var $this = $(this);
                 if ($this.closest('.exception').length) {
                     var href = $this.attr('href');
@@ -7252,16 +7431,18 @@
                 }
                 // refocus because links have tabindex in case where user want
                 // tab change urls, we can ignore this function on click
-                self.find('textarea').focus();
-            });
-            if (self.is(':visible')) {
-                num_chars = self.cols();
-                command_line.resize(num_chars);
-                if (!char_size) {
-                    char_size = get_char_size(self);
+                if (enabled) {
+                    self.find('.cmd textarea').focus();
                 }
-                num_rows = get_num_rows(self, char_size);
+            });
+            function calculate_char_size() {
+                var width = char_size.width;
+                char_size = get_char_size(self);
+                if (width !== char_size.width) {
+                    command_line.option('char_width', char_size.width).refresh();
+                }
             }
+            resize();
             function resize() {
                 if (self.is(':visible')) {
                     var width = fill.width();
@@ -7277,7 +7458,7 @@
             function create_resizers() {
                 self.resizer('unbind').resizer(resize);
                 font_resizer.resizer('unbind').resizer(function() {
-                    char_size = get_char_size(self);
+                    calculate_char_size();
                     self.resize();
                 });
             }
@@ -7297,7 +7478,7 @@
                     if (self.is(':visible') && !visible) {
                         visible = true;
                         create_resizers();
-                        char_size = get_char_size(self);
+                        calculate_char_size();
                         resize();
                         if (was_enabled) {
                             self.enable();
@@ -7314,26 +7495,27 @@
             }
             var in_dom = !!self.closest('body').length;
             var MutationObsrv = window.MutationObserver || window.WebKitMutationObserver;
-            if (window.IntersectionObserver) {
-                if (MutationObsrv) {
-                    mutation_observer = new MutationObsrv(function() {
-                        if (self.closest('body').length) {
-                            if (!in_dom) {
-                                self.scroll_to_bottom();
+            if (MutationObsrv) {
+                mutation_observer = new MutationObsrv(function() {
+                    if (self.closest('body').length) {
+                        if (!in_dom) {
+                            self.scroll_to_bottom();
+                            if (window.IntersectionObserver) {
                                 observe_visibility();
                             }
-                            in_dom = true;
-                        } else if (in_dom) {
-                            in_dom = false;
+                            resize();
                         }
-                    });
-                    mutation_observer.observe(document.body, {childList: true});
-                }
+                        in_dom = true;
+                    } else if (in_dom) {
+                        in_dom = false;
+                    }
+                });
+                mutation_observer.observe(document.body, {childList: true});
+            }
+            if (window.IntersectionObserver && in_dom) {
                 // check if element is in the DOM if not running IntersectionObserver
                 // don't make sense
-                if (in_dom) {
-                    observe_visibility();
-                }
+                observe_visibility();
             }
             command_queue.resolve();
             // touch devices need touch event to get virtual keyboard
