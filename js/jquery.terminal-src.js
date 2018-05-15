@@ -5542,8 +5542,12 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    lines = clone(view.lines);
-                    interpreters = view.interpreters;
+                    lines = clone(view.lines).filter(function(line) {
+                        return line[0];
+                    });
+                    if (view.interpreters instanceof Stack) {
+                        interpreters = view.interpreters;
+                    }
                     if (settings.importHistory) {
                         command_line.history().set(view.history);
                     }
