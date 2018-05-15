@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.15.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 13 May 2018 09:34:11 +0000
+ * Date: Tue, 15 May 2018 07:48:01 +0000
  */
 
 /* TODO:
@@ -2590,7 +2590,7 @@
     var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
-    var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimy]*)$/;
+    var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
     var string_re = /("(?:[^"\\]|\\(?:\\\\)*")*"|'(?:[^'\\]|\\(?:\\\\)*')*')/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
@@ -2871,8 +2871,8 @@
         }
     }
     $.terminal = {
-        version: '1.15.0',
-        date: 'Sun, 13 May 2018 09:34:11 +0000',
+        version: 'DEV',
+        date: 'Tue, 15 May 2018 07:48:01 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5542,8 +5542,12 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    lines = clone(view.lines);
-                    interpreters = view.interpreters;
+                    lines = clone(view.lines).filter(function(line) {
+                        return line[0];
+                    });
+                    if (view.interpreters instanceof Stack) {
+                        interpreters = view.interpreters;
+                    }
                     if (settings.importHistory) {
                         command_line.history().set(view.history);
                     }
