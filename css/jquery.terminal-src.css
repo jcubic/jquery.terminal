@@ -80,15 +80,15 @@ body.terminal {
 .terminal > div {
     overflow: hidden;
 }
-.terminal > .resizer, .terminal > .font .resizer{
+.terminal > .resizer, .terminal > .font .resizer {
     position: absolute;
-    left: 0;
     top: 0;
     right: 0;
     bottom: 0;
+    left: 0;
     overflow: hidden;
+    pointer-events: none;
     z-index: -1;
-    visibility: hidden;
     height: 100%;
     border: none;
     padding: 0;
