@@ -2,6 +2,7 @@
 ### Features
 * allow to have limited import when export is save and restored from JSON [#393](https://github.com/jcubic/jquery.terminal/issues/393)
 * add support for new u and s regex flags when parsing commands
+* add less plugin based on the one from leash
 
 
 
