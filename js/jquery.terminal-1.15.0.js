@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 17 May 2018 04:01:57 +0000
+ * Date: Thu, 17 May 2018 06:43:41 +0000
  */
 
 /* TODO:
@@ -2872,7 +2872,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 17 May 2018 04:01:57 +0000',
+        date: 'Thu, 17 May 2018 06:43:41 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5303,6 +5303,14 @@
                 if (completion === 'settings') {
                     completion = settings.completion;
                 }
+                function resolve(commands) {
+                    self.complete(commands, {
+                        echo: true,
+                        word: settings.wordAutocomplete,
+                        escape: settings.completionEscape,
+                        caseSensitive: caseSensitive
+                    });
+                }
                 if (completion) {
                     switch ($.type(completion)) {
                         case 'function':
@@ -5312,22 +5320,13 @@
                                 display_exception(error, 'USER');
                                 return false;
                             }
-                            completion.call(self, string, function(commands) {
-                                self.complete(commands, {
-                                    echo: true,
-                                    word: settings.wordAutocomplete,
-                                    escape: settings.completionEscape,
-                                    caseSensitive: caseSensitive
-                                });
-                            });
+                            var result = completion.call(self, string, resolve);
+                            if (result && $.isFunction(result.then)) {
+                                result.then(resolve);
+                            }
                             break;
                         case 'array':
-                            self.complete(completion, {
-                                echo: true,
-                                word: settings.wordAutocomplete,
-                                escape: settings.completionEscape,
-                                caseSensitive: caseSensitive
-                            });
+                            resolve(completion);
                             break;
                         default:
                             throw new Error(strings().invalidCompletion);

@@ -5303,6 +5303,14 @@
                 if (completion === 'settings') {
                     completion = settings.completion;
                 }
+                function resolve(commands) {
+                    self.complete(commands, {
+                        echo: true,
+                        word: settings.wordAutocomplete,
+                        escape: settings.completionEscape,
+                        caseSensitive: caseSensitive
+                    });
+                }
                 if (completion) {
                     switch ($.type(completion)) {
                         case 'function':
@@ -5312,22 +5320,13 @@
                                 display_exception(error, 'USER');
                                 return false;
                             }
-                            completion.call(self, string, function(commands) {
-                                self.complete(commands, {
-                                    echo: true,
-                                    word: settings.wordAutocomplete,
-                                    escape: settings.completionEscape,
-                                    caseSensitive: caseSensitive
-                                });
-                            });
+                            var result = completion.call(self, string, resolve);
+                            if (result && $.isFunction(result.then)) {
+                                result.then(resolve);
+                            }
                             break;
                         case 'array':
-                            self.complete(completion, {
-                                echo: true,
-                                word: settings.wordAutocomplete,
-                                escape: settings.completionEscape,
-                                caseSensitive: caseSensitive
-                            });
+                            resolve(completion);
                             break;
                         default:
                             throw new Error(strings().invalidCompletion);

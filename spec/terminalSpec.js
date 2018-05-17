@@ -2186,6 +2186,24 @@ function tests_on_ready() {
                 expect(term.get_command()).toEqual("asd \"foo 'bar' baz\"");
                 term.destroy().remove();
             });
+            iit('should complete when function returm promise', function(done) {
+                term = $('<div/>').appendTo('body').terminal({}, {
+                    completion: function() {
+                        return new Promise(function(resolve) {
+                            setTimeout(function() {
+                                resolve(["foo", "bar", "baz"]);
+                            }, 200);
+                        });
+                    }
+                });
+                term.focus();
+                term.insert('f');
+                shortcut(false, false, false, 9, 'tab');
+                setTimeout(function() {
+                    expect(term.get_command()).toEqual("foo");
+                    done();
+                }, 400);
+            });
         });
         describe('jQuery Terminal methods', function() {
             var terminal_name = 'methods';
