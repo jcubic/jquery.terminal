@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 15 May 2018 07:52:04 +0000
+ * Date: Thu, 17 May 2018 04:01:57 +0000
  */
 
 /* TODO:
@@ -2872,7 +2872,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 15 May 2018 07:52:04 +0000',
+        date: 'Thu, 17 May 2018 04:01:57 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3466,30 +3466,32 @@
             var lengths = array.map(function(string) {
                 return string.length;
             });
-            var length = Math.max.apply(null, lengths) + space;
             if (typeof space === 'undefined') {
                 space = 4;
             }
-            var columns = Math.floor(cols / length);
-            var lines = [];
-            var line;
-            function push(i) {
-                var pad = new Array(length - array[i].length).join(' ');
-                line.push(array[i] + ((i % columns === 0) ? '' : pad));
-            }
-            if (columns < 2) {
+            var length = Math.max.apply(null, lengths) + space;
+            // we need value - 1 because index starts from 0
+            var column_limit = Math.floor(cols / length) - 1;
+            if (column_limit < 1) {
                 return array.join('\n');
             }
+            var lines = [];
+            var line = [];
+            function push(i) {
+                var pad = new Array(length - array[i].length + 1).join(' ');
+                line.push(array[i] + ((i % column_limit === 0 && i !== 0) ? '' : pad));
+            }
             for (var i = 0; i < array.length; ++i) {
-                if (i % columns === 0) {
-                    if (line) {
-                        push(i);
-                        lines.push(line.join(''));
-                    }
+                if (i % column_limit === 0 && i !== 0) {
+                    push(i);
+                    lines.push(line.join(''));
                     line = [];
                 } else {
                     push(i);
                 }
+            }
+            if (line.length) {
+                lines.push(line.join(''));
             }
             return lines.join('\n');
         },

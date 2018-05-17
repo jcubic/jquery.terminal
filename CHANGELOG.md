@@ -7,6 +7,7 @@
 
 ### Bugs
 * fix resizer in Firefox [#395](https://github.com/jcubic/jquery.terminal/issues/395)
+* fix $.terminal.columns [#394](https://github.com/jcubic/jquery.terminal/issues/394)
 
 ## 1.15.0
 
