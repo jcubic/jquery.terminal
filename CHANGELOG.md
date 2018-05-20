@@ -11,6 +11,7 @@
 * fix resizer in Firefox [#395](https://github.com/jcubic/jquery.terminal/issues/395)
 * fix $.terminal.columns [#394](https://github.com/jcubic/jquery.terminal/issues/394)
 * fix rows() when using --size [#398](https://github.com/jcubic/jquery.terminal/issues/398)
+* fix null in JSON hash
 
 ## 1.15.0
 

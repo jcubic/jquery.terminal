@@ -7546,10 +7546,13 @@
                 var terminal = terminals.get()[spec[0]];
                 // execute if belong to this terminal
                 if (terminal && terminal_id === terminal.id()) {
-                    if (spec[2]) {
+                    var defer = $.Deferred();
+                    if (!spec[2]) {
+                        defer.resolve();
+                        return defer.promise();
+                    } else {
                         try {
                             if (paused) {
-                                var defer = $.Deferred();
                                 resume_callbacks.push(function() {
                                     return terminal.exec(spec[2]).done(function() {
                                         terminal.save_state(spec[2], true, spec[1]);
@@ -7594,6 +7597,7 @@
                                 }
                             })();// */
                         } catch (e) {
+                            console.log(e);
                             // invalid json - ignore
                         }
                     });

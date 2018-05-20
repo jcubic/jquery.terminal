@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 20 May 2018 12:43:02 +0000
+ * Date: Sun, 20 May 2018 13:05:02 +0000
  */
 
 /* TODO:
@@ -2872,7 +2872,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 20 May 2018 12:43:02 +0000',
+        date: 'Sun, 20 May 2018 13:05:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7546,10 +7546,13 @@
                 var terminal = terminals.get()[spec[0]];
                 // execute if belong to this terminal
                 if (terminal && terminal_id === terminal.id()) {
-                    if (spec[2]) {
+                    var defer = $.Deferred();
+                    if (!spec[2]) {
+                        defer.resolve();
+                        return defer.promise();
+                    } else {
                         try {
                             if (paused) {
-                                var defer = $.Deferred();
                                 resume_callbacks.push(function() {
                                     return terminal.exec(spec[2]).done(function() {
                                         terminal.save_state(spec[2], true, spec[1]);
@@ -7594,6 +7597,7 @@
                                 }
                             })();// */
                         } catch (e) {
+                            console.log(e);
                             // invalid json - ignore
                         }
                     });
