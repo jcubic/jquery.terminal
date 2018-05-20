@@ -5,7 +5,6 @@
 * add support for new u and s regex flags when parsing commands
 * add less plugin based on the one from leash
 * supports for promises returned from completion function
-* add --char-height css variable to terminal element
 
 ### Bugs
 * fix resizer in Firefox [#395](https://github.com/jcubic/jquery.terminal/issues/395)

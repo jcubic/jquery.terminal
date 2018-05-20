@@ -6342,9 +6342,6 @@
                 if (char_size.width !== 0) {
                     self[0].style.setProperty('--char-width', char_size.width);
                 }
-                if (char_size.height !== 0) {
-                    self[0].style.setProperty('--char-height', char_size.height);
-                }
                 redraw({
                     scroll: false,
                     update: true
