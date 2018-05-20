@@ -79,6 +79,7 @@ body.terminal {
 }
 .terminal > div {
     overflow: hidden;
+    height: 100%;
 }
 .terminal > .resizer, .terminal > .font .resizer {
     position: absolute;
