@@ -3781,8 +3781,9 @@
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
     function get_char_size(div) {
-        var temp = $('<div class="terminal temp"><div class="cmd"><span cla' +
-                     'ss="prompt">&nbsp;</span></div></div>').appendTo('body');
+        var temp = $('<div class="terminal temp"><div class="terminal-output">' +
+                     '<div><div class="line" style="float: left"><span>&nbsp;</span>' +
+                     '</div></div></div></div>').appendTo('body');
         temp.addClass(div.attr('class'));
         if (div) {
             var style = div.attr('style');
@@ -3793,7 +3794,7 @@
                 temp.attr('style', style);
             }
         }
-        var rect = temp.find('span')[0].getBoundingClientRect();
+        var rect = temp.find('.line')[0].getBoundingClientRect();
         var result = {
             width: rect.width,
             height: rect.height
@@ -6341,6 +6342,9 @@
                 if (char_size.width !== 0) {
                     self[0].style.setProperty('--char-width', char_size.width);
                 }
+                if (char_size.height !== 0) {
+                    self[0].style.setProperty('--char-height', char_size.height);
+                }
                 redraw({
                     scroll: false,
                     update: true
@@ -7147,7 +7151,7 @@
             requests.push(xhr);
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
-        var font_resizer = $('<div class="font"/>').appendTo(self);
+        var font_resizer = $('<div class="font">&nbsp;</div>').appendTo(self);
         var fill = $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
