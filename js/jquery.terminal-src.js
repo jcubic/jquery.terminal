@@ -275,7 +275,7 @@
             return tmp;
         },
         clone_array: function(array) {
-            if (!$.isFunction(Array.prototype.map)) {
+            if (!s_function(Array.prototype.map)) {
                 throw new Error("Your browser don't support ES5 array map " +
                                 'use es5-shim');
             }
@@ -4640,8 +4640,8 @@
                 }, line.options || {});
                 var string;
                 var arg = line.string;
-                var is_function = get_type(arg) === 'function';
-                if (is_function) {
+                var is_fn = is_function(arg);
+                if (is_fn) {
                     arg = arg();
                 }
                 if (get_type(arg) !== 'string') {
@@ -4699,7 +4699,7 @@
                         buffer_line(string, line.index, line_settings);
                     }
                 }
-                if (string === '' && is_function) {
+                if (string === '' && is_fn) {
                     buffer_line(string, line.index, line_settings);
                 }
             } catch (e) {

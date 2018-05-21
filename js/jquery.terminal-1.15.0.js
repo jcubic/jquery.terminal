@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 21 May 2018 10:26:03 +0000
+ * Date: Mon, 21 May 2018 10:46:15 +0000
  */
 
 /* TODO:
@@ -275,7 +275,7 @@
             return tmp;
         },
         clone_array: function(array) {
-            if (!$.isFunction(Array.prototype.map)) {
+            if (!s_function(Array.prototype.map)) {
                 throw new Error("Your browser don't support ES5 array map " +
                                 'use es5-shim');
             }
@@ -2875,7 +2875,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 21 May 2018 10:26:03 +0000',
+        date: 'Mon, 21 May 2018 10:46:15 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4640,8 +4640,8 @@
                 }, line.options || {});
                 var string;
                 var arg = line.string;
-                var is_function = get_type(arg) === 'function';
-                if (is_function) {
+                var is_fn = is_function(arg);
+                if (is_fn) {
                     arg = arg();
                 }
                 if (get_type(arg) !== 'string') {
@@ -4699,7 +4699,7 @@
                         buffer_line(string, line.index, line_settings);
                     }
                 }
-                if (string === '' && is_function) {
+                if (string === '' && is_fn) {
                     buffer_line(string, line.index, line_settings);
                 }
             } catch (e) {
