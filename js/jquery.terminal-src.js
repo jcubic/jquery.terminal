@@ -6695,18 +6695,32 @@
             // -------------------------------------------------------------
             // :: wrapper for common use case
             // -------------------------------------------------------------
-            read: function(message, callback) {
-                var d = new $.Deferred();
-                self.push(function(text) {
-                    self.pop();
-                    if ($.isFunction(callback)) {
-                        callback(text);
+            read: function(message, success, cancel) {
+                var defer = jQuery.Deferred();
+                var history = self.history();
+                var read = false;
+                history.disable();
+                self.push(function(string) {
+                    read = true;
+                    defer.resolve(string);
+                    if ($.isFunction(success)) {
+                        success(string);
                     }
-                    d.resolve(text);
+                    self.pop();
                 }, {
-                    prompt: message
+                    name: 'read',
+                    prompt: prompt || '',
+                    onExit: function() {
+                        if (!read) {
+                            defer.reject();
+                            if ($.isFunction(cancel)) {
+                                cancel();
+                            }
+                        }
+                        history.enable();
+                    }
                 });
-                return d.promise();
+                return defer.promise();
             },
             // -------------------------------------------------------------
             // :: Push a new interenter on the Stack

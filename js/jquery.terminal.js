@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 21 May 2018 07:39:35 +0000
+ * Date: Mon, 21 May 2018 08:58:52 +0000
  */
 
 /* TODO:
@@ -2872,7 +2872,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 21 May 2018 07:39:35 +0000',
+        date: 'Mon, 21 May 2018 08:58:52 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6695,18 +6695,32 @@
             // -------------------------------------------------------------
             // :: wrapper for common use case
             // -------------------------------------------------------------
-            read: function(message, callback) {
-                var d = new $.Deferred();
-                self.push(function(text) {
-                    self.pop();
-                    if ($.isFunction(callback)) {
-                        callback(text);
+            read: function(message, success, cancel) {
+                var defer = jQuery.Deferred();
+                var history = self.history();
+                var read = false;
+                history.disable();
+                self.push(function(string) {
+                    read = true;
+                    defer.resolve(string);
+                    if ($.isFunction(success)) {
+                        success(string);
                     }
-                    d.resolve(text);
+                    self.pop();
                 }, {
-                    prompt: message
+                    name: 'read',
+                    prompt: prompt || '',
+                    onExit: function() {
+                        if (!read) {
+                            defer.reject();
+                            if ($.isFunction(cancel)) {
+                                cancel();
+                            }
+                        }
+                        history.enable();
+                    }
                 });
-                return d.promise();
+                return defer.promise();
             },
             // -------------------------------------------------------------
             // :: Push a new interenter on the Stack
