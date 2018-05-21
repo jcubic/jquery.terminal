@@ -5713,7 +5713,8 @@
                 self.push(function(user) {
                     self.set_mask(settings.maskChar).push(function(pass) {
                         try {
-                            var ret = auth.call(self, user, pass, function(token, silent) {
+                            var ret = auth.call(self, user, pass, function(token,
+                                                                           silent) {
                                 login_callback(user, token, silent);
                             });
                             if (ret && is_function(ret.then)) {
