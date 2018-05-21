@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 20 May 2018 14:14:21 +0000
+ * Date: Mon, 21 May 2018 07:14:44 +0000
  */
 
 /* TODO:
@@ -2872,7 +2872,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 20 May 2018 14:14:21 +0000',
+        date: 'Mon, 21 May 2018 07:14:44 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3463,8 +3463,11 @@
         // :: return string where array items are in columns padded spaces
         // ---------------------------------------------------------------------
         columns: function(array, cols, space) {
-            var lengths = array.map(function(string) {
-                return string.length;
+            var no_formatting = array.map(function(string) {
+                return $.terminal.strip(string);
+            });
+            var lengths = no_formatting.map(function(string) {
+                return strlen(string);
             });
             if (typeof space === 'undefined') {
                 space = 4;
@@ -3478,7 +3481,7 @@
             var lines = [];
             var line = [];
             function push(i) {
-                var pad = new Array(length - array[i].length + 1).join(' ');
+                var pad = new Array(length - no_formatting[i].length + 1).join(' ');
                 line.push(array[i] + ((i % column_limit === 0 && i !== 0) ? '' : pad));
             }
             for (var i = 0; i < array.length; ++i) {
