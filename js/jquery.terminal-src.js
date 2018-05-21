@@ -275,7 +275,7 @@
             return tmp;
         },
         clone_array: function(array) {
-            if (!s_function(Array.prototype.map)) {
+            if (!is_function(Array.prototype.map)) {
                 throw new Error("Your browser don't support ES5 array map " +
                                 'use es5-shim');
             }

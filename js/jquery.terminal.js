@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 21 May 2018 10:46:15 +0000
+ * Date: Mon, 21 May 2018 11:12:20 +0000
  */
 
 /* TODO:
@@ -275,7 +275,7 @@
             return tmp;
         },
         clone_array: function(array) {
-            if (!s_function(Array.prototype.map)) {
+            if (!is_function(Array.prototype.map)) {
                 throw new Error("Your browser don't support ES5 array map " +
                                 'use es5-shim');
             }
@@ -2875,7 +2875,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 21 May 2018 10:46:15 +0000',
+        date: 'Mon, 21 May 2018 11:12:20 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
