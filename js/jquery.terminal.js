@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 21 May 2018 07:14:44 +0000
+ * Date: Mon, 21 May 2018 07:39:35 +0000
  */
 
 /* TODO:
@@ -2588,7 +2588,7 @@
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
-    var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
+    var format_exec_re = /(\[\[(?:[^\][]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
     var string_re = /("(?:[^"\\]|\\(?:\\\\)*")*"|'(?:[^'\\]|\\(?:\\\\)*')*')/;
@@ -2872,7 +2872,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 21 May 2018 07:14:44 +0000',
+        date: 'Mon, 21 May 2018 07:39:35 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3242,8 +3242,8 @@
                 return string;
             }
             var stack = [];
-            var re = /((?:\[\[(?:[^\]]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
-            var format_re = /(\[\[(?:[^\]]|\\\])+\])[\s\S]*/;
+            var re = /((?:\[\[(?:[^\][]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
+            var format_re = /(\[\[(?:[^\][]|\\\])+\])[\s\S]*/;
             return string.split(re).filter(Boolean).map(function(string) {
                 if (string.match(/^\[\[/)) {
                     if (!$.terminal.is_formatting(string)) {
@@ -7597,7 +7597,6 @@
                                 }
                             })();// */
                         } catch (e) {
-                            console.log(e);
                             // invalid json - ignore
                         }
                     });

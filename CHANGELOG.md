@@ -14,6 +14,7 @@
 * fix rows() when using --size [#398](https://github.com/jcubic/jquery.terminal/issues/398)
 * fix null in JSON hash
 * fix jumping on right click (context menu) [#399](https://github.com/jcubic/jquery.terminal/issues/399)
+* fix formatting inside brackets [#396](https://github.com/jcubic/jquery.terminal/issues/396)
 
 ## 1.15.0
 

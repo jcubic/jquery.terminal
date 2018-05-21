@@ -2588,7 +2588,7 @@
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
-    var format_exec_re = /(\[\[(?:[^\]]|\\\])+\]\])/;
+    var format_exec_re = /(\[\[(?:[^\][]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
     var string_re = /("(?:[^"\\]|\\(?:\\\\)*")*"|'(?:[^'\\]|\\(?:\\\\)*')*')/;
@@ -3242,8 +3242,8 @@
                 return string;
             }
             var stack = [];
-            var re = /((?:\[\[(?:[^\]]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
-            var format_re = /(\[\[(?:[^\]]|\\\])+\])[\s\S]*/;
+            var re = /((?:\[\[(?:[^\][]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
+            var format_re = /(\[\[(?:[^\][]|\\\])+\])[\s\S]*/;
             return string.split(re).filter(Boolean).map(function(string) {
                 if (string.match(/^\[\[/)) {
                     if (!$.terminal.is_formatting(string)) {
@@ -7597,7 +7597,6 @@
                                 }
                             })();// */
                         } catch (e) {
-                            console.log(e);
                             // invalid json - ignore
                         }
                     });
