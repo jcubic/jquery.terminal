@@ -4876,7 +4876,7 @@
                 var ret = prompt(function(string) {
                     self.echo(string + command, options);
                 });
-                if (ret && ret.then) {
+                if (ret && is_function(ret.then)) {
                     ret.then(function(string) {
                         if (typeof string === 'string') {
                             self.echo(string + command, options);
@@ -5035,7 +5035,7 @@
                         // auto pause/resume when user return promises
                         self.pause(settings.softPause);
                         // when for native Promise object work only in jQuery 3.x
-                        if (result.then) {
+                        if (is_function(result.then)) {
                             result.then(show);
                         } else {
                             return $.when(result).done(show);
@@ -5115,7 +5115,7 @@
             if (is_function(interpreter.prompt)) {
                 command_line.prompt(function(callback) {
                     var ret = interpreter.prompt.call(self, callback, self);
-                    if (ret && ret.then) {
+                    if (ret && is_function(ret.then)) {
                         ret.then(function(string) {
                             if (typeof string === 'string') {
                                 callback(string);
@@ -5713,9 +5713,16 @@
                 self.push(function(user) {
                     self.set_mask(settings.maskChar).push(function(pass) {
                         try {
-                            auth.call(self, user, pass, function(token, silent) {
+                            var ret = auth.call(self, user, pass, function(token, silent) {
                                 login_callback(user, token, silent);
                             });
+                            if (ret && is_function(ret.then)) {
+                                self.pause();
+                                ret.then(function(token) {
+                                    login_callback(user, token);
+                                    self.resume();
+                                });
+                            }
                         } catch (e) {
                             display_exception(e, 'AUTH');
                         }

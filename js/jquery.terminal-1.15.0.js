@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 21 May 2018 11:12:20 +0000
+ * Date: Mon, 21 May 2018 11:22:09 +0000
  */
 
 /* TODO:
@@ -2875,7 +2875,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 21 May 2018 11:12:20 +0000',
+        date: 'Mon, 21 May 2018 11:22:09 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4876,7 +4876,7 @@
                 var ret = prompt(function(string) {
                     self.echo(string + command, options);
                 });
-                if (ret && ret.then) {
+                if (ret && is_function(ret.then)) {
                     ret.then(function(string) {
                         if (typeof string === 'string') {
                             self.echo(string + command, options);
@@ -5035,7 +5035,7 @@
                         // auto pause/resume when user return promises
                         self.pause(settings.softPause);
                         // when for native Promise object work only in jQuery 3.x
-                        if (result.then) {
+                        if (is_function(result.then)) {
                             result.then(show);
                         } else {
                             return $.when(result).done(show);
@@ -5115,7 +5115,7 @@
             if (is_function(interpreter.prompt)) {
                 command_line.prompt(function(callback) {
                     var ret = interpreter.prompt.call(self, callback, self);
-                    if (ret && ret.then) {
+                    if (ret && is_function(ret.then)) {
                         ret.then(function(string) {
                             if (typeof string === 'string') {
                                 callback(string);
@@ -5713,9 +5713,16 @@
                 self.push(function(user) {
                     self.set_mask(settings.maskChar).push(function(pass) {
                         try {
-                            auth.call(self, user, pass, function(token, silent) {
+                            var ret = auth.call(self, user, pass, function(token, silent) {
                                 login_callback(user, token, silent);
                             });
+                            if (ret && is_function(ret.then)) {
+                                self.pause();
+                                ret.then(function(token) {
+                                    login_callback(user, token);
+                                    self.resume();
+                                });
+                            }
                         } catch (e) {
                             display_exception(e, 'AUTH');
                         }
