@@ -5,6 +5,7 @@
 * add support for new u and s regex flags when parsing commands
 * add less plugin based on the one from leash
 * supports for promises returned from completion function
+* add prism.js file that include monkey patch for PrismJS library (for syntax highlight) to output terminal formatting
 
 ### Bugs
 * fix resizer in Firefox [#395](https://github.com/jcubic/jquery.terminal/issues/395)
