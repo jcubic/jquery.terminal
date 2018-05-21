@@ -2765,6 +2765,8 @@
         };
     })();
     // ---------------------------------------------------------------------
+    // :: try to copy given DOM element text to clipboard
+    // -----------------------------------------------------------------------
     function text_to_clipboard(container, text) {
         var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
         $div.appendTo('body');
@@ -2795,6 +2797,7 @@
             };
         }
     })();
+    // ---------------------------------------------------------------------
     function clear_textarea_selection(textarea) {
         textarea.selectionStart = textarea.selectionEnd = 0;
     }
@@ -3822,14 +3825,13 @@
         return Math.floor(terminal.find('.terminal-fill').height() / char_size.height);
     }
     // -----------------------------------------------------------------------
-    // :: try to copy given DOM element text to clipboard
-    // -----------------------------------------------------------------------
     function all(array, fn) {
         var same = array.filter(function(item) {
             return item[fn]() === item;
         });
         return same.length === array.length;
     }
+    // -----------------------------------------------------------------------
     function string_case(string) {
         var array = string.split('');
         if (all(array, 'toLowerCase')) {
@@ -3840,8 +3842,18 @@
             return 'mixed';
         }
     }
+    // -----------------------------------------------------------------------
     function same_case(string) {
         return string_case(string) !== 'mixed';
+    }
+    // -----------------------------------------------------------------------
+    // fix for jQuery bug
+    function is_function(object) {
+        return get_type(object) === 'function';
+    }
+    // -----------------------------------------------------------------------
+    function get_type(object) {
+        return typeof object === 'function' ? 'function' : $.type(object);
     }
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
@@ -4026,7 +4038,7 @@
             if ($.terminal.unclosed_strings(command)) {
                 var string = $.terminal.escape_brackets(command);
                 throw new Error(sprintf(strings().invalidStrings, "`" + string + "`"));
-            } else if ($.isFunction(settings.processArguments)) {
+            } else if (is_function(settings.processArguments)) {
                 return process_command(command, settings.processArguments);
             } else if (settings.processArguments) {
                 return $.terminal.parse_command(command);
@@ -4078,7 +4090,7 @@
         // :: Helper function
         // ---------------------------------------------------------------------
         function display_json_rpc_error(error) {
-            if ($.isFunction(settings.onRPCError)) {
+            if (is_function(settings.onRPCError)) {
                 settings.onRPCError.call(self, error);
             } else {
                 self.error('&#91;RPC&#93; ' + error.message);
@@ -4123,7 +4135,7 @@
                     success: function success(json) {
                         if (json.error) {
                             display_json_rpc_error(json.error);
-                        } else if ($.isFunction(settings.processRPCResponse)) {
+                        } else if (is_function(settings.processRPCResponse)) {
                             settings.processRPCResponse.call(self, json.result, self);
                         } else {
                             display_object(json.result);
@@ -4177,7 +4189,7 @@
                     command = get_processed_command(user_command);
                 } catch (e) {
                     // exception can be thrown on invalid regex
-                    if ($.isFunction(settings.exception)) {
+                    if (is_function(settings.exception)) {
                         settings.exception(e, self);
                     } else {
                         self.error(e.toString());
@@ -4196,7 +4208,7 @@
                     }
                 }*/
                 var val = object[command.name];
-                var type = $.type(val);
+                var type = get_type(val);
                 if (type === 'function') {
                     if (arity && val.length !== command.args.length) {
                         self.error('&#91;Arity&#93; ' +
@@ -4220,9 +4232,9 @@
                         name: command.name,
                         completion: type === 'object' ? commands : undefined
                     });
-                } else if ($.isFunction(fallback)) {
+                } else if (is_function(fallback)) {
                     fallback(user_command, self);
-                } else if ($.isFunction(settings.onCommandNotFound)) {
+                } else if (is_function(settings.onCommandNotFound)) {
                     settings.onCommandNotFound.call(self, user_command, self);
                 } else {
                     terminal.error(sprintf(strings().commandNotFound, command.name));
@@ -4232,7 +4244,7 @@
         // ---------------------------------------------------------------------
         function ajax_error(xhr, status, error) {
             self.resume(); // onAjaxError can use pause/resume call it first
-            if ($.isFunction(settings.onAjaxError)) {
+            if (is_function(settings.onAjaxError)) {
                 settings.onAjaxError.call(self, xhr, status, error);
             } else if (status !== 'abort') {
                 self.error('&#91;AJAX&#93; ' + status + ' - ' +
@@ -4245,7 +4257,7 @@
             function jrpc_success(json) {
                 if (json.error) {
                     display_json_rpc_error(json.error);
-                } else if ($.isFunction(settings.processRPCResponse)) {
+                } else if (is_function(settings.processRPCResponse)) {
                     settings.processRPCResponse.call(self, json.result, self);
                 } else {
                     display_object(json.result);
@@ -4374,7 +4386,7 @@
         // ---------------------------------------------------------------------
         function make_interpreter(user_intrp, login, finalize) {
             finalize = finalize || $.noop;
-            var type = $.type(user_intrp);
+            var type = get_type(user_intrp);
             var object;
             var result = {};
             var rpc_count = 0; // only one rpc can be use for array
@@ -4386,7 +4398,7 @@
                     if (interpreters.length) {
                         var first = interpreters[0];
                         var rest = interpreters.slice(1);
-                        var type = $.type(first);
+                        var type = get_type(first);
                         if (type === 'string') {
                             self.pause(settings.softPause);
                             if (settings.describe === false) {
@@ -4484,7 +4496,7 @@
         // :: Create JSON-RPC authentication function
         // ---------------------------------------------------------------------
         function make_json_rpc_login(url, login) {
-            var method = $.type(login) === 'boolean' ? 'login' : login;
+            var method = get_type(login) === 'boolean' ? 'login' : login;
             return function(user, passwd, callback) {
                 self.pause(settings.softPause);
                 $.jrpc({
@@ -4523,7 +4535,7 @@
         // :: display Exception on terminal
         // ---------------------------------------------------------------------
         function display_exception(e, label, silent) {
-            if ($.isFunction(settings.exceptionHandler)) {
+            if (is_function(settings.exceptionHandler)) {
                 settings.exceptionHandler.call(self, e, label);
             } else {
                 self.exception(e, label);
@@ -4550,7 +4562,7 @@
         // ---------------------------------------------------------------------
         function validate(label, object) {
             try {
-                if ($.isFunction(object)) {
+                if (is_function(object)) {
                     object.call(self, $.noop, self);
                 } else if (typeof object !== 'string') {
                     var msg = label + ' must be string or function';
@@ -4628,14 +4640,14 @@
                 }, line.options || {});
                 var string;
                 var arg = line.string;
-                var is_function = $.type(arg) === 'function';
+                var is_function = get_type(arg) === 'function';
                 if (is_function) {
                     arg = arg();
                 }
-                if ($.type(arg) !== 'string') {
-                    if ($.isFunction(settings.parseObject)) {
+                if (get_type(arg) !== 'string') {
+                    if (is_function(settings.parseObject)) {
                         var ret = settings.parseObject(arg);
-                        if ($.type(ret) === 'string') {
+                        if (get_type(ret) === 'string') {
                             string = ret;
                         }
                     } else if (arg instanceof Array) {
@@ -4693,7 +4705,7 @@
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
-                if ($.isFunction(settings.exceptionHandler)) {
+                if (is_function(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL');
                 } else {
                     alert_exception('[Internal Exception(process_line)]', e);
@@ -4730,10 +4742,10 @@
                 lines.forEach(function(line, index) {
                     var string = line[0];
                     var options = line[1];
-                    if ($.type(string) === 'function') {
+                    if (get_type(string) === 'function') {
                         string = string();
                     }
-                    if ($.type(string) !== 'string') {
+                    if (get_type(string) !== 'string') {
                         string = String(string);
                     }
                     lines_to_show.push({
@@ -4768,7 +4780,7 @@
                     display_exception(e, 'onAfterRedraw');
                 }
             } catch (e) {
-                if ($.isFunction(settings.exceptionHandler)) {
+                if (is_function(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
                 } else {
                     alert_exception('[redraw]', e);
@@ -4860,7 +4872,7 @@
                     }
                 }
             };
-            if ($.isFunction(prompt)) {
+            if (is_function(prompt)) {
                 var ret = prompt(function(string) {
                     self.echo(string + command, options);
                 });
@@ -4954,7 +4966,7 @@
                     change_hash = saved_change_hash;
                 }
                 deferred.resolve();
-                if ($.isFunction(settings.onAfterCommand)) {
+                if (is_function(settings.onAfterCommand)) {
                     settings.onAfterCommand.call(self, self, command);
                 }
             }
@@ -4967,7 +4979,7 @@
             }
             try {
                 // this callback can disable commands
-                if ($.isFunction(settings.onBeforeCommand)) {
+                if (is_function(settings.onBeforeCommand)) {
                     if (settings.onBeforeCommand.call(self, self, command) === false) {
                         return;
                     }
@@ -4978,7 +4990,7 @@
                 if (!ghost()) {
                     // exec execute this function wihout the help of cmd plugin
                     // that add command to history on enter
-                    if (exec && ($.isFunction(settings.historyFilter) &&
+                    if (exec && (is_function(settings.historyFilter) &&
                                  settings.historyFilter(command) ||
                                  command.match(settings.historyFilter))) {
                         command_line.history().append(command);
@@ -5049,7 +5061,7 @@
         // :: function is defined. The check for this is in the self.pop method
         // ---------------------------------------------------------------------
         function global_logout() {
-            if ($.isFunction(settings.onBeforeLogout)) {
+            if (is_function(settings.onBeforeLogout)) {
                 try {
                     if (settings.onBeforeLogout.call(self, self) === false) {
                         return;
@@ -5059,7 +5071,7 @@
                 }
             }
             clear_loging_storage();
-            if ($.isFunction(settings.onAfterLogout)) {
+            if (is_function(settings.onAfterLogout)) {
                 try {
                     settings.onAfterLogout.call(self, self);
                 } catch (e) {
@@ -5100,7 +5112,7 @@
                 maybe_append_name(name);
             }
             command_line.name(name);
-            if ($.isFunction(interpreter.prompt)) {
+            if (is_function(interpreter.prompt)) {
                 command_line.prompt(function(callback) {
                     var ret = interpreter.prompt.call(self, callback, self);
                     if (ret && ret.then) {
@@ -5128,7 +5140,7 @@
             }
             command_line.set('');
             init_queue.resolve();
-            if (!silent && $.isFunction(interpreter.onStart)) {
+            if (!silent && is_function(interpreter.onStart)) {
                 interpreter.onStart.call(self, self);
             }
         }
@@ -5163,7 +5175,7 @@
             // login and pause in onInit, 3rd exec will have proper timing (will
             // execute after onInit resume)
             var was_paused = false;
-            if ($.isFunction(settings.onInit)) {
+            if (is_function(settings.onInit)) {
                 onPause = function() { // local in terminal
                     was_paused = true;
                 };
@@ -5249,12 +5261,12 @@
         // ---------------------------------------------------------------------
         function user_key_down(e) {
             var result, top = interpreters.top();
-            if ($.isFunction(top.keydown)) {
+            if (is_function(top.keydown)) {
                 result = top.keydown.call(self, e, self);
                 if (result !== undefined) {
                     return result;
                 }
-            } else if ($.isFunction(settings.keydown)) {
+            } else if (is_function(settings.keydown)) {
                 result = settings.keydown.call(self, e, self);
                 if (result !== undefined) {
                     return result;
@@ -5266,7 +5278,7 @@
                 if (!in_login) {
                     if (command_line.get() === '') {
                         if (interpreters.size() > 1 ||
-                            $.isFunction(global_login_fn)) {
+                            is_function(global_login_fn)) {
                             self.pop('');
                         } else {
                             self.resume();
@@ -5298,7 +5310,7 @@
                     caseSensitive = settings.caseSensitiveAutocomplete;
                 }
                 if (settings.completion &&
-                    $.type(settings.completion) !== 'boolean' &&
+                    get_type(settings.completion) !== 'boolean' &&
                     top.completion === undefined) {
                     completion = settings.completion;
                 } else {
@@ -5316,7 +5328,7 @@
                     });
                 }
                 if (completion) {
-                    switch ($.type(completion)) {
+                    switch (get_type(completion)) {
                         case 'function':
                             var string = self.before_cursor(settings.wordAutocomplete);
                             if (completion.length === 3) {
@@ -5325,7 +5337,7 @@
                                 return false;
                             }
                             var result = completion.call(self, string, resolve);
-                            if (result && $.isFunction(result.then)) {
+                            if (result && is_function(result.then)) {
                                 result.then(resolve);
                             }
                             break;
@@ -5395,7 +5407,7 @@
                                     try {
                                         r.abort();
                                     } catch (error) {
-                                        if ($.isFunction(settings.exceptionHandler)) {
+                                        if (is_function(settings.exceptionHandler)) {
                                             settings.exceptionHandler.call(self,
                                                                            e,
                                                                            'AJAX ABORT');
@@ -5506,7 +5518,7 @@
             // -------------------------------------------------------------
             export_view: function() {
                 var user_export = {};
-                if ($.isFunction(settings.onExport)) {
+                if (is_function(settings.onExport)) {
                     try {
                         user_export = settings.onExport.call(self);
                     } catch (e) {
@@ -5531,7 +5543,7 @@
                 if (in_login) {
                     throw new Error(sprintf(strings().notWhileLogin, 'import_view'));
                 }
-                if ($.isFunction(settings.onImport)) {
+                if (is_function(settings.onImport)) {
                     try {
                         settings.onImport.call(self, view);
                     } catch (e) {
@@ -5636,7 +5648,7 @@
                 if (in_login) {
                     throw new Error(sprintf(strings().notWhileLogin, 'login'));
                 }
-                if (!$.isFunction(auth)) {
+                if (!is_function(auth)) {
                     throw new Error(strings().loginIsNotAFunction);
                 }
                 in_login = true;
@@ -5645,7 +5657,7 @@
                     self.logout(true);
                 } else if (self.token(true) && self.login_name(true)) {
                     in_login = false;
-                    if ($.isFunction(success)) {
+                    if (is_function(success)) {
                         success();
                     }
                     return self;
@@ -5668,7 +5680,7 @@
                         storage.set(name + 'token', token);
                         storage.set(name + 'login', user);
                         in_login = false;
-                        if ($.isFunction(success)) {
+                        if (is_function(success)) {
                             // will be used internaly since users know
                             // when login success (they decide when
                             // it happen by calling the callback -
@@ -5689,7 +5701,7 @@
                             self.pop(undefined, true).pop(undefined, true);
                         }
                         // used only to call pop in push
-                        if ($.isFunction(error)) {
+                        if (is_function(error)) {
                             error();
                         }
                     }
@@ -5900,7 +5912,7 @@
                         prepare_top_interpreter(true);
                     });
                 }
-                if ($.type(user_intrp) === 'string' && login) {
+                if (get_type(user_intrp) === 'string' && login) {
                     self.login(make_json_rpc_login(user_intrp, login),
                                true,
                                overwrite_interpreter);
@@ -5933,7 +5945,7 @@
                     if (!visible) {
                         command_line.find('.prompt').hidden();
                     }
-                    if ($.isFunction(settings.onPause)) {
+                    if (is_function(settings.onPause)) {
                         settings.onPause.call(self);
                     }
                 });
@@ -5960,7 +5972,7 @@
                         fn();
                     }
                     scroll_to_bottom();
-                    if ($.isFunction(settings.onResume)) {
+                    if (is_function(settings.onResume)) {
                         settings.onResume.call(self);
                     }
                 });
@@ -6253,7 +6265,7 @@
             set_prompt: function(prompt) {
                 when_ready(function ready() {
                     if (validate('prompt', prompt)) {
-                        if ($.isFunction(prompt)) {
+                        if (is_function(prompt)) {
                             command_line.prompt(function(callback) {
                                 prompt(callback, self);
                             });
@@ -6292,7 +6304,7 @@
                     return lines;
                 } else {
                     return $.map(lines, function(item) {
-                        return $.isFunction(item[0]) ? item[0]() : item[0];
+                        return is_function(item[0]) ? item[0]() : item[0];
                     }).join('\n');
                 }
             },
@@ -6329,9 +6341,9 @@
                         command_line.resize(num_chars);
                         self.refresh();
                         var top = interpreters.top();
-                        if ($.isFunction(top.resize)) {
+                        if (is_function(top.resize)) {
                             top.resize.call(self, self);
-                        } else if ($.isFunction(settings.onResize)) {
+                        } else if (is_function(settings.onResize)) {
                             settings.onResize.call(self, self);
                         }
                     }
@@ -6366,7 +6378,7 @@
                     $.each(output_buffer, function(i, line) {
                         if (line === NEW_LINE) {
                             wrapper = $('<div></div>');
-                        } else if ($.isPlainObject(line) && $.isFunction(line.finalize)) {
+                        } else if ($.isPlainObject(line) && is_function(line.finalize)) {
                             // this is finalize function from echo
                             if (options.update) {
                                 var selector = '> div[data-index=' + line.index + ']';
@@ -6396,7 +6408,7 @@
                     }
                     output_buffer = [];
                 } catch (e) {
-                    if ($.isFunction(settings.exceptionHandler)) {
+                    if (is_function(settings.exceptionHandler)) {
                         settings.exceptionHandler.call(self, e, 'TERMINAL (Flush)');
                     } else {
                         alert_exception('[Flush]', e);
@@ -6473,7 +6485,7 @@
                                     div.addClass('raw');
                                 }
                                 try {
-                                    if ($.isFunction(finalize)) {
+                                    if (is_function(finalize)) {
                                         finalize(div);
                                     }
                                 } catch (e) {
@@ -6508,14 +6520,14 @@
                     } catch (e) {
                         // if echo throw exception we can't use error to
                         // display that exception
-                        if ($.isFunction(settings.exceptionHandler)) {
+                        if (is_function(settings.exceptionHandler)) {
                             settings.exceptionHandler.call(self, e, 'TERMINAL (echo)');
                         } else {
                             alert_exception('[Terminal.echo]', e);
                         }
                     }
                 }
-                if (arg !== undefined && $.isFunction(arg.then)) {
+                if (arg !== undefined && is_function(arg.then)) {
                     $.when(arg).done(echo);
                 } else {
                     echo(arg);
@@ -6703,7 +6715,7 @@
                 self.push(function(string) {
                     read = true;
                     defer.resolve(string);
-                    if ($.isFunction(success)) {
+                    if (is_function(success)) {
                         success(string);
                     }
                     self.pop();
@@ -6713,7 +6725,7 @@
                     onExit: function() {
                         if (!read) {
                             defer.reject();
-                            if ($.isFunction(cancel)) {
+                            if (is_function(cancel)) {
                                 cancel();
                             }
                         }
@@ -6762,14 +6774,14 @@
                         }
                         if (push_settings.login) {
                             var error;
-                            var type = $.type(push_settings.login);
+                            var type = get_type(push_settings.login);
                             if (type === 'function') {
                                 error = push_settings.infiniteLogin ? $.noop : self.pop;
                                 self.login(push_settings.login,
                                            push_settings.infiniteLogin,
                                            init,
                                            error);
-                            } else if ($.type(interpreter) === 'string' &&
+                            } else if (get_type(interpreter) === 'string' &&
                                        type === 'string' || type === 'boolean') {
                                 error = push_settings.infiniteLogin ? $.noop : self.pop;
                                 self.login(make_json_rpc_login(interpreter,
@@ -6804,7 +6816,7 @@
                             settings.onPop.call(self, top, null, self);
                         }
                         global_logout();
-                        if ($.isFunction(settings.onExit)) {
+                        if (is_function(settings.onExit)) {
                             try {
                                 settings.onExit.call(self, self);
                             } catch (e) {
@@ -6829,7 +6841,7 @@
                     if (in_login && self.get_prompt() !== strings().login + ': ') {
                         in_login = false;
                     }
-                    if ($.isFunction(current.onExit)) {
+                    if (is_function(current.onExit)) {
                         try {
                             current.onExit.call(self, self);
                         } catch (e) {
@@ -7171,7 +7183,7 @@
             .appendTo(wrapper);
         self.addClass('terminal');
         // before login event
-        if (settings.login && $.isFunction(settings.onBeforeLogin)) {
+        if (settings.login && is_function(settings.onBeforeLogin)) {
             try {
                 if (settings.onBeforeLogin.call(self, self) === false) {
                     autologin = false;
@@ -7195,7 +7207,7 @@
             }
         }
         var global_login_fn;
-        if ($.isFunction(settings.login)) {
+        if (is_function(settings.login)) {
             global_login_fn = settings.login;
         } else if (base_interpreter &&
             (typeof settings.login === 'string' || settings.login === true)) {
@@ -7291,15 +7303,15 @@
                 keypress: function(e) {
                     var top = interpreters.top();
                     if (enabled && (!paused || !settings.pauseEvents)) {
-                        if ($.isFunction(top.keypress)) {
+                        if (is_function(top.keypress)) {
                             return top.keypress.call(self, e, self);
-                        } else if ($.isFunction(settings.keypress)) {
+                        } else if (is_function(settings.keypress)) {
                             return settings.keypress.call(self, e, self);
                         }
                     }
                 },
                 onCommandChange: function(command) {
-                    if ($.isFunction(settings.onCommandChange)) {
+                    if (is_function(settings.onCommandChange)) {
                         try {
                             settings.onCommandChange.call(self, command, self);
                         } catch (e) {
@@ -7549,7 +7561,7 @@
             }
             // -------------------------------------------------------------
             // Run Login
-            if ($.isFunction(global_login_fn)) {
+            if (is_function(global_login_fn)) {
                 self.login(global_login_fn, true, initialize);
             } else {
                 initialize();
@@ -7581,7 +7593,7 @@
                             }
                         } catch (e) {
                             var settings = terminal.settings();
-                            if ($.isFunction(settings.exceptionHandler)) {
+                            if (is_function(settings.exceptionHandler)) {
                                 settings.exceptionHandler.call(self, e, 'EXEC HASH');
                             } else {
                                 var cmd = $.terminal.escape_brackets(command);
@@ -7640,9 +7652,9 @@
                 if (!shift) {
                     var interpreter = interpreters.top();
                     var ret;
-                    if ($.isFunction(interpreter.mousewheel)) {
+                    if (is_function(interpreter.mousewheel)) {
                         ret = interpreter.mousewheel(event, delta, self);
-                    } else if ($.isFunction(settings.mousewheel)) {
+                    } else if (is_function(settings.mousewheel)) {
                         ret = settings.mousewheel(event, delta, self);
                     }
                     if (have_scrollbar() || ret === false) {
