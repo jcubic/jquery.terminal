@@ -6,6 +6,7 @@
 * add less plugin based on the one from leash
 * supports for promises returned from completion function
 * add prism.js file that include monkey patch for PrismJS library (for syntax highlight) to output terminal formatting
+* better read method [#397](https://github.com/jcubic/jquery.terminal/issues/397)
 
 ### Bugs
 * fix resizer in Firefox [#395](https://github.com/jcubic/jquery.terminal/issues/395)
@@ -15,6 +16,7 @@
 * fix null in JSON hash
 * fix jumping on right click (context menu) [#399](https://github.com/jcubic/jquery.terminal/issues/399)
 * fix formatting inside brackets [#396](https://github.com/jcubic/jquery.terminal/issues/396)
+* fix async interpreter [#400](https://github.com/jcubic/jquery.terminal/issues/400)
 
 ## 1.15.0
 
