@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 21 May 2018 11:22:09 +0000
+ * Date: Wed, 23 May 2018 15:01:08 +0000
  */
 
 /* TODO:
@@ -2875,7 +2875,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 21 May 2018 11:22:09 +0000',
+        date: 'Wed, 23 May 2018 15:01:08 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5713,7 +5713,8 @@
                 self.push(function(user) {
                     self.set_mask(settings.maskChar).push(function(pass) {
                         try {
-                            var ret = auth.call(self, user, pass, function(token, silent) {
+                            var ret = auth.call(self, user, pass, function(token,
+                                                                           silent) {
                                 login_callback(user, token, silent);
                             });
                             if (ret && is_function(ret.then)) {
@@ -7391,6 +7392,15 @@
                         count = 0;
                         $target = null;
                     }
+                    // fix weird jumping on Chrome/windows #402
+                    var scroll_top;
+                    self.find('.cmd textarea').on('focus', function() {
+                        if (typeof scroll_top !== 'undefined') {
+                            scroll_object.scrollTop(scroll_top);
+                        }
+                    }).on('blur', function() {
+                        scroll_top = scroll_object.scrollTop();
+                    });
                     self.mousedown(function(e) {
                         if (!scrollbar_event(e, fill)) {
                             $target = $(e.target);

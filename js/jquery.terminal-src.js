@@ -7392,6 +7392,15 @@
                         count = 0;
                         $target = null;
                     }
+                    // fix weird jumping on Chrome/windows #402
+                    var scroll_top;
+                    self.find('.cmd textarea').on('focus', function() {
+                        if (typeof scroll_top !== 'undefined') {
+                            scroll_object.scrollTop(scroll_top);
+                        }
+                    }).on('blur', function() {
+                        scroll_top = scroll_object.scrollTop();
+                    });
                     self.mousedown(function(e) {
                         if (!scrollbar_event(e, fill)) {
                             $target = $(e.target);
