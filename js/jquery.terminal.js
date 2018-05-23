@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 23 May 2018 15:01:08 +0000
+ * Date: Wed, 23 May 2018 15:29:13 +0000
  */
 
 /* TODO:
@@ -2875,7 +2875,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 23 May 2018 15:01:08 +0000',
+        date: 'Wed, 23 May 2018 15:29:13 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5372,12 +5372,16 @@
                 self.scroll(-self.height());
             }
         };
+        // ---------------------------------------------------------------------
+        // var used in hack for weird jumping on Chrome/windows #402
+        var scroll_top;
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i;
             if (self.enabled()) {
                 if (!self.paused()) {
+                    scroll_top = scroll_object.scrollTop();
                     result = user_key_down(e);
                     if (result !== undefined) {
                         return result;
@@ -5425,11 +5429,27 @@
                 }
             }
         }
+        // ---------------------------------------------------------------------
+        function key_press(e) {
+            var top = interpreters.top();
+            if (enabled && (!paused || !settings.pauseEvents)) {
+                setTimeout(function() {
+                    scroll_object.scrollTop(scroll_top);
+                }, 0);
+                if (is_function(top.keypress)) {
+                    return top.keypress.call(self, e, self);
+                } else if (is_function(settings.keypress)) {
+                    return settings.keypress.call(self, e, self);
+                }
+            }
+        }
+        // ---------------------------------------------------------------------
         function ready(queue) {
             return function(fun) {
                 queue.add(fun);
             };
         }
+        // ---------------------------------------------------------------------
         function strings() {
             return $.extend(
                 {},
@@ -7308,16 +7328,7 @@
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
-                keypress: function(e) {
-                    var top = interpreters.top();
-                    if (enabled && (!paused || !settings.pauseEvents)) {
-                        if (is_function(top.keypress)) {
-                            return top.keypress.call(self, e, self);
-                        } else if (is_function(settings.keypress)) {
-                            return settings.keypress.call(self, e, self);
-                        }
-                    }
-                },
+                keypress: key_press,
                 onCommandChange: function(command) {
                     if (is_function(settings.onCommandChange)) {
                         try {
@@ -7392,7 +7403,7 @@
                         count = 0;
                         $target = null;
                     }
-                    // fix weird jumping on Chrome/windows #402
+                    // hack for weird jumping on Chrome/windows #402
                     var scroll_top;
                     self.find('.cmd textarea').on('focus', function() {
                         if (typeof scroll_top !== 'undefined') {
