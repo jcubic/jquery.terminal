@@ -45,7 +45,7 @@
 
         var env = {
             type: o.type,
-            content: Token.stringify(o.content, language, parent),
+            content: _.Token.stringify(o.content, language, parent),
             tag: 'span',
             classes: ['token', o.type],
             attributes: {},
@@ -64,11 +64,8 @@
 
         _.hooks.run('wrap', env);
 
-        var attributes = Object.keys(env.attributes).map(function(name) {
-            return name + '="' + (env.attributes[name] || '').replace(/"/g, '&quot;') + '"';
-        }).join(' ');
         return env.content.split(/\n/).map(function(content) {
-            return '[[b;;;' + env.classes.join(' ') + ']' + $.terminal.escape_brackets(content) + ']';
+            return '[[b;;;' + env.classes.join(' ') + ']' + content + ']';
         }).join('\n');
 
     };
