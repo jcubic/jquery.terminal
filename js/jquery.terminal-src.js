@@ -1059,6 +1059,13 @@
             },
             disable: function() {
                 enabled = false;
+            },
+            toggle: function(value) {
+                if (typeof value === 'undefined') {
+                    enabled = !enabled;
+                } else {
+                    enabled = value;
+                }
             }
         });
     }
@@ -5126,6 +5133,7 @@
             } else {
                 command_line.prompt(interpreter.prompt);
             }
+            self.history().toggle(interpreter.history);
             if ($.isPlainObject(interpreter.keymap)) {
                 command_line.keymap($.omap(interpreter.keymap, function(name, fun) {
                     return function() {
@@ -6737,9 +6745,7 @@
             // -------------------------------------------------------------
             read: function(message, success, cancel) {
                 var defer = jQuery.Deferred();
-                var history = self.history();
                 var read = false;
-                history.disable();
                 self.push(function(string) {
                     read = true;
                     defer.resolve(string);
@@ -6749,6 +6755,7 @@
                     self.pop();
                 }, {
                     name: 'read',
+                    history: false,
                     prompt: prompt || '',
                     onExit: function() {
                         if (!read) {
@@ -6757,7 +6764,6 @@
                                 cancel();
                             }
                         }
-                        history.enable();
                     }
                 });
                 return defer.promise();
@@ -6769,7 +6775,8 @@
                 cmd_ready(function ready() {
                     options = options || {};
                     var defaults = {
-                        infiniteLogin: false
+                        infiniteLogin: false,
+                        history: true
                     };
                     var push_settings = $.extend({}, defaults, options);
                     if (!push_settings.name && prev_command) {
@@ -7313,6 +7320,7 @@
                 resize: settings.onResize,
                 greetings: settings.greetings,
                 mousewheel: settings.mousewheel,
+                history: settings.history,
                 keymap: new_keymap
             }, itrp));
             // CREATE COMMAND LINE

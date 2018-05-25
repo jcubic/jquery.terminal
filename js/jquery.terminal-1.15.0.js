@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 23 May 2018 15:29:13 +0000
+ * Date: Fri, 25 May 2018 09:42:08 +0000
  */
 
 /* TODO:
@@ -1059,6 +1059,13 @@
             },
             disable: function() {
                 enabled = false;
+            },
+            toggle: function(value) {
+                if (typeof value === 'undefined') {
+                    enabled = !enabled;
+                } else {
+                    enabled = value;
+                }
             }
         });
     }
@@ -2875,7 +2882,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 23 May 2018 15:29:13 +0000',
+        date: 'Fri, 25 May 2018 09:42:08 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5126,6 +5133,7 @@
             } else {
                 command_line.prompt(interpreter.prompt);
             }
+            self.history().toggle(interpreter.history);
             if ($.isPlainObject(interpreter.keymap)) {
                 command_line.keymap($.omap(interpreter.keymap, function(name, fun) {
                     return function() {
@@ -6737,9 +6745,7 @@
             // -------------------------------------------------------------
             read: function(message, success, cancel) {
                 var defer = jQuery.Deferred();
-                var history = self.history();
                 var read = false;
-                history.disable();
                 self.push(function(string) {
                     read = true;
                     defer.resolve(string);
@@ -6749,6 +6755,7 @@
                     self.pop();
                 }, {
                     name: 'read',
+                    history: false,
                     prompt: prompt || '',
                     onExit: function() {
                         if (!read) {
@@ -6757,7 +6764,6 @@
                                 cancel();
                             }
                         }
-                        history.enable();
                     }
                 });
                 return defer.promise();
@@ -6769,7 +6775,8 @@
                 cmd_ready(function ready() {
                     options = options || {};
                     var defaults = {
-                        infiniteLogin: false
+                        infiniteLogin: false,
+                        history: true
                     };
                     var push_settings = $.extend({}, defaults, options);
                     if (!push_settings.name && prev_command) {
@@ -7313,6 +7320,7 @@
                 resize: settings.onResize,
                 greetings: settings.greetings,
                 mousewheel: settings.mousewheel,
+                history: settings.history,
                 keymap: new_keymap
             }, itrp));
             // CREATE COMMAND LINE
