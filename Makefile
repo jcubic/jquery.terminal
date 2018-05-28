@@ -95,6 +95,9 @@ eslint:
 	$(ESLINT) js/xml_formatting.js
 	$(ESLINT) js/unix_formatting.js
 
+skipped_tests:
+	@grep -E 'iit|ddescribe' spec/terminalSpec.js && false || true
+
 jsonlint: package.json bower.json
 	$(JSONLINT) package.json > /dev/null
 	$(JSONLINT) bower.json > /dev/null

@@ -6,6 +6,7 @@ install:
 script:
   - make
   - make lint
+  - make skipped_tests
   - make test
 after_script:
   - make coveralls
