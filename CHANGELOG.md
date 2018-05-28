@@ -19,7 +19,7 @@
 * fix jumping on right click (context menu) [#399](https://github.com/jcubic/jquery.terminal/issues/399)
 * fix formatting inside brackets [#396](https://github.com/jcubic/jquery.terminal/issues/396)
 * fix async interpreter [#400](https://github.com/jcubic/jquery.terminal/issues/400)
-
+* use window resize when terminal added to body
 ## 1.15.0
 
 ### Features

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 25 May 2018 09:42:08 +0000
+ * Date: Mon, 28 May 2018 15:25:32 +0000
  */
 
 /* TODO:
@@ -778,6 +778,8 @@
                             // just in case of memory leaks in IE
                             $(iframe[0].contentWindow).off('resize').remove();
                             iframe.remove();
+                        } else if($this.is('body')) {
+                            $(window).off('resize.resizer');
                         }
                     }
                 }
@@ -787,24 +789,26 @@
                 callbacks = $.Callbacks();
                 callbacks.add(callback);
                 $this.data('callbacks', callbacks);
+                function resize_handler() {
+                    callbacks.fire();
+                }
                 var resizer;
                 var first = true;
                 if (window.ResizeObserver) {
                     resizer = new ResizeObserver(function() {
                         if (!first) {
-                            var callbacks = $this.data('callbacks');
-                            callbacks.fire();
+                            resize_handler();
                         }
                         first = false;
                     });
                     resizer.observe(this);
                     $this.data('observer', resizer);
+                } else if ($this.is('body')) {
+                    $(window).on('resize.resizer', resize_handler);
                 } else {
                     iframe = $('<iframe/>').addClass('resizer').appendTo(this)[0];
 
-                    $(iframe.contentWindow).on('resize', function() {
-                        callbacks.fire();
-                    });
+                    $(iframe.contentWindow).on('resize', resize_handler);
                 }
             }
         });
@@ -2882,7 +2886,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 25 May 2018 09:42:08 +0000',
+        date: 'Mon, 28 May 2018 15:25:32 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
