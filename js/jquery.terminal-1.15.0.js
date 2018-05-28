@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 28 May 2018 15:25:32 +0000
+ * Date: Mon, 28 May 2018 15:58:29 +0000
  */
 
 /* TODO:
@@ -754,6 +754,9 @@
             var $this = $(this);
             var iframe;
             var callbacks;
+            function resize_handler() {
+                callbacks.fire();
+            }
             if (unbind) {
                 callbacks = $this.data('callbacks');
                 if (callback && callbacks) {
@@ -778,7 +781,7 @@
                             // just in case of memory leaks in IE
                             $(iframe[0].contentWindow).off('resize').remove();
                             iframe.remove();
-                        } else if($this.is('body')) {
+                        } else if ($this.is('body')) {
                             $(window).off('resize.resizer');
                         }
                     }
@@ -789,9 +792,6 @@
                 callbacks = $.Callbacks();
                 callbacks.add(callback);
                 $this.data('callbacks', callbacks);
-                function resize_handler() {
-                    callbacks.fire();
-                }
                 var resizer;
                 var first = true;
                 if (window.ResizeObserver) {
@@ -2886,7 +2886,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 28 May 2018 15:25:32 +0000',
+        date: 'Mon, 28 May 2018 15:58:29 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

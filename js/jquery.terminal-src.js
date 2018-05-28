@@ -754,6 +754,9 @@
             var $this = $(this);
             var iframe;
             var callbacks;
+            function resize_handler() {
+                callbacks.fire();
+            }
             if (unbind) {
                 callbacks = $this.data('callbacks');
                 if (callback && callbacks) {
@@ -778,7 +781,7 @@
                             // just in case of memory leaks in IE
                             $(iframe[0].contentWindow).off('resize').remove();
                             iframe.remove();
-                        } else if($this.is('body')) {
+                        } else if ($this.is('body')) {
                             $(window).off('resize.resizer');
                         }
                     }
@@ -789,9 +792,6 @@
                 callbacks = $.Callbacks();
                 callbacks.add(callback);
                 $this.data('callbacks', callbacks);
-                function resize_handler() {
-                    callbacks.fire();
-                }
                 var resizer;
                 var first = true;
                 if (window.ResizeObserver) {
