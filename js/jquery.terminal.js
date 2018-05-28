@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 28 May 2018 15:58:29 +0000
+ * Date: Mon, 28 May 2018 16:06:58 +0000
  */
 
 /* TODO:
@@ -742,13 +742,13 @@
     // -----------------------------------------------------------------------
     $.fn.resizer = function(callback) {
         var unbind = arguments[0] === "unbind";
-        if (!unbind && !$.isFunction(callback)) {
+        if (!unbind && !is_function(callback)) {
             throw new Error(
                 'Invalid argument, it need to a function or string "unbind".'
             );
         }
         if (unbind) {
-            callback = $.isFunction(arguments[1]) ? arguments[1] : null;
+            callback = is_function(arguments[1]) ? arguments[1] : null;
         }
         return this.each(function() {
             var $this = $(this);
@@ -1206,7 +1206,7 @@
             },
             'ENTER': function() {
                 if (history && command && !settings.mask &&
-                    ($.isFunction(options.historyFilter) &&
+                    (is_function(options.historyFilter) &&
                      options.historyFilter(command)) ||
                     (options.historyFilter instanceof RegExp &&
                      command.match(options.historyFilter)) ||
@@ -1224,7 +1224,7 @@
                 if (options.commands) {
                     options.commands(tmp);
                 }
-                if ($.isFunction(prompt)) {
+                if (is_function(prompt)) {
                     draw_prompt();
                 }
                 clip.val('');
@@ -1984,7 +1984,7 @@
             }
         }
         function fire_change_command() {
-            if ($.isFunction(options.onCommandChange)) {
+            if (is_function(options.onCommandChange)) {
                 options.onCommandChange(command);
             }
         }
@@ -2170,7 +2170,7 @@
                         position = n;
                     }
                     formatted_position = get_formatted_position(position);
-                    if ($.isFunction(settings.onPositionChange)) {
+                    if (is_function(settings.onPositionChange)) {
                         settings.onPositionChange(position);
                     }
                     redraw();
@@ -2346,7 +2346,7 @@
             // prevent native insert action
             clip.off('input', paste);
             var key = get_key(e);
-            if ($.isFunction(settings.keydown)) {
+            if (is_function(settings.keydown)) {
                 result = settings.keydown(e);
                 if (result !== undefined) {
                     //prevent_keypress = true;
@@ -2377,7 +2377,7 @@
                     // finish reverse search and execute normal event handler
                     /* jshint validthis:true */
                     keydown_event.call(this, e);
-                } else if ($.isFunction(keymap[key])) {
+                } else if (is_function(keymap[key])) {
                     result = keymap[key](e);
                     if (result === true) {
                         return;
@@ -2410,7 +2410,7 @@
             if (prevent_keypress) {
                 return;
             }
-            if ($.isFunction(settings.keypress)) {
+            if (is_function(settings.keypress)) {
                 result = settings.keypress(e);
                 if (result !== undefined) {
                     if (!result) {
@@ -2886,7 +2886,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 28 May 2018 15:58:29 +0000',
+        date: 'Mon, 28 May 2018 16:06:58 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3735,7 +3735,7 @@
         return $.ajax({
             url: options.url,
             beforeSend: function beforeSend(jxhr, settings) {
-                if ($.isFunction(options.request)) {
+                if (is_function(options.request)) {
                     options.request(jxhr, request);
                 }
                 settings.data = JSON.stringify(request);
@@ -3757,7 +3757,7 @@
                     }
                     return;
                 }
-                if ($.isFunction(options.response)) {
+                if (is_function(options.response)) {
                     options.response(jqXHR, json);
                 }
                 if (validJSONRPC(json) || options.method === 'system.describe') {
@@ -6760,7 +6760,7 @@
                 }, {
                     name: 'read',
                     history: false,
-                    prompt: prompt || '',
+                    prompt: message || '',
                     onExit: function() {
                         if (!read) {
                             defer.reject();

@@ -2186,7 +2186,7 @@ function tests_on_ready() {
                 expect(term.get_command()).toEqual("asd \"foo 'bar' baz\"");
                 term.destroy().remove();
             });
-            iit('should complete when function returm promise', function(done) {
+            it('should complete when function returm promise', function(done) {
                 term = $('<div/>').appendTo('body').terminal({}, {
                     completion: function() {
                         return new Promise(function(resolve) {
