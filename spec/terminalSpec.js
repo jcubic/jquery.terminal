@@ -3342,7 +3342,7 @@ function tests_on_ready() {
                     term.read('text: ');
                     expect(term.get_prompt()).toEqual('text: ');
                 });
-                iit('should return promise that get resolved', function() {
+                it('should return promise that get resolved', function() {
                     var test = {
                         callback: function() {}
                     };
