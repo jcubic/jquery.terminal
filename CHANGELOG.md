@@ -7,7 +7,7 @@
 * supports for promises returned from completion function
 * add prism.js file that include monkey patch for PrismJS library (for syntax highlight) to output terminal formatting
 * better read method [#397](https://github.com/jcubic/jquery.terminal/issues/397)
-* handle promises returned from login and async functions [#401](https://github.com/jcubic/jquery.terminal/issues/401)
+* handle promises returned from login and async login function [#401](https://github.com/jcubic/jquery.terminal/issues/401)
 * add history option for push for easy disabling history for new interpreter
 
 ### Bugs
