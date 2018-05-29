@@ -5384,16 +5384,12 @@
                 self.scroll(-self.height());
             }
         };
-        // ---------------------------------------------------------------------
-        // var used in hack for weird jumping on Chrome/windows #402
-        var scroll_top;
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i;
             if (self.enabled()) {
                 if (!self.paused()) {
-                    scroll_top = scroll_object.scrollTop();
                     result = user_key_down(e);
                     if (result !== undefined) {
                         return result;
@@ -5401,7 +5397,6 @@
                     if (e.which !== 9) { // not a TAB
                         tab_count = 0;
                     }
-                    self.attr({scrollTop: self.attr('scrollHeight')});
                 } else {
                     if (!settings.pauseEvents) {
                         result = user_key_down(e);
@@ -5445,9 +5440,6 @@
         function key_press(e) {
             var top = interpreters.top();
             if (enabled && (!paused || !settings.pauseEvents)) {
-                setTimeout(function() {
-                    scroll_object.scrollTop(scroll_top);
-                }, 0);
                 if (is_function(top.keypress)) {
                     return top.keypress.call(self, e, self);
                 } else if (is_function(settings.keypress)) {
@@ -7702,6 +7694,8 @@
                         event.preventDefault();
                     }
                     if (ret === false) {
+                        return false;
+                    } else if (ret === true) {
                         return;
                     }
                     if (delta > 0) {

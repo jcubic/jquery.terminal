@@ -97,8 +97,7 @@ eslint:
 	$(ESLINT) js/unix_formatting.js
 
 skipped_tests:
-	@grep -E $(skip_re) spec/terminalSpec.js || true
-	$(if $(shell grep -E $(skip_re) spec/terminalSpec.js), @false, @true)
+	@! grep -E $(skip_re) spec/terminalSpec.js
 
 jsonlint: package.json bower.json
 	$(JSONLINT) package.json > /dev/null
