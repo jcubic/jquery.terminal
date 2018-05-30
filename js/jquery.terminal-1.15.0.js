@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 29 May 2018 17:15:21 +0000
+ * Date: Wed, 30 May 2018 09:32:48 +0000
  */
 
 /* TODO:
@@ -2886,7 +2886,7 @@
     }
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 29 May 2018 17:15:21 +0000',
+        date: 'Wed, 30 May 2018 09:32:48 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3937,6 +3937,7 @@
         extra: {},
         tabs: 4,
         historySize: 60,
+        scrollObject: null,
         historyState: false,
         importHistory: false,
         historyFilter: null,
@@ -4556,16 +4557,6 @@
                     }, 0);
                 }
             }
-        }
-        // ---------------------------------------------------------------------
-        function scroll_to_bottom() {
-            var scrollHeight;
-            if (scroll_object.prop) {
-                scrollHeight = scroll_object.prop('scrollHeight');
-            } else {
-                scrollHeight = scroll_object.attr('scrollHeight');
-            }
-            scroll_object.scrollTop(scrollHeight);
         }
         // ---------------------------------------------------------------------
         // :: validating if object is a string or a function, call that function
@@ -5367,7 +5358,7 @@
             'CTRL+V': function(e, original) {
                 original(e);
                 self.oneTime(200, function() {
-                    scroll_to_bottom();
+                    self.scroll_to_bottom();
                 });
                 return true;
             },
@@ -6003,7 +5994,7 @@
                     if (fn) {
                         fn();
                     }
-                    scroll_to_bottom();
+                    self.scroll_to_bottom();
                     if (is_function(settings.onResume)) {
                         settings.onResume.call(self);
                     }
@@ -6283,7 +6274,7 @@
                         var bottom = self.is_bottom();
                         command_line.insert(string, stay);
                         if (settings.scrollOnEcho || bottom) {
-                            scroll_to_bottom();
+                            self.scroll_to_bottom();
                         }
                     });
                     return self;
@@ -6436,7 +6427,7 @@
                     }
                     //num_rows = get_num_rows(self, char_size);
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
-                        scroll_to_bottom();
+                        self.scroll_to_bottom();
                     }
                     output_buffer = [];
                 } catch (e) {
@@ -7050,7 +7041,13 @@
             },
             // -------------------------------------------------------------
             scroll_to_bottom: function() {
-                scroll_to_bottom();
+                var scrollHeight;
+                if (scroll_object.prop) {
+                    scrollHeight = scroll_object.prop('scrollHeight');
+                } else {
+                    scrollHeight = scroll_object.attr('scrollHeight');
+                }
+                scroll_object.scrollTop(scrollHeight);
                 return self;
             },
             // -------------------------------------------------------------
@@ -7198,10 +7195,13 @@
         }
         // scrollTop need be on html but scrollHeight taken from body
         // on Safari both on body it's easier to just put both in selector and it works
-        if (self.is('body') && !is_safari) {
-            scroll_object = $('html,body');
+        if (settings.scrollObject !== null) {
+            scroll_object = $(settings.scrollObject);
         } else {
             scroll_object = self;
+        }
+        if (scroll_object.is('body') && !is_safari) {
+            scroll_object = $('html,body');
         }
         // register ajaxSend for cancel requests on CTRL+D
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
@@ -7342,7 +7342,7 @@
                             display_exception(e, 'onCommandChange');
                         }
                     }
-                    scroll_to_bottom();
+                    self.scroll_to_bottom();
                 },
                 commands: commands
             });

@@ -9,6 +9,7 @@
 * better read method [#397](https://github.com/jcubic/jquery.terminal/issues/397)
 * handle promises returned from login and async login function [#401](https://github.com/jcubic/jquery.terminal/issues/401)
 * add history option for push for easy disabling history for new interpreter
+* add scrollObject option, so you can use body when terminal is on full screen div
 
 ### Bugs
 * fix resizer in Firefox [#395](https://github.com/jcubic/jquery.terminal/issues/395)
