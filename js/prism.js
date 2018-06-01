@@ -28,7 +28,11 @@
  */
 /* global jQuery, Prism */
 (function(Token, $) {
+    if (typeof Prism === 'undefined') {
+        throw new Error('PrismJS not defined');
+    }
     var _ = Prism;
+
     _.Token = function(type, content, alias, matchedStr, greedy) {
         Token.apply(this, [].slice.call(arguments));
     };
@@ -70,3 +74,21 @@
 
     };
 })(Prism.Token, jQuery);
+
+(function($) {
+    if (!$) {
+        throw new Error('jQuery Not defined');
+    }
+    if (!$.terminal) {
+        throw new Error('$.terminal is not defined');
+    }
+    jQuery.terminal.prism_formatter = function(language, text) {
+        if (language && Prism.languages[language]) {
+            var grammar = Prism.languages[language];
+            var tokens = Prism.tokenize(text, grammar);
+            return Prism.Token.stringify(tokens, language);
+        } else {
+            return text;
+        }
+    };
+})(jQuery);
