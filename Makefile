@@ -17,6 +17,7 @@ CSSNANO=./node_modules/.bin/cssnano
 SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
+skip_re="[xfi]it\\(|[fdx]describe\\("
 
 .PHONY: coverage
 
@@ -94,6 +95,9 @@ eslint:
 	$(ESLINT) js/dterm.js
 	$(ESLINT) js/xml_formatting.js
 	$(ESLINT) js/unix_formatting.js
+
+skipped_tests:
+	@! grep -E $(skip_re) spec/terminalSpec.js
 
 jsonlint: package.json bower.json
 	$(JSONLINT) package.json > /dev/null

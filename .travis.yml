@@ -6,6 +6,7 @@ install:
 script:
   - make
   - make lint
-  - make test
+  - make skipped_tests || travis_terminate 1
+  - make test || travis_terminate 1
 after_script:
   - make coveralls

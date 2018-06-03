@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.15.0
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 13 May 2018 09:34:11 +0000
+ * Date: Tue, 29 May 2018 17:15:25 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -79,16 +79,17 @@ body.terminal {
 }
 .terminal > div {
     overflow: hidden;
+    min-height: 100%;
 }
-.terminal > .resizer, .terminal > .font .resizer{
+.terminal > .resizer, .terminal > .font .resizer {
     position: absolute;
-    left: 0;
     top: 0;
     right: 0;
     bottom: 0;
+    left: 0;
     overflow: hidden;
+    pointer-events: none;
     z-index: -1;
-    visibility: hidden;
     height: 100%;
     border: none;
     padding: 0;
@@ -97,9 +98,7 @@ body.terminal {
 .cmd {
     padding: 0;
     position: relative;
-    /*margin-top: 3px; */
     float: left;
-    padding-bottom: 3px;
 }
 .terminal a[tabindex="1000"],
 .terminal a[tabindex="1000"]:active,
@@ -165,9 +164,9 @@ terminal .terminal-output > div {
 }
 .terminal .font {
     position: absolute;
+    float: left;
     font-size: inherit;
-    width: 1em;
-    height: 1em;
+    line-height: inherit;
     top: -100%;
     left: 0;
     margin-bottom: 1px;
@@ -453,10 +452,6 @@ terminal .terminal-output > div {
     .terminal, .cmd {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
-    }
-    .terminal .font {
-        width: calc(var(--size, 1) * 1em);
-        height: calc(var(--size, 1) * 1em);
     }
     .terminal span[style*="--length"] {
         /*
