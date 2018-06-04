@@ -273,7 +273,7 @@
       "complexity": [
         "error",
         {
-          "max": 26
+          "max": 30
         }
       ],
       "indent": [
