@@ -16,8 +16,9 @@
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 var loaded;
 if (typeof window === 'undefined') {
-    var jsdom = require("jsdom");
-    global.window = jsdom.jsdom().defaultView;
+    var { JSDOM } = require("jsdom");
+    const dom = new JSDOM(`<!DOCTYPE html><body></body>`);
+    global.window = dom.window;
     global.document = window.document;
     var navigator = {userAgent: "node-js", platform: "Linux i686"};
     global.window.navigator = global.navigator = navigator;
