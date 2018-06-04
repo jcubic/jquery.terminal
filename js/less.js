@@ -26,19 +26,18 @@
         var left = 0;
         function print() {
             term.clear();
-            if (lines.length-pos > rows-1) {
+            if (lines.length - pos > rows - 1) {
                 prompt = ':';
             } else {
                 prompt = '[[;;;inverted](END)]';
             }
             term.set_prompt(prompt);
-            var to_print = lines.slice(pos, pos+rows-1);
-            var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
-            to_print = to_print.map(function(line, line_index) {
-                return $.terminal.substring(line, left, left+cols-1);
+            var to_print = lines.slice(pos, pos + rows - 1);
+            to_print = to_print.map(function(line) {
+                return $.terminal.substring(line, left, left + cols - 1);
             });
-            if (to_print.length < rows-1) {
-                while (rows-1 > to_print.length) {
+            if (to_print.length < rows - 1) {
+                while (rows - 1 > to_print.length) {
                     to_print.push('~');
                 }
             }
@@ -72,44 +71,42 @@
         var in_search = false, last_found, search_string;
         function search(start, reset) {
             var escape = $.terminal.escape_brackets(search_string),
-                flag = search_string.toLowerCase() == search_string ? 'i' : '',
+                flag = search_string.toLowerCase() === search_string ? 'i' : '',
                 start_re = new RegExp('^(' + escape + ')', flag),
-                regex = new RegExp(escape, flag),
                 index = -1,
                 prev_format = '',
                 formatting = false,
-                    in_text = false;
+                in_text = false;
             lines = original_lines.slice();
             if (reset) {
                 index = pos = 0;
             }
-            for (var i=0; i<lines.length; ++i) {
+            for (var i = 0; i < lines.length; ++i) {
                 var line = lines[i];
-                for (var j=0, jlen=line.length; j<jlen; ++j) {
-                    if (line[j] === '[' && line[j+1] === '[') {
+                for (var j = 0, jlen = line.length; j < jlen; ++j) {
+                    if (line[j] === '[' && line[j + 1] === '[') {
                         formatting = true;
-                            in_text = false;
+                        in_text = false;
                         start = j;
                     } else if (formatting && line[j] === ']') {
                         if (in_text) {
                             formatting = false;
-                                in_text = false;
+                            in_text = false;
                         } else {
-                                in_text = true;
-                            prev_format = line.substring(start, j+1);
+                            in_text = true;
+                            prev_format = line.substring(start, j + 1);
                         }
                     } else if (formatting && in_text || !formatting) {
                         if (line.substring(j).match(start_re)) {
                             var rep;
                             if (formatting && in_text) {
-                                rep = '][[;;;inverted]$1]' +
-                                    prev_format;
+                                rep = '][[;;;inverted]$1]' + prev_format;
                             } else {
                                 rep = '[[;;;inverted]$1]';
                             }
                             line = line.substring(0, j) +
                                 line.substring(j).replace(start_re, rep);
-                            j += rep.length-2;
+                            j += rep.length - 2;
                             if (i > pos && index === -1) {
                                 index = pos = i;
                             }
@@ -133,8 +130,8 @@
                     }
                 } else {
                     pos += scroll_by;
-                    if (pos-1 > lines.length-rows) {
-                        pos = lines.length-rows+1;
+                    if (pos - 1 > lines.length - rows) {
+                        pos = lines.length - rows + 1;
                     }
                 }
                 print();
@@ -144,76 +141,73 @@
             keydown: function(e) {
                 var command = term.get_command();
                 if (term.get_prompt() !== '/') {
-                    if (e.which == 191) {
+                    if (e.which === 191) {
                         term.set_prompt('/');
                     } else if (in_search &&
-                               $.inArray(e.which, [78, 80]) != -1) {
-                        if (e.which == 78) { // search_string
-                            if (last_found != -1) {
-                                last_found = search(last_found+1);
+                               $.inArray(e.which, [78, 80]) !== -1) {
+                        if (e.which === 78) { // search_string
+                            if (last_found !== -1) {
+                                last_found = search(last_found + 1);
                             }
-                        } else if (e.which == 80) { // P
+                        } else if (e.which === 80) { // P
                             last_found = search(0, true);
                         }
-                    } else if (e.which == 81) { //Q
+                    } else if (e.which === 81) { //Q
                         quit();
-                    } else if (e.which == 39) { // right
-                        left+=Math.round(cols/2);
+                    } else if (e.which === 39) { // right
+                        left += Math.round(cols / 2);
                         print();
-                    } else if (e.which == 37) { // left
-                        left-=Math.round(cols/2);
+                    } else if (e.which === 37) { // left
+                        left -= Math.round(cols / 2);
                         if (left < 0) {
                             left = 0;
                         }
                         print();
-                    } else {
                         // scroll
-                        if (lines.length > rows) {
-                            if (e.which === 38) { //up
-                                if (pos > 0) {
-                                    --pos;
-                                    print();
-                                }
-                            } else if (e.which === 40) { //down
-                                if (pos <= lines.length-rows) {
-                                    ++pos;
-                                    print();
-                                }
-                            } else if (e.which === 34) {
-                                // Page up
-                                pos += rows;
-                                if (pos > lines.length-rows+1) {
-                                    pos = lines.length-rows+1;
-                                }
-                                print();
-                            } else if (e.which === 33) {
-                                //Page Down
-                                pos -= rows;
-                                if (pos < 0) {
-                                    pos = 0;
-                                }
+                    } else if (lines.length > rows) {
+                        if (e.which === 38) { //up
+                            if (pos > 0) {
+                                --pos;
                                 print();
                             }
+                        } else if (e.which === 40) { //down
+                            if (pos <= lines.length - rows) {
+                                ++pos;
+                                print();
+                            }
+                        } else if (e.which === 34) {
+                            // Page up
+                            pos += rows;
+                            var limit = lines.length - rows + 1;
+                            if (pos > limit) {
+                                pos = limit;
+                            }
+                            print();
+                        } else if (e.which === 33) {
+                            //Page Down
+                            pos -= rows;
+                            if (pos < 0) {
+                                pos = 0;
+                            }
+                            print();
                         }
                     }
                     if (!e.ctrlKey && !e.alKey) {
                         return false;
                     }
-                } else {
                     // search
-                    if (e.which === 8 && command === '') {
-                        // backspace
-                        term.set_prompt(prompt);
-                    } else if (e.which == 13) { // enter
-                        // basic search find only first
-                        if (command.length > 0) {
-                                in_search = true;
-                            pos = 0;
-                            search_string = command;
-                            last_found = search(0);
-                        }
-                        return false;
+                } else if (e.which === 8 && command === '') {
+                    // backspace
+                    term.set_prompt(prompt);
+                } else if (e.which === 13) { // enter
+                    // basic search find only first
+                    if (command.length > 0) {
+                        in_search = true;
+                        pos = 0;
+                        search_string = command;
+                        last_found = search(0);
                     }
+                    return false;
                 }
             },
             prompt: prompt
@@ -228,8 +222,10 @@
         }
         var term = this.terminal();
         if (!term) {
-            throw new Error('You need to invoke this plugin on selector that have ' +
-                            'jQuery Terminal or on jQuery Terminal instance');
+            throw new Error(
+                'You need to invoke this plugin on selector that have ' +
+                'jQuery Terminal or on jQuery Terminal instance'
+            );
         }
         less(term, text, settings.onExit);
     };
