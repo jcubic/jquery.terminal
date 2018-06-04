@@ -95,6 +95,8 @@ eslint:
 	$(ESLINT) js/dterm.js
 	$(ESLINT) js/xml_formatting.js
 	$(ESLINT) js/unix_formatting.js
+	$(ESLINT) js/prims.js
+	$(ESLINT) js/less.js
 
 skipped_tests:
 	@! grep -E $(skip_re) spec/terminalSpec.js

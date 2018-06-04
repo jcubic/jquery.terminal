@@ -29,10 +29,10 @@
             var striped = full.replace(/_x08|\x08_|_\u0008|\u0008_/g, '');
             return '[[u;;]' + striped + ']';
         }).replace(/((?:.\x08.)+)/g, function(full) {
-            return '[[b;#fff;]' + full.replace(/(.)(?:\x08|\u0008)\1/g,
-                                               function(full, g) {
-                                                   return g;
-                                               }) + ']';
+            full = full.replace(/(.)(?:\x08|\u0008)\1/g, function(full, g) {
+                return g;
+            });
+            return '[[b;#fff;]' + full + ']';
         });
     };
     // ---------------------------------------------------------------------

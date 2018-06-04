@@ -1,3 +1,8 @@
+## 1.16.1
+### Bugs
+* fix paste/select all when click below .cmd
+* second fix to jumping on right click (context menu) [#399](https://github.com/jcubic/jquery.terminal/issues/399)
+
 ## 1.16.0
 
 ### Features
