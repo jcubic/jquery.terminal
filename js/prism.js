@@ -82,7 +82,7 @@
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');
     }
-    jQuery.terminal.prism_formatter = function(language, text) {
+    jQuery.terminal.prism = function(language, text) {
         if (language && Prism.languages[language]) {
             var grammar = Prism.languages[language];
             var tokens = Prism.tokenize(text, grammar);
