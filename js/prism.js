@@ -16,11 +16,12 @@
  *
  * js code:
  *
- *     var grammar = Prism.languages[language];
- *     var tokens = Prism.tokenize(file, grammar);
- *     var code = Prism.Token.stringify(tokens, language);
+ *     code = $.terminal.prism(language, code);
  *
  *     term.echo(code); // or term.less(code) if you include less.js
+ *
+ * by default only javascript markup and css languages are defined (also file extension
+ * for them. To have more languages you need to include appropriate js files.
  *
  * Copyright (c) 2018 Jakub Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license

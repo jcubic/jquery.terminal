@@ -1,3 +1,7 @@
+## 1.17.0
+### Features
+* add ascii_table utility in separated file
+
 ## 1.16.1
 ### Bugs
 * fix paste/select all when click below .cmd
