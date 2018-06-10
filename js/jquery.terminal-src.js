@@ -1093,7 +1093,8 @@
         var lines = data || [];
         var output_buffer = [];
         this.char_size = char_size;
-        var self = $.extend(this, {
+        var self = this;
+        $.extend(self, {
             data: function() {
                 return lines;
             },
@@ -1193,7 +1194,7 @@
                                 output_buffer.push($.terminal.format(
                                     array[i],
                                     format_options
-                            ));
+                                ));
                             }
                         }
                     } else {
@@ -1210,9 +1211,6 @@
                     finalize: options.finalize,
                     index: index
                 });
-            },
-            appened: function(arg) {
-                
             },
             update: function() {
                 var lines_to_show = [];
@@ -1258,8 +1256,8 @@
                 });
             },
             flush: function() {
-                return output_buffer;
                 output_buffer = [];
+                return output_buffer;
             }
         });
     }
@@ -4954,7 +4952,8 @@
                             // and lines variable have all extended commands
                             string = string.replace(/^\[\[|\]\]$/g, '');
                             if (line_settings.exec) {
-                                if (prev_command && prev_command.command.trim() === string.trim()) {
+                                if (prev_command &&
+                                    prev_command.command.trim() === string.trim()) {
                                     self.error(strings().recursiveCall);
                                 } else {
                                     $.terminal.extended_command(self, string);
