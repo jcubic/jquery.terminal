@@ -1071,6 +1071,199 @@
         });
     }
     // -------------------------------------------------------------------------
+    function TerminalException(type, message, parent) {
+        this.parent = parent;
+        this.type = type;
+        this.message = message;
+        this.stack = (new Error()).stack;
+    }
+    TerminalException.prototype = new Error();
+    // -------------------------------------------------------------------------
+    // :: lines data abstraction for output of the terminal
+    // -------------------------------------------------------------------------
+    // params terminal insetance char_size.width terminal settings
+    // -------------------------------------------------------------------------
+    Lines.NEW_LINE = 1;
+    // -------------------------------------------------------------------------
+    function Lines(data, term, char_size, settings) {
+        // array of line objects:
+        // - function (called whenever necessary, result is printed)
+        // - array (expected form: [line, settings])
+        // - anything else (cast to string when painted)
+        var lines = data || [];
+        var output_buffer = [];
+        this.char_size = char_size;
+        var self = $.extend(this, {
+            data: function() {
+                return lines;
+            },
+            char_size: function(char_size) {
+                if (typeof char_size === 'undefined') {
+                    return this.char_size;
+                }
+                this.char_size = char_size;
+            },
+            process: function(line) {
+                var line_settings = $.extend({
+                    exec: true,
+                    raw: false,
+                    finalize: $.noop
+                }, line.options || {});
+                var string;
+                var arg = line.string;
+                var is_fn = is_function(arg);
+                if (is_fn) {
+                    arg = arg();
+                }
+                if (get_type(arg) !== 'string') {
+                    if (is_function(settings.parseObject)) {
+                        var ret = settings.parseObject(arg);
+                        if (get_type(ret) === 'string') {
+                            string = ret;
+                        }
+                    } else if (arg instanceof Array) {
+                        string = $.terminal.columns(arg, self.cols(), settings.tabs);
+                    } else {
+                        string = String(arg);
+                    }
+                } else {
+                    string = arg;
+                }
+                if (string !== '') {
+                    string = $.map(string.split(format_exec_re), function(string) {
+                        if (string && string.match(format_exec_re) &&
+                            !$.terminal.is_formatting(string)) {
+                            // redraw should not execute commands and it have
+                            // and lines variable have all extended commands
+                            string = string.replace(/^\[\[|\]\]$/g, '');
+                            if (line_settings.exec) {
+                                $.terminal.extended_command(term, string);
+                            }
+                            return '';
+                        } else {
+                            return string;
+                        }
+                    }).join('');
+                    // string can be empty after removing extended commands
+                    if (string !== '') {
+                        if (!line_settings.raw) {
+                            if (settings.convertLinks) {
+                                string = string.replace(email_re, '[[!;;]$1]').
+                                    replace(url_nf_re, '[[!;;]$1]');
+                            }
+                            if (line_settings.formatters) {
+                                string = $.terminal.apply_formatters(
+                                    string,
+                                    settings
+                                );
+                            }
+                            string = $.terminal.encode(string);
+                        }
+                        self.buffer_line(string, line.index, line_settings);
+                    }
+                }
+                if (string === '' && is_fn) {
+                    self.buffer_line(string, line.index, line_settings);
+                }
+            },
+            buffer: function(string, index, options) {
+                // urls should always have formatting to keep url if split
+                var i, len;
+                output_buffer.push(Lines.NEW_LINE);
+                if (string === '') {
+                    // ignore empty string, it can happen if line was a function
+                    // that returned empty string in this case whe need to add container
+                    // because on update/resize it can return content
+                } else if (!options.raw) {
+                    var format_options = {
+                        linksNoReferrer: settings.linksNoReferrer,
+                        char_width: self.char_size.width
+                    };
+                    var cols = term.cols();
+                    if ((strlen(string) > cols ||
+                         string.match(/\n/)) &&
+                        ((settings.wrap === true && options.wrap === undefined) ||
+                         settings.wrap === false && options.wrap === true)) {
+                        var words = options.keepWords;
+                        var array = $.terminal.split_equal(string, cols, words);
+                        for (i = 0, len = array.length; i < len; ++i) {
+                            if (array[i] === '' || array[i] === '\r') {
+                                output_buffer.push('<span></span>');
+                            } else {
+                                output_buffer.push($.terminal.format(
+                                    array[i],
+                                    format_options
+                            ));
+                            }
+                        }
+                    } else {
+                        string = $.terminal.normalize(string);
+                        string = $.terminal.format(string, format_options);
+                        string.split(/\n/).forEach(function(string) {
+                            output_buffer.push(string);
+                        });
+                    }
+                } else {
+                    output_buffer.push(string);
+                }
+                output_buffer.push({
+                    finalize: options.finalize,
+                    index: index
+                });
+            },
+            appened: function(arg) {
+                
+            },
+            update: function() {
+                var lines_to_show = [];
+                // Dead code
+                if (settings.outputLimit >= 0) {
+                    // flush will limit lines but if there is lot of
+                    // lines we don't need to show them and then remove
+                    // them from terminal
+                    var limit;
+                    if (settings.outputLimit === 0) {
+                        limit = self.rows();
+                    } else {
+                        limit = settings.outputLimit;
+                    }
+                    lines.forEach(function(line, index) {
+                        var string = line[0];
+                        var options = line[1];
+                        if (get_type(string) === 'function') {
+                            string = string();
+                        }
+                        if (get_type(string) !== 'string') {
+                            string = String(string);
+                        }
+                        lines_to_show.push({
+                            string: string,
+                            index: index,
+                            options: options
+                        });
+                    });
+                    lines_to_show = lines_to_show.slice(lines_to_show.length - limit - 1);
+                } else {
+                    lines_to_show = lines.map(function(line, index) {
+                        return {
+                            string: line[0],
+                            index: index,
+                            options: line[1]
+                        };
+                    });
+                }
+                output_buffer = [];
+                $.each(lines_to_show, function(i, line) {
+                    self.process(line);
+                });
+            },
+            flush: function() {
+                return output_buffer;
+                output_buffer = [];
+            }
+        });
+    }
+    // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
     var cmd_index = 0;
@@ -2640,7 +2833,7 @@
         return animation;
     })();
     // -------------------------------------------------------------------------
-    var ch_unit_supported = (function() {
+    var is_ch_unit_supported = (function() {
         var agent = window.navigator.userAgent;
         if (agent.match(/MSIE|Trident/) && !agent.match(/IEMobile/)) {
             return false;
@@ -2650,7 +2843,7 @@
         return div.style.width === '1ch';
     })();
     // -------------------------------------------------------------------------
-    var css_variables_supported = window.CSS && window.CSS.supports &&
+    var is_css_variables_supported = window.CSS && window.CSS.supports &&
             window.CSS.supports('--fake-var', 0);
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
@@ -2665,6 +2858,14 @@
         var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
         return get.toString().match(/\[native code\]/);
     })();
+    // -------------------------------------------------------------------------
+    var is_mobile = (function(a) {
+        var check = false;
+        if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
+            check = true;
+        }
+        return check;
+    })(navigator.userAgent || navigator.vendor || window.opera);
     // -------------------------------------------------------------------------
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
@@ -2695,9 +2896,9 @@
     }
     // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
-        if (ch_unit_supported) {
+        if (is_ch_unit_supported) {
             return 'width: ' + len + 'ch';
-        } else if (!css_variables_supported) {
+        } else if (!is_css_variables_supported) {
             if (options.char_width) {
                 return 'width: ' + (options.char_width * len) + 'px';
             }
@@ -2764,14 +2965,6 @@
         }
         return text;
     }
-    // -------------------------------------------------------------------------
-    var is_mobile = (function(a) {
-        var check = false;
-        if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
-            check = true;
-        }
-        return check;
-    })(navigator.userAgent || navigator.vendor || window.opera);
     // ---------------------------------------------------------------------
     // :: Cross-Browser selection utils
     // ---------------------------------------------------------------------
@@ -2830,6 +3023,56 @@
     // ---------------------------------------------------------------------
     function clear_textarea_selection(textarea) {
         textarea.selectionStart = textarea.selectionEnd = 0;
+    }
+    // ---------------------------------------------------------------------
+    // :: return string that are common in all elements of the array
+    // ---------------------------------------------------------------------
+    function common_string(string, array, matchCase) {
+        if (!array.length) {
+            return '';
+        }
+        var type = string_case(string);
+        var result = [];
+        for (var j = string.length; j < array[0].length; ++j) {
+            var push = false;
+            var candidate = array[0].charAt(j),
+                candidateLower = candidate.toLowerCase();
+            for (var i = 1; i < array.length; ++i) {
+                push = true;
+                var current = array[i].charAt(j),
+                    currentLower = current.toLowerCase();
+                if (candidate !== current) {
+                    if (matchCase || type === 'mixed') {
+                        push = false;
+                        break;
+                    } else if (candidateLower === currentLower) {
+                        if (type === 'lower') {
+                            candidate = candidate.toLowerCase();
+                        } else if (type === 'upper') {
+                            candidate = candidate.toUpperCase();
+                        } else {
+                            push = false;
+                            break;
+                        }
+                    } else {
+                        push = false;
+                        break;
+                    }
+                }
+            }
+            if (push) {
+                result.push(candidate);
+            } else {
+                break;
+            }
+        }
+        return string + result.join('');
+    }
+    // ---------------------------------------------------------------------
+    function trigger_terminal_change(next) {
+        terminals.forEach(function(term) {
+            term.settings().onTerminalChange.call(term, next);
+        });
     }
     // ---------------------------------------------------------------------
     var select = (function() {
@@ -3358,7 +3601,8 @@
                     return string;
                 }, string);
             } catch (e) {
-                throw new Error('Error in formatter [' + (i - 1) + ']');
+                var msg = 'Error in formatter [' + (i - 1) + ']';
+                throw new TerminalException('formatting', msg);
             }
         },
         // ---------------------------------------------------------------------
@@ -5260,57 +5504,6 @@
             return in_login || command_line.mask() !== false;
         }
         // ---------------------------------------------------------------------
-        // :: return string that are common in all elements of the array
-        // ---------------------------------------------------------------------
-        function common_string(string, array, matchCase) {
-            if (!array.length) {
-                return '';
-            }
-            var type = string_case(string);
-            var result = [];
-            for (var j = string.length; j < array[0].length; ++j) {
-                var push = false;
-                var candidate = array[0].charAt(j),
-                    candidateLower = candidate.toLowerCase();
-                for (var i = 1; i < array.length; ++i) {
-                    push = true;
-                    var current = array[i].charAt(j),
-                        currentLower = current.toLowerCase();
-                    if (candidate !== current) {
-                        if (matchCase || type === 'mixed') {
-                            push = false;
-                            break;
-                        } else if (candidateLower === currentLower) {
-                            if (type === 'lower') {
-                                candidate = candidate.toLowerCase();
-                            } else if (type === 'upper') {
-                                candidate = candidate.toUpperCase();
-                            } else {
-                                push = false;
-                                break;
-                            }
-                        } else {
-                            push = false;
-                            break;
-                        }
-                    }
-                }
-                if (push) {
-                    result.push(candidate);
-                } else {
-                    break;
-                }
-            }
-            return string + result.join('');
-        }
-        // ---------------------------------------------------------------------
-        // ---------------------------------------------------------------------
-        function trigger_terminal_change(next) {
-            terminals.forEach(function(term) {
-                term.settings().onTerminalChange.call(term, next);
-            });
-        }
-        // ---------------------------------------------------------------------
         // :: Keydown event handler
         // ---------------------------------------------------------------------
         function user_key_down(e) {
@@ -5527,11 +5720,6 @@
         var scroll_object;
         var prev_command; // used for name on the terminal if not defined
         var tab_count = 0; // for tab completion
-        // array of line objects:
-        // - function (called whenever necessary, result is printed)
-        // - array (expected form: [line, settings])
-        // - anything else (cast to string when painted)
-        var lines = [];
         var output; // .terminal-output jquery object
         var terminal_id = terminals.length();
         var num_chars; // numer of chars in line
@@ -5551,11 +5739,15 @@
         var settings = $.extend(
             {},
             $.terminal.defaults,
-            {name: self.selector},
+            {
+                name: self.selector
+            },
             options || {}
         );
+        var lines = []; //new Lines(self, char_size, settings);
         var storage = new StorageHelper(settings.memory);
-        var enabled = settings.enabled, frozen = false;
+        var enabled = settings.enabled;
+        var frozen = false;
         var paused = false;
         var autologin = true; // set to false if onBeforeLogin return false
         var interpreters;
@@ -6458,6 +6650,7 @@
                     var bottom = self.is_bottom();
                     var wrapper;
                     // print all lines
+                    // var output_buffer = lines.flush();
                     $.each(output_buffer, function(i, line) {
                         if (line === NEW_LINE) {
                             wrapper = $('<div></div>');
