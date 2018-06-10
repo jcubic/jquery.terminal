@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 10 Jun 2018 09:23:11 +0000
+ * Date: Sun, 10 Jun 2018 17:19:39 +0000
  */
 
 /* TODO:
@@ -2438,7 +2438,7 @@
                 // key polyfill is not correct for keypress
                 // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
                 var key;
-                if (is_key_native() || e.fake) {
+                if (is_key_native || e.fake) {
                     key = e.key;
                     // fixing IE inconsistency #362
                     var normalized = key.toUpperCase();
@@ -2656,6 +2656,15 @@
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
     var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    // -------------------------------------------------------------------------
+    var is_key_native = (function is_key_native() {
+        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
+            return false;
+        }
+        var proto = window.KeyboardEvent.prototype;
+        var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
+        return get.toString().match(/\[native code\]/);
+    })();
     // -------------------------------------------------------------------------
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
@@ -2897,7 +2906,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 10 Jun 2018 09:23:11 +0000',
+        date: 'Sun, 10 Jun 2018 17:19:39 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3708,15 +3717,6 @@
     $.fn.hidden = function() {
         return this.css('visibility', 'hidden');
     };
-    // -----------------------------------------------------------------------
-    function is_key_native() {
-        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
-            return false;
-        }
-        var proto = window.KeyboardEvent.prototype;
-        var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
-        return get.toString().match(/\[native code\]/);
-    }
     // -----------------------------------------------------------------------
     function warn(msg) {
         msg = '[jQuery Terminal] ' + msg;
