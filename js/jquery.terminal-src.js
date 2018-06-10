@@ -4710,7 +4710,7 @@
                             // and lines variable have all extended commands
                             string = string.replace(/^\[\[|\]\]$/g, '');
                             if (line_settings.exec) {
-                                if (prev_command && prev_command.command === string) {
+                                if (prev_command && prev_command.command.trim() === string.trim()) {
                                     self.error(strings().recursiveCall);
                                 } else {
                                     $.terminal.extended_command(self, string);

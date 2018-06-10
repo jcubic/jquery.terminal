@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 10 Jun 2018 17:19:39 +0000
+ * Date: Sun, 10 Jun 2018 17:37:28 +0000
  */
 
 /* TODO:
@@ -2906,7 +2906,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 10 Jun 2018 17:19:39 +0000',
+        date: 'Sun, 10 Jun 2018 17:37:28 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4710,7 +4710,7 @@
                             // and lines variable have all extended commands
                             string = string.replace(/^\[\[|\]\]$/g, '');
                             if (line_settings.exec) {
-                                if (prev_command && prev_command.command === string) {
+                                if (prev_command && prev_command.command.trim() === string.trim()) {
                                     self.error(strings().recursiveCall);
                                 } else {
                                     $.terminal.extended_command(self, string);

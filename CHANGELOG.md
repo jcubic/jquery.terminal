@@ -5,6 +5,7 @@
 
 ### Bugfix
 * disable history in read & login (regression from 1.16.0 history interpreter option)
+* fix recursive error on extended commands (but it will only work on exact same commands)
 
 ## 1.16.1
 ### Bugs
