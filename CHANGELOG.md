@@ -1,6 +1,10 @@
 ## 1.17.0
 ### Features
 * add ascii_table utility in separated file
+* per user command line history
+
+### Bugfix
+* disable history in read & login (regression from 1.16.0 history interpreter option)
 
 ## 1.16.1
 ### Bugs

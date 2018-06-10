@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.16.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,15 +32,12 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 04 Jun 2018 19:48:32 +0000
+ * Date: Sun, 10 Jun 2018 09:23:11 +0000
  */
 
 /* TODO:
  *
  * Debug interpreters names in LocalStorage
- * onPositionChange event add to terminal ???
- * different command line history for each login users (add login if present to
- * localStorage key)
  *
  * TEST: login + promises/exec
  *       json-rpc/object + promises
@@ -2013,7 +2010,7 @@
                     name = string;
                     var enabled = history && history.enabled() || !history;
                     history = new History(
-                        string,
+                        name,
                         settings.historySize,
                         settings.history === 'memory'
                     );
@@ -2899,8 +2896,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '1.16.1',
-        date: 'Mon, 04 Jun 2018 19:48:32 +0000',
+        version: 'DEV',
+        date: 'Sun, 10 Jun 2018 09:23:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5164,7 +5161,8 @@
             if (!ghost()) {
                 maybe_append_name(name);
             }
-            command_line.name(name);
+            var login = self.login_name(true);
+            command_line.name(name + (login ? '_' + login : ''));
             if (is_function(interpreter.prompt)) {
                 command_line.prompt(function(callback) {
                     var ret = interpreter.prompt.call(self, callback, self);
@@ -5179,7 +5177,9 @@
             } else {
                 command_line.prompt(interpreter.prompt);
             }
-            self.history().toggle(interpreter.history);
+            if (typeof interpreter.history !== 'undefined') {
+                self.history().toggle(interpreter.history);
+            }
             if ($.isPlainObject(interpreter.keymap)) {
                 command_line.keymap($.omap(interpreter.keymap, function(name, fun) {
                     return function() {
@@ -6800,6 +6800,9 @@
                         success(string);
                     }
                     self.pop();
+                    if (settings.history) {
+                        command_line.history().enable();
+                    }
                 }, {
                     name: 'read',
                     history: false,
@@ -6813,6 +6816,9 @@
                         }
                     }
                 });
+                if (settings.history) {
+                    command_line.history().disable();
+                }
                 return defer.promise();
             },
             // -------------------------------------------------------------
@@ -6822,8 +6828,7 @@
                 cmd_ready(function ready() {
                     options = options || {};
                     var defaults = {
-                        infiniteLogin: false,
-                        history: true
+                        infiniteLogin: false
                     };
                     var push_settings = $.extend({}, defaults, options);
                     if (!push_settings.name && prev_command) {
