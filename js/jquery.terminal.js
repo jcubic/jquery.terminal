@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 10 Jun 2018 19:00:25 +0000
+ * Date: Wed, 13 Jun 2018 14:15:11 +0000
  */
 
 /* TODO:
@@ -1093,7 +1093,8 @@
         var lines = data || [];
         var output_buffer = [];
         this.char_size = char_size;
-        var self = $.extend(this, {
+        var self = this;
+        $.extend(self, {
             data: function() {
                 return lines;
             },
@@ -1193,7 +1194,7 @@
                                 output_buffer.push($.terminal.format(
                                     array[i],
                                     format_options
-                            ));
+                                ));
                             }
                         }
                     } else {
@@ -1210,9 +1211,6 @@
                     finalize: options.finalize,
                     index: index
                 });
-            },
-            appened: function(arg) {
-                
             },
             update: function() {
                 var lines_to_show = [];
@@ -1258,8 +1256,8 @@
                 });
             },
             flush: function() {
-                return output_buffer;
                 output_buffer = [];
+                return output_buffer;
             }
         });
     }
@@ -3149,7 +3147,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 10 Jun 2018 19:00:25 +0000',
+        date: 'Wed, 13 Jun 2018 14:15:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3883,7 +3881,7 @@
         // :: Function split and strips single and double quotes
         // :: and escapes spaces
         // ---------------------------------------------------------------------
-        split_arguments: function(string) {
+        split_arguments: function split_arguments(string) {
             return $.map(string.match(command_re) || [], function(arg) {
                 return $.terminal.parse_argument(arg, false);
             });
@@ -3898,10 +3896,59 @@
         // ---------------------------------------------------------------------
         // :: Same as parse_command but arguments are parsed using split_arguments
         // ---------------------------------------------------------------------
-        split_command: function(string) {
+        split_command: function split_command(string) {
             return process_command(string, function(arg) {
                 return $.terminal.parse_argument(arg, false);
             });
+        },
+        // ---------------------------------------------------------------------
+        // :; function that parse arguments like yargs library
+        // ---------------------------------------------------------------------
+        parse_options: function parse_options(arg, options) {
+            var settings = $.extend({}, {
+                boolean: []
+            }, options);
+            if (typeof arg === 'string') {
+                return parse_options($.terminal.split_arguments(arg), options);
+            }
+            var result = {
+                _: []
+            };
+            function token(value) {
+                this.value = value;
+            }
+            var rest = arg.reduce(function(acc, arg) {
+                if (arg.match(/^-/) && acc instanceof token) {
+                    result[acc.value] = true;
+                }
+                if (arg.match(/^--/)) {
+                    var name = arg.replace(/^--/, '');
+                    if (settings.boolean.indexOf(name) == -1) {
+                        return new token(name);
+                    } else {
+                        result[name] = true;
+                    }
+                } else if (arg.match(/^-/)) {
+                    var single = arg.replace(/^-/, '').split('');
+                    if (settings.boolean.indexOf(single.slice(-1)[0]) == -1) {
+                        var last = single.pop();
+                    }
+                    single.forEach(function(single) {
+                        result[single] = true;
+                    });
+                    if (last) {
+                        return new token(last);
+                    }
+                } else if (acc instanceof token) {
+                    result[acc.value] = arg;
+                } else if (arg) {
+                    result._.push(arg);
+                }
+            }, null);
+            if (rest instanceof token) {
+                result[rest.value] = true;
+            }
+            return result;
         },
         // ---------------------------------------------------------------------
         // :: function executed for each text inside [{ .... }]
@@ -4954,7 +5001,8 @@
                             // and lines variable have all extended commands
                             string = string.replace(/^\[\[|\]\]$/g, '');
                             if (line_settings.exec) {
-                                if (prev_command && prev_command.command.trim() === string.trim()) {
+                                if (prev_command &&
+                                    prev_command.command.trim() === string.trim()) {
                                     self.error(strings().recursiveCall);
                                 } else {
                                     $.terminal.extended_command(self, string);
