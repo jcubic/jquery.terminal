@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 13 Jun 2018 14:15:11 +0000
+ * Date: Wed, 13 Jun 2018 14:27:58 +0000
  */
 
 /* TODO:
@@ -3147,7 +3147,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 13 Jun 2018 14:15:11 +0000',
+        date: 'Wed, 13 Jun 2018 14:27:58 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3918,19 +3918,22 @@
                 this.value = value;
             }
             var rest = arg.reduce(function(acc, arg) {
+                if (typeof arg !== 'string') {
+                    arg = String(arg);
+                }
                 if (arg.match(/^-/) && acc instanceof token) {
                     result[acc.value] = true;
                 }
                 if (arg.match(/^--/)) {
                     var name = arg.replace(/^--/, '');
-                    if (settings.boolean.indexOf(name) == -1) {
+                    if (settings.boolean.indexOf(name) === -1) {
                         return new token(name);
                     } else {
                         result[name] = true;
                     }
                 } else if (arg.match(/^-/)) {
                     var single = arg.replace(/^-/, '').split('');
-                    if (settings.boolean.indexOf(single.slice(-1)[0]) == -1) {
+                    if (settings.boolean.indexOf(single.slice(-1)[0]) === -1) {
                         var last = single.pop();
                     }
                     single.forEach(function(single) {
@@ -3944,6 +3947,7 @@
                 } else if (arg) {
                     result._.push(arg);
                 }
+                return null;
             }, null);
             if (rest instanceof token) {
                 result[rest.value] = true;
