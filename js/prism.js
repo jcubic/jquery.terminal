@@ -28,11 +28,14 @@
  *
  */
 /* global jQuery, Prism */
+
+
+
 (function(Token, $) {
     if (typeof Prism === 'undefined') {
         throw new Error('PrismJS not defined');
     }
-    var _ = Prism;
+    var _ = $.extend({}, Prism);
 
     _.Token = function(type, content, alias, matchedStr, greedy) {
         Token.apply(this, [].slice.call(arguments));
@@ -74,9 +77,6 @@
         }).join('\n');
 
     };
-})(Prism.Token, jQuery);
-
-(function($) {
     if (!$) {
         throw new Error('jQuery Not defined');
     }
@@ -84,12 +84,12 @@
         throw new Error('$.terminal is not defined');
     }
     jQuery.terminal.prism = function(language, text) {
-        if (language && Prism.languages[language]) {
-            var grammar = Prism.languages[language];
-            var tokens = Prism.tokenize(text, grammar);
-            return Prism.Token.stringify(tokens, language);
+        if (language && _.languages[language]) {
+            var grammar = _.languages[language];
+            var tokens = _.tokenize(text, grammar);
+            return _.Token.stringify(tokens, language);
         } else {
             return text;
         }
     };
-})(jQuery);
+})(Prism.Token, jQuery);
