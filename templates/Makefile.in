@@ -11,8 +11,7 @@ BRANCH=`git branch | grep '^*' | sed 's/* //'`
 ESLINT=./node_modules/.bin/eslint
 UGLIFY=./node_modules/.bin/uglifyjs
 JSONLINT=./node_modules/.bin/jsonlint
-ISTANBUL=./node_modules/.bin/istanbul
-JASMINE=./node_modules/.bin/jasmine-node
+JEST=./node_modules/.bin/jest
 CSSNANO=./node_modules/.bin/cssnano
 SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
@@ -79,13 +78,10 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 test:
-	$(JASMINE) --captureExceptions --verbose --junitreport --color --forceexit spec
-
-coverage:
-	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js
+	$(JEST) --coverage
 
 coveralls:
-	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js --captureExceptions; cat ./coverage/lcov.info | ./node_modules/.bin/coveralls -v
+	$(CAT) ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 
 lint.src:
 	$(ESLINT) js/jquery.terminal-src.js
