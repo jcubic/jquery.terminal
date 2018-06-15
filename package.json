@@ -294,7 +294,8 @@
     }
   },
   "dependencies": {
-    "jquery": "~3"
+    "jquery": "~3",
+    "wcwidth": "^1.0.1"
   },
   "devDependencies": {
     "coveralls": "^3.0.1",

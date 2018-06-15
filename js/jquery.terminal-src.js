@@ -47,7 +47,7 @@
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
-         wcwidth, module, require, define */
+         module, require, define */
 /* eslint-disable */
 (function(ctx) {
     var sprintf = function() {
