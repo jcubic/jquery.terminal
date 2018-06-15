@@ -3,6 +3,7 @@
 * add ascii_table utility in separated file
 * per user command line history
 * add $.terminal.parse_options which return same object as yargs parser
+* $.jrpc helper now return its own created promise instead of $.ajax
 
 ### Bugfix
 * disable history in read & login (regression from 1.16.0 history interpreter option)

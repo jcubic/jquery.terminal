@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 13 Jun 2018 14:27:58 +0000
+ * Date: Fri, 15 Jun 2018 15:42:09 +0000
  */
 
 /* TODO:
@@ -3147,7 +3147,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 13 Jun 2018 14:27:58 +0000',
+        date: 'Fri, 15 Jun 2018 15:42:09 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4029,6 +4029,7 @@
     // -----------------------------------------------------------------------
     var ids = {}; // list of url based ids of JSON-RPC
     $.jrpc = function(url, method, params, success, error) {
+        var deferred = new $.Deferred();
         var options;
         if ($.isPlainObject(url)) {
             options = url;
@@ -4053,7 +4054,7 @@
             'params': options.params,
             'id': ++ids[options.url]
         };
-        return $.ajax({
+        $.ajax({
             url: options.url,
             beforeSend: function beforeSend(jxhr, settings) {
                 if (is_function(options.request)) {
@@ -4076,6 +4077,7 @@
                     } else {
                         throw new Error('Invalid JSON');
                     }
+                    deferred.reject({message: 'Invalid JSON', response: response});
                     return;
                 }
                 if (is_function(options.response)) {
@@ -4084,10 +4086,12 @@
                 if (validJSONRPC(json) || options.method === 'system.describe') {
                     // don't catch errors in success callback
                     options.success(json, status, jqXHR);
-                } else if (options.error) {
-                    options.error(jqXHR, 'Invalid JSON-RPC');
+                    deferred.resolve(json);
                 } else {
-                    throw new Error('Invalid JSON-RPC');
+                    if (options.error) {
+                        options.error(jqXHR, 'Invalid JSON-RPC');
+                    }
+                    deferred.reject({message: 'Invalid JSON-RPC', response: response});
                 }
             },
             error: options.error,
@@ -4098,6 +4102,7 @@
             // timeout: 1,
             type: 'POST'
         });
+        return deferred.promise();
     };
 
     // -----------------------------------------------------------------------
