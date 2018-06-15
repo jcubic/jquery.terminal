@@ -11,7 +11,7 @@
  * Released under the MIT license
  */
 /* global global, it, expect, describe, require, spyOn, setTimeout, location,
-          beforeEach, afterEach, sprintf, jQuery, $ */
+          beforeEach, afterEach, sprintf, jQuery, $, wcwidth */
 /* TODO: test caseSensitivity */
 
 function Storage() {}
@@ -63,6 +63,7 @@ global.alert = window.alert = function(string) {
 global.location = global.window.location = {hash: ''};
 global.document = window.document;
 global.jQuery = global.$ = require("jquery");
+global.wcwidth = require('wcwidth');
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting');
 
@@ -405,7 +406,6 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.is_formatting', function() {
-
         it('should detect terminal formatting', function() {
             var formattings = [
                 '[[;;]Te[xt]',
@@ -732,6 +732,30 @@ describe('Terminal utils', function() {
             specs.forEach(function(spec) {
                 expect($.terminal.split_equal(spec[0])).toEqual(spec[1]);
             });
+        });
+        it('should handle wider characters', function() {
+            var input = 'ターミナルウィンドウは黒です';
+            var count = 0;
+            var len = 0;
+            $.terminal.split_equal(input, 4).forEach(function(string) {
+                var width = wcwidth(string);
+                expect(width).toEqual(4);
+                expect(string.length).toEqual(2);
+                len += string.length;
+                count += width;
+            });
+            expect(wcwidth(input)).toEqual(count);
+            expect(input.length).toEqual(len);
+        });
+        it('should handle mixed size characters', function() {
+            var input = 'ターミナルウィンドウは黒です lorem ipsum';
+            var given = $.terminal.split_equal(input, 10);
+            given.forEach(function(string) {
+                expect(string.length).toBeLessThan(11);
+                expect(wcwidth(string)).toBeLessThan(11);
+            });
+            var expected = ["ターミナル", "ウィンドウ", "は黒です l", "orem ipsum"];
+            expect(given).toEqual(expected);
         });
     });
     describe('Cycle', function() {
