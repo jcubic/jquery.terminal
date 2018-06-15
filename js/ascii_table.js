@@ -27,15 +27,15 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(['wcwidth'], function(wcwidth) {
-            return (root.ascii_table = factory(root, wcwidth));
+            return (root.ascii_table = factory(wcwidth));
         });
     } else if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
-        module.exports = factory(root, require('wcwidth'));
+        module.exports = factory(require('wcwidth'));
     } else {
-        root.ascii_table = factory(root, root.wcwidth);
+        root.ascii_table = factory(root.wcwidth);
     }
-})(function(root, wcwidth, undefined) {
+})(function(wcwidth, undefined) {
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
             return function(string) {
