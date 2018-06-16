@@ -72,6 +72,9 @@
 .terminal {
     contain: content;
 }
+html {
+    height: 100%;
+}
 body.terminal {
     min-height: 100vh;
     margin: 0;

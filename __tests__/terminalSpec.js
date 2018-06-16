@@ -45,6 +45,42 @@ Object.defineProperties(window.HTMLElement.prototype, {
     },
     offsetWidth: {
         get: function() { return parseFloat(window.getComputedStyle(this).width) || 0; }
+    },
+    // this will test if setting 1ch change value to 1ch which don't work in jsdom used by jest
+    style: {
+        get: function() {
+            if (this.__style) {
+                return this.__style;
+            }
+            var self = this;
+            var attr = {};
+            function setStyleAttr() {
+                self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]};`));
+            }
+            var mapping = {
+                backgroundClip: 'background-clip',
+                className: 'class'
+            };
+            var reversed_mapping = {};
+            Object.keys(mapping).forEach(key => {
+                reversed_mapping[mapping[key]] = key;
+            });
+            return this.__style = new Proxy({}, {
+                set: function(target, name, value) {
+                    name = mapping[name] || name;
+                    attr[name] = value;
+                    target[name] = value;
+                    setStyleAttr();
+                    return true;
+                },
+                deleteProperty: function(target, name) {
+                    name = reversed_mapping[name] || name;
+                    delete target[name];
+                    delete attr[name];
+                    setStyleAttr();
+                }
+            });
+        }
     }
 });
 
@@ -481,6 +517,13 @@ describe('Terminal utils', function() {
                                    '="foo" data-text="Bar">Bar</span><span sty'+
                                    'le="text-decoration:underline line-through'+
                                    ' overline;" data-text="Baz">Baz</span>');
+        });
+        it('should handle wider characters without formatting', function() {
+            var input = 'ターミナルウィンドウは黒です';
+            var string = $.terminal.format(input, {char_width: 7});
+            expect(string).toEqual('<span style="width: 28ch"><span style="widt'+
+                                   'h: 28ch">ターミナルウィンドウは黒です</span></s'+
+                                   'pan>');
         });
     });
     describe('$.terminal.strip', function() {

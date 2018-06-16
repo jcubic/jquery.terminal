@@ -11,6 +11,7 @@
 * fix recursive error on extended commands (but it will only work on exact same commands without trailing white space)
 * create copy of Prism for formatter so it can be used with normal html based prism snippets
 * double fix: command line when formatter return empty formatting and prism that return empty formatting after `(` and space
+* third fix fox jumping on right click
 
 ## 1.16.1
 ### Bugs
