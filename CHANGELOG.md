@@ -10,6 +10,7 @@
 * disable history in read & login (regression from 1.16.0 history interpreter option)
 * fix recursive error on extended commands (but it will only work on exact same commands without trailing white space)
 * create copy of Prism for formatter so it can be used with normal html based prism snippets
+* double fix: command line when formatter return empty formatting and prism that return empty formatting after `(` and space
 
 ## 1.16.1
 ### Bugs

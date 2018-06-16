@@ -1087,6 +1087,7 @@
     // -------------------------------------------------------------------------
     // params terminal insetance char_size.width terminal settings
     // -------------------------------------------------------------------------
+    /*
     Lines.NEW_LINE = 1;
     // -------------------------------------------------------------------------
     function Lines(data, term, char_size, settings) {
@@ -1265,6 +1266,7 @@
             }
         });
     }
+     */
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
@@ -1832,7 +1834,9 @@
             // we don't want to format command when user type formatting in
             string = $.terminal.escape_formatting(string);
             try {
-                return $.terminal.apply_formatters(string, settings);
+                string = $.terminal.apply_formatters(string, settings);
+                string = $.terminal.normalize(string);
+                return string;
             } catch (e) {
                 alert_exception('[Formatting]', e);
             }
@@ -5039,6 +5043,7 @@
                                         string,
                                         settings
                                     );
+                                    string = $.terminal.normalize(string);
                                 } catch (e) {
                                     display_exception(e, 'FORMATTING');
                                 }

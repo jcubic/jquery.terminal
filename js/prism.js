@@ -73,9 +73,8 @@
         _.hooks.run('wrap', env);
 
         return env.content.split(/\n/).map(function(content) {
-            return '[[b;;;' + env.classes.join(' ') + ']' + content + ']';
+            return content ? '[[b;;;' + env.classes.join(' ') + ']' + content + ']' : '';
         }).join('\n');
-
     };
     if (!$) {
         throw new Error('jQuery Not defined');
@@ -87,9 +86,8 @@
         if (language && _.languages[language]) {
             var grammar = _.languages[language];
             var tokens = _.tokenize(text, grammar);
-            return _.Token.stringify(tokens, language);
-        } else {
-            return text;
+            text = _.Token.stringify(tokens, language);
         }
+        return text;
     };
 })(Prism.Token, jQuery);

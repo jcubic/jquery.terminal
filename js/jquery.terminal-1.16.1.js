@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 15 Jun 2018 18:16:24 +0000
+ * Date: Sat, 16 Jun 2018 07:58:15 +0000
  */
 
 /* TODO:
@@ -1087,6 +1087,7 @@
     // -------------------------------------------------------------------------
     // params terminal insetance char_size.width terminal settings
     // -------------------------------------------------------------------------
+    /*
     Lines.NEW_LINE = 1;
     // -------------------------------------------------------------------------
     function Lines(data, term, char_size, settings) {
@@ -1265,6 +1266,7 @@
             }
         });
     }
+     */
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
@@ -1832,7 +1834,9 @@
             // we don't want to format command when user type formatting in
             string = $.terminal.escape_formatting(string);
             try {
-                return $.terminal.apply_formatters(string, settings);
+                string = $.terminal.apply_formatters(string, settings);
+                string = $.terminal.normalize(string);
+                return string;
             } catch (e) {
                 alert_exception('[Formatting]', e);
             }
@@ -3151,7 +3155,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 15 Jun 2018 18:16:24 +0000',
+        date: 'Sat, 16 Jun 2018 07:58:15 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5039,6 +5043,7 @@
                                         string,
                                         settings
                                     );
+                                    string = $.terminal.normalize(string);
                                 } catch (e) {
                                     display_exception(e, 'FORMATTING');
                                 }

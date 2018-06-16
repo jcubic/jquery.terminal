@@ -13,7 +13,7 @@ UGLIFY=./node_modules/.bin/uglifyjs
 JSONLINT=./node_modules/.bin/jsonlint
 JEST=./node_modules/.bin/jest
 CSSNANO=./node_modules/.bin/cssnano
-SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
+SPEC_CHECKSUM=`md5sum __tests__/terminalSpec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
@@ -95,7 +95,7 @@ eslint:
 	$(ESLINT) js/less.js
 
 skipped_tests:
-	@! grep -E $(skip_re) spec/terminalSpec.js
+	@! grep -E $(skip_re) __tests__/terminalSpec.js
 
 jsonlint: package.json bower.json
 	$(JSONLINT) package.json > /dev/null
