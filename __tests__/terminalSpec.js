@@ -54,7 +54,7 @@ Object.defineProperties(window.HTMLElement.prototype, {
             }
             var self = this;
             var attr = {};
-            function setStyleAttr() {
+            function set_style_attr() {
                 self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]};`));
             }
             var mapping = {
@@ -68,16 +68,20 @@ Object.defineProperties(window.HTMLElement.prototype, {
             return this.__style = new Proxy({}, {
                 set: function(target, name, value) {
                     name = mapping[name] || name;
-                    attr[name] = value;
-                    target[name] = value;
-                    setStyleAttr();
+                    if (!value) {
+                        delete target[name];
+                        delete attr[name];
+                    } else {
+                        attr[name] = target[name] = value;
+                    }
+                    set_style_attr();
                     return true;
                 },
                 deleteProperty: function(target, name) {
                     name = reversed_mapping[name] || name;
                     delete target[name];
                     delete attr[name];
-                    setStyleAttr();
+                    set_style_attr();
                 }
             });
         }
@@ -149,19 +153,33 @@ function enter_text(text) {
         $root.trigger(e);
     }
 }
-function shortcut(ctrl, alt, shift, which, key) {
+function keydown(ctrl, alt, shift, which, key) {
     var e = $.Event("keydown");
-    var doc = $(document.documentElement || window);
     e.ctrlKey = ctrl;
-    e.key = key;
     e.altKey = alt;
     e.shiftKey = shift;
+    if (typeof which === 'string') {
+        key = which;
+        which = key.toUpperCase().charCodeAt(0);
+    }
+    e.key = key;
     e.which = e.keyCode = which;
-    doc.trigger(e);
-    e = $.Event("keypress");
+    return e;
+}
+function keypress(key) {
+    var e = $.Event("keypress");
     e.key = key;
     e.which = e.keyCode = 0;
-    doc.trigger(e);
+    return e;
+}
+function shortcut(ctrl, alt, shift, which, key) {
+    var doc = $(document.documentElement || window);
+    if (typeof which === 'string') {
+        key = which;
+        which = key.toUpperCase().charCodeAt(0);
+    }
+    doc.trigger(keydown(ctrl, alt, shift, which, key));
+    doc.trigger(keypress(key));
 }
 function enter_key() {
     shortcut(false, false, false, 13, 'enter');
@@ -173,6 +191,11 @@ function enter(term, text) {
 
 function last_div(term) {
     return term.find('.terminal-output > div:eq(' + term.last_index() + ')');
+}
+function output(term) {
+    return term.find('.terminal-output > div div').map(function() {
+        return $(this).text().replace(/\xA0/g, ' ');
+    }).get();
 }
 
 var support_animations = (function() {
@@ -298,12 +321,18 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.overtyping', function() {
-        var string = 'HELLO TERMINAL'.replace(/./g, function(chr) {
-            return chr == ' ' ? chr : chr + '\x08' + chr;
-        });
-        var result = '[[b;#fff;]HELLO] [[b;#fff;]TERMINAL]';
         it('should convert to terminal formatting', function() {
+            var string = 'HELLO TERMINAL'.replace(/./g, function(chr) {
+                return chr == ' ' ? chr : chr + '\x08' + chr;
+            });
+            var result = '[[b;#fff;]HELLO] [[b;#fff;]TERMINAL]';
             expect($.terminal.overtyping(string)).toEqual(result);
+        });
+        it('should create underline', function() {
+            var string = 'HELLO TERMINAL'.replace(/./g, function(chr) {
+                return chr == ' ' ? chr : chr + '\x08_';
+            });
+            var result = '[[u;;]HELLO TERMINAL]';
         });
     });
     describe('$.terminal.escape_brackets', function() {
@@ -527,10 +556,15 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.strip', function() {
-        var formatting = '-_-[[biugs;#fff;#000]Foo]-_-[[i;;;foo]Bar]-_-[[ous;;'+
-                ']Baz]-_-';
-        var result = '-_-Foo-_-Bar-_-Baz-_-';
         it('should remove formatting', function() {
+            var formatting = '-_-[[biugs;#fff;#000]Foo]-_-[[i;;;foo]Bar]-_-[[ous;;'+
+                    ']Baz]-_-';
+            var result = '-_-Foo-_-Bar-_-Baz-_-';
+            expect($.terminal.strip(formatting)).toEqual(result);
+        });
+        it('should remove escaping brackets from string', function() {
+            var formatting = 'foo [[;;]bar\\]baz]';
+            var result = 'foo bar]baz';
             expect($.terminal.strip(formatting)).toEqual(result);
         });
     });
@@ -967,23 +1001,27 @@ describe('Terminal utils', function() {
         function history_commands(name) {
             return JSON.parse(window.localStorage.getItem(name));
         }
-        it('should create commands key', function() {
-            window.localStorage.clear();
+        function make_history(name, commands) {
+            commands = commands || [];
             var history = new $.terminal.History('foo');
-            history.append('item');
-            expect(Object.keys(window.localStorage)).toEqual(['foo_commands']);
-        });
-        it('should put items to localStorage', function() {
-            window.localStorage.clear();
-            var history = new $.terminal.History('foo');
-            var commands = ['lorem', 'ipsum'];
             commands.forEach(function(command) {
                 history.append(command);
             });
+            return history;
+        }
+        beforeEach(function() {
+            window.localStorage.clear();
+        });
+        it('should create commands key', function() {
+            var history = make_history('foo', ['item']);
+            expect(Object.keys(window.localStorage)).toEqual(['foo_commands']);
+        });
+        it('should put items to localStorage', function() {
+            var commands = ['lorem', 'ipsum'];
+            var history = make_history('foo', commands);
             expect(history_commands('foo_commands')).toEqual(commands);
         });
         it('should add only one commands if adding the same command', function() {
-            window.localStorage.clear();
             var history = new $.terminal.History('foo');
             for (var i = 0; i < 10; ++i) {
                 history.append('command');
@@ -991,7 +1029,6 @@ describe('Terminal utils', function() {
             expect(history_commands('foo_commands')).toEqual(['command']);
         });
         it('shound not add more commands then the limit', function() {
-            window.localStorage.clear();
             var history = new $.terminal.History('foo', 30);
             for (var i = 0; i < 40; ++i) {
                 history.append('command ' + i);
@@ -999,7 +1036,6 @@ describe('Terminal utils', function() {
             expect(history_commands('foo_commands').length).toEqual(30);
         });
         it('should create commands in memory', function() {
-            window.localStorage.clear();
             var history = new $.terminal.History('foo', 10, true);
             for (var i = 0; i < 40; ++i) {
                 history.append('command ' + i);
@@ -1010,7 +1046,6 @@ describe('Terminal utils', function() {
             expect(window.localStorage.getItem('foo_commands')).not.toBeDefined();
         });
         it('should clear localStorage', function() {
-            window.localStorage.clear();
             var history = new $.terminal.History('foo');
             for (var i = 0; i < 40; ++i) {
                 history.append('command ' + i);
@@ -1020,11 +1055,7 @@ describe('Terminal utils', function() {
         });
         it('should iterate over commands', function() {
             var commands = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
-            window.localStorage.clear();
-            var history = new $.terminal.History('foo');
-            commands.forEach(function(command) {
-                history.append(command);
-            });
+            var history = make_history('foo', commands);
             var i;
             for (i=commands.length; i--;) {
                 expect(history.current()).toEqual(commands[i]);
@@ -1037,16 +1068,30 @@ describe('Terminal utils', function() {
         });
         it('should not add commands when disabled', function() {
             var commands = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
-            window.localStorage.clear();
-            var history = new $.terminal.History('foo');
-            commands.forEach(function(command) {
-                history.append(command);
-            });
+            var history = make_history('foo', commands);
             history.disable();
             history.append('foo');
             history.enable();
             history.append('bar');
             expect(history_commands('foo_commands')).toEqual(commands.concat(['bar']));
+        });
+        it('should return last item', function() {
+            var commands = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
+            var history = make_history('foo', commands);
+            expect(history.last()).toEqual('amet');
+        });
+        it('should return position', function() {
+            var commands = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
+            var last_index = commands.length - 1;
+            var history = make_history('foo', commands);
+            expect(history.position()).toEqual(last_index);
+            history.previous();
+            expect(history.position()).toEqual(last_index - 1);
+            history.previous();
+            expect(history.position()).toEqual(last_index - 2);
+            history.next();
+            history.next();
+            expect(history.position()).toEqual(last_index);
         });
     });
     describe('Stack', function() {
@@ -1139,6 +1184,22 @@ describe('Terminal utils', function() {
                 expect(stack_clone.data()).toEqual([]);
             });
         });
+    });
+    describe('$.terminal.columns', function() {
+        var input = [
+            'lorem', 'ipsum', 'dolor', 'sit', 'amet',
+            'lorem', 'ipsum', 'dolor', 'sit', 'amet',
+            'lorem', 'ipsum', 'dolor', 'sit', 'amet'
+        ];
+        var output = $.terminal.columns(input, 60);
+        expect(typeof output).toBe('string');
+        var lines = output.split('\n');
+        lines.forEach(function(line, i) {
+            expect(line.split(/\s+/)).toEqual([
+                'lorem', 'ipsum', 'dolor', 'sit', 'amet'
+            ]);
+        });
+        expect($.terminal.columns(input, 5)).toEqual(input.join('\n'));
     });
 });
 describe('sub plugins', function() {
@@ -1464,22 +1525,95 @@ describe('Terminal plugin', function() {
             }, 100);
         });
     });
-    describe('enter text', function() {
-        var interpreter = {
-            foo: function() {
-            }
-        };
-        var term = $('<div/>').appendTo('body').terminal(interpreter);
-        it('text should appear and interpreter function should be called', function() {
-            term.focus(true);
-            spy(interpreter, 'foo');
-            enter_text('foo');
-            enter_key();
-            expect(interpreter.foo).toHaveBeenCalled();
-            var last_div = term.find('.terminal-output > div:last-child');
-            expect(last_div.hasClass('command')).toBe(true);
-            expect(last_div.children().html()).toEqual('<span>&gt;&nbsp;foo</span>');
-            term.destroy().remove();
+    describe('events', function() {
+        describe('click', function() {
+            var term = $('<div/>').terminal();
+            it('should move cursor to click position', function(done) {
+                term.insert('foo bar').focus();
+                var pos = 2;
+                var node = term.find('.cmd .cursor-line > span:eq(0) span:eq(' + pos + ')');
+                var e = new $.Event('mouseup');
+                e.button = 0;
+                node.trigger('mousedown').trigger(e);
+                setTimeout(function() {
+                    expect(term.get_position()).toBe(pos);
+                    done();
+                }, 300);
+            });
+        });
+        describe('contextmenu', function() {
+            var term = $('<div/>').terminal();
+            it('should move textarea', function(done) {
+                var cmd = term.cmd();
+                var clip = term.find('textarea');
+                var event = new $.Event('contextmenu');
+                expect(clip.attr('style')).toBeFalsy();
+                event.pageX = 100;
+                event.pageY = 100;
+                cmd.trigger(event);
+                expect(clip.attr('style')).toBeTruthy();
+                setTimeout(function() {
+                    expect(clip.attr('style')).toBeFalsy();
+                    done();
+                }, 200);
+            });
+        });
+        describe('input', function() {
+            var doc = $(document.documentElement || window);
+            it('should trigger keypress from input', function(done) {
+                // trigger input without keypress
+                var term = $('<div/>').terminal();
+                term.focus();
+                var clip = term.find('textarea');
+                clip.val(clip.val() + 'a');
+                doc.one('keypress', function(e) {
+                    expect(e.key).toEqual('a');
+                    setTimeout(function() {
+                        expect(term.get_command()).toEqual('a');
+                        done();
+                    }, 200);
+                });
+                doc.trigger(keydown(false, false, false, 'a'));
+                doc.trigger('input');
+            });
+            it('should trigger keydown from input', function(done) {
+                // trigger input without keydown
+                var term = $('<div/>').terminal();
+                term.focus();
+                term.insert('foo bar');
+                var clip = term.find('textarea');
+                clip.val(clip.val().replace(/.$/, ''));
+                doc.one('keydown', function(e) {
+                    expect(e.which).toBe(8);
+                    setTimeout(function() {
+                        expect(term.get_command()).toEqual('foo ba');
+                        // the code before will trigger dead key - in Android it's always
+                        // no keypress or no keydown for all keys
+                        doc.trigger(keypress('a'));
+                        done();
+                    }, 200);
+                });
+                doc.trigger('input');
+            });
+        });
+        describe('enter text', function() {
+            var interpreter = {
+                foo: function() {
+                }
+            };
+            var term = $('<div/>').appendTo('body').terminal(interpreter);
+            it('text should appear and interpreter function should be called', function() {
+                term.focus(true);
+                spy(interpreter, 'foo');
+                enter_text('foo');
+                expect(term.get_command()).toEqual('foo');
+                enter_key();
+                expect(interpreter.foo).toHaveBeenCalled();
+                var last_div = term.find('.terminal-output > div:last-child');
+                expect(last_div.hasClass('command')).toBe(true);
+                expect(last_div.children().html()).toEqual('<span>&gt;&nbsp;foo</span>');
+                term.destroy().remove();
+            });
         });
     });
     describe('prompt', function() {
@@ -1666,6 +1800,10 @@ describe('Terminal plugin', function() {
             expect(cmd.get()).toEqual('foo bar');
             shortcut(true, false, false, 71, 'g'); // CTRL+G
             expect(cmd.get()).toEqual('foo bar baz');
+            expect(cmd.prompt()).toEqual("> ");
+            shortcut(true, false, false, 82, 'r'); // CTRL+R
+            expect(cmd.prompt()).toEqual("(reverse-i-search)`': ");
+            shortcut(false, false, false, 36, 'Home');
             expect(cmd.prompt()).toEqual("> ");
             cmd.purge();
             term.destroy().remove();
@@ -2274,14 +2412,15 @@ describe('Terminal plugin', function() {
         var prompt = '$ ';
         var mask = '-';
         var position;
+        var last_id = $.terminal.last_id();
         var term = $('<div/>').appendTo('body').terminal($.noop, {
             name: terminal_name,
             greetings: greetings,
             completion: completion
         });
         it('should return id of the terminal', function() {
+            expect(term.id()).toEqual(last_id + 1);
             term.focus();
-            expect(term.id()).toEqual(11);
         });
         it('should clear the terminal', function() {
             term.clear();
@@ -3164,15 +3303,18 @@ describe('Terminal plugin', function() {
         });
         describe('exception', function() {
             var error = new Error('Some Message');
-            var term = $('<div/>').appendTo('body').terminal($.noop, {
-                greetings: false
+            var term;
+            beforeEach(function() {
+                term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                if (error.stack) {
+                    var length = Math.max.apply(Math, error.stack.split("\n").map(function(line) {
+                        return line.length;
+                    }));
+                    term.option('numChars', length+1);
+                }
             });
-            if (error.stack) {
-                var length = Math.max.apply(Math, error.stack.split("\n").map(function(line) {
-                    return line.length;
-                }));
-                term.option('numChars', length+1);
-            }
             it('should show exception', function() {
                 term.exception(error, 'ERROR');
                 var message = '[[;;;error]&#91;ERROR&#93;: ';
@@ -3199,6 +3341,44 @@ describe('Terminal plugin', function() {
                     expect(div.hasClass('stack-trace')).toBeTruthy();
                 }
                 term.destroy().remove();
+            });
+            it('should fetch line from file using AJAX', function(done) {
+                var error = {
+                    message: 'Some Message',
+                    fileName: '/file.js',
+                    lineNumber: 2
+                };
+                var lines = [
+                    'function foo(a, b) {',
+                    '    return a + b;',
+                    '}',
+                    'foo(10, 20);'
+                ];
+                AJAXMock('/file.js', lines.join('\n'));
+                term.clear().exception(error, 'foo');
+                setTimeout(function() {
+                    expect(output(term)).toEqual([
+                        '[foo]: /file.js: Some Message',
+                        '[2]:     return a + b;'
+                    ]);
+                    done();
+                }, 100);
+            });
+        });
+        describe('scroll', function() {
+            var term = $('<div/>').terminal($.noop, {
+                height: 100,
+                numRows: 10
+            });
+            it('should change scrollTop', function() {
+                for (var i = 0; i < 20; i++) {
+                    term.echo('text ' + i);
+                }
+                var pos = term.prop('scrollTop');
+                term.scroll(10);
+                expect(term.prop('scrollTop')).toEqual(pos + 10);
+                term.scroll(-10);
+                expect(term.prop('scrollTop')).toEqual(pos);
             });
         });
         describe('logout/token', function() {
@@ -3273,6 +3453,9 @@ describe('Terminal plugin', function() {
                 });
             });
             it('should logout from all interpreters', function() {
+                push_interpreter();
+                enter(term, '2');
+                enter(term, '2');
                 push_interpreter();
                 enter(term, '2');
                 enter(term, '2');
@@ -3422,6 +3605,18 @@ describe('Terminal plugin', function() {
                 var text = 'lorem ipsum';
                 enter(term, text);
                 expect(test.callback).toHaveBeenCalledWith(text);
+            });
+            it('should cancel', function() {
+                var test = {
+                    success: function() {},
+                    cancel: function() {}
+                };
+                spyOn(test, 'success');
+                spyOn(test, 'cancel');
+                term.read('foo: ', test.success, test.cancel);
+                shortcut(true, false, false, 'd');
+                expect(test.success).not.toHaveBeenCalled();
+                expect(test.cancel).toHaveBeenCalled();
             });
         });
         describe('push', function() {
@@ -3935,10 +4130,27 @@ describe('Terminal plugin', function() {
             });
             it('should call default cmd keymap', function() {
                 term.set_command('foo');
-                term.keymap('ENTER', test.original);
+                term.keymap({
+                    'ENTER': test.original
+                });
                 enter_key();
                 expect(term.get_command()).toEqual('');
             });
+            it('should return keymap', function() {
+                var fn = function() { };
+                var keys = Object.keys(term.keymap());
+                expect(term.keymap('CTRL+S')).toBeFalsy();
+                term.keymap('CTRL+S', fn);
+                expect(term.keymap('CTRL+S')).toBeTruthy();
+                expect(term.keymap()['CTRL+S']).toBeTruthy();
+                expect(Object.keys(term.keymap())).toEqual(keys.concat(['CTRL+S']));
+            });
+        });
+        describe('invoke_key', function() {
+            var term = $('<div/>').terminal();
+            expect(term.find('.terminal-output').html()).toBeTruthy();
+            term.invoke_key('CTRL+L');
+            expect(term.find('.terminal-output').html()).toBeFalsy();
         });
     });
 });

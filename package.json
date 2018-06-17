@@ -295,7 +295,6 @@
   },
   "dependencies": {
     "jquery": "~3",
-    "jsdom": "^11.11.0",
     "wcwidth": "^1.0.1"
   },
   "devDependencies": {

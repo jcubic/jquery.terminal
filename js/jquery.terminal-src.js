@@ -49,6 +49,7 @@
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
          module, require, define */
 /* eslint-disable */
+/* istanbul ignore next */
 (function(ctx) {
     var sprintf = function() {
         if (!sprintf.cache.hasOwnProperty(arguments[0])) {
@@ -56,7 +57,6 @@
         }
         return sprintf.format.call(null, sprintf.cache[arguments[0]], arguments);
     };
-
     sprintf.format = function(parse_tree, argv) {
         var cursor = 1, tree_length = parse_tree.length, node_type = '', arg, output = [], i, k, match, pad, pad_character, pad_length;
         for (i = 0; i < tree_length; i++) {
@@ -297,286 +297,293 @@
     // -----------------------------------------------------------------------
     // :: Storage plugin
     // -----------------------------------------------------------------------
-    var hasLS = function() {
-        try {
-            var testKey = 'test', storage = window.localStorage;
-            storage.setItem(testKey, '1');
-            storage.removeItem(testKey);
-            return true;
-        } catch (error) {
-            return false;
-        }
-    };
-    var hasCookies = function() {
-        try {
-            document.cookie.split(';');
-            return true;
-        } catch (e) {
-            return false;
-        }
-    };
-    // Private data
-    var isLS = hasLS();
-    // Private functions
-    function wls(n, v) {
-        var c;
-        if (typeof n === 'string' && typeof v === 'string') {
-            localStorage[n] = v;
-            return true;
-        } else if (typeof n === 'object' && typeof v === 'undefined') {
-            for (c in n) {
-                if (n.hasOwnProperty(c)) {
-                    localStorage[c] = n[c];
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-    function wc(n, v) {
-        var dt, e, c;
-        dt = new Date();
-        dt.setTime(dt.getTime() + 31536000000);
-        e = '; expires=' + dt.toGMTString();
-        if (typeof n === 'string' && typeof v === 'string') {
-            document.cookie = n + '=' + v + e + '; path=/';
-            return true;
-        } else if (typeof n === 'object' && typeof v === 'undefined') {
-            for (c in n) {
-                if (n.hasOwnProperty(c)) {
-                    document.cookie = c + '=' + n[c] + e + '; path=/';
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-    function rls(n) {
-        return localStorage[n];
-    }
-    function rc(n) {
-        var nn, ca, i, c;
-        nn = n + '=';
-        ca = document.cookie.split(';');
-        for (i = 0; i < ca.length; i++) {
-            c = ca[i];
-            while (c.charAt(0) === ' ') {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nn) === 0) {
-                return c.substring(nn.length, c.length);
-            }
-        }
-        return null;
-    }
-    function dls(n) {
-        return delete localStorage[n];
-    }
-    function dc(n) {
-        return wc(n, '', -1);
-    }
-    /**
-    * Public API
-    * $.Storage.set("name", "value")
-    * $.Storage.set({"name1":"value1", "name2":"value2", etc})
-    * $.Storage.get("name")
-    * $.Storage.remove("name")
-    */
     var localStorage;
-    if (!hasCookies() && !isLS) {
-        localStorage = {};
-        $.extend({
-            Storage: {
-                set: wls,
-                get: rls,
-                remove: dls
+    /* istanbul ignore next */
+    (function() {
+        var hasLS = function() {
+            try {
+                var testKey = 'test', storage = window.localStorage;
+                storage.setItem(testKey, '1');
+                storage.removeItem(testKey);
+                return true;
+            } catch (error) {
+                return false;
             }
-        });
-    } else {
-        if (isLS) {
-            localStorage = window.localStorage;
+        };
+        var hasCookies = function() {
+            try {
+                document.cookie.split(';');
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+        // Private data
+        var isLS = hasLS();
+        // Private functions
+        function wls(n, v) {
+            var c;
+            if (typeof n === 'string' && typeof v === 'string') {
+                localStorage[n] = v;
+                return true;
+            } else if (typeof n === 'object' && typeof v === 'undefined') {
+                for (c in n) {
+                    if (n.hasOwnProperty(c)) {
+                        localStorage[c] = n[c];
+                    }
+                }
+                return true;
+            }
+            return false;
         }
-        $.extend({
-            Storage: {
-                set: isLS ? wls : wc,
-                get: isLS ? rls : rc,
-                remove: isLS ? dls : dc
+        function wc(n, v) {
+            var dt, e, c;
+            dt = new Date();
+            dt.setTime(dt.getTime() + 31536000000);
+            e = '; expires=' + dt.toGMTString();
+            if (typeof n === 'string' && typeof v === 'string') {
+                document.cookie = n + '=' + v + e + '; path=/';
+                return true;
+            } else if (typeof n === 'object' && typeof v === 'undefined') {
+                for (c in n) {
+                    if (n.hasOwnProperty(c)) {
+                        document.cookie = c + '=' + n[c] + e + '; path=/';
+                    }
+                }
+                return true;
             }
-        });
-    }
+            return false;
+        }
+        function rls(n) {
+            return localStorage[n];
+        }
+        function rc(n) {
+            var nn, ca, i, c;
+            nn = n + '=';
+            ca = document.cookie.split(';');
+            for (i = 0; i < ca.length; i++) {
+                c = ca[i];
+                while (c.charAt(0) === ' ') {
+                    c = c.substring(1, c.length);
+                }
+                if (c.indexOf(nn) === 0) {
+                    return c.substring(nn.length, c.length);
+                }
+            }
+            return null;
+        }
+        function dls(n) {
+            return delete localStorage[n];
+        }
+        function dc(n) {
+            return wc(n, '', -1);
+        }
+        /**
+         * Public API
+         * $.Storage.set("name", "value")
+         * $.Storage.set({"name1":"value1", "name2":"value2", etc})
+         * $.Storage.get("name")
+         * $.Storage.remove("name")
+         */
+        if (!hasCookies() && !isLS) {
+            localStorage = {};
+            $.extend({
+                Storage: {
+                    set: wls,
+                    get: rls,
+                    remove: dls
+                }
+            });
+        } else {
+            if (isLS) {
+                localStorage = window.localStorage;
+            }
+            $.extend({
+                Storage: {
+                    set: isLS ? wls : wc,
+                    get: isLS ? rls : rc,
+                    remove: isLS ? dls : dc
+                }
+            });
+        }
+    })();
     // -----------------------------------------------------------------------
     // :: jQuery Timers
     // -----------------------------------------------------------------------
     var jQuery = $;
-    jQuery.fn.extend({
-        everyTime: function(interval, label, fn, times, belay) {
-            return this.each(function() {
-                jQuery.timer.add(this, interval, label, fn, times, belay);
-            });
-        },
-        oneTime: function(interval, label, fn) {
-            return this.each(function() {
-                jQuery.timer.add(this, interval, label, fn, 1);
-            });
-        },
-        stopTime: function(label, fn) {
-            return this.each(function() {
-                jQuery.timer.remove(this, label, fn);
-            });
-        }
-    });
-
-    jQuery.extend({
-        timer: {
-            guid: 1,
-            global: {},
-            regex: /^([0-9]+)\s*(.*s)?$/,
-            powers: {
-                // Yeah this is major overkill...
-                'ms': 1,
-                'cs': 10,
-                'ds': 100,
-                's': 1000,
-                'das': 10000,
-                'hs': 100000,
-                'ks': 1000000
+    /* istanbul ignore next */
+    (function($) {
+        jQuery.fn.extend({
+            everyTime: function(interval, label, fn, times, belay) {
+                return this.each(function() {
+                    jQuery.timer.add(this, interval, label, fn, times, belay);
+                });
             },
-            timeParse: function(value) {
-                if (value === undefined || value === null) {
-                    return null;
-                }
-                var result = this.regex.exec(jQuery.trim(value.toString()));
-                if (result[2]) {
-                    var num = parseInt(result[1], 10);
-                    var mult = this.powers[result[2]] || 1;
-                    return num * mult;
-                } else {
-                    return value;
-                }
+            oneTime: function(interval, label, fn) {
+                return this.each(function() {
+                    jQuery.timer.add(this, interval, label, fn, 1);
+                });
             },
-            add: function(element, interval, label, fn, times, belay) {
-                var counter = 0;
+            stopTime: function(label, fn) {
+                return this.each(function() {
+                    jQuery.timer.remove(this, label, fn);
+                });
+            }
+        });
 
-                if (jQuery.isFunction(label)) {
-                    if (!times) {
-                        times = fn;
+        jQuery.extend({
+            timer: {
+                guid: 1,
+                global: {},
+                regex: /^([0-9]+)\s*(.*s)?$/,
+                powers: {
+                    // Yeah this is major overkill...
+                    'ms': 1,
+                    'cs': 10,
+                    'ds': 100,
+                    's': 1000,
+                    'das': 10000,
+                    'hs': 100000,
+                    'ks': 1000000
+                },
+                timeParse: function(value) {
+                    if (value === undefined || value === null) {
+                        return null;
                     }
-                    fn = label;
-                    label = interval;
-                }
+                    var result = this.regex.exec(jQuery.trim(value.toString()));
+                    if (result[2]) {
+                        var num = parseInt(result[1], 10);
+                        var mult = this.powers[result[2]] || 1;
+                        return num * mult;
+                    } else {
+                        return value;
+                    }
+                },
+                add: function(element, interval, label, fn, times, belay) {
+                    var counter = 0;
 
-                interval = jQuery.timer.timeParse(interval);
+                    if (jQuery.isFunction(label)) {
+                        if (!times) {
+                            times = fn;
+                        }
+                        fn = label;
+                        label = interval;
+                    }
 
-                if (typeof interval !== 'number' ||
-                    isNaN(interval) ||
-                    interval <= 0) {
-                    return;
-                }
-                if (times && times.constructor !== Number) {
-                    belay = !!times;
-                    times = 0;
-                }
+                    interval = jQuery.timer.timeParse(interval);
 
-                times = times || 0;
-                belay = belay || false;
-
-                if (!element.$timers) {
-                    element.$timers = {};
-                }
-                if (!element.$timers[label]) {
-                    element.$timers[label] = {};
-                }
-                fn.$timerID = fn.$timerID || this.guid++;
-
-                var handler = function() {
-                    if (belay && handler.inProgress) {
+                    if (typeof interval !== 'number' ||
+                        isNaN(interval) ||
+                        interval <= 0) {
                         return;
                     }
-                    handler.inProgress = true;
-                    if ((++counter > times && times !== 0) ||
-                        fn.call(element, counter) === false) {
-                        jQuery.timer.remove(element, label, fn);
+                    if (times && times.constructor !== Number) {
+                        belay = !!times;
+                        times = 0;
                     }
-                    handler.inProgress = false;
-                };
 
-                handler.$timerID = fn.$timerID;
+                    times = times || 0;
+                    belay = belay || false;
 
-                if (!element.$timers[label][fn.$timerID]) {
-                    element.$timers[label][fn.$timerID] = window.setInterval(handler, interval);
-                }
+                    if (!element.$timers) {
+                        element.$timers = {};
+                    }
+                    if (!element.$timers[label]) {
+                        element.$timers[label] = {};
+                    }
+                    fn.$timerID = fn.$timerID || this.guid++;
 
-                if (!this.global[label]) {
-                    this.global[label] = [];
-                }
-                this.global[label].push(element);
-
-            },
-            remove: function(element, label, fn) {
-                var timers = element.$timers, ret;
-
-                if (timers) {
-
-                    if (!label) {
-                        for (var lab in timers) {
-                            if (timers.hasOwnProperty(lab)) {
-                                this.remove(element, lab, fn);
-                            }
+                    var handler = function() {
+                        if (belay && handler.inProgress) {
+                            return;
                         }
-                    } else if (timers[label]) {
-                        if (fn) {
-                            if (fn.$timerID) {
-                                window.clearInterval(timers[label][fn.$timerID]);
-                                delete timers[label][fn.$timerID];
-                            }
-                        } else {
-                            for (var _fn in timers[label]) {
-                                if (timers[label].hasOwnProperty(_fn)) {
-                                    window.clearInterval(timers[label][_fn]);
-                                    delete timers[label][_fn];
+                        handler.inProgress = true;
+                        if ((++counter > times && times !== 0) ||
+                            fn.call(element, counter) === false) {
+                            jQuery.timer.remove(element, label, fn);
+                        }
+                        handler.inProgress = false;
+                    };
+
+                    handler.$timerID = fn.$timerID;
+
+                    if (!element.$timers[label][fn.$timerID]) {
+                        element.$timers[label][fn.$timerID] = window.setInterval(handler, interval);
+                    }
+
+                    if (!this.global[label]) {
+                        this.global[label] = [];
+                    }
+                    this.global[label].push(element);
+
+                },
+                remove: function(element, label, fn) {
+                    var timers = element.$timers, ret;
+
+                    if (timers) {
+
+                        if (!label) {
+                            for (var lab in timers) {
+                                if (timers.hasOwnProperty(lab)) {
+                                    this.remove(element, lab, fn);
                                 }
                             }
+                        } else if (timers[label]) {
+                            if (fn) {
+                                if (fn.$timerID) {
+                                    window.clearInterval(timers[label][fn.$timerID]);
+                                    delete timers[label][fn.$timerID];
+                                }
+                            } else {
+                                for (var _fn in timers[label]) {
+                                    if (timers[label].hasOwnProperty(_fn)) {
+                                        window.clearInterval(timers[label][_fn]);
+                                        delete timers[label][_fn];
+                                    }
+                                }
+                            }
+
+                            for (ret in timers[label]) {
+                                if (timers[label].hasOwnProperty(ret)) {
+                                    break;
+                                }
+                            }
+                            if (!ret) {
+                                ret = null;
+                                delete timers[label];
+                            }
                         }
 
-                        for (ret in timers[label]) {
-                            if (timers[label].hasOwnProperty(ret)) {
+                        for (ret in timers) {
+                            if (timers.hasOwnProperty(ret)) {
                                 break;
                             }
                         }
                         if (!ret) {
-                            ret = null;
-                            delete timers[label];
+                            element.$timers = null;
                         }
-                    }
-
-                    for (ret in timers) {
-                        if (timers.hasOwnProperty(ret)) {
-                            break;
-                        }
-                    }
-                    if (!ret) {
-                        element.$timers = null;
-                    }
-                }
-            }
-        }
-    });
-    if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
-        $(window).one('unload', function() {
-            var global = jQuery.timer.global;
-            for (var label in global) {
-                if (global.hasOwnProperty(label)) {
-                    var els = global[label], i = els.length;
-                    while (--i) {
-                        jQuery.timer.remove(els[i], label);
                     }
                 }
             }
         });
-    }
+        if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
+            $(window).one('unload', function() {
+                var global = jQuery.timer.global;
+                for (var label in global) {
+                    if (global.hasOwnProperty(label)) {
+                        var els = global[label], i = els.length;
+                        while (--i) {
+                            jQuery.timer.remove(els[i], label);
+                        }
+                    }
+                }
+            });
+        }
+    })(jQuery);
     // -----------------------------------------------------------------------
     // :: CROSS BROWSER SPLIT
     // -----------------------------------------------------------------------
+    /* istanbul ignore next */
     (function(undef) {
 
         // prevent double include
@@ -667,6 +674,7 @@
     // -----------------------------------------------------------------------
     // :: jQuery Caret
     // -----------------------------------------------------------------------
+    /* istanbul ignore next */
     $.fn.caret = function(pos) {
         var target = this[0];
         var isContentEditable = target.contentEditable === 'true';
@@ -1928,7 +1936,7 @@
             var new_position = position;
             var start;
             rex.lastIndex = 0; // Just to be sure
-            while (match = rex.exec(string)) {
+            while ((match = rex.exec(string))) {
                 // Add any of the original string we just skipped
                 var last_index = length(substring(string, 0, rex.lastIndex));
                 start = last_index - length(match[0]);
@@ -2529,7 +2537,7 @@
             debug('keydown "' + e.key + '" ' + e.fake + ' ' + e.which);
             process = (e.key || '').toLowerCase() === 'process' || e.which === 0;
             var result;
-            dead_key = no_keypress && single_key;
+            dead_key = no_keypress && single_key && !is_backspace(e);
             // special keys don't trigger keypress fix #293
             try {
                 if (!e.fake) {
@@ -2751,7 +2759,14 @@
             self.on('mousedown.cmd', function() {
                 was_down = true;
             }).on('mouseup.cmd', function(e) {
-                if (e.originalEvent.button === 0 && get_selected_text() === '') {
+                // we get button from event for testing normally it's on originalEvent
+                var button;
+                if (e.originalEvent === undefined) {
+                    button = e.button;
+                } else {
+                    button = e.originalEvent.button;
+                }
+                if (button === 0 && get_selected_text() === '') {
                     var name = 'click_' + id;
                     if (++count === 1) {
                         var down = was_down;
@@ -3778,22 +3793,15 @@
                 return array.join('\n');
             }
             var lines = [];
-            var line = [];
-            function push(i) {
-                var pad = new Array(length - no_formatting[i].length + 1).join(' ');
-                line.push(array[i] + ((i % column_limit === 0 && i !== 0) ? '' : pad));
-            }
-            for (var i = 0; i < array.length; ++i) {
-                if (i % column_limit === 0 && i !== 0) {
-                    push(i);
-                    lines.push(line.join(''));
-                    line = [];
-                } else {
-                    push(i);
-                }
-            }
-            if (line.length) {
-                lines.push(line.join(''));
+            for (var i = 0, len = array.length; i < len; i += column_limit) {
+                var line = array.slice(i, i + column_limit);
+                var last = line.pop();
+                lines.push(line.reduce(function(acc, string) {
+                    var stripped = $.terminal.strip(string);
+                    var pad = new Array(length - stripped.length + 1).join(' ');
+                    acc.push(string + pad);
+                    return acc;
+                }, []).join('') + last);
             }
             return lines.join('\n');
         },
@@ -3802,12 +3810,8 @@
         // ---------------------------------------------------------------------
         strip: function strip(str) {
             str = str.replace(format_parts_re, '$6');
-            return str.replace(/(\\?)([[\]])/g, function(whole, slash) {
-                if (slash) {
-                    return whole;
-                } else {
-                    return '';
-                }
+            return str.replace(/\\([[\]])/g, function(whole, bracket) {
+                return bracket;
             });
         },
         // ---------------------------------------------------------------------
@@ -7996,72 +8000,76 @@
             }
             // change_hash = true; // exec can now change hash
             // -------------------------------------------------------------
-            var shift = false;
-            $(document).bind('keydown.terminal_' + self.id(), function(e) {
-                if (e.shiftKey) {
-                    shift = true;
-                }
-            }).bind('keyup.terminal_' + self.id(), function(e) {
-                // in Google Chromium/Linux shiftKey is false
-                if (e.shiftKey || e.which === 16) {
-                    shift = false;
-                }
-            });
-            // this could work without calling scroll on wheel event but we
-            // need it for cases where you have mouse wheel work differently
-            // like with less command that scroll text
-            function mousewheel(event, delta) {
-                if (!shift) {
-                    var interpreter = interpreters.top();
-                    var ret;
-                    if (is_function(interpreter.mousewheel)) {
-                        ret = interpreter.mousewheel(event, delta, self);
-                    } else if (is_function(settings.mousewheel)) {
-                        ret = settings.mousewheel(event, delta, self);
+            /* istanbul ignore next */
+            (function() {
+                var shift = false;
+                $(document).bind('keydown.terminal_' + self.id(), function(e) {
+                    if (e.shiftKey) {
+                        shift = true;
                     }
-                    if (have_scrollbar() || ret === false) {
-                        event.stopPropagation();
-                        event.preventDefault();
+                }).bind('keyup.terminal_' + self.id(), function(e) {
+                    // in Google Chromium/Linux shiftKey is false
+                    if (e.shiftKey || e.which === 16) {
+                        shift = false;
                     }
-                    if (ret === false) {
-                        return false;
-                    } else if (ret === true) {
-                        return;
-                    }
-                    if (delta > 0) {
-                        self.scroll(-40);
-                    } else {
-                        self.scroll(40);
-                    }
-                }
-            }
-            if ($.event.special.mousewheel) {
-                // we keep mousewheel plugin just in case
-                self.on('mousewheel', mousewheel);
-            } else {
-                // detection take from:
-                // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
-                var event;
-                var div = document.createElement("div");
-                if ("onwheel" in div) {
-                    event = "wheel"; // Modern browsers support "wheel"
-                } else if (document.onmousewheel !== undefined) {
-                    event = "mousewheel"; // Webkit and IE support at least "mousewheel"
-                } else {
-                    // let's assume that remaining browsers are older Firefox
-                    event = "DOMMouseScroll";
-                }
-                div = null;
-                self.on(event, function(e) {
-                    var delta;
-                    if (event === 'mousewheel') {
-                        delta = - 1 / 40 * e.originalEvent.wheelDelta;
-                    } else {
-                        delta = e.originalEvent.deltaY || e.originalEvent.detail;
-                    }
-                    mousewheel(e, -delta);
                 });
-            }
+                // this could work without calling scroll on wheel event but we
+                // need it for cases where you have mouse wheel work differently
+                // like with less command that scroll text
+                function mousewheel(event, delta) {
+                    if (!shift) {
+                        var interpreter = interpreters.top();
+                        var ret;
+                        if (is_function(interpreter.mousewheel)) {
+                            ret = interpreter.mousewheel(event, delta, self);
+                        } else if (is_function(settings.mousewheel)) {
+                            ret = settings.mousewheel(event, delta, self);
+                        }
+                        if (have_scrollbar() || ret === false) {
+                            event.stopPropagation();
+                            event.preventDefault();
+                        }
+                        if (ret === false) {
+                            return false;
+                        } else if (ret === true) {
+                            return;
+                        }
+                        if (delta > 0) {
+                            self.scroll(-40);
+                        } else {
+                            self.scroll(40);
+                        }
+                    }
+                }
+                if ($.event.special.mousewheel) {
+                    // we keep mousewheel plugin just in case
+                    self.on('mousewheel', mousewheel);
+                } else {
+                    // detection take from:
+                    // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+                    var event;
+                    var div = document.createElement("div");
+                    if ("onwheel" in div) {
+                        event = "wheel"; // Modern browsers support "wheel"
+                    } else if (document.onmousewheel !== undefined) {
+                        // Webkit and IE support at least "mousewheel"
+                        event = "mousewheel";
+                    } else {
+                        // let's assume that remaining browsers are older Firefox
+                        event = "DOMMouseScroll";
+                    }
+                    div = null;
+                    self.on(event, function(e) {
+                        var delta;
+                        if (event === 'mousewheel') {
+                            delta = - 1 / 40 * e.originalEvent.wheelDelta;
+                        } else {
+                            delta = e.originalEvent.deltaY || e.originalEvent.detail;
+                        }
+                        mousewheel(e, -delta);
+                    });
+                }
+            })();
         }); // make_interpreter
         self.data('terminal', self);
         return self;
