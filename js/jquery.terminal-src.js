@@ -1083,13 +1083,13 @@
         });
     }
     // -------------------------------------------------------------------------
-    function TerminalException(type, message, parent) {
+    function Terminal_Exception(type, message, parent) {
         this.parent = parent;
         this.type = type;
         this.message = message;
         this.stack = (new Error()).stack;
     }
-    TerminalException.prototype = new Error();
+    Terminal_Exception.prototype = new Error();
     // -------------------------------------------------------------------------
     // :: lines data abstraction for output of the terminal
     // -------------------------------------------------------------------------
@@ -1935,6 +1935,12 @@
             var rep_string;
             var new_position = position;
             var start;
+            if (rex.flags.indexOf('g') === -1) {
+                throw new Terminal_Exception(
+                    'Formatters',
+                    'Regex formatters need to have global flag'
+                );
+            }
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // Add any of the original string we just skipped
@@ -2394,6 +2400,8 @@
                 redraw();
                 return self;
             },
+            // if formatter change length of the strings (like emoji demo) we need to keep
+            // track of two different positions one for command and one for display
             display_position: function(n, relative) {
                 if (n === undefined) {
                     return formatted_position;
@@ -3623,7 +3631,7 @@
                 }, string);
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
-                throw new TerminalException('formatting', msg);
+                throw new Terminal_Exception('formatting', msg);
             }
         },
         // ---------------------------------------------------------------------
@@ -7414,7 +7422,7 @@
                 } catch (e) {
                     // exec catch by command (resume call exec)
                     if (name !== 'exec' && name !== 'resume') {
-                        display_exception(e, 'TERMINAL', true);
+                        display_exception(e, e.type || 'TERMINAL', true);
                     }
                     if (!settings.exceptionHandler) {
                         throw e;

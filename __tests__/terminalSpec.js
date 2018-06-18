@@ -1220,6 +1220,27 @@ describe('sub plugins', function() {
             expect(elements.find('span').text_length()).toEqual(10);
         });
     });
+    // stuff not tested in other places
+    describe('cmd', function() {
+        describe('display_position', function() {
+            var formatters = $.terminal.defaults.formatters, cmd;
+            beforeEach(function() {
+                $.terminal.defaults.formatters = formatters.slice();
+                $.terminal.defaults.formatters.push([/foo/g, '[[;red;]foo bar]']);
+                cmd = $('<div/>').cmd({});
+            });
+            afterEach(function() {
+                $.terminal.defaults.formatters = formatters;
+            });
+            it('should return corrected position', function() {
+                var text = 'hello foo';
+                var replacement = 'hello foo bar';
+                cmd.insert(text);
+                expect(cmd.position()).toEqual(text.length);
+                expect(cmd.display_position()).toEqual(replacement.length);
+            });
+        });
+    });
 });
 describe('Terminal plugin', function() {
     describe('jQuery Terminal options', function() {
