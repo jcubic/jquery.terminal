@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 18 Jun 2018 07:25:13 +0000
+ * Date: Mon, 18 Jun 2018 07:34:08 +0000
  */
 
 /* TODO:
@@ -1082,14 +1082,6 @@
             }
         });
     }
-    // -------------------------------------------------------------------------
-    function Terminal_Exception(type, message, parent) {
-        this.parent = parent;
-        this.type = type;
-        this.message = message;
-        this.stack = (new Error()).stack;
-    }
-    Terminal_Exception.prototype = new Error();
     // -------------------------------------------------------------------------
     // :: lines data abstraction for output of the terminal
     // -------------------------------------------------------------------------
@@ -3176,7 +3168,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 18 Jun 2018 07:25:13 +0000',
+        date: 'Mon, 18 Jun 2018 07:34:08 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3638,7 +3630,7 @@
                 }, string);
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
-                throw new Terminal_Exception('formatting', msg);
+                throw new $.terminal.Exception('formatting', msg);
             }
         },
         // ---------------------------------------------------------------------
@@ -4030,6 +4022,14 @@
             }
         })()
     };
+    // -------------------------------------------------------------------------
+    $.terminal.Exception = function Terminal_Exception(type, message, parent) {
+        this.parent = parent;
+        this.type = type;
+        this.message = message;
+        this.stack = (new Error()).stack;
+    };
+    $.terminal.Exception.prototype = new Error();
     // -----------------------------------------------------------------------
     // Helper plugins and functions
     // -----------------------------------------------------------------------
@@ -4110,7 +4110,7 @@
                     if (options.error) {
                         options.error(jqXHR, 'Invalid JSON', e);
                     } else {
-                        throw new Error('Invalid JSON');
+                        throw new $.termina.Exception('JSON', 'Invalid JSON');
                     }
                     deferred.reject({message: 'Invalid JSON', response: response});
                     return;
@@ -4410,7 +4410,8 @@
         function get_processed_command(command) {
             if ($.terminal.unclosed_strings(command)) {
                 var string = $.terminal.escape_brackets(command);
-                throw new Error(sprintf(strings().invalidStrings, "`" + string + "`"));
+                var message = sprintf(strings().invalidStrings, "`" + string + "`");
+                throw new $.terminal.Exception(message);
             } else if (is_function(settings.processArguments)) {
                 return process_command(command, settings.processArguments);
             } else if (settings.processArguments) {
@@ -4872,7 +4873,8 @@
                 if (type === 'undefined') {
                     user_intrp = $.noop;
                 } else if (type !== 'function') {
-                    throw new Error(type + ' is invalid interpreter value');
+                    var msg = type + ' is invalid interpreter value';
+                    throw new $.terminal.Exception(msg);
                 }
                 // single function don't need bind
                 finalize({
@@ -5284,7 +5286,7 @@
             // spec [terminal_id, state_index, command]
             var terminal = terminals.get()[spec[0]];
             if (!terminal) {
-                throw new Error(strings().invalidTerminalId);
+                throw new $.terminal.Exception(strings().invalidTerminalId);
             }
             var command_idx = spec[1];
             if (save_state[command_idx]) { // state exists
@@ -5685,7 +5687,7 @@
                             resolve(completion);
                             break;
                         default:
-                            throw new Error(strings().invalidCompletion);
+                            throw new $.terminal.Exception(strings().invalidCompletion);
                     }
                 } else {
                     orignal();
@@ -5807,7 +5809,8 @@
             return self.data('terminal');
         }
         if (self.length === 0) {
-            throw new Error(sprintf(strings().invalidSelector, self.selector));
+            var msg = sprintf(strings().invalidSelector, self.selector);
+            throw new $.terminal.Exception(msg);
         }
         // var names = []; // stack if interpreter names
         var scroll_object;
