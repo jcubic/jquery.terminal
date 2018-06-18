@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 18 Jun 2018 07:00:23 +0000
+ * Date: Mon, 18 Jun 2018 07:10:15 +0000
  */
 
 /* TODO:
@@ -1935,12 +1935,6 @@
             var rep_string;
             var new_position = position;
             var start;
-            if (rex.flags.indexOf('g') === -1) {
-                throw new Terminal_Exception(
-                    'Formatters',
-                    'Regex formatters need to have global flag'
-                );
-            }
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // Add any of the original string we just skipped
@@ -1975,6 +1969,10 @@
                         // It's *in* the replacement, put it just after
                         new_position += length(rep_string) - (position - start);
                     }
+                }
+                // single replace
+                if (rex.flags.indexOf('g') === -1) {
+                    break;
                 }
             }
             // Add on any trailing text in the string
@@ -3178,7 +3176,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 18 Jun 2018 07:00:23 +0000',
+        date: 'Mon, 18 Jun 2018 07:10:15 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4033,10 +4031,12 @@
         return this.css('visibility', 'hidden');
     };
     // -----------------------------------------------------------------------
-    function warn(msg) {
+    function warn(msg, log) {
         msg = '[jQuery Terminal] ' + msg;
         if (console && console.warn) {
             console.warn(msg);
+        } else if (log) {
+            console.log(msg);
         } else {
             // prevent catching in outer try..catch
             setTimeout(function() {

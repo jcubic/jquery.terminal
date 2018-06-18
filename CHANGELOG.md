@@ -13,6 +13,7 @@
 * double fix: command line when formatter return empty formatting and prism that return empty formatting after `(` and space
 * third fix fox jumping on right click
 * fix columns method
+* fix infinite loop when regex in formatters don't have g flag
 
 ## 1.16.1
 ### Bugs
