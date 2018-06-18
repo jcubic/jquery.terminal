@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 18 Jun 2018 07:10:15 +0000
+ * Date: Mon, 18 Jun 2018 07:25:13 +0000
  */
 
 /* TODO:
@@ -1903,7 +1903,7 @@
         // :: change length of output text like with emoji demo
         // ---------------------------------------------------------------------
         // :: main function that return corrected cursor position on display
-        // :: if cursor is in the middle of the word that is shorter the before
+        // :: if cursor is in the middle of the word that is shorter than before
         // :: applying formatting then the corrected position is after the word
         // :: so it stay in place when you move real cursor in the middle
         // :: of the word
@@ -3176,7 +3176,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 18 Jun 2018 07:10:15 +0000',
+        date: 'Mon, 18 Jun 2018 07:25:13 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3594,6 +3594,13 @@
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
         apply_formatters: function(string, settings) {
+            function test_lengths(ret, string) {
+                if ($.terminal.length(ret) !== $.terminal.length(string)) {
+                    warn('Your formatter change length of the string, ' +
+                         'you should use [regex, replacement] formatte' +
+                         'r instead');
+                }
+            }
             var formatters = $.terminal.defaults.formatters;
             var i = 0;
             try {
@@ -3605,6 +3612,7 @@
                     // on the list
                     if (typeof formatter === 'function' && formatter.__meta__) {
                         var ret = formatter(string, settings);
+                        test_lengths(ret, string);
                         if (typeof ret === 'string') {
                             return ret;
                         }
@@ -3617,6 +3625,7 @@
                                     return string.replace(formatter[0], formatter[1]);
                                 } else if (typeof formatter === 'function') {
                                     var ret = formatter(string, settings);
+                                    test_lengths(ret, string);
                                     if (typeof ret === 'string') {
                                         return ret;
                                     }
@@ -4031,17 +4040,23 @@
         return this.css('visibility', 'hidden');
     };
     // -----------------------------------------------------------------------
-    function warn(msg, log) {
+    var warnings = [];
+    function warn(msg) {
         msg = '[jQuery Terminal] ' + msg;
-        if (console && console.warn) {
-            console.warn(msg);
-        } else if (log) {
-            console.log(msg);
-        } else {
-            // prevent catching in outer try..catch
-            setTimeout(function() {
-                throw new Error('WARN: ' + msg);
-            }, 0);
+        if (warnings.indexOf(msg) === -1) {
+            warnings.push(msg);
+            if (console) {
+                if (console.warn) {
+                    console.warn(msg);
+                } else if (console.log) {
+                    console.log(msg);
+                }
+            } else {
+                // prevent catching in outer try..catch
+                setTimeout(function() {
+                    throw new Error('WARN: ' + msg);
+                }, 0);
+            }
         }
     }
     // -----------------------------------------------------------------------
