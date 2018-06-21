@@ -1220,6 +1220,72 @@ describe('sub plugins', function() {
             expect(elements.find('span').text_length()).toEqual(10);
         });
     });
+    describe('resizer', function() {
+        describe('ResizeObserver', function() {
+            var div, test,  node, callback;
+            beforeEach(function() {
+                div = $('<div/>');
+                test = {
+                    a: function() {},
+                    b: function() {}
+                };
+                spy(test, 'a');
+                spy(test, 'b');
+                callback = null;
+                window.ResizeObserver = function(observer) {
+                    return {
+                        unobserve: function() {
+                            callback = null;
+                        },
+                        observe: function(node) {
+                            callback = observer;
+                        }
+                    };
+                };
+                spy(window, 'ResizeObserver');
+            });
+            it('should create ResizeObserver', function() {
+                div.resizer(function() {});
+                expect(div.find('iframe').length).toBe(0);
+                expect(window.ResizeObserver).toHaveBeenCalled();
+                expect(typeof callback).toBe('function');
+            });
+            it('should call callback', function() {
+                div.resizer(test.a);
+                div.resizer(test.b);
+                // original ResizeObserver is called on init and plugin skip it
+                callback();
+                callback();
+                expect(test.a).toHaveBeenCalled();
+                expect(test.b).toHaveBeenCalled();
+            });
+        });
+        describe('iframe', function() {
+            var div, test;
+            beforeEach(function() {
+                div = $('<div/>').appendTo('body');
+                test = {
+                    a: function() {},
+                    b: function() {}
+                };
+                spy(test, 'a');
+                spy(test, 'b');
+                delete window.ResizeObserver;
+            });
+            it('should create iframe', function() {
+                div.resizer($.noop);
+                expect(div.find('iframe').length).toBe(1);
+            });
+            it('should trigger callback', function(done) {
+                div.resizer(test.a);
+                $(div.find('iframe')[0].contentWindow).trigger('resize');
+                setTimeout(function() {
+                    expect(test.a).toHaveBeenCalled();
+                    done();
+                }, 100);
+            });
+        });
+    });
     // stuff not tested in other places
     describe('cmd', function() {
         describe('display_position', function() {

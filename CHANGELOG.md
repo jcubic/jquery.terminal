@@ -15,6 +15,7 @@
 * third fix fox jumping on right click
 * fix columns method
 * fix infinite loop when regex in formatters don't have g flag
+* fix parsing escape quotes
 
 ## 1.16.1
 ### Bugs

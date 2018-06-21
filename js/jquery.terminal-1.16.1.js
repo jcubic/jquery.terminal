@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 18 Jun 2018 07:34:08 +0000
+ * Date: Thu, 21 Jun 2018 12:00:29 +0000
  */
 
 /* TODO:
@@ -2824,7 +2824,7 @@
     var format_exec_re = /(\[\[(?:[^\][]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
-    var string_re = /("(?:[^"\\]|\\(?:\\\\)*")*"|'(?:[^'\\]|\\(?:\\\\)*')*')/;
+    var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*')/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     // -------------------------------------------------------------------------
@@ -3168,7 +3168,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 18 Jun 2018 07:34:08 +0000',
+        date: 'Thu, 21 Jun 2018 12:00:29 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3902,6 +3902,7 @@
         // ---------------------------------------------------------------------
         split_arguments: function split_arguments(string) {
             return $.map(string.match(command_re) || [], function(arg) {
+                console.log(arg);
                 return $.terminal.parse_argument(arg, false);
             });
         },
