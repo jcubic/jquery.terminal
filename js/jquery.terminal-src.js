@@ -3717,7 +3717,6 @@
         // ---------------------------------------------------------------------
         split_arguments: function split_arguments(string) {
             return $.map(string.match(command_re) || [], function(arg) {
-                console.log(arg);
                 return $.terminal.parse_argument(arg, false);
             });
         },

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 21 Jun 2018 18:21:44 +0000
+ * Date: Fri, 22 Jun 2018 09:19:52 +0000
  */
 
 /* TODO:
@@ -2983,7 +2983,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 21 Jun 2018 18:21:44 +0000',
+        date: 'Fri, 22 Jun 2018 09:19:52 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3717,7 +3717,6 @@
         // ---------------------------------------------------------------------
         split_arguments: function split_arguments(string) {
             return $.map(string.match(command_re) || [], function(arg) {
-                console.log(arg);
                 return $.terminal.parse_argument(arg, false);
             });
         },
