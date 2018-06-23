@@ -6,6 +6,7 @@
 * $.jrpc helper now return its own created promise instead of $.ajax
 * add wcwidth as dependency so it will always show wider characters correctly (in browsers will work the same as optional)
 * expose terminal exception in $.terminal namespace
+* new API option doubleTab [#405](https://github.com/jcubic/jquery.terminal/issues/405)
 
 ### Bugfix
 * disable history in read & login (regression from 1.16.0 history interpreter option)

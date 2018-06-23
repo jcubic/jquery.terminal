@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 23 Jun 2018 13:24:23 +0000
+ * Date: Sat, 23 Jun 2018 13:48:22 +0000
  */
 
 /* TODO:
@@ -2993,7 +2993,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 23 Jun 2018 13:24:23 +0000',
+        date: 'Sat, 23 Jun 2018 13:48:22 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4144,6 +4144,7 @@
         response: $.noop,
         describe: 'procs',
         onRPCError: null,
+        doubleTab: null,
         completion: false,
         onInit: $.noop,
         onClear: $.noop,
@@ -5492,7 +5493,8 @@
                         echo: true,
                         word: settings.wordAutocomplete,
                         escape: settings.completionEscape,
-                        caseSensitive: caseSensitive
+                        caseSensitive: caseSensitive,
+                        doubleTab: settings.doubleTab
                     });
                 }
                 if (completion) {
@@ -5978,7 +5980,8 @@
                     word: true,
                     echo: false,
                     escape: true,
-                    caseSensitive: true
+                    caseSensitive: true,
+                    doubleTab: null
                 }, options || {});
                 var sensitive = options.caseSensitive;
                 // cursor can be in the middle of the command
@@ -6070,12 +6073,26 @@
                     if (++tab_count >= 2) {
                         tab_count = 0;
                         if (options.echo) {
-                            echo_command();
-                            var text = matched.reverse().join('\t');
-                            self.echo($.terminal.escape_brackets(text), {
-                                keepWords: true,
-                                formatters: false
-                            });
+                            if (is_function(options.doubleTab)) {
+                                var ret = options.doubleTab.call(
+                                    self,
+                                    string,
+                                    matched,
+                                    echo_command
+                                );
+                                if (typeof ret === 'undefined') {
+                                    return true;
+                                } else {
+                                    return ret;
+                                }
+                            } else {
+                                echo_command();
+                                var text = matched.reverse().join('\t');
+                                self.echo($.terminal.escape_brackets(text), {
+                                    keepWords: true,
+                                    formatters: false
+                                });
+                            }
                             return true;
                         }
                     } else {
