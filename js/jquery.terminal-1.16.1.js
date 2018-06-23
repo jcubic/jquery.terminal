@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 22 Jun 2018 09:19:52 +0000
+ * Date: Sat, 23 Jun 2018 13:07:36 +0000
  */
 
 /* TODO:
@@ -1218,11 +1218,11 @@
             },
             'ENTER': function() {
                 if (history && command && !settings.mask &&
-                    (is_function(options.historyFilter) &&
-                     options.historyFilter(command)) ||
-                    (options.historyFilter instanceof RegExp &&
-                     command.match(options.historyFilter)) ||
-                    !options.historyFilter) {
+                    (is_function(settings.historyFilter) &&
+                     settings.historyFilter(command)) ||
+                    (settings.historyFilter instanceof RegExp &&
+                     command.match(settings.historyFilter)) ||
+                    !settings.historyFilter) {
                     history.append(command);
                 }
                 var tmp = command;
@@ -1233,8 +1233,8 @@
                 no_keydown = true;
 
                 self.set('');
-                if (options.commands) {
-                    options.commands(tmp);
+                if (settings.commands) {
+                    settings.commands(tmp);
                 }
                 if (is_function(prompt)) {
                     draw_prompt();
@@ -1603,7 +1603,13 @@
                     return !$.terminal.strip(line).match(/^ $/);
                 });
             }
-            var prompt = prompt_node.text();
+            var line = prompt_node.find('.line');
+            var prompt;
+            if (line.length) {
+                prompt = line.nextUntil('.line').text();
+            } else {
+                prompt = prompt_node.text();
+            }
             var re = new RegExp('^' + $.terminal.escape_regex(prompt));
             var array;
             if (string.match(/\n/)) {
@@ -1971,6 +1977,7 @@
                         $.terminal.format(line, options) +
                         '</span>';
                 }).concat([last_line]).join('\n');
+                // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
                     prompt_len = strlen($('<span>' + last_line + '</span>').text());
@@ -2051,7 +2058,7 @@
             'delete': function(n, stay) {
                 var removed;
                 if (n === 0) {
-                    return self;
+                    return "";
                 } else if (n < 0) {
                     if (position > 0) {
                         // this may look weird but if n is negative we need
@@ -2245,6 +2252,7 @@
                     visible.apply(self, []);
                     redraw();
                     draw_prompt();
+                    return self;
                 };
             })(),
             show: (function() {
@@ -2253,6 +2261,7 @@
                     show.apply(self, []);
                     redraw();
                     draw_prompt();
+                    return self;
                 };
             })(),
             resize: function(num) {
@@ -2983,7 +2992,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 22 Jun 2018 09:19:52 +0000',
+        date: 'Sat, 23 Jun 2018 13:07:36 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3090,6 +3099,7 @@
                 return not_formatting && string[i] !== ']' && !opening;
             }
             // ----------------------------------------------------------------
+            var have_formatting = $.terminal.have_formatting(string);
             var formatting = false;
             var in_text = false;
             var count = 0;
@@ -3136,7 +3146,7 @@
                         // escape \] counts as one character
                         --count;
                         --length;
-                    } else if (!braket) {
+                    } else if (!braket || !have_formatting) {
                         ++count;
                         ++length;
                     }

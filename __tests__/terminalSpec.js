@@ -696,28 +696,32 @@ describe('Terminal utils', function() {
             });
         });
         function test_lenghts(string, fn) {
-            var cols = [10, 40, 60, 400];
+            var cols = [10, 40, 50, 60, 400];
             for (var i=cols.length; i--;) {
                 var lines = $.terminal.split_equal(string, cols[i]);
+                var max_len;
                 var lengths;
                 if (fn) {
                     lengths = lines.map(function(line) {
                         return fn(line).length;
                     });
+                    max_len = fn(string).length;
                 } else {
                     lengths = lines.map(function(line) {
                         return line.length;
                     });
+                    max_len = fn.length;
                 }
                 lengths.forEach(function(length, j) {
+                    var max = max_len < cols[i] ? max_len : cols[i];
                     if (j < lengths - 1) {
-                        if (length != cols[i]) {
+                        if (length != max) {
                             throw new Error('Lines count is ' + JSON.stringify(lengths) +
                                             ' but it should have ' + cols[i] +
                                             ' line ' + JSON.stringify(lines[j]));
                         }
                     } else {
-                        if (length > cols[i]) {
+                        if (length > max) {
                             throw new Error('Lines count is ' + JSON.stringify(lengths) +
                                             ' but it should have ' + cols[i] +
                                             ' line ' + JSON.stringify(lines[j]));
@@ -833,6 +837,16 @@ describe('Terminal utils', function() {
             });
             var expected = ["ターミナル", "ウィンドウ", "は黒です l", "orem ipsum"];
             expect(given).toEqual(expected);
+        });
+        it('should split normal text with brackets', function() {
+            var text = 'jcubic@gitwebterm:/git [gh-pages] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+            test_lenghts(text, function(line) {
+                return $('<div>' + line + '</div>').text();
+            });
+            var output = $.terminal.split_equal(text, 50);
+            output.forEach(function(string) {
+                expect(string.length - 1).toBeLessThan(50);
+            });
         });
     });
     describe('Cycle', function() {
