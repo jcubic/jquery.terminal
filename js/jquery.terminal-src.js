@@ -1610,6 +1610,7 @@
             } else {
                 prompt = prompt_node.text();
             }
+            prompt = $.terminal.escape_brackets(prompt);
             var re = new RegExp('^' + $.terminal.escape_regex(prompt));
             var array;
             if (string.match(/\n/)) {

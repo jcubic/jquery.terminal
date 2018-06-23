@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 23 Jun 2018 13:07:36 +0000
+ * Date: Sat, 23 Jun 2018 13:24:23 +0000
  */
 
 /* TODO:
@@ -1610,6 +1610,7 @@
             } else {
                 prompt = prompt_node.text();
             }
+            prompt = $.terminal.escape_brackets(prompt);
             var re = new RegExp('^' + $.terminal.escape_regex(prompt));
             var array;
             if (string.match(/\n/)) {
@@ -2992,7 +2993,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 23 Jun 2018 13:07:36 +0000',
+        date: 'Sat, 23 Jun 2018 13:24:23 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

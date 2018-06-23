@@ -17,6 +17,7 @@
 * fix infinite loop when regex in formatters don't have g flag
 * fix parsing escape quotes
 * fix split equal to handle brackets when using without formatting
+* fix command line wrapping if prompt contain brackets as text [#407](https://github.com/jcubic/jquery.terminal/issues/407)
 
 ## 1.16.1
 ### Bugs
