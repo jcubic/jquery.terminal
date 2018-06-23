@@ -5461,7 +5461,11 @@
             },
             'CTRL+C': function() {
                 if (get_selected_text() === '') {
-                    echo_command(self.get_command() + '^C');
+                    var command = self.get_command();
+                    var position = self.get_position();
+                    command = command.substring(0, position) + '^C' +
+                        command.substring(position + 2);
+                    echo_command(command);
                     self.set_command('');
                 }
             },

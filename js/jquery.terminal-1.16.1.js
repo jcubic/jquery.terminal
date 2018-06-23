@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 23 Jun 2018 13:48:22 +0000
+ * Date: Sat, 23 Jun 2018 18:26:52 +0000
  */
 
 /* TODO:
@@ -2993,7 +2993,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 23 Jun 2018 13:48:22 +0000',
+        date: 'Sat, 23 Jun 2018 18:26:52 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5461,7 +5461,11 @@
             },
             'CTRL+C': function() {
                 if (get_selected_text() === '') {
-                    echo_command(self.get_command() + '^C');
+                    var command = self.get_command();
+                    var position = self.get_position();
+                    command = command.substring(0, position) + '^C' +
+                        command.substring(position + 2);
+                    echo_command(command);
                     self.set_command('');
                 }
             },
