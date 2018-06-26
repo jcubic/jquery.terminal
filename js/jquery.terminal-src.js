@@ -2016,9 +2016,6 @@
                 options.onCommandChange(command);
             }
         }
-        function crlf(string) {
-            return string.replace(/[\r\n]{2}/g, '\n');
-        }
         // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
@@ -2737,6 +2734,10 @@
             return string;
         }
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
+    }
+    // -------------------------------------------------------------------------
+    function crlf(string) {
+        return string.replace(/[\r\n]{2}/g, '\n');
     }
     // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
@@ -4899,7 +4900,7 @@
                                         string,
                                         settings
                                     );
-                                    string = $.terminal.normalize(string);
+                                    string = crlf($.terminal.normalize(string));
                                 } catch (e) {
                                     display_exception(e, 'FORMATTING');
                                 }

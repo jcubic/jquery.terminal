@@ -20,6 +20,7 @@
 * fix split equal to handle brackets when using without formatting
 * fix command line wrapping if prompt contain brackets as text [#407](https://github.com/jcubic/jquery.terminal/issues/407)
 * insert ^C where cursor was located [#404](https://github.com/jcubic/jquery.terminal/issues/404)
+* fix echo crlf (windows line ending) [#408](https://github.com/jcubic/jquery.terminal/issues/408)
 
 ## 1.16.1
 ### Bugs

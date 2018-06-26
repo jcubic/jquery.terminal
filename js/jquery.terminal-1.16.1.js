@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 23 Jun 2018 18:26:52 +0000
+ * Date: Tue, 26 Jun 2018 10:13:27 +0000
  */
 
 /* TODO:
@@ -2016,9 +2016,6 @@
                 options.onCommandChange(command);
             }
         }
-        function crlf(string) {
-            return string.replace(/[\r\n]{2}/g, '\n');
-        }
         // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
@@ -2739,6 +2736,10 @@
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
+    function crlf(string) {
+        return string.replace(/[\r\n]{2}/g, '\n');
+    }
+    // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
         if (is_ch_unit_supported) {
             return 'width: ' + len + 'ch';
@@ -2993,7 +2994,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 23 Jun 2018 18:26:52 +0000',
+        date: 'Tue, 26 Jun 2018 10:13:27 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4899,7 +4900,7 @@
                                         string,
                                         settings
                                     );
-                                    string = $.terminal.normalize(string);
+                                    string = crlf($.terminal.normalize(string));
                                 } catch (e) {
                                     display_exception(e, 'FORMATTING');
                                 }

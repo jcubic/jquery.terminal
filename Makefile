@@ -8,11 +8,19 @@ CAT=cat
 DATE=`date -uR`
 GIT=git
 BRANCH=`git branch | grep '^*' | sed 's/* //'`
-ESLINT=./node_modules/.bin/eslint
-UGLIFY=./node_modules/.bin/uglifyjs
-JSONLINT=./node_modules/.bin/jsonlint
-JEST=./node_modules/.bin/jest
-CSSNANO=./node_modules/.bin/cssnano
+ifdef SYSTEMROOT
+  UGLIFY=.\node_modules\.bin\uglifyjs
+  JSONLINT=.\node_modules\.bin\jsonlint
+  JEST=.\node_modules\.bin\jest
+  CSSNANO=.\node_modules\.bin\cssnano
+  ESLINT=.\node_modules\.bin\eslint
+else
+  UGLIFY=./node_modules/.bin/uglifyjs
+  JSONLINT=./node_modules/.bin/jsonlint
+  JEST=./node_modules/.bin/jest
+  CSSNANO=./node_modules/.bin/cssnano
+  ESLINT=./node_modules/.bin/eslint
+endif
 SPEC_CHECKSUM=`md5sum __tests__/terminalSpec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
@@ -78,7 +86,7 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 test:
-	$(JEST) --coverage --collectCoverageFrom=js/{unix_formatting,jquery.terminal-src}.js
+	$(JEST) --coverage
 
 coveralls:
 	$(CAT) ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
