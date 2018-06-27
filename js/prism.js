@@ -16,6 +16,7 @@
  *
  * js code:
  *
+ *     code = $.terminal.escape_brackets(code);
  *     code = $.terminal.prism(language, code);
  *
  *     term.echo(code); // or term.less(code) if you include less.js
