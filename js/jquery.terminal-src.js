@@ -3458,6 +3458,7 @@
                 }, string);
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
+                formatters.splice(i - 1);
                 throw new $.terminal.Exception('formatting', msg);
             }
         },

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 30 Jun 2018 20:09:25 +0000
+ * Date: Sat, 30 Jun 2018 20:16:29 +0000
  */
 
 /* TODO:
@@ -2995,7 +2995,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 30 Jun 2018 20:09:25 +0000',
+        date: 'Sat, 30 Jun 2018 20:16:29 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3458,6 +3458,7 @@
                 }, string);
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
+                formatters.splice(i - 1);
                 throw new $.terminal.Exception('formatting', msg);
             }
         },
