@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 30 Jun 2018 12:25:02 +0000
+ * Date: Sat, 30 Jun 2018 12:28:07 +0000
  */
 
 /* TODO:
@@ -2994,7 +2994,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 30 Jun 2018 12:25:02 +0000',
+        date: 'Sat, 30 Jun 2018 12:28:07 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6090,7 +6090,7 @@
                                 } else {
                                     return ret;
                                 }
-                            } else {
+                            } else if (options.doubleTab !== false) {
                                 echo_command();
                                 var text = matched.reverse().join('\t');
                                 self.echo($.terminal.escape_brackets(text), {

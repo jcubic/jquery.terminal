@@ -6090,7 +6090,7 @@
                                 } else {
                                     return ret;
                                 }
-                            } else {
+                            } else if (options.doubleTab !== false) {
                                 echo_command();
                                 var text = matched.reverse().join('\t');
                                 self.echo($.terminal.escape_brackets(text), {
