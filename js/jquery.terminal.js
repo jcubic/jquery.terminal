@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 26 Jun 2018 10:13:27 +0000
+ * Date: Sat, 30 Jun 2018 12:25:02 +0000
  */
 
 /* TODO:
@@ -1598,7 +1598,7 @@
                 return $.terminal.split_equal(string, num_chars);
             }
             function skip_empty(array) {
-                // we remove lines that are left overs after adding space at the end
+                // we remove lines that are leftovers after adding space at the end
                 return array.filter(function(line) {
                     return !$.terminal.strip(line).match(/^ $/);
                 });
@@ -2012,8 +2012,8 @@
             }
         }
         function fire_change_command() {
-            if (is_function(options.onCommandChange)) {
-                options.onCommandChange(command);
+            if (is_function(settings.onCommandChange)) {
+                settings.onCommandChange(command);
             }
         }
         // ---------------------------------------------------------------------
@@ -2994,7 +2994,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 26 Jun 2018 10:13:27 +0000',
+        date: 'Sat, 30 Jun 2018 12:25:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

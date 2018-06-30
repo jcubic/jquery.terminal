@@ -1598,7 +1598,7 @@
                 return $.terminal.split_equal(string, num_chars);
             }
             function skip_empty(array) {
-                // we remove lines that are left overs after adding space at the end
+                // we remove lines that are leftovers after adding space at the end
                 return array.filter(function(line) {
                     return !$.terminal.strip(line).match(/^ $/);
                 });
@@ -2012,8 +2012,8 @@
             }
         }
         function fire_change_command() {
-            if (is_function(options.onCommandChange)) {
-                options.onCommandChange(command);
+            if (is_function(settings.onCommandChange)) {
+                settings.onCommandChange(command);
             }
         }
         // ---------------------------------------------------------------------

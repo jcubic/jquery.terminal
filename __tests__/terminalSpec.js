@@ -225,8 +225,8 @@ var support_animations = (function() {
 
 
 describe('Terminal utils', function() {
-    var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10 ""';
-    var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 ""';
+    var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" \'foo\'';
+    var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" \'foo\'';
     describe('$.terminal.split_arguments', function() {
         it('should create array of arguments', function() {
             expect($.terminal.split_arguments(args)).toEqual([
@@ -236,7 +236,9 @@ describe('Terminal utils', function() {
                 'str str',
                 '10',
                 '1e10',
-                ''
+                '',
+                'foo"bar"',
+                "foo"
             ]);
         });
     });
@@ -249,7 +251,9 @@ describe('Terminal utils', function() {
                 'str str',
                 10,
                 1e10,
-                ''
+                '',
+                'foobar',
+                'foo'
             ]);
         });
     });
@@ -266,10 +270,12 @@ describe('Terminal utils', function() {
                     'str str',
                     '10',
                     '1e10',
-                    ''
+                    '',
+                    'foo"bar"',
+                    'foo'
                 ],
-                args_quotes: ['"', '', '', '', '', '', '"'],
-                rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 ""'
+                args_quotes: ['"', '', '', '', '', '', '"', '', "'"],
+                rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" \'foo\''
             });
         });
     });
@@ -286,10 +292,12 @@ describe('Terminal utils', function() {
                     'str str',
                     10,
                     1e10,
-                    ''
+                    '',
+                    'foobar',
+                    'foo'
                 ],
-                args_quotes: ['"', '', '', '', '', '', '"'],
-                rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 ""'
+                args_quotes: ['"', '', '', '', '', '', '"', '', "'"],
+                rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" \'foo\''
             });
         });
         it('should handle JSON string', function() {
@@ -303,15 +311,13 @@ describe('Terminal utils', function() {
             });
         });
     });
-    var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz';
     describe('$.terminal.from_ansi', function() {
+        var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz';
         it('should convert ansi to terminal formatting', function() {
             var string = $.terminal.from_ansi(ansi_string);
             expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
                                    'B[[sb;;]a]r][[;#000;#AAA]Baz]');
         });
-    });
-    describe('$.terminal.from_ansi', function() {
         it('should convert ansi to terminal formatting and escape the remaining brackets', function() {
             var string = $.terminal.from_ansi(ansi_string, {
                 unixFormattingEscapeBrackets: true
@@ -459,13 +465,18 @@ describe('Terminal utils', function() {
         });
         it('should not add 5 argument', function() {
             var tests = [
-                ['[[;;;;Foo]Lorem Ipsum Dolor] [[;;;;Bar]Amet]', '[[;;;;Foo]Lorem Ipsum Dolor] [[;;;;Bar]Amet]']
+                [
+                    '[[;;;;Foo]Lorem Ipsum Dolor] [[;;;;Bar]Amet]',
+                    '[[;;;;Foo]Lorem Ipsum Dolor] [[;;;;Bar]Amet]']
             ];
             test(tests);
         });
         it('should remove empty formatting', function() {
             var tests = [
-                ['[[;;]]Lorem Ipsum [[;;]]Dolor Sit [[;;;;]]Amet', 'Lorem Ipsum Dolor Sit Amet']
+                [
+                    '[[;;]]Lorem Ipsum [[;;]]Dolor Sit [[;;;;]]Amet',
+                    'Lorem Ipsum Dolor Sit Amet'
+                ]
             ];
             test(tests);
         });
@@ -548,11 +559,61 @@ describe('Terminal utils', function() {
                                    ' overline;" data-text="Baz">Baz</span>');
         });
         it('should handle wider characters without formatting', function() {
-            var input = 'ターミナルウィンドウは黒です';
+            var input = 'ターミナルウィンドウは黒[[;;]です]';
             var string = $.terminal.format(input, {char_width: 7});
-            expect(string).toEqual('<span style="width: 28ch"><span style="widt'+
-                                   'h: 28ch">ターミナルウィンドウは黒です</span></s'+
-                                   'pan>');
+            expect(string).toEqual('<span style="width: 24ch"><span style="widt'+
+                                   'h: 24ch">ターミナルウィンドウは黒</span></span'+
+                                   '><span style="width: 4ch" data-text="です">'+
+                                   '<span style="width: 4ch">です</span></span>');
+        });
+        it('should handle links', function() {
+            var input = '[[!;;]https://terminal.jcubic.pl]';
+            var tests = [
+                [
+                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
+                        ' rel="noopener" tabindex="1000">https://terminal.jcubic.pl<'+
+                        '/a>',
+                    {}
+                ],
+                [
+                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
+                        ' rel="noreferrer noopener" tabindex="1000">https'+
+                        '://terminal.jcubic.pl</a>',
+                    {
+                        linksNoReferrer: true
+                    }
+                ]
+            ];
+            tests.forEach(function(spec) {
+                var expected = spec[0];
+                var options = spec[1];
+                var output = $.terminal.format(input, spec[1]);
+                expect(output).toEqual(expected);
+            });
+        });
+        it('should handle emails', function() {
+            var tests = [
+                [
+                    '[[!;;]jcubic@onet.pl]',
+                    '<a href="mailto:jcubic@onet.pl" tabindex="1000">jcubic@onet.pl</a>'
+                ],
+                [
+                    '[[!;;;;jcubic@onet.pl]j][[!;;;;jcubic@onet.pl]cubic@onet.pl]',
+                    '<a href="mailto:jcubic@onet.pl" tabindex="1000">j</a>' +
+                        '<a href="mailto:jcubic@onet.pl" tabindex="1000">c' +
+                        'ubic@onet.pl</a>'
+                ]
+            ];
+            tests.forEach(function([input, expected]) {
+                expect($.terminal.format(input)).toEqual(expected);
+            });
+        });
+        it('should skip empty parts', function() {
+            var input = '[[;;]]x[[b;;]y][[b;;]z]';
+            var output = $.terminal.format(input);
+            expect(output).toEqual('<span>x</span><span style="font-weight:' +
+                                   'bold;" data-text="y">y</span><span styl' +
+                                   'e="font-weight:bold;" data-text="z">z</span>');
         });
     });
     describe('$.terminal.strip', function() {
@@ -1013,7 +1074,12 @@ describe('Terminal utils', function() {
     });
     describe('History', function() {
         function history_commands(name) {
-            return JSON.parse(window.localStorage.getItem(name));
+            try {
+                return JSON.parse(window.localStorage.getItem(name + '_commands'));
+            } catch(e) {
+                // to see in jest logs
+                expect(window.localStorage.getItem(name)).toEqual('');
+            }
         }
         function make_history(name, commands) {
             commands = commands || [];
@@ -1033,21 +1099,21 @@ describe('Terminal utils', function() {
         it('should put items to localStorage', function() {
             var commands = ['lorem', 'ipsum'];
             var history = make_history('foo', commands);
-            expect(history_commands('foo_commands')).toEqual(commands);
+            expect(history_commands('foo')).toEqual(commands);
         });
         it('should add only one commands if adding the same command', function() {
             var history = new $.terminal.History('foo');
             for (var i = 0; i < 10; ++i) {
                 history.append('command');
             }
-            expect(history_commands('foo_commands')).toEqual(['command']);
+            expect(history_commands('foo')).toEqual(['command']);
         });
         it('shound not add more commands then the limit', function() {
             var history = new $.terminal.History('foo', 30);
             for (var i = 0; i < 40; ++i) {
                 history.append('command ' + i);
             }
-            expect(history_commands('foo_commands').length).toEqual(30);
+            expect(history_commands('foo').length).toEqual(30);
         });
         it('should create commands in memory', function() {
             var history = new $.terminal.History('foo', 10, true);
@@ -1087,7 +1153,7 @@ describe('Terminal utils', function() {
             history.append('foo');
             history.enable();
             history.append('bar');
-            expect(history_commands('foo_commands')).toEqual(commands.concat(['bar']));
+            expect(history_commands('foo')).toEqual(commands.concat(['bar']));
         });
         it('should return last item', function() {
             var commands = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
@@ -1106,6 +1172,13 @@ describe('Terminal utils', function() {
             history.next();
             history.next();
             expect(history.position()).toEqual(last_index);
+        });
+        it('should set data', function() {
+            var commands = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
+            var last_index = commands.length - 1;
+            var history = make_history('foo', []);
+            history.set(commands);
+            expect(history_commands('foo')).toEqual(commands);
         });
     });
     describe('Stack', function() {
@@ -1273,6 +1346,11 @@ describe('sub plugins', function() {
                 expect(test.a).toHaveBeenCalled();
                 expect(test.b).toHaveBeenCalled();
             });
+            it('should remove resizer', function() {
+                div.resizer(test.a);
+                div.resizer('unbind');
+                expect(callback).toBe(null);
+            });
         });
         describe('iframe', function() {
             var div, test;
@@ -1304,20 +1382,44 @@ describe('sub plugins', function() {
     describe('cmd', function() {
         describe('display_position', function() {
             var formatters = $.terminal.defaults.formatters, cmd;
+            var text = 'hello foo';
+            var rep = 'foo bar';
+            var replacement = 'hello ' + rep;
+            var len = rep.length;
+            function get_pos() {
+                return [cmd.position(), cmd.display_position()];
+            }
             beforeEach(function() {
                 $.terminal.defaults.formatters = formatters.slice();
                 $.terminal.defaults.formatters.push([/foo/g, '[[;red;]foo bar]']);
-                cmd = $('<div/>').cmd({});
+                cmd = $('<div/>').cmd();
             });
             afterEach(function() {
                 $.terminal.defaults.formatters = formatters;
             });
             it('should return corrected position', function() {
-                var text = 'hello foo';
-                var replacement = 'hello foo bar';
                 cmd.insert(text);
                 expect(cmd.position()).toEqual(text.length);
                 expect(cmd.display_position()).toEqual(replacement.length);
+            });
+            it('should not change position', function() {
+                cmd.insert(text);
+                var pos = get_pos();
+                for (var i = 0; i < len; i++) {
+                    cmd.display_position(-i, true);
+                    expect(get_pos()).toEqual(pos);
+                }
+            });
+            it('should change position', function() {
+                cmd.insert(text);
+                var pos = get_pos();
+                expect(get_pos()).toEqual([9, 13]);
+                cmd.display_position(-len, true);
+                expect(get_pos()).toEqual([6, 6]);
+                cmd.display_position(5);
+                expect(get_pos()).toEqual([5, 5]);
+                cmd.display_position(100);
+                expect(get_pos()).toEqual(pos);
             });
         });
     });
