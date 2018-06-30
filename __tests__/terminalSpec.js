@@ -665,6 +665,18 @@ describe('Terminal utils', function() {
             expect($.terminal.apply_formatters(input)).toEqual('[[;;]lorem] [[;;]ipsum]');
             expect(test.formatter).toHaveBeenCalled();
         });
+        it('should throw except', function() {
+            var formatters = $.terminal.defaults.formatters.slice();
+            $.terminal.defaults.formatters.push(function() {
+                x();
+            });
+            expect(function() {
+                $.terminal.apply_formatters('foo');
+            }).toThrow($.terminal.Exception('Error in formatter [' +
+                                            (formatters.length - 1) +
+                                            ']'));
+            $.terminal.defaults.formatters.pop();
+        });
     });
     describe('$.terminal.split_equal', function() {
         var text = ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
@@ -1288,6 +1300,29 @@ describe('Terminal utils', function() {
         });
         expect($.terminal.columns(input, 5)).toEqual(input.join('\n'));
     });
+    describe('$.terminal.formatter', function() {
+        var t = $.terminal.formatter;
+        it('should split formatting', function() {
+            expect('[[;;]foo]bar[[;;]baz]'.split(t))
+                .toEqual([
+                    '[[;;]foo]',
+                    'bar',
+                    '[[;;]baz]'
+                ]);
+        });
+        it('should strip formatting', function() {
+            expect('[[;;]foo]bar[[;;]baz]'.replace(t, '$6')).toEqual('foobarbaz');
+        });
+        it('should match formatting', function() {
+            expect('[[;;]foo]'.match(t)).toBeTruthy();
+            expect('[[ ]]]'.match(t)).toBeFalsy();
+        });
+        it('should find formatting index', function() {
+            expect('[[;;]foo]'.search(t)).toEqual(0);
+            expect('xxx[[;;]foo]'.search(t)).toEqual(3);
+            expect('[[ [[;;]foo] [[;;]bar]'.search(t)).toEqual(3);
+        });
+    });
 });
 describe('sub plugins', function() {
     describe('resizer', function() {
@@ -1711,6 +1746,31 @@ describe('Terminal plugin', function() {
             expect(term.children().length).toBe(0);
             term.remove();
         });
+        it('should create multiple terminals', function() {
+            var divs = $('<div><div/><div/></div>');
+            divs.find('div').terminal();
+            expect(divs.find('.terminal').length).toEqual(2);
+        });
+        it('should return previously created terminal', function() {
+            var div = $('<div/>');
+            div.terminal();
+            var test = {
+                fn: $.noop
+            };
+            spy(test, 'fn');
+            var term = div.terminal($.noop, {
+                onInit: test.fn
+            });
+            expect(test.fn).not.toHaveBeenCalled();
+            expect(typeof term.login).toEqual('function');
+        });
+        it('should throw exception on empty selector', function() {
+            var strings = $.terminal.defaults.strings;
+            var error = new $.terminal.Exception(strings.invalidSelector);
+            expect(function() {
+                $('#notExisting').terminal();
+            }).toThrow(error);
+        });
     });
     describe('cursor', function() {
         it('only one terminal should have blinking cursor', function(done) {
@@ -2019,26 +2079,36 @@ describe('Terminal plugin', function() {
         }, options);
         $.ajax = function(obj) {
             function done() {
-                if ($.isFunction(obj.success)) {
-                    obj.success(response, 'OK', {
-                        getResponseHeader: function(header) {
-                            if (header == 'Content-Type') {
-                                return 'application/json';
-                            }
-                        },
-                        responseText: response
-                    });
+                if (!canceled) {
+                    if ($.isFunction(obj.success)) {
+                        obj.success(response, 'OK', {
+                            getResponseHeader: function(header) {
+                                if (header == 'Content-Type') {
+                                    return 'application/json';
+                                }
+                            },
+                            responseText: response
+                        });
+                    }
+                    defer.resolve(response);
                 }
-                defer.resolve(response);
             }
             if (obj.url == url) {
                 var defer = $.Deferred();
+                var canceled = false;
+                var jqXHR = {
+                    abort: function() {
+                        canceled = true;
+                    }
+                };
+                $(document).trigger("ajaxSend", [ jqXHR, obj ] );
                 try {
                     if ($.isFunction(obj.beforeSend)) {
                         obj.beforeSend({}, obj);
                     }
                     if (options.async) {
-                        setTimeout(done, 100);
+                        var num = +options.async;
+                        setTimeout(done, isNaN(num) ? 100 : num);
                     } else {
                         done();
                     }
@@ -2131,7 +2201,14 @@ describe('Terminal plugin', function() {
                                 };
                             }
                         } catch (e) {
-                            error = {message: e.message};
+                            error = {
+                                message: e.message,
+                                error: {
+                                    file: '/foo/bar/baz.php',
+                                    at: 10,
+                                    message: 'Syntax Error'
+                                }
+                            };
                         }
                         resp = {
                             id: req.id,
@@ -2299,30 +2376,60 @@ describe('Terminal plugin', function() {
             });
         });
     });
-    describe('nested object interpreter', function() {
-        var interpereter = {
-            foo: {
-                bar: {
-                    baz: function() {
-                    },
-                    add: function(a, b) {
-                        this.echo(a+b);
-                    },
-                    type: function(obj) {
-                        type.test(obj.constructor);
-                        this.echo(JSON.stringify([].slice.call(arguments)));
-                    }
+    describe('cancelable ajax requests', function() {
+        var term = $('<div/>').terminal({}, {greetings: false});
+        AJAXMock('/500ms', 'foo bar', {async: 500});
+        it('should cancel ajax request', function(done) {
+            var test = {
+                fn: function() {
                 }
-            },
-            quux: '/test'
-        };
-        var type = {
-            test: function(obj) { }
-        };
-        var fallback = {
-            interpreter: function(command, term) { }
-        };
-        var term = $('<div/>').appendTo('body').terminal(interpereter);
+            };
+            spy(test, 'fn');
+            term.focus().pause();
+            $.get('/500ms', function(data) {
+                test.fn(data);
+            });
+            shortcut(true, false, false, 'D');
+            expect(term.paused()).toBeFalsy();
+            setTimeout(function() {
+                expect(output(term)).toEqual([]);
+                expect(test.fn).not.toHaveBeenCalled();
+                done();
+            }, 600);
+        });
+    });
+    describe('nested object interpreter', function() {
+        var interpereter, type, fallback, term;
+        beforeEach(function() {
+            fallback = {
+                interpreter: function(command, term) { }
+            };
+            interpereter = {
+                foo: {
+                    bar: {
+                        baz: function() {
+                        },
+                        add: function(a, b) {
+                            this.echo(a+b);
+                        },
+                        type: function(obj) {
+                            type.test(obj.constructor);
+                            this.echo(JSON.stringify([].slice.call(arguments)));
+                        }
+                    }
+                },
+                quux: '/test'
+            };
+            type = {
+                test: function(obj) { }
+            };
+            term = $('<div/>').appendTo('body').terminal(interpereter);
+            term.focus();
+        });
+        afterEach(function() {
+            term.destroy().remove();
+            term = null;
+        });
         it('should created nested intepreter', function() {
             term.focus();
             var spy = spyOn(interpereter.foo.bar, 'baz');
@@ -2335,6 +2442,7 @@ describe('Terminal plugin', function() {
         });
         it('should convert arguments', function() {
             spy(type, 'test');
+            term.exec(['foo', 'bar']);
             term.insert('add 10 20');
             enter_key();
             var last_div = term.find('.terminal-output > div:last-child');
@@ -2345,13 +2453,14 @@ describe('Terminal plugin', function() {
             expect(type.test).toHaveBeenCalledWith(Number);
         });
         it('should show error on wrong arity', function() {
+            term.exec(['foo', 'bar']);
             enter(term, 'type 10 20');
             var last_div = term.find('.terminal-output > div:last-child');
             expect(last_div.text()).toEqual("[Arity] Wrong number of arguments. Function 'type' expects 1 got 2!");
-            term.destroy().remove();
         });
         it('should call fallback function', function() {
             spy(fallback, 'interpreter');
+            term.destroy().remove();
             term = $('<div/>').appendTo('body').terminal([
                 interpereter, fallback.interpreter
             ], {
@@ -2361,7 +2470,12 @@ describe('Terminal plugin', function() {
             expect(fallback.interpreter).toHaveBeenCalledWith('baz', term);
         });
         it('should not show error on wrong arity', function() {
-            // checkArity is false from last spec
+            term.destroy().remove();
+            term = $('<div/>').appendTo('body').terminal([
+                interpereter, fallback.interpreter
+            ], {
+                checkArity: false
+            });
             spy(type, 'test');
             enter(term, 'foo');
             enter(term, 'bar');
@@ -2370,26 +2484,46 @@ describe('Terminal plugin', function() {
         });
         it('should call json-rpc', function() {
             spy(object, 'echo');
-            term.pop().pop().focus();
             enter(term, 'quux');
             expect(term.get_prompt()).toEqual('quux> ');
             // for unknown reason cmd have visibility set to hidden
             term.cmd().enable().visible();
             enter(term, 'echo foo bar');
             expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
-            term.destroy().remove();
-            term = $('<div/>').appendTo('body').terminal([
+            var new_term = $('<div/>').appendTo('body').terminal([
                 interpereter, '/test', fallback.interpreter
             ]);
-            term.focus();
-            enter(term, 'echo TOKEN world'); // we call echo without login
+            new_term.focus();
+            enter(new_term, 'echo TOKEN world'); // we call echo without login
             expect(object.echo).toHaveBeenCalledWith('TOKEN', 'world');
         });
         it('should show error', function() {
+            term.clear();
+            enter(term, 'quux');
             enter(term, 'exception TOKEN');
             var last_div = term.find('.terminal-output > div:last-child');
-            expect(last_div.text()).toEqual(nbsp('[RPC] ' +exception));
-            term.destroy().remove();
+            expect(output(term)).toEqual([
+                '> quux',
+                'quux> exception TOKEN',
+                '[RPC] ' +exception,
+                '    Syntax Error in file "baz.php" at line 10'
+            ]);
+        });
+        it('should show parse error on unclosed string', function() {
+            var commands = [
+                'foo foo"',
+                'foo "foo\\"foo',
+                "foo 'foo",
+                "foo 'foo\\'foo"
+            ];
+            commands.forEach(function(command) {
+                term.focus().clear();
+                enter(term, command);
+                expect(output(term)).toEqual([
+                    '> ' + command,
+                    'Error: Command `' + command + '` have unclosed strings'
+                ]);
+            });
         });
     });
     describe('jQuery Terminal object', function() {
@@ -3507,6 +3641,13 @@ describe('Terminal plugin', function() {
         describe('exception', function() {
             var error = new Error('Some Message');
             var term;
+            var lines = [
+                'function foo(a, b) {',
+                '    return a + b;',
+                '}',
+                'foo(10, 20);'
+            ];
+            AJAXMock('http://localhost/file.js', lines.join('\n'));
             beforeEach(function() {
                 term = $('<div/>').terminal($.noop, {
                     greetings: false
@@ -3517,6 +3658,9 @@ describe('Terminal plugin', function() {
                     }));
                     term.option('numChars', length+1);
                 }
+            });
+            afterEach(function() {
+                term.destroy().remove();
             });
             it('should show exception', function() {
                 term.exception(error, 'ERROR');
@@ -3543,29 +3687,49 @@ describe('Terminal plugin', function() {
                     expect(div.hasClass('exception')).toBeTruthy();
                     expect(div.hasClass('stack-trace')).toBeTruthy();
                 }
-                term.destroy().remove();
             });
             it('should fetch line from file using AJAX', function(done) {
                 var error = {
                     message: 'Some Message',
-                    fileName: '/file.js',
+                    fileName: 'http://localhost/file.js',
                     lineNumber: 2
                 };
-                var lines = [
-                    'function foo(a, b) {',
-                    '    return a + b;',
-                    '}',
-                    'foo(10, 20);'
-                ];
-                AJAXMock('/file.js', lines.join('\n'));
                 term.clear().exception(error, 'foo');
                 setTimeout(function() {
                     expect(output(term)).toEqual([
-                        '[foo]: /file.js: Some Message',
+                        '[foo]: http://localhost/file.js: Some Message',
                         '[2]:     return a + b;'
                     ]);
                     done();
                 }, 100);
+            });
+            it('should display stack and fetch line from file', function(done) {
+                var error = {
+                    message: 'Some Message',
+                    filename: 'http://localhost/file.js',
+                    stack: [
+                        '  foo http://localhost/file.js:2:0',
+                        '  main http://localhost/file.js:4:0'
+                    ].join('\n')
+                };
+                function output(div) {
+                    return div.find('div').map(function() {
+                        return $(this).text();
+                    }).get().join('\n');
+                }
+                term.clear().exception(error, 'foo');
+                var stack = term.find('.exception.stack-trace');
+                expect(stack.length).toEqual(1);
+                expect(output(stack)).toEqual(nbsp(error.stack));
+                stack.find('a').eq(1).click();
+                setTimeout(function() {
+                    expect(stack.next().text()).toEqual(error.filename);
+                    var code = lines.map(function(line, i) {
+                        return '[' + (i + 1) + ']: ' + line;
+                    }).slice(1).join('\n');
+                    expect(output(stack.next().next())).toEqual(nbsp(code));
+                    done();
+                }, 10);
             });
         });
         describe('scroll', function() {
@@ -4111,6 +4275,12 @@ describe('Terminal plugin', function() {
                 term.destroy();
                 expect(term.html()).toEqual(element);
             });
+            it('should throw when calling method after destroy', function() {
+                term.destroy();
+                expect(function() { term.login(); }).toThrow(
+                    new $.terminal.Exception($.terminal.defaults.strings.defunctTerminal)
+                );
+            });
         });
         describe('set_token', function() {
             var token = 'set_token';
@@ -4288,7 +4458,6 @@ describe('Terminal plugin', function() {
             var term;
             var test;
             beforeEach(function() {
-                term = $('<div/>').terminal();
                 test = {
                     empty: function() {},
                     original: function(e, original) {
@@ -4297,6 +4466,22 @@ describe('Terminal plugin', function() {
                 };
                 spy(test, 'empty');
                 spy(test, 'original');
+                term = $('<div/>').terminal($.noop, {
+                    keymap: {
+                        'CTRL+C': test.original,
+                        'CTRL+D': test.original
+                    }
+                });
+                term.focus();
+            });
+            it('should call init keymap', function() {
+                term.clear().insert('foo');
+                shortcut(true, false, false, 'c');
+                expect(test.original).toHaveBeenCalled();
+                expect(last_div(term).text().match(/foo\^C/)).toBeTruthy();
+                term.pause();
+                shortcut(true, false, false, 'D');
+                expect(term.paused()).toBeFalsy();
             });
             it('should set and call keymap shortcut', function() {
                 term.keymap('CTRL+T', test.empty);

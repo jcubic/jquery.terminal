@@ -22,6 +22,9 @@
 * insert ^C where cursor was located [#404](https://github.com/jcubic/jquery.terminal/issues/404)
 * fix echo crlf (windows line ending) [#408](https://github.com/jcubic/jquery.terminal/issues/408)
 * allow to call cmd without arguments
+* rename undocumented remove API method to remove_line so you can call jQuery remove
+* fix throwing exception when there is error in formatter (it now only show alert)
+
 
 ## 1.16.1
 ### Bugs

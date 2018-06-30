@@ -1661,6 +1661,7 @@
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e);
+                return string;
             }
         }
         // ---------------------------------------------------------------------
@@ -3850,11 +3851,14 @@
         })()
     };
     // -------------------------------------------------------------------------
-    $.terminal.Exception = function Terminal_Exception(type, message, parent) {
-        this.parent = parent;
-        this.type = type;
-        this.message = message;
-        this.stack = (new Error()).stack;
+    $.terminal.Exception = function Terminal_Exception(type, message) {
+        if (arguments.length === 1) {
+            this.message = arguments[0];
+            this.type = 'TERMINAL';
+        } else {
+            this.type = type;
+            this.message = message;
+        }
     };
     $.terminal.Exception.prototype = new Error();
     // -----------------------------------------------------------------------
@@ -3937,7 +3941,7 @@
                     if (options.error) {
                         options.error(jqXHR, 'Invalid JSON', e);
                     } else {
-                        throw new $.termina.Exception('JSON', 'Invalid JSON');
+                        throw new $.terminal.Exception('JSON', 'Invalid JSON');
                     }
                     deferred.reject({message: 'Invalid JSON', response: response});
                     return;
@@ -4182,7 +4186,7 @@
             loginIsNotAFunction: 'Authenticate must be a function',
             canExitError: "You can't exit from main interpreter",
             invalidCompletion: 'Invalid completion',
-            invalidSelector: 'Sorry, but terminal said that "%s" is not valid ' +
+            invalidSelector: 'Sorry, but terminal said that you use invalid ' +
                 'selector!',
             invalidTerminalId: 'Invalid Terminal ID',
             login: 'login',
@@ -4190,7 +4194,8 @@
             recursiveCall: 'Recursive call detected, skip',
             notAString: '%s function: argument is not a string',
             redrawError: 'Internal error, wrong position in cmd redraw',
-            invalidStrings: 'Command %s have unclosed strings'
+            invalidStrings: 'Command %s have unclosed strings',
+            defunctTerminal: "You can't call method on terminal that was destroyed"
         }
     };
     // -------------------------------------------------------------------------
@@ -4283,7 +4288,7 @@
                             line = '[[;#f00;]' +
                                 $.terminal.escape_brackets(line) + ']';
                         }
-                        return '[' + (n + i) + ']: ' + line;
+                        return '[' + (n + i - 1) + ']: ' + line;
                     }).join('\n')).resume();
                 }, 'text');
             }
@@ -5284,6 +5289,7 @@
                         return;
                     }
                 } catch (e) {
+                    settings.onBeforeLogout = $.noop;
                     display_exception(e, 'onBeforeLogout');
                 }
             }
@@ -5292,6 +5298,7 @@
                 try {
                     settings.onAfterLogout.call(self, self);
                 } catch (e) {
+                    settings.onAfterLogout = $.noop;
                     display_exception(e, 'onAfterlogout');
                 }
             }
@@ -5642,7 +5649,7 @@
             return self.data('terminal');
         }
         if (self.length === 0) {
-            var msg = sprintf(strings().invalidSelector, self.selector);
+            var msg = sprintf(strings().invalidSelector);
             throw new $.terminal.Exception(msg);
         }
         // var names = []; // stack if interpreter names
@@ -5673,7 +5680,9 @@
             },
             options || {}
         );
-        var lines = []; //new Lines(self, char_size, settings);
+        // used to throw error when calling methods on destroyed terminal
+        var defunct = false;
+        var lines = [];
         var storage = new StorageHelper(settings.memory);
         var enabled = settings.enabled;
         var frozen = false;
@@ -6670,7 +6679,7 @@
             // -------------------------------------------------------------
             // :: convenience method for removing selected line
             // -------------------------------------------------------------
-            remove: function(line, options) {
+            remove_line: function(line, options) {
                 return self.update(line, null, options);
             },
             // -------------------------------------------------------------
@@ -7244,6 +7253,7 @@
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
+                    defunct = true;
                 });
                 return self;
             },
@@ -7283,6 +7293,11 @@
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
+                if (defunct) {
+                    if (!settings.exceptionHandler) {
+                        throw new $.terminal.Exception(strings().defunctTerminal);
+                    }
+                }
                 try {
                     return fun.apply(self, [].slice.apply(arguments));
                 } catch (e) {
