@@ -1613,7 +1613,7 @@ describe('Terminal plugin', function() {
                 var line = '[[;#fff;]Lorem ipsum dolor sit amet], consectetur adipiscing elit. [[;#fee;]Cras ultrices rhoncus hendrerit.] Nunc ligula eros, tincidunt posuere tristique quis, [[;#fff;]iaculis non elit.]';
                 term.echo(line);
                 var output = last_div(term);
-                expect(output.find('span').length).toEqual(5); // 3 formatting and 2 between
+                expect(output.find('span').length).toEqual(5); // 3 formattings and 2 between
                 expect(output.find('div').length).toEqual(1);
             });
         });

@@ -60,7 +60,7 @@ css/jquery.terminal.min.css: css/jquery.terminal-$(VERSION).min.css
 css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 	$(CSSNANO) css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css --no-discardUnused --safe
 
-README.md: templates/README.in .$(VERSION)
+README.md: templates/README.in .$(VERSION) __tests__/terminalSpec.js
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e \
 	"s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" \
 	-e "s/{{COMMIT}}/$(COMMIT)/g" < templates/README.in > README.md || $(SED) -e \
