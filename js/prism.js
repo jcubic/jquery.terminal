@@ -16,22 +16,27 @@
  *
  * js code:
  *
- *     var grammar = Prism.languages[language];
- *     var tokens = Prism.tokenize(file, grammar);
- *     var code = Prism.Token.stringify(tokens, language);
+ *     code = $.terminal.escape_brackets(code);
+ *     code = $.terminal.prism(language, code);
  *
  *     term.echo(code); // or term.less(code) if you include less.js
+ *
+ * by default only javascript markup and css languages are defined (also file extension
+ * for them. To have more languages you need to include appropriate js files.
  *
  * Copyright (c) 2018 Jakub Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  */
 /* global jQuery, Prism */
+
+
+
 (function(Token, $) {
     if (typeof Prism === 'undefined') {
         throw new Error('PrismJS not defined');
     }
-    var _ = Prism;
+    var _ = $.extend({}, Prism);
 
     _.Token = function(type, content, alias, matchedStr, greedy) {
         Token.apply(this, [].slice.call(arguments));
@@ -69,13 +74,9 @@
         _.hooks.run('wrap', env);
 
         return env.content.split(/\n/).map(function(content) {
-            return '[[b;;;' + env.classes.join(' ') + ']' + content + ']';
+            return content ? '[[b;;;' + env.classes.join(' ') + ']' + content + ']' : '';
         }).join('\n');
-
     };
-})(Prism.Token, jQuery);
-
-(function($) {
     if (!$) {
         throw new Error('jQuery Not defined');
     }
@@ -83,12 +84,11 @@
         throw new Error('$.terminal is not defined');
     }
     jQuery.terminal.prism = function(language, text) {
-        if (language && Prism.languages[language]) {
-            var grammar = Prism.languages[language];
-            var tokens = Prism.tokenize(text, grammar);
-            return Prism.Token.stringify(tokens, language);
-        } else {
-            return text;
+        if (language && _.languages[language]) {
+            var grammar = _.languages[language];
+            var tokens = _.tokenize(text, grammar);
+            text = _.Token.stringify(tokens, language);
         }
+        return text;
     };
-})(jQuery);
+})(Prism.Token, jQuery);

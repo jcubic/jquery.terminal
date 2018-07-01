@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.16.1
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Mon, 04 Jun 2018 19:48:32 +0000
+ * Date: Sun, 01 Jul 2018 12:12:11 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -74,10 +74,12 @@
 }
 body.terminal {
     min-height: 100vh;
+    height: 100%;
+}
+body.terminal {
     margin: 0;
 }
 .terminal > div {
-    overflow: hidden;
     min-height: 100%;
 }
 .terminal > .resizer, .terminal > .font .resizer {

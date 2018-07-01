@@ -74,10 +74,12 @@
 }
 body.terminal {
     min-height: 100vh;
+    height: 100%;
+}
+body.terminal {
     margin: 0;
 }
 .terminal > div {
-    overflow: hidden;
     min-height: 100%;
 }
 .terminal > .resizer, .terminal > .font .resizer {

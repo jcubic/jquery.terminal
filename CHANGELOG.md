@@ -1,3 +1,31 @@
+## 1.17.0
+### Features
+* add ascii_table utility in separated file
+* per user command line history
+* add $.terminal.parse_options which return same object as yargs parser
+* $.jrpc helper now return its own created promise instead of $.ajax
+* add wcwidth as dependency so it will always show wider characters correctly (in browsers will work the same as optional)
+* expose terminal exception in $.terminal namespace
+* new API option doubleTab [#405](https://github.com/jcubic/jquery.terminal/issues/405)
+
+### Bugfix
+* disable history in read & login (regression from 1.16.0 history interpreter option)
+* fix recursive error on extended commands (but it will only work on exact same commands without trailing white space)
+* create copy of Prism for formatter so it can be used with normal html based prism snippets
+* double fix: command line when formatter return empty formatting and prism that return empty formatting after `(` and space
+* third fix fox jumping on right click
+* fix columns method
+* fix infinite loop when regex in formatters don't have g flag
+* fix parsing escape quotes
+* fix split equal to handle brackets when using without formatting
+* fix command line wrapping if prompt contain brackets as text [#407](https://github.com/jcubic/jquery.terminal/issues/407)
+* insert ^C where cursor was located [#404](https://github.com/jcubic/jquery.terminal/issues/404)
+* fix echo crlf (windows line ending) [#408](https://github.com/jcubic/jquery.terminal/issues/408)
+* allow to call cmd without arguments
+* rename undocumented remove API method to remove_line so you can call jQuery remove
+* fix throwing exception when there is error in formatter (it now only show alert)
+* fix double exception when exec command throw exception
+
 ## 1.16.1
 ### Bugs
 * fix paste/select all when click below .cmd

@@ -38,9 +38,6 @@
 /* TODO:
  *
  * Debug interpreters names in LocalStorage
- * onPositionChange event add to terminal ???
- * different command line history for each login users (add login if present to
- * localStorage key)
  *
  * TEST: login + promises/exec
  *       json-rpc/object + promises
@@ -50,8 +47,9 @@
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
-         wcwidth, module, require, define */
+         module, require, define */
 /* eslint-disable */
+/* istanbul ignore next */
 (function(ctx) {
     var sprintf = function() {
         if (!sprintf.cache.hasOwnProperty(arguments[0])) {
@@ -59,7 +57,6 @@
         }
         return sprintf.format.call(null, sprintf.cache[arguments[0]], arguments);
     };
-
     sprintf.format = function(parse_tree, argv) {
         var cursor = 1, tree_length = parse_tree.length, node_type = '', arg, output = [], i, k, match, pad, pad_character, pad_length;
         for (i = 0; i < tree_length; i++) {
@@ -187,12 +184,14 @@
 /* eslint-enable */
 // UMD taken from https://github.com/umdjs/umd
 (function(factory) {
+    var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['jquery'], factory);
+        // istanbul ignore next
+        define(['jquery', 'wcwidth'], factory);
     } else if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
-        module.exports = function(root, jQuery) {
+        module.exports = function(root, jQuery, wcwidth) {
             if (jQuery === undefined) {
                 // require('jQuery') returns a factory that requires window to
                 // build a jQuery instance, we normalize how we use modules
@@ -200,19 +199,22 @@
                 // if it's defined (how jquery works)
                 if (typeof window !== 'undefined') {
                     jQuery = require('jquery');
-                }
-                else {
+                } else {
                     jQuery = require('jquery')(root);
                 }
             }
-            factory(jQuery);
+            if (typeof wcwidth === 'undefined') {
+                wcwidth = require('wcwidth');
+            }
+            factory(jQuery, wcwidth);
             return jQuery;
         };
     } else {
-        // Browser globals
-        factory(jQuery);
+        // Browser
+        // istanbul ignore next
+        factory(root.jQuery, root.wcwidth);
     }
-})(function($, undefined) {
+})(function($, wcwidth, undefined) {
     'use strict';
     // -----------------------------------------------------------------------
     // :: Replacemenet for jQuery 2 deferred objects
@@ -296,286 +298,293 @@
     // -----------------------------------------------------------------------
     // :: Storage plugin
     // -----------------------------------------------------------------------
-    var hasLS = function() {
-        try {
-            var testKey = 'test', storage = window.localStorage;
-            storage.setItem(testKey, '1');
-            storage.removeItem(testKey);
-            return true;
-        } catch (error) {
-            return false;
-        }
-    };
-    var hasCookies = function() {
-        try {
-            document.cookie.split(';');
-            return true;
-        } catch (e) {
-            return false;
-        }
-    };
-    // Private data
-    var isLS = hasLS();
-    // Private functions
-    function wls(n, v) {
-        var c;
-        if (typeof n === 'string' && typeof v === 'string') {
-            localStorage[n] = v;
-            return true;
-        } else if (typeof n === 'object' && typeof v === 'undefined') {
-            for (c in n) {
-                if (n.hasOwnProperty(c)) {
-                    localStorage[c] = n[c];
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-    function wc(n, v) {
-        var dt, e, c;
-        dt = new Date();
-        dt.setTime(dt.getTime() + 31536000000);
-        e = '; expires=' + dt.toGMTString();
-        if (typeof n === 'string' && typeof v === 'string') {
-            document.cookie = n + '=' + v + e + '; path=/';
-            return true;
-        } else if (typeof n === 'object' && typeof v === 'undefined') {
-            for (c in n) {
-                if (n.hasOwnProperty(c)) {
-                    document.cookie = c + '=' + n[c] + e + '; path=/';
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-    function rls(n) {
-        return localStorage[n];
-    }
-    function rc(n) {
-        var nn, ca, i, c;
-        nn = n + '=';
-        ca = document.cookie.split(';');
-        for (i = 0; i < ca.length; i++) {
-            c = ca[i];
-            while (c.charAt(0) === ' ') {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nn) === 0) {
-                return c.substring(nn.length, c.length);
-            }
-        }
-        return null;
-    }
-    function dls(n) {
-        return delete localStorage[n];
-    }
-    function dc(n) {
-        return wc(n, '', -1);
-    }
-    /**
-    * Public API
-    * $.Storage.set("name", "value")
-    * $.Storage.set({"name1":"value1", "name2":"value2", etc})
-    * $.Storage.get("name")
-    * $.Storage.remove("name")
-    */
     var localStorage;
-    if (!hasCookies() && !isLS) {
-        localStorage = {};
-        $.extend({
-            Storage: {
-                set: wls,
-                get: rls,
-                remove: dls
+    /* istanbul ignore next */
+    (function() {
+        var hasLS = function() {
+            try {
+                var testKey = 'test', storage = window.localStorage;
+                storage.setItem(testKey, '1');
+                storage.removeItem(testKey);
+                return true;
+            } catch (error) {
+                return false;
             }
-        });
-    } else {
-        if (isLS) {
-            localStorage = window.localStorage;
+        };
+        var hasCookies = function() {
+            try {
+                document.cookie.split(';');
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+        // Private data
+        var isLS = hasLS();
+        // Private functions
+        function wls(n, v) {
+            var c;
+            if (typeof n === 'string' && typeof v === 'string') {
+                localStorage[n] = v;
+                return true;
+            } else if (typeof n === 'object' && typeof v === 'undefined') {
+                for (c in n) {
+                    if (n.hasOwnProperty(c)) {
+                        localStorage[c] = n[c];
+                    }
+                }
+                return true;
+            }
+            return false;
         }
-        $.extend({
-            Storage: {
-                set: isLS ? wls : wc,
-                get: isLS ? rls : rc,
-                remove: isLS ? dls : dc
+        function wc(n, v) {
+            var dt, e, c;
+            dt = new Date();
+            dt.setTime(dt.getTime() + 31536000000);
+            e = '; expires=' + dt.toGMTString();
+            if (typeof n === 'string' && typeof v === 'string') {
+                document.cookie = n + '=' + v + e + '; path=/';
+                return true;
+            } else if (typeof n === 'object' && typeof v === 'undefined') {
+                for (c in n) {
+                    if (n.hasOwnProperty(c)) {
+                        document.cookie = c + '=' + n[c] + e + '; path=/';
+                    }
+                }
+                return true;
             }
-        });
-    }
+            return false;
+        }
+        function rls(n) {
+            return localStorage[n];
+        }
+        function rc(n) {
+            var nn, ca, i, c;
+            nn = n + '=';
+            ca = document.cookie.split(';');
+            for (i = 0; i < ca.length; i++) {
+                c = ca[i];
+                while (c.charAt(0) === ' ') {
+                    c = c.substring(1, c.length);
+                }
+                if (c.indexOf(nn) === 0) {
+                    return c.substring(nn.length, c.length);
+                }
+            }
+            return null;
+        }
+        function dls(n) {
+            return delete localStorage[n];
+        }
+        function dc(n) {
+            return wc(n, '', -1);
+        }
+        /**
+         * Public API
+         * $.Storage.set("name", "value")
+         * $.Storage.set({"name1":"value1", "name2":"value2", etc})
+         * $.Storage.get("name")
+         * $.Storage.remove("name")
+         */
+        if (!hasCookies() && !isLS) {
+            localStorage = {};
+            $.extend({
+                Storage: {
+                    set: wls,
+                    get: rls,
+                    remove: dls
+                }
+            });
+        } else {
+            if (isLS) {
+                localStorage = window.localStorage;
+            }
+            $.extend({
+                Storage: {
+                    set: isLS ? wls : wc,
+                    get: isLS ? rls : rc,
+                    remove: isLS ? dls : dc
+                }
+            });
+        }
+    })();
     // -----------------------------------------------------------------------
     // :: jQuery Timers
     // -----------------------------------------------------------------------
     var jQuery = $;
-    jQuery.fn.extend({
-        everyTime: function(interval, label, fn, times, belay) {
-            return this.each(function() {
-                jQuery.timer.add(this, interval, label, fn, times, belay);
-            });
-        },
-        oneTime: function(interval, label, fn) {
-            return this.each(function() {
-                jQuery.timer.add(this, interval, label, fn, 1);
-            });
-        },
-        stopTime: function(label, fn) {
-            return this.each(function() {
-                jQuery.timer.remove(this, label, fn);
-            });
-        }
-    });
-
-    jQuery.extend({
-        timer: {
-            guid: 1,
-            global: {},
-            regex: /^([0-9]+)\s*(.*s)?$/,
-            powers: {
-                // Yeah this is major overkill...
-                'ms': 1,
-                'cs': 10,
-                'ds': 100,
-                's': 1000,
-                'das': 10000,
-                'hs': 100000,
-                'ks': 1000000
+    /* istanbul ignore next */
+    (function($) {
+        jQuery.fn.extend({
+            everyTime: function(interval, label, fn, times, belay) {
+                return this.each(function() {
+                    jQuery.timer.add(this, interval, label, fn, times, belay);
+                });
             },
-            timeParse: function(value) {
-                if (value === undefined || value === null) {
-                    return null;
-                }
-                var result = this.regex.exec(jQuery.trim(value.toString()));
-                if (result[2]) {
-                    var num = parseInt(result[1], 10);
-                    var mult = this.powers[result[2]] || 1;
-                    return num * mult;
-                } else {
-                    return value;
-                }
+            oneTime: function(interval, label, fn) {
+                return this.each(function() {
+                    jQuery.timer.add(this, interval, label, fn, 1);
+                });
             },
-            add: function(element, interval, label, fn, times, belay) {
-                var counter = 0;
+            stopTime: function(label, fn) {
+                return this.each(function() {
+                    jQuery.timer.remove(this, label, fn);
+                });
+            }
+        });
 
-                if (jQuery.isFunction(label)) {
-                    if (!times) {
-                        times = fn;
+        jQuery.extend({
+            timer: {
+                guid: 1,
+                global: {},
+                regex: /^([0-9]+)\s*(.*s)?$/,
+                powers: {
+                    // Yeah this is major overkill...
+                    'ms': 1,
+                    'cs': 10,
+                    'ds': 100,
+                    's': 1000,
+                    'das': 10000,
+                    'hs': 100000,
+                    'ks': 1000000
+                },
+                timeParse: function(value) {
+                    if (value === undefined || value === null) {
+                        return null;
                     }
-                    fn = label;
-                    label = interval;
-                }
+                    var result = this.regex.exec(jQuery.trim(value.toString()));
+                    if (result[2]) {
+                        var num = parseInt(result[1], 10);
+                        var mult = this.powers[result[2]] || 1;
+                        return num * mult;
+                    } else {
+                        return value;
+                    }
+                },
+                add: function(element, interval, label, fn, times, belay) {
+                    var counter = 0;
 
-                interval = jQuery.timer.timeParse(interval);
+                    if (jQuery.isFunction(label)) {
+                        if (!times) {
+                            times = fn;
+                        }
+                        fn = label;
+                        label = interval;
+                    }
 
-                if (typeof interval !== 'number' ||
-                    isNaN(interval) ||
-                    interval <= 0) {
-                    return;
-                }
-                if (times && times.constructor !== Number) {
-                    belay = !!times;
-                    times = 0;
-                }
+                    interval = jQuery.timer.timeParse(interval);
 
-                times = times || 0;
-                belay = belay || false;
-
-                if (!element.$timers) {
-                    element.$timers = {};
-                }
-                if (!element.$timers[label]) {
-                    element.$timers[label] = {};
-                }
-                fn.$timerID = fn.$timerID || this.guid++;
-
-                var handler = function() {
-                    if (belay && handler.inProgress) {
+                    if (typeof interval !== 'number' ||
+                        isNaN(interval) ||
+                        interval <= 0) {
                         return;
                     }
-                    handler.inProgress = true;
-                    if ((++counter > times && times !== 0) ||
-                        fn.call(element, counter) === false) {
-                        jQuery.timer.remove(element, label, fn);
+                    if (times && times.constructor !== Number) {
+                        belay = !!times;
+                        times = 0;
                     }
-                    handler.inProgress = false;
-                };
 
-                handler.$timerID = fn.$timerID;
+                    times = times || 0;
+                    belay = belay || false;
 
-                if (!element.$timers[label][fn.$timerID]) {
-                    element.$timers[label][fn.$timerID] = window.setInterval(handler, interval);
-                }
+                    if (!element.$timers) {
+                        element.$timers = {};
+                    }
+                    if (!element.$timers[label]) {
+                        element.$timers[label] = {};
+                    }
+                    fn.$timerID = fn.$timerID || this.guid++;
 
-                if (!this.global[label]) {
-                    this.global[label] = [];
-                }
-                this.global[label].push(element);
-
-            },
-            remove: function(element, label, fn) {
-                var timers = element.$timers, ret;
-
-                if (timers) {
-
-                    if (!label) {
-                        for (var lab in timers) {
-                            if (timers.hasOwnProperty(lab)) {
-                                this.remove(element, lab, fn);
-                            }
+                    var handler = function() {
+                        if (belay && handler.inProgress) {
+                            return;
                         }
-                    } else if (timers[label]) {
-                        if (fn) {
-                            if (fn.$timerID) {
-                                window.clearInterval(timers[label][fn.$timerID]);
-                                delete timers[label][fn.$timerID];
-                            }
-                        } else {
-                            for (var _fn in timers[label]) {
-                                if (timers[label].hasOwnProperty(_fn)) {
-                                    window.clearInterval(timers[label][_fn]);
-                                    delete timers[label][_fn];
+                        handler.inProgress = true;
+                        if ((++counter > times && times !== 0) ||
+                            fn.call(element, counter) === false) {
+                            jQuery.timer.remove(element, label, fn);
+                        }
+                        handler.inProgress = false;
+                    };
+
+                    handler.$timerID = fn.$timerID;
+
+                    if (!element.$timers[label][fn.$timerID]) {
+                        element.$timers[label][fn.$timerID] = window.setInterval(handler, interval);
+                    }
+
+                    if (!this.global[label]) {
+                        this.global[label] = [];
+                    }
+                    this.global[label].push(element);
+
+                },
+                remove: function(element, label, fn) {
+                    var timers = element.$timers, ret;
+
+                    if (timers) {
+
+                        if (!label) {
+                            for (var lab in timers) {
+                                if (timers.hasOwnProperty(lab)) {
+                                    this.remove(element, lab, fn);
                                 }
                             }
+                        } else if (timers[label]) {
+                            if (fn) {
+                                if (fn.$timerID) {
+                                    window.clearInterval(timers[label][fn.$timerID]);
+                                    delete timers[label][fn.$timerID];
+                                }
+                            } else {
+                                for (var _fn in timers[label]) {
+                                    if (timers[label].hasOwnProperty(_fn)) {
+                                        window.clearInterval(timers[label][_fn]);
+                                        delete timers[label][_fn];
+                                    }
+                                }
+                            }
+
+                            for (ret in timers[label]) {
+                                if (timers[label].hasOwnProperty(ret)) {
+                                    break;
+                                }
+                            }
+                            if (!ret) {
+                                ret = null;
+                                delete timers[label];
+                            }
                         }
 
-                        for (ret in timers[label]) {
-                            if (timers[label].hasOwnProperty(ret)) {
+                        for (ret in timers) {
+                            if (timers.hasOwnProperty(ret)) {
                                 break;
                             }
                         }
                         if (!ret) {
-                            ret = null;
-                            delete timers[label];
+                            element.$timers = null;
                         }
-                    }
-
-                    for (ret in timers) {
-                        if (timers.hasOwnProperty(ret)) {
-                            break;
-                        }
-                    }
-                    if (!ret) {
-                        element.$timers = null;
-                    }
-                }
-            }
-        }
-    });
-    if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
-        $(window).one('unload', function() {
-            var global = jQuery.timer.global;
-            for (var label in global) {
-                if (global.hasOwnProperty(label)) {
-                    var els = global[label], i = els.length;
-                    while (--i) {
-                        jQuery.timer.remove(els[i], label);
                     }
                 }
             }
         });
-    }
+        if (/(msie) ([\w.]+)/.exec(navigator.userAgent.toLowerCase())) {
+            $(window).one('unload', function() {
+                var global = jQuery.timer.global;
+                for (var label in global) {
+                    if (global.hasOwnProperty(label)) {
+                        var els = global[label], i = els.length;
+                        while (--i) {
+                            jQuery.timer.remove(els[i], label);
+                        }
+                    }
+                }
+            });
+        }
+    })(jQuery);
     // -----------------------------------------------------------------------
     // :: CROSS BROWSER SPLIT
     // -----------------------------------------------------------------------
+    /* istanbul ignore next */
     (function(undef) {
 
         // prevent double include
@@ -666,6 +675,7 @@
     // -----------------------------------------------------------------------
     // :: jQuery Caret
     // -----------------------------------------------------------------------
+    /* istanbul ignore next */
     $.fn.caret = function(pos) {
         var target = this[0];
         var isContentEditable = target.contentEditable === 'true';
@@ -1209,11 +1219,11 @@
             },
             'ENTER': function() {
                 if (history && command && !settings.mask &&
-                    (is_function(options.historyFilter) &&
-                     options.historyFilter(command)) ||
-                    (options.historyFilter instanceof RegExp &&
-                     command.match(options.historyFilter)) ||
-                    !options.historyFilter) {
+                    (is_function(settings.historyFilter) &&
+                     settings.historyFilter(command)) ||
+                    (settings.historyFilter instanceof RegExp &&
+                     command.match(settings.historyFilter)) ||
+                    !settings.historyFilter) {
                     history.append(command);
                 }
                 var tmp = command;
@@ -1224,8 +1234,8 @@
                 no_keydown = true;
 
                 self.set('');
-                if (options.commands) {
-                    options.commands(tmp);
+                if (settings.commands) {
+                    settings.commands(tmp);
                 }
                 if (is_function(prompt)) {
                     draw_prompt();
@@ -1589,12 +1599,19 @@
                 return $.terminal.split_equal(string, num_chars);
             }
             function skip_empty(array) {
-                // we remove lines that are left overs after adding space at the end
+                // we remove lines that are leftovers after adding space at the end
                 return array.filter(function(line) {
                     return !$.terminal.strip(line).match(/^ $/);
                 });
             }
-            var prompt = prompt_node.text();
+            var line = prompt_node.find('.line');
+            var prompt;
+            if (line.length) {
+                prompt = line.nextUntil('.line').text();
+            } else {
+                prompt = prompt_node.text();
+            }
+            prompt = $.terminal.escape_brackets(prompt);
             var re = new RegExp('^' + $.terminal.escape_regex(prompt));
             var array;
             if (string.match(/\n/)) {
@@ -1640,9 +1657,12 @@
             // we don't want to format command when user type formatting in
             string = $.terminal.escape_formatting(string);
             try {
-                return $.terminal.apply_formatters(string, settings);
+                string = $.terminal.apply_formatters(string, settings);
+                string = $.terminal.normalize(string);
+                return string;
             } catch (e) {
                 alert_exception('[Formatting]', e);
+                return string;
             }
         }
         // ---------------------------------------------------------------------
@@ -1699,7 +1719,7 @@
         // :: change length of output text like with emoji demo
         // ---------------------------------------------------------------------
         // :: main function that return corrected cursor position on display
-        // :: if cursor is in the middle of the word that is shorter the before
+        // :: if cursor is in the middle of the word that is shorter than before
         // :: applying formatting then the corrected position is after the word
         // :: so it stay in place when you move real cursor in the middle
         // :: of the word
@@ -1732,7 +1752,7 @@
             var new_position = position;
             var start;
             rex.lastIndex = 0; // Just to be sure
-            while (match = rex.exec(string)) {
+            while ((match = rex.exec(string))) {
                 // Add any of the original string we just skipped
                 var last_index = length(substring(string, 0, rex.lastIndex));
                 start = last_index - length(match[0]);
@@ -1765,6 +1785,10 @@
                         // It's *in* the replacement, put it just after
                         new_position += length(rep_string) - (position - start);
                     }
+                }
+                // single replace
+                if (rex.flags.indexOf('g') === -1) {
+                    break;
                 }
             }
             // Add on any trailing text in the string
@@ -1956,6 +1980,7 @@
                         $.terminal.format(line, options) +
                         '</span>';
                 }).concat([last_line]).join('\n');
+                // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
                     prompt_len = strlen($('<span>' + last_line + '</span>').text());
@@ -1989,12 +2014,9 @@
             }
         }
         function fire_change_command() {
-            if (is_function(options.onCommandChange)) {
-                options.onCommandChange(command);
+            if (is_function(settings.onCommandChange)) {
+                settings.onCommandChange(command);
             }
-        }
-        function crlf(string) {
-            return string.replace(/[\r\n]{2}/g, '\n');
         }
         // ---------------------------------------------------------------------
         // :: Command Line Methods
@@ -2013,7 +2035,7 @@
                     name = string;
                     var enabled = history && history.enabled() || !history;
                     history = new History(
-                        string,
+                        name,
                         settings.historySize,
                         settings.history === 'memory'
                     );
@@ -2036,7 +2058,7 @@
             'delete': function(n, stay) {
                 var removed;
                 if (n === 0) {
-                    return self;
+                    return "";
                 } else if (n < 0) {
                     if (position > 0) {
                         // this may look weird but if n is negative we need
@@ -2190,6 +2212,8 @@
                 redraw();
                 return self;
             },
+            // if formatter change length of the strings (like emoji demo) we need to keep
+            // track of two different positions one for command and one for display
             display_position: function(n, relative) {
                 if (n === undefined) {
                     return formatted_position;
@@ -2228,6 +2252,7 @@
                     visible.apply(self, []);
                     redraw();
                     draw_prompt();
+                    return self;
                 };
             })(),
             show: (function() {
@@ -2236,6 +2261,7 @@
                     show.apply(self, []);
                     redraw();
                     draw_prompt();
+                    return self;
                 };
             })(),
             resize: function(num) {
@@ -2333,7 +2359,7 @@
             debug('keydown "' + e.key + '" ' + e.fake + ' ' + e.which);
             process = (e.key || '').toLowerCase() === 'process' || e.which === 0;
             var result;
-            dead_key = no_keypress && single_key;
+            dead_key = no_keypress && single_key && !is_backspace(e);
             // special keys don't trigger keypress fix #293
             try {
                 if (!e.fake) {
@@ -2441,7 +2467,7 @@
                 // key polyfill is not correct for keypress
                 // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
                 var key;
-                if (is_key_native() || e.fake) {
+                if (is_key_native || e.fake) {
                     key = e.key;
                     // fixing IE inconsistency #362
                     var normalized = key.toUpperCase();
@@ -2555,7 +2581,14 @@
             self.on('mousedown.cmd', function() {
                 was_down = true;
             }).on('mouseup.cmd', function(e) {
-                if (e.originalEvent.button === 0 && get_selected_text() === '') {
+                // we get button from event for testing normally it's on originalEvent
+                var button;
+                if (e.originalEvent === undefined) {
+                    button = e.button;
+                } else {
+                    button = e.originalEvent.button;
+                }
+                if (button === 0 && get_selected_text() === '') {
                     var name = 'click_' + id;
                     if (++count === 1) {
                         var down = was_down;
@@ -2615,7 +2648,7 @@
     var format_exec_re = /(\[\[(?:[^\][]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
-    var string_re = /("(?:[^"\\]|\\(?:\\\\)*")*"|'(?:[^'\\]|\\(?:\\\\)*')*')/;
+    var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*')/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     /* eslint-enable */
     // -------------------------------------------------------------------------
@@ -2643,7 +2676,7 @@
         return animation;
     })();
     // -------------------------------------------------------------------------
-    var ch_unit_supported = (function() {
+    var is_ch_unit_supported = (function() {
         var agent = window.navigator.userAgent;
         if (agent.match(/MSIE|Trident/) && !agent.match(/IEMobile/)) {
             return false;
@@ -2653,12 +2686,29 @@
         return div.style.width === '1ch';
     })();
     // -------------------------------------------------------------------------
-    var css_variables_supported = window.CSS && window.CSS.supports &&
+    var is_css_variables_supported = window.CSS && window.CSS.supports &&
             window.CSS.supports('--fake-var', 0);
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
     var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    // -------------------------------------------------------------------------
+    var is_key_native = (function is_key_native() {
+        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
+            return false;
+        }
+        var proto = window.KeyboardEvent.prototype;
+        var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
+        return get.toString().match(/\[native code\]/);
+    })();
+    // -------------------------------------------------------------------------
+    var is_mobile = (function(a) {
+        var check = false;
+        if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
+            check = true;
+        }
+        return check;
+    })(navigator.userAgent || navigator.vendor || window.opera);
     // -------------------------------------------------------------------------
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
@@ -2688,10 +2738,14 @@
         return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
+    function crlf(string) {
+        return string.replace(/[\r\n]{2}/g, '\n');
+    }
+    // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
-        if (ch_unit_supported) {
+        if (is_ch_unit_supported) {
             return 'width: ' + len + 'ch';
-        } else if (!css_variables_supported) {
+        } else if (!is_css_variables_supported) {
             if (options.char_width) {
                 return 'width: ' + (options.char_width * len) + 'px';
             }
@@ -2758,14 +2812,6 @@
         }
         return text;
     }
-    // -------------------------------------------------------------------------
-    var is_mobile = (function(a) {
-        var check = false;
-        if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
-            check = true;
-        }
-        return check;
-    })(navigator.userAgent || navigator.vendor || window.opera);
     // ---------------------------------------------------------------------
     // :: Cross-Browser selection utils
     // ---------------------------------------------------------------------
@@ -2824,6 +2870,56 @@
     // ---------------------------------------------------------------------
     function clear_textarea_selection(textarea) {
         textarea.selectionStart = textarea.selectionEnd = 0;
+    }
+    // ---------------------------------------------------------------------
+    // :: return string that are common in all elements of the array
+    // ---------------------------------------------------------------------
+    function common_string(string, array, matchCase) {
+        if (!array.length) {
+            return '';
+        }
+        var type = string_case(string);
+        var result = [];
+        for (var j = string.length; j < array[0].length; ++j) {
+            var push = false;
+            var candidate = array[0].charAt(j),
+                candidateLower = candidate.toLowerCase();
+            for (var i = 1; i < array.length; ++i) {
+                push = true;
+                var current = array[i].charAt(j),
+                    currentLower = current.toLowerCase();
+                if (candidate !== current) {
+                    if (matchCase || type === 'mixed') {
+                        push = false;
+                        break;
+                    } else if (candidateLower === currentLower) {
+                        if (type === 'lower') {
+                            candidate = candidate.toLowerCase();
+                        } else if (type === 'upper') {
+                            candidate = candidate.toUpperCase();
+                        } else {
+                            push = false;
+                            break;
+                        }
+                    } else {
+                        push = false;
+                        break;
+                    }
+                }
+            }
+            if (push) {
+                result.push(candidate);
+            } else {
+                break;
+            }
+        }
+        return string + result.join('');
+    }
+    // ---------------------------------------------------------------------
+    function trigger_terminal_change(next) {
+        terminals.forEach(function(term) {
+            term.settings().onTerminalChange.call(term, next);
+        });
     }
     // ---------------------------------------------------------------------
     var select = (function() {
@@ -3007,6 +3103,7 @@
                 return not_formatting && string[i] !== ']' && !opening;
             }
             // ----------------------------------------------------------------
+            var have_formatting = $.terminal.have_formatting(string);
             var formatting = false;
             var in_text = false;
             var count = 0;
@@ -3053,7 +3150,7 @@
                         // escape \] counts as one character
                         --count;
                         --length;
-                    } else if (!braket) {
+                    } else if (!braket || !have_formatting) {
                         ++count;
                         ++length;
                     }
@@ -3318,6 +3415,13 @@
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
         apply_formatters: function(string, settings) {
+            function test_lengths(ret, string) {
+                if ($.terminal.length(ret) !== $.terminal.length(string)) {
+                    warn('Your formatter change length of the string, ' +
+                         'you should use [regex, replacement] formatte' +
+                         'r instead');
+                }
+            }
             var formatters = $.terminal.defaults.formatters;
             var i = 0;
             try {
@@ -3329,6 +3433,7 @@
                     // on the list
                     if (typeof formatter === 'function' && formatter.__meta__) {
                         var ret = formatter(string, settings);
+                        test_lengths(ret, string);
                         if (typeof ret === 'string') {
                             return ret;
                         }
@@ -3341,6 +3446,7 @@
                                     return string.replace(formatter[0], formatter[1]);
                                 } else if (typeof formatter === 'function') {
                                     var ret = formatter(string, settings);
+                                    test_lengths(ret, string);
                                     if (typeof ret === 'string') {
                                         return ret;
                                     }
@@ -3352,7 +3458,9 @@
                     return string;
                 }, string);
             } catch (e) {
-                throw new Error('Error in formatter [' + (i - 1) + ']');
+                var msg = 'Error in formatter [' + (i - 1) + ']';
+                formatters.splice(i - 1);
+                throw new $.terminal.Exception('formatting', msg);
             }
         },
         // ---------------------------------------------------------------------
@@ -3522,22 +3630,15 @@
                 return array.join('\n');
             }
             var lines = [];
-            var line = [];
-            function push(i) {
-                var pad = new Array(length - no_formatting[i].length + 1).join(' ');
-                line.push(array[i] + ((i % column_limit === 0 && i !== 0) ? '' : pad));
-            }
-            for (var i = 0; i < array.length; ++i) {
-                if (i % column_limit === 0 && i !== 0) {
-                    push(i);
-                    lines.push(line.join(''));
-                    line = [];
-                } else {
-                    push(i);
-                }
-            }
-            if (line.length) {
-                lines.push(line.join(''));
+            for (var i = 0, len = array.length; i < len; i += column_limit) {
+                var line = array.slice(i, i + column_limit);
+                var last = line.pop();
+                lines.push(line.reduce(function(acc, string) {
+                    var stripped = $.terminal.strip(string);
+                    var pad = new Array(length - stripped.length + 1).join(' ');
+                    acc.push(string + pad);
+                    return acc;
+                }, []).join('') + last);
             }
             return lines.join('\n');
         },
@@ -3546,12 +3647,8 @@
         // ---------------------------------------------------------------------
         strip: function strip(str) {
             str = str.replace(format_parts_re, '$6');
-            return str.replace(/(\\?)([[\]])/g, function(whole, slash) {
-                if (slash) {
-                    return whole;
-                } else {
-                    return '';
-                }
+            return str.replace(/\\([[\]])/g, function(whole, bracket) {
+                return bracket;
             });
         },
         // ---------------------------------------------------------------------
@@ -3565,9 +3662,7 @@
         // ---------------------------------------------------------------------
         last_id: function last_id() {
             var len = terminals.length();
-            if (len) {
-                return len - 1;
-            }
+            return len - 1;
         },
         // ---------------------------------------------------------------------
         // :: Function that works with strings like 'asd' 'asd\' asd' "asd asd"
@@ -3633,7 +3728,7 @@
         // :: Function split and strips single and double quotes
         // :: and escapes spaces
         // ---------------------------------------------------------------------
-        split_arguments: function(string) {
+        split_arguments: function split_arguments(string) {
             return $.map(string.match(command_re) || [], function(arg) {
                 return $.terminal.parse_argument(arg, false);
             });
@@ -3648,10 +3743,63 @@
         // ---------------------------------------------------------------------
         // :: Same as parse_command but arguments are parsed using split_arguments
         // ---------------------------------------------------------------------
-        split_command: function(string) {
+        split_command: function split_command(string) {
             return process_command(string, function(arg) {
                 return $.terminal.parse_argument(arg, false);
             });
+        },
+        // ---------------------------------------------------------------------
+        // :; function that parse arguments like yargs library
+        // ---------------------------------------------------------------------
+        parse_options: function parse_options(arg, options) {
+            var settings = $.extend({}, {
+                boolean: []
+            }, options);
+            if (typeof arg === 'string') {
+                return parse_options($.terminal.split_arguments(arg), options);
+            }
+            var result = {
+                _: []
+            };
+            function token(value) {
+                this.value = value;
+            }
+            var rest = arg.reduce(function(acc, arg) {
+                if (typeof arg !== 'string') {
+                    arg = String(arg);
+                }
+                if (arg.match(/^-/) && acc instanceof token) {
+                    result[acc.value] = true;
+                }
+                if (arg.match(/^--/)) {
+                    var name = arg.replace(/^--/, '');
+                    if (settings.boolean.indexOf(name) === -1) {
+                        return new token(name);
+                    } else {
+                        result[name] = true;
+                    }
+                } else if (arg.match(/^-/)) {
+                    var single = arg.replace(/^-/, '').split('');
+                    if (settings.boolean.indexOf(single.slice(-1)[0]) === -1) {
+                        var last = single.pop();
+                    }
+                    single.forEach(function(single) {
+                        result[single] = true;
+                    });
+                    if (last) {
+                        return new token(last);
+                    }
+                } else if (acc instanceof token) {
+                    result[acc.value] = arg;
+                } else if (arg) {
+                    result._.push(arg);
+                }
+                return null;
+            }, null);
+            if (rest instanceof token) {
+                result[rest.value] = true;
+            }
+            return result;
         },
         // ---------------------------------------------------------------------
         // :: function executed for each text inside [{ .... }]
@@ -3702,6 +3850,17 @@
             }
         })()
     };
+    // -------------------------------------------------------------------------
+    $.terminal.Exception = function Terminal_Exception(type, message) {
+        if (arguments.length === 1) {
+            this.message = arguments[0];
+            this.type = 'TERMINAL';
+        } else {
+            this.type = type;
+            this.message = message;
+        }
+    };
+    $.terminal.Exception.prototype = new Error();
     // -----------------------------------------------------------------------
     // Helper plugins and functions
     // -----------------------------------------------------------------------
@@ -3712,24 +3871,23 @@
         return this.css('visibility', 'hidden');
     };
     // -----------------------------------------------------------------------
-    function is_key_native() {
-        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
-            return false;
-        }
-        var proto = window.KeyboardEvent.prototype;
-        var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
-        return get.toString().match(/\[native code\]/);
-    }
-    // -----------------------------------------------------------------------
+    var warnings = [];
     function warn(msg) {
         msg = '[jQuery Terminal] ' + msg;
-        if (console && console.warn) {
-            console.warn(msg);
-        } else {
-            // prevent catching in outer try..catch
-            setTimeout(function() {
-                throw new Error('WARN: ' + msg);
-            }, 0);
+        if (warnings.indexOf(msg) === -1) {
+            warnings.push(msg);
+            if (console) {
+                if (console.warn) {
+                    console.warn(msg);
+                } else if (console.log) {
+                    console.log(msg);
+                }
+            } else {
+                // prevent catching in outer try..catch
+                setTimeout(function() {
+                    throw new Error('WARN: ' + msg);
+                }, 0);
+            }
         }
     }
     // -----------------------------------------------------------------------
@@ -3737,6 +3895,7 @@
     // -----------------------------------------------------------------------
     var ids = {}; // list of url based ids of JSON-RPC
     $.jrpc = function(url, method, params, success, error) {
+        var deferred = new $.Deferred();
         var options;
         if ($.isPlainObject(url)) {
             options = url;
@@ -3761,7 +3920,7 @@
             'params': options.params,
             'id': ++ids[options.url]
         };
-        return $.ajax({
+        $.ajax({
             url: options.url,
             beforeSend: function beforeSend(jxhr, settings) {
                 if (is_function(options.request)) {
@@ -3782,8 +3941,9 @@
                     if (options.error) {
                         options.error(jqXHR, 'Invalid JSON', e);
                     } else {
-                        throw new Error('Invalid JSON');
+                        throw new $.terminal.Exception('JSON', 'Invalid JSON');
                     }
+                    deferred.reject({message: 'Invalid JSON', response: response});
                     return;
                 }
                 if (is_function(options.response)) {
@@ -3792,10 +3952,12 @@
                 if (validJSONRPC(json) || options.method === 'system.describe') {
                     // don't catch errors in success callback
                     options.success(json, status, jqXHR);
-                } else if (options.error) {
-                    options.error(jqXHR, 'Invalid JSON-RPC');
+                    deferred.resolve(json);
                 } else {
-                    throw new Error('Invalid JSON-RPC');
+                    if (options.error) {
+                        options.error(jqXHR, 'Invalid JSON-RPC');
+                    }
+                    deferred.reject({message: 'Invalid JSON-RPC', response: response});
                 }
             },
             error: options.error,
@@ -3806,6 +3968,7 @@
             // timeout: 1,
             type: 'POST'
         });
+        return deferred.promise();
     };
 
     // -----------------------------------------------------------------------
@@ -3986,6 +4149,7 @@
         response: $.noop,
         describe: 'procs',
         onRPCError: null,
+        doubleTab: null,
         completion: false,
         onInit: $.noop,
         onClear: $.noop,
@@ -4022,7 +4186,7 @@
             loginIsNotAFunction: 'Authenticate must be a function',
             canExitError: "You can't exit from main interpreter",
             invalidCompletion: 'Invalid completion',
-            invalidSelector: 'Sorry, but terminal said that "%s" is not valid ' +
+            invalidSelector: 'Sorry, but terminal said that you use invalid ' +
                 'selector!',
             invalidTerminalId: 'Invalid Terminal ID',
             login: 'login',
@@ -4030,7 +4194,8 @@
             recursiveCall: 'Recursive call detected, skip',
             notAString: '%s function: argument is not a string',
             redrawError: 'Internal error, wrong position in cmd redraw',
-            invalidStrings: 'Command %s have unclosed strings'
+            invalidStrings: 'Command %s have unclosed strings',
+            defunctTerminal: "You can't call method on terminal that was destroyed"
         }
     };
     // -------------------------------------------------------------------------
@@ -4078,7 +4243,8 @@
         function get_processed_command(command) {
             if ($.terminal.unclosed_strings(command)) {
                 var string = $.terminal.escape_brackets(command);
-                throw new Error(sprintf(strings().invalidStrings, "`" + string + "`"));
+                var message = sprintf(strings().invalidStrings, "`" + string + "`");
+                throw new $.terminal.Exception(message);
             } else if (is_function(settings.processArguments)) {
                 return process_command(command, settings.processArguments);
             } else if (settings.processArguments) {
@@ -4122,7 +4288,7 @@
                             line = '[[;#f00;]' +
                                 $.terminal.escape_brackets(line) + ']';
                         }
-                        return '[' + (n + i) + ']: ' + line;
+                        return '[' + (n + i - 1) + ']: ' + line;
                     }).join('\n')).resume();
                 }, 'text');
             }
@@ -4540,7 +4706,8 @@
                 if (type === 'undefined') {
                     user_intrp = $.noop;
                 } else if (type !== 'function') {
-                    throw new Error(type + ' is invalid interpreter value');
+                    var msg = type + ' is invalid interpreter value';
+                    throw new $.terminal.Exception(msg);
                 }
                 // single function don't need bind
                 finalize({
@@ -4713,7 +4880,8 @@
                             // and lines variable have all extended commands
                             string = string.replace(/^\[\[|\]\]$/g, '');
                             if (line_settings.exec) {
-                                if (prev_command && prev_command.command === string) {
+                                if (prev_command &&
+                                    prev_command.command.trim() === string.trim()) {
                                     self.error(strings().recursiveCall);
                                 } else {
                                     $.terminal.extended_command(self, string);
@@ -4737,6 +4905,7 @@
                                         string,
                                         settings
                                     );
+                                    string = crlf($.terminal.normalize(string));
                                 } catch (e) {
                                     display_exception(e, 'FORMATTING');
                                 }
@@ -4950,7 +5119,7 @@
             // spec [terminal_id, state_index, command]
             var terminal = terminals.get()[spec[0]];
             if (!terminal) {
-                throw new Error(strings().invalidTerminalId);
+                throw new $.terminal.Exception(strings().invalidTerminalId);
             }
             var command_idx = spec[1];
             if (save_state[command_idx]) { // state exists
@@ -5024,6 +5193,28 @@
                 self.resume();
             }
             // -----------------------------------------------------------------
+            function invoke() {
+                // Call user interpreter function
+                var result = interpreter.interpreter.call(self, command, self);
+                if (result) {
+                    // auto pause/resume when user return promises
+                    self.pause(settings.softPause);
+                    // when for native Promise object work only in jQuery 3.x
+                    if (is_function(result.done || result.then)) {
+                        (result.done || result.then).call(result, show);
+                    } else {
+                        return $.when(result).done(show);
+                    }
+                } else if (paused) {
+                    resume_callbacks.push(function() {
+                        // exec with resume/pause in user code
+                        after_exec();
+                    });
+                } else {
+                    after_exec();
+                }
+            }
+            // -----------------------------------------------------------------
             // first command store state of the terminal before the command get
             // executed
             if (first_command) {
@@ -5082,30 +5273,18 @@
                     self.clear();
                     after_exec();
                 } else {
-                    // Call user interpreter function
-                    var result = interpreter.interpreter.call(self, command, self);
-                    if (result) {
-                        // auto pause/resume when user return promises
-                        self.pause(settings.softPause);
-                        // when for native Promise object work only in jQuery 3.x
-                        if (is_function(result.then)) {
-                            result.then(show);
-                        } else {
-                            return $.when(result).done(show);
-                        }
-                    } else if (paused) {
-                        resume_callbacks.push(function() {
-                            // exec with resume/pause in user code
-                            after_exec();
-                        });
-                    } else {
-                        after_exec();
+                    var ret = invoke();
+                    if (ret) {
+                        return ret;
                     }
                 }
                 return deferred.promise();
             } catch (e) {
-                display_exception(e, 'USER');
+                display_exception(e, 'USER', exec);
                 self.resume();
+                if (exec) {
+                    throw e;
+                }
             }
         }
         // ---------------------------------------------------------------------
@@ -5120,6 +5299,7 @@
                         return;
                     }
                 } catch (e) {
+                    settings.onBeforeLogout = $.noop;
                     display_exception(e, 'onBeforeLogout');
                 }
             }
@@ -5128,6 +5308,7 @@
                 try {
                     settings.onAfterLogout.call(self, self);
                 } catch (e) {
+                    settings.onAfterLogout = $.noop;
                     display_exception(e, 'onAfterlogout');
                 }
             }
@@ -5164,7 +5345,8 @@
             if (!ghost()) {
                 maybe_append_name(name);
             }
-            command_line.name(name);
+            var login = self.login_name(true);
+            command_line.name(name + (login ? '_' + login : ''));
             if (is_function(interpreter.prompt)) {
                 command_line.prompt(function(callback) {
                     var ret = interpreter.prompt.call(self, callback, self);
@@ -5179,7 +5361,9 @@
             } else {
                 command_line.prompt(interpreter.prompt);
             }
-            self.history().toggle(interpreter.history);
+            if (typeof interpreter.history !== 'undefined') {
+                self.history().toggle(interpreter.history);
+            }
             if ($.isPlainObject(interpreter.keymap)) {
                 command_line.keymap($.omap(interpreter.keymap, function(name, fun) {
                     return function() {
@@ -5260,57 +5444,6 @@
             return in_login || command_line.mask() !== false;
         }
         // ---------------------------------------------------------------------
-        // :: return string that are common in all elements of the array
-        // ---------------------------------------------------------------------
-        function common_string(string, array, matchCase) {
-            if (!array.length) {
-                return '';
-            }
-            var type = string_case(string);
-            var result = [];
-            for (var j = string.length; j < array[0].length; ++j) {
-                var push = false;
-                var candidate = array[0].charAt(j),
-                    candidateLower = candidate.toLowerCase();
-                for (var i = 1; i < array.length; ++i) {
-                    push = true;
-                    var current = array[i].charAt(j),
-                        currentLower = current.toLowerCase();
-                    if (candidate !== current) {
-                        if (matchCase || type === 'mixed') {
-                            push = false;
-                            break;
-                        } else if (candidateLower === currentLower) {
-                            if (type === 'lower') {
-                                candidate = candidate.toLowerCase();
-                            } else if (type === 'upper') {
-                                candidate = candidate.toUpperCase();
-                            } else {
-                                push = false;
-                                break;
-                            }
-                        } else {
-                            push = false;
-                            break;
-                        }
-                    }
-                }
-                if (push) {
-                    result.push(candidate);
-                } else {
-                    break;
-                }
-            }
-            return string + result.join('');
-        }
-        // ---------------------------------------------------------------------
-        // ---------------------------------------------------------------------
-        function trigger_terminal_change(next) {
-            terminals.forEach(function(term) {
-                term.settings().onTerminalChange.call(term, next);
-            });
-        }
-        // ---------------------------------------------------------------------
         // :: Keydown event handler
         // ---------------------------------------------------------------------
         function user_key_down(e) {
@@ -5346,7 +5479,11 @@
             },
             'CTRL+C': function() {
                 if (get_selected_text() === '') {
-                    echo_command(self.get_command() + '^C');
+                    var command = self.get_command();
+                    var position = self.get_position();
+                    command = command.substring(0, position) + '^C' +
+                        command.substring(position + 2);
+                    echo_command(command);
                     self.set_command('');
                 }
             },
@@ -5378,7 +5515,8 @@
                         echo: true,
                         word: settings.wordAutocomplete,
                         escape: settings.completionEscape,
-                        caseSensitive: caseSensitive
+                        caseSensitive: caseSensitive,
+                        doubleTab: settings.doubleTab
                     });
                 }
                 if (completion) {
@@ -5399,7 +5537,7 @@
                             resolve(completion);
                             break;
                         default:
-                            throw new Error(strings().invalidCompletion);
+                            throw new $.terminal.Exception(strings().invalidCompletion);
                     }
                 } else {
                     orignal();
@@ -5521,17 +5659,13 @@
             return self.data('terminal');
         }
         if (self.length === 0) {
-            throw new Error(sprintf(strings().invalidSelector, self.selector));
+            var msg = sprintf(strings().invalidSelector);
+            throw new $.terminal.Exception(msg);
         }
         // var names = []; // stack if interpreter names
         var scroll_object;
         var prev_command; // used for name on the terminal if not defined
         var tab_count = 0; // for tab completion
-        // array of line objects:
-        // - function (called whenever necessary, result is printed)
-        // - array (expected form: [line, settings])
-        // - anything else (cast to string when painted)
-        var lines = [];
         var output; // .terminal-output jquery object
         var terminal_id = terminals.length();
         var num_chars; // numer of chars in line
@@ -5551,11 +5685,17 @@
         var settings = $.extend(
             {},
             $.terminal.defaults,
-            {name: self.selector},
+            {
+                name: self.selector
+            },
             options || {}
         );
+        // used to throw error when calling methods on destroyed terminal
+        var defunct = false;
+        var lines = [];
         var storage = new StorageHelper(settings.memory);
-        var enabled = settings.enabled, frozen = false;
+        var enabled = settings.enabled;
+        var frozen = false;
         var paused = false;
         var autologin = true; // set to false if onBeforeLogin return false
         var interpreters;
@@ -5666,6 +5806,7 @@
                     hash_commands.push(state);
                     maybe_update_hash();
                 }
+                return self;
             },
             // -------------------------------------------------------------
             // :: Execute a command, it will handle commands that do AJAX
@@ -5692,9 +5833,12 @@
                         // commands may return promise from user code
                         // it will resolve exec promise when user promise
                         // is resolved
-                        commands(command, silent, true).done(function() {
-                            d.resolve(self);
-                        });
+                        var ret = commands(command, silent, true);
+                        if (ret && (ret.done || ret.then)) {
+                            (ret.done || ret.then).call(ret, function() {
+                                d.resolve(self);
+                            });
+                        }
                     }
                 });
                 // while testing it didn't executed last exec when using this
@@ -5864,7 +6008,8 @@
                     word: true,
                     echo: false,
                     escape: true,
-                    caseSensitive: true
+                    caseSensitive: true,
+                    doubleTab: null
                 }, options || {});
                 var sensitive = options.caseSensitive;
                 // cursor can be in the middle of the command
@@ -5956,12 +6101,26 @@
                     if (++tab_count >= 2) {
                         tab_count = 0;
                         if (options.echo) {
-                            echo_command();
-                            var text = matched.reverse().join('\t');
-                            self.echo($.terminal.escape_brackets(text), {
-                                keepWords: true,
-                                formatters: false
-                            });
+                            if (is_function(options.doubleTab)) {
+                                var ret = options.doubleTab.call(
+                                    self,
+                                    string,
+                                    matched,
+                                    echo_command
+                                );
+                                if (typeof ret === 'undefined') {
+                                    return true;
+                                } else {
+                                    return ret;
+                                }
+                            } else if (options.doubleTab !== false) {
+                                echo_command();
+                                var text = matched.reverse().join('\t');
+                                self.echo($.terminal.escape_brackets(text), {
+                                    keepWords: true,
+                                    formatters: false
+                                });
+                            }
                             return true;
                         }
                     } else {
@@ -6458,6 +6617,7 @@
                     var bottom = self.is_bottom();
                     var wrapper;
                     // print all lines
+                    // var output_buffer = lines.flush();
                     $.each(output_buffer, function(i, line) {
                         if (line === NEW_LINE) {
                             wrapper = $('<div></div>');
@@ -6533,7 +6693,7 @@
             // -------------------------------------------------------------
             // :: convenience method for removing selected line
             // -------------------------------------------------------------
-            remove: function(line, options) {
+            remove_line: function(line, options) {
                 return self.update(line, null, options);
             },
             // -------------------------------------------------------------
@@ -6800,6 +6960,9 @@
                         success(string);
                     }
                     self.pop();
+                    if (settings.history) {
+                        command_line.history().enable();
+                    }
                 }, {
                     name: 'read',
                     history: false,
@@ -6813,6 +6976,9 @@
                         }
                     }
                 });
+                if (settings.history) {
+                    command_line.history().disable();
+                }
                 return defer.promise();
             },
             // -------------------------------------------------------------
@@ -6822,8 +6988,7 @@
                 cmd_ready(function ready() {
                     options = options || {};
                     var defaults = {
-                        infiniteLogin: false,
-                        history: true
+                        infiniteLogin: false
                     };
                     var push_settings = $.extend({}, defaults, options);
                     if (!push_settings.name && prev_command) {
@@ -7102,6 +7267,7 @@
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
+                    defunct = true;
                 });
                 return self;
             },
@@ -7141,12 +7307,17 @@
         }, function(name, fun) {
             // wrap all functions and display execptions
             return function() {
+                if (defunct) {
+                    if (!settings.exceptionHandler) {
+                        throw new $.terminal.Exception(strings().defunctTerminal);
+                    }
+                }
                 try {
                     return fun.apply(self, [].slice.apply(arguments));
                 } catch (e) {
                     // exec catch by command (resume call exec)
                     if (name !== 'exec' && name !== 'resume') {
-                        display_exception(e, 'TERMINAL', true);
+                        display_exception(e, e.type || 'TERMINAL', true);
                     }
                     if (!settings.exceptionHandler) {
                         throw e;
@@ -7320,6 +7491,8 @@
             old_enabled = enabled;
             self.disable().find('.cmd textarea').trigger('blur', [true]);
         }
+        // paste event is not testable in node
+        // istanbul ignore next
         function paste_event(e) {
             e = e.originalEvent;
             // we don't care about browser that don't support clipboard data
@@ -7435,6 +7608,7 @@
             document.addEventListener("resume", function() {
                 self.disable();
             });
+            // istanbul ignore next
             if (is_mobile) {
                 self.click(function() {
                     if (!frozen) {
@@ -7607,7 +7781,7 @@
                 if (visible) {
                     create_resizers();
                 }
-                visibility_observer = new IntersectionObserver(function() {
+                visibility_observer = new window.IntersectionObserver(function() {
                     if (self.is(':visible') && !visible) {
                         visible = true;
                         create_resizers();
@@ -7670,35 +7844,22 @@
                 var terminal = terminals.get()[spec[0]];
                 // execute if belong to this terminal
                 if (terminal && terminal_id === terminal.id()) {
-                    var defer = $.Deferred();
                     if (!spec[2]) {
                         defer.resolve();
                         return defer.promise();
+                    } else if (paused) {
+                        var defer = $.Deferred();
+                        resume_callbacks.push(function() {
+                            return terminal.exec(spec[2]).done(function() {
+                                terminal.save_state(spec[2], true, spec[1]);
+                                defer.resolve();
+                            });
+                        });
+                        return defer.promise();
                     } else {
-                        try {
-                            if (paused) {
-                                resume_callbacks.push(function() {
-                                    return terminal.exec(spec[2]).done(function() {
-                                        terminal.save_state(spec[2], true, spec[1]);
-                                        defer.resolve();
-                                    });
-                                });
-                                return defer.promise();
-                            } else {
-                                return terminal.exec(spec[2]).done(function() {
-                                    terminal.save_state(spec[2], true, spec[1]);
-                                });
-                            }
-                        } catch (e) {
-                            var settings = terminal.settings();
-                            if (is_function(settings.exceptionHandler)) {
-                                settings.exceptionHandler.call(self, e, 'EXEC HASH');
-                            } else {
-                                var cmd = $.terminal.escape_brackets(command);
-                                var msg = 'Error while exec with command ' + cmd;
-                                terminal.error(msg).exception(e);
-                            }
-                        }
+                        return terminal.exec(spec[2]).done(function() {
+                            terminal.save_state(spec[2], true, spec[1]);
+                        });
                     }
                 }
             }
@@ -7732,72 +7893,76 @@
             }
             // change_hash = true; // exec can now change hash
             // -------------------------------------------------------------
-            var shift = false;
-            $(document).bind('keydown.terminal_' + self.id(), function(e) {
-                if (e.shiftKey) {
-                    shift = true;
-                }
-            }).bind('keyup.terminal_' + self.id(), function(e) {
-                // in Google Chromium/Linux shiftKey is false
-                if (e.shiftKey || e.which === 16) {
-                    shift = false;
-                }
-            });
-            // this could work without calling scroll on wheel event but we
-            // need it for cases where you have mouse wheel work differently
-            // like with less command that scroll text
-            function mousewheel(event, delta) {
-                if (!shift) {
-                    var interpreter = interpreters.top();
-                    var ret;
-                    if (is_function(interpreter.mousewheel)) {
-                        ret = interpreter.mousewheel(event, delta, self);
-                    } else if (is_function(settings.mousewheel)) {
-                        ret = settings.mousewheel(event, delta, self);
+            /* istanbul ignore next */
+            (function() {
+                var shift = false;
+                $(document).bind('keydown.terminal_' + self.id(), function(e) {
+                    if (e.shiftKey) {
+                        shift = true;
                     }
-                    if (have_scrollbar() || ret === false) {
-                        event.stopPropagation();
-                        event.preventDefault();
+                }).bind('keyup.terminal_' + self.id(), function(e) {
+                    // in Google Chromium/Linux shiftKey is false
+                    if (e.shiftKey || e.which === 16) {
+                        shift = false;
                     }
-                    if (ret === false) {
-                        return false;
-                    } else if (ret === true) {
-                        return;
-                    }
-                    if (delta > 0) {
-                        self.scroll(-40);
-                    } else {
-                        self.scroll(40);
-                    }
-                }
-            }
-            if ($.event.special.mousewheel) {
-                // we keep mousewheel plugin just in case
-                self.on('mousewheel', mousewheel);
-            } else {
-                // detection take from:
-                // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
-                var event;
-                var div = document.createElement("div");
-                if ("onwheel" in div) {
-                    event = "wheel"; // Modern browsers support "wheel"
-                } else if (document.onmousewheel !== undefined) {
-                    event = "mousewheel"; // Webkit and IE support at least "mousewheel"
-                } else {
-                    // let's assume that remaining browsers are older Firefox
-                    event = "DOMMouseScroll";
-                }
-                div = null;
-                self.on(event, function(e) {
-                    var delta;
-                    if (event === 'mousewheel') {
-                        delta = - 1 / 40 * e.originalEvent.wheelDelta;
-                    } else {
-                        delta = e.originalEvent.deltaY || e.originalEvent.detail;
-                    }
-                    mousewheel(e, -delta);
                 });
-            }
+                // this could work without calling scroll on wheel event but we
+                // need it for cases where you have mouse wheel work differently
+                // like with less command that scroll text
+                function mousewheel(event, delta) {
+                    if (!shift) {
+                        var interpreter = interpreters.top();
+                        var ret;
+                        if (is_function(interpreter.mousewheel)) {
+                            ret = interpreter.mousewheel(event, delta, self);
+                        } else if (is_function(settings.mousewheel)) {
+                            ret = settings.mousewheel(event, delta, self);
+                        }
+                        if (have_scrollbar() || ret === false) {
+                            event.stopPropagation();
+                            event.preventDefault();
+                        }
+                        if (ret === false) {
+                            return false;
+                        } else if (ret === true) {
+                            return;
+                        }
+                        if (delta > 0) {
+                            self.scroll(-40);
+                        } else {
+                            self.scroll(40);
+                        }
+                    }
+                }
+                if ($.event.special.mousewheel) {
+                    // we keep mousewheel plugin just in case
+                    self.on('mousewheel', mousewheel);
+                } else {
+                    // detection take from:
+                    // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+                    var event;
+                    var div = document.createElement("div");
+                    if ("onwheel" in div) {
+                        event = "wheel"; // Modern browsers support "wheel"
+                    } else if (document.onmousewheel !== undefined) {
+                        // Webkit and IE support at least "mousewheel"
+                        event = "mousewheel";
+                    } else {
+                        // let's assume that remaining browsers are older Firefox
+                        event = "DOMMouseScroll";
+                    }
+                    div = null;
+                    self.on(event, function(e) {
+                        var delta;
+                        if (event === 'mousewheel') {
+                            delta = - 1 / 40 * e.originalEvent.wheelDelta;
+                        } else {
+                            delta = e.originalEvent.deltaY || e.originalEvent.detail;
+                        }
+                        mousewheel(e, -delta);
+                    });
+                }
+            })();
         }); // make_interpreter
         self.data('terminal', self);
         return self;

@@ -8,18 +8,25 @@ CAT=cat
 DATE=`date -uR`
 GIT=git
 BRANCH=`git branch | grep '^*' | sed 's/* //'`
-ESLINT=./node_modules/.bin/eslint
-UGLIFY=./node_modules/.bin/uglifyjs
-JSONLINT=./node_modules/.bin/jsonlint
-ISTANBUL=./node_modules/.bin/istanbul
-JASMINE=./node_modules/.bin/jasmine-node
-CSSNANO=./node_modules/.bin/cssnano
-SPEC_CHECKSUM=`md5sum spec/terminalSpec.js | cut -d' ' -f 1`
+ifdef SYSTEMROOT
+  UGLIFY=.\node_modules\.bin\uglifyjs
+  JSONLINT=.\node_modules\.bin\jsonlint
+  JEST=.\node_modules\.bin\jest
+  CSSNANO=.\node_modules\.bin\cssnano
+  ESLINT=.\node_modules\.bin\eslint
+else
+  UGLIFY=./node_modules/.bin/uglifyjs
+  JSONLINT=./node_modules/.bin/jsonlint
+  JEST=./node_modules/.bin/jest
+  CSSNANO=./node_modules/.bin/cssnano
+  ESLINT=./node_modules/.bin/eslint
+endif
+SPEC_CHECKSUM=`md5sum __tests__/terminalSpec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
 
-.PHONY: coverage
+.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint
 
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile
 
@@ -53,7 +60,7 @@ css/jquery.terminal.min.css: css/jquery.terminal-$(VERSION).min.css
 css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal-$(VERSION).css
 	$(CSSNANO) css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css --no-discardUnused --safe
 
-README.md: templates/README.in .$(VERSION)
+README.md: templates/README.in .$(VERSION) __tests__/terminalSpec.js
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e \
 	"s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" \
 	-e "s/{{COMMIT}}/$(COMMIT)/g" < templates/README.in > README.md || $(SED) -e \
@@ -79,13 +86,10 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 test:
-	$(JASMINE) --captureExceptions --verbose --junitreport --color --forceexit spec
-
-coverage:
-	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js
+	$(JEST) --coverage
 
 coveralls:
-	$(ISTANBUL) cover node_modules/jasmine/bin/jasmine.js --captureExceptions; cat ./coverage/lcov.info | ./node_modules/.bin/coveralls -v
+	$(CAT) ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 
 lint.src:
 	$(ESLINT) js/jquery.terminal-src.js
@@ -99,7 +103,7 @@ eslint:
 	$(ESLINT) js/less.js
 
 skipped_tests:
-	@! grep -E $(skip_re) spec/terminalSpec.js
+	@! grep -E $(skip_re) __tests__/terminalSpec.js
 
 jsonlint: package.json bower.json
 	$(JSONLINT) package.json > /dev/null
