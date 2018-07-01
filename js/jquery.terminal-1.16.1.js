@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 01 Jul 2018 11:31:47 +0000
+ * Date: Sun, 01 Jul 2018 11:38:24 +0000
  */
 
 /* TODO:
@@ -2996,7 +2996,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 01 Jul 2018 11:31:47 +0000',
+        date: 'Sun, 01 Jul 2018 11:38:24 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5193,6 +5193,28 @@
                 self.resume();
             }
             // -----------------------------------------------------------------
+            function invoke() {
+                // Call user interpreter function
+                var result = interpreter.interpreter.call(self, command, self);
+                if (result) {
+                    // auto pause/resume when user return promises
+                    self.pause(settings.softPause);
+                    // when for native Promise object work only in jQuery 3.x
+                    if (is_function(result.done || result.then)) {
+                        (result.done || result.then).call(result, show);
+                    } else {
+                        return $.when(result).done(show);
+                    }
+                } else if (paused) {
+                    resume_callbacks.push(function() {
+                        // exec with resume/pause in user code
+                        after_exec();
+                    });
+                } else {
+                    after_exec();
+                }
+            }
+            // -----------------------------------------------------------------
             // first command store state of the terminal before the command get
             // executed
             if (first_command) {
@@ -5251,25 +5273,7 @@
                     self.clear();
                     after_exec();
                 } else {
-                    // Call user interpreter function
-                    var result = interpreter.interpreter.call(self, command, self);
-                    if (result) {
-                        // auto pause/resume when user return promises
-                        self.pause(settings.softPause);
-                        // when for native Promise object work only in jQuery 3.x
-                        if (is_function(result.done || result.then)) {
-                            (result.done || result.then).call(result, show);
-                        } else {
-                            return $.when(result).done(show);
-                        }
-                    } else if (paused) {
-                        resume_callbacks.push(function() {
-                            // exec with resume/pause in user code
-                            after_exec();
-                        });
-                    } else {
-                        after_exec();
-                    }
+                    return invoke();
                 }
                 return deferred.promise();
             } catch (e) {
@@ -7840,21 +7844,19 @@
                     if (!spec[2]) {
                         defer.resolve();
                         return defer.promise();
-                    } else {
-                        if (paused) {
-                            var defer = $.Deferred();
-                            resume_callbacks.push(function() {
-                                return terminal.exec(spec[2]).done(function() {
-                                    terminal.save_state(spec[2], true, spec[1]);
-                                    defer.resolve();
-                                });
-                            });
-                            return defer.promise();
-                        } else {
+                    } else if (paused) {
+                        var defer = $.Deferred();
+                        resume_callbacks.push(function() {
                             return terminal.exec(spec[2]).done(function() {
                                 terminal.save_state(spec[2], true, spec[1]);
+                                defer.resolve();
                             });
-                        }
+                        });
+                        return defer.promise();
+                    } else {
+                        return terminal.exec(spec[2]).done(function() {
+                            terminal.save_state(spec[2], true, spec[1]);
+                        });
                     }
                 }
             }
