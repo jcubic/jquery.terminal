@@ -24,7 +24,7 @@
 * allow to call cmd without arguments
 * rename undocumented remove API method to remove_line so you can call jQuery remove
 * fix throwing exception when there is error in formatter (it now only show alert)
-
+* fix double exception when exec command throw exception
 
 ## 1.16.1
 ### Bugs

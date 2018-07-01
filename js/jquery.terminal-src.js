@@ -187,6 +187,7 @@
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
+        // istanbul ignore next
         define(['jquery', 'wcwidth'], factory);
     } else if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
@@ -198,8 +199,7 @@
                 // if it's defined (how jquery works)
                 if (typeof window !== 'undefined') {
                     jQuery = require('jquery');
-                }
-                else {
+                } else {
                     jQuery = require('jquery')(root);
                 }
             }
@@ -211,6 +211,7 @@
         };
     } else {
         // Browser
+        // istanbul ignore next
         factory(root.jQuery, root.wcwidth);
     }
 })(function($, wcwidth, undefined) {
@@ -3661,9 +3662,7 @@
         // ---------------------------------------------------------------------
         last_id: function last_id() {
             var len = terminals.length();
-            if (len) {
-                return len - 1;
-            }
+            return len - 1;
         },
         // ---------------------------------------------------------------------
         // :: Function that works with strings like 'asd' 'asd\' asd' "asd asd"
@@ -5258,8 +5257,8 @@
                         // auto pause/resume when user return promises
                         self.pause(settings.softPause);
                         // when for native Promise object work only in jQuery 3.x
-                        if (is_function(result.then)) {
-                            result.then(show);
+                        if (is_function(result.done || result.then)) {
+                            (result.done || result.then).call(result, show);
                         } else {
                             return $.when(result).done(show);
                         }
@@ -5274,8 +5273,11 @@
                 }
                 return deferred.promise();
             } catch (e) {
-                display_exception(e, 'USER');
+                display_exception(e, 'USER', exec);
                 self.resume();
+                if (exec) {
+                    throw e;
+                }
             }
         }
         // ---------------------------------------------------------------------
@@ -5797,6 +5799,7 @@
                     hash_commands.push(state);
                     maybe_update_hash();
                 }
+                return self;
             },
             // -------------------------------------------------------------
             // :: Execute a command, it will handle commands that do AJAX
@@ -5823,9 +5826,12 @@
                         // commands may return promise from user code
                         // it will resolve exec promise when user promise
                         // is resolved
-                        commands(command, silent, true).done(function() {
-                            d.resolve(self);
-                        });
+                        var ret = commands(command, silent, true);
+                        if (ret && (ret.done || ret.then)) {
+                            (ret.done || ret.then).call(ret, function() {
+                                d.resolve(self);
+                            });
+                        }
                     }
                 });
                 // while testing it didn't executed last exec when using this
@@ -7478,6 +7484,8 @@
             old_enabled = enabled;
             self.disable().find('.cmd textarea').trigger('blur', [true]);
         }
+        // paste event is not testable in node
+        // istanbul ignore next
         function paste_event(e) {
             e = e.originalEvent;
             // we don't care about browser that don't support clipboard data
@@ -7593,6 +7601,7 @@
             document.addEventListener("resume", function() {
                 self.disable();
             });
+            // istanbul ignore next
             if (is_mobile) {
                 self.click(function() {
                     if (!frozen) {
@@ -7765,7 +7774,7 @@
                 if (visible) {
                     create_resizers();
                 }
-                visibility_observer = new IntersectionObserver(function() {
+                visibility_observer = new window.IntersectionObserver(function() {
                     if (self.is(':visible') && !visible) {
                         visible = true;
                         create_resizers();
@@ -7828,34 +7837,23 @@
                 var terminal = terminals.get()[spec[0]];
                 // execute if belong to this terminal
                 if (terminal && terminal_id === terminal.id()) {
-                    var defer = $.Deferred();
                     if (!spec[2]) {
                         defer.resolve();
                         return defer.promise();
                     } else {
-                        try {
-                            if (paused) {
-                                resume_callbacks.push(function() {
-                                    return terminal.exec(spec[2]).done(function() {
-                                        terminal.save_state(spec[2], true, spec[1]);
-                                        defer.resolve();
-                                    });
-                                });
-                                return defer.promise();
-                            } else {
+                        if (paused) {
+                            var defer = $.Deferred();
+                            resume_callbacks.push(function() {
                                 return terminal.exec(spec[2]).done(function() {
                                     terminal.save_state(spec[2], true, spec[1]);
+                                    defer.resolve();
                                 });
-                            }
-                        } catch (e) {
-                            var settings = terminal.settings();
-                            if (is_function(settings.exceptionHandler)) {
-                                settings.exceptionHandler.call(self, e, 'EXEC HASH');
-                            } else {
-                                var cmd = $.terminal.escape_brackets(command);
-                                var msg = 'Error while exec with command ' + cmd;
-                                terminal.error(msg).exception(e);
-                            }
+                            });
+                            return defer.promise();
+                        } else {
+                            return terminal.exec(spec[2]).done(function() {
+                                terminal.save_state(spec[2], true, spec[1]);
+                            });
                         }
                     }
                 }

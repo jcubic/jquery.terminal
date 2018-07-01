@@ -94,6 +94,18 @@ global.window.Element.prototype.getBoundingClientRect = function() {
 };
 global.window.Element.prototype.getClientRects = function() {
     var self = $(this);
+    var node = this;
+    while(node) {
+        if(node === document) {
+            break;
+        }
+        // don't know why but style is sometimes undefined
+        if (!node.style || node.style.display === 'none' ||
+            node.style.visibility === 'hidden') {
+            return [];
+        }
+        node = node.parentNode;
+    }
     return [{width: self.width(), height: self.height()}];
 };
 window.localStorage = new Storage();
@@ -1325,17 +1337,6 @@ describe('Terminal utils', function() {
     });
 });
 describe('sub plugins', function() {
-    describe('resizer', function() {
-        it('should create html', function() {
-            var div = $('<div/>').resizer($.noop);
-            expect(div.find('iframe').length).toEqual(1);
-        });
-        it('should remove html', function() {
-            var div = $('<div/>').resizer($.noop);
-            div.resizer('unbind');
-            expect(div.find('iframe').length).toEqual(0);
-        });
-    });
     describe('text_length', function() {
         it('should return length of the text in div', function() {
             var elements = $('<div><span>hello</span><span>world</span>');
@@ -1786,6 +1787,79 @@ describe('Terminal plugin', function() {
                 term2.destroy().remove();
                 done();
             }, 100);
+        });
+    });
+    describe('observers', function() {
+        var i_callback, m_callback, test, term;
+        function init() {
+            beforeEach(function() {
+                test = {
+                    fn: $.noop
+                };
+                spy(test, 'fn');
+                window.IntersectionObserver = function(callback) {
+                    i_callback = callback;
+                    return {
+                        observe: function() {
+                        },
+                        unobserve: function() {
+                            i_callback = null;
+                        }
+                    };
+                };
+                window.MutationObserver = function(callback) {
+                    m_callback = callback;
+                    return {
+                        observe: function() {
+                        },
+                        disconnect: function() {
+                            m_callback = null;
+                        }
+                    };
+                };
+                global.IntersectionObserver = window.IntersectionObserver;
+                term = $('<div/>').appendTo('body').terminal($.noop, {
+                    onResize: test.fn
+                });
+            });
+            afterEach(function() {
+                term.destroy().remove();
+                // we only need observers in this tests
+                delete global.IntersectionObserver;
+                delete window.IntersectionObserver;
+                delete window.MutationObserver;
+            });
+        }
+        describe('MutationObserver', function() {
+            init();
+            it('should call resize', function() {
+                term.detach();
+                m_callback();
+                term.appendTo('body');
+                m_callback();
+                expect(test.fn).toHaveBeenCalled();
+            });
+        });
+        describe('IntersectionObserver', function() {
+            init();
+            it('should enable/disable terminal', function() {
+                expect(term.enabled()).toBe(true);
+                i_callback();
+                term.hide();
+                i_callback();
+                expect(term.enabled()).toBe(false);
+                term.show();
+                i_callback();
+                expect(term.enabled()).toBe(true);
+            });
+            it('should call resize', function() {
+                i_callback();
+                term.hide();
+                i_callback();
+                term.show();
+                i_callback();
+                expect(test.fn).toHaveBeenCalled();
+            });
         });
     });
     describe('events', function() {
@@ -2456,7 +2530,8 @@ describe('Terminal plugin', function() {
             term.exec(['foo', 'bar']);
             enter(term, 'type 10 20');
             var last_div = term.find('.terminal-output > div:last-child');
-            expect(last_div.text()).toEqual("[Arity] Wrong number of arguments. Function 'type' expects 1 got 2!");
+            expect(last_div.text()).toEqual("[Arity] Wrong number of arguments." +
+                                            " Function 'type' expects 1 got 2!");
         });
         it('should call fallback function', function() {
             spy(fallback, 'interpreter');
@@ -3006,12 +3081,46 @@ describe('Terminal plugin', function() {
                     }
                 }, 500);
             }, 5000);
-        });
-        describe('methods after creating async rpc with system.describe', function() {
-            it('should call methods', function(done) {
+            it('should exec when paused', function(done) {
+                var test = {
+                    fn: function() {
+                    }
+                };
+                spy(test, 'fn');
+                var term = $('<div/>').terminal({
+                    echo: function(arg) {
+                        test.fn(arg);
+                    }
+                }, {});
+                term.pause();
+                term.exec('echo foo');
+                expect(test.fn).not.toHaveBeenCalled();
+                term.resume();
+                setTimeout(function() {
+                    expect(test.fn).toHaveBeenCalledWith('foo');
+                    done();
+                }, 10);
+            });
+            it('should throw exception from exec', function() {
+                var error = {
+                    message: 'Some Error',
+                    stack: 'stack trace'
+                };
+                expect(function() {
+                    var term = $('<div/>').terminal({
+                        echo: function(arg) {
+                            throw error;
+                        }
+                    }, {
+                        greetings: false
+                    });
+                    term.focus().exec('echo foo');
+                }).toThrow(error);
+            });
+            it('should call async rpc methods', function(done) {
                 spy(object, 'echo');
-                var term = $('<div/>').appendTo('body').terminal('/async');
-                term.exec('echo foo bar');
+                var term = $('<div/>').terminal('/async');
+                term.focus().exec('echo foo bar');
                 term.insert('foo');
                 setTimeout(function() {
                     expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
