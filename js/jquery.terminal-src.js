@@ -5273,7 +5273,10 @@
                     self.clear();
                     after_exec();
                 } else {
-                    return invoke();
+                    var ret = invoke();
+                    if (ret) {
+                        return ret;
+                    }
                 }
                 return deferred.promise();
             } catch (e) {
