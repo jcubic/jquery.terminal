@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 05 Jul 2018 16:27:09 +0000
+ * Date: Thu, 05 Jul 2018 16:33:32 +0000
  */
 
 /* TODO:
@@ -2996,7 +2996,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 05 Jul 2018 16:27:09 +0000',
+        date: 'Thu, 05 Jul 2018 16:33:32 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3445,7 +3445,10 @@
                                 if (formatter instanceof Array) {
                                     if (formatter[2]) {
                                         while (string.match(formatter[0])) {
-                                            string = string.replace(formatter[0], formatter[1]);
+                                            string = string.replace(
+                                                formatter[0],
+                                                formatter[1]
+                                            );
                                         }
                                         return string;
                                     }

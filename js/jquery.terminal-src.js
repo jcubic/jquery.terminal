@@ -3445,7 +3445,10 @@
                                 if (formatter instanceof Array) {
                                     if (formatter[2]) {
                                         while (string.match(formatter[0])) {
-                                            string = string.replace(formatter[0], formatter[1]);
+                                            string = string.replace(
+                                                formatter[0],
+                                                formatter[1]
+                                            );
                                         }
                                         return string;
                                     }
