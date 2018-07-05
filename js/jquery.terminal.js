@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.17.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 01 Jul 2018 13:35:08 +0000
+ * Date: Thu, 05 Jul 2018 16:27:09 +0000
  */
 
 /* TODO:
@@ -2995,8 +2995,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '1.17.0',
-        date: 'Sun, 01 Jul 2018 13:35:08 +0000',
+        version: 'DEV',
+        date: 'Thu, 05 Jul 2018 16:27:09 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3443,6 +3443,12 @@
                                 return string;
                             } else {
                                 if (formatter instanceof Array) {
+                                    if (formatter[2]) {
+                                        while (string.match(formatter[0])) {
+                                            string = string.replace(formatter[0], formatter[1]);
+                                        }
+                                        return string;
+                                    }
                                     return string.replace(formatter[0], formatter[1]);
                                 } else if (typeof formatter === 'function') {
                                     var ret = formatter(string, settings);

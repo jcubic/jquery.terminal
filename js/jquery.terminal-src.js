@@ -3443,6 +3443,12 @@
                                 return string;
                             } else {
                                 if (formatter instanceof Array) {
+                                    if (formatter[2]) {
+                                        while (string.match(formatter[0])) {
+                                            string = string.replace(formatter[0], formatter[1]);
+                                        }
+                                        return string;
+                                    }
                                     return string.replace(formatter[0], formatter[1]);
                                 } else if (typeof formatter === 'function') {
                                     var ret = formatter(string, settings);
