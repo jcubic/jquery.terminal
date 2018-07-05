@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 05 Jul 2018 16:33:32 +0000
+ * Date: Thu, 05 Jul 2018 21:31:15 +0000
  */
 
 /* TODO:
@@ -1736,6 +1736,13 @@
                 return formatters.reduce(function(result, frmt) {
                     var command = result[0];
                     var position = result[1];
+                    if (frmt[2]) {
+                        result = result.slice();
+                        while (result[0].match(frmt[0])) {
+                            result = tracking_replace(result[0], frmt[0], frmt[1], result[1]);
+                        }
+                        return result;
+                    }
                     return tracking_replace(command, frmt[0], frmt[1], position);
                 }, [command, position])[1];
             }
@@ -2996,7 +3003,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 05 Jul 2018 16:33:32 +0000',
+        date: 'Thu, 05 Jul 2018 21:31:15 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

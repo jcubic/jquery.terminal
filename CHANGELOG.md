@@ -1,6 +1,6 @@
 ## Next
 ### Bugs
-* handle backspaces in echo [#409](https://github.com/jcubic/jquery.terminal/issues/409)
+* handle formatters that replace backspaces and characters before [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 
 ## 1.17.0
 ### Features
