@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 06 Jul 2018 07:03:25 +0000
+ * Date: Fri, 06 Jul 2018 20:24:45 +0000
  */
 
 /* TODO:
@@ -2956,7 +2956,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 06 Jul 2018 07:03:25 +0000',
+        date: 'Fri, 06 Jul 2018 20:24:45 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3055,11 +3055,18 @@
             var rep_string;
             var new_position = position;
             var start;
+            var global = rex.flags.indexOf('g') !== -1;
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
-                // Add any of the original string we just skipped
-                var last_index = length(substring(string, 0, rex.lastIndex));
-                start = last_index - length(match[0]);
+                // if regex don't have g flag lastIndex don't work
+                if (global) {
+                    // Add any of the original string we just skipped
+                    var last_index = length(substring(string, 0, rex.lastIndex));
+                    start = last_index - length(match[0]);
+                } else {
+                    start = match.index;
+                    last_index = start + length(match[0]);
+                }
                 if (index < start) {
                     new_string += substring(string, index, start);
                 }
@@ -3090,8 +3097,9 @@
                         new_position += length(rep_string) - (position - start);
                     }
                 }
-                // single replace
-                if (rex.flags.indexOf('g') === -1) {
+                // If the regular expression doesn't have the g flag, break here so
+                // we do just one replacement (and so we don't have an endless loop!)
+                if (!global) {
                     break;
                 }
             }
