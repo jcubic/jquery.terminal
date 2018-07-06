@@ -1706,7 +1706,7 @@
             return result.join('');
         }
         // ---------------------------------------------------------------------
-        // :: shortcut helper
+        // :: shortcut helpers
         // ---------------------------------------------------------------------
         function length(str) {
             return $.terminal.length(str);
@@ -1739,71 +1739,24 @@
                     if (frmt[2]) {
                         result = result.slice();
                         while (result[0].match(frmt[0])) {
-                            result = tracking_replace(result[0], frmt[0], frmt[1], result[1]);
+                            result = $.terminal.tracking_replace(
+                                result[0],
+                                frmt[0],
+                                frmt[1],
+                                result[1]
+                            );
                         }
                         return result;
                     }
-                    return tracking_replace(command, frmt[0], frmt[1], position);
+                    return $.terminal.tracking_replace(
+                        command,
+                        frmt[0],
+                        frmt[1],
+                        position
+                    );
                 }, [command, position])[1];
             }
             return position;
-        }
-        // ---------------------------------------------------------------------
-        // :: source https://stackoverflow.com/a/46756077/387194
-        // ---------------------------------------------------------------------
-        function tracking_replace(string, rex, replacement, position) {
-            var new_string = "";
-            var match;
-            var index = 0;
-            var rep_string;
-            var new_position = position;
-            var start;
-            rex.lastIndex = 0; // Just to be sure
-            while ((match = rex.exec(string))) {
-                // Add any of the original string we just skipped
-                var last_index = length(substring(string, 0, rex.lastIndex));
-                start = last_index - length(match[0]);
-                if (index < start) {
-                    new_string += substring(string, index, start);
-                }
-                index = last_index;
-                // Build the replacement string. This just handles $$ and $n,
-                // you may want to add handling for $`, $', and $&.
-                rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
-                    if (c0 === "$") {
-                        return "$";
-                    }
-                    return match[c0];
-                });
-                // Add on the replacement
-                new_string += rep_string;
-                // If the position is affected...
-                if (start < position) {
-                    // ... update it:
-                    if (last_index < position) {
-                        // It's after the replacement, move it
-                        new_position = Math.max(
-                            0,
-                            new_position +
-                            length(rep_string) -
-                            length(match[0])
-                        );
-                    } else {
-                        // It's *in* the replacement, put it just after
-                        new_position += length(rep_string) - (position - start);
-                    }
-                }
-                // single replace
-                if (rex.flags.indexOf('g') === -1) {
-                    break;
-                }
-            }
-            // Add on any trailing text in the string
-            if (index < length(string)) {
-                new_string += substring(string, index);
-            }
-            // Return the string and the updated position
-            return [new_string, new_position];
         }
         // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
@@ -3085,6 +3038,71 @@
             return str.split(format_split_re).filter(Boolean);
         },
         // ---------------------------------------------------------------------
+        // :: replace that return position after replace for working with
+        // :: replacement that change length of the string
+        // :: source https://stackoverflow.com/a/46756077/387194
+        // ---------------------------------------------------------------------
+        tracking_replace: function tracking_replace(string, rex, replacement, position) {
+            function substring(string, start, end) {
+                return $.terminal.substring(string, start, end);
+            }
+            function length(string) {
+                return $.terminal.length(string);
+            }
+            var new_string = "";
+            var match;
+            var index = 0;
+            var rep_string;
+            var new_position = position;
+            var start;
+            rex.lastIndex = 0; // Just to be sure
+            while ((match = rex.exec(string))) {
+                // Add any of the original string we just skipped
+                var last_index = length(substring(string, 0, rex.lastIndex));
+                start = last_index - length(match[0]);
+                if (index < start) {
+                    new_string += substring(string, index, start);
+                }
+                index = last_index;
+                // Build the replacement string. This just handles $$ and $n,
+                // you may want to add handling for $`, $', and $&.
+                rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
+                    if (c0 === "$") {
+                        return "$";
+                    }
+                    return match[c0];
+                });
+                // Add on the replacement
+                new_string += rep_string;
+                // If the position is affected...
+                if (start < position) {
+                    // ... update it:
+                    if (last_index < position) {
+                        // It's after the replacement, move it
+                        new_position = Math.max(
+                            0,
+                            new_position +
+                            length(rep_string) -
+                            length(match[0])
+                        );
+                    } else {
+                        // It's *in* the replacement, put it just after
+                        new_position += length(rep_string) - (position - start);
+                    }
+                }
+                // single replace
+                if (rex.flags.indexOf('g') === -1) {
+                    break;
+                }
+            }
+            // Add on any trailing text in the string
+            if (index < length(string)) {
+                new_string += substring(string, index);
+            }
+            // Return the string and the updated position
+            return [new_string, new_position];
+        },
+        // ---------------------------------------------------------------------
         // :: helper function used by substring and split_equal it loop over
         // :: string and execute callback with text count and other data
         // ---------------------------------------------------------------------
@@ -3107,7 +3125,8 @@
             }
             // ----------------------------------------------------------------
             function is_text(i) {
-                return not_formatting && string[i] !== ']' && !opening;
+                return not_formatting && (string[i] !== ']' || !have_formatting)
+                    && !opening;
             }
             // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
