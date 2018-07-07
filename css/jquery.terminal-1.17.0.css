@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Thu, 05 Jul 2018 16:27:10 +0000
+ * Date: Sat, 07 Jul 2018 19:31:22 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -691,4 +691,16 @@ terminal .terminal-output > div {
         background-color: rgba(170, 170, 170, 0.99);
         color: #000;
     }
+}
+.terminal .token.operator,
+.terminal .token.entity,
+.terminal .token.url,
+.terminal .token.string,
+.terminal .style .token.string,
+.cmd .token.operator,
+.cmd .token.entity,
+.cmd .token.url,
+.cmd .token.string,
+.cmd .style .token.string{
+    background: inherit;
 }
