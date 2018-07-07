@@ -5,6 +5,8 @@
 * $.terminal.syntax helper
 ### Bugs
 * handle formatters that replace backspaces and characters before [#409](https://github.com/jcubic/jquery.terminal/issues/409)
+* fix broken < > & with cmd + prism [#410](https://github.com/jcubic/jquery.terminal/issues/410)
+* fix background in prism with black background terminal
 
 ## 1.17.0
 ### Features
