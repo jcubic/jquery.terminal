@@ -1655,7 +1655,6 @@
         // ---------------------------------------------------------------------
         function formatting(string) {
             // we don't want to format command when user type formatting in
-            string = $.terminal.escape_formatting(string);
             try {
                 string = $.terminal.apply_formatters(string, settings);
                 string = $.terminal.normalize(string);
@@ -1827,7 +1826,7 @@
                         break;
                 }
                 var pos = formatted_position;
-                string = formatting(safe(string.replace(/&/g, '&amp;')));
+                string = safe(formatting(string));
                 var i;
                 self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
                 before.html('');
@@ -2695,7 +2694,8 @@
         if (!string.match(/[<>]/)) {
             return string;
         }
-        return string.replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        return string.replace(/&(?![^;]+;)/g, '&amp;')
+            .replace(/>/g, '&gt;').replace(/</g, '&lt;');
     }
     // -------------------------------------------------------------------------
     function crlf(string) {

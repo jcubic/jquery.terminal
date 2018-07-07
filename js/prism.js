@@ -74,7 +74,11 @@
         _.hooks.run('wrap', env);
 
         return env.content.split(/\n/).map(function(content) {
-            return content ? '[[b;;;' + env.classes.join(' ') + ']' + content + ']' : '';
+            if (content) {
+                content = $.terminal.escape_formatting(content);
+                return '[[b;;;' + env.classes.join(' ') + ']' + content + ']';
+            }
+            return '';
         }).join('\n');
     };
     if (!$) {
@@ -92,6 +96,6 @@
         return text;
     };
     jQuery.terminal.syntax = function(language) {
-        jQuery.terminal.defaults.formatters(jQuery.terminal.prism.bind(null, language));
+        jQuery.terminal.defaults.formatters.push(jQuery.terminal.prism.bind(null, language));
     };
 })(Prism.Token, jQuery);
