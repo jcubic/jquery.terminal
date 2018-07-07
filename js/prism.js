@@ -91,4 +91,7 @@
         }
         return text;
     };
+    jQuery.terminal.syntax = function(language) {
+        jQuery.terminal.defaults.formatters(jQuery.terminal.prism.bind(null, language));
+    };
 })(Prism.Token, jQuery);

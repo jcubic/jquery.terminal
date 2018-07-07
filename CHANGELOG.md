@@ -2,6 +2,7 @@
 ### Feature
 * looping regex formatters that replace until they don't match the regex
 * add tracking_replace to $.terminal namespace
+* $.terminal.syntax helper
 ### Bugs
 * handle formatters that replace backspaces and characters before [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 
