@@ -216,9 +216,8 @@
     }
 })(function($, wcwidth, undefined) {
     'use strict';
-    /*
     // -----------------------------------------------------------------------
-    // :: debug functions, commented out so it don't affect coverage
+    // :: debug functions
     // -----------------------------------------------------------------------
     function debug(str) {
         if (false) {
@@ -226,6 +225,7 @@
             $.terminal.active().echo(str);
         }
     }
+    /* commented out so it don't affect coverage
     // -----------------------------------------------------------------------
     Function.prototype.monitor = function() {
         var name = this.name;
