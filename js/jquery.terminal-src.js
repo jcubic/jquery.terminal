@@ -3503,7 +3503,7 @@
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
                 formatters.splice(i - 1);
-                throw new $.terminal.Exception('formatting', msg);
+                throw new $.terminal.Exception('formatting', msg, e.stack);
             }
         },
         // ---------------------------------------------------------------------
@@ -3894,13 +3894,16 @@
         })()
     };
     // -------------------------------------------------------------------------
-    $.terminal.Exception = function Terminal_Exception(type, message) {
+    $.terminal.Exception = function Terminal_Exception(type, message, stack) {
         if (arguments.length === 1) {
             this.message = arguments[0];
             this.type = 'TERMINAL';
         } else {
             this.type = type;
             this.message = message;
+            if (stack) {
+                this.stack = stack;
+            }
         }
     };
     $.terminal.Exception.prototype = new Error();
