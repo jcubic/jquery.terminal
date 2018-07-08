@@ -1756,7 +1756,7 @@
             }
             if (formatters.length) {
                 return formatters.reduce(function(result, frmt) {
-                    var options = frmt[2];
+                    var options = frmt[2] || {};
                     if (options.loop) {
                         result = result.slice();
                         while (result[0].match(frmt[0])) {
@@ -3499,7 +3499,7 @@
                                 return string;
                             } else {
                                 if (formatter instanceof Array) {
-                                    var options = formatter[2];
+                                    var options = formatter[2] || {};
                                     if (options.loop) {
                                         while (string.match(formatter[0])) {
                                             string = string.replace(
