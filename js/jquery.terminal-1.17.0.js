@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 08 Jul 2018 04:13:41 +0000
+ * Date: Sun, 08 Jul 2018 07:00:52 +0000
  */
 
 /* TODO:
@@ -216,6 +216,28 @@
     }
 })(function($, wcwidth, undefined) {
     'use strict';
+    /*
+    // -----------------------------------------------------------------------
+    // :: debug functions, commented out so it don't affect coverage
+    // -----------------------------------------------------------------------
+    function debug(str) {
+        if (false) {
+            console.log(str);
+            $.terminal.active().echo(str);
+        }
+    }
+    // -----------------------------------------------------------------------
+    Function.prototype.monitor = function() {
+        var name = this.name;
+        var fn = this;
+        return function(...args) {
+            console.log(name + '(' + JSON.stringify(args).replace(/^\[|\]$/g, '') + ')');
+            var ret = fn.apply(this, args);
+            console.log('return ' + JSON.stringify(ret));
+            return ret;
+        };
+    };
+    //*/
     // -----------------------------------------------------------------------
     // :: Replacemenet for jQuery 2 deferred objects
     // -----------------------------------------------------------------------
@@ -1656,11 +1678,12 @@
         function formatting(string) {
             // we don't want to format command when user type formatting in
             try {
+                string = $.terminal.escape_formatting(string);
                 string = $.terminal.apply_formatters(string, settings);
                 string = $.terminal.normalize(string);
                 return string;
             } catch (e) {
-                alert_exception('[Formatting]', e);
+                alert_exception('[Formatting]', e.stack);
                 return string;
             }
         }
@@ -1733,9 +1756,8 @@
             }
             if (formatters.length) {
                 return formatters.reduce(function(result, frmt) {
-                    var command = result[0];
-                    var position = result[1];
-                    if (frmt[2]) {
+                    var options = frmt[2];
+                    if (options.loop) {
                         result = result.slice();
                         while (result[0].match(frmt[0])) {
                             result = $.terminal.tracking_replace(
@@ -1747,6 +1769,8 @@
                         }
                         return result;
                     }
+                    var command = result[0];
+                    var position = result[1];
                     return $.terminal.tracking_replace(
                         command,
                         frmt[0],
@@ -1826,7 +1850,7 @@
                         break;
                 }
                 var pos = formatted_position;
-                string = safe(formatting(string));
+                string = formatting(string);
                 var i;
                 self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
                 before.html('');
@@ -2093,7 +2117,7 @@
                         string + command.slice(position);
                 }
                 if (!stay) {
-                    self.position(string.length, true);
+                    self.position(string.length, true, true);
                 } else {
                     fix_textarea();
                 }
@@ -2144,7 +2168,7 @@
             kill_text: function() {
                 return kill_text;
             },
-            position: function(n, relative) {
+            position: function(n, relative, silent) {
                 if (typeof n === 'number') {
                     if (relative) {
                         position += n;
@@ -2159,8 +2183,10 @@
                     if (is_function(settings.onPositionChange)) {
                         settings.onPositionChange(position);
                     }
-                    redraw();
-                    fix_textarea(true);
+                    if (!silent) {
+                        redraw();
+                        fix_textarea(true);
+                    }
                     return self;
                 } else {
                     return position;
@@ -2464,12 +2490,6 @@
             event.fake = true;
             doc.trigger(event);
         }
-        function debug(str) {
-            if (false) {
-                console.log(str);
-                $.terminal.active().echo(str);
-            }
-        }
         function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
@@ -2691,7 +2711,7 @@
     }
     // -------------------------------------------------------------------------
     function safe(string) {
-        if (!string.match(/[<>]/)) {
+        if (!string.match(/[<>&]/)) {
             return string;
         }
         return string.replace(/&(?![^;]+;)/g, '&amp;')
@@ -2956,7 +2976,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 08 Jul 2018 04:13:41 +0000',
+        date: 'Sun, 08 Jul 2018 07:00:52 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3449,8 +3469,10 @@
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
         apply_formatters: function(string, settings) {
-            function test_lengths(ret, string) {
-                if ($.terminal.length(ret) !== $.terminal.length(string)) {
+            function test_lengths(formatter, ret, string) {
+                if (!formatter.__no_warn__ &&
+                    $.terminal.length(ret) !== $.terminal.length(string)) {
+                    console.log(formatter);
                     warn('Your formatter change length of the string, ' +
                          'you should use [regex, replacement] formatte' +
                          'r instead');
@@ -3467,7 +3489,7 @@
                     // on the list
                     if (typeof formatter === 'function' && formatter.__meta__) {
                         var ret = formatter(string, settings);
-                        test_lengths(ret, string);
+                        test_lengths(formatter, ret, string);
                         if (typeof ret === 'string') {
                             return ret;
                         }
@@ -3477,7 +3499,8 @@
                                 return string;
                             } else {
                                 if (formatter instanceof Array) {
-                                    if (formatter[2]) {
+                                    var options = formatter[2];
+                                    if (options.loop) {
                                         while (string.match(formatter[0])) {
                                             string = string.replace(
                                                 formatter[0],
@@ -3489,7 +3512,7 @@
                                     return string.replace(formatter[0], formatter[1]);
                                 } else if (typeof formatter === 'function') {
                                     var ret = formatter(string, settings);
-                                    test_lengths(ret, string);
+                                    test_lengths(formatter, ret, string);
                                     if (typeof ret === 'string') {
                                         return ret;
                                     }
@@ -3503,9 +3526,7 @@
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
                 formatters.splice(i - 1);
-                var new_error = new $.terminal.Exception('formatting', msg);
-                new_error.stack = e.stack;
-                throw new_error;
+                throw new $.terminal.Exception('formatting', msg, e.stack);
             }
         },
         // ---------------------------------------------------------------------
@@ -3648,6 +3669,12 @@
         // ---------------------------------------------------------------------
         escape_brackets: function escape_brackets(string) {
             return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
+        },
+        // ---------------------------------------------------------------------
+        // :: complmentary function
+        // ---------------------------------------------------------------------
+        unescape_brackets: function unescape_brackets(string) {
+            return string.replace(/&#91;/g, '[').replace(/&#93;/g, ']');
         },
         // ---------------------------------------------------------------------
         // :: return number of characters without formatting
@@ -3896,13 +3923,16 @@
         })()
     };
     // -------------------------------------------------------------------------
-    $.terminal.Exception = function Terminal_Exception(type, message) {
+    $.terminal.Exception = function Terminal_Exception(type, message, stack) {
         if (arguments.length === 1) {
             this.message = arguments[0];
             this.type = 'TERMINAL';
         } else {
             this.type = type;
             this.message = message;
+            if (stack) {
+                this.stack = stack;
+            }
         }
     };
     $.terminal.Exception.prototype = new Error();
@@ -3986,7 +4016,7 @@
                     if (options.error) {
                         options.error(jqXHR, 'Invalid JSON', e);
                     } else {
-                        throw new $.terminal.Exception('JSON', 'Invalid JSON');
+                        throw new $.terminal.Exception('JSON', 'Invalid JSON', e.stack);
                     }
                     deferred.reject({message: 'Invalid JSON', response: response});
                     return;
@@ -4151,6 +4181,8 @@
     // :: Default options
     // -----------------------------------------------------------------------
     $.terminal.nested_formatting.__meta__ = true;
+    // nested formatting will always return different length so we silent the warning
+    $.terminal.nested_formatting.__no_warn__ = true;
     $.terminal.defaults = {
         prompt: '> ',
         history: true,

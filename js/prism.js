@@ -21,6 +21,12 @@
  *
  *     term.echo(code); // or term.less(code) if you include less.js
  *
+ * you can also use helper that will create formatter
+ *
+ *     $.terminal.syntax(language);
+ *
+ * there is one extra language 'website' that format html with script and style tags
+ *
  * by default only javascript markup and css languages are defined (also file extension
  * for them. To have more languages you need to include appropriate js files.
  *
@@ -41,7 +47,7 @@
     _.Token = function(type, content, alias, matchedStr, greedy) {
         Token.apply(this, [].slice.call(arguments));
     };
-    _.Token.stringify = function(o, language, parent) {
+    _.Token.stringify = function(o, language, parent, recur) {
         if (typeof o == 'string') {
             return o;
         }
@@ -75,8 +81,7 @@
 
         return env.content.split(/\n/).map(function(content) {
             if (content) {
-                content = $.terminal.escape_formatting(content);
-                return '[[b;;;' + env.classes.join(' ') + ']' + content + ']';
+                return '\x00\x00\x00\x00[[b;;;' + env.classes.join(' ') + ']' + content + '\x00\x00\x00\x00]';
             }
             return '';
         }).join('\n');
@@ -87,15 +92,54 @@
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');
     }
-    jQuery.terminal.prism = function(language, text) {
-        if (language && _.languages[language]) {
-            var grammar = _.languages[language];
-            var tokens = _.tokenize(text, grammar);
-            text = _.Token.stringify(tokens, language);
+    // we use 0x00 character so we know which one of the formatting came from prism so we can escape the reset
+    // because we unescape original values, the values need to be escape in cmd plugin so you can't type in
+    // formatting
+    var format_split_re = /(\x00\x00\x00\x00(?:\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*[^\\](\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?|\]))/i;
+    $.terminal.prism = function prism(language, string) {
+        if (language === 'website') {
+            var re = /(<\/?\s*(?:script|style)[^>]*>)/g;
+            var style;
+            var script;
+            return string.split(re).filter(Boolean).map(function(string) {
+                if (script) {
+                    script = false;
+                    return $.terminal.prism('javascript', string);
+                } else if (style) {
+                    style = false;
+                    return $.terminal.prism('css', string);
+                }
+                if (string.match(/^<script/)) {
+                    script = true;
+                } else if (string.match(/^<style/)) {
+                    style = true;
+                }
+                return $.terminal.prism('html', string);
+            }).join('');
         }
-        return text;
+        if (language && _.languages[language]) {
+            string = $.terminal.unescape_brackets(string);
+            var grammar = _.languages[language];
+            var tokens = _.tokenize(string, grammar);
+            string = _.Token.stringify(tokens, language);
+            string = string.split(format_split_re).filter(Boolean).map(function(string) {
+                if (string.match(/^\x00/)) {
+                    return string.replace(/\x00/g, '');
+                } else {
+                    return $.terminal.escape_brackets(string);
+                }
+            }).join('');
+        }
+        return string;
     };
-    jQuery.terminal.syntax = function(language) {
-        jQuery.terminal.defaults.formatters.push(jQuery.terminal.prism.bind(null, language));
+    $.terminal.syntax = function syntax(language) {
+        // we create function with name so we will see it in developer tools
+        // we bind jQuery as argument so it will work when jQuery with noConflict
+        // is added after this script
+        var fn = new Function('', 'return function syntax_' + language +
+                              '($, string) { return $.terminal.prism("' + language +
+                              '", string); }')().bind(null, $);
+        fn.__no_warn__ = true;
+        $.terminal.defaults.formatters.unshift(fn);
     };
 })(Prism.Token, jQuery);
