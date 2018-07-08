@@ -3,7 +3,7 @@
 * looping regex formatters that replace until they don't match the regex
 * add tracking_replace to $.terminal namespace
 * $.terminal.syntax helper
-* new language for prism website that handle html, javascript and css syntax
+* new language for prism: "website" that handle html, javascript and css syntax
 ### Bugs
 * handle formatters that replace backspaces and characters before [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 * fix broken < > & with cmd + prism [#410](https://github.com/jcubic/jquery.terminal/issues/410)
