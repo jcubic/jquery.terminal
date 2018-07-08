@@ -692,3 +692,15 @@ terminal .terminal-output > div {
         color: #000;
     }
 }
+.terminal .token.operator,
+.terminal .token.entity,
+.terminal .token.url,
+.terminal .token.string,
+.terminal .style .token.string,
+.cmd .token.operator,
+.cmd .token.entity,
+.cmd .token.url,
+.cmd .token.string,
+.cmd .style .token.string{
+    background: inherit;
+}

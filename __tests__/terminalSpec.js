@@ -1335,6 +1335,119 @@ describe('Terminal utils', function() {
             expect('[[ [[;;]foo] [[;;]bar]'.search(t)).toEqual(3);
         });
     });
+    describe('$.terminal.parse_options', function() {
+        function test(spec) {
+            expect($.terminal.parse_options(spec[0], spec[2])).toEqual(spec[1]);
+        }
+        it('should create object from string', function() {
+            test(['--foo bar -aif foo', {
+                _: [],
+                foo: 'bar',
+                a: true,
+                i: true,
+                f: 'foo'
+            }]);
+        });
+        it('should create object from array', function() {
+            test([['--foo', 'bar', '-aif', 'foo'], {
+                _: [],
+                foo: 'bar',
+                a: true,
+                i: true,
+                f: 'foo'
+            }]);
+        });
+        it('should create boolean option for double dash if arg is missing', function() {
+            [
+                [
+                    ['--foo', '-aif', 'foo'], {
+                        _: [],
+                        foo: true,
+                        a: true,
+                        i: true,
+                        f: 'foo'
+                    }
+                ],
+                [
+                    ['--foo', '--bar', '-i'], {
+                        _: [],
+                        foo: true,
+                        bar: true,
+                        i: true
+                    }
+                ],
+                [
+                    ['--foo', '--bar', '-i', '-b'], {
+                        _: [],
+                        foo: true,
+                        bar: true,
+                        i: true,
+                        b: true
+                    }
+                ]
+            ].forEach(test);
+        });
+        it('should create booelan options if they are on the list of booleans', function() {
+            test([
+                ['--foo', 'bar', '-i', 'baz'], {
+                    _: ["bar"],
+                    foo: true,
+                    i: 'baz'
+                }, {
+                    boolean: ['foo']
+                }
+            ]);
+            test([
+                ['--foo', 'bar', '-i', 'baz'], {
+                    _: ["bar", "baz"],
+                    foo: true,
+                    i: true
+                }, {
+                    boolean: ['foo', 'i']
+                }
+            ]);
+        });
+    });
+    describe('$.terminal.tracking_replace', function() {
+        function test(spec) {
+            spec = spec.slice();
+            var result = spec.pop();
+            expect($.terminal.tracking_replace.apply(null, spec)).toEqual(result);
+        }
+        function test_positions(str, re, replacement, positions) {
+            var output = str.replace(re, replacement);
+            positions.forEach(function(n, i) {
+                test([str, re, replacement, i, [output, n]]);
+            });
+        }
+        it('should replace single value', function() {
+            test(['foo bar', /foo/, 'f', 0, ['f bar', 0]]);
+            test(['foo foo', /foo/, 'f', 0, ['f foo', 0]]);
+            test(['foo bar', /bar/, 'f', 0, ['foo f', 0]]);
+        });
+        it('should remove all values', function() {
+            test(['foo foo foo', /foo/g, 'f', 0, ['f f f', 0]]);
+        });
+        it('should replace matched values', function() {
+            test(['100 200 30', /([0-9]+)/g, '($1$$)', 0, ['(100$) (200$) (30$)', 0]]);
+            test(['100 200 30', /([0-9]+)/, '($1$$)', 0, ['(100$) 200 30', 0]]);
+        });
+        it('should track position if replacement is shorter', function() {
+            var positions = [0, 1, 1, 1, 2, 3, 4, 5];
+            test_positions('foo bar baz', /foo/g, 'f', [0, 1, 1, 1, 2, 3, 4, 5]);
+            test_positions('foo foo foo', /foo/g, 'f', [
+                0, 1, 1, 1, 2, 3, 3, 3, 4, 5, 5, 5
+            ]);
+        });
+        it('should track position if replacement is longer', function() {
+            test_positions('foo bar baz', /f/g, 'bar', [
+                0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
+            ]);
+            test_positions('foo foo foo', /f/g, 'bar', [
+                0, 3, 4, 5, 6, 9, 10, 11, 12, 15, 16, 17
+            ]);
+        });
+    });
 });
 describe('sub plugins', function() {
     describe('text_length', function() {

@@ -1,3 +1,15 @@
+## 1.18.0
+### Feature
+* looping regex formatters that replace until they don't match the regex
+* add tracking_replace to $.terminal namespace
+* $.terminal.syntax helper
+* new language for prism website that handle html, javascript and css syntax
+### Bugs
+* handle formatters that replace backspaces and characters before [#409](https://github.com/jcubic/jquery.terminal/issues/409)
+* fix broken < > & with cmd + prism [#410](https://github.com/jcubic/jquery.terminal/issues/410)
+* fix background in prism with black background terminal
+* remove warning from nested_formatting when if find nested formatting
+
 ## 1.17.0
 ### Features
 * add ascii_table utility in separated file
