@@ -25,15 +25,97 @@
     // :: Replace overtyping (from man) formatting with terminal formatting
     // ---------------------------------------------------------------------
     $.terminal.overtyping = function overtyping(string) {
-        return string.replace(/((?:_\x08.|.\x08_)+)/g, function(full) {
-            var striped = full.replace(/_x08|\x08_|_\u0008|\u0008_/g, '');
-            return '[[u;;]' + striped + ']';
-        }).replace(/((?:.\x08.)+)/g, function(full) {
-            full = full.replace(/(.)(?:\x08|\u0008)\1/g, function(full, g) {
-                return g;
+        var removed_chars = [];
+        function replace(string) {
+            // we match characters and html entities because command line escape brackets
+            // echo don't, when writing formatter always process html entitites so it work
+            // for cmd plugin as well for echo
+            var re = /^([^\x08]|[\r\n]{2}|&[^;]+;)?\x08/;
+            var result = '';
+            var push = 0;
+            for (var i = 0; i < string.length; ++i) {
+                var partial = string.substring(i);
+                var match = partial.match(re);
+                var removed_char = removed_chars[0];
+                if (match) {
+                    // we remove backspace and character or html entity before it
+                    // but we keep it in removed array so we can put it back
+                    // when we have caritage return
+                    if (match[1]) {
+                        removed_chars.push({
+                            index: i - match[1].length + push,
+                            string: match[1]
+                        });
+                    }
+                    return result + partial.replace(re, '');
+                } else if (string[i] === '\r') {
+                    // if newline we need to add at the end all characters
+                    // removed by backspace
+                    if (removed_chars.length) {
+                        result += removed_chars.map(function(x) {
+                            return x.string;
+                        }).join('');
+                        removed_chars = [];
+                    }
+                    return result + partial;
+                } else {
+                    if (removed_chars.length) {
+                        // if we are in index of removed character we check if the
+                        // character is the same it will be bold or if removed char
+                        // or char at index is underscore then it will
+                        // be terminal formatting with underscore
+                        if (i > removed_char.index) {
+                            if (removed_char.string === string[i] ||
+                                removed_char.string === '_' || string[i] === '_') {
+                                removed_chars.shift();
+                                // if we add special character we need to correct
+                                // next push to removed_char array
+                                push++;
+                                // we use special characters instead of terminal
+                                // formatting so it's easier to proccess when removing
+                                // backspaces
+                                if (removed_char.string === string[i]) {
+                                    result += string[i] + '\uFFF1';
+                                    continue;
+                                } else if (removed_char.string === '_' ||
+                                           string[i] === '_') {
+                                    var chr;
+                                    if (removed_char.string === '_') {
+                                        chr = string[i];
+                                    } else {
+                                        chr = removed_char.string;
+                                    }
+                                    result += chr + '\uFFF2';
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    result += string[i];
+                }
+            }
+            return result;
+        }
+        // loop until not more backspaces
+        while (string.match(/\x08/) || removed_chars.length) {
+            string = replace(string);
+            if (!string.match(/\x08/)) {
+                // we break the loop so if removed_chars still chave items
+                // we don't have infite loop
+                break;
+            }
+        }
+        function format(string, chr, style) {
+            var re = new RegExp('((:?.' + chr + ')+)', 'g');
+            return string.replace(re, function(_, string) {
+                var re = new RegExp(chr, 'g');
+                return '[[' + style + ']' + string.replace(re, '') + ']';
             });
-            return '[[b;#fff;]' + full + ']';
-        });
+        }
+        // replace special characters with terminal formatting
+        string = format(string, '\uFFF1', 'b;#fff;');
+        string = format(string, '\uFFF2', 'u;;');
+        return string;
     };
     // ---------------------------------------------------------------------
     // :: Html colors taken from ANSI formatting in Linux Terminal

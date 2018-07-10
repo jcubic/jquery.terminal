@@ -1,3 +1,7 @@
+## 1.18.1
+### Bugs
+* fix overtyping function [#409](https://github.com/jcubic/jquery.terminal/issues/409)
+
 ## 1.18.0
 ### Feature
 * looping regex formatters that replace until they don't match the regex

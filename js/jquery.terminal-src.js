@@ -3469,13 +3469,11 @@
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
         apply_formatters: function(string, settings) {
-            function test_lengths(formatter, ret, string) {
+            function test_lengths(formatter, index, ret, string) {
                 if (!formatter.__no_warn__ &&
                     $.terminal.length(ret) !== $.terminal.length(string)) {
-                    console.log(formatter);
-                    warn('Your formatter change length of the string, ' +
-                         'you should use [regex, replacement] formatte' +
-                         'r instead');
+                    warn('Your formatter[' + index + '] change length of the string, ' +
+                         'you should use [regex, replacement] formatter instead');
                 }
             }
             var formatters = $.terminal.defaults.formatters;
@@ -3489,7 +3487,7 @@
                     // on the list
                     if (typeof formatter === 'function' && formatter.__meta__) {
                         var ret = formatter(string, settings);
-                        test_lengths(formatter, ret, string);
+                        test_lengths(formatter, i, ret, string);
                         if (typeof ret === 'string') {
                             return ret;
                         }
@@ -3512,7 +3510,7 @@
                                     return string.replace(formatter[0], formatter[1]);
                                 } else if (typeof formatter === 'function') {
                                     var ret = formatter(string, settings);
-                                    test_lengths(formatter, ret, string);
+                                    test_lengths(formatter, i, ret, string);
                                     if (typeof ret === 'string') {
                                         return ret;
                                     }
