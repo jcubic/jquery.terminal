@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.18.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 08 Jul 2018 07:20:52 +0000
+ * Date: Tue, 10 Jul 2018 17:55:19 +0000
  */
 
 /* TODO:
@@ -1681,6 +1681,7 @@
                 string = $.terminal.escape_formatting(string);
                 string = $.terminal.apply_formatters(string, settings);
                 string = $.terminal.normalize(string);
+                string = crlf(string);
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -2066,7 +2067,6 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
-                    command = crlf(string);
                     if (!stay) {
                         self.position(command.length);
                     }
@@ -2107,7 +2107,6 @@
                 }
             },
             insert: function(string, stay) {
-                string = crlf(string);
                 if (position === command.length) {
                     command += string;
                 } else if (position === 0) {
@@ -2975,8 +2974,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '1.18.0',
-        date: 'Sun, 08 Jul 2018 07:20:52 +0000',
+        version: 'DEV',
+        date: 'Tue, 10 Jul 2018 17:55:19 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3469,13 +3468,11 @@
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
         apply_formatters: function(string, settings) {
-            function test_lengths(formatter, ret, string) {
+            function test_lengths(formatter, index, ret, string) {
                 if (!formatter.__no_warn__ &&
                     $.terminal.length(ret) !== $.terminal.length(string)) {
-                    console.log(formatter);
-                    warn('Your formatter change length of the string, ' +
-                         'you should use [regex, replacement] formatte' +
-                         'r instead');
+                    warn('Your formatter[' + index + '] change length of the string, ' +
+                         'you should use [regex, replacement] formatter instead');
                 }
             }
             var formatters = $.terminal.defaults.formatters;
@@ -3489,7 +3486,7 @@
                     // on the list
                     if (typeof formatter === 'function' && formatter.__meta__) {
                         var ret = formatter(string, settings);
-                        test_lengths(formatter, ret, string);
+                        test_lengths(formatter, i, ret, string);
                         if (typeof ret === 'string') {
                             return ret;
                         }
@@ -3512,7 +3509,7 @@
                                     return string.replace(formatter[0], formatter[1]);
                                 } else if (typeof formatter === 'function') {
                                     var ret = formatter(string, settings);
-                                    test_lengths(formatter, ret, string);
+                                    test_lengths(formatter, i, ret, string);
                                     if (typeof ret === 'string') {
                                         return ret;
                                     }

@@ -1,6 +1,7 @@
 ## 1.18.1
 ### Bugs
 * fix overtyping function [#409](https://github.com/jcubic/jquery.terminal/issues/409)
+* remove CR characters only for display
 
 ## 1.18.0
 ### Feature

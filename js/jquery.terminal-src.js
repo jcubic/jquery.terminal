@@ -1681,6 +1681,7 @@
                 string = $.terminal.escape_formatting(string);
                 string = $.terminal.apply_formatters(string, settings);
                 string = $.terminal.normalize(string);
+                string = crlf(string);
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -2066,7 +2067,6 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
-                    command = crlf(string);
                     if (!stay) {
                         self.position(command.length);
                     }
@@ -2107,7 +2107,6 @@
                 }
             },
             insert: function(string, stay) {
-                string = crlf(string);
                 if (position === command.length) {
                     command += string;
                 } else if (position === 0) {

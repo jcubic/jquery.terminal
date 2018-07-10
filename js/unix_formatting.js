@@ -96,13 +96,17 @@
             }
             return result;
         }
+        var break_next = false;
         // loop until not more backspaces
         while (string.match(/\x08/) || removed_chars.length) {
             string = replace(string);
+            if (break_next) {
+                break;
+            }
             if (!string.match(/\x08/)) {
                 // we break the loop so if removed_chars still chave items
                 // we don't have infite loop
-                break;
+                break_next = true;
             }
         }
         function format(string, chr, style) {
