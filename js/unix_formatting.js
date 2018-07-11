@@ -339,10 +339,11 @@
             return [styles.join(''), color, background];
         }
         return function from_ansi(input, options) {
-
             var settings = $.extend({
                 unixFormattingEscapeBrackets: false
             }, options);
+
+            input = input.replace(/[^\r\n]+\r\x1B(?:&#91;|\[)K/g, '');
 
             //merge multiple codes
             /*input = input.replace(/((?:\x1B\[[0-9;]*[A-Za-z])*)/g, function(group) {
