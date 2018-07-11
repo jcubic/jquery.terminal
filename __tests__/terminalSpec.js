@@ -209,6 +209,18 @@ function output(term) {
         return $(this).text().replace(/\xA0/g, ' ');
     }).get();
 }
+function timer(callback, timeout) {
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            try {
+                resolve(callback());
+            } catch(e) {
+                reject(e);
+            }
+        }, timeout);
+    });
+}
+
 
 var support_animations = (function() {
     var animation = false,
