@@ -26,11 +26,15 @@
     // ---------------------------------------------------------------------
     $.terminal.overtyping = function overtyping(string) {
         var removed_chars = [];
+        var chr = '[^\\x08]|[\\r\\n]{2}|&[^;]+;';
+        /* eslint-disable */
+        var re = new RegExp('^(' + chr + ')?\\x08');
+        var overtyping_re = new RegExp('^(?:(' + chr + ')?\\x08(_|\\1)|(_)\\x08(' + chr + '))');
+        /* eslint-enable */
         function replace(string) {
             // we match characters and html entities because command line escape brackets
             // echo don't, when writing formatter always process html entitites so it work
             // for cmd plugin as well for echo
-            var re = /^([^\x08]|[\r\n]{2}|&[^;]+;)?\x08/;
             var result = '';
             var push = 0;
             for (var i = 0; i < string.length; ++i) {
@@ -44,7 +48,8 @@
                     if (match[1]) {
                         removed_chars.push({
                             index: i - match[1].length + push,
-                            string: match[1]
+                            string: match[1],
+                            overtyping: partial.match(overtyping_re)
                         });
                     }
                     return result + partial.replace(re, '');
@@ -52,42 +57,43 @@
                     // if newline we need to add at the end all characters
                     // removed by backspace
                     if (removed_chars.length) {
-                        result += removed_chars.map(function(x) {
-                            return x.string;
-                        }).join('');
-                        removed_chars = [];
+                        removed_chars = removed_chars.reduce(function(acc, char) {
+                            if (i > char.index) {
+                                result += char.string;
+                                return acc;
+                            }
+                            acc.push(char);
+                            return acc;
+                        }, []);
                     }
-                    return result + partial;
+                    result += string[i];
                 } else {
                     if (removed_chars.length) {
                         // if we are in index of removed character we check if the
                         // character is the same it will be bold or if removed char
                         // or char at index is underscore then it will
                         // be terminal formatting with underscore
-                        if (i > removed_char.index) {
-                            if (removed_char.string === string[i] ||
-                                removed_char.string === '_' || string[i] === '_') {
-                                removed_chars.shift();
-                                // if we add special character we need to correct
-                                // next push to removed_char array
-                                push++;
-                                // we use special characters instead of terminal
-                                // formatting so it's easier to proccess when removing
-                                // backspaces
-                                if (removed_char.string === string[i]) {
-                                    result += string[i] + '\uFFF1';
-                                    continue;
-                                } else if (removed_char.string === '_' ||
-                                           string[i] === '_') {
-                                    var chr;
-                                    if (removed_char.string === '_') {
-                                        chr = string[i];
-                                    } else {
-                                        chr = removed_char.string;
-                                    }
-                                    result += chr + '\uFFF2';
-                                    continue;
+                        if (i > removed_char.index && removed_char.overtyping) {
+                            removed_chars.shift();
+                            // if we add special character we need to correct
+                            // next push to removed_char array
+                            push++;
+                            // we use special characters instead of terminal
+                            // formatting so it's easier to proccess when removing
+                            // backspaces
+                            if (removed_char.string === string[i]) {
+                                result += string[i] + '\uFFF1';
+                                continue;
+                            } else if (removed_char.string === '_' ||
+                                       string[i] === '_') {
+                                var chr;
+                                if (removed_char.string === '_') {
+                                    chr = string[i];
+                                } else {
+                                    chr = removed_char.string;
                                 }
+                                result += chr + '\uFFF2';
+                                continue;
                             }
                         }
                     }

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 10 Jul 2018 17:55:19 +0000
+ * Date: Wed, 11 Jul 2018 06:24:38 +0000
  */
 
 /* TODO:
@@ -219,12 +219,14 @@
     // -----------------------------------------------------------------------
     // :: debug functions
     // -----------------------------------------------------------------------
+    /* eslint-disable */
     function debug(str) {
         if (false) {
             console.log(str);
             $.terminal.active().echo(str);
         }
     }
+    /* eslint-enable */
     /* commented out so it don't affect coverage
     // -----------------------------------------------------------------------
     Function.prototype.monitor = function() {
@@ -2067,6 +2069,7 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
+                    command = string;
                     if (!stay) {
                         self.position(command.length);
                     }
@@ -2975,7 +2978,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 10 Jul 2018 17:55:19 +0000',
+        date: 'Wed, 11 Jul 2018 06:24:38 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3948,12 +3951,14 @@
         msg = '[jQuery Terminal] ' + msg;
         if (warnings.indexOf(msg) === -1) {
             warnings.push(msg);
+            /* eslint-disable */
             if (console) {
                 if (console.warn) {
                     console.warn(msg);
                 } else if (console.log) {
                     console.log(msg);
                 }
+                /* eslint-enable */
             } else {
                 // prevent catching in outer try..catch
                 setTimeout(function() {

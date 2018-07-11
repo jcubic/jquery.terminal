@@ -219,12 +219,14 @@
     // -----------------------------------------------------------------------
     // :: debug functions
     // -----------------------------------------------------------------------
+    /* eslint-disable */
     function debug(str) {
         if (false) {
             console.log(str);
             $.terminal.active().echo(str);
         }
     }
+    /* eslint-enable */
     /* commented out so it don't affect coverage
     // -----------------------------------------------------------------------
     Function.prototype.monitor = function() {
@@ -2067,6 +2069,7 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
+                    command = string;
                     if (!stay) {
                         self.position(command.length);
                     }
@@ -3948,12 +3951,14 @@
         msg = '[jQuery Terminal] ' + msg;
         if (warnings.indexOf(msg) === -1) {
             warnings.push(msg);
+            /* eslint-disable */
             if (console) {
                 if (console.warn) {
                     console.warn(msg);
                 } else if (console.log) {
                     console.log(msg);
                 }
+                /* eslint-enable */
             } else {
                 // prevent catching in outer try..catch
                 setTimeout(function() {

@@ -140,6 +140,7 @@
       "Symbol": true
     },
     "rules": {
+      "no-console": "error",
       "eqeqeq": "error",
       "curly": "error",
       "no-unreachable": "error",
