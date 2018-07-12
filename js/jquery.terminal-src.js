@@ -3095,12 +3095,16 @@
                 index = last_index;
                 // Build the replacement string. This just handles $$ and $n,
                 // you may want to add handling for $`, $', and $&.
-                rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
-                    if (c0 === "$") {
-                        return "$";
-                    }
-                    return match[c0];
-                });
+                if (typeof replacement === 'function') {
+                    rep_string = replacement.apply(null, match);
+                } else {
+                    rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
+                        if (c0 === "$") {
+                            return "$";
+                        }
+                        return match[c0];
+                    });
+                }
                 // Add on the replacement
                 new_string += rep_string;
                 // If the position is affected...
@@ -3475,54 +3479,110 @@
                 if (!formatter.__no_warn__ &&
                     $.terminal.length(ret) !== $.terminal.length(string)) {
                     warn('Your formatter[' + index + '] change length of the string, ' +
-                         'you should use [regex, replacement] formatter instead');
+                         'you should use [regex, replacement] formatter or function ' +
+                         ' that return [replacement, position] instead');
                 }
             }
             var formatters = $.terminal.defaults.formatters;
+            settings = settings || {};
             var i = 0;
+            function apply_function_formatter(formatter, input) {
+                var options = $.extend({}, settings, {
+                    position: input[1]
+                });
+                var ret = formatter(input[0], options);
+                if (typeof ret === 'string') {
+                    test_lengths(formatter, i - 1, ret, input[0]);
+                    if (typeof ret === 'string') {
+                        return [ret, options.position];
+                    }
+                    return input;
+                } else if (ret instanceof Array && ret.length === 2) {
+                    return ret;
+                } else {
+                    return input;
+                }
+            }
+            var input;
+            if (typeof settings.position === 'number') {
+                input = [string, settings.position];
+            } else {
+                input = [string, 0];
+            }
             try {
-                return formatters.reduce(function(string, formatter) {
+                var result = formatters.reduce(function(input, formatter) {
                     i++;
                     // __meta__ is for safe formatter that can handle formatters
                     // inside formatters. for other usage we use format_split so one
                     // formatter don't mess with formatter that was previous
                     // on the list
                     if (typeof formatter === 'function' && formatter.__meta__) {
-                        var ret = formatter(string, settings);
-                        test_lengths(formatter, i, ret, string);
-                        if (typeof ret === 'string') {
-                            return ret;
-                        }
+                        return apply_function_formatter(formatter, input);
                     } else {
-                        return $.terminal.format_split(string).map(function(string) {
+                        var length = 0;
+                        var splitted = $.terminal.format_split(input[0]);
+                        var partials = splitted.map(function(string) {
+                            var position;
+                            if (input[1] - length >= 0) {
+                                position = input[1] - length;
+                            } else {
+                                // -1 indicate that we will not track position because it
+                                // was in one the previous parial strings
+                                position = -1;
+                            }
+                            length += $.terminal.length(string);
                             if ($.terminal.is_formatting(string)) {
-                                return string;
+                                return [string, -1];
                             } else {
                                 if (formatter instanceof Array) {
                                     var options = formatter[2] || {};
+                                    var result = [string, position === -1 ? 0 : position];
                                     if (options.loop) {
                                         while (string.match(formatter[0])) {
-                                            string = string.replace(
+                                            result = $.terminal.tracking_replace(
+                                                result[0],
                                                 formatter[0],
-                                                formatter[1]
+                                                formatter[1],
+                                                result[1]
                                             );
                                         }
-                                        return string;
+                                    } else {
+                                        result = $.terminal.tracking_replace(
+                                            result[0],
+                                            formatter[0],
+                                            formatter[1],
+                                            result[1]
+                                        );
                                     }
-                                    return string.replace(formatter[0], formatter[1]);
+                                    if (position === -1) {
+                                        return [result, -1];
+                                    }
+                                    return result;
                                 } else if (typeof formatter === 'function') {
-                                    var ret = formatter(string, settings);
-                                    test_lengths(formatter, i, ret, string);
-                                    if (typeof ret === 'string') {
-                                        return ret;
-                                    }
+                                    return apply_function_formatter(formatter, [
+                                        string, position
+                                    ]);
                                 }
-                                return string;
+                                return [string, -1];
                             }
+                        });
+                        var position = partials.filter(function(partial) {
+                            return partial[1] !== -1;
+                        })[0];
+                        var string = partials.map(function(partial) {
+                            return partial[0];
                         }).join('');
+                        return [
+                            string,
+                            typeof position === 'undefined' ? 0 : position[1]
+                        ];
                     }
-                    return string;
-                }, string);
+                }, input);
+                if (typeof settings.position === 'number') {
+                    return result;
+                } else {
+                    return result[0];
+                }
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
                 formatters.splice(i - 1);
