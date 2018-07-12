@@ -2184,8 +2184,8 @@
                         } else {
                             // reverse search for correct position
                             for (var i = 0; i < command_len; ++i) {
-                                var options = $.extend({}, settings, {position: i});
-                                var pos = $.terminal.apply_formatters(command, options)[1];
+                                var opts = $.extend({}, settings, {position: i});
+                                var pos = $.terminal.apply_formatters(command, opts)[1];
                                 if (new_formatted_pos === pos) {
                                     formatted_position = pos;
                                     self.position(i);

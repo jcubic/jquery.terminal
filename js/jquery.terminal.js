@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 12 Jul 2018 16:17:46 +0000
+ * Date: Thu, 12 Jul 2018 16:36:11 +0000
  */
 
 /* TODO:
@@ -2184,8 +2184,8 @@
                         } else {
                             // reverse search for correct position
                             for (var i = 0; i < command_len; ++i) {
-                                var options = $.extend({}, settings, {position: i});
-                                var pos = $.terminal.apply_formatters(command, options)[1];
+                                var opts = $.extend({}, settings, {position: i});
+                                var pos = $.terminal.apply_formatters(command, opts)[1];
                                 if (new_formatted_pos === pos) {
                                     formatted_position = pos;
                                     self.position(i);
@@ -2941,7 +2941,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 12 Jul 2018 16:17:46 +0000',
+        date: 'Thu, 12 Jul 2018 16:36:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
