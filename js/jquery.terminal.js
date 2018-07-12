@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 12 Jul 2018 07:59:04 +0000
+ * Date: Thu, 12 Jul 2018 16:17:46 +0000
  */
 
 /* TODO:
@@ -1681,7 +1681,12 @@
             // we don't want to format command when user type formatting in
             try {
                 string = $.terminal.escape_formatting(string);
-                string = $.terminal.apply_formatters(string, settings);
+                var options = $.extend({}, settings, {
+                    position: position
+                });
+                var frormatted = $.terminal.apply_formatters(string, options);
+                formatted_position = frormatted[1];
+                string = frormatted[0];
                 string = $.terminal.normalize(string);
                 string = crlf(string);
                 return string;
@@ -1738,51 +1743,6 @@
         }
         function substring(str, start, end) {
             return $.terminal.substring(str, start, end);
-        }
-        // ---------------------------------------------------------------------
-        // :: functions used to calculate position of cursor when formatting
-        // :: change length of output text like with emoji demo
-        // ---------------------------------------------------------------------
-        // :: main function that return corrected cursor position on display
-        // :: if cursor is in the middle of the word that is shorter than before
-        // :: applying formatting then the corrected position is after the word
-        // :: so it stay in place when you move real cursor in the middle
-        // :: of the word
-        // ---------------------------------------------------------------------
-        function get_formatted_position(position) {
-            // only regex formatters can change length of output string
-            var formatters = $.terminal.defaults.formatters.filter(function(formatter) {
-                return formatter instanceof Array;
-            });
-            if (position === 0) {
-                return position;
-            }
-            if (formatters.length) {
-                return formatters.reduce(function(result, frmt) {
-                    var options = frmt[2] || {};
-                    if (options.loop) {
-                        result = result.slice();
-                        while (result[0].match(frmt[0])) {
-                            result = $.terminal.tracking_replace(
-                                result[0],
-                                frmt[0],
-                                frmt[1],
-                                result[1]
-                            );
-                        }
-                        return result;
-                    }
-                    var command = result[0];
-                    var position = result[1];
-                    return $.terminal.tracking_replace(
-                        command,
-                        frmt[0],
-                        frmt[1],
-                        position
-                    );
-                }, [command, position])[1];
-            }
-            return position;
         }
         // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
@@ -1852,8 +1812,8 @@
                         string = command.replace(/./g, settings.mask);
                         break;
                 }
-                var pos = formatted_position;
                 string = formatting(string);
+                var pos = formatted_position;
                 var i;
                 self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
                 before.html('');
@@ -2181,7 +2141,6 @@
                     } else {
                         position = n;
                     }
-                    formatted_position = get_formatted_position(position);
                     if (is_function(settings.onPositionChange)) {
                         settings.onPositionChange(position);
                     }
@@ -2223,8 +2182,12 @@
                         if (new_formatted_pos === len) {
                             self.position($.terminal.length(command));
                         } else {
+                            // reverse search for correct position
                             for (var i = 0; i < command_len; ++i) {
-                                if (new_formatted_pos === get_formatted_position(i)) {
+                                var options = $.extend({}, settings, {position: i});
+                                var pos = $.terminal.apply_formatters(command, options)[1];
+                                if (new_formatted_pos === pos) {
+                                    formatted_position = pos;
                                     self.position(i);
                                 }
                             }
@@ -2978,7 +2941,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 12 Jul 2018 07:59:04 +0000',
+        date: 'Thu, 12 Jul 2018 16:17:46 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
