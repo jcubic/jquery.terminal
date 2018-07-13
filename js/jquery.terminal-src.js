@@ -908,6 +908,9 @@
                         return;
                     }
                 }
+                if (!data.length) {
+                    return;
+                }
                 if (data.length === 1) {
                     return data[0];
                 } else {
@@ -957,10 +960,19 @@
                 }
             },
             map: function(fn) {
-                return data.filter(Boolean).map(fn);
+                return data.map(function(item, i) {
+                    if (typeof item !== 'undefined') {
+                        return fn(item, i);
+                    }
+                    return null;
+                }).filter(Boolean);
             },
             forEach: function(fn) {
-                data.filter(Boolean).forEach(fn);
+                return data.forEach(function(item, i) {
+                    if (typeof item !== 'undefined') {
+                        fn(item, i);
+                    }
+                });
             },
             append: function(item) {
                 data.push(item);
@@ -1119,7 +1131,8 @@
             prompt: '> ',
             enabled: true,
             history: true,
-            onPositionChange: $.noop
+            onPositionChange: $.noop,
+            onCommandChange: $.noop
         }
     };
     $.fn.cmd = function(options) {
@@ -3384,7 +3397,7 @@
         // ---------------------------------------------------------------------
         // :: Escape & that's not part of entity
         // ---------------------------------------------------------------------
-        amp: function(str) {
+        amp: function amp(str) {
             return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
         },
         // ---------------------------------------------------------------------
