@@ -1,35 +1,67 @@
-import * as $ from "jquery";
-
-type TypeOrArray<T> = T | T[];
-type interpterFunction = (command: string, term?: JQueryTerminal) => any;
 type anyFunction = (...args: any[]) => any;
 type ObjectInterpreter = {
     [key: string]: ObjectInterpreter | anyFunction;
 }
+type TypeOrArray<T> = T | T[];
+type interpterFunction = (command: string, term?: JQueryTerminal) => any;
 type Interpterer = string | interpterFunction | ObjectInterpreter;
 
 type TypeOrString<T> = string | T;
 
-interface JQueryTerminal extends JQuery {
-    terminal(interpreter: TypeOrArray<Interpterer>);
-    resizer(arg: TypeOrString<anyFunction>);
+interface JQuery<TElement = HTMLElement> {
+    terminal(interpreter?: TypeOrArray<Interpterer>, options?: TerminalOptions): JQueryTerminal;
+    resizer(arg: TypeOrString<anyFunction>): JQuery;
+    cmd(options?: CmdOptions): Cmd;
+    text_length(): number;
+    caret(pos?: number): number;
+    visible(): JQuery;
+    hidden(): JQuery;
+}
+
+type StringOrNumber = string | number | null;
+
+type JSONObject = {
+    [key: string]: StringOrNumber
 }
 
 type mapFunction = (key: string, anyFunction) => any;
 
 interface JQueryStatic {
-    omap(object: {[key: string]: anyFunction}, mapFunction);
+    omap(object: { [key: string]: anyFunction }, mapFunction);
+    jrpc(url: string, method: string, params: any[], sucess?: (json: JSONObject, status?: string, jqxhr?: JQuery.jqXHR) => void, error?: (jqxhr?: JQuery.jqXHR, status?: string) => void): void;
 }
 
 type keymapFunction = (event: JQueryKeyEventObject, original?: keymapFunction) => any;
-type keymapObject = {[key:string]: keymapFunction};
+type keymapObject = { [key: string]: keymapFunction };
 
 type commandsCmdFunction = (command: string) => any;
 type setStringFunction = (value: string) => void;
 type cmdPrompt = (setPrompt: setStringFunction) => void | string;
 
+type historyFilterFunction = (command: string) => boolean;
+type historyFilter = RegExp | historyFilterFunction;
 
-// we copy from method from jQuery to overwrite it
+type KeyEventHandler = (event?: JQueryKeyEventObject) => any;
+
+type CmdOptions = {
+    mask?: string | boolean;
+    caseSensitiveSearch?: boolean;
+    historySize?: number;
+    prompt?: cmdPrompt;
+    enabled?: boolean;
+    history?: boolean | "memory";
+    onPositionChange?: (position?: number, display_position?: number) => void;
+    width?: number;
+    historyFilter?: historyFilter;
+    commands?: commandsCmdFunction;
+    char_width?: number;
+    onCommandChange?: (command: string) => void;
+    name?: string;
+    keypress?: KeyEventHandler;
+    keydown?: KeyEventHandler;
+}
+
+// we copy methods from jQuery to overwrite it
 // see: https://github.com/Microsoft/TypeScript/issues/978
 interface Cmd extends JQuery {
     option(name: string, value: any): Cmd;
@@ -73,26 +105,21 @@ interface Cmd extends JQuery {
     mask(toggle: boolean): Cmd;
     mask(mask: string): Cmd;
 }
-/*
-type TerminalOptions = {
-}
+
+
 
 interface History {
-    
+
 }
 
-interface CmdOptions {
-    
-}
-
-
-interface Terminal extends jQuery {
-    
-}
 
 interface TerminalOptions {
-    
+
 }
 
 
-*/
+interface JQueryTerminal extends JQuery {
+    set_command(command: string): JQueryTerminal;
+    id(): number;
+    clear(): JQueryTerminal;
+}

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 12 Jul 2018 16:36:11 +0000
+ * Date: Fri, 13 Jul 2018 11:41:02 +0000
  */
 
 /* TODO:
@@ -2132,6 +2132,7 @@
             },
             position: function(n, relative, silent) {
                 if (typeof n === 'number') {
+                    var pos = position;
                     if (relative) {
                         position += n;
                     } else if (n < 0) {
@@ -2141,10 +2142,10 @@
                     } else {
                         position = n;
                     }
-                    if (is_function(settings.onPositionChange)) {
-                        settings.onPositionChange(position);
-                    }
-                    if (!silent) {
+                    if (pos !== position && !silent) {
+                        if (is_function(settings.onPositionChange)) {
+                            settings.onPositionChange(position, formatted_position);
+                        }
                         redraw();
                         fix_textarea(true);
                     }
@@ -2941,7 +2942,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 12 Jul 2018 16:36:11 +0000',
+        date: 'Fri, 13 Jul 2018 11:41:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4051,7 +4052,9 @@
                 }
                 if (validJSONRPC(json) || options.method === 'system.describe') {
                     // don't catch errors in success callback
-                    options.success(json, status, jqXHR);
+                    if (options.success) {
+                        options.success(json, status, jqXHR);
+                    }
                     deferred.resolve(json);
                 } else {
                     if (options.error) {

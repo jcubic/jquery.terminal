@@ -2,6 +2,7 @@
 ### Bugs
 * fix overtyping function [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 * remove CR characters only for display
+* don't invoke onPosition change when calling position and don't change the value
 
 ## 1.18.0
 ### Feature

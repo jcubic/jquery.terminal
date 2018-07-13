@@ -2132,6 +2132,7 @@
             },
             position: function(n, relative, silent) {
                 if (typeof n === 'number') {
+                    var pos = position;
                     if (relative) {
                         position += n;
                     } else if (n < 0) {
@@ -2141,10 +2142,10 @@
                     } else {
                         position = n;
                     }
-                    if (is_function(settings.onPositionChange)) {
-                        settings.onPositionChange(position);
-                    }
-                    if (!silent) {
+                    if (pos !== position && !silent) {
+                        if (is_function(settings.onPositionChange)) {
+                            settings.onPositionChange(position, formatted_position);
+                        }
                         redraw();
                         fix_textarea(true);
                     }
@@ -4051,7 +4052,9 @@
                 }
                 if (validJSONRPC(json) || options.method === 'system.describe') {
                     // don't catch errors in success callback
-                    options.success(json, status, jqXHR);
+                    if (options.success) {
+                        options.success(json, status, jqXHR);
+                    }
                     deferred.resolve(json);
                 } else {
                     if (options.error) {
