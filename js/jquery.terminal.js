@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 13 Jul 2018 17:23:39 +0000
+ * Date: Sat, 14 Jul 2018 08:54:59 +0000
  */
 
 /* TODO:
@@ -964,6 +964,7 @@
                     if (typeof item !== 'undefined') {
                         return fn(item, i);
                     }
+                    return null;
                 }).filter(Boolean);
             },
             forEach: function(fn) {
@@ -2954,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 13 Jul 2018 17:23:39 +0000',
+        date: 'Sat, 14 Jul 2018 08:54:59 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5107,7 +5108,7 @@
                 }
                 self.flush(options);
                 try {
-                    settings.onAfterRedraw.call(self);
+                    settings.onAfterRedraw.call(self, self);
                 } catch (e) {
                     settings.onAfterRedraw = $.noop;
                     display_exception(e, 'onAfterRedraw');

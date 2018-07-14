@@ -5108,7 +5108,7 @@
                 }
                 self.flush(options);
                 try {
-                    settings.onAfterRedraw.call(self);
+                    settings.onAfterRedraw.call(self, self);
                 } catch (e) {
                     settings.onAfterRedraw = $.noop;
                     display_exception(e, 'onAfterRedraw');
