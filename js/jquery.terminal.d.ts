@@ -5,10 +5,11 @@ type anyFunction = (...args: any[]) => any;
 type StringOrNumber = string | number | null;
 
 type JSONObject = {
-    [key: string]: StringOrNumber | JSONObject;
+    [key: string]: StringOrNumber | boolean | JSONObject;
 }
 
 type mapFunction = (key: string, anyFunction) => any;
+type voidFunction = () => void;
 
 type TypeOrArray<T> = T | T[];
 type TypeOrString<T> = string | T;
@@ -43,7 +44,9 @@ declare namespace JQueryTerminal {
     type Formatter = [RegExp, FormaterRegExpReplacement] | [RegExp, FormaterRegExpReplacement, { loop: boolean }] | FormatterFunction;
 
     type keymapFunction = (event: JQueryKeyEventObject, original?: keymapFunction) => any;
+    type keymapFunctionWithContext = (this: JQueryTerminal, event: JQueryKeyEventObject, original?: keymapFunction) => any;
     type keymapObject = { [key: string]: keymapFunction };
+    type keymapObjectWithContext = { [key: string]: keymapFunctionWithContext };
 
     type commandsCmdFunction = (command: string) => any;
     type setStringFunction = (value: string) => void;
@@ -65,6 +68,8 @@ declare namespace JQueryTerminal {
     type SetLoginCallback = (token: string) => (void | ObjectWithThenMethod);
     type LoginFunction = (username: string, password: string, cb?: SetLoginCallback) => (void | ObjectWithThenMethod);
 
+    type LoginArgument = string | boolean | JQueryTerminal.LoginFunction;
+
     type Completion = string[] | CompletionFunction;
 
     type SetComplationCallback = (complation: string[]) => void;
@@ -84,7 +89,7 @@ declare namespace JQueryTerminal {
     type EventCallback = (this: JQueryTerminal, term: JQueryTerminal) => (void | boolean);
 
 
-    type Interpreter = {
+    type InterpreterItem = {
         completion: "settings" | JQueryTerminal.Completion;
         history?: boolean;
         // all other iterpreters are converted to function
@@ -96,7 +101,35 @@ declare namespace JQueryTerminal {
         prompt: ExtendedPrompt;
     }
 
-    type PushPopCallback = (this: JQueryTerminal, before: JQueryTerminal.Interpreter, after: JQueryTerminal.Interpreter) => void;
+    type PushPopCallback = (this: JQueryTerminal, before: JQueryTerminal.InterpreterItem, after: JQueryTerminal.InterpreterItem) => void;
+
+    type Lines = Array<{ string: any, options?: EchoOptions, index: number }>;
+
+    type View = {
+        focus: boolean;
+        mask: string | boolean;
+        prompt?: ExtendedPrompt;
+        command: string;
+        position: number;
+        lines: Lines;
+        interpreters?: Stack<InterpreterItem>;
+    }
+
+    type CompleteOptions = {
+        word?: boolean;
+        echo?: boolean;
+        escape?: boolean;
+        caseSensitive?: boolean;
+        doubleTab?: DoubleTabFunction;
+    }
+
+    type EchoOptions = {
+        flush?: boolean;
+        raw?: boolean;
+        finalize?: JQueryTerminal.EchoFinalizeFunction;
+        keepWords?: boolean;
+        formatters?: boolean;
+    }
 
     interface History<T = string> {
         new(name?: string, size?: number, memory?: boolean): History<T>;
@@ -300,6 +333,7 @@ type TerminalOptions = {
     wrap?: boolean;
     checkArity?: boolean;
     raw?: boolean;
+    keymap?: JQueryTerminal.keymapObjectWithContext;
     exceptionHandler?: null | JQueryTerminal.ExceptionHandler;
     pauseEvents?: boolean;
     softPause?: boolean;
@@ -319,7 +353,7 @@ type TerminalOptions = {
     historyFilter?: JQueryTerminal.historyFilter;
     echoCommand?: boolean;
     scrollOnEcho?: boolean;
-    login?: string | boolean | JQueryTerminal.LoginFunction;
+    login?: JQueryTerminal.LoginArgument;
     outputLimit?: number;
     onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status?: string, error?: string) => void;
     pasteImage?: boolean;
@@ -352,19 +386,79 @@ type TerminalOptions = {
     }
 }
 
-type EchoOptions = {
-    flush?: boolean;
-    raw?: boolean;
-    finalize?: JQueryTerminal.EchoFinalizeFunction;
-    keepWords?: boolean;
-    formatters?: boolean;
-}
-
-
 interface JQueryTerminal extends JQuery {
     set_command(command: string): JQueryTerminal;
     id(): number;
     clear(): JQueryTerminal;
+    export_view(): JQueryTerminal.View;
+    import_view(view: JQueryTerminal.View): JQueryTerminal;
+    save_state(command?: string, ignore_hash?: boolean, index?: number): JQueryTerminal;
+    exec(command: string, silent?: boolean, defered?: JQuery.Deferred<void>): JQuery.Promise<void>;
+    autologin(user: string, token: string, silent?: boolean): JQueryTerminal;
+    login(auth: JQueryTerminal.LoginFunction, infinite?: boolean, success?: () => void, error?: () => void): JQueryTerminal;
+    settings(): TerminalOptions;
+    before_cursor(word?: boolean): string;
+    complete(commands: string[], options?: JQueryTerminal.CompleteOptions): boolean;
+    commands(): JQueryTerminal.interpterFunction;
+    set_interpreter(interpter: TypeOrArray<JQueryTerminal.Interpterer>, login?: JQueryTerminal.LoginArgument): JQueryTerminal;
+    greetings(): JQueryTerminal;
+    paused(): boolean;
+    pause(): JQueryTerminal;
+    resume(): JQueryTerminal;
+    cols(): number;
+    rows(): number;
+    history: JQueryTerminal.History<string>;
+    history_state(toogle: boolean): JQueryTerminal;
+    clear_history_state(): JQueryTerminal;
+    next(): JQueryTerminal;
+    focus(): JQueryTerminal;
+    freeze(toogle: boolean): JQueryTerminal;
+    frozen(): boolean;
+    enable(silent?: boolean): JQueryTerminal;
+    disable(silent?: boolean): JQueryTerminal;
+    enabled(): boolean;
+    signature(): string;
+    version(): string;
+    cmd(): Cmd;
+    get_command(): string;
+    set_command(cmd: string, silent?: boolean): JQueryTerminal;
+    set_position(pos: number, relative?: boolean): JQueryTerminal;
+    get_position(): number;
+    insert(str: string, stay?: boolean): JQueryTerminal;
+    set_prompt(prompt: JQueryTerminal.ExtendedPrompt): JQueryTerminal;
+    get_prompt(): JQueryTerminal.ExtendedPrompt;
+    set_mask(toggle?: boolean): JQueryTerminal;
+    get_output(raw?: boolean): JQueryTerminal.Lines | string[];
+    resize(width?: number, height?: number): JQueryTerminal;
+    refresh(): JQueryTerminal;
+    flush(options?: { update?: boolean, scroll?: boolean }): JQueryTerminal;
+    update(line: number, str: string, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    // options for remove_line is useless but that's how API look like
+    remove_line(line: number, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    last_index(): number;
+    echo(arg: any, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    error(arg: any, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    exception(e: Error, label?: string): JQueryTerminal;
+    scroll(amount: number): JQueryTerminal;
+    logout(local?: boolean): JQueryTerminal;
+    token(local?: boolean): string | void;
+    set_token(token?: string, local?: boolean): JQueryTerminal;
+    get_token(local?: boolean): string | void;
+    login_name(local?: boolean): string | void;
+    name(): string;
+    prefix_name(local?: boolean): string;
+    read(message: string, success?: (result: string) => void, cancel?: voidFunction): JQuery.Promise<string>;
     push(interpreter: TypeOrArray<JQueryTerminal.Interpterer>, options?: JSONObject): JQueryTerminal;
-    echo(arg: any, options?: EchoOptions): JQueryTerminal;
+    pop(echoCommand?: string, silent?: boolean): JQueryTerminal;
+    option(options: TerminalOptions | string, value: any): any;
+    invoke_key(shorcut: string): JQueryTerminal;
+    keymap(keymap?: JQueryTerminal.keymapObjectWithContext | string, fn?: JQueryTerminal.keymapFunctionWithContext): JQueryTerminal.keymapObjectWithContext | JQueryTerminal.keymapFunctionWithContext | void;
+    level(): number;
+    reset(): JQueryTerminal;
+    purge(): JQueryTerminal;
+    destroy(): JQueryTerminal;
+    scroll_to_bottom(): JQueryTerminal;
+    is_bottom(): boolean;
 }
+
+

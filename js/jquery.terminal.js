@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 14 Jul 2018 08:54:59 +0000
+ * Date: Sat, 14 Jul 2018 10:42:54 +0000
  */
 
 /* TODO:
@@ -223,7 +223,7 @@
     function debug(str) {
         if (false) {
             console.log(str);
-            $.terminal.active().echo(str);
+            //$.terminal.active().echo(str);
         }
     }
     /* eslint-enable */
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 14 Jul 2018 08:54:59 +0000',
+        date: 'Sat, 14 Jul 2018 10:42:54 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5808,6 +5808,8 @@
             },
             options || {}
         );
+        // so it's the same as in TypeScript definition for options
+        delete settings.formatters;
         // used to throw error when calling methods on destroyed terminal
         var defunct = false;
         var lines = [];
@@ -6477,6 +6479,7 @@
                         self.enable();
                     }
                 });
+                return self;
             },
             // -------------------------------------------------------------
             // :: check if terminal is frozen
@@ -6958,6 +6961,7 @@
                         formatters: false
                     });
                 }
+                return self;
             },
             // -------------------------------------------------------------
             // :: Scroll Div that holds the terminal

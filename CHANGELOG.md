@@ -1,4 +1,6 @@
-## 1.18.1
+## 1.19.0
+### Features
+* add TypeScript definition file
 ### Bugs
 * fix overtyping function [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 * remove CR characters only for display

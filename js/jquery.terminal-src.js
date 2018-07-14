@@ -223,7 +223,7 @@
     function debug(str) {
         if (false) {
             console.log(str);
-            $.terminal.active().echo(str);
+            //$.terminal.active().echo(str);
         }
     }
     /* eslint-enable */
@@ -5808,6 +5808,8 @@
             },
             options || {}
         );
+        // so it's the same as in TypeScript definition for options
+        delete settings.formatters;
         // used to throw error when calling methods on destroyed terminal
         var defunct = false;
         var lines = [];
@@ -6477,6 +6479,7 @@
                         self.enable();
                     }
                 });
+                return self;
             },
             // -------------------------------------------------------------
             // :: check if terminal is frozen
@@ -6958,6 +6961,7 @@
                         formatters: false
                     });
                 }
+                return self;
             },
             // -------------------------------------------------------------
             // :: Scroll Div that holds the terminal
