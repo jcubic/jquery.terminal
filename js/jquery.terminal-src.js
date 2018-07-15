@@ -5804,7 +5804,8 @@
             {},
             $.terminal.defaults,
             {
-                name: self.selector
+                name: self.selector,
+                exit: !!(options && options.login || !options)
             },
             options || {}
         );

@@ -1,10 +1,15 @@
 ## 1.19.0
 ### Features
 * add TypeScript definition file
+* update formatters API to have a way to return position after replace from function formatter
+* update unix formatters to use new API so they work with command line
+* set exit to false if no login provided
+
 ### Bugs
 * fix overtyping function [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 * remove CR characters only for display
 * don't invoke onPosition change when calling position and don't change the value
+
 
 ## 1.18.0
 ### Feature
@@ -12,6 +17,7 @@
 * add tracking_replace to $.terminal namespace
 * $.terminal.syntax helper
 * new language for prism: "website" that handle html, javascript and css syntax
+
 ### Bugs
 * handle formatters that replace backspaces and characters before [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 * fix broken < > & with cmd + prism [#410](https://github.com/jcubic/jquery.terminal/issues/410)

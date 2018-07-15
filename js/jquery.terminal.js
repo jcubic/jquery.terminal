@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 14 Jul 2018 10:42:54 +0000
+ * Date: Sun, 15 Jul 2018 11:15:53 +0000
  */
 
 /* TODO:
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 14 Jul 2018 10:42:54 +0000',
+        date: 'Sun, 15 Jul 2018 11:15:53 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5804,7 +5804,8 @@
             {},
             $.terminal.defaults,
             {
-                name: self.selector
+                name: self.selector,
+                exit: !!(options && options.login || !options)
             },
             options || {}
         );
