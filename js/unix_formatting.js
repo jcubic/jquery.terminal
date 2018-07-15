@@ -20,45 +20,73 @@
     }
 
     $.terminal.defaults.unixFormattingEscapeBrackets = false;
-
+    var chr = '[^\\x08]|[\\r\\n]{2}|&[^;]+;';
+    var backspace_re = new RegExp('^(' + chr + ')?\\x08');
+    var overtyping_re = new RegExp('^(?:(' + chr + ')?\\x08(_|\\1)|' +
+                                   '(_)\\x08(' + chr + '))');
+    // ---------------------------------------------------------------------
+    function length(string) {
+        return $.terminal.length(string);
+    }
     // ---------------------------------------------------------------------
     // :: Replace overtyping (from man) formatting with terminal formatting
     // ---------------------------------------------------------------------
-    $.terminal.overtyping = function overtyping(string) {
+    $.terminal.overtyping = function overtyping(string, options) {
+        var settings = $.extend({
+            position: 0
+        }, options);
         var removed_chars = [];
-        var chr = '[^\\x08]|[\\r\\n]{2}|&[^;]+;';
-        /* eslint-disable */
-        var re = new RegExp('^(' + chr + ')?\\x08');
-        var overtyping_re = new RegExp('^(?:(' + chr + ')?\\x08(_|\\1)|(_)\\x08(' + chr + '))');
-        /* eslint-enable */
-        function replace(string) {
+        var new_position;
+        function replace(string, position) {
             // we match characters and html entities because command line escape brackets
             // echo don't, when writing formatter always process html entitites so it work
             // for cmd plugin as well for echo
             var result = '';
             var push = 0;
+            var start;
+            function correct_position(start, match, rep_string) {
+                // logic taken from $.terminal.tracking_replace
+                if (start < position) {
+                    var last_index = start + length(match);
+                    if (last_index < position) {
+                        // It's after the replacement, move it
+                        new_position = Math.max(
+                            0,
+                            new_position +
+                            length(rep_string) -
+                            length(match)
+                        );
+                    } else {
+                        // It's *in* the replacement, put it just after
+                        new_position += length(rep_string) - (position - start);
+                    }
+                }
+            }
             for (var i = 0; i < string.length; ++i) {
                 var partial = string.substring(i);
-                var match = partial.match(re);
+                var match = partial.match(backspace_re);
                 var removed_char = removed_chars[0];
                 if (match) {
                     // we remove backspace and character or html entity before it
                     // but we keep it in removed array so we can put it back
                     // when we have caritage return
                     if (match[1]) {
+                        start = i - match[1].length + push;
                         removed_chars.push({
-                            index: i - match[1].length + push,
+                            index: start,
                             string: match[1],
                             overtyping: partial.match(overtyping_re)
                         });
+                        correct_position(start, match[0], '', 1);
                     }
-                    return result + partial.replace(re, '');
+                    return result + partial.replace(backspace_re, '');
                 } else if (string[i] === '\r') {
                     // if newline we need to add at the end all characters
                     // removed by backspace
                     if (removed_chars.length) {
                         removed_chars = removed_chars.reduce(function(acc, char) {
                             if (i > char.index) {
+                                correct_position(char.index, '', char.string, 2);
                                 result += char.string;
                                 return acc;
                             }
@@ -75,6 +103,7 @@
                         // be terminal formatting with underscore
                         if (i > removed_char.index && removed_char.overtyping) {
                             removed_chars.shift();
+                            correct_position(removed_char.index, '', removed_char.string);
                             // if we add special character we need to correct
                             // next push to removed_char array
                             push++;
@@ -104,8 +133,9 @@
         }
         var break_next = false;
         // loop until not more backspaces
+        new_position = settings.position;
         while (string.match(/\x08/) || removed_chars.length) {
-            string = replace(string);
+            string = replace(string, new_position);
             if (break_next) {
                 break;
             }
@@ -125,6 +155,9 @@
         // replace special characters with terminal formatting
         string = format(string, '\uFFF1', 'b;#fff;');
         string = format(string, '\uFFF2', 'u;;');
+        if (options && typeof options.position === 'number') {
+            return [string, new_position];
+        }
         return string;
     };
     // ---------------------------------------------------------------------
@@ -338,12 +371,17 @@
             }
             return [styles.join(''), color, background];
         }
+        var clear_line_re = /[^\r\n]+\r\x1B(?:&#91;|\[)K/g;
         return function from_ansi(input, options) {
             var settings = $.extend({
-                unixFormattingEscapeBrackets: false
+                unixFormattingEscapeBrackets: false,
+                position: 0
             }, options);
-
-            input = input.replace(/[^\r\n]+\r\x1B(?:&#91;|\[)K/g, '');
+            var new_position = settings.position;
+            var rep = $.terminal.tracking_replace(input, clear_line_re, '', new_position);
+            var position = new_position = rep[1];
+            var result;
+            input = rep[0];
 
             //merge multiple codes
             /*input = input.replace(/((?:\x1B\[[0-9;]*[A-Za-z])*)/g, function(group) {
@@ -352,9 +390,13 @@
             var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
             if (splitted.length === 1) {
                 if (settings.unixFormattingEscapeBrackets) {
-                    return $.terminal.escape_brackets(input);
+                    result = $.terminal.escape_brackets(input);
                 }
-                return input;
+                result = input;
+                if (typeof options.position === 'number') {
+                    return [result, new_position];
+                }
+                return result;
             }
             var output = [];
             //skip closing at the begining
@@ -369,6 +411,22 @@
             for (var i = 0; i < splitted.length; ++i) {
                 match = splitted[i].match(/^\x1B\[([0-9;]*)([A-Za-z])$/);
                 if (match) {
+                    var start = match.index;
+                    // logic taken from $.terminal.tracking_replace
+                    if (start < position) {
+                        var last_index = start + $.terminal.length(match);
+                        if (last_index < position) {
+                            // It's after the replacement, move it
+                            new_position = Math.max(
+                                0,
+                                new_position +
+                                    $.terminal.length(match)
+                            );
+                        } else {
+                            // It's *in* the replacement, put it just after
+                            new_position += position - start;
+                        }
+                    }
                     switch (match[2]) {
                         case 'm':
                             if (+match[1] !== 0) {
@@ -417,7 +475,11 @@
             if (inside) {
                 output.push(']');
             }
-            return output.join(''); //.replace(/\[\[[^\]]+\]\]/g, '');
+            result = output.join('');
+            if (options && typeof options.position === 'number') {
+                return [result, new_position];
+            }
+            return result;
         };
     })();
 
