@@ -2,6 +2,7 @@
 ### Features
 * add TypeScript definition file
 * update formatters API to have a way to return position after replace from function formatter
+* regex formatters and $.tracking_replace now accept function as replacement
 * update unix formatters to use new API so they work with command line
 * set exit to false if no login provided
 
