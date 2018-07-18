@@ -381,7 +381,7 @@ type TerminalOptions = {
     onAfterRedraw?: JQueryTerminal.EventCallback;
     onEchoCommand?: (this: JQueryTerminal, div: JQuery, command?: string) => void;
     onFlush?: JQueryTerminal.EventCallback;
-    strings: {
+    strings?: {
         [key: string]: string;
     }
 }
