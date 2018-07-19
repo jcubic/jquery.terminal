@@ -16,9 +16,10 @@ type TypeOrString<T> = string | T;
 
 declare namespace JQueryTerminal {
     type interpterFunction = (this: JQueryTerminal, command: string, term?: JQueryTerminal) => any;
+    type terminalObjectFunction = (...args: (string | number | RegExp)[]) => (void | PromiseLike<any>);
     type Interpterer = string | interpterFunction | ObjectInterpreter;
     type ObjectInterpreter = {
-        [key: string]: ObjectInterpreter | anyFunction;
+        [key: string]: ObjectInterpreter | terminalObjectFunction;
     }
 
     type RegExpReplacementFunction = (...args: string[]) => string;
