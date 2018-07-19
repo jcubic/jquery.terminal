@@ -3141,7 +3141,7 @@
             }
             // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
-            var formatting = false;
+            var formatting = '';
             var in_text = false;
             var count = 0;
             var match;

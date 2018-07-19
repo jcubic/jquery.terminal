@@ -23,7 +23,15 @@ declare namespace JQueryTerminal {
     }
 
     type RegExpReplacementFunction = (...args: string[]) => string;
-    type IterateFormattingFunction = (data: JSONObject) => void;
+    type IterateFormattingArgument = {
+        count: number,
+        index: number,
+        formatting: string,
+        length: number,
+        text: boolean,
+        space: number
+    };
+    type IterateFormattingFunction = (data: IterateFormattingArgument) => void;
 
     type ParsedCommand<T> = {
         command: string;
