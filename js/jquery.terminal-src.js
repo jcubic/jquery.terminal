@@ -2698,7 +2698,7 @@
     }
     // -------------------------------------------------------------------------
     function crlf(string) {
-        return string.replace(/[\r\n]{2}/g, '\n');
+        return string.replace(/\r/g, '');
     }
     // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
