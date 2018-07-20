@@ -33,6 +33,34 @@ declare namespace JQueryTerminal {
     };
     type IterateFormattingFunction = (data: IterateFormattingArgument) => void;
 
+    type strings = {
+        comletionParameters: string;
+        wrongPasswordTryAgain: string;
+        wrongPassword: string;
+        ajaxAbortError: string;
+        wrongArity: string;
+        commandNotFound: string;
+        oneRPCWithIgnore: string;
+        oneInterpreterFunction: string;
+        loginFunctionMissing: string;
+        noTokenError: string;
+        serverResponse: string;
+        wrongGreetings: string;
+        notWhileLogin: string;
+        loginIsNotAFunction: string;
+        canExitError: string;
+        invalidCompletion: string;
+        invalidSelector: string;
+        invalidTerminalId: string;
+        login: string;
+        password: string;
+        recursiveCall: string;
+        notAString: string;
+        redrawError: string;
+        invalidStrings: string;
+        defunctTerminal: string;
+    };
+
     type ParsedCommand<T> = {
         command: string;
         name: string;
@@ -210,9 +238,7 @@ interface JQueryTerminalStatic {
     color_names: string[];
     defaults: {
         formatters: TypeOrArray<JQueryTerminal.Formatter>;
-        strings: {
-            [key: string]: string;
-        };
+        strings: JQueryTerminal.strings;
         [key: string]: any;
     };
     History(name?: string, size?: number, memory?: boolean): JQueryTerminal.History<any>;
@@ -390,9 +416,7 @@ type TerminalOptions = {
     onAfterRedraw?: JQueryTerminal.EventCallback;
     onEchoCommand?: (this: JQueryTerminal, div: JQuery, command?: string) => void;
     onFlush?: JQueryTerminal.EventCallback;
-    strings?: {
-        [key: string]: string;
-    }
+    strings?: JQueryTerminal.strings;
 }
 
 interface JQueryTerminal extends JQuery {
