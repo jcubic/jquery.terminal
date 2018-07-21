@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 19 Jul 2018 16:57:50 +0000
+ * Date: Sat, 21 Jul 2018 12:11:18 +0000
  */
 
 /* TODO:
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 19 Jul 2018 16:57:50 +0000',
+        date: 'Sat, 21 Jul 2018 12:11:18 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7029,7 +7029,7 @@
             set_token: function(token, local) {
                 var name = self.prefix_name(local) + '_token';
                 if (typeof token === 'undefined') {
-                    storage.remove(name, token);
+                    storage.remove(name);
                 } else {
                     storage.set(name, token);
                 }

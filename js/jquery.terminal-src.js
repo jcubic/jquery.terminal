@@ -7029,7 +7029,7 @@
             set_token: function(token, local) {
                 var name = self.prefix_name(local) + '_token';
                 if (typeof token === 'undefined') {
-                    storage.remove(name, token);
+                    storage.remove(name);
                 } else {
                     storage.set(name, token);
                 }
