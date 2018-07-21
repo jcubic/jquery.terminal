@@ -209,6 +209,18 @@ function output(term) {
         return $(this).text().replace(/\xA0/g, ' ');
     }).get();
 }
+function timer(callback, timeout) {
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            try {
+                resolve(callback());
+            } catch(e) {
+                reject(e);
+            }
+        }, timeout);
+    });
+}
+
 
 var support_animations = (function() {
     var animation = false,
@@ -351,6 +363,21 @@ describe('Terminal utils', function() {
                 return chr == ' ' ? chr : chr + '\x08_';
             });
             var result = '[[u;;]HELLO TERMINAL]';
+        });
+        it('should process normal backspaces', function() {
+            var tests = [
+                ['Checking current state.\t[    ]\b\b\b\b\b-\r\u001B[KChecking current state.'+
+                 '\t[    ]\b\b\b\b\bFAIL\r\n',
+                 "Checking current state.\t[-    ]\r\u001b[KChecking current state.\t[FAIL]    \r\n"
+                ],
+                ['[Start]\b\b] \b\b\b\b\b\b    \b\b\b\b---\b\b\b   \b\b\bDone] show be displa'+
+                 'yed as [Done]',
+                 '[Done] show be displayed as [Done]'
+                ]
+            ];
+            tests.forEach(function(spec) {
+                expect($.terminal.overtyping(spec[0])).toEqual(spec[1]);
+            });
         });
     });
     describe('$.terminal.escape_brackets', function() {

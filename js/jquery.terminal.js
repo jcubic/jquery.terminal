@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.18.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 08 Jul 2018 07:20:52 +0000
+ * Date: Sat, 21 Jul 2018 12:11:18 +0000
  */
 
 /* TODO:
@@ -219,12 +219,14 @@
     // -----------------------------------------------------------------------
     // :: debug functions
     // -----------------------------------------------------------------------
+    /* eslint-disable */
     function debug(str) {
         if (false) {
             console.log(str);
-            $.terminal.active().echo(str);
+            //$.terminal.active().echo(str);
         }
     }
+    /* eslint-enable */
     /* commented out so it don't affect coverage
     // -----------------------------------------------------------------------
     Function.prototype.monitor = function() {
@@ -906,6 +908,9 @@
                         return;
                     }
                 }
+                if (!data.length) {
+                    return;
+                }
                 if (data.length === 1) {
                     return data[0];
                 } else {
@@ -955,10 +960,19 @@
                 }
             },
             map: function(fn) {
-                return data.filter(Boolean).map(fn);
+                return data.map(function(item, i) {
+                    if (typeof item !== 'undefined') {
+                        return fn(item, i);
+                    }
+                    return null;
+                }).filter(Boolean);
             },
             forEach: function(fn) {
-                data.filter(Boolean).forEach(fn);
+                return data.forEach(function(item, i) {
+                    if (typeof item !== 'undefined') {
+                        fn(item, i);
+                    }
+                });
             },
             append: function(item) {
                 data.push(item);
@@ -1117,7 +1131,8 @@
             prompt: '> ',
             enabled: true,
             history: true,
-            onPositionChange: $.noop
+            onPositionChange: $.noop,
+            onCommandChange: $.noop
         }
     };
     $.fn.cmd = function(options) {
@@ -1679,8 +1694,14 @@
             // we don't want to format command when user type formatting in
             try {
                 string = $.terminal.escape_formatting(string);
-                string = $.terminal.apply_formatters(string, settings);
+                var options = $.extend({}, settings, {
+                    position: position
+                });
+                var frormatted = $.terminal.apply_formatters(string, options);
+                formatted_position = frormatted[1];
+                string = frormatted[0];
                 string = $.terminal.normalize(string);
+                string = crlf(string);
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -1735,51 +1756,6 @@
         }
         function substring(str, start, end) {
             return $.terminal.substring(str, start, end);
-        }
-        // ---------------------------------------------------------------------
-        // :: functions used to calculate position of cursor when formatting
-        // :: change length of output text like with emoji demo
-        // ---------------------------------------------------------------------
-        // :: main function that return corrected cursor position on display
-        // :: if cursor is in the middle of the word that is shorter than before
-        // :: applying formatting then the corrected position is after the word
-        // :: so it stay in place when you move real cursor in the middle
-        // :: of the word
-        // ---------------------------------------------------------------------
-        function get_formatted_position(position) {
-            // only regex formatters can change length of output string
-            var formatters = $.terminal.defaults.formatters.filter(function(formatter) {
-                return formatter instanceof Array;
-            });
-            if (position === 0) {
-                return position;
-            }
-            if (formatters.length) {
-                return formatters.reduce(function(result, frmt) {
-                    var options = frmt[2] || {};
-                    if (options.loop) {
-                        result = result.slice();
-                        while (result[0].match(frmt[0])) {
-                            result = $.terminal.tracking_replace(
-                                result[0],
-                                frmt[0],
-                                frmt[1],
-                                result[1]
-                            );
-                        }
-                        return result;
-                    }
-                    var command = result[0];
-                    var position = result[1];
-                    return $.terminal.tracking_replace(
-                        command,
-                        frmt[0],
-                        frmt[1],
-                        position
-                    );
-                }, [command, position])[1];
-            }
-            return position;
         }
         // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
@@ -1849,8 +1825,8 @@
                         string = command.replace(/./g, settings.mask);
                         break;
                 }
-                var pos = formatted_position;
                 string = formatting(string);
+                var pos = formatted_position;
                 var i;
                 self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
                 before.html('');
@@ -2066,7 +2042,7 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
-                    command = crlf(string);
+                    command = string;
                     if (!stay) {
                         self.position(command.length);
                     }
@@ -2107,7 +2083,6 @@
                 }
             },
             insert: function(string, stay) {
-                string = crlf(string);
                 if (position === command.length) {
                     command += string;
                 } else if (position === 0) {
@@ -2170,6 +2145,7 @@
             },
             position: function(n, relative, silent) {
                 if (typeof n === 'number') {
+                    var pos = position;
                     if (relative) {
                         position += n;
                     } else if (n < 0) {
@@ -2179,11 +2155,10 @@
                     } else {
                         position = n;
                     }
-                    formatted_position = get_formatted_position(position);
-                    if (is_function(settings.onPositionChange)) {
-                        settings.onPositionChange(position);
-                    }
-                    if (!silent) {
+                    if (pos !== position && !silent) {
+                        if (is_function(settings.onPositionChange)) {
+                            settings.onPositionChange(position, formatted_position);
+                        }
                         redraw();
                         fix_textarea(true);
                     }
@@ -2221,8 +2196,12 @@
                         if (new_formatted_pos === len) {
                             self.position($.terminal.length(command));
                         } else {
+                            // reverse search for correct position
                             for (var i = 0; i < command_len; ++i) {
-                                if (new_formatted_pos === get_formatted_position(i)) {
+                                var opts = $.extend({}, settings, {position: i});
+                                var pos = $.terminal.apply_formatters(command, opts)[1];
+                                if (new_formatted_pos === pos) {
+                                    formatted_position = pos;
                                     self.position(i);
                                 }
                             }
@@ -2719,7 +2698,7 @@
     }
     // -------------------------------------------------------------------------
     function crlf(string) {
-        return string.replace(/[\r\n]{2}/g, '\n');
+        return string.replace(/\r/g, '');
     }
     // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
@@ -2975,8 +2954,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '1.18.0',
-        date: 'Sun, 08 Jul 2018 07:20:52 +0000',
+        version: 'DEV',
+        date: 'Sat, 21 Jul 2018 12:11:18 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3093,12 +3072,16 @@
                 index = last_index;
                 // Build the replacement string. This just handles $$ and $n,
                 // you may want to add handling for $`, $', and $&.
-                rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
-                    if (c0 === "$") {
-                        return "$";
-                    }
-                    return match[c0];
-                });
+                if (typeof replacement === 'function') {
+                    rep_string = replacement.apply(null, match);
+                } else {
+                    rep_string = replacement.replace(/\$(\$|\d)/g, function(m, c0) {
+                        if (c0 === "$") {
+                            return "$";
+                        }
+                        return match[c0];
+                    });
+                }
                 // Add on the replacement
                 new_string += rep_string;
                 // If the position is affected...
@@ -3158,7 +3141,7 @@
             }
             // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
-            var formatting = false;
+            var formatting = '';
             var in_text = false;
             var count = 0;
             var match;
@@ -3414,7 +3397,7 @@
         // ---------------------------------------------------------------------
         // :: Escape & that's not part of entity
         // ---------------------------------------------------------------------
-        amp: function(str) {
+        amp: function amp(str) {
             return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
         },
         // ---------------------------------------------------------------------
@@ -3469,60 +3452,114 @@
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
         apply_formatters: function(string, settings) {
-            function test_lengths(formatter, ret, string) {
+            function test_lengths(formatter, index, ret, string) {
                 if (!formatter.__no_warn__ &&
                     $.terminal.length(ret) !== $.terminal.length(string)) {
-                    console.log(formatter);
-                    warn('Your formatter change length of the string, ' +
-                         'you should use [regex, replacement] formatte' +
-                         'r instead');
+                    warn('Your formatter[' + index + '] change length of the string, ' +
+                         'you should use [regex, replacement] formatter or function ' +
+                         ' that return [replacement, position] instead');
                 }
             }
             var formatters = $.terminal.defaults.formatters;
+            settings = settings || {};
             var i = 0;
+            function apply_function_formatter(formatter, input) {
+                var options = $.extend({}, settings, {
+                    position: input[1]
+                });
+                var ret = formatter(input[0], options);
+                if (typeof ret === 'string') {
+                    test_lengths(formatter, i - 1, ret, input[0]);
+                    if (typeof ret === 'string') {
+                        return [ret, options.position];
+                    }
+                    return input;
+                } else if (ret instanceof Array && ret.length === 2) {
+                    return ret;
+                } else {
+                    return input;
+                }
+            }
+            var input;
+            if (typeof settings.position === 'number') {
+                input = [string, settings.position];
+            } else {
+                input = [string, 0];
+            }
             try {
-                return formatters.reduce(function(string, formatter) {
+                var result = formatters.reduce(function(input, formatter) {
                     i++;
                     // __meta__ is for safe formatter that can handle formatters
                     // inside formatters. for other usage we use format_split so one
                     // formatter don't mess with formatter that was previous
                     // on the list
                     if (typeof formatter === 'function' && formatter.__meta__) {
-                        var ret = formatter(string, settings);
-                        test_lengths(formatter, ret, string);
-                        if (typeof ret === 'string') {
-                            return ret;
-                        }
+                        return apply_function_formatter(formatter, input);
                     } else {
-                        return $.terminal.format_split(string).map(function(string) {
+                        var length = 0;
+                        var splitted = $.terminal.format_split(input[0]);
+                        var partials = splitted.map(function(string) {
+                            var position;
+                            if (input[1] - length >= 0) {
+                                position = input[1] - length;
+                            } else {
+                                // -1 indicate that we will not track position because it
+                                // was in one the previous parial strings
+                                position = -1;
+                            }
+                            length += $.terminal.length(string);
                             if ($.terminal.is_formatting(string)) {
-                                return string;
+                                return [string, -1];
                             } else {
                                 if (formatter instanceof Array) {
                                     var options = formatter[2] || {};
+                                    var result = [string, position === -1 ? 0 : position];
                                     if (options.loop) {
                                         while (string.match(formatter[0])) {
-                                            string = string.replace(
+                                            result = $.terminal.tracking_replace(
+                                                result[0],
                                                 formatter[0],
-                                                formatter[1]
+                                                formatter[1],
+                                                result[1]
                                             );
                                         }
-                                        return string;
+                                    } else {
+                                        result = $.terminal.tracking_replace(
+                                            result[0],
+                                            formatter[0],
+                                            formatter[1],
+                                            result[1]
+                                        );
                                     }
-                                    return string.replace(formatter[0], formatter[1]);
+                                    if (position === -1) {
+                                        return [result, -1];
+                                    }
+                                    return result;
                                 } else if (typeof formatter === 'function') {
-                                    var ret = formatter(string, settings);
-                                    test_lengths(formatter, ret, string);
-                                    if (typeof ret === 'string') {
-                                        return ret;
-                                    }
+                                    return apply_function_formatter(formatter, [
+                                        string, position
+                                    ]);
                                 }
-                                return string;
+                                return [string, -1];
                             }
+                        });
+                        var position = partials.filter(function(partial) {
+                            return partial[1] !== -1;
+                        })[0];
+                        var string = partials.map(function(partial) {
+                            return partial[0];
                         }).join('');
+                        return [
+                            string,
+                            typeof position === 'undefined' ? 0 : position[1]
+                        ];
                     }
-                    return string;
-                }, string);
+                }, input);
+                if (typeof settings.position === 'number') {
+                    return result;
+                } else {
+                    return result[0];
+                }
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
                 formatters.splice(i - 1);
@@ -3951,12 +3988,14 @@
         msg = '[jQuery Terminal] ' + msg;
         if (warnings.indexOf(msg) === -1) {
             warnings.push(msg);
+            /* eslint-disable */
             if (console) {
                 if (console.warn) {
                     console.warn(msg);
                 } else if (console.log) {
                     console.log(msg);
                 }
+                /* eslint-enable */
             } else {
                 // prevent catching in outer try..catch
                 setTimeout(function() {
@@ -4026,7 +4065,9 @@
                 }
                 if (validJSONRPC(json) || options.method === 'system.describe') {
                     // don't catch errors in success callback
-                    options.success(json, status, jqXHR);
+                    if (options.success) {
+                        options.success(json, status, jqXHR);
+                    }
                     deferred.resolve(json);
                 } else {
                     if (options.error) {
@@ -5067,7 +5108,7 @@
                 }
                 self.flush(options);
                 try {
-                    settings.onAfterRedraw.call(self);
+                    settings.onAfterRedraw.call(self, self);
                 } catch (e) {
                     settings.onAfterRedraw = $.noop;
                     display_exception(e, 'onAfterRedraw');
@@ -5763,10 +5804,13 @@
             {},
             $.terminal.defaults,
             {
-                name: self.selector
+                name: self.selector,
+                exit: !!(options && options.login || !options)
             },
             options || {}
         );
+        // so it's the same as in TypeScript definition for options
+        delete settings.formatters;
         // used to throw error when calling methods on destroyed terminal
         var defunct = false;
         var lines = [];
@@ -6436,6 +6480,7 @@
                         self.enable();
                     }
                 });
+                return self;
             },
             // -------------------------------------------------------------
             // :: check if terminal is frozen
@@ -6917,6 +6962,7 @@
                         formatters: false
                     });
                 }
+                return self;
             },
             // -------------------------------------------------------------
             // :: Scroll Div that holds the terminal
@@ -6983,7 +7029,7 @@
             set_token: function(token, local) {
                 var name = self.prefix_name(local) + '_token';
                 if (typeof token === 'undefined') {
-                    storage.remove(name, token);
+                    storage.remove(name);
                 } else {
                     storage.set(name, token);
                 }
