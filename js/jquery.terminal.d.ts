@@ -8,7 +8,7 @@ type JSONObject = {
     [key: string]: StringOrNumber | boolean | JSONObject;
 }
 
-type mapFunction = (key: string, anyFunction) => any;
+type mapFunction = (key: string, value: anyFunction) => any;
 type voidFunction = () => void;
 
 type TypeOrArray<T> = T | T[];
@@ -206,7 +206,7 @@ declare namespace JQueryTerminal {
         rotate(): T | void;
         length(): number;
         remove(i: number): void;
-        set(T): void;
+        set(item: T): void;
         front(): void | T;
         map(fn: (item: T, index?: number) => any): any[];
         forEach(fn: (item: T, index?: number) => any): void;
@@ -226,7 +226,7 @@ interface JQuery<TElement = HTMLElement> {
 }
 
 interface JQueryStatic {
-    omap(object: { [key: string]: anyFunction }, mapFunction);
+    omap(object: { [key: string]: anyFunction }, fn: mapFunction): { [key: string]: anyFunction };
     jrpc(url: string, method: string, params: any[], sucess?: (json: JSONObject, status?: string, jqxhr?: JQuery.jqXHR) => void, error?: (jqxhr?: JQuery.jqXHR, status?: string) => void): void;
     terminal: JQueryTerminalStatic;
 }
@@ -313,7 +313,7 @@ type CmdOptions = {
 
 // we copy methods from jQuery to overwrite it
 // see: https://github.com/Microsoft/TypeScript/issues/978
-interface Cmd extends JQuery {
+interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     option(name: string, value: any): Cmd;
     option(name: string): any;
     name(name: string): Cmd;
@@ -325,13 +325,14 @@ interface Cmd extends JQuery {
     set(command: string, stay?: boolean, silent?: boolean): Cmd;
     keymap(shortcut: string, callback: JQueryTerminal.keymapFunction): Cmd;
     keymap(shortcut: string): JQueryTerminal.keymapFunction;
-    keymap(keymapObject): Cmd;
+    keymap(arg: JQueryTerminal.keymapObject): Cmd;
     keymap(): JQueryTerminal.keymapObject;
     insert(value: string, stay?: boolean): Cmd;
-    get(index: number): HTMLElement;
-    get(): HTMLElement[];
+    /* jQuery types */
+    get(index: number): TElement;
+    get(): TElement[];
     get(): string;
-    commands(commandsCmdFunction): Cmd;
+    commands(fn: JQueryTerminal.commandsCmdFunction): Cmd;
     commands(): JQueryTerminal.commandsCmdFunction;
     destroy(): Cmd;
     prompt(prompt: JQueryTerminal.CmdPrompt): Cmd;
@@ -344,10 +345,15 @@ interface Cmd extends JQuery {
     display_position(): number;
     display_position(value: number): Cmd;
     visible(): Cmd;
+    //jQuery methods
+    show(duration: JQuery.Duration, easing: string, complete: (this: TElement) => void): this;
+    show(duration: JQuery.Duration, easing_complete: string | ((this: TElement) => void)): this;
+    show(duration_complete_options?: JQuery.Duration | ((this: TElement) => void) | JQuery.EffectsOptions<TElement>): this;
     show(): Cmd;
     //jQuery methods
-    resize(handler: (eventObject: JQueryEventObject) => any): JQuery;
-    resize(eventData: Object, handler: (eventObject: JQueryEventObject) => any): JQuery;
+    resize<TData>(eventData: TData,
+        handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
+    resize(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
     //jQuery Terminal method
     resize(num_chars?: number): Cmd;
     enable(): Cmd;
@@ -419,7 +425,7 @@ type TerminalOptions = {
     strings?: JQueryTerminal.strings;
 }
 
-interface JQueryTerminal extends JQuery {
+interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_command(command: string): JQueryTerminal;
     id(): number;
     clear(): JQueryTerminal;
@@ -443,8 +449,12 @@ interface JQueryTerminal extends JQuery {
     history: JQueryTerminal.History<string>;
     history_state(toogle: boolean): JQueryTerminal;
     clear_history_state(): JQueryTerminal;
+    next(selector?: JQuery.Selector): this;
     next(): JQueryTerminal;
-    focus(): JQueryTerminal;
+    focus(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
+    focus<TData>(eventData: TData,
+        handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
+    focus(toggle?: boolean): JQueryTerminal;
     freeze(toogle: boolean): JQueryTerminal;
     frozen(): boolean;
     enable(silent?: boolean): JQueryTerminal;
@@ -462,6 +472,9 @@ interface JQueryTerminal extends JQuery {
     get_prompt(): JQueryTerminal.ExtendedPrompt;
     set_mask(toggle?: boolean): JQueryTerminal;
     get_output(raw?: boolean): JQueryTerminal.Lines | string[];
+    resize<TData>(eventData: TData,
+        handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
+    resize(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
     resize(width?: number, height?: number): JQueryTerminal;
     refresh(): JQueryTerminal;
     flush(options?: { update?: boolean, scroll?: boolean }): JQueryTerminal;
@@ -472,6 +485,9 @@ interface JQueryTerminal extends JQuery {
     echo(arg: any, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     error(arg: any, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     exception(e: Error, label?: string): JQueryTerminal;
+    scroll<TData>(eventData: TData,
+        handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
+    scroll(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
     scroll(amount: number): JQueryTerminal;
     logout(local?: boolean): JQueryTerminal;
     token(local?: boolean): string | void;
