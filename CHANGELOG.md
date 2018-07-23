@@ -1,3 +1,8 @@
+## 1.19.1
+### Bug Fixes
+* fix type definition to match types from @types/jquery [#412](https://github.com/jcubic/jquery.terminal/issues/412)
+* fix infinite loop in regex formatter with loop option [#409](https://github.com/jcubic/jquery.terminal/issues/409#issuecomment-407025872)
+
 ## 1.19.0
 ### Features
 * add TypeScript definition file

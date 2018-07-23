@@ -3515,7 +3515,7 @@
                                     var options = formatter[2] || {};
                                     var result = [string, position === -1 ? 0 : position];
                                     if (options.loop) {
-                                        while (string.match(formatter[0])) {
+                                        while (result[0].match(formatter[0])) {
                                             result = $.terminal.tracking_replace(
                                                 result[0],
                                                 formatter[0],
