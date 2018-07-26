@@ -24,6 +24,7 @@
     var backspace_re = new RegExp('^(' + chr + ')?\\x08');
     var overtyping_re = new RegExp('^(?:(' + chr + ')?\\x08(_|\\1)|' +
                                    '(_)\\x08(' + chr + '))');
+    var new_line_re = /^(\r\n|\n\r|\r|\n)/;
     // ---------------------------------------------------------------------
     function length(string) {
         return $.terminal.length(string);
@@ -69,7 +70,7 @@
                 if (match) {
                     // we remove backspace and character or html entity before it
                     // but we keep it in removed array so we can put it back
-                    // when we have caritage return
+                    // when we have caritage return or line feed
                     if (match[1]) {
                         start = i - match[1].length + push;
                         removed_chars.push({
@@ -80,7 +81,7 @@
                         correct_position(start, match[0], '', 1);
                     }
                     return result + partial.replace(backspace_re, '');
-                } else if (string[i] === '\r') {
+                } else if (partial.match(new_line_re)) {
                     // if newline we need to add at the end all characters
                     // removed by backspace
                     if (removed_chars.length) {
@@ -94,7 +95,9 @@
                             return acc;
                         }, []);
                     }
-                    result += string[i];
+                    var m = partial.match(new_line_re);
+                    result += m[1];
+                    i += m[1].length - 1;
                 } else {
                     if (removed_chars.length) {
                         // if we are in index of removed character we check if the
