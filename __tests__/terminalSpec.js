@@ -610,13 +610,13 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noopener" tabindex="1000">https://terminal.jcubic.pl<'+
+                        ' rel="noopener" tabindex="1000">https://terminal.jcubic.pl<'+
                         '/a>',
                     {}
                 ],
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noreferrer noopener" tabindex="1000">https'+
+                        ' rel="noreferrer noopener" tabindex="1000">https'+
                         '://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true
@@ -638,31 +638,57 @@ describe('Terminal utils', function() {
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
                     '<a target="_blank" href=""' +
-                        ' rel="nofollow noopener" tabindex="1000">xss<'+
+                        ' rel="noopener" tabindex="1000">xss<'+
                         '/a>'
                 ],
                 [
-                    "[[!;;;;javascript:alert('x')]xss]", {javascriptLinks: true},
+                    "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
                     '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="nofollow noopener" tabindex="1000">xss<'+
+                        ' rel="noopener" tabindex="1000">xss<'+
                         '/a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
                     '<a target="_blank" href=""' +
-                        ' rel="nofollow noopener" tabindex="1000">xss<'+
+                        ' rel="noopener" tabindex="1000">xss<'+
                         '/a>'
                 ],
                 [
-                    "[[!;;;;JaVaScRiPt:alert('x')]xss]", {javascriptLinks: false},
+                    "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
                     '<a target="_blank" href=""' +
-                        ' rel="nofollow noopener" tabindex="1000">xss<'+
+                        ' rel="noopener" tabindex="1000">xss<'+
                         '/a>'
                 ],
             ];
             tests.forEach(function(spec) {
                 var output = $.terminal.format(spec[0], spec[1]);
                 expect(output).toEqual(spec[2]);
+            });
+        });
+        it('should add nofollow', function() {
+            var input = '[[!;;]https://terminal.jcubic.pl]';
+            var tests = [
+                [
+                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
+                        ' rel="nofollow noopener" tabindex="1000">https://terminal.jcubic.pl<'+
+                        '/a>',
+                    {linksNoFollow: true}
+                ],
+                [
+                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
+                        ' rel="nofollow noreferrer noopener" tabindex="1000">https'+
+                        '://terminal.jcubic.pl</a>',
+                    {
+                        linksNoReferrer: true,
+                        linksNoFollow: true
+                    }
+                ]
+            ];
+            tests.forEach(function(spec) {
+                var expected = spec[0];
+                var options = spec[1];
+                var output = $.terminal.format(input, spec[1]);
+                expect(output).toEqual(expected);
             });
         });
         it('should handle emails', function() {

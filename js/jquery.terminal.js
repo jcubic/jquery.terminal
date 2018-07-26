@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 26 Jul 2018 16:19:51 +0000
+ * Date: Thu, 26 Jul 2018 17:15:24 +0000
  */
 
 /* TODO:
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 26 Jul 2018 16:19:51 +0000',
+        date: 'Thu, 26 Jul 2018 17:15:24 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3584,7 +3584,8 @@
             }
             var settings = $.extend({}, {
                 linksNoReferrer: false,
-                javaScriptLinks: false
+                linksNoFollow: false,
+                anyLinks: false
             }, options || {});
             if (typeof str === 'string') {
                 // support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
@@ -3658,16 +3659,19 @@
                                 if (data.match(email_re)) {
                                     result = '<a href="mailto:' + data + '"';
                                 } else {
-                                    if (!(settings.javaScriptLinks ||
-                                          data.match(/^(https?|ftp):\/\//))) {
+                                    if (!settings.anyLinks &&
+                                        !data.match(/^(https?|ftp):\/\//)) {
                                         data = '';
                                     }
                                     result = '<a target="_blank" href="' + data + '"';
+                                    var rel = ["noopener"];
                                     if (settings.linksNoReferrer) {
-                                        result += ' rel="nofollow noreferrer noopener"';
-                                    } else {
-                                        result += ' rel="nofollow noopener"';
+                                        rel.unshift("noreferrer");
                                     }
+                                    if (settings.linksNoFollow) {
+                                        rel.unshift("nofollow");
+                                    }
+                                    result += ' rel="' + rel.join(' ') + '"';
                                 }
                                 // make focus to terminal textarea that will enable
                                 // terminal when pressing tab and terminal is disabled
@@ -4246,7 +4250,8 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
-        javaScriptLinks: false,
+        anyLinks: false,
+        linksNoFollow: false,
         processRPCResponse: null,
         completionEscape: true,
         convertLinks: true,
@@ -4933,7 +4938,8 @@
             } else if (!options.raw) {
                 var format_options = {
                     linksNoReferrer: settings.linksNoReferrer,
-                    javaScriptLinks: settings.javaScriptLinks,
+                    linksNoFollow: settings.linksNoFollow,
+                    anyLinks: settings.anyLinks,
                     char_width: char_size.width
                 };
                 var cols = self.cols();

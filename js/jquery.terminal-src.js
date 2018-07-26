@@ -3584,7 +3584,8 @@
             }
             var settings = $.extend({}, {
                 linksNoReferrer: false,
-                javascriptLinks: false
+                linksNoFollow: false,
+                anyLinks: false
             }, options || {});
             if (typeof str === 'string') {
                 // support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
@@ -3658,16 +3659,19 @@
                                 if (data.match(email_re)) {
                                     result = '<a href="mailto:' + data + '"';
                                 } else {
-                                    if (!settings.javascriptLinks &&
+                                    if (!settings.anyLinks &&
                                         !data.match(/^(https?|ftp):\/\//)) {
                                         data = '';
                                     }
                                     result = '<a target="_blank" href="' + data + '"';
+                                    var rel = ["noopener"];
                                     if (settings.linksNoReferrer) {
-                                        result += ' rel="nofollow noreferrer noopener"';
-                                    } else {
-                                        result += ' rel="nofollow noopener"';
+                                        rel.unshift("noreferrer");
                                     }
+                                    if (settings.linksNoFollow) {
+                                        rel.unshift("nofollow");
+                                    }
+                                    result += ' rel="' + rel.join(' ') + '"';
                                 }
                                 // make focus to terminal textarea that will enable
                                 // terminal when pressing tab and terminal is disabled
@@ -4246,7 +4250,8 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
-        javascriptLinks: false,
+        anyLinks: false,
+        linksNoFollow: false,
         processRPCResponse: null,
         completionEscape: true,
         convertLinks: true,
@@ -4933,7 +4938,8 @@
             } else if (!options.raw) {
                 var format_options = {
                     linksNoReferrer: settings.linksNoReferrer,
-                    javascriptLinks: settings.javascriptLinks,
+                    linksNoFollow: settings.linksNoFollow,
+                    anyLinks: settings.anyLinks,
                     char_width: char_size.width
                 };
                 var cols = self.cols();

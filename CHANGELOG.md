@@ -1,6 +1,7 @@
 ## 1.20.0
 ### Feature
-* disable javascript links by default with option to turn it on
+* anyLinks option to disable anything exception http and ftp (when false - default)
+* linksNoFollow option (default false)
 ### Bug Fixes
 * handle \r \n \r\n \n\r the same when adding leftovers before backspace in unix formatting [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 

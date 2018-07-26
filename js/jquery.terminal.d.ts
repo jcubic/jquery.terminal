@@ -125,6 +125,12 @@ declare namespace JQueryTerminal {
     type EchoFinalizeFunction = (div: JQuery) => void;
     type EventCallback = (this: JQueryTerminal, term: JQueryTerminal) => (void | boolean);
 
+    type formatOptions = {
+        linksNoReferrer?: boolean;
+        anyLinks?: boolean;
+        char_width?: number;
+        linksNoFollow?: boolean;
+    };
 
     type InterpreterItem = {
         completion: "settings" | JQueryTerminal.Completion;
@@ -263,7 +269,7 @@ interface JQueryTerminalStatic {
      * if options have position it will return [string, display_position]
      */
     apply_formatters(str: string, options: JSONObject): string | [string, number];
-    format(str: string, options?: { linksNoReferrer?: boolean; javascriptLinks?: boolean }): string;
+    format(str: string, options?: JQueryTerminal.formatOptions): string;
     escape_brackets(str: string): string;
     unescape_brackets(str: string): string;
     length(str: string): number;
