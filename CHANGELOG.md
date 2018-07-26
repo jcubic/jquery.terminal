@@ -1,3 +1,9 @@
+## 1.20.0
+### Feature
+* disable javascript links by default with option to turn it on
+### Bug Fixes
+* handle \r \n \r\n \n\r the same when adding leftovers before backspace in unix formatting [#409](https://github.com/jcubic/jquery.terminal/issues/409)
+
 ## 1.19.1
 ### Bug Fixes
 * fix type definition to match types from @types/jquery [#412](https://github.com/jcubic/jquery.terminal/issues/412)

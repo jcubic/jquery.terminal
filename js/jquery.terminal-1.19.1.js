@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 26 Jul 2018 16:00:36 +0000
+ * Date: Thu, 26 Jul 2018 16:19:51 +0000
  */
 
 /* TODO:
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 26 Jul 2018 16:00:36 +0000',
+        date: 'Thu, 26 Jul 2018 16:19:51 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3583,7 +3583,8 @@
                 return safe(string);
             }
             var settings = $.extend({}, {
-                linksNoReferrer: false
+                linksNoReferrer: false,
+                javaScriptLinks: false
             }, options || {});
             if (typeof str === 'string') {
                 // support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
@@ -3657,11 +3658,15 @@
                                 if (data.match(email_re)) {
                                     result = '<a href="mailto:' + data + '"';
                                 } else {
+                                    if (!(settings.javaScriptLinks ||
+                                          data.match(/^(https?|ftp):\/\//))) {
+                                        data = '';
+                                    }
                                     result = '<a target="_blank" href="' + data + '"';
                                     if (settings.linksNoReferrer) {
-                                        result += ' rel="noreferrer noopener"';
+                                        result += ' rel="nofollow noreferrer noopener"';
                                     } else {
-                                        result += ' rel="noopener"';
+                                        result += ' rel="nofollow noopener"';
                                     }
                                 }
                                 // make focus to terminal textarea that will enable
@@ -4241,6 +4246,7 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
+        javaScriptLinks: false,
         processRPCResponse: null,
         completionEscape: true,
         convertLinks: true,
@@ -4927,6 +4933,7 @@
             } else if (!options.raw) {
                 var format_options = {
                     linksNoReferrer: settings.linksNoReferrer,
+                    javaScriptLinks: settings.javaScriptLinks,
                     char_width: char_size.width
                 };
                 var cols = self.cols();

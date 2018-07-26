@@ -263,7 +263,7 @@ interface JQueryTerminalStatic {
      * if options have position it will return [string, display_position]
      */
     apply_formatters(str: string, options: JSONObject): string | [string, number];
-    format(str: string, options?: { linksNoReferrer: boolean }): string;
+    format(str: string, options?: { linksNoReferrer?: boolean; javascriptLinks?: boolean }): string;
     escape_brackets(str: string): string;
     unescape_brackets(str: string): string;
     length(str: string): number;
@@ -382,6 +382,7 @@ type TerminalOptions = {
     cancelableAjax?: boolean;
     processArguments?: boolean;
     linksNoReferrer?: boolean;
+    javascriptLinks?: boolean;
     processRPCResponse?: null | JQueryTerminal.processRPCResponseFunction;
     completionEscape?: boolean;
     convertLinks?: boolean;
