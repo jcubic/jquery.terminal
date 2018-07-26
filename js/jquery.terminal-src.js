@@ -3584,7 +3584,7 @@
             }
             var settings = $.extend({}, {
                 linksNoReferrer: false,
-                javaScriptLinks: false
+                javascriptLinks: false
             }, options || {});
             if (typeof str === 'string') {
                 // support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
@@ -3658,8 +3658,8 @@
                                 if (data.match(email_re)) {
                                     result = '<a href="mailto:' + data + '"';
                                 } else {
-                                    if (!(settings.javaScriptLinks ||
-                                          data.match(/^(https?|ftp):\/\//))) {
+                                    if (!settings.javascriptLinks &&
+                                        !data.match(/^(https?|ftp):\/\//)) {
                                         data = '';
                                     }
                                     result = '<a target="_blank" href="' + data + '"';
@@ -4246,7 +4246,7 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
-        javaScriptLinks: false,
+        javascriptLinks: false,
         processRPCResponse: null,
         completionEscape: true,
         convertLinks: true,
@@ -4933,7 +4933,7 @@
             } else if (!options.raw) {
                 var format_options = {
                     linksNoReferrer: settings.linksNoReferrer,
-                    javaScriptLinks: settings.javaScriptLinks,
+                    javascriptLinks: settings.javascriptLinks,
                     char_width: char_size.width
                 };
                 var cols = self.cols();
