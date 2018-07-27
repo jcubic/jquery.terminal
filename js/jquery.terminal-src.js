@@ -1697,9 +1697,9 @@
                 var options = $.extend({}, settings, {
                     position: position
                 });
-                var frormatted = $.terminal.apply_formatters(string, options);
-                formatted_position = frormatted[1];
-                string = frormatted[0];
+                var formatted = $.terminal.apply_formatters(string, options);
+                formatted_position = formatted[1];
+                string = formatted[0];
                 string = $.terminal.normalize(string);
                 string = crlf(string);
                 return string;
@@ -3497,14 +3497,16 @@
                         return apply_function_formatter(formatter, input);
                     } else {
                         var length = 0;
+                        var found_position = false;
                         var splitted = $.terminal.format_split(input[0]);
                         var partials = splitted.map(function(string) {
                             var position;
-                            if (input[1] - length >= 0) {
+                            if (input[1] - length >= 0 && !found_position) {
                                 position = input[1] - length;
+                                found_position = true;
                             } else {
                                 // -1 indicate that we will not track position because it
-                                // was in one the previous parial strings
+                                // was in one of the previous parial strings
                                 position = -1;
                             }
                             length += $.terminal.length(string);
@@ -3513,7 +3515,7 @@
                             } else {
                                 if (formatter instanceof Array) {
                                     var options = formatter[2] || {};
-                                    var result = [string, position === -1 ? 0 : position];
+                                    var result = [string, position < 0 ? 0 : position];
                                     if (options.loop) {
                                         while (result[0].match(formatter[0])) {
                                             result = $.terminal.tracking_replace(
@@ -3531,8 +3533,8 @@
                                             result[1]
                                         );
                                     }
-                                    if (position === -1) {
-                                        return [result, -1];
+                                    if (position < 0) {
+                                        return [result[0], -1];
                                     }
                                     return result;
                                 } else if (typeof formatter === 'function') {
@@ -3543,16 +3545,17 @@
                                 return [string, -1];
                             }
                         });
-                        var position = partials.filter(function(partial) {
+                        var position_partial = partials.filter(function(partial) {
                             return partial[1] !== -1;
                         })[0];
                         var string = partials.map(function(partial) {
                             return partial[0];
                         }).join('');
-                        return [
-                            string,
-                            typeof position === 'undefined' ? 0 : position[1]
-                        ];
+                        if (typeof position_partial === 'undefined') {
+                            return [string, input[1]];
+                        } else {
+                            return [string, position_partial[1]];
+                        }
                     }
                 }, input);
                 if (typeof settings.position === 'number') {
