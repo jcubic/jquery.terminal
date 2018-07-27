@@ -137,7 +137,7 @@ body.terminal {
 .cmd .prompt > span {
     float: left;
 }
-.terminal, .cmd {
+.terminal, .terminal *, .cmd, .cmd * {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     color: #aaa;
@@ -462,7 +462,7 @@ terminal .terminal-output > div {
         width: calc(var(--length, 1) * var(--char-width, 7.23438) * 1px);
         display: inline-block;
     }
-    .terminal, .cmd, .terminal .terminal-output > div > div, .cmd .prompt {
+    .terminal, .terminal *, .cmd, .cmd * {
         font-size: calc(var(--size, 1) * 12px);
         line-height: calc(var(--size, 1) * 14px);
     }
