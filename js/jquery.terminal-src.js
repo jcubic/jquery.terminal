@@ -3501,7 +3501,8 @@
                         var splitted = $.terminal.format_split(input[0]);
                         var partials = splitted.map(function(string) {
                             var position;
-                            if (input[1] - length >= 0 && !found_position) {
+                            var this_len = $.terminal.length(string);
+                            if (input[1] <= length + this_len && !found_position) {
                                 position = input[1] - length;
                                 found_position = true;
                             } else {
@@ -3509,7 +3510,8 @@
                                 // was in one of the previous parial strings
                                 position = -1;
                             }
-                            length += $.terminal.length(string);
+                            var length_before = length;
+                            length += this_len;
                             if ($.terminal.is_formatting(string)) {
                                 return [string, -1];
                             } else {
@@ -3536,6 +3538,7 @@
                                     if (position < 0) {
                                         return [result[0], -1];
                                     }
+                                    result[1] += length_before;
                                     return result;
                                 } else if (typeof formatter === 'function') {
                                     return apply_function_formatter(formatter, [
@@ -3551,11 +3554,16 @@
                         var string = partials.map(function(partial) {
                             return partial[0];
                         }).join('');
+                        var position;
                         if (typeof position_partial === 'undefined') {
-                            return [string, input[1]];
+                            position = input[1];
                         } else {
-                            return [string, position_partial[1]];
+                            position = position_partial[1];
                         }
+                        if (position >= $.terminal.length(input[0])) {
+                            position = $.terminal.length(string);
+                        }
+                        return [string, position];
                     }
                 }, input);
                 if (typeof settings.position === 'number') {

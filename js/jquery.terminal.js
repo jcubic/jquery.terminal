@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Fri, 27 Jul 2018 17:44:53 +0000
+ * Date: Sun, 29 Jul 2018 08:50:42 +0000
  */
 
 /* TODO:
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 27 Jul 2018 17:44:53 +0000',
+        date: 'Sun, 29 Jul 2018 08:50:42 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3501,7 +3501,8 @@
                         var splitted = $.terminal.format_split(input[0]);
                         var partials = splitted.map(function(string) {
                             var position;
-                            if (input[1] - length >= 0 && !found_position) {
+                            var this_len = $.terminal.length(string);
+                            if (input[1] <= length + this_len && !found_position) {
                                 position = input[1] - length;
                                 found_position = true;
                             } else {
@@ -3509,7 +3510,8 @@
                                 // was in one of the previous parial strings
                                 position = -1;
                             }
-                            length += $.terminal.length(string);
+                            var length_before = length;
+                            length += this_len;
                             if ($.terminal.is_formatting(string)) {
                                 return [string, -1];
                             } else {
@@ -3536,6 +3538,7 @@
                                     if (position < 0) {
                                         return [result[0], -1];
                                     }
+                                    result[1] += length_before;
                                     return result;
                                 } else if (typeof formatter === 'function') {
                                     return apply_function_formatter(formatter, [
@@ -3551,11 +3554,16 @@
                         var string = partials.map(function(partial) {
                             return partial[0];
                         }).join('');
+                        var position;
                         if (typeof position_partial === 'undefined') {
-                            return [string, input[1]];
+                            position = input[1];
                         } else {
-                            return [string, position_partial[1]];
+                            position = position_partial[1];
                         }
+                        if (position >= $.terminal.length(input[0])) {
+                            position = $.terminal.length(string);
+                        }
+                        return [string, position];
                     }
                 }, input);
                 if (typeof settings.position === 'number') {

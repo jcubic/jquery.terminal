@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Fri, 27 Jul 2018 16:46:07 +0000
+ * Date: Sun, 29 Jul 2018 08:50:43 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -146,6 +146,10 @@ body.terminal {
     line-height: 14px;
     box-sizing: border-box;
     cursor: text;
+}
+.cmd .cursor span {
+    color: inherit;
+    background-color: inherit;
 }
 .cmd .cursor * {
     background-color: transparent;

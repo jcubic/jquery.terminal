@@ -147,6 +147,10 @@ body.terminal {
     box-sizing: border-box;
     cursor: text;
 }
+.cmd .cursor span {
+    color: inherit;
+    background-color: inherit;
+}
 .cmd .cursor * {
     background-color: transparent;
 }
