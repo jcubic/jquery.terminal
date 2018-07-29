@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 29 Jul 2018 08:50:42 +0000
+ * Date: Sun, 29 Jul 2018 09:06:28 +0000
  */
 
 /* TODO:
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 29 Jul 2018 08:50:42 +0000',
+        date: 'Sun, 29 Jul 2018 09:06:28 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3502,6 +3502,7 @@
                         var partials = splitted.map(function(string) {
                             var position;
                             var this_len = $.terminal.length(string);
+                            // first position that match is used for this partial
                             if (input[1] <= length + this_len && !found_position) {
                                 position = input[1] - length;
                                 found_position = true;
@@ -3510,6 +3511,7 @@
                                 // was in one of the previous parial strings
                                 position = -1;
                             }
+                            // length is used to correct position after replace
                             var length_before = length;
                             length += this_len;
                             if ($.terminal.is_formatting(string)) {
@@ -3538,6 +3540,8 @@
                                     if (position < 0) {
                                         return [result[0], -1];
                                     }
+                                    // correct position becuase it's relative
+                                    // to partial and we need global for whole string
                                     result[1] += length_before;
                                     return result;
                                 } else if (typeof formatter === 'function') {
@@ -3560,6 +3564,7 @@
                         } else {
                             position = position_partial[1];
                         }
+                        // to make sure that output position is not outside the string
                         if (position >= $.terminal.length(input[0])) {
                             position = $.terminal.length(string);
                         }
