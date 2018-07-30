@@ -1621,11 +1621,10 @@
         // :: Recalculate number of characters in command line
         // ---------------------------------------------------------------------
         function change_num_chars() {
-            var $prompt = self.find('.prompt').text('&nbsp;');
+            var $prompt = self.find('.prompt').html('<span>&nbsp;</span>');
             var W = self.width();
-            var w = $prompt[0].getBoundingClientRect().width;
+            var w = $prompt.find('span')[0].getBoundingClientRect().width;
             num_chars = Math.floor(W / w);
-            draw_prompt();
         }
         // ---------------------------------------------------------------------
         // :: Split String that fit into command line where first line need to

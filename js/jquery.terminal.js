@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 29 Jul 2018 09:06:28 +0000
+ * Date: Mon, 30 Jul 2018 06:54:42 +0000
  */
 
 /* TODO:
@@ -1621,11 +1621,10 @@
         // :: Recalculate number of characters in command line
         // ---------------------------------------------------------------------
         function change_num_chars() {
-            var $prompt = self.find('.prompt').text('&nbsp;');
+            var $prompt = self.find('.prompt').html('<span>&nbsp;</span>');
             var W = self.width();
-            var w = $prompt[0].getBoundingClientRect().width;
+            var w = $prompt.find('span')[0].getBoundingClientRect().width;
             num_chars = Math.floor(W / w);
-            draw_prompt();
         }
         // ---------------------------------------------------------------------
         // :: Split String that fit into command line where first line need to
@@ -2955,7 +2954,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 29 Jul 2018 09:06:28 +0000',
+        date: 'Mon, 30 Jul 2018 06:54:42 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

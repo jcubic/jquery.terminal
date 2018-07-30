@@ -6,7 +6,8 @@
 ### Bug Fixes
 * handle \r \n \r\n \n\r the same when adding leftovers before backspace in unix formatting [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 * fix font change in universal selector [#415](https://github.com/jcubic/jquery.terminal/issues/415)
-* Fix regression bug in formatters (emoji demo) [#416](https://github.com/jcubic/jquery.terminal/issues/416)
+* fix regression bug in formatters (emoji demo) [#416](https://github.com/jcubic/jquery.terminal/issues/416)
+* fix cmd::resize() without args that make number of characters equal to 1 [#413](https://github.com/jcubic/jquery.terminal/issues/413)
 
 ## 1.19.1
 ### Bug Fixes
