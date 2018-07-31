@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Tue, 31 Jul 2018 13:25:08 +0000
+ * Date: Tue, 31 Jul 2018 13:32:19 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -137,7 +137,7 @@ body.terminal {
 .cmd .prompt > span {
     float: left;
 }
-.terminal, .terminal-wrapper *, .terminal .font, .cmd, .cmd * {
+.terminal, .terminal-wrapper *, .cmd, .cmd * {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     color: #aaa;
@@ -302,12 +302,14 @@ terminal .terminal-output > div {
       color: #aaa;
       border-bottom: none;
       border-left: none;
+      margin-left: 0;
   }
   50% {
       background-color: #bbb;
       color: #000;
       border-bottom: none;
       border-left: none;
+      margin-left: 0;
   }
 }
 
@@ -317,12 +319,14 @@ terminal .terminal-output > div {
       color: #aaa;
       border-bottom: none;
       border-left: none;
+      margin-left: 0;
   }
   50% {
       background-color: #bbb;
       color: #000;
       border-bottom: none;
       border-left: none;
+      margin-left: 0;
   }
 }
 
@@ -332,12 +336,14 @@ terminal .terminal-output > div {
       color: #aaa;
       border-bottom: none;
       border-left: none;
+      margin-left: 0;
   }
   50% {
       background-color: #bbb;
       color: #000;
       border-bottom: none;
       border-left: none;
+      margin-left: 0;
   }
 }
 @keyframes terminal-blink {
@@ -346,12 +352,14 @@ terminal .terminal-output > div {
       color: #aaa;
       border-bottom: none;
       border-left: none;
+      margin-left: 0;
   }
   50% {
       background-color: #bbb; /* not #aaa because it's seems there is Google Chrome bug */
       color: #000;
       border-bottom: none;
       border-left: none;
+      margin-left: 0;
   }
 }
 @-webkit-keyframes terminal-bar {
@@ -550,6 +558,7 @@ terminal .terminal-output > div {
           color: var(--color, #aaa);
           border-bottom: none;
           border-left: none;
+          margin-left: 0;
       }
       50% {
           background-color: var(--color, #aaa);
@@ -557,6 +566,7 @@ terminal .terminal-output > div {
           border-bottom: none;
           border-left: none;
       }
+          margin-left: 0;
     }
 
     @-ms-keyframes terminal-blink {
@@ -565,12 +575,14 @@ terminal .terminal-output > div {
           color: var(--color, #aaa);
           border-bottom: none;
           border-left: none;
+          margin-left: 0;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
           border-bottom: none;
           border-left: none;
+          margin-left: 0;
       }
     }
     @-moz-keyframes terminal-blink {
@@ -579,12 +591,14 @@ terminal .terminal-output > div {
           color: var(--color, #aaa);
           border-bottom: none;
           border-left: none;
+          margin-left: 0;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
           border-bottom: none;
           border-left: none;
+          margin-left: 0;
       }
     }
     @keyframes terminal-blink {
@@ -593,12 +607,14 @@ terminal .terminal-output > div {
           color: var(--color, #aaa);
           border-bottom: none;
           border-left: none;
+          margin-left: 0;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
           border-bottom: none;
           border-left: none;
+          margin-left: 0;
       }
     }
     @-webkit-keyframes terminal-bar {
