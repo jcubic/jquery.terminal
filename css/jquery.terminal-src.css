@@ -137,7 +137,7 @@ body.terminal {
 .cmd .prompt > span {
     float: left;
 }
-.terminal, .terminal *, .cmd, .cmd * {
+.terminal, .terminal-wrapper *, .terminal .font, .cmd, .cmd * {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     color: #aaa;
@@ -473,7 +473,7 @@ terminal .terminal-output > div {
             animation-name: terminal-bar;
 }
 @supports (--css: variables) {
-    .terminal, .terminal *, .cmd, .cmd * {
+    .terminal, .terminal-wrapper *, .cmd, .cmd * {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
