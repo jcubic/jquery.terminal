@@ -300,10 +300,14 @@ terminal .terminal-output > div {
   0%, 100% {
       background-color: #000;
       color: #aaa;
+      border-bottom: none;
+      border-left: none;
   }
   50% {
       background-color: #bbb;
       color: #000;
+      border-bottom: none;
+      border-left: none;
   }
 }
 
@@ -311,10 +315,14 @@ terminal .terminal-output > div {
   0%, 100% {
       background-color: #000;
       color: #aaa;
+      border-bottom: none;
+      border-left: none;
   }
   50% {
       background-color: #bbb;
       color: #000;
+      border-bottom: none;
+      border-left: none;
   }
 }
 
@@ -322,20 +330,28 @@ terminal .terminal-output > div {
   0%, 100% {
       background-color: #000;
       color: #aaa;
+      border-bottom: none;
+      border-left: none;
   }
   50% {
       background-color: #bbb;
       color: #000;
+      border-bottom: none;
+      border-left: none;
   }
 }
 @keyframes terminal-blink {
   0%, 100% {
       background-color: #000;
       color: #aaa;
+      border-bottom: none;
+      border-left: none;
   }
   50% {
       background-color: #bbb; /* not #aaa because it's seems there is Google Chrome bug */
       color: #000;
+      border-bottom: none;
+      border-left: none;
   }
 }
 @-webkit-keyframes terminal-bar {
@@ -532,10 +548,14 @@ terminal .terminal-output > div {
       0%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
+          border-bottom: none;
+          border-left: none;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
+          border-bottom: none;
+          border-left: none;
       }
     }
 
@@ -543,62 +563,82 @@ terminal .terminal-output > div {
       0%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
+          border-bottom: none;
+          border-left: none;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
+          border-bottom: none;
+          border-left: none;
       }
     }
     @-moz-keyframes terminal-blink {
       0%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
+          border-bottom: none;
+          border-left: none;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
+          border-bottom: none;
+          border-left: none;
       }
     }
     @keyframes terminal-blink {
       0%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
+          border-bottom: none;
+          border-left: none;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
+          border-bottom: none;
+          border-left: none;
       }
     }
     @-webkit-keyframes terminal-bar {
       0%, 100% {
           border-left-color: var(--background, #000);
+          border-bottom: none;
       }
       50% {
           border-left-color: var(--color, #aaa);
+          border-bottom: none;
       }
     }
     @-ms-keyframes terminal-bar {
       0%, 100% {
           border-left-color: var(--background, #000);
+          border-bottom: none;
       }
       50% {
           border-left-color: var(--color, #aaa);
+          border-bottom: none;
       }
     }
     @-moz-keyframes terminal-bar {
       0%, 100% {
           border-left-color: var(--background, #000);
+          border-bottom: none;
       }
       50% {
           border-left-color: var(--color, #aaa);
+          border-bottom: none;
       }
     }
     @keyframes terminal-bar {
       0%, 100% {
           border-left-color: var(--background, #000);
+          border-bottom: none;
       }
       50% {
           border-left-color: var(--color, #aaa);
+          border-bottom: none;
       }
     }
     @-webkit-keyframes terminal-underline {
