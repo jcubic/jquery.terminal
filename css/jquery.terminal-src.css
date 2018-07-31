@@ -249,7 +249,7 @@ terminal .terminal-output > div {
     background-color: rgba(170, 170, 170, 0.99);
     color: #000;
 }
-.terminal .terminal-output div.error, .terminal .terminal-output div.error div {
+.terminal .terminal-output div.error, .terminal .terminal-output div.error * {
     color: red;
     color: var(--error-color, red);
 }
@@ -457,7 +457,7 @@ terminal .terminal-output > div {
             animation-name: terminal-bar;
 }
 @supports (--css: variables) {
-    .terminal, .cmd {
+    .terminal, .terminal *, .cmd, .cmd * {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }

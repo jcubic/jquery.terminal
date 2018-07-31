@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 29 Jul 2018 08:50:43 +0000
+ * Date: Tue, 31 Jul 2018 13:01:30 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -249,7 +249,7 @@ terminal .terminal-output > div {
     background-color: rgba(170, 170, 170, 0.99);
     color: #000;
 }
-.terminal .terminal-output div.error, .terminal .terminal-output div.error div {
+.terminal .terminal-output div.error, .terminal .terminal-output div.error * {
     color: red;
     color: var(--error-color, red);
 }
@@ -457,7 +457,7 @@ terminal .terminal-output > div {
             animation-name: terminal-bar;
 }
 @supports (--css: variables) {
-    .terminal, .cmd {
+    .terminal, .terminal *, .cmd, .cmd * {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
