@@ -13,7 +13,7 @@
  * Released under the MIT license
  *
  */
-/* global jQuery */
+// UMD taken from https://github.com/umdjs/umd
 (function($) {
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');
@@ -485,4 +485,4 @@
 
     $.terminal.defaults.formatters.unshift($.terminal.overtyping);
     $.terminal.defaults.formatters.unshift($.terminal.from_ansi);
-})(jQuery);
+}));
