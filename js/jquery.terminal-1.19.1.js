@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Mon, 30 Jul 2018 06:54:42 +0000
+ * Date: Wed, 08 Aug 2018 12:02:49 +0000
  */
 
 /* TODO:
@@ -2200,7 +2200,6 @@
                                 var opts = $.extend({}, settings, {position: i});
                                 var pos = $.terminal.apply_formatters(command, opts)[1];
                                 if (new_formatted_pos === pos) {
-                                    formatted_position = pos;
                                     self.position(i);
                                 }
                             }
@@ -2954,7 +2953,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 30 Jul 2018 06:54:42 +0000',
+        date: 'Wed, 08 Aug 2018 12:02:49 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3056,7 +3055,7 @@
             var global = rex.flags.indexOf('g') !== -1;
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
-                // if regex don't have g flag lastIndex don't work
+                // if regex don't have g flag lastIndex will not work
                 if (global) {
                     // Add any of the original string we just skipped
                     var last_index = length(substring(string, 0, rex.lastIndex));

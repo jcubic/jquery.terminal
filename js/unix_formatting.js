@@ -38,6 +38,8 @@
         }, options);
         var removed_chars = [];
         var new_position;
+        var char_count = 0;
+        var backspaces = [];
         function replace(string, position) {
             // we match characters and html entities because command line escape brackets
             // echo don't, when writing formatter always process html entitites so it work
@@ -63,6 +65,7 @@
                     }
                 }
             }
+            char_count = 0;
             for (var i = 0; i < string.length; ++i) {
                 var partial = string.substring(i);
                 var match = partial.match(backspace_re);
@@ -73,6 +76,9 @@
                     // when we have caritage return or line feed
                     if (match[1]) {
                         start = i - match[1].length + push;
+                        removed_chars.forEach(function(chr) {
+                            chr.index -= match[1].length;
+                        });
                         removed_chars.push({
                             index: start,
                             string: match[1],
@@ -80,25 +86,44 @@
                         });
                         correct_position(start, match[0], '', 1);
                     }
+                    if (char_count < 0) {
+                        char_count = 0;
+                    }
+                    backspaces = backspaces.map(function(b) {
+                        return b - 1;
+                    });
+                    backspaces.push(start);
                     return result + partial.replace(backspace_re, '');
                 } else if (partial.match(new_line_re)) {
                     // if newline we need to add at the end all characters
                     // removed by backspace
                     if (removed_chars.length) {
-                        removed_chars = removed_chars.reduce(function(acc, char) {
+                        var chars = removed_chars;
+                        removed_chars = [];
+                        chars.reverse().forEach(function(char) {
                             if (i > char.index) {
                                 correct_position(char.index, '', char.string, 2);
-                                result += char.string;
-                                return acc;
+                                if (--char_count <= 0) {
+                                    result += char.string;
+                                }
+                            } else {
+                                removed_chars.unshift(char);
                             }
-                            acc.push(char);
-                            return acc;
-                        }, []);
+                        });
                     }
                     var m = partial.match(new_line_re);
                     result += m[1];
                     i += m[1].length - 1;
                 } else {
+                    if (backspaces.length) {
+                        var backspace = backspaces[0];
+                        if (i === backspace) {
+                            backspaces.shift();
+                        }
+                        if (i >= backspace) {
+                            char_count++;
+                        }
+                    }
                     if (removed_chars.length) {
                         // if we are in index of removed character we check if the
                         // character is the same it will be bold or if removed char
@@ -374,8 +399,9 @@
             }
             return [styles.join(''), color, background];
         }
-        var clear_line_re = /[^\r\n]+\r\x1B(?:&#91;|\[)K/g;
+        var clear_line_re = /[^\r\n]+\r\x1B\[K/g;
         return function from_ansi(input, options) {
+            input = $.terminal.unescape_brackets(input);
             var settings = $.extend({
                 unixFormattingEscapeBrackets: false,
                 position: 0
@@ -393,9 +419,10 @@
             var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
             if (splitted.length === 1) {
                 if (settings.unixFormattingEscapeBrackets) {
-                    result = $.terminal.escape_brackets(input);
+                    result = $.terminal.escape_formatting(input);
+                } else {
+                    result = input;
                 }
-                result = input;
                 if (typeof options.position === 'number') {
                     return [result, new_position];
                 }
@@ -417,13 +444,13 @@
                     var start = match.index;
                     // logic taken from $.terminal.tracking_replace
                     if (start < position) {
-                        var last_index = start + $.terminal.length(match);
+                        var last_index = start + $.terminal.length(match[0]);
                         if (last_index < position) {
                             // It's after the replacement, move it
                             new_position = Math.max(
                                 0,
                                 new_position +
-                                    $.terminal.length(match)
+                                    $.terminal.length(match[0])
                             );
                         } else {
                             // It's *in* the replacement, put it just after
@@ -470,7 +497,7 @@
                             break;
                     }
                 } else if (settings.unixFormattingEscapeBrackets) {
-                    output.push($.terminal.escape_brackets(splitted[i]));
+                    output.push($.terminal.escape_formatting(splitted[i]));
                 } else {
                     output.push(splitted[i]);
                 }
