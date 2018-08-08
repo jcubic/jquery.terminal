@@ -364,7 +364,7 @@ describe('Terminal utils', function() {
             });
             var result = '[[u;;]HELLO TERMINAL]';
         });
-        fit('should process normal backspaces', function() {
+        it('should process normal backspaces', function() {
             var tests = [
                 ['Checking current state.\t[    ]\b\b\b\b\b-\r\u001B[KChecking current state.'+
                  '\t[    ]\b\b\b\b\bFAIL\r\n',
