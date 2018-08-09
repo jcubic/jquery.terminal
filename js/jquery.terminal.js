@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 09 Aug 2018 15:40:04 +0000
+ * Date: Thu, 09 Aug 2018 17:04:28 +0000
  */
 
 /* TODO:
@@ -1188,7 +1188,7 @@
             if (node.is('span')) {
                 return node.index() + node.parent('span').prevAll().find('span').length +
                     node.closest('[role="presentation"]')
-                        .prevUntil('.prompt').text_length();
+                        .prevUntil('.prompt').find('span').length;
             } else if (node.is('div[role="presentation"]')) {
                 var index = node.index();
                 var lines = command.split(/\n/).slice(0, index);
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 09 Aug 2018 15:40:04 +0000',
+        date: 'Thu, 09 Aug 2018 17:04:28 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

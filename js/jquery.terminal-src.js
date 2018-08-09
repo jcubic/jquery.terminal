@@ -1188,7 +1188,7 @@
             if (node.is('span')) {
                 return node.index() + node.parent('span').prevAll().find('span').length +
                     node.closest('[role="presentation"]')
-                        .prevUntil('.prompt').text_length();
+                        .prevUntil('.prompt').find('span').length;
             } else if (node.is('div[role="presentation"]')) {
                 var index = node.index();
                 var lines = command.split(/\n/).slice(0, index);
