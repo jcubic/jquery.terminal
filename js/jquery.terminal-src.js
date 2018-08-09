@@ -1186,9 +1186,9 @@
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
-                return node.index() + node.parents('span').prevAll().text_length() +
-                       node.closest('[role="presentation"]')
-                           .prevUntil('.prompt').text_length();
+                return node.index() + node.parent('span').prevAll().find('span').length +
+                    node.closest('[role="presentation"]')
+                        .prevUntil('.prompt').text_length();
             } else if (node.is('div[role="presentation"]')) {
                 var index = node.index();
                 var lines = command.split(/\n/).slice(0, index);
@@ -1689,7 +1689,7 @@
         // ---------------------------------------------------------------------
         // :: use custom formatting
         // ---------------------------------------------------------------------
-        function formatting(string) {
+        function formatting(string, skip_formatted_position) {
             // we don't want to format command when user type formatting in
             try {
                 string = $.terminal.escape_formatting(string);
@@ -1697,8 +1697,10 @@
                     position: position
                 });
                 var formatted = $.terminal.apply_formatters(string, options);
-                formatted_position = formatted[1];
                 string = formatted[0];
+                if (!skip_formatted_position) {
+                    formatted_position = formatted[1];
+                }
                 string = $.terminal.normalize(string);
                 string = crlf(string);
                 return string;
@@ -2155,10 +2157,10 @@
                         position = n;
                     }
                     if (pos !== position && !silent) {
+                        redraw();
                         if (is_function(settings.onPositionChange)) {
                             settings.onPositionChange(position, formatted_position);
                         }
-                        redraw();
                         fix_textarea(true);
                     }
                     return self;
@@ -2177,7 +2179,7 @@
                 if (n === undefined) {
                     return formatted_position;
                 } else {
-                    var string = formatting(command);
+                    var string = formatting(command, true);
                     var len = $.terminal.length(string);
                     var command_len = $.terminal.length(command);
                     if (len === command_len) {
@@ -2191,17 +2193,17 @@
                         } else {
                             new_formatted_pos = n;
                         }
-                        // it's faster then reverse algorithm
-                        if (new_formatted_pos === len) {
-                            self.position($.terminal.length(command));
-                        } else {
-                            // reverse search for correct position
-                            for (var i = 0; i < command_len; ++i) {
-                                var opts = $.extend({}, settings, {position: i});
-                                var pos = $.terminal.apply_formatters(command, opts)[1];
-                                if (new_formatted_pos === pos) {
-                                    self.position(i);
-                                }
+                        if (len === new_formatted_pos) {
+                            return self.position(command_len);
+                        }
+                        // reverse search for correct position
+                        for (var i = 0; i < command_len; ++i) {
+                            var opts = $.extend({}, settings, {position: i});
+                            var pos = $.terminal.apply_formatters(command, opts)[1];
+                            if (new_formatted_pos === pos) {
+                                formatted_position = new_formatted_pos;
+                                self.position(i);
+                                break;
                             }
                         }
                     }

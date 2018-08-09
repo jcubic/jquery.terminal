@@ -366,9 +366,8 @@ describe('Terminal utils', function() {
         });
         it('should process normal backspaces', function() {
             var tests = [
-                ['Checking current state.\t[    ]\b\b\b\b\b-\r\u001B[KChecking current state.'+
-                 '\t[    ]\b\b\b\b\bFAIL\r\n',
-                 "Checking current state.\t[-   ]\r\u001b[KChecking current state.\t[FAIL]\r\n"
+                ['Checking current state.\t[    ]\b\b\b\b\bFAIL\r\n',
+                 "Checking current state.\t[FAIL]\r\n"
                 ],
                 ['[Start]\b\b] \b\b\b\b\b\b    \b\b\b\b---\b\b\b   \b\b\bDone] show be displa'+
                  'yed as [Done]',

@@ -20,6 +20,9 @@
     }
 
     $.terminal.defaults.unixFormattingEscapeBrackets = false;
+    // we match characters and html entities because command line escape brackets
+    // echo don't, when writing formatter always process html entitites so it work
+    // for cmd plugin as well for echo
     var chr = '[^\\x08]|[\\r\\n]{2}|&[^;]+;';
     var backspace_re = new RegExp('^(' + chr + ')?\\x08');
     var overtyping_re = new RegExp('^(?:(' + chr + ')?\\x08(_|\\1)|' +
@@ -33,6 +36,7 @@
     // :: Replace overtyping (from man) formatting with terminal formatting
     // ---------------------------------------------------------------------
     $.terminal.overtyping = function overtyping(string, options) {
+        string = $.terminal.unescape_brackets(string);
         var settings = $.extend({
             position: 0
         }, options);
@@ -41,12 +45,10 @@
         var char_count = 0;
         var backspaces = [];
         function replace(string, position) {
-            // we match characters and html entities because command line escape brackets
-            // echo don't, when writing formatter always process html entitites so it work
-            // for cmd plugin as well for echo
             var result = '';
             var push = 0;
             var start;
+            char_count = 0;
             function correct_position(start, match, rep_string) {
                 // logic taken from $.terminal.tracking_replace
                 if (start < position) {
@@ -65,7 +67,6 @@
                     }
                 }
             }
-            char_count = 0;
             for (var i = 0; i < string.length; ++i) {
                 var partial = string.substring(i);
                 var match = partial.match(backspace_re);
@@ -76,9 +77,6 @@
                     // when we have caritage return or line feed
                     if (match[1]) {
                         start = i - match[1].length + push;
-                        removed_chars.forEach(function(chr) {
-                            chr.index -= match[1].length;
-                        });
                         removed_chars.push({
                             index: start,
                             string: match[1],
@@ -96,14 +94,16 @@
                     return result + partial.replace(backspace_re, '');
                 } else if (partial.match(new_line_re)) {
                     // if newline we need to add at the end all characters
-                    // removed by backspace
+                    // removed by backspace but only if there are no more
+                    // other characters than backspaces added between
+                    // backspaces and newline
                     if (removed_chars.length) {
                         var chars = removed_chars;
                         removed_chars = [];
                         chars.reverse().forEach(function(char) {
                             if (i > char.index) {
-                                correct_position(char.index, '', char.string, 2);
                                 if (--char_count <= 0) {
+                                    correct_position(char.index, '', char.string, 2);
                                     result += char.string;
                                 }
                             } else {
