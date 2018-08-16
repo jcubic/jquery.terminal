@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 09 Aug 2018 17:04:28 +0000
+ * Date: Thu, 16 Aug 2018 11:32:40 +0000
  */
 
 /* TODO:
@@ -1186,15 +1186,13 @@
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
-                return node.index() + node.parent('span').prevAll().find('span').length +
+                return node.index() +
+                    node.parent('span').prevAll().find('span').length +
                     node.closest('[role="presentation"]')
                         .prevUntil('.prompt').find('span').length;
             } else if (node.is('div[role="presentation"]')) {
-                var index = node.index();
-                var lines = command.split(/\n/).slice(0, index);
-                return lines.reduce(function(pos, line) {
-                    return pos + length(line);
-                }, 0) + (lines.length - 1);
+                return node.find('span[data-text]').length +
+                    node.prevUntil('.prompt').find('span[data-text]').length - 1;
             }
         }
         // IE mapping
@@ -2955,7 +2953,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 09 Aug 2018 17:04:28 +0000',
+        date: 'Thu, 16 Aug 2018 11:32:40 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

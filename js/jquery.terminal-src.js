@@ -1186,15 +1186,13 @@
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
-                return node.index() + node.parent('span').prevAll().find('span').length +
+                return node.index() +
+                    node.parent('span').prevAll().find('span').length +
                     node.closest('[role="presentation"]')
                         .prevUntil('.prompt').find('span').length;
             } else if (node.is('div[role="presentation"]')) {
-                var index = node.index();
-                var lines = command.split(/\n/).slice(0, index);
-                return lines.reduce(function(pos, line) {
-                    return pos + length(line);
-                }, 0) + (lines.length - 1);
+                return node.find('span[data-text]').length +
+                    node.prevUntil('.prompt').find('span[data-text]').length - 1;
             }
         }
         // IE mapping

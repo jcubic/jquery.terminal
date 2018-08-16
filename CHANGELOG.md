@@ -13,6 +13,7 @@
 * fix font change in universal selector [#415](https://github.com/jcubic/jquery.terminal/issues/415)
 * fix regression bug in formatters (emoji demo) [#416](https://github.com/jcubic/jquery.terminal/issues/416)
 * fix cmd::resize() without args that make number of characters equal to 1 [#413](https://github.com/jcubic/jquery.terminal/issues/413)
+* fix click  after line [#419](https://github.com/jcubic/jquery.terminal/issues/419)
 
 ## 1.19.1
 ### Bug Fixes
