@@ -4,6 +4,7 @@
 
 ### Features
 * linksNoFollow option (default false)
+* add UMD for utility files [#418](https://github.com/jcubic/jquery.terminal/issues/418)
 
 ### Bug Fixes
 * handling backspaces in unix formatting [#409](https://github.com/jcubic/jquery.terminal/issues/409)

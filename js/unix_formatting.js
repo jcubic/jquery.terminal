@@ -13,12 +13,43 @@
  * Released under the MIT license
  *
  */
-/* global jQuery */
-(function($) {
-    if (!$.terminal) {
-        throw new Error('$.terminal is not defined');
+/* global jQuery, define, global, require, module */
+(function(factory) {
+    var root = typeof window !== 'undefined' ? window : global;
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        // istanbul ignore next
+        define(['jquery', 'jquery.terminal'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // Node/CommonJS
+        module.exports = function(root, jQuery) {
+            if (jQuery === undefined) {
+                // require('jQuery') returns a factory that requires window to
+                // build a jQuery instance, we normalize how we use modules
+                // that require this pattern but the window provided is a noop
+                // if it's defined (how jquery works)
+                if (typeof window !== 'undefined') {
+                    jQuery = require('jquery');
+                } else {
+                    jQuery = require('jquery')(root);
+                }
+            }
+            if (!jQuery.fn.terminal) {
+                if (typeof window !== 'undefined') {
+                    require('jquery.terminal');
+                } else {
+                    require('jquery.terminal')(jQuery);
+                }
+            }
+            factory(jQuery);
+            return jQuery;
+        };
+    } else {
+        // Browser
+        // istanbul ignore next
+        factory(root.jQuery);
     }
-
+})(function($) {
     $.terminal.defaults.unixFormattingEscapeBrackets = false;
     // we match characters and html entities because command line escape brackets
     // echo don't, when writing formatter always process html entitites so it work
@@ -515,4 +546,4 @@
 
     $.terminal.defaults.formatters.unshift($.terminal.overtyping);
     $.terminal.defaults.formatters.unshift($.terminal.from_ansi);
-})(jQuery);
+});

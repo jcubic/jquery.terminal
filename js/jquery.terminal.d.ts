@@ -392,6 +392,7 @@ type TerminalOptions = {
     processRPCResponse?: null | JQueryTerminal.processRPCResponseFunction;
     completionEscape?: boolean;
     convertLinks?: boolean;
+    unixFormattingEscapeBrackets?: boolean; // provided by unix_formatting
     extra?: any;
     tabs?: number;
     historySize?: number;
