@@ -117,7 +117,7 @@ global.document = window.document;
 global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
 require('../js/jquery.terminal-src')(global.$);
-require('../js/unix_formatting');
+require('../js/unix_formatting')(global.$);
 
 function nbsp(string) {
     return string.replace(/ /g, '\xA0');

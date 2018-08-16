@@ -183,7 +183,7 @@
 })(typeof global !== "undefined" ? global : window);
 /* eslint-enable */
 // UMD taken from https://github.com/umdjs/umd
-(function(factory) {
+(function(factory, undefined) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
@@ -197,13 +197,13 @@
                 // build a jQuery instance, we normalize how we use modules
                 // that require this pattern but the window provided is a noop
                 // if it's defined (how jquery works)
-                if (typeof window !== 'undefined') {
+                if (window !== undefined) {
                     jQuery = require('jquery');
                 } else {
                     jQuery = require('jquery')(root);
                 }
             }
-            if (typeof wcwidth === 'undefined') {
+            if (wcwidth === undefined) {
                 wcwidth = require('wcwidth');
             }
             factory(jQuery, wcwidth);

@@ -34,11 +34,47 @@
  * Released under the MIT license
  *
  */
-/* global jQuery, Prism */
-
-
-
-(function(Token, $) {
+/* global jQuery, Prism, define, global, require, module */
+(function(factory, undefined) {
+    var root = typeof window !== 'undefined' ? window : global;
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        // istanbul ignore next
+        define(['prismjs', 'jquery', 'jquery.terminal'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // Node/CommonJS
+        module.exports = function(root, jQuery, Prism) {
+            if (Prism === undefined) {
+                Prism = require('prismjs');
+            }
+            if (jQuery === undefined) {
+                // require('jQuery') returns a factory that requires window to
+                // build a jQuery instance, we normalize how we use modules
+                // that require this pattern but the window provided is a noop
+                // if it's defined (how jquery works)
+                if (window !== undefined) {
+                    jQuery = require('jquery');
+                } else {
+                    jQuery = require('jquery')(root);
+                }
+            }
+            if (!jQuery.fn.terminal) {
+                if (window !== undefined) {
+                    require('jquery.terminal');
+                } else {
+                    require('jquery.terminal')(jQuery);
+                }
+            }
+            factory(jQuery, Prism);
+            return jQuery;
+        };
+    } else {
+        // Browser
+        // istanbul ignore next
+        factory(root.jQuery, root.Prism);
+    }
+})(function($, Prism) {
+    var Token = Prism.Token;
     if (typeof Prism === 'undefined') {
         throw new Error('PrismJS not defined');
     }
@@ -142,4 +178,4 @@
         fn.__no_warn__ = true;
         $.terminal.defaults.formatters.unshift(fn);
     };
-})(Prism.Token, jQuery);
+});
