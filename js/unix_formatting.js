@@ -69,6 +69,7 @@
     $.terminal.overtyping = function overtyping(string, options) {
         string = $.terminal.unescape_brackets(string);
         var settings = $.extend({
+            unixFormattingEscapeBrackets: false,
             position: 0
         }, options);
         var removed_chars = [];
@@ -214,6 +215,9 @@
         // replace special characters with terminal formatting
         string = format(string, '\uFFF1', 'b;#fff;');
         string = format(string, '\uFFF2', 'u;;');
+        if (settings.unixFormattingEscapeBrackets) {
+            string = $.terminal.escape_brackets(string);
+        }
         if (options && typeof options.position === 'number') {
             return [string, new_position];
         }
@@ -544,6 +548,6 @@
         };
     })();
 
-    $.terminal.defaults.formatters.unshift($.terminal.overtyping);
     $.terminal.defaults.formatters.unshift($.terminal.from_ansi);
+    $.terminal.defaults.formatters.unshift($.terminal.overtyping);
 });

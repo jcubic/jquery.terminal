@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 19 Aug 2018 10:06:14 +0000
+ * Date: Sun, 19 Aug 2018 11:45:23 +0000
  */
 
 /* TODO:
@@ -1694,6 +1694,7 @@
             try {
                 string = $.terminal.escape_formatting(string);
                 var options = $.extend({}, settings, {
+                    unixFormattingEscapeBrackets: true,
                     position: position
                 });
                 var formatted = $.terminal.apply_formatters(string, options);
@@ -1869,7 +1870,7 @@
                     } else {
                         var last = array.slice(-1)[0];
                         var len = length(string);
-                        var from_last = len - pos - tabs_rm;
+                        var from_last = len - pos + tabs_rm;
                         var last_len = length(last);
                         var new_pos = 0;
                         if (from_last === -1) {
@@ -2198,7 +2199,10 @@
                         }
                         // reverse search for correct position
                         for (var i = 0; i < command_len; ++i) {
-                            var opts = $.extend({}, settings, {position: i});
+                            var opts = $.extend({}, settings, {
+                                position: i,
+                                unixFormattingEscapeBrackets: true
+                            });
                             var pos = $.terminal.apply_formatters(command, opts)[1];
                             if (new_formatted_pos === pos) {
                                 formatted_position = new_formatted_pos;
@@ -2955,7 +2959,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 19 Aug 2018 10:06:14 +0000',
+        date: 'Sun, 19 Aug 2018 11:45:23 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
