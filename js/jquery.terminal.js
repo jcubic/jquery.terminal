@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 19 Aug 2018 11:56:18 +0000
+ * Date: Sun, 19 Aug 2018 13:11:53 +0000
  */
 
 /* TODO:
@@ -1837,6 +1837,7 @@
                     string.match(/\n/)) {
                     var tabs = string.match(/\t/g);
                     var tabs_rm = tabs ? tabs.length * 3 : 0;
+                    var original_string = string;
                     //quick tabulation hack
                     if (tabs) {
                         string = string.replace(/\t/g, '\x00\x00\x00\x00');
@@ -1860,17 +1861,14 @@
                         if (array.length > 1) {
                             lines_after(array.slice(2));
                         }
-                    } else if (pos < first_len) {
-                        draw_cursor_line(array[0], pos);
-                        lines_after(array.slice(1));
                     } else if (pos === first_len) {
                         cursor_line.before(div(array[0]));
                         draw_cursor_line(array[1], 0);
                         lines_after(array.slice(2));
                     } else {
                         var last = array.slice(-1)[0];
-                        var len = length(string);
-                        var from_last = len - pos + tabs_rm;
+                        var len = length(original_string);
+                        var from_last = len - pos;
                         var last_len = length(last);
                         var new_pos = 0;
                         if (from_last === -1) {
@@ -2200,8 +2198,7 @@
                         // reverse search for correct position
                         for (var i = 0; i < command_len; ++i) {
                             var opts = $.extend({}, settings, {
-                                position: i,
-                                unixFormattingEscapeBrackets: true
+                                position: i
                             });
                             var pos = $.terminal.apply_formatters(command, opts)[1];
                             if (new_formatted_pos === pos) {
@@ -2959,7 +2956,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '1.20.2',
-        date: 'Sun, 19 Aug 2018 11:56:18 +0000',
+        date: 'Sun, 19 Aug 2018 13:11:53 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

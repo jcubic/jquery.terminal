@@ -1,6 +1,7 @@
 ### 1.20.2
 * escape formatting when using unix formatting in cmd
-* fix cursor on links
+* fix cursor style while hover over links
+* one more fix cursor position
 
 ## 1.20.1
 ### Bugfix
