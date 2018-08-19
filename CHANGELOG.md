@@ -8,8 +8,8 @@
 
 ### Bug Fixes
 * handling backspaces in unix formatting [#409](https://github.com/jcubic/jquery.terminal/issues/409)
-  * handle \r \n \r\n \n\r the same when adding leftovers before backspace in unix formatting 
-  * fix cursor position when text have tabs found when fixing
+  * handle \r \n \r\n \n\r the same when adding leftovers before backspace in unix formatting
+  * fix cursor position when text have tabs found when fixing #409
   * other fixes to backspaces
 * fix font change in universal selector [#415](https://github.com/jcubic/jquery.terminal/issues/415)
 * fix regression bug in formatters (emoji demo) [#416](https://github.com/jcubic/jquery.terminal/issues/416)
