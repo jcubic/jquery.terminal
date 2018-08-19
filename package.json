@@ -297,7 +297,9 @@
   },
   "dependencies": {
     "jquery": "~3",
+    "prismjs": "^1.15.0",
     "wcwidth": "^1.0.1"
+
   },
   "devDependencies": {
     "coveralls": "^3.0.1",

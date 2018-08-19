@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.20.1
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 19 Aug 2018 09:48:57 +0000
+ * Date: Sun, 19 Aug 2018 11:50:12 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -57,7 +57,7 @@
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
 }
-.terminal img, .terminal value, .terminal audio, .terminal object, .terminal canvas {
+.terminal img, .terminal audio, .terminal object, .terminal canvas {
     cursor: default;
 }
 .terminal .error {
@@ -144,9 +144,12 @@ body.terminal {
     background-color: #000;
     font-size: 12px;
     line-height: 14px;
+}
+.terminal, .cmd {
     box-sizing: border-box;
     cursor: text;
 }
+
 .cmd .cursor span {
     color: inherit;
     background-color: inherit;

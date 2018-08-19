@@ -1,4 +1,3 @@
-
 .*
 *~
 www
@@ -9,7 +8,7 @@ manifest
 README.in
 terminal.jquery.json
 SpecRunner.html
-spec
+__tests__
 examples
 bin
 css/jquery.terminal-*.css

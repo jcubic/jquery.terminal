@@ -1,3 +1,7 @@
+### 1.20.2
+* escape formatting when using unix formatting in cmd
+* fix cursor on links
+
 ## 1.20.1
 ### Bugfix
 * fix click after line for last line
