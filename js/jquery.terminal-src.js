@@ -1191,8 +1191,10 @@
                     node.closest('[role="presentation"]')
                         .prevUntil('.prompt').find('span').length;
             } else if (node.is('div[role="presentation"]')) {
+                var last = !node.nextUntil('textarea').length;
                 return node.find('span[data-text]').length +
-                    node.prevUntil('.prompt').find('span[data-text]').length - 1;
+                    node.prevUntil('.prompt').find('span[data-text]').length -
+                    (last ? 0 : 1);
             }
         }
         // IE mapping

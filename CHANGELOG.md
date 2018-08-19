@@ -1,3 +1,7 @@
+## 1.20.1
+### Bugfix
+* fix click after line for last line
+
 ## 1.20.0
 ### Security
 * anyLinks option to disable anything exception http and ftp (when false - default) - it make possible to insert javascript links, which is potential XSS vulnerability
