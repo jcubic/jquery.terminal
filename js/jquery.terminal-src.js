@@ -1836,7 +1836,6 @@
                 if (strlen(text(string)) > num_chars - prompt_len - 1 ||
                     string.match(/\n/)) {
                     var tabs = string.match(/\t/g);
-                    var tabs_rm = tabs ? tabs.length * 3 : 0;
                     var original_string = string;
                     //quick tabulation hack
                     if (tabs) {

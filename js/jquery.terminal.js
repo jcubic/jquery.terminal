@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 19 Aug 2018 13:11:53 +0000
+ * Date: Sun, 19 Aug 2018 13:14:18 +0000
  */
 
 /* TODO:
@@ -1836,7 +1836,6 @@
                 if (strlen(text(string)) > num_chars - prompt_len - 1 ||
                     string.match(/\n/)) {
                     var tabs = string.match(/\t/g);
-                    var tabs_rm = tabs ? tabs.length * 3 : 0;
                     var original_string = string;
                     //quick tabulation hack
                     if (tabs) {
@@ -2956,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '1.20.2',
-        date: 'Sun, 19 Aug 2018 13:11:53 +0000',
+        date: 'Sun, 19 Aug 2018 13:14:18 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
