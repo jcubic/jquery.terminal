@@ -137,7 +137,7 @@ body.terminal {
 .cmd .prompt > span {
     float: left;
 }
-.terminal, .cmd {
+.terminal, .terminal-wrapper *, .cmd, .cmd * {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     color: #aaa;
@@ -146,6 +146,13 @@ body.terminal {
     line-height: 14px;
     box-sizing: border-box;
     cursor: text;
+}
+.cmd .cursor span {
+    color: inherit;
+    background-color: inherit;
+}
+.cmd .cursor * {
+    background-color: transparent;
 }
 .cmd div {
     clear: both;
@@ -242,7 +249,7 @@ terminal .terminal-output > div {
     background-color: rgba(170, 170, 170, 0.99);
     color: #000;
 }
-.terminal .terminal-output div.error, .terminal .terminal-output div.error div {
+.terminal .terminal-output div.error, .terminal .terminal-output div.error * {
     color: red;
     color: var(--error-color, red);
 }
@@ -293,10 +300,16 @@ terminal .terminal-output > div {
   0%, 100% {
       background-color: #000;
       color: #aaa;
+      border-bottom: none;
+      border-left: none;
+      margin-left: 0;
   }
   50% {
       background-color: #bbb;
       color: #000;
+      border-bottom: none;
+      border-left: none;
+      margin-left: 0;
   }
 }
 
@@ -304,10 +317,16 @@ terminal .terminal-output > div {
   0%, 100% {
       background-color: #000;
       color: #aaa;
+      border-bottom: none;
+      border-left: none;
+      margin-left: 0;
   }
   50% {
       background-color: #bbb;
       color: #000;
+      border-bottom: none;
+      border-left: none;
+      margin-left: 0;
   }
 }
 
@@ -315,20 +334,32 @@ terminal .terminal-output > div {
   0%, 100% {
       background-color: #000;
       color: #aaa;
+      border-bottom: none;
+      border-left: none;
+      margin-left: 0;
   }
   50% {
       background-color: #bbb;
       color: #000;
+      border-bottom: none;
+      border-left: none;
+      margin-left: 0;
   }
 }
 @keyframes terminal-blink {
   0%, 100% {
       background-color: #000;
       color: #aaa;
+      border-bottom: none;
+      border-left: none;
+      margin-left: 0;
   }
   50% {
       background-color: #bbb; /* not #aaa because it's seems there is Google Chrome bug */
       color: #000;
+      border-bottom: none;
+      border-left: none;
+      margin-left: 0;
   }
 }
 @-webkit-keyframes terminal-bar {
@@ -450,7 +481,7 @@ terminal .terminal-output > div {
             animation-name: terminal-bar;
 }
 @supports (--css: variables) {
-    .terminal, .cmd {
+    .terminal, .terminal-wrapper *, .cmd, .cmd * {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
@@ -462,7 +493,7 @@ terminal .terminal-output > div {
         width: calc(var(--length, 1) * var(--char-width, 7.23438) * 1px);
         display: inline-block;
     }
-    .terminal, .cmd, .terminal .terminal-output > div > div, .cmd .prompt {
+    .terminal, .terminal *, .cmd, .cmd * {
         font-size: calc(var(--size, 1) * 12px);
         line-height: calc(var(--size, 1) * 14px);
     }
@@ -525,73 +556,105 @@ terminal .terminal-output > div {
       0%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
+          border-bottom: none;
+          border-left: none;
+          margin-left: 0;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
+          border-bottom: none;
+          border-left: none;
       }
+          margin-left: 0;
     }
 
     @-ms-keyframes terminal-blink {
       0%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
+          border-bottom: none;
+          border-left: none;
+          margin-left: 0;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
+          border-bottom: none;
+          border-left: none;
+          margin-left: 0;
       }
     }
     @-moz-keyframes terminal-blink {
       0%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
+          border-bottom: none;
+          border-left: none;
+          margin-left: 0;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
+          border-bottom: none;
+          border-left: none;
+          margin-left: 0;
       }
     }
     @keyframes terminal-blink {
       0%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
+          border-bottom: none;
+          border-left: none;
+          margin-left: 0;
       }
       50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
+          border-bottom: none;
+          border-left: none;
+          margin-left: 0;
       }
     }
     @-webkit-keyframes terminal-bar {
       0%, 100% {
           border-left-color: var(--background, #000);
+          border-bottom: none;
       }
       50% {
           border-left-color: var(--color, #aaa);
+          border-bottom: none;
       }
     }
     @-ms-keyframes terminal-bar {
       0%, 100% {
           border-left-color: var(--background, #000);
+          border-bottom: none;
       }
       50% {
           border-left-color: var(--color, #aaa);
+          border-bottom: none;
       }
     }
     @-moz-keyframes terminal-bar {
       0%, 100% {
           border-left-color: var(--background, #000);
+          border-bottom: none;
       }
       50% {
           border-left-color: var(--color, #aaa);
+          border-bottom: none;
       }
     }
     @keyframes terminal-bar {
       0%, 100% {
           border-left-color: var(--background, #000);
+          border-bottom: none;
       }
       50% {
           border-left-color: var(--color, #aaa);
+          border-bottom: none;
       }
     }
     @-webkit-keyframes terminal-underline {

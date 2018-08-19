@@ -1,3 +1,21 @@
+## 1.20.0
+### Security
+* anyLinks option to disable anything exception http and ftp (when false - default) - it make possible to insert javascript links, which is potential XSS vulnerability
+
+### Features
+* linksNoFollow option (default false)
+* add UMD for utility files [#418](https://github.com/jcubic/jquery.terminal/issues/418)
+
+### Bug Fixes
+* handling backspaces in unix formatting [#409](https://github.com/jcubic/jquery.terminal/issues/409)
+  * handle \r \n \r\n \n\r the same when adding leftovers before backspace in unix formatting 
+  * fix cursor position when text have tabs found when fixing
+  * other fixes to backspaces
+* fix font change in universal selector [#415](https://github.com/jcubic/jquery.terminal/issues/415)
+* fix regression bug in formatters (emoji demo) [#416](https://github.com/jcubic/jquery.terminal/issues/416)
+* fix cmd::resize() without args that make number of characters equal to 1 [#413](https://github.com/jcubic/jquery.terminal/issues/413)
+* fix click  after line [#419](https://github.com/jcubic/jquery.terminal/issues/419)
+
 ## 1.19.1
 ### Bug Fixes
 * fix type definition to match types from @types/jquery [#412](https://github.com/jcubic/jquery.terminal/issues/412)

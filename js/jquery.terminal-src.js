@@ -183,7 +183,7 @@
 })(typeof global !== "undefined" ? global : window);
 /* eslint-enable */
 // UMD taken from https://github.com/umdjs/umd
-(function(factory) {
+(function(factory, undefined) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
@@ -197,13 +197,13 @@
                 // build a jQuery instance, we normalize how we use modules
                 // that require this pattern but the window provided is a noop
                 // if it's defined (how jquery works)
-                if (typeof window !== 'undefined') {
+                if (window !== undefined) {
                     jQuery = require('jquery');
                 } else {
                     jQuery = require('jquery')(root);
                 }
             }
-            if (typeof wcwidth === 'undefined') {
+            if (wcwidth === undefined) {
                 wcwidth = require('wcwidth');
             }
             factory(jQuery, wcwidth);
@@ -1186,15 +1186,13 @@
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
-                return node.index() + node.parents('span').prevAll().text_length() +
-                       node.closest('[role="presentation"]')
-                           .prevUntil('.prompt').text_length();
+                return node.index() +
+                    node.parent('span').prevAll().find('span').length +
+                    node.closest('[role="presentation"]')
+                        .prevUntil('.prompt').find('span').length;
             } else if (node.is('div[role="presentation"]')) {
-                var index = node.index();
-                var lines = command.split(/\n/).slice(0, index);
-                return lines.reduce(function(pos, line) {
-                    return pos + length(line);
-                }, 0) + (lines.length - 1);
+                return node.find('span[data-text]').length +
+                    node.prevUntil('.prompt').find('span[data-text]').length - 1;
             }
         }
         // IE mapping
@@ -1621,11 +1619,10 @@
         // :: Recalculate number of characters in command line
         // ---------------------------------------------------------------------
         function change_num_chars() {
-            var $prompt = self.find('.prompt').text('&nbsp;');
+            var $prompt = self.find('.prompt').html('<span>&nbsp;</span>');
             var W = self.width();
-            var w = $prompt[0].getBoundingClientRect().width;
+            var w = $prompt.find('span')[0].getBoundingClientRect().width;
             num_chars = Math.floor(W / w);
-            draw_prompt();
         }
         // ---------------------------------------------------------------------
         // :: Split String that fit into command line where first line need to
@@ -1690,16 +1687,18 @@
         // ---------------------------------------------------------------------
         // :: use custom formatting
         // ---------------------------------------------------------------------
-        function formatting(string) {
+        function formatting(string, skip_formatted_position) {
             // we don't want to format command when user type formatting in
             try {
                 string = $.terminal.escape_formatting(string);
                 var options = $.extend({}, settings, {
                     position: position
                 });
-                var frormatted = $.terminal.apply_formatters(string, options);
-                formatted_position = frormatted[1];
-                string = frormatted[0];
+                var formatted = $.terminal.apply_formatters(string, options);
+                string = formatted[0];
+                if (!skip_formatted_position) {
+                    formatted_position = formatted[1];
+                }
                 string = $.terminal.normalize(string);
                 string = crlf(string);
                 return string;
@@ -2156,10 +2155,10 @@
                         position = n;
                     }
                     if (pos !== position && !silent) {
+                        redraw();
                         if (is_function(settings.onPositionChange)) {
                             settings.onPositionChange(position, formatted_position);
                         }
-                        redraw();
                         fix_textarea(true);
                     }
                     return self;
@@ -2178,7 +2177,7 @@
                 if (n === undefined) {
                     return formatted_position;
                 } else {
-                    var string = formatting(command);
+                    var string = formatting(command, true);
                     var len = $.terminal.length(string);
                     var command_len = $.terminal.length(command);
                     if (len === command_len) {
@@ -2192,18 +2191,17 @@
                         } else {
                             new_formatted_pos = n;
                         }
-                        // it's faster then reverse algorithm
-                        if (new_formatted_pos === len) {
-                            self.position($.terminal.length(command));
-                        } else {
-                            // reverse search for correct position
-                            for (var i = 0; i < command_len; ++i) {
-                                var opts = $.extend({}, settings, {position: i});
-                                var pos = $.terminal.apply_formatters(command, opts)[1];
-                                if (new_formatted_pos === pos) {
-                                    formatted_position = pos;
-                                    self.position(i);
-                                }
+                        if (len === new_formatted_pos) {
+                            return self.position(command_len);
+                        }
+                        // reverse search for correct position
+                        for (var i = 0; i < command_len; ++i) {
+                            var opts = $.extend({}, settings, {position: i});
+                            var pos = $.terminal.apply_formatters(command, opts)[1];
+                            if (new_formatted_pos === pos) {
+                                formatted_position = new_formatted_pos;
+                                self.position(i);
+                                break;
                             }
                         }
                     }
@@ -3057,7 +3055,7 @@
             var global = rex.flags.indexOf('g') !== -1;
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
-                // if regex don't have g flag lastIndex don't work
+                // if regex don't have g flag lastIndex will not work
                 if (global) {
                     // Add any of the original string we just skipped
                     var last_index = length(substring(string, 0, rex.lastIndex));
@@ -3497,23 +3495,29 @@
                         return apply_function_formatter(formatter, input);
                     } else {
                         var length = 0;
+                        var found_position = false;
                         var splitted = $.terminal.format_split(input[0]);
                         var partials = splitted.map(function(string) {
                             var position;
-                            if (input[1] - length >= 0) {
+                            var this_len = $.terminal.length(string);
+                            // first position that match is used for this partial
+                            if (input[1] <= length + this_len && !found_position) {
                                 position = input[1] - length;
+                                found_position = true;
                             } else {
                                 // -1 indicate that we will not track position because it
-                                // was in one the previous parial strings
+                                // was in one of the previous parial strings
                                 position = -1;
                             }
-                            length += $.terminal.length(string);
+                            // length is used to correct position after replace
+                            var length_before = length;
+                            length += this_len;
                             if ($.terminal.is_formatting(string)) {
                                 return [string, -1];
                             } else {
                                 if (formatter instanceof Array) {
                                     var options = formatter[2] || {};
-                                    var result = [string, position === -1 ? 0 : position];
+                                    var result = [string, position < 0 ? 0 : position];
                                     if (options.loop) {
                                         while (result[0].match(formatter[0])) {
                                             result = $.terminal.tracking_replace(
@@ -3531,9 +3535,12 @@
                                             result[1]
                                         );
                                     }
-                                    if (position === -1) {
-                                        return [result, -1];
+                                    if (position < 0) {
+                                        return [result[0], -1];
                                     }
+                                    // correct position becuase it's relative
+                                    // to partial and we need global for whole string
+                                    result[1] += length_before;
                                     return result;
                                 } else if (typeof formatter === 'function') {
                                     return apply_function_formatter(formatter, [
@@ -3543,16 +3550,23 @@
                                 return [string, -1];
                             }
                         });
-                        var position = partials.filter(function(partial) {
+                        var position_partial = partials.filter(function(partial) {
                             return partial[1] !== -1;
                         })[0];
                         var string = partials.map(function(partial) {
                             return partial[0];
                         }).join('');
-                        return [
-                            string,
-                            typeof position === 'undefined' ? 0 : position[1]
-                        ];
+                        var position;
+                        if (typeof position_partial === 'undefined') {
+                            position = input[1];
+                        } else {
+                            position = position_partial[1];
+                        }
+                        // to make sure that output position is not outside the string
+                        if (position >= $.terminal.length(input[0])) {
+                            position = $.terminal.length(string);
+                        }
+                        return [string, position];
                     }
                 }, input);
                 if (typeof settings.position === 'number') {
@@ -3583,7 +3597,9 @@
                 return safe(string);
             }
             var settings = $.extend({}, {
-                linksNoReferrer: false
+                linksNoReferrer: false,
+                linksNoFollow: false,
+                anyLinks: false
             }, options || {});
             if (typeof str === 'string') {
                 // support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
@@ -3657,12 +3673,19 @@
                                 if (data.match(email_re)) {
                                     result = '<a href="mailto:' + data + '"';
                                 } else {
-                                    result = '<a target="_blank" href="' + data + '"';
-                                    if (settings.linksNoReferrer) {
-                                        result += ' rel="noreferrer noopener"';
-                                    } else {
-                                        result += ' rel="noopener"';
+                                    if (!settings.anyLinks &&
+                                        !data.match(/^(https?|ftp):\/\//)) {
+                                        data = '';
                                     }
+                                    result = '<a target="_blank" href="' + data + '"';
+                                    var rel = ["noopener"];
+                                    if (settings.linksNoReferrer) {
+                                        rel.unshift("noreferrer");
+                                    }
+                                    if (settings.linksNoFollow) {
+                                        rel.unshift("nofollow");
+                                    }
+                                    result += ' rel="' + rel.join(' ') + '"';
                                 }
                                 // make focus to terminal textarea that will enable
                                 // terminal when pressing tab and terminal is disabled
@@ -4241,6 +4264,8 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
+        anyLinks: false,
+        linksNoFollow: false,
         processRPCResponse: null,
         completionEscape: true,
         convertLinks: true,
@@ -4927,6 +4952,8 @@
             } else if (!options.raw) {
                 var format_options = {
                     linksNoReferrer: settings.linksNoReferrer,
+                    linksNoFollow: settings.linksNoFollow,
+                    anyLinks: settings.anyLinks,
                     char_width: char_size.width
                 };
                 var cols = self.cols();

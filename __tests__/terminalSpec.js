@@ -117,7 +117,7 @@ global.document = window.document;
 global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
 require('../js/jquery.terminal-src')(global.$);
-require('../js/unix_formatting');
+require('../js/unix_formatting')(global.$);
 
 function nbsp(string) {
     return string.replace(/ /g, '\xA0');
@@ -366,13 +366,15 @@ describe('Terminal utils', function() {
         });
         it('should process normal backspaces', function() {
             var tests = [
-                ['Checking current state.\t[    ]\b\b\b\b\b-\r\u001B[KChecking current state.'+
-                 '\t[    ]\b\b\b\b\bFAIL\r\n',
-                 "Checking current state.\t[-    ]\r\u001b[KChecking current state.\t[FAIL]    \r\n"
+                ['Checking current state.\t[    ]\b\b\b\b\bFAIL\r\n',
+                 "Checking current state.\t[FAIL]\r\n"
                 ],
                 ['[Start]\b\b] \b\b\b\b\b\b    \b\b\b\b---\b\b\b   \b\b\bDone] show be displa'+
                  'yed as [Done]',
                  '[Done] show be displayed as [Done]'
+                ],
+                ['Test 2.\t[    ]\b\b\b\b\bFAIL\nTest 3.\t[    ]\b\b\b\b\bWARNING]\n',
+                 'Test 2.\t[FAIL]\nTest 3.\t[WARNING]\n'
                 ]
             ];
             tests.forEach(function(spec) {
@@ -620,6 +622,67 @@ describe('Terminal utils', function() {
                         '://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true
+                    }
+                ]
+            ];
+            tests.forEach(function(spec) {
+                var expected = spec[0];
+                var options = spec[1];
+                var output = $.terminal.format(input, spec[1]);
+                expect(output).toEqual(expected);
+            });
+        });
+        it('should handle javascript links', function() {
+            var js = "javascript".split('').map(function(chr) {
+                return '&#' + chr.charCodeAt(0) + ';';
+            }).join('');
+            var tests = [
+                [
+                    "[[!;;;;javascript:alert('x')]xss]", {},
+                    '<a target="_blank" href=""' +
+                        ' rel="noopener" tabindex="1000">xss<'+
+                        '/a>'
+                ],
+                [
+                    "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
+                    '<a target="_blank" href="javascript:alert(\'x\')"' +
+                        ' rel="noopener" tabindex="1000">xss<'+
+                        '/a>'
+                ],
+                [
+                    "[[!;;;;" + js + ":alert('x')]xss]", {},
+                    '<a target="_blank" href=""' +
+                        ' rel="noopener" tabindex="1000">xss<'+
+                        '/a>'
+                ],
+                [
+                    "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
+                    '<a target="_blank" href=""' +
+                        ' rel="noopener" tabindex="1000">xss<'+
+                        '/a>'
+                ],
+            ];
+            tests.forEach(function(spec) {
+                var output = $.terminal.format(spec[0], spec[1]);
+                expect(output).toEqual(spec[2]);
+            });
+        });
+        it('should add nofollow', function() {
+            var input = '[[!;;]https://terminal.jcubic.pl]';
+            var tests = [
+                [
+                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
+                        ' rel="nofollow noopener" tabindex="1000">https://terminal.jcubic.pl<'+
+                        '/a>',
+                    {linksNoFollow: true}
+                ],
+                [
+                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
+                        ' rel="nofollow noreferrer noopener" tabindex="1000">https'+
+                        '://terminal.jcubic.pl</a>',
+                    {
+                        linksNoReferrer: true,
+                        linksNoFollow: true
                     }
                 ]
             ];
