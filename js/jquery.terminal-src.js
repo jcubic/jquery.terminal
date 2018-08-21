@@ -1712,6 +1712,7 @@
                 }
                 string = $.terminal.normalize(string);
                 string = crlf(string);
+                //string = $.terminal.amp(string);
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -3151,8 +3152,9 @@
                     string.substring(i - 1, i).match(/\s/);
             }
             // ----------------------------------------------------------------
+            var entity_re = /^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
             function match_entity(index) {
-                return string.substring(index).match(/^(&[^;]+;)/);
+                return string.substring(index).match(entity_re);
             }
             // ----------------------------------------------------------------
             function is_open_formatting(i) {

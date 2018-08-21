@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 21 Aug 2018 15:55:23 +0000
+ * Date: Tue, 21 Aug 2018 16:16:13 +0000
  */
 
 /* TODO:
@@ -1712,6 +1712,7 @@
                 }
                 string = $.terminal.normalize(string);
                 string = crlf(string);
+                //string = $.terminal.amp(string);
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -2983,7 +2984,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 21 Aug 2018 15:55:23 +0000',
+        date: 'Tue, 21 Aug 2018 16:16:13 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3151,8 +3152,9 @@
                     string.substring(i - 1, i).match(/\s/);
             }
             // ----------------------------------------------------------------
+            var entity_re = /^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
             function match_entity(index) {
-                return string.substring(index).match(/^(&[^;]+;)/);
+                return string.substring(index).match(entity_re);
             }
             // ----------------------------------------------------------------
             function is_open_formatting(i) {
