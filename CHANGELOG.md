@@ -1,3 +1,7 @@
+## 1.21.0
+### Features
+* HOLD keymap modifier + HOLD+[SHIFT]+BACKSPACE/DELETE to delete word before and after the cursor [#420](https://github.com/jcubic/jquery.terminal/issues/420)
+
 ## 1.20.5
 ### Bugfix
 * one more fix to position in normal function formatter (prism)

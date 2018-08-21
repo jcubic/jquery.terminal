@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.20.5
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 21 Aug 2018 09:50:49 +0000
+ * Date: Tue, 21 Aug 2018 15:55:23 +0000
  */
 
 /* TODO:
@@ -1132,7 +1132,9 @@
             enabled: true,
             history: true,
             onPositionChange: $.noop,
-            onCommandChange: $.noop
+            onCommandChange: $.noop,
+            clickTimeout: 200,
+            holdTimout: 400
         }
     };
     $.fn.cmd = function(options) {
@@ -1244,16 +1246,9 @@
         }
         var keymap;
         var default_keymap = {
-            'ALT+D': function() {
-                var re = / *[^ ]+ *(?= )|[^ ]+$/;
-                self.set(
-                    command.slice(0, position) +
-                    command.slice(position).replace(re, ''),
-                    true
-                );
-                // chrome jump to address bar
-                return false;
-            },
+            'ALT+D': delete_word,
+            'HOLD+DELETE': delete_word,
+            'HOLD+SHIFT+DELETE': delete_word,
             'ENTER': function() {
                 if (history && command && !settings.mask &&
                     (is_function(settings.historyFilter) &&
@@ -1374,17 +1369,9 @@
             'CTRL+A': home,
             'SHIFT+INSERT': paste_event,
             'CTRL+SHIFT+T': return_true, // open closed tab
-            'CTRL+W': function() {
-                // don't work in Chromium (can't prevent close tab)
-                if (command !== '' && position !== 0) {
-                    var m = command.slice(0, position).match(/([^ ]+ *$)/);
-                    if (m[0].length) {
-                        kill_text = self['delete'](-m[0].length);
-                        text_to_clipboard(self, kill_text);
-                    }
-                }
-                return false;
-            },
+            'CTRL+W': delete_word_backward,
+            'HOLD+BACKSPACE': delete_word_backward,
+            'HOLD+SHIFT+BACKSPACE': delete_word_backward,
             'CTRL+H': function() {
                 if (command !== '' && position > 0) {
                     self['delete'](-1);
@@ -1422,6 +1409,27 @@
             'META+R': return_true, // CMD+R page reload in Chrome Mac
             'META+L': return_true // CLD+L jump into Ominbox on Chrome Mac
         };
+        function delete_word() {
+            var re = / *[^ ]+ *(?= )|[^ ]+$/;
+            self.set(
+                command.slice(0, position) +
+                command.slice(position).replace(re, ''),
+                true
+            );
+            // chrome jump to address bar
+            return false;
+        }
+        function delete_word_backward() {
+            // don't work in Chromium (can't prevent close tab)
+            if (command !== '' && position !== 0) {
+                var m = command.slice(0, position).match(/([^ ]+ *$)/);
+                if (m[0].length) {
+                    kill_text = self['delete'](-m[0].length);
+                    text_to_clipboard(self, kill_text);
+                }
+            }
+            return false;
+        }
         function return_true() {
             return true;
         }
@@ -2304,7 +2312,10 @@
         var no_keydown = true;
         var backspace = false;
         var process = false;
+        var hold = false;
+        var hold_pause = false;
         var skip_insert;
+        var hold_timer;
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
         var prev_command = '';
@@ -2360,6 +2371,19 @@
                 }
             }
             if (enabled) {
+                hold_timer = self.oneTime(settings.holdTimout, 'hold', function() {
+                    hold = true;
+                });
+                if (hold) {
+                    key = 'HOLD+' + key;
+                    if (hold_pause) {
+                        return;
+                    }
+                    hold_pause = true;
+                    self.oneTime(settings.holdTimout, 'delay', function() {
+                        hold_pause = false;
+                    });
+                }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
@@ -2398,6 +2422,10 @@
                 //prevent_keypress = true;
                 //e.preventDefault();
             }
+        }
+        function keyup_event() {
+            self.stopTime('hold');
+            hold = false;
         }
         var doc = $(document.documentElement || window);
         self.keymap(settings.keymap || {});
@@ -2532,7 +2560,7 @@
             no_keydown = true;
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
-            .bind('input.cmd', input_event);
+            .bind('keyup.cmd', keyup_event).bind('input.cmd', input_event);
         (function() {
             var was_down = false;
             var count = 0;
@@ -2954,8 +2982,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '1.20.5',
-        date: 'Tue, 21 Aug 2018 09:50:49 +0000',
+        version: 'DEV',
+        date: 'Tue, 21 Aug 2018 15:55:23 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4295,6 +4323,7 @@
         caseSensitiveAutocomplete: true,
         caseSensitiveSearch: true,
         clickTimeout: 200,
+        holdTimout: 400,
         request: $.noop,
         response: $.noop,
         describe: 'procs',
@@ -7728,6 +7757,7 @@
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
+                holdTimout: settings.holdTimout,
                 keypress: key_press,
                 onCommandChange: function(command) {
                     if (is_function(settings.onCommandChange)) {
