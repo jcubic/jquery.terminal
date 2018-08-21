@@ -1,3 +1,8 @@
+## 1.20.4
+### Bugfix
+* fix position in normal function formatter (prism)
+* fix syntax (prism) function name in developer tools
+
 ## 1.20.3
 ### Bugfix
 * fix regression in overtyping [#409](https://github.com/jcubic/jquery.terminal/issues/409)
