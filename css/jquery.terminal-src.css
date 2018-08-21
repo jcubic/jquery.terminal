@@ -149,8 +149,7 @@ body.terminal {
     box-sizing: border-box;
     cursor: text;
 }
-
-.cmd .cursor span {
+.cmd .cursor span:not(.token) {
     color: inherit;
     background-color: inherit;
 }

@@ -172,9 +172,9 @@
         // we create function with name so we will see it in developer tools
         // we bind jQuery as argument so it will work when jQuery with noConflict
         // is added after this script
-        var fn = new Function('', 'return function syntax_' + language +
-                              '($, string) { return $.terminal.prism("' + language +
-                              '", string); }')().bind(null, $);
+        var fn = new Function('$', 'return function syntax_' + language +
+                              '(string) { return $.terminal.prism("' + language +
+                              '", string); }')($);
         fn.__no_warn__ = true;
         $.terminal.defaults.formatters.unshift(fn);
     };

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 21 Aug 2018 06:28:27 +0000
+ * Date: Tue, 21 Aug 2018 08:56:55 +0000
  */
 
 /* TODO:
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '1.20.3',
-        date: 'Tue, 21 Aug 2018 06:28:27 +0000',
+        date: 'Tue, 21 Aug 2018 08:56:55 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3513,13 +3513,14 @@
                             }
                             // length is used to correct position after replace
                             var length_before = length;
+                            var result;
                             length += this_len;
                             if ($.terminal.is_formatting(string)) {
                                 return [string, -1];
                             } else {
                                 if (formatter instanceof Array) {
                                     var options = formatter[2] || {};
-                                    var result = [string, position < 0 ? 0 : position];
+                                    result = [string, position < 0 ? 0 : position];
                                     if (options.loop) {
                                         while (result[0].match(formatter[0])) {
                                             result = $.terminal.tracking_replace(
@@ -3540,14 +3541,16 @@
                                     if (position < 0) {
                                         return [result[0], -1];
                                     }
+                                } else if (typeof formatter === 'function') {
+                                    result = apply_function_formatter(formatter, [
+                                        string, position
+                                    ]);
+                                }
+                                if (typeof result !== 'undefined') {
                                     // correct position becuase it's relative
                                     // to partial and we need global for whole string
                                     result[1] += length_before;
                                     return result;
-                                } else if (typeof formatter === 'function') {
-                                    return apply_function_formatter(formatter, [
-                                        string, position
-                                    ]);
                                 }
                                 return [string, -1];
                             }
