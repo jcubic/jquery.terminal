@@ -1,6 +1,6 @@
 ## 1.20.3
-### Bugifx
-* fix regresion in overtyping [#409](https://github.com/jcubic/jquery.terminal/issues/409)
+### Bugfix
+* fix regression in overtyping [#409](https://github.com/jcubic/jquery.terminal/issues/409)
 
 ## 1.20.2
 ### Bugfix
