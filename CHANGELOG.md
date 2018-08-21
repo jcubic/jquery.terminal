@@ -1,3 +1,7 @@
+## 1.20.3
+### Bugifx
+* fix regresion in overtyping [#409](https://github.com/jcubic/jquery.terminal/issues/409)
+
 ## 1.20.2
 ### Bugfix
 * escape formatting when using unix formatting in cmd

@@ -59,6 +59,7 @@
     var overtyping_re = new RegExp('^(?:(' + chr + ')?\\x08(_|\\1)|' +
                                    '(_)\\x08(' + chr + '))');
     var new_line_re = /^(\r\n|\n\r|\r|\n)/;
+    var clear_line_re = /[^\r\n]+\r\x1B\[K/g;
     // ---------------------------------------------------------------------
     function length(string) {
         return $.terminal.length(string);
@@ -194,6 +195,12 @@
         var break_next = false;
         // loop until not more backspaces
         new_position = settings.position;
+        // we need to clear line \x1b[K in overtyping because it need to be before
+        // overtyping and from_ansi need to be called after so it escape stuff
+        // between Escape Code and cmd will have escaped formatting typed by user
+        var rep = $.terminal.tracking_replace(string, clear_line_re, '', new_position);
+        string = rep[0];
+        new_position = rep[1];
         while (string.match(/\x08/) || removed_chars.length) {
             string = replace(string, new_position);
             if (break_next) {
@@ -434,7 +441,6 @@
             }
             return [styles.join(''), color, background];
         }
-        var clear_line_re = /[^\r\n]+\r\x1B\[K/g;
         return function from_ansi(input, options) {
             input = $.terminal.unescape_brackets(input);
             var settings = $.extend({
@@ -442,11 +448,8 @@
                 position: 0
             }, options);
             var new_position = settings.position;
-            var rep = $.terminal.tracking_replace(input, clear_line_re, '', new_position);
-            var position = new_position = rep[1];
+            var position = new_position;
             var result;
-            input = rep[0];
-
             //merge multiple codes
             /*input = input.replace(/((?:\x1B\[[0-9;]*[A-Za-z])*)/g, function(group) {
               return group.replace(/m\x1B\[/g, ';');
