@@ -192,6 +192,7 @@ function shortcut(ctrl, alt, shift, which, key) {
     }
     doc.trigger(keydown(ctrl, alt, shift, which, key));
     doc.trigger(keypress(key));
+    doc.trigger($.Event("keyup"));
 }
 function enter_key() {
     shortcut(false, false, false, 13, 'enter');
