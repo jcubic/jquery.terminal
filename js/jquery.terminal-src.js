@@ -3501,7 +3501,7 @@
                         var splitted = $.terminal.format_split(input[0]);
                         var partials = splitted.map(function(string) {
                             var position;
-                            var this_len = $.terminal.length(string);
+                            var this_len = $.terminal.length($.terminal.strip(string));
                             // first position that match is used for this partial
                             if (input[1] <= length + this_len && !found_position) {
                                 position = input[1] - length;
@@ -3549,7 +3549,9 @@
                                 if (typeof result !== 'undefined') {
                                     // correct position becuase it's relative
                                     // to partial and we need global for whole string
-                                    result[1] += length_before;
+                                    if (result[1] !== -1) {
+                                        result[1] += length_before;
+                                    }
                                     return result;
                                 }
                                 return [string, -1];

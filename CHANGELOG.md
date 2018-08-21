@@ -1,3 +1,7 @@
+## 1.20.5
+### Bugfix
+* one more fix to position in normal function formatter (prism)
+
 ## 1.20.4
 ### Bugfix
 * fix position in normal function formatter (prism)

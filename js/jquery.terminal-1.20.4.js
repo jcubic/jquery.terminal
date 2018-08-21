@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 21 Aug 2018 08:57:53 +0000
+ * Date: Tue, 21 Aug 2018 09:49:54 +0000
  */
 
 /* TODO:
@@ -2955,7 +2955,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '1.20.4',
-        date: 'Tue, 21 Aug 2018 08:57:53 +0000',
+        date: 'Tue, 21 Aug 2018 09:49:54 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3501,7 +3501,7 @@
                         var splitted = $.terminal.format_split(input[0]);
                         var partials = splitted.map(function(string) {
                             var position;
-                            var this_len = $.terminal.length(string);
+                            var this_len = $.terminal.length($.terminal.strip(string));
                             // first position that match is used for this partial
                             if (input[1] <= length + this_len && !found_position) {
                                 position = input[1] - length;
@@ -3549,7 +3549,9 @@
                                 if (typeof result !== 'undefined') {
                                     // correct position becuase it's relative
                                     // to partial and we need global for whole string
-                                    result[1] += length_before;
+                                    if (result[1] !== -1) {
+                                        result[1] += length_before;
+                                    }
                                     return result;
                                 }
                                 return [string, -1];
