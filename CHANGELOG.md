@@ -1,8 +1,10 @@
 ## 1.21.0
 ### Features
 * HOLD keymap modifier + HOLD+[SHIFT]+BACKSPACE/DELETE to delete word before and after the cursor [#420](https://github.com/jcubic/jquery.terminal/issues/420)
+
 ### Bugfix
 * fix &) in scheme prism formatting [#421](https://github.com/jcubic/jquery.terminal/issues/421)
+* don't process keys other then enter in reverse search
 
 ## 1.20.5
 ### Bugfix

@@ -2316,7 +2316,6 @@
         var hold = false;
         var hold_pause = false;
         var skip_insert;
-        var hold_timer;
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
         var prev_command = '';
@@ -2329,6 +2328,14 @@
         // ---------------------------------------------------------------------
         function is_single(e) {
             return e.key && e.key.length === 1 && !e.ctrlKey;
+        }
+        // ---------------------------------------------------------------------
+        function clear_reverse_search_key(e) {
+            // arrows / Home / End / ENTER
+            return e.which === 35 || e.which === 36 ||
+                e.which === 37 || e.which === 38 ||
+                e.which === 39 || e.which === 40 ||
+                e.which === 13 || e.which === 27;
         }
         // ---------------------------------------------------------------------
         function keydown_event(e) {
@@ -2372,7 +2379,7 @@
                 }
             }
             if (enabled) {
-                hold_timer = self.oneTime(settings.holdTimout, 'hold', function() {
+                self.oneTime(settings.holdTimout, 'hold', function() {
                     hold = true;
                 });
                 if (hold) {
@@ -2391,20 +2398,16 @@
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }
-                // arrows / Home / End / ENTER
-                if (reverse_search && (e.which === 35 || e.which === 36 ||
-                                       e.which === 37 || e.which === 38 ||
-                                       e.which === 39 || e.which === 40 ||
-                                       e.which === 13 || e.which === 27)) {
+                if (reverse_search && clear_reverse_search_key(e)) {
                     clear_reverse_state();
                     draw_prompt();
                     if (e.which === 27) { // ESC
                         self.set('');
                     }
                     redraw();
-                    // finish reverse search and execute normal event handler
-                    /* jshint validthis:true */
-                    keydown_event.call(this, e);
+                    if (e.which === 13) {
+                        keydown_event.call(this, e);
+                    }
                 } else if (is_function(keymap[key])) {
                     result = keymap[key](e);
                     if (result === true) {
