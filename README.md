@@ -10,7 +10,7 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&66a7b6e20905c7cf5a558e6df32d8d9a484ba767)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&570e431b8076ba507451877a7f6ef3cd2ea02da0)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&e104f3cdd4a7f88c9d0e82d00c64c294)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)

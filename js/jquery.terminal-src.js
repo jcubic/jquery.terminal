@@ -1712,7 +1712,6 @@
                 }
                 string = $.terminal.normalize(string);
                 string = crlf(string);
-                //string = $.terminal.amp(string);
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);

@@ -175,7 +175,15 @@
         var fn = new Function('$', 'return function syntax_' + language +
                               '(string) { return $.terminal.prism("' + language +
                               '", string); }')($);
+        // disable warning because it may create nested formatting
         fn.__no_warn__ = true;
-        $.terminal.defaults.formatters.unshift(fn);
+        var formatters = $.terminal.defaults.formatters;
+        for (var i = 0; i < formatters.length; ++i) {
+            if (formatters[i] === $.terminal.nested_formatting) {
+                formatters.splice(i, 0, fn);
+                return;
+            }
+        }
+        formatters.push(fn);
     };
 });

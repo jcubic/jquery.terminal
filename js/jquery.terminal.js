@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 21 Aug 2018 16:43:49 +0000
+ * Date: Wed, 22 Aug 2018 14:11:17 +0000
  */
 
 /* TODO:
@@ -1712,7 +1712,6 @@
                 }
                 string = $.terminal.normalize(string);
                 string = crlf(string);
-                //string = $.terminal.amp(string);
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -2987,7 +2986,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 21 Aug 2018 16:43:49 +0000',
+        date: 'Wed, 22 Aug 2018 14:11:17 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
