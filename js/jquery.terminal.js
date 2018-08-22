@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Wed, 22 Aug 2018 14:11:17 +0000
+ * Date: Wed, 22 Aug 2018 16:26:02 +0000
  */
 
 /* TODO:
@@ -2426,7 +2426,7 @@
                 //e.preventDefault();
             }
         }
-        function keyup_event() {
+        function clear_hold() {
             self.stopTime('hold');
             hold = false;
         }
@@ -2434,6 +2434,7 @@
         self.keymap(settings.keymap || {});
         function keypress_event(e) {
             debug('keypress "' + e.key + '" ' + e.fake);
+            clear_hold();
             var result;
             if (!e.fake) {
                 no_keypress = false;
@@ -2563,7 +2564,7 @@
             no_keydown = true;
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
-            .bind('keyup.cmd', keyup_event).bind('input.cmd', input_event);
+            .bind('keyup.cmd', clear_hold).bind('input.cmd', input_event);
         (function() {
             var was_down = false;
             var count = 0;
@@ -2986,7 +2987,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 22 Aug 2018 14:11:17 +0000',
+        date: 'Wed, 22 Aug 2018 16:26:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
