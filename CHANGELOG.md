@@ -5,6 +5,7 @@
 ### Bugfix
 * fix &) in scheme prism formatting [#421](https://github.com/jcubic/jquery.terminal/issues/421)
 * don't process keys other then enter in reverse search
+* fix issue with background in Prismjs css
 
 ## 1.20.5
 ### Bugfix
