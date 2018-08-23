@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 23 Aug 2018 15:38:18 +0000
+ * Date: Thu, 23 Aug 2018 15:52:22 +0000
  */
 
 /* TODO:
@@ -1411,7 +1411,7 @@
         };
         // -------------------------------------------------------------------------------
         function delete_word(clipboard) {
-            function delete_word() {
+            return function delete_word() {
                 var re = / *[^ ]+ *(?= )|[^ ]+$/;
                 var substring = command.slice(position);
                 var m = substring.match(re);
@@ -1428,7 +1428,7 @@
                 );
                 // chrome jump to address bar
                 return false;
-            }
+            };
         }
         // -------------------------------------------------------------------------------
         function delete_word_backward(clipboard) {
@@ -3038,7 +3038,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 23 Aug 2018 15:38:18 +0000',
+        date: 'Thu, 23 Aug 2018 15:52:22 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3332,7 +3332,6 @@
             var end_formatting = '';
             var prev_index;
             var re = /(&[^;]+);$/;
-            var count = 0;
             $.terminal.iterate_formatting(string, function(data) {
                 var m;
                 if (start_index && data.count === start_index + 1) {
@@ -3347,11 +3346,12 @@
                     }
                 }
                 var substring = string.substring(data.index);
+                var pair = substring.substring(0, 2);
                 m = substring.match(emoji_re);
                 var len = -1;
                 if (m) {
                     len = m[1].length;
-                } else if (substring.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
+                } else if (pair.replace(astral_symbols_re, '_') === 1) {
                     len = 2;
                 }
                 if (end_index && data.count === end_index) {
