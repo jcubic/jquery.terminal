@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 25 Aug 2018 08:28:21 +0000
+ * Date: Sat, 25 Aug 2018 09:32:58 +0000
  */
 
 /* TODO:
@@ -3044,7 +3044,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 25 Aug 2018 08:28:21 +0000',
+        date: 'Sat, 25 Aug 2018 09:32:58 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3137,22 +3137,39 @@
             function length(string) {
                 return $.terminal.length(string);
             }
+            // we need to correct position from regex and match to take into account
+            // characters that are created from more when one code point like
+            // emoji or surogate pairs #422
+            function correct_index(index) {
+                var len = length(string.substring(0, index));
+                for (var i = index; i < string.length; ++i) {
+                    var next_len = length(string.substring(0, i));
+                    if (next_len === len + 1) {
+                        return len;
+                    }
+                    len = next_len;
+                }
+                return len;
+            }
             var new_string = "";
             var match;
             var index = 0;
             var rep_string;
-            var new_position = position;
+            var new_position = correct_index(position);
             var start;
             var global = rex.flags.indexOf('g') !== -1;
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // if regex don't have g flag lastIndex will not work
                 if (global) {
+                    // fix lastIndex for emoji and characters
+                    // that have more then one codepoint
+                    var i = correct_index(rex.lastIndex);
                     // Add any of the original string we just skipped
-                    var last_index = length(substring(string, 0, rex.lastIndex));
+                    var last_index = length(substring(string, 0, i));
                     start = last_index - length(match[0]);
                 } else {
-                    start = match.index;
+                    start = correct_index(match.index);
                     last_index = start + length(match[0]);
                 }
                 if (index < start) {
@@ -3200,6 +3217,9 @@
                 new_string += substring(string, index);
             }
             // Return the string and the updated position
+            if (string === new_string) {
+                return [string, position];
+            }
             return [new_string, new_position];
         },
         // ---------------------------------------------------------------------
@@ -3310,7 +3330,6 @@
                         }
                         if (ret.index !== undefined) {
                             i = ret.index;
-
                         }
                     }
                 } else if (i === string.length - 1) {
@@ -3625,7 +3644,7 @@
                         var splitted = $.terminal.format_split(input[0]);
                         var partials = splitted.map(function(string) {
                             var position;
-                            var this_len = $.terminal.length($.terminal.strip(string));
+                            var this_len = text(string).length;
                             // first position that match is used for this partial
                             if (input[1] <= length + this_len && !found_position) {
                                 position = input[1] - length;
@@ -3696,6 +3715,9 @@
                         // to make sure that output position is not outside the string
                         if (position >= $.terminal.length(input[0])) {
                             position = $.terminal.length(string);
+                        }
+                        if (string === input[0]) {
+                            return input;
                         }
                         return [string, position];
                     }
