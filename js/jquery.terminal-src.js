@@ -4067,11 +4067,19 @@
         // ---------------------------------------------------------------------
         // :: function executed for each text inside [{ .... }]
         // ---------------------------------------------------------------------
-        extended_command: function extended_command(term, string) {
+        extended_command: function extended_command(term, string, options) {
+            var settings = $.extend({
+                invokeMethods: false
+            }, options);
             try {
                 change_hash = false;
                 var m = string.match(extended_command_re);
                 if (m) {
+                    if (!settings.invokeMethods) {
+                        warn('To invoke terminal or cmd methods you need to enable ' +
+                             'invokeMethods option');
+                        return;
+                    }
                     string = m[1];
                     var obj = m[2] === 'terminal' ? term : term.cmd();
                     var fn = m[3];
@@ -4388,6 +4396,7 @@
         wrap: true,
         checkArity: true,
         raw: false,
+        invokeMethods: false,
         exceptionHandler: null,
         pauseEvents: true,
         softPause: false,
@@ -5161,7 +5170,9 @@
                                     prev_command.command.trim() === string.trim()) {
                                     self.error(strings().recursiveCall);
                                 } else {
-                                    $.terminal.extended_command(self, string);
+                                    $.terminal.extended_command(self, string, {
+                                        invokeMethods: settings.invokeMethods
+                                    });
                                 }
                             }
                             return '';

@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sat, 25 Aug 2018 07:07:34 +0000
+ * Date: Sat, 25 Aug 2018 08:19:13 +0000
  */
 
 /* TODO:
@@ -1134,7 +1134,8 @@
             onPositionChange: $.noop,
             onCommandChange: $.noop,
             clickTimeout: 200,
-            holdTimout: 400
+            holdTimout: 400,
+            tabs: 4
         }
     };
     $.fn.cmd = function(options) {
@@ -1750,7 +1751,10 @@
         // :: format end encode the string
         // ---------------------------------------------------------------------
         function format(string) {
-            return $.terminal.format($.terminal.encode(wrap(string)), {
+            var encoded = $.terminal.encode(wrap(string), {
+                tabs: settings.tabs
+            });
+            return $.terminal.format(encoded, {
                 char_width: settings.char_width
             });
         }
@@ -1962,7 +1966,9 @@
         var draw_prompt = (function() {
             function set(prompt) {
                 var lines = $.terminal.split_equal(
-                    $.terminal.encode(prompt),
+                    $.terminal.encode(prompt, {
+                        tabs: settings.tabs
+                    }),
                     num_chars
                 );
                 var options = {
@@ -3038,7 +3044,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 25 Aug 2018 07:07:34 +0000',
+        date: 'Sat, 25 Aug 2018 08:19:13 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3503,7 +3509,7 @@
         // ---------------------------------------------------------------------
         encode: function encode(str, options) {
             var settings = $.extend({
-                tabStop: 4
+                tabs: 4
             }, options);
             return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/ /g, '&nbsp;').split('\n').map(function(line) {
@@ -3511,11 +3517,11 @@
                     return splitted.map(function(str, i) {
                         if (str === '\t') {
                             if (i === 0 || splitted[i - 1] === '\t') {
-                                return new Array(settings.tabStop + 1).join('&nbsp;');
+                                return new Array(settings.tabs + 1).join('&nbsp;');
                             } else {
                                 var before = splitted.slice(0, i).join('');
                                 var len = $.terminal.length(before);
-                                var chars = settings.tabStop - (len % settings.tabStop);
+                                var chars = settings.tabs - (len % settings.tabs);
                                 if (chars === 0) {
                                     chars = 4;
                                 }
@@ -4061,11 +4067,19 @@
         // ---------------------------------------------------------------------
         // :: function executed for each text inside [{ .... }]
         // ---------------------------------------------------------------------
-        extended_command: function extended_command(term, string) {
+        extended_command: function extended_command(term, string, options) {
+            var settings = $.extend({
+                invokeMethods: false
+            }, options);
             try {
                 change_hash = false;
                 var m = string.match(extended_command_re);
                 if (m) {
+                    if (!settings.invokeMethods) {
+                        warn('To invoke terminal or cmd methods you need to enable ' +
+                             'invokeMethods option');
+                        return;
+                    }
                     string = m[1];
                     var obj = m[2] === 'terminal' ? term : term.cmd();
                     var fn = m[3];
@@ -4382,6 +4396,7 @@
         wrap: true,
         checkArity: true,
         raw: false,
+        invokeMethods: false,
         exceptionHandler: null,
         pauseEvents: true,
         softPause: false,
@@ -5155,7 +5170,9 @@
                                     prev_command.command.trim() === string.trim()) {
                                     self.error(strings().recursiveCall);
                                 } else {
-                                    $.terminal.extended_command(self, string);
+                                    $.terminal.extended_command(self, string, {
+                                        invokeMethods: settings.invokeMethods
+                                    });
                                 }
                             }
                             return '';
@@ -5181,7 +5198,9 @@
                                     display_exception(e, 'FORMATTING');
                                 }
                             }
-                            string = $.terminal.encode(string);
+                            string = $.terminal.encode(string, {
+                                tabs: settings.tabs
+                            });
                         }
                         buffer_line(string, line.index, line_settings);
                     }
@@ -7849,6 +7868,7 @@
                 clickTimeout: settings.clickTimeout,
                 holdTimout: settings.holdTimout,
                 keypress: key_press,
+                tabs: settings.tabs,
                 onCommandChange: function(command) {
                     if (is_function(settings.onCommandChange)) {
                         try {
