@@ -2,6 +2,8 @@
 ### Features
 * HOLD keymap modifier + HOLD+[SHIFT]+BACKSPACE/DELETE to delete word before and after the cursor [#420](https://github.com/jcubic/jquery.terminal/issues/420)
 * align tabs like in unix terminal [#423](https://github.com/jcubic/jquery.terminal/issues/423)
+* `tabs` terminal options change tab length, not only columns/arrays
+* add `tabs` option for cmd
 
 ### Bugfix
 * fix &) in scheme prism formatting [#421](https://github.com/jcubic/jquery.terminal/issues/421)
