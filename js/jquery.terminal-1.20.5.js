@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 23 Aug 2018 15:52:22 +0000
+ * Date: Sat, 25 Aug 2018 07:07:34 +0000
  */
 
 /* TODO:
@@ -3038,7 +3038,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 23 Aug 2018 15:52:22 +0000',
+        date: 'Sat, 25 Aug 2018 07:07:34 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3501,10 +3501,30 @@
         // ---------------------------------------------------------------------
         // :: Encode formating as html for insertion into DOM
         // ---------------------------------------------------------------------
-        encode: function encode(str) {
+        encode: function encode(str, options) {
+            var settings = $.extend({
+                tabStop: 4
+            }, options);
             return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/ /g, '&nbsp;')
-                .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                .replace(/ /g, '&nbsp;').split('\n').map(function(line) {
+                    var splitted = line.split(/(\t)/);
+                    return splitted.map(function(str, i) {
+                        if (str === '\t') {
+                            if (i === 0 || splitted[i - 1] === '\t') {
+                                return new Array(settings.tabStop + 1).join('&nbsp;');
+                            } else {
+                                var before = splitted.slice(0, i).join('');
+                                var len = $.terminal.length(before);
+                                var chars = settings.tabStop - (len % settings.tabStop);
+                                if (chars === 0) {
+                                    chars = 4;
+                                }
+                                return new Array(chars + 1).join('&nbsp;');
+                            }
+                        }
+                        return str;
+                    }).join('');
+                }).join('\n');
         },
         // -----------------------------------------------------------------------
         // :: Default formatter that allow for nested formatting, example:
