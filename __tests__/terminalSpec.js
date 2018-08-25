@@ -3851,7 +3851,10 @@ describe('Terminal plugin', function() {
                 expect(output().join('\n')).toEqual(input);
             });
             describe('extended commands', function() {
-                var term = $('<div/>').terminal($.noop, {checkArity: false});
+                var term = $('<div/>').terminal($.noop, {
+                    checkArity: false,
+                    invokeMethods: true
+                });
                 var interpreter;
                 beforeEach(function() {
                     interpreter = {
