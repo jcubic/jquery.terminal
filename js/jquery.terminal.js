@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version DEV
+ *           \/              /____/                              version 1.21.0
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 26 Aug 2018 08:15:17 +0000
+ * Date: Sun, 26 Aug 2018 08:53:53 +0000
  */
 
 /* TODO:
@@ -1741,6 +1741,12 @@
                 }
                 string = $.terminal.normalize(string);
                 string = crlf(string);
+                var max = $.terminal.length(string);
+                // fix issue with nested formatting where max length is checked before
+                // nested_formatting flatten formatting
+                if (formatted_position > max) {
+                    formatted_position = max;
+                }
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -3085,8 +3091,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: 'DEV',
-        date: 'Sun, 26 Aug 2018 08:15:17 +0000',
+        version: '1.21.0',
+        date: 'Sun, 26 Aug 2018 08:53:53 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4167,6 +4173,7 @@
                 // error is process in exec
             }
         },
+        // ---------------------------------------------------------------------
         formatter: new (function() {
             try {
                 this[Symbol.split] = function(string) {
@@ -4183,7 +4190,20 @@
                 };
             } catch (e) {
             }
-        })()
+        })(),
+        // ---------------------------------------------------------------------
+        // :: helper function that add formatter before nested_formatting
+        // ---------------------------------------------------------------------
+        new_formatter: function(formatter) {
+            var formatters = $.terminal.defaults.formatters;
+            for (var i = 0; i < formatters.length; ++i) {
+                if (formatters[i] === $.terminal.nested_formatting) {
+                    formatters.splice(i, 0, formatter);
+                    return;
+                }
+            }
+            formatters.push(formatter);
+        }
     };
     // -------------------------------------------------------------------------
     $.terminal.Exception = function Terminal_Exception(type, message, stack) {
