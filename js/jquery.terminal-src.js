@@ -2216,6 +2216,17 @@
             // if formatter change length of the strings (like emoji demo) we need to keep
             // track of two different positions one for command and one for display
             display_position: function(n, relative) {
+                function find_position(i) {
+                    var opts = $.extend({}, settings, {
+                        position: i
+                    });
+                    var pos = $.terminal.apply_formatters(command, opts)[1];
+                    if (new_formatted_pos === pos) {
+                        formatted_position = new_formatted_pos;
+                        self.position(i);
+                        return true;
+                    }
+                }
                 if (n === undefined) {
                     return formatted_position;
                 } else {
@@ -2236,16 +2247,19 @@
                         if (len === new_formatted_pos) {
                             return self.position(command_len);
                         }
+                        var i;
                         // reverse search for correct position
-                        for (var i = 0; i < command_len; ++i) {
-                            var opts = $.extend({}, settings, {
-                                position: i
-                            });
-                            var pos = $.terminal.apply_formatters(command, opts)[1];
-                            if (new_formatted_pos === pos) {
-                                formatted_position = new_formatted_pos;
-                                self.position(i);
-                                break;
+                        if (len < command_len) {
+                            for (i = position; i--;) {
+                                if (find_position(i)) {
+                                    break;
+                                }
+                            }
+                        } else {
+                            for (i = position; i < command_len; ++i) {
+                                if (find_position(i)) {
+                                    break;
+                                }
                             }
                         }
                     }
