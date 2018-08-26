@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Sun, 26 Aug 2018 09:51:18 +0000
+ * Date: Sun, 26 Aug 2018 10:37:15 +0000
  */
 
 /* TODO:
@@ -1984,17 +1984,37 @@
                     return -1;
                 }
             }
-            return function(formatted_position) {
-                var string = formatting(command, true);
-                var len = text(string).length;
-                var pos = binary_search(0, len, formatted_position, cmp);
-                for (var i = pos; i < command.length; ++i) {
-                    var opts = $.extend({}, settings, {
-                        position: i
-                    });
-                    var new_pos = $.terminal.apply_formatters(command, opts)[1];
-                    if (new_pos === formatted_position) {
-                        return i;
+            return function(string, formatted_position) {
+                var codepoint_len = text(string).length;
+                var char_len = $.terminal.length(string);
+                var i, opts, guess;
+                if (codepoint_len > char_len) {
+                    // if we have emoji or characters with more then one codepoints
+                    // binary search don't work, so we fallback to iteration.
+                    // we need to find largest position that have same display_position,
+                    // binary search was founding codepoint in the middle of the character
+                    for (i = 0; i < command.length; ++i) {
+                        opts = $.extend({}, settings, {
+                            position: i
+                        });
+                        guess = $.terminal.apply_formatters(command, opts)[1];
+                        if (guess === formatted_position) {
+                            pos = i;
+                        }
+                        if (guess > formatted_position) {
+                            break;
+                        }
+                    }
+                } else {
+                    var pos = binary_search(0, codepoint_len, formatted_position, cmp);
+                    for (i = pos; i < command.length; ++i) {
+                        opts = $.extend({}, settings, {
+                            position: i
+                        });
+                        guess = $.terminal.apply_formatters(command, opts)[1];
+                        if (guess === formatted_position) {
+                            return i;
+                        }
                     }
                 }
                 return pos;
@@ -2273,7 +2293,7 @@
                     if (len === new_formatted_pos) {
                         return self.position(command_len);
                     }
-                    var pos = find_position(new_formatted_pos);
+                    var pos = find_position(command, new_formatted_pos);
                     if (pos !== -1) {
                         formatted_position = new_formatted_pos;
                         self.position(pos);
@@ -3100,7 +3120,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '1.21.0',
-        date: 'Sun, 26 Aug 2018 09:51:18 +0000',
+        date: 'Sun, 26 Aug 2018 10:37:15 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
