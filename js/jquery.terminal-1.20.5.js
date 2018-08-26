@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.20.5
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 21 Aug 2018 09:50:49 +0000
+ * Date: Sun, 26 Aug 2018 08:15:17 +0000
  */
 
 /* TODO:
@@ -1132,7 +1132,10 @@
             enabled: true,
             history: true,
             onPositionChange: $.noop,
-            onCommandChange: $.noop
+            onCommandChange: $.noop,
+            clickTimeout: 200,
+            holdTimout: 400,
+            tabs: 4
         }
     };
     $.fn.cmd = function(options) {
@@ -1244,16 +1247,9 @@
         }
         var keymap;
         var default_keymap = {
-            'ALT+D': function() {
-                var re = / *[^ ]+ *(?= )|[^ ]+$/;
-                self.set(
-                    command.slice(0, position) +
-                    command.slice(position).replace(re, ''),
-                    true
-                );
-                // chrome jump to address bar
-                return false;
-            },
+            'ALT+D': delete_word(true),
+            'HOLD+DELETE': delete_word(false),
+            'HOLD+SHIFT+DELETE': delete_word(false),
             'ENTER': function() {
                 if (history && command && !settings.mask &&
                     (is_function(settings.historyFilter) &&
@@ -1374,17 +1370,9 @@
             'CTRL+A': home,
             'SHIFT+INSERT': paste_event,
             'CTRL+SHIFT+T': return_true, // open closed tab
-            'CTRL+W': function() {
-                // don't work in Chromium (can't prevent close tab)
-                if (command !== '' && position !== 0) {
-                    var m = command.slice(0, position).match(/([^ ]+ *$)/);
-                    if (m[0].length) {
-                        kill_text = self['delete'](-m[0].length);
-                        text_to_clipboard(self, kill_text);
-                    }
-                }
-                return false;
-            },
+            'CTRL+W': delete_word_backward(true),
+            'HOLD+BACKSPACE': delete_word_backward(false),
+            'HOLD+SHIFT+BACKSPACE': delete_word_backward(false),
             'CTRL+H': function() {
                 if (command !== '' && position > 0) {
                     self['delete'](-1);
@@ -1422,9 +1410,48 @@
             'META+R': return_true, // CMD+R page reload in Chrome Mac
             'META+L': return_true // CLD+L jump into Ominbox on Chrome Mac
         };
+        // -------------------------------------------------------------------------------
+        function delete_word(clipboard) {
+            return function delete_word() {
+                var re = / *[^ ]+ *(?= )|[^ ]+$/;
+                var substring = command.slice(position);
+                var m = substring.match(re);
+                if (m) {
+                    kill_text = m[0];
+                    if (clipboard) {
+                        text_to_clipboard(self, kill_text);
+                    }
+                }
+                self.set(
+                    command.slice(0, position) +
+                        command.slice(position).replace(re, ''),
+                    true
+                );
+                // chrome jump to address bar
+                return false;
+            };
+        }
+        // -------------------------------------------------------------------------------
+        function delete_word_backward(clipboard) {
+            return function delete_word_backward() {
+                // don't work in Chromium (can't prevent close tab)
+                if (command !== '' && position !== 0) {
+                    var m = command.slice(0, position).match(/([^ ]+ *$)/);
+                    if (m[0].length) {
+                        kill_text = self['delete'](-m[0].length);
+                        if (clipboard) {
+                            text_to_clipboard(self, kill_text);
+                        }
+                    }
+                }
+                return false;
+            };
+        }
+        // -------------------------------------------------------------------------------
         function return_true() {
             return true;
         }
+        // -------------------------------------------------------------------------------
         function paste_event() {
             clip.val('');
             paste_count = 0;
@@ -1434,6 +1461,7 @@
             clip.one('input', paste);
             return true;
         }
+        // -------------------------------------------------------------------------------
         function prev_history() {
             if (first_up_history) {
                 last_command = command;
@@ -1444,10 +1472,12 @@
             first_up_history = false;
             return false;
         }
+        // -------------------------------------------------------------------------------
         function next_history() {
             self.set(history.end() ? last_command : history.next());
             return false;
         }
+        // -------------------------------------------------------------------------------
         function backspace_key() {
             if (reverse_search) {
                 rev_search_str = rev_search_str.slice(0, -1);
@@ -1462,24 +1492,29 @@
                 no_keydown = true;
             });
         }
+        // -------------------------------------------------------------------------------
         function left() {
             if (position > 0) {
                 self.position(-1, true);
                 redraw();
             }
         }
+        // -------------------------------------------------------------------------------
         function right() {
             if (position < command.length) {
                 self.position(1, true);
             }
             return false;
         }
+        // -------------------------------------------------------------------------------
         function home() {
             self.position(0);
         }
+        // -------------------------------------------------------------------------------
         function end() {
             self.position(command.length);
         }
+        // -------------------------------------------------------------------------------
         function mobile_focus() {
             //if (is_touch) {
             var focus = clip.is(':focus');
@@ -1496,6 +1531,7 @@
                 clip.trigger('blur', [true]);
             }
         }
+        // -------------------------------------------------------------------------------
         // on mobile you can't delete character if input is empty (event
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
@@ -1524,6 +1560,7 @@
                 }
             });
         }
+        // -------------------------------------------------------------------------------
         // terminal animation don't work on android because they animate
         // 2 properties
         if (animation_supported && !is_android) {
@@ -1714,7 +1751,10 @@
         // :: format end encode the string
         // ---------------------------------------------------------------------
         function format(string) {
-            return $.terminal.format($.terminal.encode(wrap(string)), {
+            var encoded = $.terminal.encode(wrap(string), {
+                tabs: settings.tabs
+            });
+            return $.terminal.format(encoded, {
                 char_width: settings.char_width
             });
         }
@@ -1921,12 +1961,36 @@
             };
         })();
         // ---------------------------------------------------------------------
+        // :: find position that match display position for commands that
+        // :: change length by formatters
+        // ---------------------------------------------------------------------
+        var find_position = (function() {
+            function cmp(search_pos, pos) {
+                var opts = $.extend({}, settings, {
+                    position: pos
+                });
+                var guess = $.terminal.apply_formatters(command, opts)[1];
+                if (guess === search_pos) {
+                    return 0;
+                } else if (guess < search_pos) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+            return function(formatted_position) {
+                return binary_search(0, command.length, formatted_position, cmp);
+            };
+        })();
+        // ---------------------------------------------------------------------
         // :: Draw prompt that can be a function or a string
         // ---------------------------------------------------------------------
         var draw_prompt = (function() {
             function set(prompt) {
                 var lines = $.terminal.split_equal(
-                    $.terminal.encode(prompt),
+                    $.terminal.encode(prompt, {
+                        tabs: settings.tabs
+                    }),
                     num_chars
                 );
                 var options = {
@@ -2194,17 +2258,10 @@
                         if (len === new_formatted_pos) {
                             return self.position(command_len);
                         }
-                        // reverse search for correct position
-                        for (var i = 0; i < command_len; ++i) {
-                            var opts = $.extend({}, settings, {
-                                position: i
-                            });
-                            var pos = $.terminal.apply_formatters(command, opts)[1];
-                            if (new_formatted_pos === pos) {
-                                formatted_position = new_formatted_pos;
-                                self.position(i);
-                                break;
-                            }
+                        var pos = find_position(new_formatted_pos);
+                        if (pos !== -1) {
+                            formatted_position = new_formatted_pos;
+                            self.position(pos);
                         }
                     }
                     return self;
@@ -2304,6 +2361,8 @@
         var no_keydown = true;
         var backspace = false;
         var process = false;
+        var hold = false;
+        var hold_pause = false;
         var skip_insert;
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
@@ -2317,6 +2376,14 @@
         // ---------------------------------------------------------------------
         function is_single(e) {
             return e.key && e.key.length === 1 && !e.ctrlKey;
+        }
+        // ---------------------------------------------------------------------
+        function clear_reverse_search_key(e) {
+            // arrows / Home / End / ENTER
+            return e.which === 35 || e.which === 36 ||
+                e.which === 37 || e.which === 38 ||
+                e.which === 39 || e.which === 40 ||
+                e.which === 13 || e.which === 27;
         }
         // ---------------------------------------------------------------------
         function keydown_event(e) {
@@ -2360,26 +2427,35 @@
                 }
             }
             if (enabled) {
+                self.oneTime(settings.holdTimout, 'hold', function() {
+                    hold = true;
+                });
+                if (hold) {
+                    key = 'HOLD+' + key;
+                    if (hold_pause) {
+                        return;
+                    }
+                    hold_pause = true;
+                    self.oneTime(settings.holdTimout, 'delay', function() {
+                        hold_pause = false;
+                    });
+                }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
                     first_up_history = true;
                 }
-                // arrows / Home / End / ENTER
-                if (reverse_search && (e.which === 35 || e.which === 36 ||
-                                       e.which === 37 || e.which === 38 ||
-                                       e.which === 39 || e.which === 40 ||
-                                       e.which === 13 || e.which === 27)) {
+                if (reverse_search && clear_reverse_search_key(e)) {
                     clear_reverse_state();
                     draw_prompt();
                     if (e.which === 27) { // ESC
                         self.set('');
                     }
                     redraw();
-                    // finish reverse search and execute normal event handler
-                    /* jshint validthis:true */
-                    keydown_event.call(this, e);
+                    if (e.which === 13) {
+                        keydown_event.call(this, e);
+                    }
                 } else if (is_function(keymap[key])) {
                     result = keymap[key](e);
                     if (result === true) {
@@ -2399,10 +2475,15 @@
                 //e.preventDefault();
             }
         }
+        function clear_hold() {
+            self.stopTime('hold');
+            hold = false;
+        }
         var doc = $(document.documentElement || window);
         self.keymap(settings.keymap || {});
         function keypress_event(e) {
             debug('keypress "' + e.key + '" ' + e.fake);
+            clear_hold();
             var result;
             if (!e.fake) {
                 no_keypress = false;
@@ -2532,7 +2613,7 @@
             no_keydown = true;
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
-            .bind('input.cmd', input_event);
+            .bind('keyup.cmd', clear_hold).bind('input.cmd', input_event);
         (function() {
             var was_down = false;
             var count = 0;
@@ -2586,6 +2667,10 @@
     }; // cmd plugin
     // -------------------------------------------------------------------------
     /* eslint-disable */
+    // source: https://mathiasbynens.be/notes/javascript-unicode
+    var astral_symbols_re = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+    // source: https://stackoverflow.com/a/41164587/387194
+    var emoji_re = /^((?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff]))/;
     // https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
     var mobile_re = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i;
     var tablet_re = /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i;
@@ -2701,6 +2786,25 @@
         return string.replace(/\r/g, '');
     }
     // -------------------------------------------------------------------------
+    // function that return array of characters counting emoji and surogate pairs
+    function split_characters(string) {
+        var result = [];
+        while (string.length) {
+            var m = string.match(emoji_re);
+            if (m) {
+                result.push(m[1]);
+                string = string.substring(m[1].length);
+            } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
+                result.push(string.substring(0, 2));
+                string = string.substring(2);
+            } else {
+                result.push(string[0]);
+                string = string.substring(1);
+            }
+        }
+        return result;
+    }
+    // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
         if (is_ch_unit_supported) {
             return 'width: ' + len + 'ch';
@@ -2728,7 +2832,7 @@
     function wide_characters(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
-            if (bare.length === 1) {
+            if (split_characters(bare).length === 1) {
                 return text;
             }
             var specs = bare.split('').map(function(chr) {
@@ -2770,6 +2874,33 @@
             }).join('');
         }
         return text;
+    }
+    // ---------------------------------------------------------------------
+    // :: Binary search utility
+    // ---------------------------------------------------------------------
+    function binary_search(start, end, search_pos, compare_fn) {
+        var len = end - start;
+        var mid = start + Math.floor(len / 2);
+        var cmp = compare_fn(search_pos, mid);
+        if (cmp === 0) {
+            return mid;
+        } else if (cmp > 0 && len > 1) {
+            return binary_search(
+                mid,
+                end,
+                search_pos,
+                compare_fn
+            );
+        } else if (cmp < 0 && len > 1) {
+            return binary_search(
+                start,
+                mid,
+                search_pos,
+                compare_fn
+            );
+        } else {
+            return -1;
+        }
     }
     // ---------------------------------------------------------------------
     // :: Cross-Browser selection utils
@@ -2954,8 +3085,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '1.20.5',
-        date: 'Tue, 21 Aug 2018 09:50:49 +0000',
+        version: 'DEV',
+        date: 'Sun, 26 Aug 2018 08:15:17 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3048,22 +3179,39 @@
             function length(string) {
                 return $.terminal.length(string);
             }
+            // we need to correct position from regex and match to take into account
+            // characters that are created from more when one code point like
+            // emoji or surogate pairs #422
+            function correct_index(index) {
+                var len = length(string.substring(0, index));
+                for (var i = index; i < string.length; ++i) {
+                    var next_len = length(string.substring(0, i));
+                    if (next_len === len + 1) {
+                        return len;
+                    }
+                    len = next_len;
+                }
+                return len;
+            }
             var new_string = "";
             var match;
             var index = 0;
             var rep_string;
-            var new_position = position;
+            var new_position = correct_index(position);
             var start;
             var global = rex.flags.indexOf('g') !== -1;
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // if regex don't have g flag lastIndex will not work
                 if (global) {
+                    // fix lastIndex for emoji and characters
+                    // that have more then one codepoint
+                    var i = correct_index(rex.lastIndex);
                     // Add any of the original string we just skipped
-                    var last_index = length(substring(string, 0, rex.lastIndex));
+                    var last_index = length(substring(string, 0, i));
                     start = last_index - length(match[0]);
                 } else {
-                    start = match.index;
+                    start = correct_index(match.index);
                     last_index = start + length(match[0]);
                 }
                 if (index < start) {
@@ -3111,6 +3259,9 @@
                 new_string += substring(string, index);
             }
             // Return the string and the updated position
+            if (string === new_string) {
+                return [string, position];
+            }
             return [new_string, new_position];
         },
         // ---------------------------------------------------------------------
@@ -3123,8 +3274,9 @@
                     string.substring(i - 1, i).match(/\s/);
             }
             // ----------------------------------------------------------------
+            var entity_re = /^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
             function match_entity(index) {
-                return string.substring(index).match(/^(&[^;]+;)/);
+                return string.substring(index).match(entity_re);
             }
             // ----------------------------------------------------------------
             function is_open_formatting(i) {
@@ -3220,7 +3372,6 @@
                         }
                         if (ret.index !== undefined) {
                             i = ret.index;
-
                         }
                     }
                 } else if (i === string.length - 1) {
@@ -3261,6 +3412,15 @@
                         start_formatting = data.formatting;
                     }
                 }
+                var substring = string.substring(data.index);
+                var pair = substring.substring(0, 2);
+                m = substring.match(emoji_re);
+                var len = -1;
+                if (m) {
+                    len = m[1].length;
+                } else if (pair.replace(astral_symbols_re, '_') === 1) {
+                    len = 2;
+                }
                 if (end_index && data.count === end_index) {
                     end_formatting = data.formatting;
                     prev_index = data.index;
@@ -3274,6 +3434,11 @@
                     if (data.formatting) {
                         end = prev_index + 1;
                     }
+                }
+                if (len > 0) {
+                    return {
+                        index: data.index + len - 1
+                    };
                 }
             });
             if (start_index && !start) {
@@ -3403,10 +3568,30 @@
         // ---------------------------------------------------------------------
         // :: Encode formating as html for insertion into DOM
         // ---------------------------------------------------------------------
-        encode: function encode(str) {
+        encode: function encode(str, options) {
+            var settings = $.extend({
+                tabs: 4
+            }, options);
             return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/ /g, '&nbsp;')
-                .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                .replace(/ /g, '&nbsp;').split('\n').map(function(line) {
+                    var splitted = line.split(/(\t)/);
+                    return splitted.map(function(str, i) {
+                        if (str === '\t') {
+                            if (i === 0 || splitted[i - 1] === '\t') {
+                                return new Array(settings.tabs + 1).join('&nbsp;');
+                            } else {
+                                var before = splitted.slice(0, i).join('');
+                                var len = $.terminal.length(before);
+                                var chars = settings.tabs - (len % settings.tabs);
+                                if (chars === 0) {
+                                    chars = 4;
+                                }
+                                return new Array(chars + 1).join('&nbsp;');
+                            }
+                        }
+                        return str;
+                    }).join('');
+                }).join('\n');
         },
         // -----------------------------------------------------------------------
         // :: Default formatter that allow for nested formatting, example:
@@ -3501,7 +3686,7 @@
                         var splitted = $.terminal.format_split(input[0]);
                         var partials = splitted.map(function(string) {
                             var position;
-                            var this_len = $.terminal.length($.terminal.strip(string));
+                            var this_len = text(string).length;
                             // first position that match is used for this partial
                             if (input[1] <= length + this_len && !found_position) {
                                 position = input[1] - length;
@@ -3572,6 +3757,9 @@
                         // to make sure that output position is not outside the string
                         if (position >= $.terminal.length(input[0])) {
                             position = $.terminal.length(string);
+                        }
+                        if (string === input[0]) {
+                            return input;
                         }
                         return [string, position];
                     }
@@ -3747,7 +3935,7 @@
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
         length: function(string) {
-            return text(string).length;
+            return split_characters(text(string)).length;
         },
         // ---------------------------------------------------------------------
         // :: return string where array items are in columns padded spaces
@@ -3943,11 +4131,19 @@
         // ---------------------------------------------------------------------
         // :: function executed for each text inside [{ .... }]
         // ---------------------------------------------------------------------
-        extended_command: function extended_command(term, string) {
+        extended_command: function extended_command(term, string, options) {
+            var settings = $.extend({
+                invokeMethods: false
+            }, options);
             try {
                 change_hash = false;
                 var m = string.match(extended_command_re);
                 if (m) {
+                    if (!settings.invokeMethods) {
+                        warn('To invoke terminal or cmd methods you need to enable ' +
+                             'invokeMethods option');
+                        return;
+                    }
                     string = m[1];
                     var obj = m[2] === 'terminal' ? term : term.cmd();
                     var fn = m[3];
@@ -4264,6 +4460,7 @@
         wrap: true,
         checkArity: true,
         raw: false,
+        invokeMethods: false,
         exceptionHandler: null,
         pauseEvents: true,
         softPause: false,
@@ -4295,6 +4492,7 @@
         caseSensitiveAutocomplete: true,
         caseSensitiveSearch: true,
         clickTimeout: 200,
+        holdTimout: 400,
         request: $.noop,
         response: $.noop,
         describe: 'procs',
@@ -5036,7 +5234,9 @@
                                     prev_command.command.trim() === string.trim()) {
                                     self.error(strings().recursiveCall);
                                 } else {
-                                    $.terminal.extended_command(self, string);
+                                    $.terminal.extended_command(self, string, {
+                                        invokeMethods: settings.invokeMethods
+                                    });
                                 }
                             }
                             return '';
@@ -5062,7 +5262,9 @@
                                     display_exception(e, 'FORMATTING');
                                 }
                             }
-                            string = $.terminal.encode(string);
+                            string = $.terminal.encode(string, {
+                                tabs: settings.tabs
+                            });
                         }
                         buffer_line(string, line.index, line_settings);
                     }
@@ -7728,7 +7930,9 @@
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
+                holdTimout: settings.holdTimout,
                 keypress: key_press,
+                tabs: settings.tabs,
                 onCommandChange: function(command) {
                     if (is_function(settings.onCommandChange)) {
                         try {

@@ -1,3 +1,21 @@
+## 1.21.0
+### Security
+* add option invokeMethods that disable by default executing terminal and cmd methods from echo
+
+### Features
+* HOLD keymap modifier + HOLD+[SHIFT]+BACKSPACE/DELETE to delete word before and after the cursor [#420](https://github.com/jcubic/jquery.terminal/issues/420)
+* align tabs like in unix terminal [#423](https://github.com/jcubic/jquery.terminal/issues/423)
+* `tabs` terminal options change tab length, not only columns/arrays
+* add `tabs` option for cmd
+* improve performance of display_position (when you click on character in long command)
+
+### Bugfix
+* fix &) in scheme prism formatting [#421](https://github.com/jcubic/jquery.terminal/issues/421)
+* don't process keys other then enter in reverse search
+* fix issue with background in Prismjs css
+* insert prism syntax formatter before nested formatting so it work for html if included with unix_formatting
+* fix emoji and Unicode surrogate pairs [#422](https://github.com/jcubic/jquery.terminal/issues/422)
+
 ## 1.20.5
 ### Bugfix
 * one more fix to position in normal function formatter (prism)

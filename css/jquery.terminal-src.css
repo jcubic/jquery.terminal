@@ -759,13 +759,17 @@ terminal .terminal-output > div {
 }
 .terminal .token.operator,
 .terminal .token.entity,
+.terminal .token.variable,
 .terminal .token.url,
 .terminal .token.string,
 .terminal .style .token.string,
+.terminal .token.token,
 .cmd .token.operator,
 .cmd .token.entity,
+.cmd .token.variable,
 .cmd .token.url,
 .cmd .token.string,
-.cmd .style .token.string{
+.cmd .style .token.string,
+.cmd .token.token {
     background: inherit;
 }

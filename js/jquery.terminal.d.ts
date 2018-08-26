@@ -307,6 +307,8 @@ type CmdOptions = {
     enabled?: boolean;
     history?: boolean | "memory";
     onPositionChange?: (position?: number, display_position?: number) => void;
+    clickTimeout?: number;
+    holdTimeout?: number;
     width?: number;
     historyFilter?: JQueryTerminal.historyFilter;
     commands?: JQueryTerminal.commandsCmdFunction;
@@ -411,6 +413,7 @@ type TerminalOptions = {
     caseSensitiveAutocomplete?: boolean;
     caseSensitiveSearch?: boolean;
     clickTimeout?: number;
+    holdTimeout?: number;
     request?: JQueryTerminal.RequestResponseCallback;
     response?: JQueryTerminal.RequestResponseCallback;
     describe?: string;

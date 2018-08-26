@@ -192,6 +192,7 @@ function shortcut(ctrl, alt, shift, which, key) {
     }
     doc.trigger(keydown(ctrl, alt, shift, which, key));
     doc.trigger(keypress(key));
+    doc.trigger($.Event("keyup"));
 }
 function enter_key() {
     shortcut(false, false, false, 13, 'enter');
@@ -3850,7 +3851,10 @@ describe('Terminal plugin', function() {
                 expect(output().join('\n')).toEqual(input);
             });
             describe('extended commands', function() {
-                var term = $('<div/>').terminal($.noop, {checkArity: false});
+                var term = $('<div/>').terminal($.noop, {
+                    checkArity: false,
+                    invokeMethods: true
+                });
                 var interpreter;
                 beforeEach(function() {
                     interpreter = {

@@ -442,6 +442,12 @@
             return [styles.join(''), color, background];
         }
         return function from_ansi(input, options) {
+            if (!input.match(/\x1b/)) {
+                if (options.position) {
+                    return [input, options.position];
+                }
+                return input;
+            }
             input = $.terminal.unescape_brackets(input);
             var settings = $.extend({
                 unixFormattingEscapeBrackets: false,
