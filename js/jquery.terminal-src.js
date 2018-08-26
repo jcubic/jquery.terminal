@@ -1985,7 +1985,19 @@
                 }
             }
             return function(formatted_position) {
-                return binary_search(0, command.length, formatted_position, cmp);
+                var string = formatting(command, true);
+                var len = text(string).length;
+                var pos = binary_search(0, len, formatted_position, cmp);
+                for (var i = pos; i < command.length; ++i) {
+                    var opts = $.extend({}, settings, {
+                        position: i
+                    });
+                    var new_pos = $.terminal.apply_formatters(command, opts)[1];
+                    if (new_pos === formatted_position) {
+                        return i;
+                    }
+                }
+                return pos;
             };
         })();
         // ---------------------------------------------------------------------
@@ -2250,25 +2262,21 @@
                     var string = formatting(command, true);
                     var len = $.terminal.length(string);
                     var command_len = $.terminal.length(command);
-                    if (len === command_len) {
-                        return self.position(n);
+                    var new_formatted_pos;
+                    if (relative) {
+                        new_formatted_pos = formatted_position + n;
+                    } else if (n > len) {
+                        new_formatted_pos = len;
                     } else {
-                        var new_formatted_pos;
-                        if (relative) {
-                            new_formatted_pos = formatted_position + n;
-                        } else if (n > len) {
-                            new_formatted_pos = len;
-                        } else {
-                            new_formatted_pos = n;
-                        }
-                        if (len === new_formatted_pos) {
-                            return self.position(command_len);
-                        }
-                        var pos = find_position(new_formatted_pos);
-                        if (pos !== -1) {
-                            formatted_position = new_formatted_pos;
-                            self.position(pos);
-                        }
+                        new_formatted_pos = n;
+                    }
+                    if (len === new_formatted_pos) {
+                        return self.position(command_len);
+                    }
+                    var pos = find_position(new_formatted_pos);
+                    if (pos !== -1) {
+                        formatted_position = new_formatted_pos;
+                        self.position(pos);
                     }
                     return self;
                 }

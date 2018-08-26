@@ -1619,7 +1619,7 @@ describe('sub plugins', function() {
         });
     });
     // stuff not tested in other places
-    describe('cmd', function() {
+    fdescribe('cmd', function() {
         describe('display_position', function() {
             var formatters = $.terminal.defaults.formatters, cmd;
             var text = 'hello foo';
@@ -1645,9 +1645,9 @@ describe('sub plugins', function() {
             it('should not change position', function() {
                 cmd.insert(text);
                 var pos = get_pos();
-                for (var i = 0; i < len; i++) {
+                for (var i = 2; i < len; i++) {
                     cmd.display_position(-i, true);
-                    expect(get_pos()).toEqual(pos);
+                    expect([i, get_pos()]).toEqual([i, pos]);
                 }
             });
             it('should change position', function() {
