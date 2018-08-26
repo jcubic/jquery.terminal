@@ -55,7 +55,7 @@
     }
     // this formatter allow to echo xml where tags are colors like:
     // <red>hello <navy>blue</navy> world</red>
-    $.terminal.defaults.formatters.push(function(string) {
+    function xml_formatter(string) {
         var stack = [];
         var output = [];
         var parts = string.split(/(<\/?[a-zA-Z]+>)/);
@@ -80,5 +80,6 @@
             }
         }
         return output.join('');
-    });
+    }
+    $.terminal.new_formatter(xml_formatter);
 })(jQuery);

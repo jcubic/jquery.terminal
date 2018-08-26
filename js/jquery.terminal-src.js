@@ -1741,6 +1741,12 @@
                 }
                 string = $.terminal.normalize(string);
                 string = crlf(string);
+                var max = $.terminal.length(string);
+                // fix issue with nested formatting where max length is checked before
+                // nested_formatting flatten formatting
+                if (formatted_position > max) {
+                    formatted_position = max;
+                }
                 return string;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -4167,6 +4173,7 @@
                 // error is process in exec
             }
         },
+        // ---------------------------------------------------------------------
         formatter: new (function() {
             try {
                 this[Symbol.split] = function(string) {
@@ -4183,7 +4190,20 @@
                 };
             } catch (e) {
             }
-        })()
+        })(),
+        // ---------------------------------------------------------------------
+        // :: helper function that add formatter before nested_formatting
+        // ---------------------------------------------------------------------
+        new_formatter: function(formatter) {
+            var formatters = $.terminal.defaults.formatters;
+            for (var i = 0; i < formatters.length; ++i) {
+                if (formatters[i] === $.terminal.nested_formatting) {
+                    formatters.splice(i, 0, formatter);
+                    return;
+                }
+            }
+            formatters.push(formatter);
+        }
     };
     // -------------------------------------------------------------------------
     $.terminal.Exception = function Terminal_Exception(type, message, stack) {

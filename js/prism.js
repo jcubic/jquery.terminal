@@ -177,13 +177,6 @@
                               '", string); }')($);
         // disable warning because it may create nested formatting
         fn.__no_warn__ = true;
-        var formatters = $.terminal.defaults.formatters;
-        for (var i = 0; i < formatters.length; ++i) {
-            if (formatters[i] === $.terminal.nested_formatting) {
-                formatters.splice(i, 0, fn);
-                return;
-            }
-        }
-        formatters.push(fn);
+        $.terminal.new_formatter(fn);
     };
 });

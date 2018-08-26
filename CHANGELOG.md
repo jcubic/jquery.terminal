@@ -7,7 +7,7 @@
 * align tabs like in unix terminal [#423](https://github.com/jcubic/jquery.terminal/issues/423)
 * `tabs` terminal options change tab length, not only columns/arrays
 * add `tabs` option for cmd
-* improve performance of display_position (when you click on character in long command)
+* improve performance of display_position (when you click on character in long command that change length)
 
 ### Bugfix
 * fix &) in scheme prism formatting [#421](https://github.com/jcubic/jquery.terminal/issues/421)
