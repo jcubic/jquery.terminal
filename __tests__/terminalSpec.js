@@ -1619,7 +1619,7 @@ describe('sub plugins', function() {
         });
     });
     // stuff not tested in other places
-    fdescribe('cmd', function() {
+    describe('cmd', function() {
         describe('display_position', function() {
             var formatters = $.terminal.defaults.formatters, cmd;
             var text = 'hello foo';
