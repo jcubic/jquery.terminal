@@ -1961,6 +1961,28 @@
             };
         })();
         // ---------------------------------------------------------------------
+        // :: find position that match display position for commands that
+        // :: change length by formatters
+        // ---------------------------------------------------------------------
+        var find_position = (function() {
+            function cmp(search_pos, pos) {
+                var opts = $.extend({}, settings, {
+                    position: pos
+                });
+                var guess = $.terminal.apply_formatters(command, opts)[1];
+                if (guess === search_pos) {
+                    return 0;
+                } else if (guess < search_pos) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+            return function(formatted_position) {
+                return binary_search(0, command.length, formatted_position, cmp);
+            };
+        })();
+        // ---------------------------------------------------------------------
         // :: Draw prompt that can be a function or a string
         // ---------------------------------------------------------------------
         var draw_prompt = (function() {
@@ -2216,17 +2238,6 @@
             // if formatter change length of the strings (like emoji demo) we need to keep
             // track of two different positions one for command and one for display
             display_position: function(n, relative) {
-                function find_position(i) {
-                    var opts = $.extend({}, settings, {
-                        position: i
-                    });
-                    var pos = $.terminal.apply_formatters(command, opts)[1];
-                    if (new_formatted_pos === pos) {
-                        formatted_position = new_formatted_pos;
-                        self.position(i);
-                        return true;
-                    }
-                }
                 if (n === undefined) {
                     return formatted_position;
                 } else {
@@ -2247,20 +2258,10 @@
                         if (len === new_formatted_pos) {
                             return self.position(command_len);
                         }
-                        var i;
-                        // reverse search for correct position
-                        if (len < command_len) {
-                            for (i = position; i--;) {
-                                if (find_position(i)) {
-                                    break;
-                                }
-                            }
-                        } else {
-                            for (i = position; i < command_len; ++i) {
-                                if (find_position(i)) {
-                                    break;
-                                }
-                            }
+                        var pos = find_position(new_formatted_pos);
+                        if (pos !== -1) {
+                            formatted_position = new_formatted_pos;
+                            self.position(pos);
                         }
                     }
                     return self;
@@ -2873,6 +2874,33 @@
             }).join('');
         }
         return text;
+    }
+    // ---------------------------------------------------------------------
+    // :: Binary search utility
+    // ---------------------------------------------------------------------
+    function binary_search(start, end, search_pos, compare_fn) {
+        var len = end - start;
+        var mid = start + Math.floor(len / 2);
+        var cmp = compare_fn(search_pos, mid);
+        if (cmp === 0) {
+            return mid;
+        } else if (cmp > 0 && len > 1) {
+            return binary_search(
+                mid,
+                end,
+                search_pos,
+                compare_fn
+            );
+        } else if (cmp < 0 && len > 1) {
+            return binary_search(
+                start,
+                mid,
+                search_pos,
+                compare_fn
+            );
+        } else {
+            return -1;
+        }
     }
     // ---------------------------------------------------------------------
     // :: Cross-Browser selection utils
