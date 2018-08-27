@@ -383,6 +383,7 @@ type TerminalOptions = {
     wrap?: boolean;
     checkArity?: boolean;
     invokeMethods?: boolean;
+    anyLinks?: boolean;
     raw?: boolean;
     keymap?: JQueryTerminal.keymapObjectWithContext;
     exceptionHandler?: null | JQueryTerminal.ExceptionHandler;
