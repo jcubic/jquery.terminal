@@ -306,6 +306,7 @@ type CmdOptions = {
     prompt?: JQueryTerminal.CmdPrompt;
     enabled?: boolean;
     history?: boolean | "memory";
+    tabs?: number;
     onPositionChange?: (position?: number, display_position?: number) => void;
     clickTimeout?: number;
     holdTimeout?: number;
@@ -381,6 +382,7 @@ type TerminalOptions = {
     maskCHar?: string;
     wrap?: boolean;
     checkArity?: boolean;
+    invokeMethods?: boolean;
     raw?: boolean;
     keymap?: JQueryTerminal.keymapObjectWithContext;
     exceptionHandler?: null | JQueryTerminal.ExceptionHandler;

@@ -1,3 +1,7 @@
+## 1.21.1
+### Bugfix
+* update typescript definition to new options
+
 ## 1.21.0
 ### Security
 * add option invokeMethods that disable by default executing terminal and cmd methods from echo
