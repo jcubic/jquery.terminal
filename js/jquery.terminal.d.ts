@@ -87,7 +87,7 @@ declare namespace JQueryTerminal {
 
     type commandsCmdFunction = (command: string) => any;
     type setStringFunction = (value: string) => void;
-    type greetingsArg = ((this: JQueryTerminal, setPrompt: setStringFunction) => void) | string;
+    type greetingsArg = ((this: JQueryTerminal, setGreeting: setStringFunction) => void) | string;
     type cmdPrompt = ((setPrompt: setStringFunction) => void) | string;
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
