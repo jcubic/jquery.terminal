@@ -1,6 +1,7 @@
 ## 1.21.1
 ### Bugfix
 * update typescript definition to new options
+* fix cursor for PrismJS punctuation class
 
 ## 1.21.0
 ### Security
