@@ -35,7 +35,7 @@
  * emoji regex v7.0.0 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 28 Aug 2018 12:16:50 +0000
+ * Date: Tue, 28 Aug 2018 12:32:56 +0000
  */
 
 /* TODO:
@@ -2826,27 +2826,33 @@
         return string.replace(/\r/g, '');
     }
     // -------------------------------------------------------------------------
-    // function that return array of characters counting emoji and surogate pairs
+    // :: function that return character from beginning of the string
+    // :: counting emoji, suroggate pairs and combine characters
+    // -------------------------------------------------------------------------
+    function get_next_character(string) {
+        var match_emoji = string.match(emoji_re);
+        if (match_emoji) {
+            return match_emoji[1];
+        } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
+            if (string.substring(1).match(combine_chr_re)) {
+                return string.substring(0, 3);
+            }
+            return string.substring(0, 2);
+        } else {
+            var match_combo = string.match(combine_chr_re);
+            if (match_combo) {
+                return match_combo[1];
+            }
+            return string[0];
+        }
+    }
+    // -------------------------------------------------------------------------
     function split_characters(string) {
         var result = [];
         while (string.length) {
-            var match_emoji = string.match(emoji_re);
-            if (match_emoji) {
-                result.push(match_emoji[1]);
-                string = string.substring(match_emoji[1].length);
-            } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
-                result.push(string.substring(0, 2));
-                string = string.substring(2);
-            } else {
-                var match_combo = string.match(combine_chr_re);
-                if (match_combo) {
-                    result.push(match_combo[1]);
-                    string = string.substring(match_combo[1].length);
-                } else {
-                    result.push(string[0]);
-                    string = string.substring(1);
-                }
-            }
+            var chr = get_next_character(string);
+            string = string.substring(chr.length);
+            result.push(chr);
         }
         return result;
     }
@@ -3132,7 +3138,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 28 Aug 2018 12:16:50 +0000',
+        date: 'Tue, 28 Aug 2018 12:32:56 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3458,20 +3464,6 @@
                         start_formatting = data.formatting;
                     }
                 }
-                var substring = string.substring(data.index);
-                var pair = substring.substring(0, 2);
-                m = substring.match(emoji_re);
-                var len = -1;
-                if (m) {
-                    len = m[1].length;
-                } else if (pair.replace(astral_symbols_re, '_') === 1) {
-                    len = 2;
-                } else {
-                    m = substring.match(combine_chr_re);
-                    if (m) {
-                        len = 2;
-                    }
-                }
                 if (end_index && data.count === end_index) {
                     end_formatting = data.formatting;
                     prev_index = data.index;
@@ -3486,9 +3478,12 @@
                         end = prev_index + 1;
                     }
                 }
-                if (len > 0) {
+                var substring = string.substring(data.index);
+                var chr = get_next_character(substring);
+                // handle emoji, suroggate pairs and combine characters
+                if (chr.length > 1) {
                     return {
-                        index: data.index + len - 1
+                        index: data.index + chr.length - 1
                     };
                 }
             });
