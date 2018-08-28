@@ -6,6 +6,7 @@
 * fix cursor for PrismJS punctuation class
 * fix emoji that contain U+FE0F character at the end [#424](https://github.com/jcubic/jquery.terminal/issues/424)
 * fix for combine characters
+* fix typescript definition for prompt and greetings [#425](https://github.com/jcubic/jquery.terminal/issues/425)
 
 ## 1.21.0
 ### Security

@@ -87,8 +87,9 @@ declare namespace JQueryTerminal {
 
     type commandsCmdFunction = (command: string) => any;
     type setStringFunction = (value: string) => void;
-    type CmdPrompt = (setPrompt: setStringFunction) => void | string;
-    type ExtendedPrompt = (this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>) | string;
+    type greetingsArg = ((setPrompt: setStringFunction) => void) | string;
+    type cmdPrompt = ((setPrompt: setStringFunction) => void) | string;
+    type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
     type historyFilterFunction = (command: string) => boolean;
     type historyFilter = null | RegExp | historyFilterFunction;
@@ -401,6 +402,7 @@ type TerminalOptions = {
     extra?: any;
     tabs?: number;
     historySize?: number;
+    greetings?: JQueryTerminal.greetingsArg;
     scrollObject?: null | JQuery.Selector | HTMLElement | JQuery;
     historyState?: boolean;
     importHistory?: boolean;
