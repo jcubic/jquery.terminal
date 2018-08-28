@@ -2,6 +2,7 @@
 ### Bugfix
 * update typescript definition to new options
 * fix cursor for PrismJS punctuation class
+* fix emoji that contain U+FE0F character at the end [#424](https://github.com/jcubic/jquery.terminal/issues/424)
 
 ## 1.21.0
 ### Security

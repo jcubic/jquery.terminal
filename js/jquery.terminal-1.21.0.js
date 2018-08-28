@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 28 Aug 2018 06:14:42 +0000
+ * Date: Tue, 28 Aug 2018 07:11:20 +0000
  */
 
 /* TODO:
@@ -2700,6 +2700,9 @@
         return self;
     }; // cmd plugin
     // -------------------------------------------------------------------------
+    // https://codepoints.net/U+FE0F
+    var variation_selector = String.fromCharCode(65039);
+    // -------------------------------------------------------------------------
     /* eslint-disable */
     // source: https://mathiasbynens.be/notes/javascript-unicode
     var astral_symbols_re = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
@@ -2826,8 +2829,14 @@
         while (string.length) {
             var m = string.match(emoji_re);
             if (m) {
-                result.push(m[1]);
-                string = string.substring(m[1].length);
+                // handle image emoji unicode (the one that have U+FE0F) #424
+                if (string[m[1].length] === variation_selector) {
+                    result.push(m[1] + string[m[1].length]);
+                    string = string.substring(m[1].length + 1);
+                } else {
+                    result.push(m[1]);
+                    string = string.substring(m[1].length);
+                }
             } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
                 result.push(string.substring(0, 2));
                 string = string.substring(2);
@@ -3120,7 +3129,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 28 Aug 2018 06:14:42 +0000',
+        date: 'Tue, 28 Aug 2018 07:11:20 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3433,6 +3442,7 @@
             var end_formatting = '';
             var prev_index;
             var re = /(&[^;]+);$/;
+            
             $.terminal.iterate_formatting(string, function(data) {
                 var m;
                 if (start_index && data.count === start_index + 1) {
@@ -3452,6 +3462,9 @@
                 var len = -1;
                 if (m) {
                     len = m[1].length;
+                    if (substring[len] === variation_selector) {
+                        len += 1;
+                    }
                 } else if (pair.replace(astral_symbols_re, '_') === 1) {
                     len = 2;
                 }
