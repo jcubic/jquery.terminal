@@ -13,10 +13,11 @@ type voidFunction = () => void;
 
 type TypeOrArray<T> = T | T[];
 type TypeOrString<T> = string | T;
+type TypeOrPromise<T> = PromiseLike<T> | T;
 
 declare namespace JQueryTerminal {
     type interpterFunction = (this: JQueryTerminal, command: string, term?: JQueryTerminal) => any;
-    type terminalObjectFunction = (...args: (string | number | RegExp)[]) => (void | PromiseLike<any>);
+    type terminalObjectFunction = (...args: (string | number | RegExp)[]) => (void | PromiseLike<echoValue>);
     type Interpterer = string | interpterFunction | ObjectInterpreter;
     type ObjectInterpreter = {
         [key: string]: ObjectInterpreter | terminalObjectFunction;
@@ -89,7 +90,9 @@ declare namespace JQueryTerminal {
     type setStringFunction = (value: string) => void;
     type greetingsArg = ((this: JQueryTerminal, setGreeting: setStringFunction) => void) | string;
     type cmdPrompt = ((setPrompt: setStringFunction) => void) | string;
-    type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
+
+    type echoValue = string | string[] | (() => string | string[]);
+    type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<echoValue>)) | string;
 
     type historyFilterFunction = (command: string) => boolean;
     type historyFilter = null | RegExp | historyFilterFunction;
@@ -498,8 +501,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     // options for remove_line is useless but that's how API look like
     remove_line(line: number, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     last_index(): number;
-    echo(arg: any, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
-    error(arg: any, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    echo(arg: TypeOrPromise<JQueryTerminal.echoValue>, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    error(arg: TypeOrPromise<JQueryTerminal.echoValue>, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     exception(e: Error, label?: string): JQueryTerminal;
     scroll<TData>(eventData: TData,
         handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
