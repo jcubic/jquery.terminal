@@ -2706,7 +2706,7 @@
     /* eslint-disable */
     // regex that match single character at begining and folowing combine character
     // https://en.wikipedia.org/wiki/Combining_character
-    var combine_chr_re = /^(.[\u0300-\u036F]|[\u1AB0-\u1abE]|[\u1DC0-\u1DF9]|[\u1DFB-\u1DFF]|[\u20D0-\u20F0]|[\uFE20-\uFE2F])/;
+    var combine_chr_re = /^(.(?:[\u0300-\u036F]|[\u1AB0-\u1abE]|[\u1DC0-\u1DF9]|[\u1DFB-\u1DFF]|[\u20D0-\u20F0]|[\uFE20-\uFE2F])+)/;
     // source: https://mathiasbynens.be/notes/javascript-unicode
     var astral_symbols_re = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
     // source: https://github.com/mathiasbynens/emoji-regex
