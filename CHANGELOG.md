@@ -1,4 +1,6 @@
 ## 1.21.1
+### Features
+* embed emoji regex by Mathias Bynens for better emoji detection
 ### Bugfix
 * update typescript definition to new options
 * fix cursor for PrismJS punctuation class
