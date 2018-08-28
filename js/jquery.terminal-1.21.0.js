@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Tue, 28 Aug 2018 10:59:42 +0000
+ * Date: Tue, 28 Aug 2018 11:06:44 +0000
  */
 
 /* TODO:
@@ -2826,9 +2826,8 @@
         while (string.length) {
             var m = string.match(emoji_re);
             if (m) {
-                
-                    result.push(m[1]);
-                    string = string.substring(m[1].length);
+                result.push(m[1]);
+                string = string.substring(m[1].length);
             } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
                 result.push(string.substring(0, 2));
                 string = string.substring(2);
@@ -3121,7 +3120,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 28 Aug 2018 10:59:42 +0000',
+        date: 'Tue, 28 Aug 2018 11:06:44 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

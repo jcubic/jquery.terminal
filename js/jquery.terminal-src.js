@@ -2826,9 +2826,8 @@
         while (string.length) {
             var m = string.match(emoji_re);
             if (m) {
-                
-                    result.push(m[1]);
-                    string = string.substring(m[1].length);
+                result.push(m[1]);
+                string = string.substring(m[1].length);
             } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
                 result.push(string.substring(0, 2));
                 string = string.substring(2);
