@@ -35,7 +35,7 @@
  * emoji regex v7.0.0 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 28 Aug 2018 11:17:02 +0000
+ * Date: Tue, 28 Aug 2018 12:16:50 +0000
  */
 
 /* TODO:
@@ -2704,6 +2704,9 @@
     }; // cmd plugin
     // -------------------------------------------------------------------------
     /* eslint-disable */
+    // regex that match single character at begining and folowing combine character
+    // https://en.wikipedia.org/wiki/Combining_character
+    var combine_chr_re = /^(.[\u0300-\u036F]|[\u1AB0-\u1abE]|[\u1DC0-\u1DF9]|[\u1DFB-\u1DFF]|[\u20D0-\u20F0]|[\uFE20-\uFE2F])/;
     // source: https://mathiasbynens.be/notes/javascript-unicode
     var astral_symbols_re = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
     // source: https://github.com/mathiasbynens/emoji-regex
@@ -2827,16 +2830,22 @@
     function split_characters(string) {
         var result = [];
         while (string.length) {
-            var m = string.match(emoji_re);
-            if (m) {
-                result.push(m[1]);
-                string = string.substring(m[1].length);
+            var match_emoji = string.match(emoji_re);
+            if (match_emoji) {
+                result.push(match_emoji[1]);
+                string = string.substring(match_emoji[1].length);
             } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
                 result.push(string.substring(0, 2));
                 string = string.substring(2);
             } else {
-                result.push(string[0]);
-                string = string.substring(1);
+                var match_combo = string.match(combine_chr_re);
+                if (match_combo) {
+                    result.push(match_combo[1]);
+                    string = string.substring(match_combo[1].length);
+                } else {
+                    result.push(string[0]);
+                    string = string.substring(1);
+                }
             }
         }
         return result;
@@ -3123,7 +3132,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 28 Aug 2018 11:17:02 +0000',
+        date: 'Tue, 28 Aug 2018 12:16:50 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3457,6 +3466,11 @@
                     len = m[1].length;
                 } else if (pair.replace(astral_symbols_re, '_') === 1) {
                     len = 2;
+                } else {
+                    m = substring.match(combine_chr_re);
+                    if (m) {
+                        len = 2;
+                    }
                 }
                 if (end_index && data.count === end_index) {
                     end_formatting = data.formatting;
