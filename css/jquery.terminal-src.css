@@ -757,6 +757,7 @@ terminal .terminal-output > div {
         color: #000;
     }
 }
+/* PrismJS style overwrites */
 .terminal .token.operator,
 .terminal .token.entity,
 .terminal .token.variable,
@@ -772,4 +773,7 @@ terminal .terminal-output > div {
 .cmd .style .token.string,
 .cmd .token.token {
     background: inherit;
+}
+.token.punctuation {
+    color: inherit;
 }
