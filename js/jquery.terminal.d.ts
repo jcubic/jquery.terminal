@@ -87,12 +87,13 @@ declare namespace JQueryTerminal {
     type keymapObjectWithContext = { [key: string]: keymapFunctionWithContext };
 
     type commandsCmdFunction = (command: string) => any;
+    type echoValue = string | string[] | (() => string | string[]);
     type setStringFunction = (value: string) => void;
+    type setEchoValueFunction = (value: echoValue) => void;
     type greetingsArg = ((this: JQueryTerminal, setGreeting: setStringFunction) => void) | string;
     type cmdPrompt = ((setPrompt: setStringFunction) => void) | string;
 
-    type echoValue = string | string[] | (() => string | string[]);
-    type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<echoValue>)) | string;
+    type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
     type historyFilterFunction = (command: string) => boolean;
     type historyFilter = null | RegExp | historyFilterFunction;
