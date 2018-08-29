@@ -300,7 +300,6 @@
     "jquery": "~3",
     "prismjs": "^1.15.0",
     "wcwidth": "^1.0.1"
-
   },
   "devDependencies": {
     "coveralls": "^3.0.1",
@@ -308,6 +307,7 @@
     "eslint": "^4.19.1",
     "jest": "^23.1.0",
     "jsonlint": "^1.6.3",
+    "typescript": "^3.0.1",
     "uglify-js": "^3.4.0"
   }
 }

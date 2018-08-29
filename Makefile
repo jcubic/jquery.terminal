@@ -8,25 +8,28 @@ CAT=cat
 DATE=`date -uR`
 GIT=git
 BRANCH=`git branch | grep '^*' | sed 's/* //'`
+
 ifdef SYSTEMROOT
   UGLIFY=.\node_modules\.bin\uglifyjs
   JSONLINT=.\node_modules\.bin\jsonlint
   JEST=.\node_modules\.bin\jest
   CSSNANO=.\node_modules\.bin\cssnano
   ESLINT=.\node_modules\.bin\eslint
+  TSC=.\node_modules\.bin\tsc
 else
   UGLIFY=./node_modules/.bin/uglifyjs
   JSONLINT=./node_modules/.bin/jsonlint
   JEST=./node_modules/.bin/jest
   CSSNANO=./node_modules/.bin/cssnano
   ESLINT=./node_modules/.bin/eslint
+  TSC=./node_modules/.bin/tsc
 endif
 SPEC_CHECKSUM=`md5sum __tests__/terminalSpec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
 
-.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint
+.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint typescript
 
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile
 
@@ -104,6 +107,9 @@ eslint:
 
 skipped_tests:
 	@! grep -E $(skip_re) __tests__/terminalSpec.js
+
+tscheck:
+	$(TSC) --noEmit --project tsconfig.json
 
 jsonlint: package.json bower.json
 	$(JSONLINT) package.json > /dev/null

@@ -12,8 +12,8 @@ type mapFunction = (key: string, value: anyFunction) => any;
 type voidFunction = () => void;
 
 type TypeOrArray<T> = T | T[];
-type TypeOrString<T> = string | T;
-type TypeOrPromise<T> = PromiseLike<T> | T;
+type TypeOrString<T> = T | string;
+type TypeOrPromise<T> = T | PromiseLike<T>;
 
 declare namespace JQueryTerminal {
     type interpterFunction = (this: JQueryTerminal, command: string, term?: JQueryTerminal) => any;
@@ -308,7 +308,7 @@ type CmdOptions = {
     mask?: string | boolean;
     caseSensitiveSearch?: boolean;
     historySize?: number;
-    prompt?: JQueryTerminal.CmdPrompt;
+    prompt?: JQueryTerminal.cmdPrompt;
     enabled?: boolean;
     history?: boolean | "memory";
     tabs?: number;
@@ -349,8 +349,8 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     commands(fn: JQueryTerminal.commandsCmdFunction): Cmd;
     commands(): JQueryTerminal.commandsCmdFunction;
     destroy(): Cmd;
-    prompt(prompt: JQueryTerminal.CmdPrompt): Cmd;
-    prompt(): JQueryTerminal.CmdPrompt;
+    prompt(prompt: JQueryTerminal.cmdPrompt): Cmd;
+    prompt(): JQueryTerminal.cmdPrompt;
     kill_text(): string;
     position(): JQueryCoordinates;
     position(): number;
