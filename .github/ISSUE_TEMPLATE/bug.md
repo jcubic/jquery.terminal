@@ -1,3 +1,8 @@
+---
+name: Bug Report
+about: Found bug in the library
+---
+
 ### Expected behavior
 
 ### Actual behavior
