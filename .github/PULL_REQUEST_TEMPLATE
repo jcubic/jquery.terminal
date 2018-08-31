@@ -1,6 +1,5 @@
 <!--
 
-Thank you the PR, if you want your PR to be merged make sure you modify -src files and run make to build
-the project (it add date+version and minify the files) and create PR against devel branch
+Thank you the PR, if you want your PR to be merged make sure you modify -src files and create PR against devel branch
 
 -->
