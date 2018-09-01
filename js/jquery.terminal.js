@@ -35,7 +35,7 @@
  * emoji regex v7.0.0 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 01 Sep 2018 11:09:17 +0000
+ * Date: Sat, 01 Sep 2018 11:55:49 +0000
  */
 
 /* TODO:
@@ -2861,6 +2861,33 @@
         return result;
     }
     // -------------------------------------------------------------------------
+    // normalize position for counting emoji
+    // -------------------------------------------------------------------------
+    function normalize_position(string, position) {
+        if (position === 0) {
+            return position;
+        }
+        string = $.terminal.strip(string);
+        var result = split_characters(string).reduce(function(acc, chr) {
+            if (typeof acc === 'number') {
+                return acc;
+            }
+            var length = acc.length + chr.length;
+            if (length >= position) {
+                return acc.position + 1;
+            }
+            return {
+                position: acc.position + 1,
+                length: length
+            };
+        }, {position: 0, length: 0});
+        if (typeof result === 'number') {
+            return result;
+        } else {
+            return result.position;
+        }
+    }
+    // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
         if (is_ch_unit_supported) {
             return 'width: ' + len + 'ch';
@@ -3142,7 +3169,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 01 Sep 2018 11:09:17 +0000',
+        date: 'Sat, 01 Sep 2018 11:55:49 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3230,10 +3257,10 @@
         // ---------------------------------------------------------------------
         tracking_replace: function tracking_replace(string, rex, replacement, position) {
             function substring(string, start, end) {
-                return $.terminal.substring(string, start, end);
+                return string.substring(start, end);
             }
             function length(string) {
-                return $.terminal.length(string);
+                return $.terminal.strip(string).length;
             }
             // we need to correct position from regex and match to take into account
             // characters that are created from more when one code point like
@@ -3804,10 +3831,6 @@
                         } else {
                             position = position_partial[1];
                         }
-                        // to make sure that output position is not outside the string
-                        if (position >= $.terminal.length(input[0])) {
-                            position = $.terminal.length(string);
-                        }
                         if (string === input[0]) {
                             return input;
                         }
@@ -3815,6 +3838,13 @@
                     }
                 }, input);
                 if (typeof settings.position === 'number') {
+                    var position = result[1];
+                    position = normalize_position(string, position);
+                    var max = $.terminal.length(result[0]);
+                    if (position > max) {
+                        position = max;
+                    }
+                    result[1] = position;
                     return result;
                 } else {
                     return result[0];
