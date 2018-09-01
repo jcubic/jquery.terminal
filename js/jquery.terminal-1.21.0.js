@@ -35,7 +35,7 @@
  * emoji regex v7.0.0 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 01 Sep 2018 09:22:16 +0000
+ * Date: Sat, 01 Sep 2018 11:09:17 +0000
  */
 
 /* TODO:
@@ -2028,6 +2028,9 @@
         // ---------------------------------------------------------------------
         var draw_prompt = (function() {
             function set(prompt) {
+                prompt = $.terminal.apply_formatters(prompt, {});
+                prompt = $.terminal.normalize(prompt);
+                prompt = crlf(prompt);
                 var lines = $.terminal.split_equal(
                     $.terminal.encode(prompt, {
                         tabs: settings.tabs
@@ -2046,7 +2049,7 @@
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
-                    prompt_len = strlen($('<span>' + last_line + '</span>').text());
+                    prompt_len = strlen(text(last_line));
                 }
             }
             return function() {
@@ -2797,7 +2800,7 @@
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
             return function(string) {
-                return string.length;
+                return $.terminal.length(string);
             };
         } else {
             return wcwidth;
@@ -3139,7 +3142,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 01 Sep 2018 09:22:16 +0000',
+        date: 'Sat, 01 Sep 2018 11:09:17 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
