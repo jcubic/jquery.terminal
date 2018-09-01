@@ -567,8 +567,8 @@ terminal .terminal-output > div {
           color: var(--background, #000);
           border-bottom: none;
           border-left: none;
-      }
           margin-left: 0;
+      }
     }
 
     @-ms-keyframes terminal-blink {
