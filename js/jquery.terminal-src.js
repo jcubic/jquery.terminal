@@ -2284,7 +2284,7 @@
                 } else {
                     var string = formatting(command, true);
                     var len = $.terminal.length(string);
-                    var command_len = $.terminal.length(command);
+                    var command_len = text(command).length;
                     var new_formatted_pos;
                     if (relative) {
                         new_formatted_pos = formatted_position + n;
@@ -2294,6 +2294,7 @@
                         new_formatted_pos = n;
                     }
                     if (len === new_formatted_pos) {
+                        formatted_position = new_formatted_pos;
                         return self.position(command_len);
                     }
                     var pos = find_position(command, new_formatted_pos);
