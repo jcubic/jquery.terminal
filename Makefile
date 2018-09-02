@@ -31,7 +31,7 @@ skip_re="[xfi]it\\(|[fdx]describe\\("
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint typescript
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal-$(VERSION).min.css.map css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile 
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile
 
 bower.json: templates/bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
@@ -48,7 +48,7 @@ js/jquery.terminal.js: js/jquery.terminal-$(VERSION).js
 js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal.min.js
 	$(CP) js/jquery.terminal.min.js js/jquery.terminal-$(VERSION).min.js
 
-js/jquery.terminal.min.js: js/jquery.terminal-$(VERSION).js
+js/jquery.terminal.min.js js/jquery.terminal.min.js.map: js/jquery.terminal-$(VERSION).js
 	$(UGLIFY) -o js/jquery.terminal.min.js --comments --mangle --source-map "includeSources,url='jquery.terminal.min.js.map'" -- js/jquery.terminal.js
 
 css/jquery.terminal-$(VERSION).css: css/jquery.terminal-src.css .$(VERSION)
