@@ -27,8 +27,7 @@ function error(err) {
 }
 
 fs.readFile(input, function(err, buffer) {
-    buffer.toString();
-    nano.process(String(buffer), options).then(function (result) {
+    nano.process(String(buffer), options).then(function(result) {
         fs.writeFile(output, result.css, function(err) {
             error(err);
             fs.writeFile(output + '.map', result.map.toString(), error);
