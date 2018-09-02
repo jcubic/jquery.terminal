@@ -32,7 +32,7 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * emoji regex v7.0.0 by Mathias Bynens
+ * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
  * Date: {{DATE}}

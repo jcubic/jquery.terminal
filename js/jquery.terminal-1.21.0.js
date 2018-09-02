@@ -32,10 +32,10 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * emoji regex v7.0.0 by Mathias Bynens
+ * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 02 Sep 2018 06:41:15 +0000
+ * Date: Sun, 02 Sep 2018 07:32:31 +0000
  */
 
 /* TODO:
@@ -3169,7 +3169,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 02 Sep 2018 06:41:15 +0000',
+        date: 'Sun, 02 Sep 2018 07:32:31 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

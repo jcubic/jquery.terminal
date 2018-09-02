@@ -45,11 +45,11 @@ js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
 js/jquery.terminal.js: js/jquery.terminal-$(VERSION).js
 	$(CP) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js
 
-js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal-$(VERSION).js
-	$(UGLIFY) -o js/jquery.terminal-$(VERSION).min.js --comments --mangle -- js/jquery.terminal-$(VERSION).js
+js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal-$(VERSION).js js/jquery.terminal-$(VERSION).min.js.map
+	$(UGLIFY) -o js/jquery.terminal-$(VERSION).min.js --comments --mangle --source-map "includeSources,url='jquery.terminal-$(VERSION).min.js.map'" -- js/jquery.terminal-$(VERSION).js
 
-js/jquery.terminal.min.js: js/jquery.terminal-$(VERSION).min.js
-	$(CP) js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js
+js/jquery.terminal.min.js: js/jquery.terminal-$(VERSION).js js/jquery.terminal.min.js.map
+	$(UGLIFY) -o js/jquery.terminal.min.js --comments --mangle --source-map "includeSources,url='jquery.terminal.min.js.map'" -- js/jquery.terminal.js
 
 css/jquery.terminal-$(VERSION).css: css/jquery.terminal-src.css .$(VERSION)
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css
