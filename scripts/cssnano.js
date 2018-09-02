@@ -5,11 +5,11 @@ var input = process.argv[2];
 var output = process.argv[3];
 
 var options = {
+    preset: "default",
     map: {
         inline: false
     },
     discardUnused: false,
-    safe: true,
     from: input,
     to: output
 };
