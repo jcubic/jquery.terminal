@@ -45,8 +45,8 @@ js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
 js/jquery.terminal.js: js/jquery.terminal-$(VERSION).js
 	$(CP) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js
 
-js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal-$(VERSION).js
-	$(UGLIFY) -o js/jquery.terminal-$(VERSION).min.js --comments --mangle --source-map "includeSources,url='jquery.terminal-$(VERSION).min.js.map'" -- js/jquery.terminal-$(VERSION).js
+js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal.min.js
+	$(CP) js/jquery.terminal.min.js js/jquery.terminal-$(VERSION).min.js
 
 js/jquery.terminal.min.js: js/jquery.terminal-$(VERSION).js
 	$(UGLIFY) -o js/jquery.terminal.min.js --comments --mangle --source-map "includeSources,url='jquery.terminal.min.js.map'" -- js/jquery.terminal.js
@@ -57,11 +57,11 @@ css/jquery.terminal-$(VERSION).css: css/jquery.terminal-src.css .$(VERSION)
 css/jquery.terminal.css: css/jquery.terminal-$(VERSION).css .$(VERSION)
 	$(CP) css/jquery.terminal-$(VERSION).css css/jquery.terminal.css
 
-css/jquery.terminal.min.css css/jquery.terminal.min.css.map: css/jquery.terminal-$(VERSION).css
-	$(CSSNANO) css/jquery.terminal-$(VERSION).css css/jquery.terminal.min.css
+css/jquery.terminal.min.css css/jquery.terminal.min.css.map: css/jquery.terminal.css
+	$(CSSNANO) css/jquery.terminal.css css/jquery.terminal.min.css
 
-css/jquery.terminal-$(VERSION).min.css css/jquery.terminal-$(VERSION).min.css.map: css/jquery.terminal-$(VERSION).css
-	$(CSSNANO) css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css
+css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal.min.css
+	$(CP) css/jquery.terminal.min.css css/jquery.terminal-$(VERSION).min.css
 
 README.md: templates/README.in .$(VERSION) __tests__/terminalSpec.js
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e \

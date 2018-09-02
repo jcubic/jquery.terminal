@@ -11,6 +11,5 @@ elif [ "$1" != "$VERSION" ]; then
     git mv css/jquery.terminal-${VERSION}.min.css css/jquery.terminal-${1}.min.css
     git mv js/jquery.terminal-${VERSION}.js js/jquery.terminal-${1}.js
     git mv js/jquery.terminal-${VERSION}.min.js js/jquery.terminal-${1}.min.js
-    git mv js/jquery.terminal-${VERSION}.min.js.map js/jquery.terminal-${1}.min.js.map
     rm .${VERSION}
 fi
