@@ -315,6 +315,7 @@ type CmdOptions = {
     onPositionChange?: (position?: number, display_position?: number) => void;
     clickTimeout?: number;
     holdTimeout?: number;
+    holdRepeatTimeout?: number;
     width?: number;
     historyFilter?: JQueryTerminal.historyFilter;
     commands?: JQueryTerminal.commandsCmdFunction;
@@ -423,6 +424,7 @@ type TerminalOptions = {
     caseSensitiveSearch?: boolean;
     clickTimeout?: number;
     holdTimeout?: number;
+    holdRepeatTimeout?: number;
     request?: JQueryTerminal.RequestResponseCallback;
     response?: JQueryTerminal.RequestResponseCallback;
     describe?: string;

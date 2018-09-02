@@ -1,12 +1,16 @@
 ## 1.21.1
-### Features
-* embed emoji regex by Mathias Bynens for better emoji detection
+### Feature
+* add sourcemaps to min js and css files [#430](https://github.com/jcubic/jquery.terminal/issues/430)
+* new option holdRepeatTimeout - which is number of the delay between keypress repeat when holding key
 ### Bugfix
+* embed emoji regex by Mathias Bynens for better emoji detection
 * update typescript definition to new options
 * fix cursor for PrismJS punctuation class
 * fix emoji that contain U+FE0F character at the end [#424](https://github.com/jcubic/jquery.terminal/issues/424)
 * fix for combine characters
 * fix typescript definition for prompt and greetings [#425](https://github.com/jcubic/jquery.terminal/issues/425)
+* fix typo in holdTimeout option name
+
 
 ## 1.21.0
 ### Security

@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 02 Sep 2018 10:55:32 +0000
+ * Date: Sun, 02 Sep 2018 11:43:02 +0000
  */
 
 /* TODO:
@@ -1137,7 +1137,8 @@
             onPositionChange: $.noop,
             onCommandChange: $.noop,
             clickTimeout: 200,
-            holdTimout: 400,
+            holdTimeout: 400,
+            holdRepeatTimeout: 200,
             tabs: 4
         }
     };
@@ -1301,6 +1302,7 @@
             'ARROWDOWN': next_history,
             'CTRL+N': next_history,
             'ARROWLEFT': left,
+            'HOLD+ARROWLEFT': left,
             'CTRL+B': left,
             'CTRL+ARROWLEFT': function() {
                 // jump to one character after last space before prevoius word
@@ -1346,6 +1348,7 @@
                 }
             },
             'ARROWRIGHT': right,
+            'HOLD+ARROWRIGHT': right,
             'CTRL+F': right,
             'CTRL+ARROWRIGHT': function() {
                 // jump to beginning or end of the word
@@ -2464,11 +2467,12 @@
                     if (!result) {
                         skip_insert = true;
                     }
+                    console.log('result');
                     return result;
                 }
             }
             if (enabled) {
-                self.oneTime(settings.holdTimout, 'hold', function() {
+                self.oneTime(settings.holdTimeout, 'hold', function() {
                     hold = true;
                 });
                 if (hold) {
@@ -2477,7 +2481,7 @@
                         return;
                     }
                     hold_pause = true;
-                    self.oneTime(settings.holdTimout, 'delay', function() {
+                    self.oneTime(settings.holdRepeatTimeout, 'delay', function() {
                         hold_pause = false;
                     });
                 }
@@ -3169,7 +3173,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 02 Sep 2018 10:55:32 +0000',
+        date: 'Sun, 02 Sep 2018 11:43:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4601,7 +4605,8 @@
         caseSensitiveAutocomplete: true,
         caseSensitiveSearch: true,
         clickTimeout: 200,
-        holdTimout: 400,
+        holdTimeout: 400,
+        holdRepeatTimeout: 200,
         request: $.noop,
         response: $.noop,
         describe: 'procs',
@@ -8039,7 +8044,8 @@
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
-                holdTimout: settings.holdTimout,
+                holdTimeout: settings.holdTimeout,
+                holdRepeatTimeout: settings.holdRepeatTimeout,
                 keypress: key_press,
                 tabs: settings.tabs,
                 onCommandChange: function(command) {
