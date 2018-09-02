@@ -2479,10 +2479,12 @@
                     if (hold_pause) {
                         return;
                     }
-                    hold_pause = true;
-                    self.oneTime(settings.holdRepeatTimeout, 'delay', function() {
-                        hold_pause = false;
-                    });
+                    if (settings.holdRepeatTimeout > 0) {
+                        hold_pause = true;
+                        self.oneTime(settings.holdRepeatTimeout, 'delay', function() {
+                            hold_pause = false;
+                        });
+                    }
                 }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
@@ -2521,7 +2523,7 @@
         }
         function clear_hold() {
             self.stopTime('hold');
-            hold = false;
+            hold_pause = hold = false;
         }
         var doc = $(document.documentElement || window);
         self.keymap(settings.keymap || {});
