@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sat, 01 Sep 2018 06:46:01 +0000
+ * Date: Sun, 02 Sep 2018 06:41:16 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -567,8 +567,8 @@ terminal .terminal-output > div {
           color: var(--background, #000);
           border-bottom: none;
           border-left: none;
-      }
           margin-left: 0;
+      }
     }
 
     @-ms-keyframes terminal-blink {

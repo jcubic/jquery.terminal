@@ -35,7 +35,7 @@
  * emoji regex v7.0.0 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 01 Sep 2018 11:55:49 +0000
+ * Date: Sun, 02 Sep 2018 06:41:15 +0000
  */
 
 /* TODO:
@@ -3169,7 +3169,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 01 Sep 2018 11:55:49 +0000',
+        date: 'Sun, 02 Sep 2018 06:41:15 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3713,7 +3713,14 @@
         // ---------------------------------------------------------------------
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
-        apply_formatters: function(string, settings) {
+        apply_formatters: function apply_formatters(string, settings) {
+            if (string === "") {
+                if (typeof settings.position === 'number') {
+                    return ["", settings.position];
+                } else {
+                    return "";
+                }
+            }
             function test_lengths(formatter, index, ret, string) {
                 if (!formatter.__no_warn__ &&
                     $.terminal.length(ret) !== $.terminal.length(string)) {
@@ -3783,8 +3790,17 @@
                                 if (formatter instanceof Array) {
                                     var options = formatter[2] || {};
                                     result = [string, position < 0 ? 0 : position];
-                                    if (options.loop) {
-                                        while (result[0].match(formatter[0])) {
+                                    if (result[0].match(formatter[0])) {
+                                        if (options.loop) {
+                                            while (result[0].match(formatter[0])) {
+                                                result = $.terminal.tracking_replace(
+                                                    result[0],
+                                                    formatter[0],
+                                                    formatter[1],
+                                                    result[1]
+                                                );
+                                            }
+                                        } else {
                                             result = $.terminal.tracking_replace(
                                                 result[0],
                                                 formatter[0],
@@ -3792,13 +3808,6 @@
                                                 result[1]
                                             );
                                         }
-                                    } else {
-                                        result = $.terminal.tracking_replace(
-                                            result[0],
-                                            formatter[0],
-                                            formatter[1],
-                                            result[1]
-                                        );
                                     }
                                     if (position < 0) {
                                         return [result[0], -1];
@@ -3831,6 +3840,10 @@
                         } else {
                             position = position_partial[1];
                         }
+                        // to make sure that output position is not outside the string
+                        if (position >= $.terminal.length(input[0])) {
+                            position = $.terminal.length(string);
+                        }
                         if (string === input[0]) {
                             return input;
                         }
@@ -3838,13 +3851,15 @@
                     }
                 }, input);
                 if (typeof settings.position === 'number') {
-                    var position = result[1];
-                    position = normalize_position(string, position);
-                    var max = $.terminal.length(result[0]);
-                    if (position > max) {
-                        position = max;
+                    if ($.terminal.length(result[0]) < result[0].length) {
+                        var position = result[1];
+                        position = normalize_position(result[0], position);
+                        var max = $.terminal.length(result[0]);
+                        if (position > max) {
+                            position = max;
+                        }
+                        result[1] = position;
                     }
-                    result[1] = position;
                     return result;
                 } else {
                     return result[0];
