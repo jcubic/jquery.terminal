@@ -593,12 +593,13 @@ describe('Terminal utils', function() {
             var string = $.terminal.format(format);
             expect(string).toEqual('<span style="font-weight:bold;text-decorat'+
                                    'ion:underline line-through;font-style:ital'+
-                                   'ic;color:#fff;text-shadow:0 0 5px #fff;bac'+
-                                   'kground-color:#000" data-text="Foo">Foo</s'+
-                                   'pan><span style="font-style:italic;" class'+
-                                   '="foo" data-text="Bar">Bar</span><span sty'+
-                                   'le="text-decoration:underline line-through'+
-                                   ' overline;" data-text="Baz">Baz</span>');
+                                   'ic;color:#fff;--color:#fff;text-shadow:0 0'+
+                                   ' 5px #fff;background-color:#000" data-text'+
+                                   '="Foo">Foo</span><span style="font-style:i'+
+                                   'talic;" class="foo" data-text="Bar">Bar</s'+
+                                   'pan><span style="text-decoration:underline'+
+                                   ' line-through overline;" data-text="Baz">B'+
+                                   'az</span>');
         });
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
@@ -2177,7 +2178,9 @@ describe('Terminal plugin', function() {
             expect(term.find('.prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should format prompt', function() {
-            var prompt = '<span style="font-weight:bold;text-decoration:underline;color:#fff;" data-text=">>>">&gt;&gt;&gt;</span><span>&nbsp;</span>';
+            var prompt = '<span style="font-weight:bold;text-decoration:underline;color:'+
+                    '#fff;--color:#fff;" data-text=">>>">&gt;&gt;&gt;</span><span>&nbsp;'+
+                    '</span>';
             term.set_prompt('[[ub;#fff;]>>>] ');
             expect(term.find('.prompt').html()).toEqual(prompt);
             term.set_prompt(function(callback) {

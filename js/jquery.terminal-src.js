@@ -3922,7 +3922,8 @@
                                 style_str += 'font-style:italic;';
                             }
                             if ($.terminal.valid_color(color)) {
-                                style_str += 'color:' + color + ';';
+                                style_str += 'color:' + color + ';' +
+                                    '--color:' + color + ';';
                                 if (style.indexOf('g') !== -1) {
                                     style_str += 'text-shadow:0 0 5px ' + color + ';';
                                 }
