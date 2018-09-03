@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Mon, 03 Sep 2018 14:40:32 +0000
+ * Date: Mon, 03 Sep 2018 19:01:19 +0000
  */
 
 /* TODO:
@@ -3151,7 +3151,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 03 Sep 2018 14:40:32 +0000',
+        date: 'Mon, 03 Sep 2018 19:01:19 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3561,16 +3561,18 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
+                var chars = split_characters(text(str));
+                var last_char = chars[chars.length - 1];
                 $.terminal.iterate_formatting(line, function(data) {
-                    var last_iteraction = data.index === line_length - 1;
+                    var last_iteraction = data.index === line_length - last_char.length;
+                    var chr, substring;
                     if (data.length >= length || last_iteraction ||
                         (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
                         if (keep_words && data.space !== -1) {
-                            var stripped = $.terminal.strip(line.substring(data.space));
                             // replace html entities with characters
-                            stripped = $('<span>' + stripped + '</span>').text();
+                            var stripped = text(line.substring(data.space));
                             // real length, not counting formatting
                             var text_len = stripped.length;
                             var limit = data.index + length + 1;
@@ -3581,12 +3583,16 @@
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
+                        var new_index;
                         if (keep_words && data.space !== -1 &&
                             data.index !== line_length - 1 && can_break) {
                             output = line.substring(first_index, data.space);
-                            var new_index = data.space - 1;
+                            new_index = data.space - 1;
                         } else {
-                            output = line.substring(first_index, data.index + 1);
+                            substring = line.substring(data.index);
+                            chr = get_next_character(substring);
+                            output = line.substring(first_index, data.index) + chr;
+                            new_index = data.index + chr.length - 1;
                         }
                         if (keep_words) {
                             output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
@@ -3613,6 +3619,14 @@
                         result.push(output);
                         // modify loop by returing new data
                         return {index: new_index, length: 0, space: -1};
+                    }
+                    substring = str.substring(data.index);
+                    chr = get_next_character(substring);
+                    // handle emoji, suroggate pairs and combine characters
+                    if (chr && chr.length > 1) {
+                        return {
+                            index: data.index + chr.length - 1
+                        };
                     }
                 });
             }

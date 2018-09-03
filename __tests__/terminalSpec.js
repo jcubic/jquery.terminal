@@ -1005,6 +1005,39 @@ describe('Terminal utils', function() {
             expect(wcwidth(input)).toEqual(count);
             expect(input.length).toEqual(len);
         });
+        function test_codepoints(input) {
+            var length = input.length;
+            for (var i = 2; i < 10; i++) {
+                var len = 0;
+                var count = 0;
+                $.terminal.split_equal(input, i).forEach(function(string) {
+                    len += string.length;
+                    var width = wcwidth(string);
+                    if (len < length) {
+                        expect(width).toEqual(i);
+                    } else {
+                        expect(width <= i).toBeTruthy();
+                    }
+                    count += width;
+                });
+                expect([i, input, len]).toEqual([i, input, length]);
+                expect([i, input, count]).toEqual([i, input, wcwidth(input)]);
+            }
+        }
+        it('should handle emoji', function() {
+            var input = [
+                "\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3 xxx\u0038\ufe0f\u20e3",
+                "\u263a\ufe0f xxxx \u261d\ufe0f x \u0038\ufe0f\u20e3 xxx\u0038\ufe0f\u20e3"
+            ];
+            input.forEach(test_codepoints);
+        });
+        it('should handle combine characters', function() {
+            var input = [
+                's\u030A\u032A xxxx s\u030A\u032A xxxx s\u030A\u032A xxxx',
+                's\u030A\u032A xxxx s\u030A\u032A xxxx s\u030A\u032A xxxs\u030A\u032A'
+            ];
+            input.forEach(test_codepoints);
+        });
         it('should handle mixed size characters', function() {
             var input = 'ターミナルウィンドウは黒です lorem ipsum';
             var given = $.terminal.split_equal(input, 10);
