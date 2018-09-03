@@ -1978,16 +1978,17 @@
                 }
             }
             return function(string, formatted_position) {
-                var codepoint_len = text(string).length;
+                string = text(string);
+                var codepoint_len = string.length;
                 var pos = binary_search(0, codepoint_len, formatted_position, cmp);
-                for (var i = pos; i < command.length; ++i) {
-                    var opts = $.extend({}, settings, {
-                        position: i
-                    });
-                    var result = $.terminal.apply_formatters(command, opts);
-                    var guess = result[1];
-                    if (guess === formatted_position) {
-                        return i;
+                var chars = split_characters(string);
+                if (codepoint_len > chars.length) {
+                    var len = 0;
+                    for (var i = 0; i < chars.length; ++i) {
+                        len += chars[i].length;
+                        if (len >= pos) {
+                            return len;
+                        }
                     }
                 }
                 return pos;
