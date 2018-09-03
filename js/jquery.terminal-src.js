@@ -1987,16 +1987,6 @@
                     var result = $.terminal.apply_formatters(command, opts);
                     var guess = result[1];
                     if (guess === formatted_position) {
-                        if (result[0][formatted_position].length > 1) {
-                            var chars = split_characters(string);
-                            var len = 0;
-                            for (var j = 0; j < chars.length; ++i) {
-                                if (len + chars[j].length > i) {
-                                    return len;
-                                }
-                                len += chars[j].length;
-                            }
-                        }
                         return i;
                     }
                 }
