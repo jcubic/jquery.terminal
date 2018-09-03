@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 02 Sep 2018 13:20:10 +0000
+ * Date: Mon, 03 Sep 2018 07:55:11 +0000
  */
 
 /* TODO:
@@ -230,19 +230,6 @@
         }
     }
     /* eslint-enable */
-    /* commented out so it don't affect coverage
-    // -----------------------------------------------------------------------
-    Function.prototype.monitor = function() {
-        var name = this.name;
-        var fn = this;
-        return function(...args) {
-            console.log(name + '(' + JSON.stringify(args).replace(/^\[|\]$/g, '') + ')');
-            var ret = fn.apply(this, args);
-            console.log('return ' + JSON.stringify(ret));
-            return ret;
-        };
-    };
-    //*/
     // -----------------------------------------------------------------------
     // :: Replacemenet for jQuery 2 deferred objects
     // -----------------------------------------------------------------------
@@ -1992,35 +1979,25 @@
             }
             return function(string, formatted_position) {
                 var codepoint_len = text(string).length;
-                var char_len = $.terminal.length(string);
-                var i, opts, guess;
-                if (codepoint_len > char_len) {
-                    // if we have emoji or characters with more then one codepoints
-                    // binary search don't work, so we fallback to iteration.
-                    // we need to find largest position that have same display_position,
-                    // binary search was founding codepoint in the middle of the character
-                    for (i = 0; i < command.length; ++i) {
-                        opts = $.extend({}, settings, {
-                            position: i
-                        });
-                        guess = $.terminal.apply_formatters(command, opts)[1];
-                        if (guess === formatted_position) {
-                            pos = i;
+                var pos = binary_search(0, codepoint_len, formatted_position, cmp);
+                for (var i = pos; i < command.length; ++i) {
+                    var opts = $.extend({}, settings, {
+                        position: i
+                    });
+                    var result = $.terminal.apply_formatters(command, opts);
+                    var guess = result[1];
+                    if (guess === formatted_position) {
+                        if (result[0][formatted_position].length > 1) {
+                            var chars = split_characters(string);
+                            var len = 0;
+                            for (var j = 0; j < chars.length; ++i) {
+                                if (len + chars[j].length > i) {
+                                    return len;
+                                }
+                                len += chars[j].length;
+                            }
                         }
-                        if (guess > formatted_position) {
-                            break;
-                        }
-                    }
-                } else {
-                    var pos = binary_search(0, codepoint_len, formatted_position, cmp);
-                    for (i = pos; i < command.length; ++i) {
-                        opts = $.extend({}, settings, {
-                            position: i
-                        });
-                        guess = $.terminal.apply_formatters(command, opts)[1];
-                        if (guess === formatted_position) {
-                            return i;
-                        }
+                        return i;
                     }
                 }
                 return pos;
@@ -3174,7 +3151,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 02 Sep 2018 13:20:10 +0000',
+        date: 'Mon, 03 Sep 2018 07:55:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3846,8 +3823,9 @@
                             position = position_partial[1];
                         }
                         // to make sure that output position is not outside the string
-                        if (position >= $.terminal.length(input[0])) {
-                            position = $.terminal.length(string);
+                        var max = text(string).length;
+                        if (position > max) {
+                            position = max;
                         }
                         if (string === input[0]) {
                             return input;
@@ -3856,7 +3834,8 @@
                     }
                 }, input);
                 if (typeof settings.position === 'number') {
-                    if ($.terminal.length(result[0]) < result[0].length) {
+                    var codepoint_len = $.terminal.strip(result[0]).length;
+                    if ($.terminal.length(result[0]) < codepoint_len) {
                         var position = result[1];
                         position = normalize_position(result[0], position);
                         var max = $.terminal.length(result[0]);
