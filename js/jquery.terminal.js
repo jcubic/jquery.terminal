@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Mon, 03 Sep 2018 19:12:16 +0000
+ * Date: Tue, 04 Sep 2018 09:49:15 +0000
  */
 
 /* TODO:
@@ -1749,9 +1749,10 @@
         // ---------------------------------------------------------------------
         // :: format end encode the string
         // ---------------------------------------------------------------------
-        function format(string) {
+        function format(string, before) {
             var encoded = $.terminal.encode(wrap(string), {
-                tabs: settings.tabs
+                tabs: settings.tabs,
+                before: before
             });
             return $.terminal.format(encoded, {
                 char_width: settings.char_width
@@ -1811,23 +1812,26 @@
             // -----------------------------------------------------------------
             function draw_cursor_line(string, position) {
                 var len = length(string);
+                var c;
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
-                    cursor.html(format(substring(string, 0, 1)));
-                    after.html(format(substring(string, 1)));
+                    c = substring(string, 0, 1);
+                    cursor.html(format(c));
+                    after.html(format(substring(string, 1), c));
                 } else {
                     var before_str = $.terminal.substring(string, 0, position);
                     before.html(format(before_str));
-                    var c = substring(string, position, position + 1);
-                    cursor.html(format(c));
+                    c = substring(string, position, position + 1);
+                    cursor.html(format(c, before_str));
                     if (position === len - 1) {
                         after.html('');
                     } else {
-                        after.html(format(substring(string, position + 1)));
+                        before_str += c;
+                        after.html(format(substring(string, position + 1), before_str));
                     }
                 }
             }
@@ -1978,16 +1982,17 @@
                 }
             }
             return function(string, formatted_position) {
-                var codepoint_len = text(string).length;
+                string = text(string);
+                var codepoint_len = string.length;
                 var pos = binary_search(0, codepoint_len, formatted_position, cmp);
-                for (var i = pos; i < command.length; ++i) {
-                    var opts = $.extend({}, settings, {
-                        position: i
-                    });
-                    var result = $.terminal.apply_formatters(command, opts);
-                    var guess = result[1];
-                    if (guess === formatted_position) {
-                        return i;
+                var chars = split_characters(string);
+                if (codepoint_len > chars.length) {
+                    var len = 0;
+                    for (var i = 0; i < chars.length; ++i) {
+                        len += chars[i].length;
+                        if (len >= pos) {
+                            return len;
+                        }
                     }
                 }
                 return pos;
@@ -2633,6 +2638,19 @@
             self.on('mousedown.cmd', function() {
                 was_down = true;
             }).on('mouseup.cmd', function(e) {
+                function trigger() {
+                    var $target = $(e.target);
+                    if (!$target.is('.prompt') && down) {
+                        if (enabled) {
+                            if ($target.is('.cmd')) {
+                                self.position(command.length);
+                            } else {
+                                self.display_position(get_char_pos(e));
+                            }
+                        }
+                    }
+                    count = 0;
+                }
                 // we get button from event for testing normally it's on originalEvent
                 var button;
                 if (e.originalEvent === undefined) {
@@ -2645,19 +2663,11 @@
                     if (++count === 1) {
                         var down = was_down;
                         if (enabled) {
-                            self.oneTime(settings.clickTimeout, name, function() {
-                                var $target = $(e.target);
-                                if (!$target.is('.prompt') && down) {
-                                    if (enabled) {
-                                        if ($target.is('.cmd')) {
-                                            self.position(command.length);
-                                        } else {
-                                            self.display_position(get_char_pos(e));
-                                        }
-                                    }
-                                }
-                                count = 0;
-                            });
+                            if (settings.clickTimeout === 0) {
+                                trigger();
+                            } else {
+                                self.oneTime(settings.clickTimeout, name, trigger);
+                            }
                         } else {
                             count = 0;
                         }
@@ -3141,7 +3151,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 03 Sep 2018 19:12:16 +0000',
+        date: 'Tue, 04 Sep 2018 09:49:15 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3633,7 +3643,8 @@
         // ---------------------------------------------------------------------
         encode: function encode(str, options) {
             var settings = $.extend({
-                tabs: 4
+                tabs: 4,
+                before: ''
             }, options);
             return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/ /g, '&nbsp;').split('\n').map(function(line) {
@@ -3643,7 +3654,7 @@
                             if (i === 0 || splitted[i - 1] === '\t') {
                                 return new Array(settings.tabs + 1).join('&nbsp;');
                             } else {
-                                var before = splitted.slice(0, i).join('');
+                                var before = settings.before + splitted.slice(0, i).join('');
                                 var len = $.terminal.length(before);
                                 var chars = settings.tabs - (len % settings.tabs);
                                 if (chars === 0) {

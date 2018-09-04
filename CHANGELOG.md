@@ -12,6 +12,7 @@
 * fix typescript definition for prompt and greetings [#425](https://github.com/jcubic/jquery.terminal/issues/425)
 * fix typo in holdTimeout option name
 * fix wrapping when command have emoji and combine characters
+* fix align tabs when inside cursor line
 
 ## 1.21.0
 ### Security
