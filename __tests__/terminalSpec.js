@@ -11,7 +11,7 @@
  * Released under the MIT license
  */
 /* global global, it, expect, describe, require, spyOn, setTimeout, location,
-          beforeEach, afterEach, sprintf, jQuery, $, wcwidth */
+          beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest  */
 /* TODO: test caseSensitivity */
 
 function Storage() {}
@@ -118,6 +118,8 @@ global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
+
+jest.setTimeout(10000);
 
 function nbsp(string) {
     return string.replace(/ /g, '\xA0');
@@ -376,6 +378,17 @@ describe('Terminal utils', function() {
                 ],
                 ['Test 2.\t[    ]\b\b\b\b\bFAIL\nTest 3.\t[    ]\b\b\b\b\bWARNING]\n',
                  'Test 2.\t[FAIL]\nTest 3.\t[WARNING]\n'
+                ],
+                [
+                    ['Test 0.\n\n==============================\nState1.\t[    ]\b\b\b\b\b--\r',
+                    '\u001B[KState1.\t[    ]\b\b\b\b\bDONE\nLine2.\t[    ]\b\b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b-\r\u001B[KLin2.\t[    ]\b\b\b\b\bFAIL\nTest3.\t[    ]\b',
+                    '\b\b\b\b--\r\u001B[KTest3.\t[    ]\b\b\b\b\bWARNING]\n\nFinal status\n\n',
+                    'Status details\nTime: 11'].join(''),
+                    ['Test 0.\n\n==============================\nState1.\t[DONE]\nLin2.\t[FAI',
+                     'L]\nTest3.\t[WARNING]\n\nFinal status\n\nStatus details\nTime: 11'].join('')
                 ]
             ];
             tests.forEach(function(spec) {
@@ -1694,6 +1707,65 @@ describe('sub plugins', function() {
                 expect(get_pos()).toEqual([5, 5]);
                 cmd.display_position(100);
                 expect(get_pos()).toEqual(pos);
+            });
+        });
+        describe('click', function() {
+            var term = $('<div/>').terminal($.noop, {greetings: false,clickTimeout:0});
+            var cmd = term.cmd();
+            beforeEach(function() {
+                term.focus().set_command('');
+            });
+            function click(element) {
+                var e = $.Event('mouseup');
+                e.button = 0;
+                e.target = element[0];
+                element.mousedown().trigger(e);
+            }
+            it('it should move cursor on text with backspaces', function() {
+                var input = [
+                    'Test 0.\n\n==============================\nState1.\t[    ]\b\b\b\b\b--\r',
+                    '\u001B[KState1.\t[    ]\b\b\b\b\bDONE\nLine2.\t[    ]\b\b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b-\r\u001B[KLin2.\t[    ]\b\b\b\b\bFAIL\nTest3.\t[    ]\b',
+                    '\b\b\b\b--\r\u001B[KTest3.\t[    ]\b\b\b\b\bWARNING]\n\nFinal status\n\n',
+                    'Status details\nTime: 11'
+                ].join('');
+                var output = $.terminal.apply_formatters(input).split('\n');
+                function get_count(i) {
+                    return output.slice(0, i + 1).reduce(function(acc, line) {
+                        return acc + line.length;
+                    }, 0) + i;
+                }
+                term.insert(input);
+                return new Promise(function(resolve) {
+                    setTimeout(function() {
+                        (function loop(i) {
+                            var lines = term.find('.cmd [role="presentation"]');
+                            if (i === lines.length) {
+                                return resolve();
+                            }
+                            click(lines.eq(i));
+                            var count = get_count(i);
+                            expect([i, cmd.display_position()]).toEqual([i, count]);
+                            loop(i+1);
+                        })(0);
+                    }, 100);
+                }).then(function() {
+                    return new Promise(function(resolve) {
+                        var line = 5;
+                        var offset = get_count(line);
+                        (function loop(i) {
+                            var chars = term.find('.cmd [role="presentation"]').eq(line).find('span[data-text]');
+                            if (i === chars.length) {
+                                return resolve();
+                            }
+                            click(chars.eq(i));
+                            expect(cmd.display_position()).toEqual(i + 68);
+                            loop(i+1);
+                        })(0);
+                    });
+                });
             });
         });
     });

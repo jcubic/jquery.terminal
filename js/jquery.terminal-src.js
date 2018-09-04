@@ -3654,8 +3654,8 @@
                             if (i === 0 || splitted[i - 1] === '\t') {
                                 return new Array(settings.tabs + 1).join('&nbsp;');
                             } else {
-                                var before = settings.before + splitted.slice(0, i).join('');
-                                var len = $.terminal.length(before);
+                                var before = splitted.slice(0, i).join('');
+                                var len = $.terminal.length(settings.before + before);
                                 var chars = settings.tabs - (len % settings.tabs);
                                 if (chars === 0) {
                                     chars = 4;

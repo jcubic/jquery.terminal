@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 04 Sep 2018 09:49:15 +0000
+ * Date: Tue, 04 Sep 2018 09:54:36 +0000
  */
 
 /* TODO:
@@ -3151,7 +3151,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 04 Sep 2018 09:49:15 +0000',
+        date: 'Tue, 04 Sep 2018 09:54:36 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3654,8 +3654,8 @@
                             if (i === 0 || splitted[i - 1] === '\t') {
                                 return new Array(settings.tabs + 1).join('&nbsp;');
                             } else {
-                                var before = settings.before + splitted.slice(0, i).join('');
-                                var len = $.terminal.length(before);
+                                var before = splitted.slice(0, i).join('');
+                                var len = $.terminal.length(settings.before + before);
                                 var chars = settings.tabs - (len % settings.tabs);
                                 if (chars === 0) {
                                     chars = 4;
