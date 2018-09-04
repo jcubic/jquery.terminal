@@ -395,13 +395,15 @@
             for (var i in controls) {
                 if (controls.hasOwnProperty(i)) {
                     num = parseInt(controls[i], 10);
-                    if (process_8bit && (_8bit_background || _8bit_color)) {
-                        if (_8bit_color && palette[num]) {
+                    if (process_8bit && ((_8bit_background && !output_background) ||
+                                         (_8bit_color && !output_color))) {
+                        if (_8bit_color && palette[num] && !output_color) {
                             output_color = palette[num];
                         }
-                        if (_8bit_background && palette[num]) {
+                        if (_8bit_background && palette[num] && !output_background) {
                             output_background = palette[num];
                         }
+                        process_8bit = false;
                     } else {
                         set_styles(num);
                     }
