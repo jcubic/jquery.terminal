@@ -116,10 +116,10 @@ body.terminal {
     background-clip: content-box;
 }
 .cmd .cursor.blink {
-    -webkit-animation: terminal-blink 1s infinite steps(1, start);
-       -moz-animation: terminal-blink 1s infinite steps(1, start);
-        -ms-animation: terminal-blink 1s infinite steps(1, start);
-            animation: terminal-blink 1s infinite steps(1, start);
+    -webkit-animation: terminal-blink 1s infinite linear;
+       -moz-animation: terminal-blink 1s infinite linear;
+        -ms-animation: terminal-blink 1s infinite linear;
+            animation: terminal-blink 1s infinite linear;
     border-left: 1px solid transparent;
     margin-left: -1px;
 }
@@ -202,7 +202,7 @@ terminal .terminal-output > div {
     color: inherit;
 }
 .cmd .cursor.blink > span[style*="background"] span {
-    animation: terminal-blink-span 1s infinite steps(1, start);
+    animation: terminal-blink-span 1s infinite linear;
     position: absolute;
     top: 0;
 }
@@ -219,11 +219,11 @@ terminal .terminal-output > div {
     --original-color: var(--color, #aaa);
 }
 @keyframes terminal-blink-span {
-    0%, 100% {
+    0%, 50% {
         background: inherit;
         color: inherit;
     }
-    50% {
+    50.1%, 100% {
         background: var(--original-color, #aaa);
         color: var(--background, #000);
     }
@@ -330,14 +330,15 @@ terminal .terminal-output > div {
     padding: 10px;
 }
 @-webkit-keyframes terminal-blink {
-  0%, 100% {
+  0%, 50% {
       background-color: #000;
       color: #aaa;
       border-bottom: none;
       border-left: none;
       margin-left: 0;
   }
-  50% {
+  50.1%,
+  100% {
       background-color: #bbb;
       color: #000;
       border-bottom: none;
@@ -347,14 +348,14 @@ terminal .terminal-output > div {
 }
 
 @-ms-keyframes terminal-blink {
-  0%, 100% {
+  0%, 50% {
       background-color: #000;
       color: #aaa;
       border-bottom: none;
       border-left: none;
       margin-left: 0;
   }
-  50% {
+  50.1%, 100% {
       background-color: #bbb;
       color: #000;
       border-bottom: none;
@@ -364,14 +365,14 @@ terminal .terminal-output > div {
 }
 
 @-moz-keyframes terminal-blink {
-  0%, 100% {
+  0%, 50% {
       background-color: #000;
       color: #aaa;
       border-bottom: none;
       border-left: none;
       margin-left: 0;
   }
-  50% {
+  50.1%, 100% {
       background-color: #bbb;
       color: #000;
       border-bottom: none;
@@ -380,14 +381,14 @@ terminal .terminal-output > div {
   }
 }
 @keyframes terminal-blink {
-  0%, 100% {
+  0%, 50% {
       background-color: #000;
       color: #aaa;
       border-bottom: none;
       border-left: none;
       margin-left: 0;
   }
-  50% {
+  50.1%, 100% {
       background-color: #bbb; /* not #aaa because it's seems there is Google Chrome bug */
       color: #000;
       border-bottom: none;
@@ -396,48 +397,48 @@ terminal .terminal-output > div {
   }
 }
 @-webkit-keyframes terminal-bar {
-  0%, 100% {
-      border-left-color: #aaa;
-  }
-  50% {
+  0%, 50% {
       border-left-color: #000;
+  }
+  50.1%, 100% {
+      border-left-color: #aaa;
   }
 }
 @-ms-keyframes terminal-bar {
-  0%, 100% {
-      border-left-color: #aaa;
-  }
-  50% {
+  0%, 50% {
       border-left-color: #000;
+  }
+  50.1%, 100% {
+      border-left-color: #aaa;
   }
 }
 @-moz-keyframes terminal-bar {
-  0%, 100% {
-      border-left-color: #aaa;
-  }
-  50% {
+  0%, 50% {
       border-left-color: #000;
+  }
+  50.1%, 100% {
+      border-left-color: #aaa;
   }
 }
 @keyframes terminal-bar {
-  0%, 100% {
-      border-left-color: #aaa;
-  }
-  50% {
+  0%, 50% {
       border-left-color: #000;
+  }
+  50.1%, 100% {
+      border-left-color: #aaa;
   }
 }
 @-webkit-keyframes terminal-underline {
-  0%, 100% {
-      border-bottom-color: #aaa;
+  0%, 50% {
+      border-bottom-color: #000;
       position: relative;
       line-height: 12px;
       margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
-  50% {
-      border-bottom-color: #000;
+  50.1%, 100% {
+      border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
       margin-top: 1px;
@@ -446,16 +447,16 @@ terminal .terminal-output > div {
   }
 }
 @-ms-keyframes terminal-underline {
-  0%, 100% {
-      border-bottom-color: #aaa;
+  0%, 50% {
+      border-bottom-color: #000;
       position: relative;
       line-height: 12px;
       margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
-  50% {
-      border-bottom-color: #000;
+  50.1%, 100% {
+      border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
       margin-top: 1px;
@@ -464,16 +465,16 @@ terminal .terminal-output > div {
   }
 }
 @-moz-keyframes terminal-underline {
-  0%, 100% {
-      border-bottom-color: #aaa;
+  0%, 50% {
+      border-bottom-color: #000;
       position: relative;
       line-height: 12px;
       margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
-  50% {
-      border-bottom-color: #000;
+  50.1%, 100% {
+      border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
       margin-top: 1px;
@@ -482,16 +483,16 @@ terminal .terminal-output > div {
   }
 }
 @keyframes terminal-underline {
-  0%, 100% {
-      border-bottom-color: #aaa;
+  0%, 50% {
+      border-bottom-color: #000;
       position: relative;
       line-height: 12px;
       margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
-  50% {
-      border-bottom-color: #000;
+  50.1%, 100% {
+      border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
       margin-top: 1px;
@@ -512,6 +513,9 @@ terminal .terminal-output > div {
        -moz-animation-name: terminal-bar;
         -ms-animation-name: terminal-bar;
             animation-name: terminal-bar;
+}
+.bar-animation .cursor.blink span, .underline-animation .cursor.blink span {
+    animation: none;
 }
 @supports (--css: variables) {
     .terminal, .terminal-wrapper *, .cmd, .cmd * {
@@ -538,10 +542,10 @@ terminal .terminal-output > div {
         color: var(--background, #000);
     }
     .cmd .cursor.blink {
-        -webkit-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
-           -moz-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
-            -ms-animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
-                animation: var(--animation, terminal-blink) 1s infinite steps(1, start);
+        -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
+           -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
+            -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
+                animation: var(--animation, terminal-blink) 1s infinite linear;
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
@@ -586,14 +590,14 @@ terminal .terminal-output > div {
         color: var(--background, #000);
     }
     @-webkit-keyframes terminal-blink {
-      0%, 100% {
+      0%, 50% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
           border-bottom: none;
           border-left: none;
           margin-left: 0;
       }
-      50% {
+      50.1%, 100% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
           border-bottom: none;
@@ -603,14 +607,14 @@ terminal .terminal-output > div {
     }
 
     @-ms-keyframes terminal-blink {
-      0%, 100% {
+      0%, 50% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
           border-bottom: none;
           border-left: none;
           margin-left: 0;
       }
-      50% {
+      50.1%, 100% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
           border-bottom: none;
@@ -619,14 +623,14 @@ terminal .terminal-output > div {
       }
     }
     @-moz-keyframes terminal-blink {
-      0%, 100% {
+      0%, 50% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
           border-bottom: none;
           border-left: none;
           margin-left: 0;
       }
-      50% {
+      50.1%, 100% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
           border-bottom: none;
@@ -635,14 +639,14 @@ terminal .terminal-output > div {
       }
     }
     @keyframes terminal-blink {
-      0%, 100% {
+      0%, 50% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
           border-bottom: none;
           border-left: none;
           margin-left: 0;
       }
-      50% {
+      50.1%, 100% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
           border-bottom: none;
@@ -651,56 +655,56 @@ terminal .terminal-output > div {
       }
     }
     @-webkit-keyframes terminal-bar {
-      0%, 100% {
+      0%, 50% {
           border-left-color: var(--background, #000);
           border-bottom: none;
       }
-      50% {
+      50.1%, 100% {
           border-left-color: var(--color, #aaa);
           border-bottom: none;
       }
     }
     @-ms-keyframes terminal-bar {
-      0%, 100% {
+      0%, 50% {
           border-left-color: var(--background, #000);
           border-bottom: none;
       }
-      50% {
+      50.1%, 100% {
           border-left-color: var(--color, #aaa);
           border-bottom: none;
       }
     }
     @-moz-keyframes terminal-bar {
-      0%, 100% {
+      0%, 50% {
           border-left-color: var(--background, #000);
           border-bottom: none;
       }
-      50% {
+      50.1%, 100% {
           border-left-color: var(--color, #aaa);
           border-bottom: none;
       }
     }
     @keyframes terminal-bar {
-      0%, 100% {
+      0%, 50% {
           border-left-color: var(--background, #000);
           border-bottom: none;
       }
-      50% {
+      50.1%, 100% {
           border-left-color: var(--color, #aaa);
           border-bottom: none;
       }
     }
     @-webkit-keyframes terminal-underline {
-      0%, 100% {
-          border-bottom-color: var(--color, #aaa);
+      0%, 50% {
+          border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
           margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
-      50% {
-          border-bottom-color: var(--background, #000);
+      50.1%, 100% {
+          border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
           margin-top: calc(var(--size, 1) * 1px);
@@ -709,7 +713,7 @@ terminal .terminal-output > div {
       }
     }
     @-ms-keyframes terminal-underline {
-      0%, 100% {
+      0%, 50% {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
@@ -717,7 +721,7 @@ terminal .terminal-output > div {
           border-left: none;
           margin-left: 0;
       }
-      50% {
+      50.1%, 100% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
@@ -727,7 +731,7 @@ terminal .terminal-output > div {
       }
     }
     @-moz-keyframes terminal-underline {
-      0%, 100% {
+      0%, 50% {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
@@ -735,7 +739,7 @@ terminal .terminal-output > div {
           border-left: none;
           margin-left: 0;
       }
-      50% {
+      50.1%, 100% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
@@ -745,7 +749,7 @@ terminal .terminal-output > div {
       }
     }
     @keyframes terminal-underline {
-      0%, 100% {
+      0%, 50% {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
@@ -753,7 +757,7 @@ terminal .terminal-output > div {
           border-left: none;
           margin-left: 0;
       }
-      50% {
+      50.1%, 100% {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
