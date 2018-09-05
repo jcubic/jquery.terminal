@@ -2373,6 +2373,18 @@
         if (!settings.history) {
             history.disable();
         }
+        // fix for .cursor span animation that should only be applied when
+        // animation is equal to terminal-blink
+        if (animation_supported) {
+            var style = window.getComputedStyle(cursor[0]);
+            var animationName = style.getPropertyValue('--animation');
+            animationName = animationName.replace(/^\s*|\s*$/g, '');
+
+            if (animationName && !animationName.match(/blink/)) {
+                var className = animationName.replace(/terminal-/, '') + '-animation';
+                self.addClass(className);
+            }
+        }
         var first_up_history = true;
         // prevent_keypress - hack for Android that was inserting characters on
         // backspace

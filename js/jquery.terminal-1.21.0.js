@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 05 Sep 2018 08:40:36 +0000
+ * Date: Wed, 05 Sep 2018 10:33:53 +0000
  */
 
 /* TODO:
@@ -2373,6 +2373,18 @@
         if (!settings.history) {
             history.disable();
         }
+        // fix for .cursor span animation that should only be applied when
+        // animation is equal to terminal-blink
+        if (animation_supported) {
+            var style = window.getComputedStyle(cursor[0]);
+            var animationName = style.getPropertyValue('--animation');
+            animationName = animationName.replace(/^\s*|\s*$/g, '');
+
+            if (animationName && !animationName.match(/blink/)) {
+                var className = animationName.replace(/terminal-/, '') + '-animation';
+                self.addClass(className);
+            }
+        }
         var first_up_history = true;
         // prevent_keypress - hack for Android that was inserting characters on
         // backspace
@@ -3158,7 +3170,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 05 Sep 2018 08:40:36 +0000',
+        date: 'Wed, 05 Sep 2018 10:33:53 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

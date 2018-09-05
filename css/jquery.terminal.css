@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Wed, 05 Sep 2018 08:23:01 +0000
+ * Date: Wed, 05 Sep 2018 10:33:53 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -514,7 +514,8 @@ terminal .terminal-output > div {
         -ms-animation-name: terminal-bar;
             animation-name: terminal-bar;
 }
-.bar-animation .cursor.blink span, .underline-animation .cursor.blink span {
+.bar-animation .cursor.blink span[style*="background"] span,
+.underline-animation .cursor.blink span[style*="background"] span {
     animation: none;
 }
 @supports (--css: variables) {
