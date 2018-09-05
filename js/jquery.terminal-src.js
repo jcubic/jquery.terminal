@@ -1837,6 +1837,10 @@
                         after.html(format(substring(string, position + 1), before_str));
                     }
                 }
+                // synchronize css animations (it's not that important because if user
+                // will change animation she should disable animation on span, but it
+                // looks nicer until she disable that inner animation)
+                restart_animation();
             }
             function div(string) {
                 return '<div role="presentation" aria-hidden="true">' +

@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 05 Sep 2018 07:37:05 +0000
+ * Date: Wed, 05 Sep 2018 08:40:36 +0000
  */
 
 /* TODO:
@@ -1837,6 +1837,10 @@
                         after.html(format(substring(string, position + 1), before_str));
                     }
                 }
+                // synchronize css animations (it's not that important because if user
+                // will change animation she should disable animation on span, but it
+                // looks nicer until she disable that inner animation)
+                restart_animation();
             }
             function div(string) {
                 return '<div role="presentation" aria-hidden="true">' +
@@ -3154,7 +3158,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 05 Sep 2018 07:37:05 +0000',
+        date: 'Wed, 05 Sep 2018 08:40:36 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
