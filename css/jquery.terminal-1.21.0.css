@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Wed, 05 Sep 2018 11:12:08 +0000
+ * Date: Wed, 05 Sep 2018 11:15:15 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -36,7 +36,7 @@
     position: absolute;
     left: -16px;
     top: 0;
-    width: 20px;
+    width: 16px;
     height: 16px;
     /* this seems to work after all on Android */
     /*left: -99999px;
