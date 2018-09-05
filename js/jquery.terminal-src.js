@@ -1989,6 +1989,9 @@
                 }
             }
             return function(string, formatted_position) {
+                if (formatted_position === 0) {
+                    return 0;
+                }
                 string = text(string);
                 var codepoint_len = string.length;
                 var pos = binary_search(0, codepoint_len, formatted_position, cmp);
