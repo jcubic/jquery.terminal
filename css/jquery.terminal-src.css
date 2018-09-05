@@ -810,6 +810,3 @@ terminal .terminal-output > div {
 .cmd .token.token {
     background: inherit;
 }
-.token.punctuation {
-    color: inherit;
-}
