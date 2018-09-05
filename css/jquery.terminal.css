@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Wed, 05 Sep 2018 10:46:20 +0000
+ * Date: Wed, 05 Sep 2018 10:56:28 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -201,12 +201,14 @@ terminal .terminal-output > div {
     background: inherit;
     color: inherit;
 }
-.cmd .cursor.blink > span[style*="background"] span {
+.cmd .cursor.blink > span[style*="background"] span,
+.cmd .cursor.blink > span.token span {
     animation: terminal-blink-span 1s infinite linear;
     position: absolute;
     top: 0;
 }
-.cmd .cursor.blink > span[style*="background"] {
+.cmd .cursor.blink > span[style*="background"],
+.cmd .cursor.blink > span.token {
     postion: relative;
     min-width: 1ch;
     display: inline-block;
@@ -515,7 +517,9 @@ terminal .terminal-output > div {
             animation-name: terminal-bar;
 }
 .bar-animation .cursor.blink span[style*="background"] span,
-.underline-animation .cursor.blink span[style*="background"] span {
+.underline-animation .cursor.blink span[style*="background"] span,
+.bar-animation .cmd .cursor.blink > span.token span,
+.underline-animation .cmd .cursor.blink > span.token span {
     animation: none;
 }
 @supports (--css: variables) {
