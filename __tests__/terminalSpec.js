@@ -1756,11 +1756,12 @@ describe('sub plugins', function() {
                         var line = 5;
                         var offset = get_count(line);
                         (function loop(i) {
-                            var chars = term.find('.cmd [role="presentation"]').eq(line).find('span[data-text]');
+                            var chars = term.find('.cmd [role="presentation"]')
+                                    .eq(line).find('span[data-text]');
                             if (i === chars.length) {
                                 return resolve();
                             }
-                            click(chars.eq(i));
+                            click(chars.eq(i).find('span'));
                             expect(cmd.display_position()).toEqual(i + 68);
                             loop(i+1);
                         })(0);
@@ -2178,7 +2179,7 @@ describe('Terminal plugin', function() {
             it('should move cursor to click position', function(done) {
                 term.insert('foo bar').focus();
                 var pos = 2;
-                var node = term.find('.cmd .cursor-line > span:eq(0) span:eq(' + pos + ')');
+                var node = term.find('.cmd .cursor-line > span:eq(0) > span:eq(' + pos + ')');
                 var e = new $.Event('mouseup');
                 e.button = 0;
                 node.trigger('mousedown').trigger(e);

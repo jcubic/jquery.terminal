@@ -197,6 +197,37 @@ terminal .terminal-output > div {
 .terminal td {
     border: 1px solid #aaa;
 }
+.cmd span[data-text] span {
+    background: inherit;
+    color: inherit;
+}
+.cmd .cursor.blink > span[style*="background"] span {
+    animation: terminal-blink-span 1s infinite steps(1, start);
+    position: absolute;
+    top: 0;
+}
+.cmd .cursor.blink > span[style*="background"] {
+    postion: relative;
+    min-width: 1ch;
+    display: inline-block;
+}
+/*
+ * this is set so animation can select original color as backgound for cursor
+ * so span can have --color for selection
+ */
+.cmd {
+    --original-color: var(--color, #aaa);
+}
+@keyframes terminal-blink-span {
+    0%, 100% {
+        background: inherit;
+        color: inherit;
+    }
+    50% {
+        background: var(--original-color, #aaa);
+        color: var(--background, #000);
+    }
+}
 .terminal h1::-moz-selection,
 .terminal h2::-moz-selection,
 .terminal h3::-moz-selection,

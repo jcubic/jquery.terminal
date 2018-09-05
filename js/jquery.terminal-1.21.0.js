@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 04 Sep 2018 09:54:36 +0000
+ * Date: Wed, 05 Sep 2018 07:37:05 +0000
  */
 
 /* TODO:
@@ -1180,10 +1180,11 @@
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
+                node = node.closest('[data-text]');
                 return node.index() +
-                    node.parent('span').prevAll().find('span').length +
+                    node.parent('span').prevAll().find('> span').length +
                     node.closest('[role="presentation"]')
-                        .prevUntil('.prompt').find('span').length;
+                        .prevUntil('.prompt').find('> span').length;
             } else if (node.is('div[role="presentation"]')) {
                 var last = !node.nextUntil('textarea').length;
                 return node.find('span[data-text]').length +
@@ -1754,9 +1755,11 @@
                 tabs: settings.tabs,
                 before: before
             });
-            return $.terminal.format(encoded, {
+            string = $.terminal.format(encoded, {
                 char_width: settings.char_width
             });
+            var re = /(<span[^>]+data-text[^>]+>)(.*?)(<\/span>)/g;
+            return string.replace(re, '$1<span>$2</span>$3');
         }
         // ---------------------------------------------------------------------
         // :: function create new string with all characters in it's own
@@ -3151,7 +3154,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 04 Sep 2018 09:54:36 +0000',
+        date: 'Wed, 05 Sep 2018 07:37:05 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

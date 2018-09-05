@@ -13,7 +13,8 @@
 * fix typo in holdTimeout option name
 * fix wrapping when command have emoji and combine characters
 * fix align tabs when inside cursor line
-* fix multiple code in single ANSI escape
+* fix multiple 8-bit color codes in single ANSI escape
+* fix cursor position when on formatting that change color and background
 
 ## 1.21.0
 ### Security
