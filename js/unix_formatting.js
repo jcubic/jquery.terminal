@@ -348,10 +348,10 @@
             var styles = [];
             var output_color = '';
             var output_background = '';
-            var process_true_color = -1;
+            var _process_true_color = -1;
             var _ex_color = false;
             var _ex_background = false;
-            var process_8bit = false;
+            var _process_8bit = false;
             var palette = $.terminal.ansi_colors.palette;
             function set_styles(num) {
                 switch (num) {
@@ -368,7 +368,7 @@
                         break;
                     case 5:
                         if (_ex_color || _ex_background) {
-                            process_8bit = true;
+                            _process_8bit = true;
                         }
                         break;
                     case 38:
@@ -379,7 +379,7 @@
                         break;
                     case 2:
                         if (_ex_color || _ex_background) {
-                            process_true_color = 0;
+                            _process_true_color = 0;
                         } else {
                             faited = true;
                             bold = false;
@@ -399,40 +399,53 @@
                         }
                 }
             }
+            // -----------------------------------------------------------------
+            function process_true_color() {
+                if (_ex_color) {
+                    if (!output_color) {
+                        output_color = '#';
+                    }
+                    if (output_color.length < 7) {
+                        output_color += ('0' + num.toString(16)).slice(-2);
+                    }
+                }
+                if (_ex_background) {
+                    if (!output_background) {
+                        output_background = '#';
+                    }
+                    if (output_background.length < 7) {
+                        output_background += ('0' + num.toString(16)).slice(-2);
+                    }
+                }
+                if (_process_true_color === 2) {
+                    _process_true_color = -1;
+                } else {
+                    _process_true_color++;
+                }
+            }
+            // -----------------------------------------------------------------
+            function should__process_8bit() {
+                return _process_8bit && ((_ex_background && !output_background) ||
+                                        (_ex_color && !output_color));
+            }
+            // -----------------------------------------------------------------
+            function process_8bit() {
+                if (_ex_color && palette[num] && !output_color) {
+                    output_color = palette[num];
+                }
+                if (_ex_background && palette[num] && !output_background) {
+                    output_background = palette[num];
+                }
+                _process_8bit = false;
+            }
+            // -----------------------------------------------------------------
             for (var i in controls) {
                 if (controls.hasOwnProperty(i)) {
                     num = parseInt(controls[i], 10);
-                    if (process_true_color > -1) {
-                        if (_ex_color) {
-                            if (!output_color) {
-                                output_color = '#';
-                            }
-                            if (output_color.length < 7) {
-                                output_color += ('0' + num.toString(16)).slice(-2);
-                            }
-                        }
-                        if (_ex_background) {
-                            if (!output_background) {
-                                output_background = '#';
-                            }
-                            if (output_background.length < 7) {
-                                output_background += ('0' + num.toString(16)).slice(-2);
-                            }
-                        }
-                        if (process_true_color === 2) {
-                            process_true_color = -1;
-                        } else {
-                            process_true_color++;
-                        }
-                    } else if (process_8bit && ((_ex_background && !output_background) ||
-                                         (_ex_color && !output_color))) {
-                        if (_ex_color && palette[num] && !output_color) {
-                            output_color = palette[num];
-                        }
-                        if (_ex_background && palette[num] && !output_background) {
-                            output_background = palette[num];
-                        }
-                        process_8bit = false;
+                    if (_process_true_color > -1) {
+                        process_true_color();
+                    } else if (should__process_8bit()) {
+                        process_8bit();
                     } else {
                         set_styles(num);
                     }
