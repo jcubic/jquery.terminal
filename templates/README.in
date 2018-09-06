@@ -25,6 +25,8 @@ commands or you can provide you own function in which you can parse user
 commands. It's ideal if you want to provide additional functionality for power
 users. It can also be used to debug your application.
 
+You can use this JavaScript library to create web based terminal on any website.
+
 ### Features:
 
 * You can create an interpreter for your JSON-RPC service with one line
