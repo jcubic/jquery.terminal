@@ -339,18 +339,19 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.from_ansi', function() {
-        var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz';
+        var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz\x1b[48;2;255;255;0;38;2;0;100;0mQuux\x1b[m';
         it('should convert ansi to terminal formatting', function() {
             var string = $.terminal.from_ansi(ansi_string);
             expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
-                                   'B[[sb;;]a]r][[;#000;#AAA]Baz]');
+                                   'B[[sb;;]a]r][[;#000;#AAA]Baz][[;#006400;#ffff00]Quux]');
         });
         it('should convert ansi to terminal formatting and escape the remaining brackets', function() {
             var string = $.terminal.from_ansi(ansi_string, {
                 unixFormattingEscapeBrackets: true
             });
             expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
-                                   'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz]');
+                                   'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz]' +
+                                  '[[;#006400;#ffff00]Quux]');
         });
     });
     describe('$.terminal.overtyping', function() {
