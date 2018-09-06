@@ -3,8 +3,9 @@
 * add sourcemaps to min js and css files [#430](https://github.com/jcubic/jquery.terminal/issues/430)
 * new option holdRepeatTimeout - which is number of the delay between keypress repeat when holding key
 * selection to change background color based on formatting like in Bash
-### Bugfix
 * embed emoji regex by Mathias Bynens for better emoji detection
+
+### Bugfix
 * update typescript definition to new options
 * fix cursor for PrismJS punctuation class
 * fix emoji that contain U+FE0F character at the end [#424](https://github.com/jcubic/jquery.terminal/issues/424)

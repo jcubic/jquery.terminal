@@ -1182,9 +1182,9 @@
             if (node.is('span')) {
                 node = node.closest('[data-text]');
                 return node.index() +
-                    node.parent('span').prevAll().find('> span').length +
+                    node.parent('span').prevAll().find('[data-text]').length +
                     node.closest('[role="presentation"]')
-                        .prevUntil('.prompt').find('> span').length;
+                        .prevUntil('.prompt').find('[data-text]').length;
             } else if (node.is('div[role="presentation"]')) {
                 var last = !node.nextUntil('textarea').length;
                 return node.find('span[data-text]').length +

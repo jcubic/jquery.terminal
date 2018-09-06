@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 05 Sep 2018 11:12:07 +0000
+ * Date: Thu, 06 Sep 2018 08:38:43 +0000
  */
 
 /* TODO:
@@ -1182,9 +1182,9 @@
             if (node.is('span')) {
                 node = node.closest('[data-text]');
                 return node.index() +
-                    node.parent('span').prevAll().find('> span').length +
+                    node.parent('span').prevAll().find('[data-text]').length +
                     node.closest('[role="presentation"]')
-                        .prevUntil('.prompt').find('> span').length;
+                        .prevUntil('.prompt').find('[data-text]').length;
             } else if (node.is('div[role="presentation"]')) {
                 var last = !node.nextUntil('textarea').length;
                 return node.find('span[data-text]').length +
@@ -3173,7 +3173,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 05 Sep 2018 11:12:07 +0000',
+        date: 'Thu, 06 Sep 2018 08:38:43 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
