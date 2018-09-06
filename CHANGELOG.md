@@ -4,6 +4,7 @@
 * new option holdRepeatTimeout - which is number of the delay between keypress repeat when holding key
 * selection to change background color based on formatting like in Bash
 * embed emoji regex by Mathias Bynens for better emoji detection
+* allow to execute extended commands including terminal and cmd methods from formatters
 
 ### Bugfix
 * update typescript definition to new options

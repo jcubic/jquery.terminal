@@ -462,7 +462,7 @@
             /*input = input.replace(/((?:\x1B\[[0-9;]*[A-Za-z])*)/g, function(group) {
               return group.replace(/m\x1B\[/g, ';');
               });*/
-            var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
+            var splitted = input.split(/(\x1B\[[0-9;]*[m])/g);
             if (splitted.length === 1) {
                 if (settings.unixFormattingEscapeBrackets) {
                     result = $.terminal.escape_formatting(input);

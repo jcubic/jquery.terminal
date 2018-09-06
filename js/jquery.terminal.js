@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 06 Sep 2018 08:38:43 +0000
+ * Date: Thu, 06 Sep 2018 16:06:26 +0000
  */
 
 /* TODO:
@@ -3173,7 +3173,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 06 Sep 2018 08:38:43 +0000',
+        date: 'Thu, 06 Sep 2018 16:06:26 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5355,27 +5355,6 @@
                     string = arg;
                 }
                 if (string !== '') {
-                    string = $.map(string.split(format_exec_re), function(string) {
-                        if (string && string.match(format_exec_re) &&
-                            !$.terminal.is_formatting(string)) {
-                            // redraw should not execute commands and it have
-                            // and lines variable have all extended commands
-                            string = string.replace(/^\[\[|\]\]$/g, '');
-                            if (line_settings.exec) {
-                                if (prev_command &&
-                                    prev_command.command.trim() === string.trim()) {
-                                    self.error(strings().recursiveCall);
-                                } else {
-                                    $.terminal.extended_command(self, string, {
-                                        invokeMethods: settings.invokeMethods
-                                    });
-                                }
-                            }
-                            return '';
-                        } else {
-                            return string;
-                        }
-                    }).join('');
                     // string can be empty after removing extended commands
                     if (string !== '') {
                         if (!line_settings.raw) {
@@ -5389,16 +5368,45 @@
                                         string,
                                         settings
                                     );
-                                    string = crlf($.terminal.normalize(string));
                                 } catch (e) {
                                     display_exception(e, 'FORMATTING');
                                 }
                             }
-                            string = $.terminal.encode(string, {
-                                tabs: settings.tabs
-                            });
+                            var parts = string.split(format_exec_re);
+                            string = $.map(parts, function(string) {
+                                if (string && string.match(format_exec_re) &&
+                                    !$.terminal.is_formatting(string)) {
+                                    // redraw should not execute commands and it have
+                                    // and lines variable have all extended commands
+                                    string = string.replace(/^\[\[|\]\]$/g, '');
+                                    if (line_settings.exec) {
+                                        var prev_cmd;
+                                        if (prev_command) {
+                                            prev_command = prev_command.command.trim();
+                                        }
+                                        if (prev_cmd === string.trim()) {
+                                            self.error(strings().recursiveCall);
+                                        } else {
+                                            $.terminal.extended_command(self, string, {
+                                                invokeMethods: settings.invokeMethods
+                                            });
+                                        }
+                                    }
+                                    return '';
+                                } else {
+                                    return string;
+                                }
+                            }).join('');
+                            if (string !== '') {
+                                string = crlf($.terminal.normalize(string));
+                                string = $.terminal.encode(string, {
+                                    tabs: settings.tabs
+                                });
+                            }
                         }
-                        buffer_line(string, line.index, line_settings);
+                        if (string !== '') {
+                            buffer_line(string, line.index, line_settings);
+                        }
                     }
                 }
                 if (string === '' && is_fn) {

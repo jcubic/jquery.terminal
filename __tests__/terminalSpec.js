@@ -3965,16 +3965,26 @@ describe('Terminal plugin', function() {
                     invokeMethods: true
                 });
                 var interpreter;
+                var formatters;
                 beforeEach(function() {
                     interpreter = {
                         foo: function(a, b) {
                         }
                     };
+                    formatters = $.terminal.defaults.formatters;
+                    $.terminal.defaults.formatters = [
+                        [/\x1bfoo/g, '[[ foo ]]']
+                    ];
                     spy(interpreter, 'foo');
                     term.push(interpreter);
                 });
                 afterEach(function() {
                     term.pop();
+                    $.terminal.defaults.formatters = formatters;
+                });
+                it('should invoke command using formatter', function() {
+                    term.echo('\x1bfoo');
+                    expect(interpreter.foo).toHaveBeenCalled();
                 });
                 it('should invoke command', function() {
                     term.echo('[[ foo ]]]');
