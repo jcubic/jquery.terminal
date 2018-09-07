@@ -2153,6 +2153,7 @@ describe('Terminal plugin', function() {
                 });
             });
             it('should align tabs', function() {
+                var text;
             });
             it('should move cursor on text with backspaces', function() {
                 var input = [

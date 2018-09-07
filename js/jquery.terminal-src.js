@@ -1816,6 +1816,7 @@
             // -----------------------------------------------------------------
             function draw_cursor_line(string, position, prompt) {
                 var len = length(string);
+                prompt = prompt || '';
                 var c;
                 if (position === len) {
                     before.html(format(string));
@@ -1825,22 +1826,22 @@
                     before.html('');
                     c = substring(string, 0, 1);
                     cursor.html(format(c));
-                    after.html(format(substring(string, 1), c));
+                    after.html(format(substring(string, 1), prompt + c));
                 } else {
                     var before_str = $.terminal.substring(string, 0, position);
                     before.html(format(before_str, prompt));
                     c = substring(string, position, position + 1);
-                    var c_before = ((prompt || '') + before_str).replace(/^.*\t/, '');
+                    var c_before = (prompt + before_str).replace(/^.*\t/, '');
                     cursor.html(format(c, c_before));
                     if (position === len - 1) {
                         after.html('');
                     } else {
                         if (c.match(/\t/)) {
-                            before_str = '';
+                            c_before = '';
                         } else {
-                            before_str = before_str.replace(/^.*\t/, '') + c;
+                            c_before += c;
                         }
-                        after.html(format(substring(string, position + 1), before_str));
+                        after.html(format(substring(string, position + 1), c_before));
                     }
                 }
                 // synchronize css animations (it's not that important because if user
@@ -1911,15 +1912,12 @@
                         draw_cursor_line(array[0], pos, prompt_last_line);
                         lines_after(array.slice(1));
                     } else if (pos === first_len) {
-                        cursor_line.before(div(array[0]));
+                        // first char acter of second line
+                        cursor_line.before(div(array[0], prompt_last_line));
                         draw_cursor_line(array[1] || '', 0);
                         if (array.length > 1) {
                             lines_after(array.slice(2));
                         }
-                    } else if (pos === first_len) {
-                        cursor_line.before(div(array[0]));
-                        draw_cursor_line(array[1], 0);
-                        lines_after(array.slice(2));
                     } else {
                         var last = array.slice(-1)[0];
                         var len = length(original_string);
@@ -3670,16 +3668,18 @@
             return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/ /g, '&nbsp;').split('\n').map(function(line) {
                     var splitted = line.split(/((?:\[\[[^\]]+\])?\t(?:\])?)/);
-                    return splitted.filter(Boolean).map(function(str, i) {
+                    splitted = splitted.filter(Boolean);
+                    return splitted.map(function(str, i) {
                         if (str.match(/\t/)) {
                             return str.replace(/\t([^\t]*)$/, function(_, end) {
-                                if (i === 0 || splitted[i - 1] === '\t' ||
-                                   (i === 1 && splitted[i - 1].match(/\[\[^\]]+\]$/))) {
+                                if (i !== 0 && splitted[i - 1].match(/\t\]?$/)) {
                                     var sp = new Array(settings.tabs + 1).join('&nbsp;');
                                     return sp + end;
                                 } else {
                                     var before = splitted.slice(i - 1, i).join('');
-                                    before = i <= 1 ? settings.before + before : before;
+                                    if (settings.before && i <= 1) {
+                                        before = settings.before + before;
+                                    }
                                     var len = $.terminal.length(before);
                                     var chars = settings.tabs - (len % settings.tabs);
                                     if (chars === 0) {
