@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 07 Sep 2018 07:10:30 +0000
+ * Date: Fri, 07 Sep 2018 07:15:55 +0000
  */
 
 /* TODO:
@@ -2855,8 +2855,6 @@
         }
     }
     // -------------------------------------------------------------------------
-    
-    // -------------------------------------------------------------------------
     // normalize position for counting emoji
     // -------------------------------------------------------------------------
     function normalize_position(string, position) {
@@ -3165,7 +3163,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 07 Sep 2018 07:10:30 +0000',
+        date: 'Fri, 07 Sep 2018 07:15:55 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

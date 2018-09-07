@@ -1710,66 +1710,6 @@ describe('sub plugins', function() {
                 expect(get_pos()).toEqual(pos);
             });
         });
-        describe('click', function() {
-            var term = $('<div/>').terminal($.noop, {greetings: false,clickTimeout:0});
-            var cmd = term.cmd();
-            beforeEach(function() {
-                term.focus().set_command('');
-            });
-            function click(element) {
-                var e = $.Event('mouseup');
-                e.button = 0;
-                e.target = element[0];
-                element.mousedown().trigger(e);
-            }
-            it('it should move cursor on text with backspaces', function() {
-                var input = [
-                    'Test 0.\n\n==============================\nState1.\t[    ]\b\b\b\b\b--\r',
-                    '\u001B[KState1.\t[    ]\b\b\b\b\bDONE\nLine2.\t[    ]\b\b\b\b\b----\b\b',
-                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
-                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
-                    '\b\b    \b\b\b\b-\r\u001B[KLin2.\t[    ]\b\b\b\b\bFAIL\nTest3.\t[    ]\b',
-                    '\b\b\b\b--\r\u001B[KTest3.\t[    ]\b\b\b\b\bWARNING]\n\nFinal status\n\n',
-                    'Status details\nTime: 11'
-                ].join('');
-                var output = $.terminal.apply_formatters(input).split('\n');
-                function get_count(i) {
-                    return output.slice(0, i + 1).reduce(function(acc, line) {
-                        return acc + line.length;
-                    }, 0) + i;
-                }
-                term.insert(input);
-                return new Promise(function(resolve) {
-                    setTimeout(function() {
-                        (function loop(i) {
-                            var lines = term.find('.cmd [role="presentation"]');
-                            if (i === lines.length) {
-                                return resolve();
-                            }
-                            click(lines.eq(i));
-                            var count = get_count(i);
-                            expect([i, cmd.display_position()]).toEqual([i, count]);
-                            loop(i+1);
-                        })(0);
-                    }, 100);
-                }).then(function() {
-                    return new Promise(function(resolve) {
-                        var line = 5;
-                        var offset = get_count(line);
-                        (function loop(i) {
-                            var chars = term.find('.cmd [role="presentation"]')
-                                    .eq(line).find('span[data-text]');
-                            if (i === chars.length) {
-                                return resolve();
-                            }
-                            click(chars.eq(i).find('span'));
-                            expect(cmd.display_position()).toEqual(i + 68);
-                            loop(i+1);
-                        })(0);
-                    });
-                });
-            });
-        });
     });
 });
 describe('Terminal plugin', function() {
@@ -2176,18 +2116,87 @@ describe('Terminal plugin', function() {
     });
     describe('events', function() {
         describe('click', function() {
-            var term = $('<div/>').terminal();
-            it('should move cursor to click position', function(done) {
-                term.insert('foo bar').focus();
-                var pos = 2;
-                var node = term.find('.cmd .cursor-line > span:eq(0) > span:eq(' + pos + ')');
-                var e = new $.Event('mouseup');
+            var term = $('<div/>').terminal($.noop, {greetings: false, clickTimeout: 0});
+            var cmd = term.cmd();
+            beforeEach(function() {
+                term.focus().set_command('');
+            });
+            function click(element) {
+                var e = $.Event('mouseup');
                 e.button = 0;
-                node.trigger('mousedown').trigger(e);
-                setTimeout(function() {
+                e.target = element[0];
+                element.mousedown().trigger(e);
+            }
+            it('should move cursor to click position', function() {
+                var text = 'foo\nbar\nbaz';
+                term.insert(text).focus();
+                for (var pos = 0; pos < text.length; ++pos) {
+                    var node = cmd.find('span[data-text]').eq(pos);
+                    click(node);
                     expect(term.get_position()).toBe(pos);
-                    done();
-                }, 300);
+                }
+            });
+            it('should move cursor when text have emoji', function() {
+                var text = '\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3';
+                var chars = $.terminal.split_characters(text);
+                term.insert(text).focus();
+                expect(term.find('.cmd span[data-text]').length).toBe(15);
+                [0, 7, 14].forEach(function(pos) {
+                    var node = cmd.find('span[data-text]').eq(pos);
+                    click(node);
+                    expect(cmd.display_position()).toBe(pos);
+                    var char = chars[pos];
+                    expect(cmd.find('.cursor [data-text] span').text().length)
+                        .toEqual(char.length);
+                    expect(char.length).toBeGreaterThan(1);
+                });
+            });
+            it('should move cursor on text with backspaces', function() {
+                var input = [
+                    'Test 0.\n\n==============================\nState1.\t[    ]\b\b\b\b\b--\r',
+                    '\u001B[KState1.\t[    ]\b\b\b\b\bDONE\nLine2.\t[    ]\b\b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b-\r\u001B[KLin2.\t[    ]\b\b\b\b\bFAIL\nTest3.\t[    ]\b',
+                    '\b\b\b\b--\r\u001B[KTest3.\t[    ]\b\b\b\b\bWARNING]\n\nFinal status\n\n',
+                    'Status details\nTime: 11'
+                ].join('');
+                var output = $.terminal.apply_formatters(input).split('\n');
+                function get_count(i) {
+                    return output.slice(0, i + 1).reduce(function(acc, line) {
+                        return acc + line.length;
+                    }, 0) + i;
+                }
+                term.insert(input);
+                return new Promise(function(resolve) {
+                    setTimeout(function() {
+                        (function loop(i) {
+                            var lines = term.find('.cmd [role="presentation"]');
+                            if (i === lines.length) {
+                                return resolve();
+                            }
+                            click(lines.eq(i));
+                            var count = get_count(i);
+                            expect([i, cmd.display_position()]).toEqual([i, count]);
+                            loop(i+1);
+                        })(0);
+                    }, 100);
+                }).then(function() {
+                    return new Promise(function(resolve) {
+                        var line = 5;
+                        var offset = get_count(line);
+                        (function loop(i) {
+                            var chars = term.find('.cmd [role="presentation"]')
+                                    .eq(line).find('span[data-text]');
+                            if (i === chars.length) {
+                                return resolve();
+                            }
+                            click(chars.eq(i).find('span'));
+                            expect(cmd.display_position()).toEqual(i + 68);
+                            loop(i+1);
+                        })(0);
+                    });
+                });
             });
         });
         describe('contextmenu', function() {
