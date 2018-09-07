@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 06 Sep 2018 16:06:26 +0000
+ * Date: Fri, 07 Sep 2018 07:10:30 +0000
  */
 
 /* TODO:
@@ -1995,7 +1995,7 @@
                 string = text(string);
                 var codepoint_len = string.length;
                 var pos = binary_search(0, codepoint_len, formatted_position, cmp);
-                var chars = split_characters(string);
+                var chars = $.terminal.split_characters(string);
                 if (codepoint_len > chars.length) {
                     var len = 0;
                     for (var i = 0; i < chars.length; ++i) {
@@ -2855,15 +2855,7 @@
         }
     }
     // -------------------------------------------------------------------------
-    function split_characters(string) {
-        var result = [];
-        while (string.length) {
-            var chr = get_next_character(string);
-            string = string.substring(chr.length);
-            result.push(chr);
-        }
-        return result;
-    }
+    
     // -------------------------------------------------------------------------
     // normalize position for counting emoji
     // -------------------------------------------------------------------------
@@ -2872,7 +2864,7 @@
             return position;
         }
         string = $.terminal.strip(string);
-        var result = split_characters(string).reduce(function(acc, chr) {
+        var result = $.terminal.split_characters(string).reduce(function(acc, chr) {
             if (typeof acc === 'number') {
                 return acc;
             }
@@ -2919,7 +2911,7 @@
     function wide_characters(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
-            if (split_characters(bare).length === 1) {
+            if ($.terminal.split_characters(bare).length === 1) {
                 return text;
             }
             var specs = bare.split('').map(function(chr) {
@@ -3173,7 +3165,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 06 Sep 2018 16:06:26 +0000',
+        date: 'Fri, 07 Sep 2018 07:10:30 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3477,7 +3469,8 @@
         // :: formatting aware substring function
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
-            if (!split_characters(text(string)).slice(start_index, end_index).length) {
+            var chars = $.terminal.split_characters(text(string));
+            if (!chars.slice(start_index, end_index).length) {
                 return '';
             }
             var start = 0;
@@ -3583,7 +3576,7 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
-                var chars = split_characters(text(str));
+                var chars = $.terminal.split_characters(text(str));
                 var last_char = chars[chars.length - 1];
                 $.terminal.iterate_formatting(line, function(data) {
                     var last_iteraction = data.index === line_length - last_char.length;
@@ -4052,7 +4045,19 @@
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
         length: function(string) {
-            return split_characters(text(string)).length;
+            return $.terminal.split_characters(text(string)).length;
+        },
+        // ---------------------------------------------------------------------
+        // :: split characters handling emoji, surogate pairs and combine chars
+        // ---------------------------------------------------------------------
+        split_characters: function split_characters(string) {
+            var result = [];
+            while (string.length) {
+                var chr = get_next_character(string);
+                string = string.substring(chr.length);
+                result.push(chr);
+            }
+            return result;
         },
         // ---------------------------------------------------------------------
         // :: return string where array items are in columns padded spaces

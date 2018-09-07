@@ -6,6 +6,7 @@
 * embed emoji regex by Mathias Bynens for better emoji detection
 * allow to execute extended commands including terminal and cmd methods from formatters
 * support for true colors (24bit) in unix formatting [#433](https://github.com/jcubic/jquery.terminal/issues/433)
+* expose split_characters in $.terminal namespace
 
 ### Bugfix
 * update typescript definition to new options
