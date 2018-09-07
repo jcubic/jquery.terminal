@@ -14,24 +14,7 @@
           beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest  */
 /* TODO: test caseSensitivity */
 
-function Storage() {
-    return new Proxy(this, {
-        get: function(target, name) {
-            if (typeof target[name] === 'function') {
-                return target[name].bind(target);
-            }
-            return target[name];
-        },
-        set: function(target, name, value) {
-            target[name] = value;
-            return true;
-        },
-        deleteProperty: function(target, name) {
-            delete target[name];
-            return true;
-        }
-    });
-}
+function Storage() {}
 Storage.prototype.getItem = function(name) {
     return this[name];
 };
