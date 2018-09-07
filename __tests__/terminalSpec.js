@@ -14,7 +14,24 @@
           beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest  */
 /* TODO: test caseSensitivity */
 
-function Storage() {}
+function Storage() {
+    return new Proxy(this, {
+        get: function(target, name) {
+            if (typeof target[name] === 'function') {
+                return target[name].bind(target);
+            }
+            return target[name];
+        },
+        set: function(target, name, value) {
+            target[name] = value;
+            return true;
+        },
+        deleteProperty: function(target, name) {
+            delete target[name];
+            return true;
+        }
+    });
+}
 Storage.prototype.getItem = function(name) {
     return this[name];
 };
@@ -22,9 +39,7 @@ Storage.prototype.setItem = function(name, value) {
     return this[name] = value;
 };
 Storage.prototype.removeItem = function(name) {
-    var value = this[name];
-    delete this[name];
-    return value;
+    return delete this[name];
 };
 Storage.prototype.clear = function() {
     var self = this;
@@ -108,7 +123,9 @@ global.window.Element.prototype.getClientRects = function() {
     }
     return [{width: self.width(), height: self.height()}];
 };
-window.localStorage = new Storage();
+var storage = new Storage();
+Object.defineProperty(window, 'localStorage', { value: storage });
+Object.defineProperty(global, 'localStorage', { value: storage });
 global.alert = window.alert = function(string) {
     console.log(string);
 };
@@ -1279,6 +1296,7 @@ describe('Terminal utils', function() {
             expect(history_commands('foo').length).toEqual(30);
         });
         it('should create commands in memory', function() {
+            window.localStorage.removeItem('foo_commands');
             var history = new $.terminal.History('foo', 10, true);
             for (var i = 0; i < 40; ++i) {
                 history.append('command ' + i);
@@ -1286,7 +1304,7 @@ describe('Terminal utils', function() {
             var data = history.data();
             expect(data instanceof Array).toBeTruthy();
             expect(data.length).toEqual(10);
-            expect(window.localStorage.getItem('foo_commands')).not.toBeDefined();
+            expect(window.localStorage.getItem('foo_commands')).toBeFalsy();
         });
         it('should clear localStorage', function() {
             var history = new $.terminal.History('foo');
@@ -2151,6 +2169,8 @@ describe('Terminal plugin', function() {
                     expect(char.length).toBeGreaterThan(1);
                 });
             });
+            it('should align tabs', function() {
+            });
             it('should move cursor on text with backspaces', function() {
                 var input = [
                     'Test 0.\n\n==============================\nState1.\t[    ]\b\b\b\b\b--\r',
@@ -2900,9 +2920,12 @@ describe('Terminal plugin', function() {
             enter(term, 'quux');
             enter(term, 'exception TOKEN');
             var last_div = term.find('.terminal-output > div:last-child');
-            expect(output(term)).toEqual([
+            var out = output(term);
+            expect(out[3]).toEqual('    Syntax Error in file "baz.php" at line 10');
+            expect(out[3].replace(/^(\s+)[^\s].*/, '$1').length).toEqual(4);
+            expect(out).toEqual([
                 '> quux',
-                'quux> exception TOKEN',
+                 'quux> exception TOKEN',
                 '[RPC] ' +exception,
                 '    Syntax Error in file "baz.php" at line 10'
             ]);

@@ -1158,6 +1158,7 @@
             self.width(settings.width);
         }
         var num_chars; // calculated by draw_prompt
+        var prompt_last_line;
         var prompt_len;
         var prompt_node = self.find('.prompt');
         var reverse_search = false;
@@ -1748,7 +1749,7 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: format end encode the string
+        // :: format and encode the string
         // ---------------------------------------------------------------------
         function format(string, before) {
             var encoded = $.terminal.encode(wrap(string), {
@@ -1813,7 +1814,7 @@
             // -----------------------------------------------------------------
             // :: Draw line with the cursor
             // -----------------------------------------------------------------
-            function draw_cursor_line(string, position) {
+            function draw_cursor_line(string, position, prompt) {
                 var len = length(string);
                 var c;
                 if (position === len) {
@@ -1827,13 +1828,18 @@
                     after.html(format(substring(string, 1), c));
                 } else {
                     var before_str = $.terminal.substring(string, 0, position);
-                    before.html(format(before_str));
+                    before.html(format(before_str, prompt));
                     c = substring(string, position, position + 1);
-                    cursor.html(format(c, before_str));
+                    var c_before = ((prompt || '') + before_str).replace(/^.*\t/, '');
+                    cursor.html(format(c, c_before));
                     if (position === len - 1) {
                         after.html('');
                     } else {
-                        before_str += c;
+                        if (c.match(/\t/)) {
+                            before_str = '';
+                        } else {
+                            before_str = before_str.replace(/^.*\t/, '') + c;
+                        }
                         after.html(format(substring(string, position + 1), before_str));
                     }
                 }
@@ -1842,9 +1848,9 @@
                 // looks nicer until she disable that inner animation)
                 restart_animation();
             }
-            function div(string) {
+            function div(string, before) {
                 return '<div role="presentation" aria-hidden="true">' +
-                    format(string) +
+                    format(string, before || '') +
                     '</div>';
             }
             // -----------------------------------------------------------------
@@ -1861,7 +1867,7 @@
             // -----------------------------------------------------------------
             function lines_before(lines) {
                 $.each(lines, function(i, line) {
-                    cursor_line.before(div(line));
+                    cursor_line.before(div(line, i === 0 ? prompt_last_line : ''));
                 });
             }
             // -----------------------------------------------------------------
@@ -1902,7 +1908,7 @@
                     if (first_len === 0 && array.length === 1) {
                         // skip empty line
                     } else if (pos < first_len) {
-                        draw_cursor_line(array[0], pos);
+                        draw_cursor_line(array[0], pos, prompt_last_line);
                         lines_after(array.slice(1));
                     } else if (pos === first_len) {
                         cursor_line.before(div(array[0]));
@@ -2016,17 +2022,19 @@
                 prompt = $.terminal.apply_formatters(prompt, {});
                 prompt = $.terminal.normalize(prompt);
                 prompt = crlf(prompt);
-                var lines = $.terminal.split_equal(
-                    $.terminal.encode(prompt, {
-                        tabs: settings.tabs
-                    }),
-                    num_chars
-                );
+                var lines = $.terminal.split_equal(prompt, num_chars);
                 var options = {
                     char_width: settings.char_width
                 };
-                var last_line = $.terminal.format(lines[lines.length - 1], options);
+                prompt_last_line = lines[lines.length - 1];
+                var encoded_last_line = $.terminal.encode(lines[lines.length - 1], {
+                    tabs: settings.tabs
+                });
+                var last_line = $.terminal.format(encoded_last_line, options);
                 var formatted = lines.slice(0, -1).map(function(line) {
+                    line = $.terminal.encode(prompt, {
+                        tabs: settings.tabs
+                    });
                     return '<span class="line">' +
                         $.terminal.format(line, options) +
                         '</span>';
@@ -3661,20 +3669,25 @@
             }, options);
             return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/ /g, '&nbsp;').split('\n').map(function(line) {
-                    var splitted = line.split(/(\t)/);
-                    return splitted.map(function(str, i) {
-                        if (str === '\t') {
-                            if (i === 0 || splitted[i - 1] === '\t') {
-                                return new Array(settings.tabs + 1).join('&nbsp;');
-                            } else {
-                                var before = splitted.slice(0, i).join('');
-                                var len = $.terminal.length(settings.before + before);
-                                var chars = settings.tabs - (len % settings.tabs);
-                                if (chars === 0) {
-                                    chars = 4;
+                    var splitted = line.split(/((?:\[\[[^\]]+\])?\t(?:\])?)/);
+                    return splitted.filter(Boolean).map(function(str, i) {
+                        if (str.match(/\t/)) {
+                            return str.replace(/\t([^\t]*)$/, function(_, end) {
+                                if (i === 0 || splitted[i - 1] === '\t' ||
+                                   (i === 1 && splitted[i - 1].match(/\[\[^\]]+\]$/))) {
+                                    var sp = new Array(settings.tabs + 1).join('&nbsp;');
+                                    return sp + end;
+                                } else {
+                                    var before = splitted.slice(i - 1, i).join('');
+                                    before = i <= 1 ? settings.before + before : before;
+                                    var len = $.terminal.length(before);
+                                    var chars = settings.tabs - (len % settings.tabs);
+                                    if (chars === 0) {
+                                        chars = 4;
+                                    }
+                                    return new Array(chars + 1).join('&nbsp;') + end;
                                 }
-                                return new Array(chars + 1).join('&nbsp;');
-                            }
+                            });
                         }
                         return str;
                     }).join('');
@@ -4761,8 +4774,7 @@
                 // TODO: do we need to call pause/resume or return promise?
                 self.pause(settings.softPause);
                 $.get(m[1], function(response) {
-                    var prefix = location.href.replace(/[^/]+$/, '');
-                    var file = m[1].replace(prefix, '');
+                    var file = m[1];
                     self.echo('[[b;white;]' + file + ']');
                     var code = response.split('\n');
                     var n = +m[2] - 1;
