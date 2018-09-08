@@ -4001,6 +4001,10 @@ describe('Terminal plugin', function() {
                     [
                         'foo\t\tbar\t\tbaz\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
                         'foo     bar     baz\nfoo     b       baz\nfoobar  ba      br'
+                    ],
+                    [
+                        '\u263a\ufe0foo\t\tbar\t\t\u263a\ufe0faz\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                        '\u263a\ufe0foo     bar     \u263a\ufe0faz\nfoo     b       baz\nfoobar  ba      br'
                     ]
                 ];
                 tests.forEach(function(test) {
