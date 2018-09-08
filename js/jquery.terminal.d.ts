@@ -88,12 +88,21 @@ declare namespace JQueryTerminal {
 
     type commandsCmdFunction = (command: string) => any;
     type echoValue = string | string[] | (() => string | string[]);
+    type errorArgument = string | (() => string) | PromiseLike<string>;
     type setStringFunction = (value: string) => void;
     type setEchoValueFunction = (value: TypeOrPromise<echoValue>) => void;
     type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => void) | string;
     type cmdPrompt = ((setPrompt: setStringFunction) => void) | string;
 
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
+
+    type pushOptions = {
+        infiniteLogin?: boolean;
+        prompt?: ExtendedPrompt;
+        login?: LoginArgument;
+        name?: string;
+        completion?: Completion;
+    }
 
     type historyFilterFunction = (command: string) => boolean;
     type historyFilter = null | RegExp | historyFilterFunction;
@@ -151,7 +160,7 @@ declare namespace JQueryTerminal {
 
     type PushPopCallback = (this: JQueryTerminal, before: JQueryTerminal.InterpreterItem, after: JQueryTerminal.InterpreterItem) => void;
 
-    type Lines = Array<{ string: any, options?: EchoOptions, index: number }>;
+    type Lines = Array<{ string: any, options: LineEchoOptions, index: number }>;
 
     type View = {
         focus: boolean;
@@ -172,6 +181,15 @@ declare namespace JQueryTerminal {
         doubleTab?: DoubleTabFunction;
     }
 
+    type LineEchoOptions = {
+        exec: boolean;
+        finalize: JQueryTerminal.EchoFinalizeFunction;
+        flush: boolean;
+        formatters: boolean;
+        keepWords: boolean;
+        raw: boolean;
+    }
+
     type EchoOptions = {
         flush?: boolean;
         raw?: boolean;
@@ -179,6 +197,7 @@ declare namespace JQueryTerminal {
         keepWords?: boolean;
         formatters?: boolean;
     }
+
 
     interface History<T = string> {
         new(name?: string, size?: number, memory?: boolean): History<T>;
@@ -335,7 +354,7 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     name(name: string): Cmd;
     name(): string;
     purge(): Cmd;
-    history(): History;
+    history(): JQueryTerminal.History<string>;
     delete(count: number): string;
     delete(count: number, stay: boolean): string;
     set(command: string, stay?: boolean, silent?: boolean): Cmd;
@@ -471,7 +490,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     resume(): JQueryTerminal;
     cols(): number;
     rows(): number;
-    history: JQueryTerminal.History<string>;
+    history(): JQueryTerminal.History<string>;
     history_state(toogle: boolean): JQueryTerminal;
     clear_history_state(): JQueryTerminal;
     next(selector?: JQuery.Selector): this;
@@ -480,7 +499,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     focus<TData>(eventData: TData,
         handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
     focus(toggle?: boolean): JQueryTerminal;
-    freeze(toogle: boolean): JQueryTerminal;
+    freeze(toogle?: boolean): JQueryTerminal;
     frozen(): boolean;
     enable(silent?: boolean): JQueryTerminal;
     disable(silent?: boolean): JQueryTerminal;
@@ -494,9 +513,9 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     get_position(): number;
     insert(str: string, stay?: boolean): JQueryTerminal;
     set_prompt(prompt: JQueryTerminal.ExtendedPrompt): JQueryTerminal;
-    get_prompt(): JQueryTerminal.ExtendedPrompt;
-    set_mask(toggle?: boolean): JQueryTerminal;
-    get_output(raw?: boolean): JQueryTerminal.Lines | string[];
+    get_prompt<T extends JQueryTerminal.ExtendedPrompt>(): T;
+    set_mask(toggle?: boolean | string): JQueryTerminal;
+    get_output<T extends JQueryTerminal.Lines | string[]>(raw?: boolean): T;
     resize<TData>(eventData: TData,
         handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
     resize(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
@@ -505,28 +524,28 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     flush(options?: { update?: boolean, scroll?: boolean }): JQueryTerminal;
     update(line: number, str: string, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     // options for remove_line is useless but that's how API look like
-    remove_line(line: number, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    remove_line(line: number): JQueryTerminal;
     last_index(): number;
     echo(arg: TypeOrPromise<JQueryTerminal.echoValue>, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
-    error(arg: TypeOrPromise<JQueryTerminal.echoValue>, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
-    exception(e: Error, label?: string): JQueryTerminal;
+    error(arg: JQueryTerminal.errorArgument, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    exception<T extends Error>(e: T, label?: string): JQueryTerminal;
     scroll<TData>(eventData: TData,
         handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
     scroll(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
     scroll(amount: number): JQueryTerminal;
     logout(local?: boolean): JQueryTerminal;
-    token(local?: boolean): string | void;
+    token<T extends string | void>(local?: boolean): T;
     set_token(token?: string, local?: boolean): JQueryTerminal;
-    get_token(local?: boolean): string | void;
-    login_name(local?: boolean): string | void;
+    get_token<T extends string | void>(local?: boolean): T;
+    login_name<T extends string | void>(local?: boolean): T;
     name(): string;
     prefix_name(local?: boolean): string;
     read(message: string, success?: (result: string) => void, cancel?: voidFunction): JQuery.Promise<string>;
-    push(interpreter: TypeOrArray<JQueryTerminal.Interpterer>, options?: JSONObject): JQueryTerminal;
+    push(interpreter: TypeOrArray<JQueryTerminal.Interpterer>, options?: JQueryTerminal.pushOptions): JQueryTerminal;
     pop(echoCommand?: string, silent?: boolean): JQueryTerminal;
-    option(options: TerminalOptions | string, value: any): any;
+    option(options: TerminalOptions | string, value?: any): any;
     invoke_key(shorcut: string): JQueryTerminal;
-    keymap(keymap?: JQueryTerminal.keymapObjectWithContext | string, fn?: JQueryTerminal.keymapFunctionWithContext): JQueryTerminal.keymapObjectWithContext | JQueryTerminal.keymapFunctionWithContext | void;
+    keymap<T extends JQueryTerminal.keymapObjectWithContext | JQueryTerminal.keymapFunctionWithContext | void>(keymap?: JQueryTerminal.keymapObjectWithContext | string, fn?: JQueryTerminal.keymapFunctionWithContext): T;
     level(): number;
     reset(): JQueryTerminal;
     purge(): JQueryTerminal;
@@ -534,5 +553,3 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     scroll_to_bottom(): JQueryTerminal;
     is_bottom(): boolean;
 }
-
-

@@ -7214,8 +7214,8 @@
             // -------------------------------------------------------------
             // :: convenience method for removing selected line
             // -------------------------------------------------------------
-            remove_line: function(line, options) {
-                return self.update(line, null, options);
+            remove_line: function(line) {
+                return self.update(line, null);
             },
             // -------------------------------------------------------------
             // :: return index of last line in case when you need to update
@@ -7317,6 +7317,12 @@
                     return self.echo(function() {
                         return format(message.call(self));
                     }, options);
+                }
+                if (message && message.then) {
+                    message.then(function(string) {
+                        self.echo(format(string));
+                    });
+                    return self;
                 }
                 return self.echo(format(message), options);
             },
