@@ -19,6 +19,7 @@
 * fix align tabs when inside cursor line and align with prompt
 * fix multiple 8-bit color codes in single ANSI escape
 * fix cursor position when on formatting that change color and background
+* allow to use login function in set_interpreter
 
 ## 1.21.0
 ### Security

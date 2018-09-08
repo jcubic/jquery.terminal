@@ -108,7 +108,7 @@ declare namespace JQueryTerminal {
         then: () => any;
     }
     type SetLoginCallback = (token: string) => (void | ObjectWithThenMethod);
-    type LoginFunction = (username: string, password: string, cb?: SetLoginCallback) => (void | ObjectWithThenMethod);
+    type LoginFunction = (username: string, password: string, cb: SetLoginCallback) => (void | ObjectWithThenMethod);
 
     type LoginArgument = string | boolean | JQueryTerminal.LoginFunction;
 
@@ -161,6 +161,7 @@ declare namespace JQueryTerminal {
         position: number;
         lines: Lines;
         interpreters?: Stack<InterpreterItem>;
+        history: string[];
     }
 
     type CompleteOptions = {
@@ -456,6 +457,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     save_state(command?: string, ignore_hash?: boolean, index?: number): JQueryTerminal;
     exec(command: string, silent?: boolean, defered?: JQuery.Deferred<void>): JQuery.Promise<void>;
     autologin(user: string, token: string, silent?: boolean): JQueryTerminal;
+    // there is success and error callbacks because we call this function from terminal and auth function can
+    // be created by user
     login(auth: JQueryTerminal.LoginFunction, infinite?: boolean, success?: () => void, error?: () => void): JQueryTerminal;
     settings(): TerminalOptions;
     before_cursor(word?: boolean): string;
