@@ -4005,6 +4005,10 @@ describe('Terminal plugin', function() {
                     [
                         '\u263a\ufe0foo\t\tbar\t\t\u263a\ufe0faz\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
                         '\u263a\ufe0foo     bar     \u263a\ufe0faz\nfoo     b       baz\nfoobar  ba      br'
+                    ],
+                    [
+                        '\u263a\ufe0foo\t\tbar\t\t\u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                        '\u263a\ufe0foo     bar     \u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo     b       baz\nfoobar  ba      br'
                     ]
                 ];
                 tests.forEach(function(test) {
