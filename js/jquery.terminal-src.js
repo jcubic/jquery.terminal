@@ -3584,7 +3584,7 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
-                var chars = $.terminal.split_characters(text(str));
+                var chars = $.terminal.split_characters(text(line));
                 var last_char = chars[chars.length - 1];
                 $.terminal.iterate_formatting(line, function(data) {
                     var last_iteraction = data.index === line_length - last_char.length;

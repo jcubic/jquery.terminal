@@ -10,8 +10,8 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&d6f8398388efe7c9deffa8d19bdb2bc7448c5a89)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&c5a29b90840554b401d156297b6bfaa3)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&070c27c2a5bbfcfef9735ba8e5882618e24e00cc)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&b936831f731c7a9fac179e5e16633d54)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -195,9 +195,15 @@ by default. To enable it, you need to use `anyLinks: true` option.
 
 In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was also disabled
 by default because attacker (depending on your application) could execute `terminal::echo` with raw option to enter
-any html. To enable this feature from this version you need to use `invokeMethods: true` option.
+any html and execute any javascript. To enable this feature from this version you need to use `invokeMethods: true`
+option.
 
-The features are safe to enable, if you don't save user input in DB and don't echo it back to different users.
+The features are safe to enable, if you don't save user input in DB and don't echo it back to different users
+(like with chat application). It's also safe if you escape formatting before you echo stuff.
+
+If you don't save user input in DB but allow to echo back what user types and have enabled `execHash` options,
+you may have reflected XSS vulnerability if you enable this features. If you escape formatting this options are
+also safe.
 
 ### Contributors
 
