@@ -5193,7 +5193,6 @@
                     });
                 }
             } else if (type === 'object') {
-                console.log(type);
                 finalize({
                     interpreter: make_object_interpreter(
                         user_intrp,
@@ -6672,7 +6671,7 @@
                 }
                 if (is_function(login)) {
                     self.login(login, true, overwrite_interpreter);
-                } else if (get_type(user_intrp) === 'string' && login ) {
+                } else if (get_type(user_intrp) === 'string' && login) {
                     self.login(
                         make_json_rpc_login(user_intrp, login),
                         true,
