@@ -195,9 +195,15 @@ by default. To enable it, you need to use `anyLinks: true` option.
 
 In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was also disabled
 by default because attacker (depending on your application) could execute `terminal::echo` with raw option to enter
-any html. To enable this feature from this version you need to use `invokeMethods: true` option.
+any html and execute any javascript. To enable this feature from this version you need to use `invokeMethods: true`
+option.
 
-The features are safe to enable, if you don't save user input in DB and don't echo it back to different users.
+The features are safe to enable, if you don't save user input in DB and don't echo it back to different users
+(like with chat application). It's also safe if you escape formatting before you echo stuff.
+
+If you don't save user input in DB but allow to echo back what user types and have enabled `execHash` options,
+you may have reflected XSS vulnerability if you enable this features. If you escape formatting this options are
+also safe.
 
 ### Contributors
 
