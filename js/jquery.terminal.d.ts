@@ -5,7 +5,7 @@ type anyFunction = (...args: any[]) => any;
 type StringOrNumber = string | number | null;
 
 type JSONObject = {
-    [key: string]: StringOrNumber | boolean | JSONObject;
+    [key: string]: TypeOrArray<StringOrNumber | boolean | JSONObject>
 }
 
 type mapFunction = (key: string, value: anyFunction) => any;
@@ -16,7 +16,7 @@ type TypeOrString<T> = T | string;
 type TypeOrPromise<T> = T | PromiseLike<T>;
 
 declare namespace JQueryTerminal {
-    type interpterFunction = (this: JQueryTerminal, command: string, term?: JQueryTerminal) => any;
+    type interpterFunction = (this: JQueryTerminal, command: string, term: JQueryTerminal) => any;
     type terminalObjectFunction = (...args: (string | number | RegExp)[]) => (void | PromiseLike<echoValue>);
     type Interpterer = string | interpterFunction | ObjectInterpreter;
     type ObjectInterpreter = {
@@ -80,9 +80,10 @@ declare namespace JQueryTerminal {
     type FormatterFunction = (str: string, options: JSONObject) => (string | [string, number]);
 
     type Formatter = [RegExp, FormaterRegExpReplacement] | [RegExp, FormaterRegExpReplacement, { loop: boolean }] | FormatterFunction;
+    type keymapFunctionOptionalArg = (event: JQueryKeyEventObject, original?: keymapFunction) => any;
 
-    type keymapFunction = (event: JQueryKeyEventObject, original?: keymapFunction) => any;
-    type keymapFunctionWithContext = (this: JQueryTerminal, event: JQueryKeyEventObject, original?: keymapFunction) => any;
+    type keymapFunction = (event: JQueryKeyEventObject, original: keymapFunction) => any;
+    type keymapFunctionWithContext = (this: JQueryTerminal, event: JQueryKeyEventObject, original: keymapFunctionOptionalArg) => any;
     type keymapObject = { [key: string]: keymapFunction };
     type keymapObjectWithContext = { [key: string]: keymapFunctionWithContext };
 
@@ -91,10 +92,10 @@ declare namespace JQueryTerminal {
     type errorArgument = string | (() => string) | PromiseLike<string>;
     type setStringFunction = (value: string) => void;
     type setEchoValueFunction = (value: TypeOrPromise<echoValue>) => void;
-    type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => void) | string;
+    type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => void) | string | null;
     type cmdPrompt = ((setPrompt: setStringFunction) => void) | string;
 
-    type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
+    type ExtendedPrompt =  ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
     type pushOptions = {
         infiniteLogin?: boolean;
@@ -109,10 +110,10 @@ declare namespace JQueryTerminal {
 
     type KeyEventHandler = (event?: JQueryKeyEventObject) => (boolean | void);
 
-    type KeyEventHandlerWithContext = (this: JQueryTerminal, event?: JQueryKeyEventObject) => (boolean | void);
+    type KeyEventHandlerWithContext = (this: JQueryTerminal, event: JQueryKeyEventObject) => (boolean | void);
 
-    type ExceptionHandler = (e?: Error | TerminalExeption, label?: string) => void;
-    type processRPCResponseFunction = (result: JSONObject, term?: JQueryTerminal) => void;
+    type ExceptionHandler = (this: JQueryTerminal, e: Error | TerminalExeption, label: string) => void;
+    type processRPCResponseFunction = (this: JQueryTerminal, result: JSONObject, term: JQueryTerminal) => void;
     type ObjectWithThenMethod = {
         then: () => any;
     }
@@ -127,14 +128,14 @@ declare namespace JQueryTerminal {
 
     type CompletionFunction = (this: JQueryTerminal, str: string, callback: SetComplationCallback) => void;
 
-    type EchoCommandCallback = (command?: string) => void;
+    type EchoCommandCallback = (command: string) => void;
 
     // all arguments are optional so you can use $.noop
-    type DoubleTabFunction = (this: JQueryTerminal, str?: string, matched?: string[], echoCmd?: (command?: string) => void) => (void | boolean);
+    type DoubleTabFunction = (this: JQueryTerminal, str: string, matched: string[], echoCmd: () => void) => (void | boolean);
 
-    type RPCErrorCallback = (this: JQueryTerminal, error: JSONObject) => void;
+    type RPCErrorCallback = (this: JQueryTerminal, error: any) => void;
 
-    type RequestResponseCallback = (this: JQueryTerminal, xhr: JQuery.jqXHR, json: JSONObject, term?: JQueryTerminal) => void;
+    type RequestResponseCallback = (this: JQueryTerminal, xhr: JQuery.jqXHR, json: any, term: JQueryTerminal) => void;
 
     type EchoFinalizeFunction = (div: JQuery) => void;
     type EventCallback = (this: JQueryTerminal, term: JQueryTerminal) => (void | boolean);
@@ -239,8 +240,8 @@ declare namespace JQueryTerminal {
         remove(i: number): void;
         set(item: T): void;
         front(): void | T;
-        map(fn: (item: T, index?: number) => any): any[];
-        forEach(fn: (item: T, index?: number) => any): void;
+        map(fn: (item: T, index: number) => any): any[];
+        forEach(fn: (item: T, index: number) => any): void;
         append(item: T): void;
     }
 }
@@ -258,7 +259,7 @@ interface JQuery<TElement = HTMLElement> {
 
 interface JQueryStatic {
     omap(object: { [key: string]: anyFunction }, fn: mapFunction): { [key: string]: anyFunction };
-    jrpc(url: string, method: string, params: any[], sucess?: (json: JSONObject, status?: string, jqxhr?: JQuery.jqXHR) => void, error?: (jqxhr?: JQuery.jqXHR, status?: string) => void): void;
+    jrpc(url: string, method: string, params: any[], sucess?: (json: JSONObject, status: string, jqxhr: JQuery.jqXHR) => void, error?: (jqxhr: JQuery.jqXHR, status: string) => void): void;
     terminal: JQueryTerminalStatic;
 }
 
@@ -332,7 +333,7 @@ type CmdOptions = {
     enabled?: boolean;
     history?: boolean | "memory";
     tabs?: number;
-    onPositionChange?: (position?: number, display_position?: number) => void;
+    onPositionChange?: (position: number, display_position: number) => void;
     clickTimeout?: number;
     holdTimeout?: number;
     holdRepeatTimeout?: number;
@@ -436,7 +437,7 @@ type TerminalOptions = {
     scrollOnEcho?: boolean;
     login?: JQueryTerminal.LoginArgument;
     outputLimit?: number;
-    onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status?: string, error?: string) => void;
+    onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status: string, error: string) => void;
     pasteImage?: boolean;
     scrollBottomOffset?: boolean;
     wordAutocomplete?: boolean;
@@ -462,7 +463,7 @@ type TerminalOptions = {
     keypress?: JQueryTerminal.KeyEventHandlerWithContext;
     keydown?: JQueryTerminal.KeyEventHandlerWithContext;
     onAfterRedraw?: JQueryTerminal.EventCallback;
-    onEchoCommand?: (this: JQueryTerminal, div: JQuery, command?: string) => void;
+    onEchoCommand?: (this: JQueryTerminal, div: JQuery, command: string) => void;
     onFlush?: JQueryTerminal.EventCallback;
     strings?: JQueryTerminal.strings;
 }

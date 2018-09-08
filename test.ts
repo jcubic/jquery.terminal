@@ -41,7 +41,254 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
 // -----------------------------------------------------------------------------
 // :: Options
 // -----------------------------------------------------------------------------
-
+(function() {
+    // -------------------------------------------------------------------------
+    // :: prompt
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        prompt: function() {
+            return Promise.resolve(">>> ");
+        }
+    });
+    $('.term').terminal($.noop, {
+        prompt: ">>> "
+    });
+    $('.term').terminal($.noop, {
+        prompt: function(cb) {
+            cb(">>> ");
+            console.log(this.get_command());
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: keymap
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        keymap: {
+            'CTRL+C': function(e, original) {
+                console.log(e.target);
+                original(e);
+            }
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: exceptionHandler
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        exceptionHandler: function(e, label) {
+            this.error(e.message);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: processRPCResponse
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        processRPCResponse: function(data) {
+            data.result = 10;
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: greetings
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        greetings: "hello"
+    });
+    $('.term').terminal($.noop, {
+        greetings: null
+    });
+    $('.term').terminal($.noop, {
+        greetings: function(cb) {
+            cb("hello");
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: scrollObject
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        scrollObject: "html"
+    });
+    $('.term').terminal($.noop, {
+        scrollObject: $("body")
+    });
+    $('.term').terminal($.noop, {
+        scrollObject: document.body
+    });
+    // -------------------------------------------------------------------------
+    // :: historyFilter
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        historyFilter: /^ /
+    });
+    $('.term').terminal($.noop, {
+        historyFilter: function(command) {
+            return !!command.match(/^ /);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: login
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        login: true
+    });
+    $('.term').terminal($.noop, {
+        login: function(username, password) {
+            return Promise.resolve("TOKEN");
+        }
+    });
+    $('.term').terminal($.noop, {
+        login: function(username, password, cb) {
+            cb("TOKEN");
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: onAjaxError
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        onAjaxError: function(xhr, status, error) {
+            xhr.getAllResponseHeaders();
+            status.charCodeAt(0);
+            error.charCodeAt(0);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: request
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        request: function(xhr, json, term) {
+            term.echo("foo");
+        }
+    });
+    $('.term').terminal($.noop, {
+        request: function(xhr, data) {
+            data.params.unshift("token");
+            this.echo(JSON.stringify(data));
+            var term = this;
+            xhr.then(function(value) {
+                term.echo(value);
+            });
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: response
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        response: function(xhr, data) {
+            data.result = 10;
+            this.echo(JSON.stringify(data));
+            var term = this;
+            xhr.then(function(value) {
+                term.echo(value);
+            });
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: onRPCError
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        onRPCError: function(error) {
+            this.echo(error.error.message);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: doubleTab
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        doubleTab: function(str, matched, echo_Command) {
+            echo_Command();
+            this.echo(matched.slice(1).concat([str]));
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: completion
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        completion: ["foo", "bar", "baz"]
+    });
+    $('.term').terminal($.noop, {
+        completion: function(str, cb) {
+            str.charCodeAt(0);
+            cb(["foo", "bar", "baz"]);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: Simple events
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        onInit: function(term) {
+            this.echo('event');
+        }
+    });
+    $('.term').terminal($.noop, {
+        onClear: function(term) {
+            this.echo('event');
+        }
+    });
+    $('.term').terminal($.noop, {
+        onBlur: function(term) {
+            this.echo('event');
+        }
+    });
+    $('.term').terminal($.noop, {
+        onFocus: function(term) {
+            this.echo('event');
+        }
+    });
+    $('.term').terminal($.noop, {
+        onExit: function(term) {
+            this.echo('event');
+        }
+    });
+    $('.term').terminal($.noop, {
+        onAfterRedraw: function(term) {
+            this.echo('event');
+        }
+    });
+    $('.term').terminal($.noop, {
+        onFlush: function(term) {
+            this.echo('event');
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: onPush
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        onPush: function(before, after) {
+            before.interpreter.call(this, "init", this);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: onPush
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        onPop: function(before, after) {
+            before.interpreter.call(this, "init", this);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: keypress
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        keypress: function(e) {
+            this.echo(e.key);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: keydown
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        keydown: function(e) {
+            this.echo(e.key);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: onEchoCommand
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        onEchoCommand: function(div, command) {
+            div.css('color', 'red');
+            this.echo(command.charCodeAt(0).toString());
+        }
+    });
+});
 
 // -----------------------------------------------------------------------------
 // :: Methods
@@ -231,10 +478,14 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
     // -------------------------------------------------------------------------
     // :: set_prompt
     // -------------------------------------------------------------------------
-    test_type<JQueryTerminal>(term.set_prompt("foo"));
+    test_type<JQueryTerminal>(term.set_prompt(">>> "));
     term.set_prompt(function(cb) {
-        cb("foo");
+        cb(">>> ");
         this.get_command();
+    });
+    term.set_prompt(function() {
+        this.get_command();
+        return Promise.resolve(">>> ");
     });
     // -------------------------------------------------------------------------
     // :: get_command
@@ -273,8 +524,8 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
     // -------------------------------------------------------------------------
     // :: update
     // -------------------------------------------------------------------------
-    test_type<JQueryTerminal>(term.update(10, "foo"));
-    term.update(10, "foo", {
+    test_type<JQueryTerminal>(term.update(10, ">>>"));
+    term.update(10, ">>>", {
         finalize: function(div) {
             div.css('color', 'red');
         }
