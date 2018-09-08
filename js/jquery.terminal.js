@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 08 Sep 2018 06:29:22 +0000
+ * Date: Sat, 08 Sep 2018 06:42:29 +0000
  */
 
 /* TODO:
@@ -2905,7 +2905,7 @@
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
-            if (len !== bare.length) {
+            if (len !== $.terminal.length(bare)) {
                 return char_width_prop(len, options);
             }
         }
@@ -2915,10 +2915,11 @@
     function wide_characters(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
-            if ($.terminal.split_characters(bare).length === 1) {
+            var chars = $.terminal.split_characters(bare);
+            if (chars.length === 1) {
                 return text;
             }
-            var specs = bare.split('').map(function(chr) {
+            var specs = chars.map(function(chr) {
                 return {len: strlen(chr), chr: chr};
             }).reduce(function(arr, spec) {
                 var last = arr[arr.length - 1];
@@ -2949,10 +2950,10 @@
                     return spec.str;
                 }
                 var style = char_width_prop(spec.sum, options);
-                if (style.length) {
-                    return '<span style="' + style + '">' + spec.str + '</span>';
-                } else {
+                if (spec.sum === chars.length || !style.length) {
                     return '<span>' + spec.str + '</span>';
+                } else {
+                    return '<span style="' + style + '">' + spec.str + '</span>';
                 }
             }).join('');
         }
@@ -3169,7 +3170,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 08 Sep 2018 06:29:22 +0000',
+        date: 'Sat, 08 Sep 2018 06:42:29 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3563,7 +3564,6 @@
                 // return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting so we need to escape
                 // those using html entity equvalent
-                
                 return '[[' + format + semicolons + safe(text) + ']' + text + ']';
             });
         },
