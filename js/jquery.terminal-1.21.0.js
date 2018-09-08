@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 07 Sep 2018 12:49:42 +0000
+ * Date: Sat, 08 Sep 2018 06:29:22 +0000
  */
 
 /* TODO:
@@ -3169,7 +3169,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 07 Sep 2018 12:49:42 +0000',
+        date: 'Sat, 08 Sep 2018 06:29:22 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3541,6 +3541,11 @@
                 if (text === '') {
                     return '';
                 }
+                function safe(string) {
+                    return string.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n')
+                        .replace(/&nbsp;/g, ' ');
+                }
+                format = safe(format);
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
                 if (semicolons >= 4) {
@@ -3558,9 +3563,8 @@
                 // return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting so we need to escape
                 // those using html entity equvalent
-                var safe = text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n').
-                    replace(/&nbsp;/g, ' ');
-                return '[[' + format + semicolons + safe + ']' + text + ']';
+                
+                return '[[' + format + semicolons + safe(text) + ']' + text + ']';
             });
         },
         // ---------------------------------------------------------------------

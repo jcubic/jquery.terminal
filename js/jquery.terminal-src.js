@@ -3541,6 +3541,11 @@
                 if (text === '') {
                     return '';
                 }
+                function safe(string) {
+                    return string.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n')
+                        .replace(/&nbsp;/g, ' ');
+                }
+                format = safe(format);
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
                 if (semicolons >= 4) {
@@ -3558,9 +3563,7 @@
                 // return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting so we need to escape
                 // those using html entity equvalent
-                var safe = text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n').
-                    replace(/&nbsp;/g, ' ');
-                return '[[' + format + semicolons + safe + ']' + text + ']';
+                return '[[' + format + semicolons + safe(text) + ']' + text + ']';
             });
         },
         // ---------------------------------------------------------------------
