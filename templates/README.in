@@ -187,6 +187,18 @@ $('#term_demo').terminal('service.php', {login: true});
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [full documentation](http://terminal.jcubic.pl/api_reference.php).
 
+### Security
+
+Because of security in version 1.20.0 links with protocols different then ftp or http(s) (it was possible to enter
+javascript protocol, that could lead to XSS if author of hte app echo user input and save it in DB) was turn off
+by default. To enable it, you need to use `anyLinks: true` option.
+
+In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was also disabled
+by default because attacker (depending on your application) could execute `terminal::echo` with raw option to enter
+any html. To enable this feature from this version you need to use `invokeMethods: true` option.
+
+The features are safe to enable, if you don't save user input in DB and don't echo it back to different users.
+
 ### Contributors
 
 If you want to contrubite read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here are project contributors:

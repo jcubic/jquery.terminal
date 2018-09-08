@@ -10,7 +10,7 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&848398f2680959d572a3b271ef5d433120667625)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&d6f8398388efe7c9deffa8d19bdb2bc7448c5a89)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&c5a29b90840554b401d156297b6bfaa3)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
@@ -186,6 +186,18 @@ $('#term_demo').terminal('service.php', {login: true});
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [full documentation](http://terminal.jcubic.pl/api_reference.php).
+
+### Security
+
+Because of security in version 1.20.0 links with protocols different then ftp or http(s) (it was possible to enter
+javascript protocol, that could lead to XSS if author of hte app echo user input and save it in DB) was turn off
+by default. To enable it, you need to use `anyLinks: true` option.
+
+In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was also disabled
+by default because attacker (depending on your application) could execute `terminal::echo` with raw option to enter
+any html. To enable this feature from this version you need to use `invokeMethods: true` option.
+
+The features are safe to enable, if you don't save user input in DB and don't echo it back to different users.
 
 ### Contributors
 
