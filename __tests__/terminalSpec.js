@@ -3988,6 +3988,26 @@ describe('Terminal plugin', function() {
                 term.clear().echo(input);
                 expect(output().join('\n')).toEqual(input);
             });
+            it('should align tabs', function() {
+                var tests = [
+                    [
+                        'foobar\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr',
+                        'foobar  bar baz\nf       b   baz\nfa      ba  br'
+                    ],
+                    [
+                        'foo\t\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr',
+                        'foo     bar baz\nf       b   baz\nfa      ba  br'
+                    ],
+                    [
+                        'foo\t\tbar\t\tbaz\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                        'foo     bar     baz\nfoo     b       baz\nfoobar  ba      br'
+                    ]
+                ];
+                tests.forEach(function(test) {
+                    term.clear().echo(test[0]);
+                    expect(output(term).join('\n')).toEqual(test[1]);
+                });
+            });
             describe('extended commands', function() {
                 var term = $('<div/>').terminal($.noop, {
                     checkArity: false,
