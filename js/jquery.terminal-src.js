@@ -2049,7 +2049,7 @@
                         set(prompt);
                         break;
                     case 'function':
-                        prompt(set);
+                        prompt.call(self, set);
                         break;
                 }
             };
@@ -2154,9 +2154,10 @@
             },
             keymap: function(new_keymap, value) {
                 function wrap(key, fn) {
+                    var original = default_keymap[key].bind(self);
                     return function(e) {
                         // new keymap function will get default as 2nd argument
-                        return fn(e, default_keymap[key]);
+                        return fn.call(self, e, original);
                     };
                 }
                 if (typeof new_keymap === 'undefined') {
