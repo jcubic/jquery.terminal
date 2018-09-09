@@ -2154,7 +2154,10 @@
             },
             keymap: function(new_keymap, value) {
                 function wrap(key, fn) {
-                    var original = default_keymap[key].bind(self);
+                    var original = default_keymap[key];
+                    if (is_function(original)) {
+                        original = original.bind(self);
+                    }
                     return function(e) {
                         // new keymap function will get default as 2nd argument
                         return fn.call(self, e, original);
