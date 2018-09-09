@@ -4627,6 +4627,7 @@
         linksNoFollow: false,
         processRPCResponse: null,
         completionEscape: true,
+        onCommandChange: null,
         convertLinks: true,
         extra: {},
         tabs: 4,

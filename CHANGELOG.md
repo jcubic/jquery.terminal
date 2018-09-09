@@ -2,6 +2,7 @@
 ### Bugfix
 * fix broken jquery.terminal.js because after last change there was not build
 * fix invocation in xml_formatting and dterm
+* add onCommandChange to defaults file so it's picked up by dterm (update d.ts)
 
 ## 1.22.0
 ### Features

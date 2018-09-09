@@ -77,7 +77,17 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
     // -------------------------------------------------------------------------
     $('.term').terminal($.noop, {
         exceptionHandler: function(e, label) {
+            test_type<JQueryTerminal>(this);
             this.error(e.message);
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: onCommandChange
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        onCommandChange: function(command) {
+            test_type<JQueryTerminal>(this);
+            test_type<string>(command);
         }
     });
     // -------------------------------------------------------------------------

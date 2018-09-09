@@ -399,7 +399,7 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
 }
 type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabled" | "maskCHar" |
     "wrap" | "checkArity" | "invokeMethods" | "anyLinks" | "raw" |  "keymap" | "exceptionHandler" |
-    "pauseEvents" | "softPause" | "memory" | "cancelableAjax" | "processArguments" |
+    "pauseEvents" | "softPause" | "memory" | "cancelableAjax" | "processArguments" | "onCommandChange" |
     "linksNoReferrer" | "javascriptLinks" | "processRPCResponse" | "completionEscape" | "convertLinks" |
     "unixFormattingEscapeBrackets" |  "extra" | "tabs" | "historySize" | "greetings" | "scrollObject" |
     "historyState" | "importHistory" | "historyFilter" | "echoCommand" | "scrollOnEcho" | "login" |
@@ -430,6 +430,7 @@ type TerminalOptions = {
     memory?: boolean;
     cancelableAjax?: boolean;
     processArguments?: boolean;
+    onCommandChange?: (this: JQueryTerminal, command: string) => void;
     linksNoReferrer?: boolean;
     javascriptLinks?: boolean;
     processRPCResponse?: null | JQueryTerminal.processRPCResponseFunction;
