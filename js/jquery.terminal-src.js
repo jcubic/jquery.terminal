@@ -3395,7 +3395,8 @@
             var prev_space;
             var length = 0;
             for (var i = 0; i < string.length; i++) {
-                match = string.substring(i).match(format_start_re);
+                var substring = string.substring(i);
+                match = substring.match(format_start_re);
                 if (match) {
                     formatting = match[1];
                     in_text = false;
@@ -3466,6 +3467,7 @@
                         }
                         if (ret.index !== undefined) {
                             i = ret.index;
+                            continue;
                         }
                     }
                 } else if (i === string.length - 1) {
@@ -3477,6 +3479,11 @@
                         text: in_text,
                         space: space
                     });
+                }
+                // handle emoji, suroggate pairs and combine characters
+                var char = get_next_character(substring);
+                if (char.length > 1) {
+                    i += char.length - 1;
                 }
             }
         },
@@ -3520,14 +3527,6 @@
                     if (data.formatting) {
                         end = prev_index + 1;
                     }
-                }
-                var substring = string.substring(data.index);
-                var chr = get_next_character(substring);
-                // handle emoji, suroggate pairs and combine characters
-                if (chr.length > 1) {
-                    return {
-                        index: data.index + chr.length - 1
-                    };
                 }
             });
             if (start_index && !start) {
@@ -3652,14 +3651,6 @@
                         result.push(output);
                         // modify loop by returing new data
                         return {index: new_index, length: 0, space: -1};
-                    }
-                    substring = str.substring(data.index);
-                    chr = get_next_character(substring);
-                    // handle emoji, suroggate pairs and combine characters
-                    if (chr && chr.length > 1) {
-                        return {
-                            index: data.index + chr.length - 1
-                        };
                     }
                 });
             }
