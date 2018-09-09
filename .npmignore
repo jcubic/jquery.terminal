@@ -4,6 +4,7 @@ scripts
 www
 bower.*
 package.in
+test.ts
 Makefile*
 manifest
 README.in
