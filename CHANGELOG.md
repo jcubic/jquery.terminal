@@ -7,9 +7,10 @@
 * allow to execute extended commands including terminal and cmd methods from formatters
 * support for true colors (24bit) in unix formatting [#433](https://github.com/jcubic/jquery.terminal/issues/433)
 * expose split_characters in $.terminal namespace
+* cmd commands option function to have cmd as this context
 
 ### Bugfix
-* update typescript definition to new options
+* update typescript definition to new options + minor tweaks to the api
 * fix cursor for PrismJS punctuation class
 * fix emoji that contain U+FE0F character at the end [#424](https://github.com/jcubic/jquery.terminal/issues/424)
 * fix for combine characters

@@ -1261,7 +1261,7 @@
 
                 self.set('');
                 if (settings.commands) {
-                    settings.commands(tmp);
+                    settings.commands.call(self, tmp);
                 }
                 if (is_function(prompt)) {
                     draw_prompt();
@@ -2072,7 +2072,7 @@
         }
         function fire_change_command() {
             if (is_function(settings.onCommandChange)) {
-                settings.onCommandChange(command);
+                settings.onCommandChange.call(self, command);
             }
         }
         // ---------------------------------------------------------------------
@@ -2461,7 +2461,7 @@
             clip.off('input', paste);
             var key = get_key(e);
             if (is_function(settings.keydown)) {
-                result = settings.keydown(e);
+                result = settings.keydown.call(self, e);
                 if (result !== undefined) {
                     //prevent_keypress = true;
                     if (!result) {
@@ -2541,7 +2541,7 @@
                 return;
             }
             if (is_function(settings.keypress)) {
-                result = settings.keypress(e);
+                result = settings.keypress.call(self, e);
                 if (result !== undefined) {
                     if (!result) {
                         skip_insert = true;
