@@ -87,7 +87,7 @@ declare namespace JQueryTerminal {
     type keymapObject = { [key: string]: keymapFunction };
     type keymapObjectWithContext = { [key: string]: keymapFunctionWithContext };
 
-    type commandsCmdFunction = (command: string) => any;
+    type commandsCmdFunction = (this: Cmd, command: string) => any;
     type echoValue = string | string[] | (() => string | string[]);
     type errorArgument = string | (() => string) | PromiseLike<string>;
     type setStringFunction = (value: string) => void;
@@ -108,9 +108,7 @@ declare namespace JQueryTerminal {
     type historyFilterFunction = (command: string) => boolean;
     type historyFilter = null | RegExp | historyFilterFunction;
 
-    type KeyEventHandler = (event?: JQueryKeyEventObject) => (boolean | void);
-
-    type KeyEventHandlerWithContext = (this: JQueryTerminal, event: JQueryKeyEventObject) => (boolean | void);
+    type KeyEventHandler<T = JQueryTerminal> = (this: T, event: JQueryKeyEventObject) => (boolean | void);
 
     type ExceptionHandler = (this: JQueryTerminal, e: Error | TerminalExeption, label: string) => void;
     type processRPCResponseFunction = (this: JQueryTerminal, result: JSONObject, term: JQueryTerminal) => void;
@@ -152,8 +150,8 @@ declare namespace JQueryTerminal {
         history?: boolean;
         // all other iterpreters are converted to function
         interpreter: JQueryTerminal.interpterFunction;
-        keydown?: KeyEventHandlerWithContext;
-        keypress?: KeyEventHandlerWithContext;
+        keydown?: KeyEventHandler<JQueryTerminal>;
+        keypress?: KeyEventHandler<JQueryTerminal>;
         mask?: boolean | string;
         infiniteLogin?: boolean;
         prompt: ExtendedPrompt;
@@ -341,10 +339,10 @@ type CmdOptions = {
     historyFilter?: JQueryTerminal.historyFilter;
     commands?: JQueryTerminal.commandsCmdFunction;
     char_width?: number;
-    onCommandChange?: (command: string) => void;
+    onCommandChange?: (this: Cmd, command: string) => void;
     name?: string;
-    keypress?: JQueryTerminal.KeyEventHandler;
-    keydown?: JQueryTerminal.KeyEventHandler;
+    keypress?: JQueryTerminal.KeyEventHandler<Cmd>;
+    keydown?: JQueryTerminal.KeyEventHandler<Cmd>;
 }
 
 // we copy methods from jQuery to overwrite it
@@ -460,8 +458,8 @@ type TerminalOptions = {
     onTerminalChange?: JQueryTerminal.EventCallback;
     onPush?: JQueryTerminal.PushPopCallback;
     onPop?: JQueryTerminal.PushPopCallback;
-    keypress?: JQueryTerminal.KeyEventHandlerWithContext;
-    keydown?: JQueryTerminal.KeyEventHandlerWithContext;
+    keypress?: JQueryTerminal.KeyEventHandler;
+    keydown?: JQueryTerminal.KeyEventHandler;
     onAfterRedraw?: JQueryTerminal.EventCallback;
     onEchoCommand?: (this: JQueryTerminal, div: JQuery, command: string) => void;
     onFlush?: JQueryTerminal.EventCallback;
