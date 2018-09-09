@@ -1,6 +1,7 @@
 ## 1.22.2
 ### Bugfix
 * persistent function prompt don't render on enable and on init
+* fix duplicated line when prompt have more then one line
 
 ## 1.22.1
 ### Bugfix

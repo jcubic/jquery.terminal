@@ -2032,7 +2032,7 @@
                 });
                 var last_line = $.terminal.format(encoded_last_line, options);
                 var formatted = lines.slice(0, -1).map(function(line) {
-                    line = $.terminal.encode(prompt, {
+                    line = $.terminal.encode(line, {
                         tabs: settings.tabs
                     });
                     return '<span class="line">' +
