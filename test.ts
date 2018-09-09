@@ -888,6 +888,7 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
         cb(">>> ");
     }));
     test_type<Cmd>(cmd.prompt(">>> "));
+    test_type<string>(cmd.prompt(true));
     // -------------------------------------------------------------------------
     // :: position
     // -------------------------------------------------------------------------

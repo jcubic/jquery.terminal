@@ -1,3 +1,7 @@
+## 1.22.2
+### Bugfix
+* persistent function prompt don't render on enable and on init
+
 ## 1.22.1
 ### Bugfix
 * fix broken jquery.terminal.js because after last change there was not build

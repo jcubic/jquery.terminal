@@ -1158,6 +1158,7 @@
             self.width(settings.width);
         }
         var num_chars; // calculated by draw_prompt
+        var last_rendered_prompt;
         var prompt_last_line;
         var prompt_len;
         var prompt_node = self.find('.prompt');
@@ -2020,6 +2021,7 @@
                 prompt = $.terminal.apply_formatters(prompt, {});
                 prompt = $.terminal.normalize(prompt);
                 prompt = crlf(prompt);
+                last_rendered_prompt = prompt;
                 var lines = $.terminal.split_equal(prompt, num_chars);
                 var options = {
                     char_width: settings.char_width
@@ -2226,7 +2228,9 @@
                 return self;
             },
             prompt: function(user_prompt) {
-                if (user_prompt === undefined) {
+                if (user_prompt === true) {
+                    return last_rendered_prompt;
+                } else if (user_prompt === undefined) {
                     return prompt;
                 } else {
                     if (typeof user_prompt === 'string' ||
@@ -2331,7 +2335,7 @@
                 draw_prompt();
                 return self;
             },
-            enable: function() {
+            enable: function(silient) {
                 if (!enabled) {
                     enabled = true;
                     self.addClass('enabled');
@@ -2341,7 +2345,9 @@
                         // firefox throw NS_ERROR_FAILURE ignore
                     }
                     animation(true);
-                    draw_prompt();
+                    if (!silient) {
+                        draw_prompt();
+                    }
                     fix_textarea();
                 }
                 mobile_focus();
@@ -5276,24 +5282,6 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: validating if object is a string or a function, call that function
-        // :: and display the exeption if any
-        // ---------------------------------------------------------------------
-        function validate(label, object) {
-            try {
-                if (is_function(object)) {
-                    object.call(self, $.noop, self);
-                } else if (typeof object !== 'string') {
-                    var msg = label + ' must be string or function';
-                    throw msg;
-                }
-            } catch (e) {
-                display_exception(e, label.toUpperCase());
-                return false;
-            }
-            return true;
-        }
-        // ---------------------------------------------------------------------
         // :: Draw line - can have line breaks and be longer than the width of
         // :: the terminal, there are 2 options raw and finalize
         // :: raw - will not encode the string and finalize if a function that
@@ -5582,7 +5570,7 @@
             if (typeof command === 'undefined') {
                 command = self.get_command();
             }
-            var prompt = command_line.prompt();
+            var prompt = command_line.prompt(true);
             var mask = command_line.mask();
             switch (typeof mask) {
                 case 'string':
@@ -5866,19 +5854,21 @@
             }
             var login = self.login_name(true);
             command_line.name(name + (login ? '_' + login : ''));
-            if (is_function(interpreter.prompt)) {
-                command_line.prompt(function(callback) {
-                    var ret = interpreter.prompt.call(self, callback, self);
-                    if (ret && is_function(ret.then)) {
-                        ret.then(function(string) {
-                            if (typeof string === 'string') {
-                                callback(string);
-                            }
-                        });
-                    }
-                });
-            } else {
-                command_line.prompt(interpreter.prompt);
+            if (interpreter.prompt !== command_line.prompt()) {
+                if (is_function(interpreter.prompt)) {
+                    command_line.prompt(function(callback) {
+                        var ret = interpreter.prompt.call(self, callback, self);
+                        if (ret && is_function(ret.then)) {
+                            ret.then(function(string) {
+                                if (typeof string === 'string') {
+                                    callback(string);
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    command_line.prompt(interpreter.prompt);
+                }
             }
             if (typeof interpreter.history !== 'undefined') {
                 self.history().toggle(interpreter.history);
@@ -6724,7 +6714,7 @@
                 cmd_ready(function ready() {
                     paused = false;
                     if (enabled && terminals.front() === self) {
-                        command_line.enable();
+                        command_line.enable(true);
                     }
                     command_line.find('.prompt').visible();
                     var original = delayed_commands;
@@ -6913,7 +6903,7 @@
                         if (!silent && ret === undefined || silent) {
                             enabled = true;
                             if (!self.paused()) {
-                                command_line.enable();
+                                command_line.enable(true);
                             }
                         }
                     });
@@ -7031,16 +7021,14 @@
             // -------------------------------------------------------------
             set_prompt: function(prompt) {
                 when_ready(function ready() {
-                    if (validate('prompt', prompt)) {
-                        if (is_function(prompt)) {
-                            command_line.prompt(function(callback) {
-                                prompt(callback, self);
-                            });
-                        } else {
-                            command_line.prompt(prompt);
-                        }
-                        interpreters.top().prompt = prompt;
+                    if (is_function(prompt)) {
+                        command_line.prompt(function(callback) {
+                            prompt.call(self, callback, self);
+                        });
+                    } else {
+                        command_line.prompt(prompt);
                     }
+                    interpreters.top().prompt = prompt;
                 });
                 return self;
             },
