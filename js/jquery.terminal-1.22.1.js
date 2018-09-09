@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.22.0
+ *           \/              /____/                              version 1.22.1
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 09 Sep 2018 09:18:00 +0000
+ * Date: Sun, 09 Sep 2018 10:50:19 +0000
  */
 
 /* TODO:
@@ -2154,7 +2154,10 @@
             },
             keymap: function(new_keymap, value) {
                 function wrap(key, fn) {
-                    var original = default_keymap[key].bind(self);
+                    var original = default_keymap[key];
+                    if (is_function(original)) {
+                        original = original.bind(self);
+                    }
                     return function(e) {
                         // new keymap function will get default as 2nd argument
                         return fn.call(self, e, original);
@@ -3170,8 +3173,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '1.22.0',
-        date: 'Sun, 09 Sep 2018 09:18:00 +0000',
+        version: '1.22.1',
+        date: 'Sun, 09 Sep 2018 10:50:19 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

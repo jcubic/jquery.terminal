@@ -107,4 +107,4 @@
         self.terminal = terminal;
         return self;
     };
-})(jQuery);
+});

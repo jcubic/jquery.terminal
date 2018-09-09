@@ -1,3 +1,7 @@
+## 1.22.1
+### Bugfix
+* fix broken jquery.terminal.js because after last change there was not build
+
 ## 1.22.0
 ### Features
 * add sourcemaps to min js and css files [#430](https://github.com/jcubic/jquery.terminal/issues/430)
