@@ -1,6 +1,7 @@
 ## 1.22.1
 ### Bugfix
 * fix broken jquery.terminal.js because after last change there was not build
+* fix invocation in xml_formatting and dterm
 
 ## 1.22.0
 ### Features

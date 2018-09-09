@@ -82,4 +82,4 @@
         return output.join('');
     }
     $.terminal.new_formatter(xml_formatter);
-})(jQuery);
+});
