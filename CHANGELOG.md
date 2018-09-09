@@ -1,3 +1,27 @@
+## 1.22.0
+### Features
+* add sourcemaps to min js and css files [#430](https://github.com/jcubic/jquery.terminal/issues/430)
+* new option holdRepeatTimeout - which is number of the delay between keypress repeat when holding key
+* selection to change background color based on formatting like in Bash
+* embed emoji regex by Mathias Bynens for better emoji detection
+* allow to execute extended commands including terminal and cmd methods from formatters
+* support for true colors (24bit) in unix formatting [#433](https://github.com/jcubic/jquery.terminal/issues/433)
+* expose split_characters in $.terminal namespace
+* cmd commands option functions to have cmd as this context
+
+### Bugfix
+* update typescript definition to new options + minor tweaks to the api
+* fix cursor for PrismJS punctuation class
+* fix emoji that contain U+FE0F character at the end [#424](https://github.com/jcubic/jquery.terminal/issues/424)
+* fix for combine characters
+* fix typescript definition for prompt and greetings [#425](https://github.com/jcubic/jquery.terminal/issues/425)
+* fix typo in holdTimeout option name
+* fix wrapping when command have emoji and combine characters
+* fix align tabs when inside cursor line and align with prompt
+* fix multiple 8-bit color codes in single ANSI escape
+* fix cursor position when on formatting that change color and background
+* allow to use login function in set_interpreter
+
 ## 1.21.0
 ### Security
 * add option invokeMethods that disable by default executing terminal and cmd methods from echo

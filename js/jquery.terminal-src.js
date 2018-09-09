@@ -32,6 +32,9 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
+ * emoji regex v7.0.1 by Mathias Bynens
+ * MIT license
+ *
  * Date: {{DATE}}
  */
 
@@ -227,19 +230,6 @@
         }
     }
     /* eslint-enable */
-    /* commented out so it don't affect coverage
-    // -----------------------------------------------------------------------
-    Function.prototype.monitor = function() {
-        var name = this.name;
-        var fn = this;
-        return function(...args) {
-            console.log(name + '(' + JSON.stringify(args).replace(/^\[|\]$/g, '') + ')');
-            var ret = fn.apply(this, args);
-            console.log('return ' + JSON.stringify(ret));
-            return ret;
-        };
-    };
-    //*/
     // -----------------------------------------------------------------------
     // :: Replacemenet for jQuery 2 deferred objects
     // -----------------------------------------------------------------------
@@ -1134,7 +1124,8 @@
             onPositionChange: $.noop,
             onCommandChange: $.noop,
             clickTimeout: 200,
-            holdTimout: 400,
+            holdTimeout: 400,
+            holdRepeatTimeout: 200,
             tabs: 4
         }
     };
@@ -1167,6 +1158,7 @@
             self.width(settings.width);
         }
         var num_chars; // calculated by draw_prompt
+        var prompt_last_line;
         var prompt_len;
         var prompt_node = self.find('.prompt');
         var reverse_search = false;
@@ -1189,10 +1181,11 @@
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
+                node = node.closest('[data-text]');
                 return node.index() +
-                    node.parent('span').prevAll().find('span').length +
+                    node.parent('span').prevAll().find('[data-text]').length +
                     node.closest('[role="presentation"]')
-                        .prevUntil('.prompt').find('span').length;
+                        .prevUntil('.prompt').find('[data-text]').length;
             } else if (node.is('div[role="presentation"]')) {
                 var last = !node.nextUntil('textarea').length;
                 return node.find('span[data-text]').length +
@@ -1268,7 +1261,7 @@
 
                 self.set('');
                 if (settings.commands) {
-                    settings.commands(tmp);
+                    settings.commands.call(self, tmp);
                 }
                 if (is_function(prompt)) {
                     draw_prompt();
@@ -1298,6 +1291,7 @@
             'ARROWDOWN': next_history,
             'CTRL+N': next_history,
             'ARROWLEFT': left,
+            'HOLD+ARROWLEFT': left,
             'CTRL+B': left,
             'CTRL+ARROWLEFT': function() {
                 // jump to one character after last space before prevoius word
@@ -1343,6 +1337,7 @@
                 }
             },
             'ARROWRIGHT': right,
+            'HOLD+ARROWRIGHT': right,
             'CTRL+F': right,
             'CTRL+ARROWRIGHT': function() {
                 // jump to beginning or end of the word
@@ -1754,15 +1749,18 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: format end encode the string
+        // :: format and encode the string
         // ---------------------------------------------------------------------
-        function format(string) {
+        function format(string, before) {
             var encoded = $.terminal.encode(wrap(string), {
-                tabs: settings.tabs
+                tabs: settings.tabs,
+                before: before
             });
-            return $.terminal.format(encoded, {
+            string = $.terminal.format(encoded, {
                 char_width: settings.char_width
             });
+            var re = /(<span[^>]+data-text[^>]+>)(.*?)(<\/span>)/g;
+            return string.replace(re, '$1<span>$2</span>$3');
         }
         // ---------------------------------------------------------------------
         // :: function create new string with all characters in it's own
@@ -1816,31 +1814,44 @@
             // -----------------------------------------------------------------
             // :: Draw line with the cursor
             // -----------------------------------------------------------------
-            function draw_cursor_line(string, position) {
+            function draw_cursor_line(string, position, prompt) {
                 var len = length(string);
+                prompt = prompt || '';
+                var c;
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
-                    cursor.html(format(substring(string, 0, 1)));
-                    after.html(format(substring(string, 1)));
+                    c = substring(string, 0, 1);
+                    cursor.html(format(c));
+                    after.html(format(substring(string, 1), prompt + c));
                 } else {
                     var before_str = $.terminal.substring(string, 0, position);
-                    before.html(format(before_str));
-                    var c = substring(string, position, position + 1);
-                    cursor.html(format(c));
+                    before.html(format(before_str, prompt));
+                    c = substring(string, position, position + 1);
+                    var c_before = (prompt + before_str).replace(/^.*\t/, '');
+                    cursor.html(format(c, c_before));
                     if (position === len - 1) {
                         after.html('');
                     } else {
-                        after.html(format(substring(string, position + 1)));
+                        if (c.match(/\t/)) {
+                            c_before = '';
+                        } else {
+                            c_before += c;
+                        }
+                        after.html(format(substring(string, position + 1), c_before));
                     }
                 }
+                // synchronize css animations (it's not that important because if user
+                // will change animation she should disable animation on span, but it
+                // looks nicer until she disable that inner animation)
+                restart_animation();
             }
-            function div(string) {
+            function div(string, before) {
                 return '<div role="presentation" aria-hidden="true">' +
-                    format(string) +
+                    format(string, before || '') +
                     '</div>';
             }
             // -----------------------------------------------------------------
@@ -1857,7 +1868,7 @@
             // -----------------------------------------------------------------
             function lines_before(lines) {
                 $.each(lines, function(i, line) {
-                    cursor_line.before(div(line));
+                    cursor_line.before(div(line, i === 0 ? prompt_last_line : ''));
                 });
             }
             // -----------------------------------------------------------------
@@ -1898,18 +1909,15 @@
                     if (first_len === 0 && array.length === 1) {
                         // skip empty line
                     } else if (pos < first_len) {
-                        draw_cursor_line(array[0], pos);
+                        draw_cursor_line(array[0], pos, prompt_last_line);
                         lines_after(array.slice(1));
                     } else if (pos === first_len) {
-                        cursor_line.before(div(array[0]));
+                        // first char acter of second line
+                        cursor_line.before(div(array[0], prompt_last_line));
                         draw_cursor_line(array[1] || '', 0);
                         if (array.length > 1) {
                             lines_after(array.slice(2));
                         }
-                    } else if (pos === first_len) {
-                        cursor_line.before(div(array[0]));
-                        draw_cursor_line(array[1], 0);
-                        lines_after(array.slice(2));
                     } else {
                         var last = array.slice(-1)[0];
                         var len = length(original_string);
@@ -1985,35 +1993,19 @@
                 }
             }
             return function(string, formatted_position) {
-                var codepoint_len = text(string).length;
-                var char_len = $.terminal.length(string);
-                var i, opts, guess;
-                if (codepoint_len > char_len) {
-                    // if we have emoji or characters with more then one codepoints
-                    // binary search don't work, so we fallback to iteration.
-                    // we need to find largest position that have same display_position,
-                    // binary search was founding codepoint in the middle of the character
-                    for (i = 0; i < command.length; ++i) {
-                        opts = $.extend({}, settings, {
-                            position: i
-                        });
-                        guess = $.terminal.apply_formatters(command, opts)[1];
-                        if (guess === formatted_position) {
-                            pos = i;
-                        }
-                        if (guess > formatted_position) {
-                            break;
-                        }
-                    }
-                } else {
-                    var pos = binary_search(0, codepoint_len, formatted_position, cmp);
-                    for (i = pos; i < command.length; ++i) {
-                        opts = $.extend({}, settings, {
-                            position: i
-                        });
-                        guess = $.terminal.apply_formatters(command, opts)[1];
-                        if (guess === formatted_position) {
-                            return i;
+                if (formatted_position === 0) {
+                    return 0;
+                }
+                string = text(string);
+                var codepoint_len = string.length;
+                var pos = binary_search(0, codepoint_len, formatted_position, cmp);
+                var chars = $.terminal.split_characters(string);
+                if (codepoint_len > chars.length) {
+                    var len = 0;
+                    for (var i = 0; i < chars.length; ++i) {
+                        len += chars[i].length;
+                        if (len >= pos) {
+                            return len;
                         }
                     }
                 }
@@ -2025,17 +2017,22 @@
         // ---------------------------------------------------------------------
         var draw_prompt = (function() {
             function set(prompt) {
-                var lines = $.terminal.split_equal(
-                    $.terminal.encode(prompt, {
-                        tabs: settings.tabs
-                    }),
-                    num_chars
-                );
+                prompt = $.terminal.apply_formatters(prompt, {});
+                prompt = $.terminal.normalize(prompt);
+                prompt = crlf(prompt);
+                var lines = $.terminal.split_equal(prompt, num_chars);
                 var options = {
                     char_width: settings.char_width
                 };
-                var last_line = $.terminal.format(lines[lines.length - 1], options);
+                prompt_last_line = lines[lines.length - 1];
+                var encoded_last_line = $.terminal.encode(lines[lines.length - 1], {
+                    tabs: settings.tabs
+                });
+                var last_line = $.terminal.format(encoded_last_line, options);
                 var formatted = lines.slice(0, -1).map(function(line) {
+                    line = $.terminal.encode(prompt, {
+                        tabs: settings.tabs
+                    });
                     return '<span class="line">' +
                         $.terminal.format(line, options) +
                         '</span>';
@@ -2043,7 +2040,7 @@
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
-                    prompt_len = strlen($('<span>' + last_line + '</span>').text());
+                    prompt_len = strlen(text(last_line));
                 }
             }
             return function() {
@@ -2052,7 +2049,7 @@
                         set(prompt);
                         break;
                     case 'function':
-                        prompt(set);
+                        prompt.call(self, set);
                         break;
                 }
             };
@@ -2075,7 +2072,7 @@
         }
         function fire_change_command() {
             if (is_function(settings.onCommandChange)) {
-                settings.onCommandChange(command);
+                settings.onCommandChange.call(self, command);
             }
         }
         // ---------------------------------------------------------------------
@@ -2157,9 +2154,10 @@
             },
             keymap: function(new_keymap, value) {
                 function wrap(key, fn) {
+                    var original = default_keymap[key].bind(self);
                     return function(e) {
                         // new keymap function will get default as 2nd argument
-                        return fn(e, default_keymap[key]);
+                        return fn.call(self, e, original);
                     };
                 }
                 if (typeof new_keymap === 'undefined') {
@@ -2281,7 +2279,7 @@
                 } else {
                     var string = formatting(command, true);
                     var len = $.terminal.length(string);
-                    var command_len = $.terminal.length(command);
+                    var command_len = text(command).length;
                     var new_formatted_pos;
                     if (relative) {
                         new_formatted_pos = formatted_position + n;
@@ -2291,6 +2289,7 @@
                         new_formatted_pos = n;
                     }
                     if (len === new_formatted_pos) {
+                        formatted_position = new_formatted_pos;
                         return self.position(command_len);
                     }
                     var pos = find_position(command, new_formatted_pos);
@@ -2384,6 +2383,18 @@
         if (!settings.history) {
             history.disable();
         }
+        // fix for .cursor span animation that should only be applied when
+        // animation is equal to terminal-blink
+        if (animation_supported) {
+            var style = window.getComputedStyle(cursor[0]);
+            var animationName = style.getPropertyValue('--animation');
+            animationName = animationName.replace(/^\s*|\s*$/g, '');
+
+            if (animationName && !animationName.match(/blink/)) {
+                var className = animationName.replace(/terminal-/, '') + '-animation';
+                self.addClass(className);
+            }
+        }
         var first_up_history = true;
         // prevent_keypress - hack for Android that was inserting characters on
         // backspace
@@ -2451,7 +2462,7 @@
             clip.off('input', paste);
             var key = get_key(e);
             if (is_function(settings.keydown)) {
-                result = settings.keydown(e);
+                result = settings.keydown.call(self, e);
                 if (result !== undefined) {
                     //prevent_keypress = true;
                     if (!result) {
@@ -2461,7 +2472,7 @@
                 }
             }
             if (enabled) {
-                self.oneTime(settings.holdTimout, 'hold', function() {
+                self.oneTime(settings.holdTimeout, 'hold', function() {
                     hold = true;
                 });
                 if (hold) {
@@ -2469,10 +2480,12 @@
                     if (hold_pause) {
                         return;
                     }
-                    hold_pause = true;
-                    self.oneTime(settings.holdTimout, 'delay', function() {
-                        hold_pause = false;
-                    });
+                    if (settings.holdRepeatTimeout > 0) {
+                        hold_pause = true;
+                        self.oneTime(settings.holdRepeatTimeout, 'delay', function() {
+                            hold_pause = false;
+                        });
+                    }
                 }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
@@ -2511,7 +2524,7 @@
         }
         function clear_hold() {
             self.stopTime('hold');
-            hold = false;
+            hold_pause = hold = false;
         }
         var doc = $(document.documentElement || window);
         self.keymap(settings.keymap || {});
@@ -2529,7 +2542,7 @@
                 return;
             }
             if (is_function(settings.keypress)) {
-                result = settings.keypress(e);
+                result = settings.keypress.call(self, e);
                 if (result !== undefined) {
                     if (!result) {
                         skip_insert = true;
@@ -2654,6 +2667,19 @@
             self.on('mousedown.cmd', function() {
                 was_down = true;
             }).on('mouseup.cmd', function(e) {
+                function trigger() {
+                    var $target = $(e.target);
+                    if (!$target.is('.prompt') && down) {
+                        if (enabled) {
+                            if ($target.is('.cmd')) {
+                                self.position(command.length);
+                            } else {
+                                self.display_position(get_char_pos(e));
+                            }
+                        }
+                    }
+                    count = 0;
+                }
                 // we get button from event for testing normally it's on originalEvent
                 var button;
                 if (e.originalEvent === undefined) {
@@ -2666,19 +2692,11 @@
                     if (++count === 1) {
                         var down = was_down;
                         if (enabled) {
-                            self.oneTime(settings.clickTimeout, name, function() {
-                                var $target = $(e.target);
-                                if (!$target.is('.prompt') && down) {
-                                    if (enabled) {
-                                        if ($target.is('.cmd')) {
-                                            self.position(command.length);
-                                        } else {
-                                            self.display_position(get_char_pos(e));
-                                        }
-                                    }
-                                }
-                                count = 0;
-                            });
+                            if (settings.clickTimeout === 0) {
+                                trigger();
+                            } else {
+                                self.oneTime(settings.clickTimeout, name, trigger);
+                            }
                         } else {
                             count = 0;
                         }
@@ -2701,10 +2719,13 @@
     }; // cmd plugin
     // -------------------------------------------------------------------------
     /* eslint-disable */
+    // regex that match single character at begining and folowing combine character
+    // https://en.wikipedia.org/wiki/Combining_character
+    var combine_chr_re = /^(.(?:[\u0300-\u036F]|[\u1AB0-\u1abE]|[\u1DC0-\u1DF9]|[\u1DFB-\u1DFF]|[\u20D0-\u20F0]|[\uFE20-\uFE2F])+)/;
     // source: https://mathiasbynens.be/notes/javascript-unicode
     var astral_symbols_re = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-    // source: https://stackoverflow.com/a/41164587/387194
-    var emoji_re = /^((?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff]))/;
+    // source: https://github.com/mathiasbynens/emoji-regex
+    var emoji_re = /^(\uD83C\uDFF4(?:\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74)\uDB40\uDC7F|\u200D\u2620\uFE0F)|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3]))|\uD83D\uDC69\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\uD83D\uDC68(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83D\uDC69\u200D[\u2695\u2696\u2708])\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC68(?:\u200D(?:(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D[\uDC66\uDC67])|\uD83C[\uDFFB-\uDFFF])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83C\uDDF6\uD83C\uDDE6|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])\uFE0F|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDD1-\uDDDD]))/;
     // https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
     var mobile_re = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i;
     var tablet_re = /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i;
@@ -2790,7 +2811,7 @@
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
             return function(string) {
-                return string.length;
+                return $.terminal.length(string);
             };
         } else {
             return wcwidth;
@@ -2820,23 +2841,52 @@
         return string.replace(/\r/g, '');
     }
     // -------------------------------------------------------------------------
-    // function that return array of characters counting emoji and surogate pairs
-    function split_characters(string) {
-        var result = [];
-        while (string.length) {
-            var m = string.match(emoji_re);
-            if (m) {
-                result.push(m[1]);
-                string = string.substring(m[1].length);
-            } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
-                result.push(string.substring(0, 2));
-                string = string.substring(2);
-            } else {
-                result.push(string[0]);
-                string = string.substring(1);
+    // :: function that return character from beginning of the string
+    // :: counting emoji, suroggate pairs and combine characters
+    // -------------------------------------------------------------------------
+    function get_next_character(string) {
+        var match_emoji = string.match(emoji_re);
+        if (match_emoji) {
+            return match_emoji[1];
+        } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
+            if (string.substring(1).match(combine_chr_re)) {
+                return string.substring(0, 3);
             }
+            return string.substring(0, 2);
+        } else {
+            var match_combo = string.match(combine_chr_re);
+            if (match_combo) {
+                return match_combo[1];
+            }
+            return string[0];
         }
-        return result;
+    }
+    // -------------------------------------------------------------------------
+    // normalize position for counting emoji
+    // -------------------------------------------------------------------------
+    function normalize_position(string, position) {
+        if (position === 0) {
+            return position;
+        }
+        string = $.terminal.strip(string);
+        var result = $.terminal.split_characters(string).reduce(function(acc, chr) {
+            if (typeof acc === 'number') {
+                return acc;
+            }
+            var length = acc.length + chr.length;
+            if (length >= position) {
+                return acc.position + 1;
+            }
+            return {
+                position: acc.position + 1,
+                length: length
+            };
+        }, {position: 0, length: 0});
+        if (typeof result === 'number') {
+            return result;
+        } else {
+            return result.position;
+        }
     }
     // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
@@ -2856,7 +2906,7 @@
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
-            if (len !== bare.length) {
+            if (len !== $.terminal.length(bare)) {
                 return char_width_prop(len, options);
             }
         }
@@ -2866,10 +2916,11 @@
     function wide_characters(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
-            if (split_characters(bare).length === 1) {
+            var chars = $.terminal.split_characters(bare);
+            if (chars.length === 1) {
                 return text;
             }
-            var specs = bare.split('').map(function(chr) {
+            var specs = chars.map(function(chr) {
                 return {len: strlen(chr), chr: chr};
             }).reduce(function(arr, spec) {
                 var last = arr[arr.length - 1];
@@ -2900,10 +2951,10 @@
                     return spec.str;
                 }
                 var style = char_width_prop(spec.sum, options);
-                if (style.length) {
-                    return '<span style="' + style + '">' + spec.str + '</span>';
-                } else {
+                if (spec.sum === chars.length || !style.length) {
                     return '<span>' + spec.str + '</span>';
+                } else {
+                    return '<span style="' + style + '">' + spec.str + '</span>';
                 }
             }).join('');
         }
@@ -3208,10 +3259,10 @@
         // ---------------------------------------------------------------------
         tracking_replace: function tracking_replace(string, rex, replacement, position) {
             function substring(string, start, end) {
-                return $.terminal.substring(string, start, end);
+                return string.substring(start, end);
             }
             function length(string) {
-                return $.terminal.length(string);
+                return $.terminal.strip(string).length;
             }
             // we need to correct position from regex and match to take into account
             // characters that are created from more when one code point like
@@ -3424,7 +3475,8 @@
         // :: formatting aware substring function
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
-            if (text(string).substring(start_index, end_index) === '') {
+            var chars = $.terminal.split_characters(text(string));
+            if (!chars.slice(start_index, end_index).length) {
                 return '';
             }
             var start = 0;
@@ -3446,15 +3498,6 @@
                         start_formatting = data.formatting;
                     }
                 }
-                var substring = string.substring(data.index);
-                var pair = substring.substring(0, 2);
-                m = substring.match(emoji_re);
-                var len = -1;
-                if (m) {
-                    len = m[1].length;
-                } else if (pair.replace(astral_symbols_re, '_') === 1) {
-                    len = 2;
-                }
                 if (end_index && data.count === end_index) {
                     end_formatting = data.formatting;
                     prev_index = data.index;
@@ -3469,9 +3512,12 @@
                         end = prev_index + 1;
                     }
                 }
-                if (len > 0) {
+                var substring = string.substring(data.index);
+                var chr = get_next_character(substring);
+                // handle emoji, suroggate pairs and combine characters
+                if (chr.length > 1) {
                     return {
-                        index: data.index + len - 1
+                        index: data.index + chr.length - 1
                     };
                 }
             });
@@ -3497,6 +3543,11 @@
                 if (text === '') {
                     return '';
                 }
+                function safe(string) {
+                    return string.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n')
+                        .replace(/&nbsp;/g, ' ');
+                }
+                format = safe(format);
                 var semicolons = format.match(/;/g).length;
                 // missing semicolons
                 if (semicolons >= 4) {
@@ -3514,9 +3565,7 @@
                 // return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting so we need to escape
                 // those using html entity equvalent
-                var safe = text.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n').
-                    replace(/&nbsp;/g, ' ');
-                return '[[' + format + semicolons + safe + ']' + text + ']';
+                return '[[' + format + semicolons + safe(text) + ']' + text + ']';
             });
         },
         // ---------------------------------------------------------------------
@@ -3536,16 +3585,18 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
+                var chars = $.terminal.split_characters(text(line));
+                var last_char = chars[chars.length - 1];
                 $.terminal.iterate_formatting(line, function(data) {
-                    var last_iteraction = data.index === line_length - 1;
+                    var last_iteraction = data.index === line_length - last_char.length;
+                    var chr, substring;
                     if (data.length >= length || last_iteraction ||
                         (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
                         if (keep_words && data.space !== -1) {
-                            var stripped = $.terminal.strip(line.substring(data.space));
                             // replace html entities with characters
-                            stripped = $('<span>' + stripped + '</span>').text();
+                            var stripped = text(line.substring(data.space));
                             // real length, not counting formatting
                             var text_len = stripped.length;
                             var limit = data.index + length + 1;
@@ -3556,12 +3607,16 @@
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
+                        var new_index;
                         if (keep_words && data.space !== -1 &&
                             data.index !== line_length - 1 && can_break) {
                             output = line.substring(first_index, data.space);
-                            var new_index = data.space - 1;
+                            new_index = data.space - 1;
                         } else {
-                            output = line.substring(first_index, data.index + 1);
+                            substring = line.substring(data.index);
+                            chr = get_next_character(substring);
+                            output = line.substring(first_index, data.index) + chr;
+                            new_index = data.index + chr.length - 1;
                         }
                         if (keep_words) {
                             output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
@@ -3589,6 +3644,14 @@
                         // modify loop by returing new data
                         return {index: new_index, length: 0, space: -1};
                     }
+                    substring = str.substring(data.index);
+                    chr = get_next_character(substring);
+                    // handle emoji, suroggate pairs and combine characters
+                    if (chr && chr.length > 1) {
+                        return {
+                            index: data.index + chr.length - 1
+                        };
+                    }
                 });
             }
             return result;
@@ -3604,24 +3667,32 @@
         // ---------------------------------------------------------------------
         encode: function encode(str, options) {
             var settings = $.extend({
-                tabs: 4
+                tabs: 4,
+                before: ''
             }, options);
             return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/ /g, '&nbsp;').split('\n').map(function(line) {
-                    var splitted = line.split(/(\t)/);
+                    var splitted = line.split(/((?:\[\[[^\]]+\])?\t(?:\])?)/);
+                    splitted = splitted.filter(Boolean);
                     return splitted.map(function(str, i) {
-                        if (str === '\t') {
-                            if (i === 0 || splitted[i - 1] === '\t') {
-                                return new Array(settings.tabs + 1).join('&nbsp;');
-                            } else {
-                                var before = splitted.slice(0, i).join('');
-                                var len = $.terminal.length(before);
-                                var chars = settings.tabs - (len % settings.tabs);
-                                if (chars === 0) {
-                                    chars = 4;
+                        if (str.match(/\t/)) {
+                            return str.replace(/\t([^\t]*)$/, function(_, end) {
+                                if (i !== 0 && splitted[i - 1].match(/\t\]?$/)) {
+                                    var sp = new Array(settings.tabs + 1).join('&nbsp;');
+                                    return sp + end;
+                                } else {
+                                    var before = splitted.slice(i - 1, i).join('');
+                                    if (settings.before && i <= 1) {
+                                        before = settings.before + before;
+                                    }
+                                    var len = $.terminal.length(before);
+                                    var chars = settings.tabs - (len % settings.tabs);
+                                    if (chars === 0) {
+                                        chars = 4;
+                                    }
+                                    return new Array(chars + 1).join('&nbsp;') + end;
                                 }
-                                return new Array(chars + 1).join('&nbsp;');
-                            }
+                            });
                         }
                         return str;
                     }).join('');
@@ -3670,7 +3741,14 @@
         // ---------------------------------------------------------------------
         // :: apply custom formatters only to text
         // ---------------------------------------------------------------------
-        apply_formatters: function(string, settings) {
+        apply_formatters: function apply_formatters(string, settings) {
+            if (string === "") {
+                if (typeof settings.position === 'number') {
+                    return ["", settings.position];
+                } else {
+                    return "";
+                }
+            }
             function test_lengths(formatter, index, ret, string) {
                 if (!formatter.__no_warn__ &&
                     $.terminal.length(ret) !== $.terminal.length(string)) {
@@ -3740,8 +3818,17 @@
                                 if (formatter instanceof Array) {
                                     var options = formatter[2] || {};
                                     result = [string, position < 0 ? 0 : position];
-                                    if (options.loop) {
-                                        while (result[0].match(formatter[0])) {
+                                    if (result[0].match(formatter[0])) {
+                                        if (options.loop) {
+                                            while (result[0].match(formatter[0])) {
+                                                result = $.terminal.tracking_replace(
+                                                    result[0],
+                                                    formatter[0],
+                                                    formatter[1],
+                                                    result[1]
+                                                );
+                                            }
+                                        } else {
                                             result = $.terminal.tracking_replace(
                                                 result[0],
                                                 formatter[0],
@@ -3749,13 +3836,6 @@
                                                 result[1]
                                             );
                                         }
-                                    } else {
-                                        result = $.terminal.tracking_replace(
-                                            result[0],
-                                            formatter[0],
-                                            formatter[1],
-                                            result[1]
-                                        );
                                     }
                                     if (position < 0) {
                                         return [result[0], -1];
@@ -3789,8 +3869,9 @@
                             position = position_partial[1];
                         }
                         // to make sure that output position is not outside the string
-                        if (position >= $.terminal.length(input[0])) {
-                            position = $.terminal.length(string);
+                        var max = text(string).length;
+                        if (position > max) {
+                            position = max;
                         }
                         if (string === input[0]) {
                             return input;
@@ -3799,6 +3880,16 @@
                     }
                 }, input);
                 if (typeof settings.position === 'number') {
+                    var codepoint_len = $.terminal.strip(result[0]).length;
+                    if ($.terminal.length(result[0]) < codepoint_len) {
+                        var position = result[1];
+                        position = normalize_position(result[0], position);
+                        var max = $.terminal.length(result[0]);
+                        if (position > max) {
+                            position = max;
+                        }
+                        result[1] = position;
+                    }
                     return result;
                 } else {
                     return result[0];
@@ -3877,7 +3968,8 @@
                                 style_str += 'font-style:italic;';
                             }
                             if ($.terminal.valid_color(color)) {
-                                style_str += 'color:' + color + ';';
+                                style_str += 'color:' + color + ';' +
+                                    '--color:' + color + ';';
                                 if (style.indexOf('g') !== -1) {
                                     style_str += 'text-shadow:0 0 5px ' + color + ';';
                                 }
@@ -3969,7 +4061,19 @@
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
         length: function(string) {
-            return split_characters(text(string)).length;
+            return $.terminal.split_characters(text(string)).length;
+        },
+        // ---------------------------------------------------------------------
+        // :: split characters handling emoji, surogate pairs and combine chars
+        // ---------------------------------------------------------------------
+        split_characters: function split_characters(string) {
+            var result = [];
+            while (string.length) {
+                var chr = get_next_character(string);
+                string = string.substring(chr.length);
+                result.push(chr);
+            }
+            return result;
         },
         // ---------------------------------------------------------------------
         // :: return string where array items are in columns padded spaces
@@ -4471,7 +4575,7 @@
             '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
             ' __ / / // / // / _  / _/ // / / / _  / _/     / /  \\/ / _ \\/ /',
             '/  / / // / // / ___/ // // / / / ___/ // / / / / /\\  / // / /__',
-            '\\___/____ \\\\__/____/_/ \\__ / /_/____/_//_/_/_/ /_/  \\/\\__\\_\\___/',
+            '\\___/____ \\\\__/____/_/ \\__ / /_/____/_//_/_/_/_/_/  \\/\\__\\_\\___/',
             '         \\/          /____/                                   '
                 .replace(reg, ' ') + version_string,
             copyright
@@ -4540,7 +4644,8 @@
         caseSensitiveAutocomplete: true,
         caseSensitiveSearch: true,
         clickTimeout: 200,
-        holdTimout: 400,
+        holdTimeout: 400,
+        holdRepeatTimeout: 200,
         request: $.noop,
         response: $.noop,
         describe: 'procs',
@@ -4674,8 +4779,7 @@
                 // TODO: do we need to call pause/resume or return promise?
                 self.pause(settings.softPause);
                 $.get(m[1], function(response) {
-                    var prefix = location.href.replace(/[^/]+$/, '');
-                    var file = m[1].replace(prefix, '');
+                    var file = m[1];
                     self.echo('[[b;white;]' + file + ']');
                     var code = response.split('\n');
                     var n = +m[2] - 1;
@@ -5093,7 +5197,8 @@
                 finalize({
                     interpreter: make_object_interpreter(
                         user_intrp,
-                        settings.checkArity
+                        settings.checkArity,
+                        login
                     ),
                     completion: Object.keys(user_intrp)
                 });
@@ -5271,27 +5376,6 @@
                     string = arg;
                 }
                 if (string !== '') {
-                    string = $.map(string.split(format_exec_re), function(string) {
-                        if (string && string.match(format_exec_re) &&
-                            !$.terminal.is_formatting(string)) {
-                            // redraw should not execute commands and it have
-                            // and lines variable have all extended commands
-                            string = string.replace(/^\[\[|\]\]$/g, '');
-                            if (line_settings.exec) {
-                                if (prev_command &&
-                                    prev_command.command.trim() === string.trim()) {
-                                    self.error(strings().recursiveCall);
-                                } else {
-                                    $.terminal.extended_command(self, string, {
-                                        invokeMethods: settings.invokeMethods
-                                    });
-                                }
-                            }
-                            return '';
-                        } else {
-                            return string;
-                        }
-                    }).join('');
                     // string can be empty after removing extended commands
                     if (string !== '') {
                         if (!line_settings.raw) {
@@ -5305,16 +5389,45 @@
                                         string,
                                         settings
                                     );
-                                    string = crlf($.terminal.normalize(string));
                                 } catch (e) {
                                     display_exception(e, 'FORMATTING');
                                 }
                             }
-                            string = $.terminal.encode(string, {
-                                tabs: settings.tabs
-                            });
+                            var parts = string.split(format_exec_re);
+                            string = $.map(parts, function(string) {
+                                if (string && string.match(format_exec_re) &&
+                                    !$.terminal.is_formatting(string)) {
+                                    // redraw should not execute commands and it have
+                                    // and lines variable have all extended commands
+                                    string = string.replace(/^\[\[|\]\]$/g, '');
+                                    if (line_settings.exec) {
+                                        var prev_cmd;
+                                        if (prev_command) {
+                                            prev_command = prev_command.command.trim();
+                                        }
+                                        if (prev_cmd === string.trim()) {
+                                            self.error(strings().recursiveCall);
+                                        } else {
+                                            $.terminal.extended_command(self, string, {
+                                                invokeMethods: settings.invokeMethods
+                                            });
+                                        }
+                                    }
+                                    return '';
+                                } else {
+                                    return string;
+                                }
+                            }).join('');
+                            if (string !== '') {
+                                string = crlf($.terminal.normalize(string));
+                                string = $.terminal.encode(string, {
+                                    tabs: settings.tabs
+                                });
+                            }
                         }
-                        buffer_line(string, line.index, line_settings);
+                        if (string !== '') {
+                            buffer_line(string, line.index, line_settings);
+                        }
                     }
                 }
                 if (string === '' && is_fn) {
@@ -6557,7 +6670,9 @@
                         prepare_top_interpreter(true);
                     });
                 }
-                if (get_type(user_intrp) === 'string' && login) {
+                if (is_function(login)) {
+                    self.login(login, true, overwrite_interpreter);
+                } else if (get_type(user_intrp) === 'string' && login) {
                     self.login(
                         make_json_rpc_login(user_intrp, login),
                         true,
@@ -7099,8 +7214,8 @@
             // -------------------------------------------------------------
             // :: convenience method for removing selected line
             // -------------------------------------------------------------
-            remove_line: function(line, options) {
-                return self.update(line, null, options);
+            remove_line: function(line) {
+                return self.update(line, null);
             },
             // -------------------------------------------------------------
             // :: return index of last line in case when you need to update
@@ -7202,6 +7317,12 @@
                     return self.echo(function() {
                         return format(message.call(self));
                     }, options);
+                }
+                if (message && message.then) {
+                    message.then(function(string) {
+                        self.echo(format(string));
+                    });
+                    return self;
                 }
                 return self.echo(format(message), options);
             },
@@ -7978,7 +8099,8 @@
                 keydown: key_down,
                 keymap: new_keymap,
                 clickTimeout: settings.clickTimeout,
-                holdTimout: settings.holdTimout,
+                holdTimeout: settings.holdTimeout,
+                holdRepeatTimeout: settings.holdRepeatTimeout,
                 keypress: key_press,
                 tabs: settings.tabs,
                 onCommandChange: function(command) {

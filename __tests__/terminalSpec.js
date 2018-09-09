@@ -11,7 +11,7 @@
  * Released under the MIT license
  */
 /* global global, it, expect, describe, require, spyOn, setTimeout, location,
-          beforeEach, afterEach, sprintf, jQuery, $, wcwidth */
+          beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest  */
 /* TODO: test caseSensitivity */
 
 function Storage() {}
@@ -22,9 +22,7 @@ Storage.prototype.setItem = function(name, value) {
     return this[name] = value;
 };
 Storage.prototype.removeItem = function(name) {
-    var value = this[name];
-    delete this[name];
-    return value;
+    return delete this[name];
 };
 Storage.prototype.clear = function() {
     var self = this;
@@ -108,7 +106,9 @@ global.window.Element.prototype.getClientRects = function() {
     }
     return [{width: self.width(), height: self.height()}];
 };
-window.localStorage = new Storage();
+var storage = new Storage();
+Object.defineProperty(window, 'localStorage', { value: storage });
+Object.defineProperty(global, 'localStorage', { value: storage });
 global.alert = window.alert = function(string) {
     console.log(string);
 };
@@ -118,6 +118,8 @@ global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
+
+jest.setTimeout(10000);
 
 function nbsp(string) {
     return string.replace(/ /g, '\xA0');
@@ -337,18 +339,19 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.from_ansi', function() {
-        var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz';
+        var ansi_string = '\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz\x1b[48;2;255;255;0;38;2;0;100;0mQuux\x1b[m';
         it('should convert ansi to terminal formatting', function() {
             var string = $.terminal.from_ansi(ansi_string);
             expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
-                                   'B[[sb;;]a]r][[;#000;#AAA]Baz]');
+                                   'B[[sb;;]a]r][[;#000;#AAA]Baz][[;#006400;#ffff00]Quux]');
         });
         it('should convert ansi to terminal formatting and escape the remaining brackets', function() {
             var string = $.terminal.from_ansi(ansi_string, {
                 unixFormattingEscapeBrackets: true
             });
             expect(string).toEqual('[[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
-                                   'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz]');
+                                   'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz]' +
+                                  '[[;#006400;#ffff00]Quux]');
         });
     });
     describe('$.terminal.overtyping', function() {
@@ -376,6 +379,17 @@ describe('Terminal utils', function() {
                 ],
                 ['Test 2.\t[    ]\b\b\b\b\bFAIL\nTest 3.\t[    ]\b\b\b\b\bWARNING]\n',
                  'Test 2.\t[FAIL]\nTest 3.\t[WARNING]\n'
+                ],
+                [
+                    ['Test 0.\n\n==============================\nState1.\t[    ]\b\b\b\b\b--\r',
+                    '\u001B[KState1.\t[    ]\b\b\b\b\bDONE\nLine2.\t[    ]\b\b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b-\r\u001B[KLin2.\t[    ]\b\b\b\b\bFAIL\nTest3.\t[    ]\b',
+                    '\b\b\b\b--\r\u001B[KTest3.\t[    ]\b\b\b\b\bWARNING]\n\nFinal status\n\n',
+                    'Status details\nTime: 11'].join(''),
+                    ['Test 0.\n\n==============================\nState1.\t[DONE]\nLin2.\t[FAI',
+                     'L]\nTest3.\t[WARNING]\n\nFinal status\n\nStatus details\nTime: 11'].join('')
                 ]
             ];
             tests.forEach(function(spec) {
@@ -593,12 +607,13 @@ describe('Terminal utils', function() {
             var string = $.terminal.format(format);
             expect(string).toEqual('<span style="font-weight:bold;text-decorat'+
                                    'ion:underline line-through;font-style:ital'+
-                                   'ic;color:#fff;text-shadow:0 0 5px #fff;bac'+
-                                   'kground-color:#000" data-text="Foo">Foo</s'+
-                                   'pan><span style="font-style:italic;" class'+
-                                   '="foo" data-text="Bar">Bar</span><span sty'+
-                                   'le="text-decoration:underline line-through'+
-                                   ' overline;" data-text="Baz">Baz</span>');
+                                   'ic;color:#fff;--color:#fff;text-shadow:0 0'+
+                                   ' 5px #fff;background-color:#000" data-text'+
+                                   '="Foo">Foo</span><span style="font-style:i'+
+                                   'talic;" class="foo" data-text="Bar">Bar</s'+
+                                   'pan><span style="text-decoration:underline'+
+                                   ' line-through overline;" data-text="Baz">B'+
+                                   'az</span>');
         });
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
@@ -1004,6 +1019,39 @@ describe('Terminal utils', function() {
             expect(wcwidth(input)).toEqual(count);
             expect(input.length).toEqual(len);
         });
+        function test_codepoints(input) {
+            var length = input.length;
+            for (var i = 2; i < 10; i++) {
+                var len = 0;
+                var count = 0;
+                $.terminal.split_equal(input, i).forEach(function(string) {
+                    len += string.length;
+                    var width = wcwidth(string);
+                    if (len < length) {
+                        expect(width).toEqual(i);
+                    } else {
+                        expect(width <= i).toBeTruthy();
+                    }
+                    count += width;
+                });
+                expect([i, input, len]).toEqual([i, input, length]);
+                expect([i, input, count]).toEqual([i, input, wcwidth(input)]);
+            }
+        }
+        it('should handle emoji', function() {
+            var input = [
+                "\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3 xxx\u0038\ufe0f\u20e3",
+                "\u263a\ufe0f xxxx \u261d\ufe0f x \u0038\ufe0f\u20e3 xxx\u0038\ufe0f\u20e3"
+            ];
+            input.forEach(test_codepoints);
+        });
+        it('should handle combine characters', function() {
+            var input = [
+                's\u030A\u032A xxxx s\u030A\u032A xxxx s\u030A\u032A xxxx',
+                's\u030A\u032A xxxx s\u030A\u032A xxxx s\u030A\u032A xxxs\u030A\u032A'
+            ];
+            input.forEach(test_codepoints);
+        });
         it('should handle mixed size characters', function() {
             var input = 'ターミナルウィンドウは黒です lorem ipsum';
             var given = $.terminal.split_equal(input, 10);
@@ -1231,6 +1279,7 @@ describe('Terminal utils', function() {
             expect(history_commands('foo').length).toEqual(30);
         });
         it('should create commands in memory', function() {
+            window.localStorage.removeItem('foo_commands');
             var history = new $.terminal.History('foo', 10, true);
             for (var i = 0; i < 40; ++i) {
                 history.append('command ' + i);
@@ -1238,7 +1287,7 @@ describe('Terminal utils', function() {
             var data = history.data();
             expect(data instanceof Array).toBeTruthy();
             expect(data.length).toEqual(10);
-            expect(window.localStorage.getItem('foo_commands')).not.toBeDefined();
+            expect(window.localStorage.getItem('foo_commands')).toBeFalsy();
         });
         it('should clear localStorage', function() {
             var history = new $.terminal.History('foo');
@@ -2068,18 +2117,102 @@ describe('Terminal plugin', function() {
     });
     describe('events', function() {
         describe('click', function() {
-            var term = $('<div/>').terminal();
-            it('should move cursor to click position', function(done) {
-                term.insert('foo bar').focus();
-                var pos = 2;
-                var node = term.find('.cmd .cursor-line > span:eq(0) span:eq(' + pos + ')');
-                var e = new $.Event('mouseup');
+            var term = $('<div/>').terminal($.noop, {greetings: false, clickTimeout: 0});
+            var cmd = term.cmd();
+            beforeEach(function() {
+                term.focus().set_command('');
+            });
+            function click(element) {
+                var e = $.Event('mouseup');
                 e.button = 0;
-                node.trigger('mousedown').trigger(e);
-                setTimeout(function() {
+                e.target = element[0];
+                element.mousedown().trigger(e);
+            }
+            it('should move cursor to click position', function() {
+                var text = 'foo\nbar\nbaz';
+                term.insert(text).focus();
+                for (var pos = 0; pos < text.length; ++pos) {
+                    var node = cmd.find('span[data-text]').eq(pos);
+                    click(node);
                     expect(term.get_position()).toBe(pos);
-                    done();
-                }, 300);
+                }
+            });
+            it('should move cursor when text have emoji', function() {
+                var text = '\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3';
+                var chars = $.terminal.split_characters(text);
+                term.insert(text).focus();
+                expect(term.find('.cmd span[data-text]').length).toBe(15);
+                // indexes of emoji
+                [0, 7, 14].forEach(function(pos) {
+                    var node = cmd.find('span[data-text]').eq(pos);
+                    click(node);
+                    expect(cmd.display_position()).toBe(pos);
+                    var char = chars[pos];
+                    expect(cmd.find('.cursor [data-text] span').text().length)
+                        .toEqual(char.length);
+                    expect(char.length).toBeGreaterThan(1);
+                });
+            });
+            it('should align tabs', function() {
+                var input_str = 'fo\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr';
+                var output_str = 'fo    bar baz \nf       b   baz \nfa      ba  br';
+                term.insert(input_str).focus();
+                for (var pos = 0; pos < input_str.length; ++pos) {
+                    var node = cmd.find('span[data-text]').eq(pos);
+                    click(node);
+                    expect(cmd.position()).toBe(pos);
+                    var output = cmd.find('[role="presentation"]').map(function() {
+                        return $(this).text().replace(/\xA0/g, ' ');
+                    }).get().join('\n');
+                    expect([pos, output]).toEqual([pos, output_str]);
+                }
+            });
+            it('should move cursor on text with backspaces', function() {
+                var input = [
+                    'Test 0.\n\n==============================\nState1.\t[    ]\b\b\b\b\b--\r',
+                    '\u001B[KState1.\t[    ]\b\b\b\b\bDONE\nLine2.\t[    ]\b\b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b\b\b    \b\b\b\b----\b\b',
+                    '\b\b    \b\b\b\b-\r\u001B[KLin2.\t[    ]\b\b\b\b\bFAIL\nTest3.\t[    ]\b',
+                    '\b\b\b\b--\r\u001B[KTest3.\t[    ]\b\b\b\b\bWARNING]\n\nFinal status\n\n',
+                    'Status details\nTime: 11'
+                ].join('');
+                var output = $.terminal.apply_formatters(input).split('\n');
+                function get_count(i) {
+                    return output.slice(0, i + 1).reduce(function(acc, line) {
+                        return acc + line.length;
+                    }, 0) + i;
+                }
+                term.insert(input);
+                return new Promise(function(resolve) {
+                    setTimeout(function() {
+                        (function loop(i) {
+                            var lines = term.find('.cmd [role="presentation"]');
+                            if (i === lines.length) {
+                                return resolve();
+                            }
+                            click(lines.eq(i));
+                            var count = get_count(i);
+                            expect([i, cmd.display_position()]).toEqual([i, count]);
+                            loop(i+1);
+                        })(0);
+                    }, 100);
+                }).then(function() {
+                    return new Promise(function(resolve) {
+                        var line = 5;
+                        var offset = get_count(line);
+                        (function loop(i) {
+                            var chars = term.find('.cmd [role="presentation"]')
+                                    .eq(line).find('span[data-text]');
+                            if (i === chars.length) {
+                                return resolve();
+                            }
+                            click(chars.eq(i).find('span'));
+                            expect(cmd.display_position()).toEqual(i + 68);
+                            loop(i+1);
+                        })(0);
+                    });
+                });
             });
         });
         describe('contextmenu', function() {
@@ -2177,7 +2310,9 @@ describe('Terminal plugin', function() {
             expect(term.find('.prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should format prompt', function() {
-            var prompt = '<span style="font-weight:bold;text-decoration:underline;color:#fff;" data-text=">>>">&gt;&gt;&gt;</span><span>&nbsp;</span>';
+            var prompt = '<span style="font-weight:bold;text-decoration:underline;color:'+
+                    '#fff;--color:#fff;" data-text=">>>">&gt;&gt;&gt;</span><span>&nbsp;'+
+                    '</span>';
             term.set_prompt('[[ub;#fff;]>>>] ');
             expect(term.find('.prompt').html()).toEqual(prompt);
             term.set_prompt(function(callback) {
@@ -2781,9 +2916,12 @@ describe('Terminal plugin', function() {
             enter(term, 'quux');
             enter(term, 'exception TOKEN');
             var last_div = term.find('.terminal-output > div:last-child');
-            expect(output(term)).toEqual([
+            var out = output(term);
+            expect(out[3]).toEqual('    Syntax Error in file "baz.php" at line 10');
+            expect(out[3].replace(/^(\s+)[^\s].*/, '$1').length).toEqual(4);
+            expect(out).toEqual([
                 '> quux',
-                'quux> exception TOKEN',
+                 'quux> exception TOKEN',
                 '[RPC] ' +exception,
                 '    Syntax Error in file "baz.php" at line 10'
             ]);
@@ -3850,22 +3988,60 @@ describe('Terminal plugin', function() {
                 term.clear().echo(input);
                 expect(output().join('\n')).toEqual(input);
             });
+            it('should align tabs', function() {
+                var tests = [
+                    [
+                        'foobar\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr',
+                        'foobar  bar baz\nf       b   baz\nfa      ba  br'
+                    ],
+                    [
+                        'foo\t\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr',
+                        'foo     bar baz\nf       b   baz\nfa      ba  br'
+                    ],
+                    [
+                        'foo\t\tbar\t\tbaz\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                        'foo     bar     baz\nfoo     b       baz\nfoobar  ba      br'
+                    ],
+                    [
+                        '\u263a\ufe0foo\t\tbar\t\t\u263a\ufe0faz\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                        '\u263a\ufe0foo     bar     \u263a\ufe0faz\nfoo     b       baz\nfoobar  ba      br'
+                    ],
+                    [
+                        '\u263a\ufe0foo\t\tbar\t\t\u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                        '\u263a\ufe0foo     bar     \u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo     b       baz\nfoobar  ba      br'
+                    ]
+                ];
+                tests.forEach(function(test) {
+                    term.clear().echo(test[0]);
+                    expect(output(term).join('\n')).toEqual(test[1]);
+                });
+            });
             describe('extended commands', function() {
                 var term = $('<div/>').terminal($.noop, {
                     checkArity: false,
                     invokeMethods: true
                 });
                 var interpreter;
+                var formatters;
                 beforeEach(function() {
                     interpreter = {
                         foo: function(a, b) {
                         }
                     };
+                    formatters = $.terminal.defaults.formatters;
+                    $.terminal.defaults.formatters = [
+                        [/\x1bfoo/g, '[[ foo ]]']
+                    ];
                     spy(interpreter, 'foo');
                     term.push(interpreter);
                 });
                 afterEach(function() {
                     term.pop();
+                    $.terminal.defaults.formatters = formatters;
+                });
+                it('should invoke command using formatter', function() {
+                    term.echo('\x1bfoo');
+                    expect(interpreter.foo).toHaveBeenCalled();
                 });
                 it('should invoke command', function() {
                     term.echo('[[ foo ]]]');

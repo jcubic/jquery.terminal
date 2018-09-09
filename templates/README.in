@@ -3,7 +3,7 @@
      / / _  /_ ____________ _/__  ___/______________  _____  / /
  __ / / // / // / _  / _/ // / / / _  / _/     / /  \/ / _ \/ /
 /  / / // / // / ___/ // // / / / ___/ // / / / / /\  / // / /__
-\___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/ /_/  \/\__\_\___/
+\___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/_/_/  \/\__\_\___/
          \/          /____/                      version {{VER}}
 ```
 http://terminal.jcubic.pl
@@ -24,6 +24,8 @@ your applications. It can automatically call JSON-RPC service when a user types
 commands or you can provide you own function in which you can parse user
 commands. It's ideal if you want to provide additional functionality for power
 users. It can also be used to debug your application.
+
+You can use this JavaScript library to create web based terminal on any website.
 
 ### Features:
 
@@ -119,7 +121,7 @@ You can also install jQuery Terminal using command line, from [bower repository]
 bower install jquery.terminal
 ```
 
-or [npm repository](https://www.npmjs.com/):
+or [npm registry](https://www.npmjs.com/):
 
 ```
 npm install jquery.terminal
@@ -184,6 +186,24 @@ $('#term_demo').terminal('service.php', {login: true});
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [full documentation](http://terminal.jcubic.pl/api_reference.php).
+
+### Security
+
+Because of security in version 1.20.0 links with protocols different then ftp or http(s) (it was possible to enter
+javascript protocol, that could lead to XSS if author of hte app echo user input and save it in DB) was turn off
+by default. To enable it, you need to use `anyLinks: true` option.
+
+In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was also disabled
+by default because attacker (depending on your application) could execute `terminal::echo` with raw option to enter
+any html and execute any javascript. To enable this feature from this version you need to use `invokeMethods: true`
+option.
+
+The features are safe to enable, if you don't save user input in DB and don't echo it back to different users
+(like with chat application). It's also safe if you escape formatting before you echo stuff.
+
+If you don't save user input in DB but allow to echo back what user types and have enabled `execHash` options,
+you may have reflected XSS vulnerability if you enable this features. If you escape formatting this options are
+also safe.
 
 ### Contributors
 

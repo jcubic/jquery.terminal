@@ -3,15 +3,15 @@
      / / _  /_ ____________ _/__  ___/______________  _____  / /
  __ / / // / // / _  / _/ // / / / _  / _/     / /  \/ / _ \/ /
 /  / / // / // / ___/ // // / / / ___/ // / / / / /\  / // / /__
-\___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/ /_/  \/\__\_\___/
-         \/          /____/                      version 1.21.0
+\___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/_/_/  \/\__\_\___/
+         \/          /____/                      version DEV
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-1.21.0-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-1.21.0-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&36dc0f016a37a91d247066da8f7d82140818f44f)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&0b824f33c6d68c4d6e206f2fe8e5b250)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
+[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&8cfaf5202313b5c1d879c3f1e1cccb9f0d554923)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&fbe0524210ae0824d96ec8b6b085dfa6)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -24,6 +24,8 @@ your applications. It can automatically call JSON-RPC service when a user types
 commands or you can provide you own function in which you can parse user
 commands. It's ideal if you want to provide additional functionality for power
 users. It can also be used to debug your application.
+
+You can use this JavaScript library to create web based terminal on any website.
 
 ### Features:
 
@@ -73,20 +75,20 @@ Include jQuery library, you can use cdn from http://jquery.com/download/
 ```
 
 
-Then include js/jquery.terminal-1.21.0.min.js and css/jquery.terminal-1.21.0.min.css
+Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.min.css
 
 You can grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.21.0/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.21.0/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@1.21.0/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@1.21.0/css/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/css/jquery.terminal.min.css">
 ```
 
 If you always want latest version, you can grab the files directly from github using rawgit.com (that service grab the files from github and use propert MIME type so you can use it in your page, you can also grab from devel branch):
@@ -119,7 +121,7 @@ You can also install jQuery Terminal using command line, from [bower repository]
 bower install jquery.terminal
 ```
 
-or [npm repository](https://www.npmjs.com/):
+or [npm registry](https://www.npmjs.com/):
 
 ```
 npm install jquery.terminal
@@ -184,6 +186,24 @@ $('#term_demo').terminal('service.php', {login: true});
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [full documentation](http://terminal.jcubic.pl/api_reference.php).
+
+### Security
+
+Because of security in version 1.20.0 links with protocols different then ftp or http(s) (it was possible to enter
+javascript protocol, that could lead to XSS if author of hte app echo user input and save it in DB) was turn off
+by default. To enable it, you need to use `anyLinks: true` option.
+
+In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was also disabled
+by default because attacker (depending on your application) could execute `terminal::echo` with raw option to enter
+any html and execute any javascript. To enable this feature from this version you need to use `invokeMethods: true`
+option.
+
+The features are safe to enable, if you don't save user input in DB and don't echo it back to different users
+(like with chat application). It's also safe if you escape formatting before you echo stuff.
+
+If you don't save user input in DB but allow to echo back what user types and have enabled `execHash` options,
+you may have reflected XSS vulnerability if you enable this features. If you escape formatting this options are
+also safe.
 
 ### Contributors
 
