@@ -1,3 +1,7 @@
+## 1.22.3
+### Bugfix
+* reverse css animations so the prompt is visible when you hold key
+
 ## 1.22.2
 ### Bugfix
 * persistent function prompt don't render on enable and on init
