@@ -2,6 +2,7 @@
 ### Bugfix
 * persistent function prompt don't render on enable and on init
 * fix duplicated line when prompt have more then one line
+* `iterate_formatting` to handle emoji like `substring` and `split_equal`
 
 ## 1.22.1
 ### Bugfix
