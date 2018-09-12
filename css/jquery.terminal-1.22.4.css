@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Wed, 12 Sep 2018 18:06:36 +0000
+ * Date: Wed, 12 Sep 2018 19:43:09 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -56,6 +56,14 @@
     overflow: hidden;
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
+}
+.cmd .noselect, .cmd [role="presentation"] > span:last-child {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 .terminal img, .terminal audio, .terminal object, .terminal canvas {
     cursor: default;

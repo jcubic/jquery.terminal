@@ -1818,6 +1818,7 @@
                 var len = length(string);
                 prompt = prompt || '';
                 var c;
+                cursor.toggleClass('noselect', position === len);
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
@@ -1965,6 +1966,7 @@
                             lines_after(array.slice(line_index + 1));
                         }
                     }
+                    self.find('.cursor-line ~ div:last-of-type').append('<span></span>');
                 } else if (string === '') {
                     before.html('');
                     cursor.html('&nbsp;');

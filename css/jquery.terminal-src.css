@@ -57,6 +57,14 @@
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
 }
+.cmd .noselect, .cmd [role="presentation"] > span:last-child {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
 .terminal img, .terminal audio, .terminal object, .terminal canvas {
     cursor: default;
 }
