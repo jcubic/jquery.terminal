@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Wed, 12 Sep 2018 16:36:06 +0000
+ * Date: Wed, 12 Sep 2018 18:06:36 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -118,6 +118,7 @@ body.terminal {
     position: relative;
     height: 14px;
     min-width: 1ch;
+    /* box-sizing: border-box; */
 }
 .cmd .cursor-line > span {
     display: inline-block;
@@ -166,6 +167,7 @@ body.terminal {
 }
 .cmd div {
     clear: both;
+    min-height: 14px;
 }
 .cmd .prompt + div {
     clear: right;
@@ -440,7 +442,6 @@ terminal .terminal-output > div {
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -448,7 +449,6 @@ terminal .terminal-output > div {
       border-bottom-color: #000;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -458,7 +458,6 @@ terminal .terminal-output > div {
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -476,7 +475,6 @@ terminal .terminal-output > div {
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -494,7 +492,6 @@ terminal .terminal-output > div {
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -551,6 +548,9 @@ terminal .terminal-output > div {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
     }
+    .cmd div {
+        min-height: calc(var(--size, 1) * 14px);
+    }
     .cmd .cursor.blink {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
@@ -561,7 +561,7 @@ terminal .terminal-output > div {
     }
     .cmd .cursor {
         height: calc(var(--size, 1) * 14px);
-        min-width: var(--char-width, 7.23438) * 1px);
+        min-width: calc(var(--char-width, 7.23438) * 1px);
     }
     .terminal h1::-moz-selection,
     .terminal h2::-moz-selection,
@@ -713,7 +713,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -721,7 +720,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -731,7 +729,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -739,7 +736,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -749,7 +745,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -757,7 +752,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -767,7 +761,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -775,7 +768,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
