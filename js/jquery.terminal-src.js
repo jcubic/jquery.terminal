@@ -1736,7 +1736,6 @@
                     formatted_position = formatted[1];
                 }
                 string = $.terminal.normalize(string);
-                string = crlf(string);
                 var max = $.terminal.length(string);
                 // fix issue with nested formatting where max length is checked before
                 // nested_formatting flatten formatting
