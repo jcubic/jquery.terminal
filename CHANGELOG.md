@@ -1,3 +1,7 @@
+## 1.22.4
+### Bugfix
+* fix cursor in prism when on token in next line
+
 ## 1.22.3
 ### Bugfix
 * reverse css animations so the prompt is visible when you hold key

@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.22.3
+ *           \/              /____/                              version 1.22.4
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Tue, 11 Sep 2018 07:34:57 +0000
+ * Date: Wed, 12 Sep 2018 07:05:10 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -114,6 +114,14 @@ body.terminal {
     border-bottom: 3px solid transparent;
     margin-bottom: -3px;
     background-clip: content-box;
+    display: inline-block;
+    position: relative;
+    height: 14px;
+    min-width: 1ch;
+}
+.cmd .cursor-line > span {
+    display: inline-block;
+    float: left;
 }
 .cmd .cursor.blink {
     -webkit-animation: terminal-blink 1s infinite linear;
@@ -206,12 +214,6 @@ terminal .terminal-output > div {
     animation: terminal-blink-span 1s infinite linear;
     position: absolute;
     top: 0;
-}
-.cmd .cursor.blink > span[style*="background"],
-.cmd .cursor.blink > span.token {
-    postion: relative;
-    min-width: 1ch;
-    display: inline-block;
 }
 /*
  * this is set so animation can select original color as backgound for cursor
@@ -556,6 +558,10 @@ terminal .terminal-output > div {
                 animation: var(--animation, terminal-blink) 1s infinite linear;
         color: var(--color, #aaa);
         background-color: var(--background, #000);
+    }
+    .cmd .cursor {
+        height: calc(var(--size, 1) * 14px);
+        min-width: var(--char-width, 7.23438) * 1px);
     }
     .terminal h1::-moz-selection,
     .terminal h2::-moz-selection,
