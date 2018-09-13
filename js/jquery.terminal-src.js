@@ -1845,9 +1845,6 @@
                 var len = length(string);
                 var prompt = settings.prompt;
                 var c;
-                var noselect = settings.position === (settings.last ? len : len - 1);
-                cursor.toggleClass('noselect', noselect);
-                fix_cursor();
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
@@ -1874,6 +1871,11 @@
                         after.html(format(substring(string, position + 1), c_before));
                     }
                 }
+                // fix for command line selection
+                var noselect = settings.position === (settings.last ? len : len - 1);
+                cursor.toggleClass('noselect', noselect);
+                // fix for animation when changing --animation dynamically
+                fix_cursor();
                 // synchronize css animations (it's not that important because if user
                 // will change animation she should disable animation on span, but it
                 // looks nicer until she disable that inner animation)
@@ -2009,7 +2011,7 @@
                     cursor.html('&nbsp;');
                     after.html('');
                 } else {
-                    draw_cursor_line(string, pos);
+                    draw_cursor_line(string, {position: pos});
                 }
             };
         })();

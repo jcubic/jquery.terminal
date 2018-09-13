@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 13 Sep 2018 17:43:58 +0000
+ * Date: Thu, 13 Sep 2018 18:35:11 +0000
  */
 
 /* TODO:
@@ -1845,10 +1845,6 @@
                 var len = length(string);
                 var prompt = settings.prompt;
                 var c;
-                console.log(position + ' === ' + len);
-                var noselect = settings.position === (settings.last ? len : len - 1);
-                cursor.toggleClass('noselect', noselect);
-                fix_cursor();
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
@@ -1875,6 +1871,11 @@
                         after.html(format(substring(string, position + 1), c_before));
                     }
                 }
+                // fix for command line selection
+                var noselect = settings.position === (settings.last ? len : len - 1);
+                cursor.toggleClass('noselect', noselect);
+                // fix for animation when changing --animation dynamically
+                fix_cursor();
                 // synchronize css animations (it's not that important because if user
                 // will change animation she should disable animation on span, but it
                 // looks nicer until she disable that inner animation)
@@ -2010,7 +2011,7 @@
                     cursor.html('&nbsp;');
                     after.html('');
                 } else {
-                    draw_cursor_line(string, pos);
+                    draw_cursor_line(string, {position: pos});
                 }
             };
         })();
@@ -3208,7 +3209,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '1.22.5',
-        date: 'Thu, 13 Sep 2018 17:43:58 +0000',
+        date: 'Thu, 13 Sep 2018 18:35:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
