@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 13 Sep 2018 16:40:24 +0000
+ * Date: Thu, 13 Sep 2018 17:43:58 +0000
  */
 
 /* TODO:
@@ -1836,11 +1836,18 @@
             // -----------------------------------------------------------------
             // :: Draw line with the cursor
             // -----------------------------------------------------------------
-            function draw_cursor_line(string, position, prompt) {
+            function draw_cursor_line(string, options) {
+                var settings = $.extend({
+                    prompt: '',
+                    last: false
+                }, options);
+                var position = settings.position;
                 var len = length(string);
-                prompt = prompt || '';
+                var prompt = settings.prompt;
                 var c;
-                cursor.toggleClass('noselect', position === len);
+                console.log(position + ' === ' + len);
+                var noselect = settings.position === (settings.last ? len : len - 1);
+                cursor.toggleClass('noselect', noselect);
                 fix_cursor();
                 if (position === len) {
                     before.html(format(string));
@@ -1933,12 +1940,15 @@
                     if (first_len === 0 && array.length === 1) {
                         // skip empty line
                     } else if (pos < first_len) {
-                        draw_cursor_line(array[0], pos, prompt_last_line);
+                        draw_cursor_line(array[0], {
+                            position: pos,
+                            prompt: prompt_last_line
+                        });
                         lines_after(array.slice(1));
                     } else if (pos === first_len) {
                         // first char acter of second line
                         cursor_line.before(div(array[0], prompt_last_line));
-                        draw_cursor_line(array[1] || '', 0);
+                        draw_cursor_line(array[1] || '', {position: 0});
                         if (array.length > 1) {
                             lines_after(array.slice(2));
                         }
@@ -1958,7 +1968,10 @@
                             } else {
                                 new_pos = last_len - from_last;
                             }
-                            draw_cursor_line(last, new_pos);
+                            draw_cursor_line(last, {
+                                position: new_pos,
+                                last: true
+                            });
                         } else {
                             // more lines, cursor in the middle
                             var line_index;
@@ -1984,7 +1997,9 @@
                                     throw new Error(msg);
                                 }
                             }
-                            draw_cursor_line(current, new_pos);
+                            draw_cursor_line(current, {
+                                position: new_pos
+                            });
                             lines_before(array.slice(0, line_index));
                             lines_after(array.slice(line_index + 1));
                         }
@@ -3193,7 +3208,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '1.22.5',
-        date: 'Thu, 13 Sep 2018 16:40:24 +0000',
+        date: 'Thu, 13 Sep 2018 17:43:58 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

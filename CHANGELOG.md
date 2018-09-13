@@ -1,3 +1,7 @@
+## 1.22.6
+### Bugfix
+* fix selection of command line
+
 ## 1.22.5
 ### Bugfix
 * fix issue with \r in command line and cursor position [#436](https://github.com/jcubic/jquery.terminal/issues/436)

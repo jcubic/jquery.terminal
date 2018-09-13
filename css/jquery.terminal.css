@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Thu, 13 Sep 2018 16:40:24 +0000
+ * Date: Thu, 13 Sep 2018 17:43:58 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -57,7 +57,8 @@
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
 }
-.cmd .noselect, .cmd [role="presentation"] > span:last-child {
+.cmd .noselect, .cmd [role="presentation"]:not(.cursor-line) > span:last-child,
+.cmd .cursor-line > span:last-child > span:last-child {
     -webkit-touch-callout: none; /* iOS Safari */
       -webkit-user-select: none; /* Safari */
        -khtml-user-select: none; /* Konqueror HTML */
@@ -131,6 +132,7 @@ body.terminal {
 .cmd .cursor-line > span {
     display: inline-block;
     float: left;
+    overflow: hidden;
 }
 .cmd .cursor.blink {
     -webkit-animation: terminal-blink 1s infinite linear;
@@ -609,7 +611,7 @@ terminal .terminal-output > div {
     .cmd > div span::selection,
     .cmd .prompt span::selection {
         background-color: var(--color, rgba(170, 170, 170, 0.99));
-        color: var(--background, #000);
+        color: var(--background, #000) !important;
     }
     @-webkit-keyframes terminal-blink {
       0%, 50% {
