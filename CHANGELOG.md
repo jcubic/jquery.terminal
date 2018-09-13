@@ -1,3 +1,10 @@
+## 1.22.5
+### Bugfix
+* fix issue with \r in command line and cursor position [#436](https://github.com/jcubic/jquery.terminal/issues/436)
+* fix underline and bar animation after fix for prism
+* disable selecting artificial last character in line for cmd
+* fix cursor animation on background for toggle animation dynamically
+
 ## 1.22.4
 ### Bugfix
 * fix cursor in prism when on token in next line

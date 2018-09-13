@@ -57,6 +57,14 @@
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
 }
+.cmd .noselect, .cmd [role="presentation"] > span:last-child {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
 .terminal img, .terminal audio, .terminal object, .terminal canvas {
     cursor: default;
 }
@@ -118,6 +126,7 @@ body.terminal {
     position: relative;
     height: 14px;
     min-width: 1ch;
+    /* box-sizing: border-box; */
 }
 .cmd .cursor-line > span {
     display: inline-block;
@@ -166,6 +175,7 @@ body.terminal {
 }
 .cmd div {
     clear: both;
+    min-height: 14px;
 }
 .cmd .prompt + div {
     clear: right;
@@ -440,7 +450,6 @@ terminal .terminal-output > div {
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -448,7 +457,6 @@ terminal .terminal-output > div {
       border-bottom-color: #000;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -458,7 +466,6 @@ terminal .terminal-output > div {
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -476,7 +483,6 @@ terminal .terminal-output > div {
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -494,7 +500,6 @@ terminal .terminal-output > div {
       border-bottom-color: #aaa;
       position: relative;
       line-height: 12px;
-      margin-top: 1px;
       border-left: none;
       margin-left: 0;
   }
@@ -523,8 +528,8 @@ terminal .terminal-output > div {
 }
 .bar-animation .cursor.blink span[style*="background"] span,
 .underline-animation .cursor.blink span[style*="background"] span,
-.bar-animation .cmd .cursor.blink > span.token span,
-.underline-animation .cmd .cursor.blink > span.token span {
+.bar-animation.cmd .cursor.blink > span.token span,
+.underline-animation.cmd .cursor.blink > span.token span {
     animation: none;
 }
 @supports (--css: variables) {
@@ -551,6 +556,9 @@ terminal .terminal-output > div {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
     }
+    .cmd div {
+        min-height: calc(var(--size, 1) * 14px);
+    }
     .cmd .cursor.blink {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
@@ -561,7 +569,7 @@ terminal .terminal-output > div {
     }
     .cmd .cursor {
         height: calc(var(--size, 1) * 14px);
-        min-width: var(--char-width, 7.23438) * 1px);
+        min-width: calc(var(--char-width, 7.23438) * 1px);
     }
     .terminal h1::-moz-selection,
     .terminal h2::-moz-selection,
@@ -713,7 +721,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -721,7 +728,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -731,7 +737,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -739,7 +744,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -749,7 +753,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -757,7 +760,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -767,7 +769,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--color, #aaa);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }
@@ -775,7 +776,6 @@ terminal .terminal-output > div {
           border-bottom-color: var(--background, #000);
           position: relative;
           line-height: calc(var(--size, 1) * 12px);
-          margin-top: calc(var(--size, 1) * 1px);
           border-left: none;
           margin-left: 0;
       }

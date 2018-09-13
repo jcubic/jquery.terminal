@@ -1528,9 +1528,30 @@
             }
         }
         // -------------------------------------------------------------------------------
+        // fix for .cursor span animation that should only be applied when
+        // animation is equal to terminal-blink
+        // -------------------------------------------------------------------------------
+        function fix_cursor() {
+            if (animation_supported) {
+                var style = window.getComputedStyle(cursor[0]);
+                var animationName = style.getPropertyValue('--animation');
+                animationName = animationName.replace(/^\s*|\s*$/g, '');
+                var _class = self.attr('class');
+                if (animationName && !animationName.match(/blink/)) {
+                    var className = animationName.replace(/terminal-/, '') + '-animation';
+                    if (!_class.match(className)) {
+                        self.addClass(className);
+                    }
+                } else if (_class.match(/-animation/)) {
+                    self.attr('class', _class.replace(/[a-z]+-animation/g, ''));
+                }
+            }
+        }
+        // -------------------------------------------------------------------------------
         // on mobile you can't delete character if input is empty (event
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
+        // -------------------------------------------------------------------------------
         function fix_textarea(position_only) {
             if (!self.isenabled()) {
                 return;
@@ -1559,6 +1580,7 @@
         // -------------------------------------------------------------------------------
         // terminal animation don't work on android because they animate
         // 2 properties
+        // -------------------------------------------------------------------------------
         if (animation_supported && !is_android) {
             animation = function(toggle) {
                 if (toggle) {
@@ -1736,7 +1758,6 @@
                     formatted_position = formatted[1];
                 }
                 string = $.terminal.normalize(string);
-                string = crlf(string);
                 var max = $.terminal.length(string);
                 // fix issue with nested formatting where max length is checked before
                 // nested_formatting flatten formatting
@@ -1819,6 +1840,8 @@
                 var len = length(string);
                 prompt = prompt || '';
                 var c;
+                cursor.toggleClass('noselect', position === len);
+                fix_cursor();
                 if (position === len) {
                     before.html(format(string));
                     cursor.html('&nbsp;');
@@ -1966,6 +1989,7 @@
                             lines_after(array.slice(line_index + 1));
                         }
                     }
+                    self.find('.cursor-line ~ div:last-of-type').append('<span></span>');
                 } else if (string === '') {
                     before.html('');
                     cursor.html('&nbsp;');
@@ -2348,6 +2372,7 @@
                     if (!silient) {
                         draw_prompt();
                     }
+                    fix_cursor();
                     fix_textarea();
                 }
                 mobile_focus();
@@ -2391,18 +2416,6 @@
         }
         if (!settings.history) {
             history.disable();
-        }
-        // fix for .cursor span animation that should only be applied when
-        // animation is equal to terminal-blink
-        if (animation_supported) {
-            var style = window.getComputedStyle(cursor[0]);
-            var animationName = style.getPropertyValue('--animation');
-            animationName = animationName.replace(/^\s*|\s*$/g, '');
-
-            if (animationName && !animationName.match(/blink/)) {
-                var className = animationName.replace(/terminal-/, '') + '-animation';
-                self.addClass(className);
-            }
         }
         var first_up_history = true;
         // prevent_keypress - hack for Android that was inserting characters on
