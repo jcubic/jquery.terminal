@@ -1,4 +1,4 @@
-## 1.22.6
+## 1.22.6/7
 ### Bugfix
 * fix selection of command line
 
