@@ -528,8 +528,8 @@ terminal .terminal-output > div {
 }
 .bar-animation .cursor.blink span[style*="background"] span,
 .underline-animation .cursor.blink span[style*="background"] span,
-.bar-animation .cmd .cursor.blink > span.token span,
-.underline-animation .cmd .cursor.blink > span.token span {
+.bar-animation.cmd .cursor.blink > span.token span,
+.underline-animation.cmd .cursor.blink > span.token span {
     animation: none;
 }
 @supports (--css: variables) {
