@@ -1,3 +1,7 @@
+## 1.23.0
+### Features
+* ES6 iterator helper that iterate over string that handle formatting, emoji and extra chars.
+
 ## 1.22.6/7
 ### Bugfix
 * fix selection of command line

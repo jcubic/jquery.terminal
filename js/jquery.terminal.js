@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.22.7
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 13 Sep 2018 19:38:25 +0000
+ * Date: Sat, 15 Sep 2018 13:10:04 +0000
  */
 
 /* TODO:
@@ -3208,8 +3208,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '1.22.7',
-        date: 'Thu, 13 Sep 2018 19:38:25 +0000',
+        version: 'DEV',
+        date: 'Sat, 15 Sep 2018 13:10:04 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4332,6 +4332,42 @@
                 }
             } catch (e) {
                 // error is process in exec
+            }
+        },
+        // ---------------------------------------------------------------------
+        // :: ES6 iterator for a given string that handle emoji and formatting
+        // ---------------------------------------------------------------------
+        iterator: function(string) {
+            function formatting(string) {
+                if ($.terminal.is_formatting(string)) {
+                    if (string.match(/\]\\\]/)) {
+                        string = string.replace(/\]\\\]/g, ']\\\\]');
+                    }
+                }
+                return string;
+            }
+            if (typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol') {
+                var len = $.terminal.length(string);
+                var i = 0;
+                var obj = {};
+                obj[Symbol.iterator] = function() {
+                    return {
+                        next: function() {
+                            if (i < len) {
+                                var text = $.terminal.substring(string, i, i + 1);
+                                i++;
+                                return {
+                                    value: formatting(text)
+                                };
+                            } else {
+                                return {
+                                    done: true
+                                };
+                            }
+                        }
+                    };
+                };
+                return obj;
             }
         },
         // ---------------------------------------------------------------------

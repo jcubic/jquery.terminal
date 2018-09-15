@@ -4335,6 +4335,42 @@
             }
         },
         // ---------------------------------------------------------------------
+        // :: ES6 iterator for a given string that handle emoji and formatting
+        // ---------------------------------------------------------------------
+        iterator: function(string) {
+            function formatting(string) {
+                if ($.terminal.is_formatting(string)) {
+                    if (string.match(/\]\\\]/)) {
+                        string = string.replace(/\]\\\]/g, ']\\\\]');
+                    }
+                }
+                return string;
+            }
+            if (typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol') {
+                var len = $.terminal.length(string);
+                var i = 0;
+                var obj = {};
+                obj[Symbol.iterator] = function() {
+                    return {
+                        next: function() {
+                            if (i < len) {
+                                var text = $.terminal.substring(string, i, i + 1);
+                                i++;
+                                return {
+                                    value: formatting(text)
+                                };
+                            } else {
+                                return {
+                                    done: true
+                                };
+                            }
+                        }
+                    };
+                };
+                return obj;
+            }
+        },
+        // ---------------------------------------------------------------------
         formatter: new (function() {
             try {
                 this[Symbol.split] = function(string) {
