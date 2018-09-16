@@ -2082,7 +2082,7 @@
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
-                    prompt_len = strlen(text(last_line));
+                    prompt_len = strlen(text(encoded_last_line));
                 }
             }
             return function() {
@@ -3322,7 +3322,12 @@
             var rep_string;
             var new_position = correct_index(position);
             var start;
-            var global = rex.flags.indexOf('g') !== -1;
+            var global;
+            if (typeof rex.global === "boolean") {
+                global = rex.global;
+            } else {
+                global = reg.flags.indexOf("g") !== -1;
+            }
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // if regex don't have g flag lastIndex will not work
@@ -3925,6 +3930,8 @@
                 }
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
+                window.formatter = formatters[i - 1];
+                console.log(e.stack);
                 formatters.splice(i - 1);
                 throw new $.terminal.Exception('formatting', msg, e.stack);
             }
