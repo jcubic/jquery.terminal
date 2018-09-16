@@ -4977,7 +4977,7 @@
                     if (is_function(settings.exception)) {
                         settings.exception(e, self);
                     } else {
-                        self.error(e.toString());
+                        self.error('Error: ' + (e.message || e));
                     }
                     return;
                     // throw e; // this will show stack in other try..catch
