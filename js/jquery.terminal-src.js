@@ -1537,13 +1537,17 @@
                 var animationName = style.getPropertyValue('--animation');
                 animationName = animationName.replace(/^\s*|\s*$/g, '');
                 var _class = self.attr('class');
+                if (_class.match(/-animation/)) {
+                    _class = _class.replace(/[a-z]+-animation/g, '');
+                }
                 if (animationName && !animationName.match(/blink/)) {
                     var className = animationName.replace(/terminal-/, '') + '-animation';
                     if (!_class.match(className)) {
-                        self.addClass(className);
+                        _class += ' ' + className;
                     }
-                } else if (_class.match(/-animation/)) {
-                    self.attr('class', _class.replace(/[a-z]+-animation/g, ''));
+                }
+                if (_class !== self.attr('class')) {
+                    self.attr('class', _class);
                 }
             }
         }
@@ -3930,8 +3934,6 @@
                 }
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
-                window.formatter = formatters[i - 1];
-                console.log(e.stack);
                 formatters.splice(i - 1);
                 throw new $.terminal.Exception('formatting', msg, e.stack);
             }
@@ -4423,6 +4425,9 @@
         }
     };
     $.terminal.Exception.prototype = new Error();
+    $.terminal.Exception.prototype.toString = function() {
+        return this.message + '\n' + this.stack;
+    };
     // -----------------------------------------------------------------------
     // Helper plugins and functions
     // -----------------------------------------------------------------------

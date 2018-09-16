@@ -1,6 +1,6 @@
 ## 1.23.0
 ### Features
-* ES6 iterator helper that iterate over string that handle formatting, emoji and extra chars.
+* ES6 iterator helper that iterate over string that handle formatting, emoji and extra chars
 ### Bugfix
 * fix tracking replace in Edge (missing RegExp::flags)
 * hide textarea cursor in Edge and IE

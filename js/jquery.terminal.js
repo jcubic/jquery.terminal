@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 16 Sep 2018 11:57:20 +0000
+ * Date: Sun, 16 Sep 2018 12:44:21 +0000
  */
 
 /* TODO:
@@ -1537,13 +1537,17 @@
                 var animationName = style.getPropertyValue('--animation');
                 animationName = animationName.replace(/^\s*|\s*$/g, '');
                 var _class = self.attr('class');
+                if (_class.match(/-animation/)) {
+                    _class = _class.replace(/[a-z]+-animation/g, '');
+                }
                 if (animationName && !animationName.match(/blink/)) {
                     var className = animationName.replace(/terminal-/, '') + '-animation';
                     if (!_class.match(className)) {
-                        self.addClass(className);
+                        _class += ' ' + className;
                     }
-                } else if (_class.match(/-animation/)) {
-                    self.attr('class', _class.replace(/[a-z]+-animation/g, ''));
+                }
+                if (_class !== self.attr('class')) {
+                    self.attr('class', _class);
                 }
             }
         }
@@ -3209,7 +3213,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 16 Sep 2018 11:57:20 +0000',
+        date: 'Sun, 16 Sep 2018 12:44:21 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3930,8 +3934,6 @@
                 }
             } catch (e) {
                 var msg = 'Error in formatter [' + (i - 1) + ']';
-                window.formatter = formatters[i - 1];
-                console.log(e.stack);
                 formatters.splice(i - 1);
                 throw new $.terminal.Exception('formatting', msg, e.stack);
             }
@@ -4423,6 +4425,9 @@
         }
     };
     $.terminal.Exception.prototype = new Error();
+    $.terminal.Exception.prototype.toString = function() {
+        return this.message + '\n' + this.stack;
+    };
     // -----------------------------------------------------------------------
     // Helper plugins and functions
     // -----------------------------------------------------------------------
