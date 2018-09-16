@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 16 Sep 2018 12:59:39 +0000
+ * Date: Sun, 16 Sep 2018 18:40:26 +0000
  */
 
 /* TODO:
@@ -3213,7 +3213,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 16 Sep 2018 12:59:39 +0000',
+        date: 'Sun, 16 Sep 2018 18:40:26 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3326,16 +3326,10 @@
             var rep_string;
             var new_position = correct_index(position);
             var start;
-            var global;
-            if (typeof rex.global === "boolean") {
-                global = rex.global;
-            } else {
-                global = reg.flags.indexOf("g") !== -1;
-            }
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // if regex don't have g flag lastIndex will not work
-                if (global) {
+                if (rex.global) {
                     // fix lastIndex for emoji and characters
                     // that have more then one codepoint
                     var i = correct_index(rex.lastIndex);
@@ -3382,7 +3376,7 @@
                 }
                 // If the regular expression doesn't have the g flag, break here so
                 // we do just one replacement (and so we don't have an endless loop!)
-                if (!global) {
+                if (!rex.global) {
                     break;
                 }
             }

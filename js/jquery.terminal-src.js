@@ -3326,16 +3326,10 @@
             var rep_string;
             var new_position = correct_index(position);
             var start;
-            var global;
-            if (typeof rex.global === "boolean") {
-                global = rex.global;
-            } else {
-                global = reg.flags.indexOf("g") !== -1;
-            }
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // if regex don't have g flag lastIndex will not work
-                if (global) {
+                if (rex.global) {
                     // fix lastIndex for emoji and characters
                     // that have more then one codepoint
                     var i = correct_index(rex.lastIndex);
@@ -3382,7 +3376,7 @@
                 }
                 // If the regular expression doesn't have the g flag, break here so
                 // we do just one replacement (and so we don't have an endless loop!)
-                if (!global) {
+                if (!rex.global) {
                     break;
                 }
             }
