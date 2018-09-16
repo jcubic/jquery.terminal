@@ -57,6 +57,17 @@
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
 }
+/*
+   Internet Explorer & Edge *, Safari ≤ 6
+   source: https://w3reign.com/internet-explorer-edge-css-hacks/
+*/
+@media screen {
+    @media (min-width: 0px) {
+        .cmd .clipboard {
+            margin-left: -40px;
+        }
+    }
+}
 .cmd .noselect, .cmd [role="presentation"]:not(.cursor-line) > span:last-child,
 .cmd .cursor-line > span:last-child > span:last-child {
     -webkit-touch-callout: none; /* iOS Safari */
@@ -617,16 +628,10 @@ terminal .terminal-output > div {
       0%, 50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
-          border-bottom: none;
-          border-left: none;
-          margin-left: 0;
       }
       50.1%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
-          border-bottom: none;
-          border-left: none;
-          margin-left: 0;
       }
     }
 
@@ -634,47 +639,31 @@ terminal .terminal-output > div {
       0%, 50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
-          border-bottom: none;
-          border-left: none;
-          margin-left: 0;
       }
       50.1%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
-          border-bottom: none;
-          border-left: none;
-          margin-left: 0;
       }
     }
     @-moz-keyframes terminal-blink {
       0%, 50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
-          border-bottom: none;
-          border-left: none;
-          margin-left: 0;
       }
       50.1%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
-          border-bottom: none;
-          border-left: none;
-          margin-left: 0;
       }
     }
     @keyframes terminal-blink {
       0%, 50% {
           background-color: var(--color, #aaa);
           color: var(--background, #000);
-          border-bottom: none;
-          border-left: none;
           margin-left: 0;
       }
       50.1%, 100% {
           background-color: var(--background, #000);
           color: var(--color, #aaa);
-          border-bottom: none;
-          border-left: none;
           margin-left: 0;
       }
     }
