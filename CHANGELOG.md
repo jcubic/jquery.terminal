@@ -1,3 +1,7 @@
+## 1.23.1
+### Bugfix
+* fix cursor when terminal is empty
+
 ## 1.23.0
 ### Features
 * ES6 iterator helper that iterate over string that handle formatting, emoji and extra chars

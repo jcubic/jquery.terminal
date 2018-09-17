@@ -2012,7 +2012,7 @@
                     self.find('.cursor-line ~ div:last-of-type').append('<span></span>');
                 } else if (string === '') {
                     before.html('');
-                    cursor.html('&nbsp;');
+                    cursor.html('<span><span>&nbsp;</span></span>');
                     after.html('');
                 } else {
                     draw_cursor_line(string, {position: pos});
