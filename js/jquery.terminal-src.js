@@ -50,7 +50,7 @@
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
-         module, require, define */
+         module, require, define, setInterval, clearInterval */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -7839,7 +7839,11 @@
                     self.stopTime();
                     terminals.remove(terminal_id);
                     if (visibility_observer) {
-                        visibility_observer.unobserve(self[0]);
+                        if (visibility_observer.unobserve) {
+                            visibility_observer.unobserve(self[0]);
+                        } else {
+                            clearInterval(visibility_observer);
+                        }
                     }
                     if (mutation_observer) {
                         mutation_observer.disconnect();
@@ -8359,14 +8363,18 @@
             }
             function observe_visibility() {
                 if (visibility_observer) {
-                    visibility_observer.unobserve(self[0]);
+                    if (visibility_observer.unobserve) {
+                        visibility_observer.unobserve(self[0]);
+                    } else {
+                        clearInterval(visibility_observer);
+                    }
                 }
                 var was_enabled = self.enabled();
                 var visible = self.is(':visible');
                 if (visible) {
                     create_resizers();
                 }
-                visibility_observer = new window.IntersectionObserver(function() {
+                function visibility_checker() {
                     if (self.is(':visible') && !visible) {
                         visible = true;
                         create_resizers();
@@ -8380,10 +8388,15 @@
                         was_enabled = $.terminal.active() === self && self.enabled();
                         self.disable();
                     }
-                }, {
-                    root: document.body
-                });
-                visibility_observer.observe(self[0]);
+                }
+                if (window.IntersectionObserver) {
+                    visibility_observer = new IntersectionObserver(visibility_checker, {
+                        root: document.body
+                    });
+                    visibility_observer.observe(self[0]);
+                } else {
+                    visibility_observer = setInterval(visibility_checker, 400);
+                }
             }
             var in_dom = !!self.closest('body').length;
             var MutationObsrv = window.MutationObserver || window.WebKitMutationObserver;
@@ -8404,7 +8417,7 @@
                 });
                 mutation_observer.observe(document.body, {childList: true});
             }
-            if (window.IntersectionObserver && in_dom) {
+            if (in_dom) {
                 // check if element is in the DOM if not running IntersectionObserver
                 // don't make sense
                 observe_visibility();

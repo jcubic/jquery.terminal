@@ -353,6 +353,18 @@ describe('Terminal utils', function() {
                                    'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz]' +
                                   '[[;#006400;#ffff00]Quux]');
         });
+        it('should return uncahnged string', function() {
+            var input = 'foo bar';
+            var output = $.terminal.from_ansi(input);
+            expect(output).toEqual(input);
+        });
+        it('should escape brakets', function() {
+            var input = 'foo [ bar ]';
+            var output = $.terminal.from_ansi(input, {
+                unixFormattingEscapeBrackets: true
+            });
+            expect(output).toEqual('foo &#91; bar &#93;');
+        });
     });
     describe('$.terminal.overtyping', function() {
         it('should convert to terminal formatting', function() {

@@ -6,6 +6,7 @@
 * hide textarea cursor in Edge and IE11
 * fix cursor in Edge and almost IE11
 * fix calculating prompt length (wrong wrapping because of first line count)
+* use `setInterval` as replacement for Intersection Observer when not supported (IE)
 
 ## 1.22.6/7
 ### Bugfix
