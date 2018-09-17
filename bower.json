@@ -1,6 +1,6 @@
 {
     "name": "jquery.terminal",
-    "version": "1.22.7",
+    "version": "1.23.0",
     "main": [
         "js/jquery.terminal.min.js",
         "js/jquery.mousewheel-min.js",
