@@ -1851,7 +1851,7 @@
                 var c;
                 if (position === len) {
                     before.html(format(string));
-                    cursor.html('&nbsp;');
+                    cursor.html('<span><span>&nbsp;</span></span>');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');

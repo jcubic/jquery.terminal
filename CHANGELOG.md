@@ -3,8 +3,8 @@
 * ES6 iterator helper that iterate over string that handle formatting, emoji and extra chars
 ### Bugfix
 * fix tracking replace in Edge (missing RegExp::flags)
-* hide textarea cursor in Edge and IE
-* fix cursor in Edge
+* hide textarea cursor in Edge and IE11
+* fix cursor in Edge and almost IE11
 * fix calculating prompt length (wrong wrapping because of first line count)
 
 ## 1.22.6/7
