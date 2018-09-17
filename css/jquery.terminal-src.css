@@ -404,43 +404,41 @@ terminal .terminal-output > div {
         -ms-animation-name: terminal-bar;
             animation-name: terminal-bar;
 }
-@media screen {
-    @media (min-width: 0px) {
-        .cmd .clipboard {
-            margin-left: -9999px;
+@supports (-ms-ime-align:auto) {
+    .cmd .clipboard {
+        margin-left: -9999px;
+    }
+    .underline-animation .cursor.blink span span {
+        margin-top: 0;
+    }
+    @keyframes terminal-blink {
+        0%, 50% {
+            background: var(--original-color, #aaa);
+            color: var(--background, #000);
         }
-        .underline-animation .cursor.blink span span {
-            margin-top: 0;
+        50.1%, 100% {
+            background: var(--background, #000);
+            color: var(--original-color, #aaa);
         }
-        @keyframes terminal-blink {
-            0%, 50% {
-                background: var(--original-color, #aaa);
-                color: var(--background, #000);
-            }
-            50.1%, 100% {
-                background: var(--background, #000);
-                color: var(--original-color, #aaa);
-            }
+    }
+    @keyframes terminal-bar {
+        0%, 50% {
+            border-left-color: var(--color, #aaa);
         }
-        @keyframes terminal-bar {
-            0%, 50% {
-                border-left-color: var(--color, #aaa);
-            }
-            50.1%, 100% {
-                border-left-color: var(--background, #000);
-            }
+        50.1%, 100% {
+            border-left-color: var(--background, #000);
         }
-        @keyframes terminal-underline {
-            0%, 50% {
-                border-bottom-color: var(--color, #aaa);
-                line-height: 12px;
-                line-height: calc(var(--size, 1) * 12px);
-            }
-            50.1%, 100% {
-                border-bottom-color: var(--background, #000);
-                line-height: 12px;
-                line-height: calc(var(--size, 1) * 12px);
-            }
+    }
+    @keyframes terminal-underline {
+        0%, 50% {
+            border-bottom-color: var(--color, #aaa);
+            line-height: 12px;
+            line-height: calc(var(--size, 1) * 12px);
+        }
+        50.1%, 100% {
+            border-bottom-color: var(--background, #000);
+            line-height: 12px;
+            line-height: calc(var(--size, 1) * 12px);
         }
     }
 }
