@@ -50,7 +50,7 @@
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
-         module, require, define */
+         module, require, define, setInterval, clearInterval */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -1537,13 +1537,17 @@
                 var animationName = style.getPropertyValue('--animation');
                 animationName = animationName.replace(/^\s*|\s*$/g, '');
                 var _class = self.attr('class');
+                if (_class.match(/-animation/)) {
+                    _class = _class.replace(/[a-z]+-animation/g, '');
+                }
                 if (animationName && !animationName.match(/blink/)) {
                     var className = animationName.replace(/terminal-/, '') + '-animation';
                     if (!_class.match(className)) {
-                        self.addClass(className);
+                        _class += ' ' + className;
                     }
-                } else if (_class.match(/-animation/)) {
-                    self.attr('class', _class.replace(/[a-z]+-animation/g, ''));
+                }
+                if (_class !== self.attr('class')) {
+                    self.attr('class', _class);
                 }
             }
         }
@@ -1847,7 +1851,7 @@
                 var c;
                 if (position === len) {
                     before.html(format(string));
-                    cursor.html('&nbsp;');
+                    cursor.html('<span><span>&nbsp;</span></span>');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
@@ -2082,7 +2086,7 @@
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
-                    prompt_len = strlen(text(last_line));
+                    prompt_len = strlen(text(encoded_last_line));
                 }
             }
             return function() {
@@ -3322,11 +3326,10 @@
             var rep_string;
             var new_position = correct_index(position);
             var start;
-            var global = rex.flags.indexOf('g') !== -1;
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // if regex don't have g flag lastIndex will not work
-                if (global) {
+                if (rex.global) {
                     // fix lastIndex for emoji and characters
                     // that have more then one codepoint
                     var i = correct_index(rex.lastIndex);
@@ -3373,7 +3376,7 @@
                 }
                 // If the regular expression doesn't have the g flag, break here so
                 // we do just one replacement (and so we don't have an endless loop!)
-                if (!global) {
+                if (!rex.global) {
                     break;
                 }
             }
@@ -4335,6 +4338,42 @@
             }
         },
         // ---------------------------------------------------------------------
+        // :: ES6 iterator for a given string that handle emoji and formatting
+        // ---------------------------------------------------------------------
+        iterator: function(string) {
+            function formatting(string) {
+                if ($.terminal.is_formatting(string)) {
+                    if (string.match(/\]\\\]/)) {
+                        string = string.replace(/\]\\\]/g, ']\\\\]');
+                    }
+                }
+                return string;
+            }
+            if (typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol') {
+                var len = $.terminal.length(string);
+                var i = 0;
+                var obj = {};
+                obj[Symbol.iterator] = function() {
+                    return {
+                        next: function() {
+                            if (i < len) {
+                                var text = $.terminal.substring(string, i, i + 1);
+                                i++;
+                                return {
+                                    value: formatting(text)
+                                };
+                            } else {
+                                return {
+                                    done: true
+                                };
+                            }
+                        }
+                    };
+                };
+                return obj;
+            }
+        },
+        // ---------------------------------------------------------------------
         formatter: new (function() {
             try {
                 this[Symbol.split] = function(string) {
@@ -4380,6 +4419,9 @@
         }
     };
     $.terminal.Exception.prototype = new Error();
+    $.terminal.Exception.prototype.toString = function() {
+        return this.message + '\n' + this.stack;
+    };
     // -----------------------------------------------------------------------
     // Helper plugins and functions
     // -----------------------------------------------------------------------
@@ -4929,7 +4971,7 @@
                     if (is_function(settings.exception)) {
                         settings.exception(e, self);
                     } else {
-                        self.error(e.toString());
+                        self.error('Error: ' + (e.message || e));
                     }
                     return;
                     // throw e; // this will show stack in other try..catch
@@ -7797,7 +7839,11 @@
                     self.stopTime();
                     terminals.remove(terminal_id);
                     if (visibility_observer) {
-                        visibility_observer.unobserve(self[0]);
+                        if (visibility_observer.unobserve) {
+                            visibility_observer.unobserve(self[0]);
+                        } else {
+                            clearInterval(visibility_observer);
+                        }
                     }
                     if (mutation_observer) {
                         mutation_observer.disconnect();
@@ -8317,14 +8363,18 @@
             }
             function observe_visibility() {
                 if (visibility_observer) {
-                    visibility_observer.unobserve(self[0]);
+                    if (visibility_observer.unobserve) {
+                        visibility_observer.unobserve(self[0]);
+                    } else {
+                        clearInterval(visibility_observer);
+                    }
                 }
                 var was_enabled = self.enabled();
                 var visible = self.is(':visible');
                 if (visible) {
                     create_resizers();
                 }
-                visibility_observer = new window.IntersectionObserver(function() {
+                function visibility_checker() {
                     if (self.is(':visible') && !visible) {
                         visible = true;
                         create_resizers();
@@ -8338,10 +8388,15 @@
                         was_enabled = $.terminal.active() === self && self.enabled();
                         self.disable();
                     }
-                }, {
-                    root: document.body
-                });
-                visibility_observer.observe(self[0]);
+                }
+                if (window.IntersectionObserver) {
+                    visibility_observer = new IntersectionObserver(visibility_checker, {
+                        root: document.body
+                    });
+                    visibility_observer.observe(self[0]);
+                } else {
+                    visibility_observer = setInterval(visibility_checker, 400);
+                }
             }
             var in_dom = !!self.closest('body').length;
             var MutationObsrv = window.MutationObserver || window.WebKitMutationObserver;
@@ -8362,7 +8417,7 @@
                 });
                 mutation_observer.observe(document.body, {childList: true});
             }
-            if (window.IntersectionObserver && in_dom) {
+            if (in_dom) {
                 // check if element is in the DOM if not running IntersectionObserver
                 // don't make sense
                 observe_visibility();

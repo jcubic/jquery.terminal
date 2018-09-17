@@ -1,3 +1,13 @@
+## 1.23.0
+### Features
+* ES6 iterator helper that iterate over string that handle formatting, emoji and extra chars
+### Bugfix
+* fix tracking replace in Edge (missing RegExp::flags)
+* hide textarea cursor in Edge and IE11
+* fix cursor in Edge and almost IE11
+* fix calculating prompt length (wrong wrapping because of first line count)
+* use `setInterval` as replacement for Intersection Observer when not supported (IE)
+
 ## 1.22.6/7
 ### Bugfix
 * fix selection of command line
