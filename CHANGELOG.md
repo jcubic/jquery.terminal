@@ -1,3 +1,7 @@
+## 1.23.2
+### Bugfix
+* fix too tall cursor (blink included underline)
+
 ## 1.23.1
 ### Bugfix
 * fix cursor when terminal is empty

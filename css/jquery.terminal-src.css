@@ -46,7 +46,7 @@
     opacity: 0.01;
     filter: alpha(opacity = 0.01);
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);*/
-    background: transparent;
+    background-color: transparent;
     border: none;
     color: transparent;
     outline: none;
@@ -134,7 +134,7 @@ body.terminal {
     position: absolute;
     top: 0;
     margin-left: -1px;
-    background: inherit;
+    background-color: inherit;
     color: inherit;
 }
 .cmd .cursor-line > span {
@@ -223,7 +223,7 @@ terminal .terminal-output > div {
     border: 1px solid #aaa;
 }
 .cmd span[data-text] span {
-    background: inherit;
+    background-color: inherit;
     color: inherit;
 }
 /*
@@ -235,49 +235,49 @@ terminal .terminal-output > div {
 }
 @-webkit-keyframes terminal-blink {
     0%, 50% {
-        background: #bbb;
-        background: var(--original-color, #bbb);
+        background-color: #bbb;
+        background-color: var(--original-color, #bbb);
         color: #000;
         color: var(--background, #000);
     }
     50.1%, 100% {
-        background: inherit;
+        background-color: inherit;
         color: inherit;
     }
 }
 @-ms-keyframes terminal-blink {
     0%, 50% {
-        background: #bbb;
-        background: var(--original-color, #bbb);
+        background-color: #bbb;
+        background-color: var(--original-color, #bbb);
         color: #000;
         color: var(--background, #000);
     }
     50.1%, 100% {
-        background: inherit;
+        background-color: inherit;
         color: inherit;
     }
 }
 @-moz-keyframes terminal-blink {
     0%, 50% {
-        background: #aaa;
-        background: var(--original-color, #aaa);
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
     }
     50.1%, 100% {
-        background: inherit;
+        background-color: inherit;
         color: inherit;
     }
 }
 @keyframes terminal-blink {
     0%, 50% {
-        background: #aaa;
-        background: var(--original-color, #aaa);
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
     }
     50.1%, 100% {
-        background: inherit;
+        background-color: inherit;
         color: inherit;
     }
 }
@@ -413,11 +413,11 @@ terminal .terminal-output > div {
     }
     @keyframes terminal-blink {
         0%, 50% {
-            background: var(--original-color, #aaa);
+            background-color: var(--original-color, #aaa);
             color: var(--background, #000);
         }
         50.1%, 100% {
-            background: var(--background, #000);
+            background-color: var(--background, #000);
             color: var(--original-color, #aaa);
         }
     }
@@ -452,11 +452,11 @@ terminal .terminal-output > div {
     }
     @-ms-keyframes terminal-blink {
         0%, 50% {
-            background: #aaa;
+            background-color: #aaa;
             color: #000;
         }
         50.1%, 100% {
-            background: #000;
+            background-color: #000;
             color: #aaa;
         }
     }
@@ -542,8 +542,8 @@ terminal .terminal-output > div {
     color: var(--link-color, #0F60FF);
 }
 .terminal a:hover {
-    background: #0F60FF;
-    background: var(--link-color, #0F60FF);
+    background-color: #0F60FF;
+    background-color: var(--link-color, #0F60FF);
     color: var(--background, #000);
     text-decoration: none;
 }
@@ -684,5 +684,5 @@ terminal .terminal-output > div {
 .cmd .token.string,
 .cmd .style .token.string,
 .cmd .token.token {
-    background: inherit;
+    background-color: inherit;
 }
