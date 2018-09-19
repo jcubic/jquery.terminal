@@ -1,3 +1,9 @@
+## 1.24.0
+### Features
+* new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting
+### Bugfix
+* fix delay when using arrow keys by filtering keys that have delay when hold
+
 ## 1.23.2
 ### Bugfix
 * fix too tall cursor (blink included underline)

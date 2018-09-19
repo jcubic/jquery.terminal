@@ -1126,6 +1126,7 @@
             clickTimeout: 200,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
+            repeatTimeoutKeys: ['HOLD+BACKSPACE'],
             tabs: 4
         }
     };
@@ -2522,7 +2523,8 @@
                     if (hold_pause) {
                         return;
                     }
-                    if (settings.holdRepeatTimeout > 0) {
+                    if (settings.holdRepeatTimeout > 0 &&
+                        key.indexOf(settings.repeatTimeoutKeys) !== -1) {
                         hold_pause = true;
                         self.oneTime(settings.holdRepeatTimeout, 'delay', function() {
                             hold_pause = false;
@@ -4718,6 +4720,7 @@
         clickTimeout: 200,
         holdTimeout: 400,
         holdRepeatTimeout: 200,
+        repeatTimeoutKeys: ['HOLD+BACKSPACE'],
         request: $.noop,
         response: $.noop,
         describe: 'procs',
@@ -8159,6 +8162,7 @@
                 clickTimeout: settings.clickTimeout,
                 holdTimeout: settings.holdTimeout,
                 holdRepeatTimeout: settings.holdRepeatTimeout,
+                repeatTimeoutKeys: settings.repeatTimeoutKeys,
                 keypress: key_press,
                 tabs: settings.tabs,
                 onCommandChange: function(command) {

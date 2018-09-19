@@ -334,6 +334,7 @@ type CmdOptions = {
     clickTimeout?: number;
     holdTimeout?: number;
     holdRepeatTimeout?: number;
+    repeatTimeoutKeys?: string[];
     width?: number;
     historyFilter?: JQueryTerminal.historyFilter;
     commands?: JQueryTerminal.commandsCmdFunction;
@@ -343,9 +344,10 @@ type CmdOptions = {
     keypress?: JQueryTerminal.KeyEventHandler<Cmd>;
     keydown?: JQueryTerminal.KeyEventHandler<Cmd>;
 }
-type CmdOption = "mask" | "caseSensitiveSearch" | "historySize" |  "prompt" | "enabled" | "history" |
-    "tabs" | "onPositionChange" |  "clickTimeout" |  "holdTimeout" |  "holdRepeatTimeout" |  "width" |
-    "historyFilter" | "commands" | "char_width" | "onCommandChange" | "name" | "keypress" | "keydown";
+type CmdOption = "mask" | "caseSensitiveSearch" | "historySize" |  "prompt" | "enabled" |
+    "history" | "tabs" | "onPositionChange" |  "clickTimeout" |  "holdTimeout" |
+    "holdRepeatTimeout" |  "repeatTimeoutKeys" | "width" | "historyFilter" | "commands" |
+    "char_width" | "onCommandChange" | "name" | "keypress" | "keydown";
 
 // we copy methods from jQuery to overwrite it
 // see: https://github.com/Microsoft/TypeScript/issues/978
@@ -408,7 +410,8 @@ type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabl
     "caseSensitiveAutocomplete" | "caseSensitiveSearch" | "clickTimeout" | "holdTimeout" |
     "holdRepeatTimeout" | "request" | "describe" | "onRPCError" | "doubleTab" | "completion" |
     "onInit" | "onClear" | "onBlur" | "onFocus" | "onExit" | "onTerminalChange" | "onPush" |
-    "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings";
+    "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
+    "repeatTimeoutKeys";
 
 
 type TerminalOptions = {
@@ -459,6 +462,7 @@ type TerminalOptions = {
     clickTimeout?: number;
     holdTimeout?: number;
     holdRepeatTimeout?: number;
+    repeatTimeoutKeys?: string[];
     request?: JQueryTerminal.RequestResponseCallback;
     response?: JQueryTerminal.RequestResponseCallback;
     describe?: string;
