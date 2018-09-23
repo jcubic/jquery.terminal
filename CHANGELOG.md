@@ -5,6 +5,7 @@
 * fix delay when using arrow keys by filtering keys that have delay when hold
 * fix skipping lines that have emoji as last character inside formatting
 * fix cursor over tab
+* fix tracking replace for emoji and extra chars when adding formatting multiple times
 
 ## 1.23.2
 ### Bugfix

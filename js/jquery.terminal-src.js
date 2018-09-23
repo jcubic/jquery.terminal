@@ -2911,7 +2911,7 @@
         }
     }
     // -------------------------------------------------------------------------
-    // normalize position for counting emoji
+    // normalize position for counting emoji and extra chars
     // -------------------------------------------------------------------------
     function normalize_position(string, position) {
         if (position === 0) {
@@ -3313,38 +3313,21 @@
             function length(string) {
                 return $.terminal.strip(string).length;
             }
-            // we need to correct position from regex and match to take into account
-            // characters that are created from more when one code point like
-            // emoji or surogate pairs #422
-            function correct_index(index) {
-                var len = length(string.substring(0, index));
-                for (var i = index; i < string.length; ++i) {
-                    var next_len = length(string.substring(0, i));
-                    if (next_len === len + 1) {
-                        return len;
-                    }
-                    len = next_len;
-                }
-                return len;
-            }
             var new_string = "";
             var match;
             var index = 0;
             var rep_string;
-            var new_position = correct_index(position);
+            var new_position = position;
             var start;
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // if regex don't have g flag lastIndex will not work
                 if (rex.global) {
-                    // fix lastIndex for emoji and characters
-                    // that have more then one codepoint
-                    var i = correct_index(rex.lastIndex);
                     // Add any of the original string we just skipped
-                    var last_index = length(substring(string, 0, i));
+                    var last_index = length(substring(string, 0, rex.lastIndex));
                     start = last_index - length(match[0]);
                 } else {
-                    start = correct_index(match.index);
+                    start = match.index;
                     last_index = start + length(match[0]);
                 }
                 if (index < start) {

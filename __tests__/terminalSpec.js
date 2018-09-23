@@ -2175,6 +2175,42 @@ describe('Terminal plugin', function() {
                     expect(char.length).toBeGreaterThan(1);
                 });
             });
+            function test_click(spec) {
+                var input_str = spec[0];
+                var output_str = spec[1];
+                term.set_command(input_str).focus();
+                for (var pos = 0, len = $.terminal.length(input_str); pos < len; ++pos) {
+                    var node = cmd.find('span[data-text]').eq(pos);
+                    click(node);
+                    expect(cmd.display_position()).toBe(pos);
+                    var output = cmd.find('[role="presentation"]').map(function() {
+                        return $(this).text().replace(/\xA0/g, ' ');
+                    }).get().join('\n');
+                    expect([pos, output]).toEqual([pos, output_str]);
+                }
+            }
+            it('should move cursor when over formatting', function() {
+                var formatters = $.terminal.defaults.formatters;
+                false && ($.terminal.defaults.formatters = [
+                    function(string, options) {
+                        var result = [string, options.position];
+                        ['\u0038\ufe0f\u20e3', '\u263a\ufe0f'].forEach(function(emoji) {
+                            result = $.terminal.tracking_replace(
+                                result[0],
+                                    /(\u0038\ufe0f\u20e3|\u263a\ufe0f)/g,
+                                '[[;;;emoji]$1]',
+                                result[1]);
+                        });
+                        return result;
+                    }
+                ]);
+                var test = [
+                    '\u263a\ufe0foo\tbar\t\t\u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                    '\u263a\ufe0foo   bar     \u263a\ufe0fa\u0038\ufe0f\u20e3 \nfoo     b       baz \nfoobar  ba      br'
+                ];
+                test_click(test);
+                $.terminal.defaults.formatters = formatters;
+            });
             it('should align tabs', function() {
                 var tests = [
                     [
@@ -2186,23 +2222,7 @@ describe('Terminal plugin', function() {
                         '\u263a\ufe0foo   bar     \u263a\ufe0fa\u0038\ufe0f\u20e3 \nfoo     b       baz \nfoobar  ba      br'
                     ]
                 ];
-                tests.forEach(function(spec) {
-                    if (spec[2]) {
-                        return;
-                    }
-                    var input_str = spec[0];
-                    var output_str = spec[1];
-                    term.set_command(input_str).focus();
-                    for (var pos = 0, len = $.terminal.length(input_str); pos < len; ++pos) {
-                        var node = cmd.find('span[data-text]').eq(pos);
-                        click(node);
-                        expect(cmd.display_position()).toBe(pos);
-                        var output = cmd.find('[role="presentation"]').map(function() {
-                            return $(this).text().replace(/\xA0/g, ' ');
-                        }).get().join('\n');
-                        expect([pos, output]).toEqual([pos, output_str]);
-                    }
-                });
+                tests.forEach(test_click);
             });
             it('should move cursor on text with backspaces', function() {
                 var input = [
