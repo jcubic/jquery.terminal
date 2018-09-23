@@ -75,6 +75,16 @@ Object.defineProperties(window.HTMLElement.prototype, {
                     set_style_attr();
                     return true;
                 },
+                get: function(target, name) {
+                    if (name === 'setProperty') {
+                        return function(name, value) {
+                            attr[name] = target[name] = value;
+                            set_style_attr();
+                        };
+                    } else {
+                        return target[name];
+                    }
+                },
                 deleteProperty: function(target, name) {
                     name = reversed_mapping[name] || name;
                     delete target[name];
@@ -2170,16 +2180,23 @@ describe('Terminal plugin', function() {
                     [
                         'fo\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr',
                         'fo    bar baz \nf       b   baz \nfa      ba  br'
+                    ],
+                    [
+                        '\u263a\ufe0foo\tbar\t\t\u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                        '\u263a\ufe0foo   bar     \u263a\ufe0fa\u0038\ufe0f\u20e3 \nfoo     b       baz \nfoobar  ba      br'
                     ]
                 ];
                 tests.forEach(function(spec) {
+                    if (spec[2]) {
+                        return;
+                    }
                     var input_str = spec[0];
                     var output_str = spec[1];
-                    term.insert(input_str).focus();
-                    for (var pos = 0; pos < input_str.length; ++pos) {
+                    term.set_command(input_str).focus();
+                    for (var pos = 0, len = $.terminal.length(input_str); pos < len; ++pos) {
                         var node = cmd.find('span[data-text]').eq(pos);
                         click(node);
-                        expect(cmd.position()).toBe(pos);
+                        expect(cmd.display_position()).toBe(pos);
                         var output = cmd.find('[role="presentation"]').map(function() {
                             return $(this).text().replace(/\xA0/g, ' ');
                         }).get().join('\n');

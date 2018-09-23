@@ -1881,6 +1881,11 @@
                 cursor.toggleClass('noselect', noselect);
                 // fix for animation when changing --animation dynamically
                 fix_cursor();
+                var cursor_len = $.terminal.length(cursor.text());
+                if (cursor_len > 1) {
+                    var node = cursor.find('[data-text]')[0];
+                    node.style.setProperty('--length', cursor_len);
+                }
                 // synchronize css animations (it's not that important because if user
                 // will change animation she should disable animation on span, but it
                 // looks nicer until she disable that inner animation)

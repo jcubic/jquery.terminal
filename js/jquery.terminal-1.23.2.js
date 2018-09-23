@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 23 Sep 2018 10:23:50 +0000
+ * Date: Sun, 23 Sep 2018 13:00:10 +0000
  */
 
 /* TODO:
@@ -1881,6 +1881,11 @@
                 cursor.toggleClass('noselect', noselect);
                 // fix for animation when changing --animation dynamically
                 fix_cursor();
+                var cursor_len = $.terminal.length(cursor.text());
+                if (cursor_len > 1) {
+                    var node = cursor.find('[data-text]')[0];
+                    node.style.setProperty('--length', cursor_len);
+                }
                 // synchronize css animations (it's not that important because if user
                 // will change animation she should disable animation on span, but it
                 // looks nicer until she disable that inner animation)
@@ -3215,7 +3220,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 23 Sep 2018 10:23:50 +0000',
+        date: 'Sun, 23 Sep 2018 13:00:10 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

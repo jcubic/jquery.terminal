@@ -3,7 +3,8 @@
 * new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting words
 ### Bugfix
 * fix delay when using arrow keys by filtering keys that have delay when hold
-* fix skipping lines that have emoji as last character in formatting
+* fix skipping lines that have emoji as last character inside formatting
+* fix cursor over tab
 
 ## 1.23.2
 ### Bugfix
