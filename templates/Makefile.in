@@ -112,8 +112,8 @@ tscheck:
 	$(TSC) --noEmit --project tsconfig.json
 
 jsonlint: package.json bower.json
-	$(JSONLINT) package.json > /dev/null
-	$(JSONLINT) bower.json > /dev/null
+	$(JSONLINT) -cq package.json
+	$(JSONLINT) -cq bower.json
 
 publish:
 	$(GIT) clone $(URL) --depth 1 npm

@@ -2166,18 +2166,26 @@ describe('Terminal plugin', function() {
                 });
             });
             it('should align tabs', function() {
-                var input_str = 'fo\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr';
-                var output_str = 'fo    bar baz \nf       b   baz \nfa      ba  br';
-                term.insert(input_str).focus();
-                for (var pos = 0; pos < input_str.length; ++pos) {
-                    var node = cmd.find('span[data-text]').eq(pos);
-                    click(node);
-                    expect(cmd.position()).toBe(pos);
-                    var output = cmd.find('[role="presentation"]').map(function() {
-                        return $(this).text().replace(/\xA0/g, ' ');
-                    }).get().join('\n');
-                    expect([pos, output]).toEqual([pos, output_str]);
-                }
+                var tests = [
+                    [
+                        'fo\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr',
+                        'fo    bar baz \nf       b   baz \nfa      ba  br'
+                    ]
+                ];
+                tests.forEach(function(spec) {
+                    var input_str = spec[0];
+                    var output_str = spec[1];
+                    term.insert(input_str).focus();
+                    for (var pos = 0; pos < input_str.length; ++pos) {
+                        var node = cmd.find('span[data-text]').eq(pos);
+                        click(node);
+                        expect(cmd.position()).toBe(pos);
+                        var output = cmd.find('[role="presentation"]').map(function() {
+                            return $(this).text().replace(/\xA0/g, ' ');
+                        }).get().join('\n');
+                        expect([pos, output]).toEqual([pos, output_str]);
+                    }
+                });
             });
             it('should move cursor on text with backspaces', function() {
                 var input = [
@@ -4090,7 +4098,8 @@ describe('Terminal plugin', function() {
         });
         describe('error', function() {
             var term = $('<div/>').terminal($.noop, {
-                greetings: false
+                greetings: false,
+                numChars: 1000
             });
             var defaults = {
                 raw: false,

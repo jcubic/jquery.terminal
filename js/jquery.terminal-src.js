@@ -3629,8 +3629,13 @@
                 var line_length = line.length;
                 var chars = $.terminal.split_characters(text(line));
                 var last_char = chars[chars.length - 1];
+                var end_index = line_length - last_char.length;
+                var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);
+                if (last_bracket) {
+                    end_index -= 1;
+                }
                 $.terminal.iterate_formatting(line, function(data) {
-                    var last_iteraction = data.index === line_length - last_char.length;
+                    var last_iteraction = data.index === end_index;
                     var chr, substring;
                     if (data.length >= length || last_iteraction ||
                         (data.length === length - 1 &&
@@ -3658,6 +3663,9 @@
                             substring = line.substring(data.index);
                             chr = get_next_character(substring);
                             output = line.substring(first_index, data.index) + chr;
+                            if (last_iteraction && last_bracket && chr !== ']') {
+                                output += ']';
+                            }
                             new_index = data.index + chr.length - 1;
                         }
                         if (keep_words) {
@@ -5371,8 +5379,9 @@
                     anyLinks: settings.anyLinks,
                     char_width: char_size.width
                 };
+                string = $.terminal.normalize(string);
                 var cols = self.cols();
-                if ((strlen(string) > cols ||
+                if ((strlen(text(string)) > cols ||
                      string.match(/\n/)) &&
                     ((settings.wrap === true && options.wrap === undefined) ||
                      settings.wrap === false && options.wrap === true)) {
@@ -5389,7 +5398,6 @@
                         }
                     }
                 } else {
-                    string = $.terminal.normalize(string);
                     string = $.terminal.format(string, format_options);
                     string.split(/\n/).forEach(function(string) {
                         output_buffer.push(string);

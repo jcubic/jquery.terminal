@@ -1,8 +1,9 @@
 ## 1.24.0
 ### Features
-* new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting
+* new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting words
 ### Bugfix
 * fix delay when using arrow keys by filtering keys that have delay when hold
+* fix skipping lines that have emoji as last character in formatting
 
 ## 1.23.2
 ### Bugfix
@@ -49,7 +50,7 @@
 
 ## 1.22.1
 ### Bugfix
-* fix broken jquery.terminal.js because after last change there was not build
+* fix broken jquery.terminal.js because after last change there was no build
 * fix invocation in xml_formatting and dterm
 * add onCommandChange to defaults file so it's picked up by dterm (update d.ts)
 
