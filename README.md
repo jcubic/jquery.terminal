@@ -10,8 +10,8 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&98b655640ce66b788e55b90821b620429b898177)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&1841287e81a9972c4a4a082981c9fcf6)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&b945412e24c2b19fd1776fb79680cbe6abf5aa6a)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&af88726cc6c8845ad92af6d827aa9a1b)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)

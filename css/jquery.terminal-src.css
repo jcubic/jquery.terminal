@@ -226,6 +226,11 @@ terminal .terminal-output > div {
     background-color: inherit;
     color: inherit;
 }
+.cmd [role="presentation"] {
+    overflow: hidden;
+    padding-bottom: 2px;
+    margin-bottom: -2px;
+}
 /*
  * this is set so animation can select original color as backgound for cursor
  * so span can have --color for selection
