@@ -6,7 +6,8 @@
 * fix skipping lines that have emoji as last character inside formatting
 * fix cursor over tab
 * fix tracking replace for emoji and extra chars when adding formatting multiple times
-* fix inconsistency of cursor on background formatting between windows and linux
+* fix inconsistency of cursor on background formatting between Windows and Linux
+* fix echo newline as first character of formatting
 
 ## 1.23.2
 ### Bugfix

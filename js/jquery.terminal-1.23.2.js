@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 28 Sep 2018 07:55:26 +0000
+ * Date: Sun, 07 Oct 2018 14:20:05 +0000
  */
 
 /* TODO:
@@ -3220,7 +3220,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 28 Sep 2018 07:55:26 +0000',
+        date: 'Sun, 07 Oct 2018 14:20:05 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3617,7 +3617,7 @@
                 var line_length = line.length;
                 var chars = $.terminal.split_characters(text(line));
                 var last_char = chars[chars.length - 1];
-                var end_index = line_length - last_char.length;
+                var end_index = line_length - (last_char ? last_char.length : 1);
                 var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);
                 if (last_bracket) {
                     end_index -= 1;
