@@ -1846,6 +1846,7 @@
                     prompt: '',
                     last: false
                 }, options);
+                string = string.replace(/((?!\\).)\\(?:&#93;|])/g, '$1&#93;');
                 var position = settings.position;
                 var len = length(string);
                 var prompt = settings.prompt;

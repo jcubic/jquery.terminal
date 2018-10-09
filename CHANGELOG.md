@@ -9,6 +9,7 @@
 * fix inconsistency of cursor on background formatting between Windows and Linux
 * fix echo newline as first character of formatting
 * fix slash as last character in formatting when generation command line with slash and cursor just after
+* fix escape bracket in command line
 
 ## 1.23.2
 ### Bugfix

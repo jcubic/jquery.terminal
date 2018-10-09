@@ -1691,6 +1691,38 @@ describe('sub plugins', function() {
     });
     // stuff not tested in other places
     describe('cmd', function() {
+        describe('formatting', function() {
+            var formatters = $.terminal.defaults.formatters;
+            var cmd = $('<div/>').cmd();
+            beforeEach(function() {
+                $.terminal.defaults.formatters = formatters.slice();
+                $.terminal.defaults.formatters.push([/((?:[a-z\\\]]|&#93;)+)/g, '[[;red;]$1]']);
+                $.terminal.defaults.formatters.push([/([0-9]]+)/g, '[[;blue;]$1]']);
+                cmd.set('');
+            });
+            afterEach(function() {
+                $.terminal.defaults.formatters = formatters;
+            });
+            it('should have proper formatting', function() {
+                var tests = [
+                    ['foo\\nbar'],
+                    [
+                        'foo\\]bar',
+                        'foo]bar'
+                    ],
+                    ['1111foo\\nbar1111'],
+                    [
+                        '1111foo111foo\\nbarr111baz\\]quux111',
+                        '1111foo111foo\\nbarr111baz]quux111'
+                    ]
+                ];
+                tests.forEach(function(spec) {
+                    cmd.set(spec[0]);
+                    var output = spec[1] || spec[0];
+                    expect(cmd.find('[data-text]').text()).toEqual(nbsp(output));
+                });
+            });
+        });
         describe('display_position', function() {
             var formatters = $.terminal.defaults.formatters, cmd;
             var text = 'hello foo';
