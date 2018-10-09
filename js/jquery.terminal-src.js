@@ -1797,8 +1797,8 @@
         function wrap(string) {
             function formatting(string) {
                 if ($.terminal.is_formatting(string)) {
-                    if (string.match(/\]\\\]/)) {
-                        string = string.replace(/\]\\\]/g, ']\\\\]');
+                    if (string.match(/\\]$/)) {
+                        string = string.replace(/\\]/g, '\\\\]');
                     }
                 } else {
                     if (string.match(/\\$/)) {
@@ -3400,7 +3400,7 @@
             }
             // ----------------------------------------------------------------
             function is_escape_bracket(i) {
-                return string[i] === ']' && string[i - 1] === '\\';
+                return string[i] === '\\' && string[i + 1] === ']';
             }
             // ----------------------------------------------------------------
             function is_text(i) {
@@ -3416,6 +3416,7 @@
             var space = -1;
             var prev_space;
             var length = 0;
+            var offset = 0;
             for (var i = 0; i < string.length; i++) {
                 var substring = string.substring(i);
                 match = substring.match(format_start_re);
@@ -3453,9 +3454,11 @@
                         ++count;
                         ++length;
                     } else if (is_escape_bracket(i)) {
-                        // escape \] counts as one character
-                        --count;
-                        --length;
+                        // escape \] and \\ counts as one character
+                        ++count;
+                        ++length;
+                        offset = 1;
+                        i += 1;
                     } else if (!braket || !have_formatting) {
                         ++count;
                         ++length;
@@ -3467,10 +3470,11 @@
                     }
                     var data = {
                         count: count,
-                        index: i,
+                        index: i - offset,
                         formatting: formatting,
                         length: length,
                         text: in_text,
+                        size: offset + 1,
                         space: space
                     };
                     var ret = callback(data);
@@ -3523,6 +3527,7 @@
             var end_formatting = '';
             var prev_index;
             var re = /(&[^;]+);$/;
+            var offset = 1;
             $.terminal.iterate_formatting(string, function(data) {
                 var m;
                 if (start_index && data.count === start_index + 1) {
@@ -3539,6 +3544,7 @@
                 if (end_index && data.count === end_index) {
                     end_formatting = data.formatting;
                     prev_index = data.index;
+                    offset = data.size;
                 }
                 if (data.count === end_index + 1) {
                     end = data.index;
@@ -3547,7 +3553,7 @@
                         end -= m[1].length;
                     }
                     if (data.formatting) {
-                        end = prev_index + 1;
+                        end = prev_index + offset;
                     }
                 }
             });

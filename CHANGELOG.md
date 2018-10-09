@@ -8,6 +8,7 @@
 * fix tracking replace for emoji and extra chars when adding formatting multiple times
 * fix inconsistency of cursor on background formatting between Windows and Linux
 * fix echo newline as first character of formatting
+* fix slash as last character in formatting when generation command line with slash and cursor just after
 
 ## 1.23.2
 ### Bugfix
