@@ -575,3 +575,14 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     scroll_to_bottom(): JQueryTerminal;
     is_bottom(): boolean;
 }
+
+/** Added an export statement so its possible to import the Libary into angular.
+ *
+ * @example
+ * import * as terminal from 'jquery.terminal';
+ * declare var jQuery: any;
+ *
+ * jQuery(<SELECTOR>).terminal(function(command) {
+ * });
+ **/
+export const JQueryTerminal:any;
