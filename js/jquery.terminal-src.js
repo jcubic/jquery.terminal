@@ -854,7 +854,10 @@
         var message = (label ? label + ': ' : '') + exception_message(e);
         if (excepctions.indexOf(message) === -1) {
             excepctions.push(message);
-            alert(message + (e.stack ? '\n' + e.stack : ''));
+            setTimeout(function() {
+                throw e;
+            }, 0);
+            //alert(message + (e.stack ? '\n' + e.stack : ''));
         }
     }
     // ---------------------------------------------------------------------
@@ -1349,7 +1352,7 @@
                 var re = /\S[\n\s]{2,}|[\n\s]+\S?/;
                 var match = command.slice(position).match(re);
                 if (!match || match[0].match(/^\s+$/)) {
-                    self.position(command.length);
+                    self.position(text(command).length);
                 } else if (match[0][0] !== ' ') {
                     position += match.index + 1;
                 } else {
@@ -1387,8 +1390,9 @@
             'CTRL+V': paste_event,
             'META+V': paste_event,
             'CTRL+K': function() {
-                if (command.length - position) {
-                    kill_text = self['delete'](command.length - position);
+                var len = text(command).length;
+                if (len > position) {
+                    kill_text = self['delete'](len - position);
                     text_to_clipboard(self, kill_text);
                 }
                 return false;
@@ -1498,7 +1502,7 @@
         }
         // -------------------------------------------------------------------------------
         function right() {
-            if (position < command.length) {
+            if (position < text(command).length) {
                 self.position(1, true);
             }
             return false;
@@ -1509,7 +1513,7 @@
         }
         // -------------------------------------------------------------------------------
         function end() {
-            self.position(command.length);
+            self.position(text(command).length);
         }
         // -------------------------------------------------------------------------------
         function mobile_focus() {
@@ -1758,18 +1762,18 @@
                     position: position
                 });
                 var formatted = $.terminal.apply_formatters(string, options);
-                string = formatted[0];
+                var output = formatted[0];
+                var max = $.terminal.length(output);
                 if (!skip_formatted_position) {
                     formatted_position = formatted[1];
+                    // fix issue with nested formatting where max length
+                    // is checked before nested_formatting flatten formatting
+                    if (formatted_position > max) {
+                        formatted_position = max;
+                    }
                 }
-                string = $.terminal.normalize(string);
-                var max = $.terminal.length(string);
-                // fix issue with nested formatting where max length is checked before
-                // nested_formatting flatten formatting
-                if (formatted_position > max) {
-                    formatted_position = max;
-                }
-                return string;
+                output = $.terminal.normalize(output);
+                return output;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
                 return string;
@@ -1827,6 +1831,7 @@
         function length(str) {
             return $.terminal.length(str);
         }
+        // ---------------------------------------------------------------------
         function substring(str, start, end) {
             return $.terminal.substring(str, start, end);
         }
@@ -1846,7 +1851,6 @@
                     prompt: '',
                     last: false
                 }, options);
-                string = string.replace(/((?!\\).)\\(?:&#93;|])/g, '$1&#93;');
                 var position = settings.position;
                 var len = length(string);
                 var prompt = settings.prompt;
@@ -1927,21 +1931,26 @@
                         string = command.replace(/./g, settings.mask);
                         break;
                 }
-                string = formatting(string);
-                var pos = formatted_position;
+                var formatted = formatting(string);
+                var pos;
+                if (length(formatted) === text(string).length) {
+                    pos = position;
+                } else {
+                    pos = formatted_position;
+                }
                 var i;
                 self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
                 before.html('');
                 // long line
-                if (strlen(text(string)) > num_chars - prompt_len - 1 ||
-                    string.match(/\n/)) {
-                    var tabs = string.match(/\t/g);
-                    var original_string = string;
+                if (strlen(text(formatted)) > num_chars - prompt_len - 1 ||
+                    formatted.match(/\n/)) {
+                    var tabs = formatted.match(/\t/g);
+                    var original_string = formatted;
                     //quick tabulation hack
                     if (tabs) {
-                        string = string.replace(/\t/g, '\x00\x00\x00\x00');
+                        formatted = formatted.replace(/\t/g, '\x00\x00\x00\x00');
                     }
-                    var array = get_splitted_command_line(string);
+                    var array = get_splitted_command_line(formatted);
                     if (tabs) {
                         array = $.map(array, function(line) {
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
@@ -2017,12 +2026,12 @@
                         }
                     }
                     self.find('.cursor-line ~ div:last-of-type').append('<span></span>');
-                } else if (string === '') {
+                } else if (formatted === '') {
                     before.html('');
                     cursor.html('<span><span>&nbsp;</span></span>');
                     after.html('');
                 } else {
-                    draw_cursor_line(string, {position: pos});
+                    draw_cursor_line(formatted, {position: pos});
                 }
             };
         })();
@@ -2123,10 +2132,15 @@
                 });
             }
         }
+        // ---------------------------------------------------------------------
         function fire_change_command() {
             if (is_function(settings.onCommandChange)) {
                 settings.onCommandChange.call(self, command);
             }
+        }
+        // ---------------------------------------------------------------------
+        function clean(string) {
+            return string.replace(/((?!\\).)\\(?:&#93;|])/g, '$1&#93;');
         }
         // ---------------------------------------------------------------------
         // :: Command Line Methods
@@ -2175,16 +2189,16 @@
                         // to use +
                         removed = command.slice(0, position).slice(n);
                         command = command.slice(0, position + n) +
-                            command.slice(position, command.length);
+                            command.slice(position, text(command).length);
                         if (!stay) {
                             self.position(position + n);
                         }
                         fire_change_command();
                     }
-                } else if (command !== '' && position < command.length) {
+                } else if (command !== '' && position < text(command).length) {
                     removed = command.slice(position).slice(0, n);
                     command = command.slice(0, position) +
-                        command.slice(position + n, command.length);
+                        command.slice(position + n, text(command).length);
                     fire_change_command();
                 }
                 redraw();
@@ -2193,9 +2207,9 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
-                    command = string;
+                    command = clean(string);
                     if (!stay) {
-                        self.position(command.length);
+                        self.position(text(command).length);
                     }
                     redraw();
                     fix_textarea();
@@ -2238,7 +2252,9 @@
                 }
             },
             insert: function(string, stay) {
-                if (position === command.length) {
+                string = clean(string);
+                var len = text(string).length;
+                if (position === len) {
                     command += string;
                 } else if (position === 0) {
                     command = string + command;
@@ -2247,7 +2263,7 @@
                         string + command.slice(position);
                 }
                 if (!stay) {
-                    self.position(string.length, true, true);
+                    self.position(len, true, true);
                 } else {
                     fix_textarea();
                 }
@@ -2303,12 +2319,13 @@
             position: function(n, relative, silent) {
                 if (typeof n === 'number') {
                     var pos = position;
+                    var len = text(command).length;
                     if (relative) {
                         position += n;
                     } else if (n < 0) {
                         position = 0;
-                    } else if (n > command.length) {
-                        position = command.length;
+                    } else if (n > len) {
+                        position = len;
                     } else {
                         position = n;
                     }
@@ -2336,7 +2353,7 @@
                     return formatted_position;
                 } else {
                     var string = formatting(command, true);
-                    var len = $.terminal.length(string);
+                    var len = length(string);
                     var command_len = text(command).length;
                     var new_formatted_pos;
                     if (relative) {
@@ -2345,6 +2362,10 @@
                         new_formatted_pos = len;
                     } else {
                         new_formatted_pos = n;
+                    }
+                    if (text(string).length === length(command)) {
+                        formatted_position = new_formatted_pos;
+                        return self.position(new_formatted_pos);
                     }
                     if (len === new_formatted_pos) {
                         formatted_position = new_formatted_pos;
@@ -2722,7 +2743,7 @@
                     if (!$target.is('.prompt') && down) {
                         if (enabled) {
                             if ($target.is('.cmd')) {
-                                self.position(command.length);
+                                self.position(text(command).length);
                             } else {
                                 self.display_position(get_char_pos(e));
                             }
