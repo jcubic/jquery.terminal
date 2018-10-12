@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 10 Oct 2018 11:49:24 +0000
+ * Date: Fri, 12 Oct 2018 19:17:10 +0000
  */
 
 /* TODO:
@@ -3242,7 +3242,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 10 Oct 2018 11:49:24 +0000',
+        date: 'Fri, 12 Oct 2018 19:17:10 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

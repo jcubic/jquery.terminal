@@ -89,7 +89,7 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 test:
-	$(JEST) --coverage
+	$(JEST) --coverage --testMatch '**/__tests__/*.spec.js'
 
 coveralls:
 	$(CAT) ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
