@@ -28,8 +28,8 @@
          }
          return result;
      }
-     var file = query().file || '__tests__/browser/base.js';
-     if (file.match(/^__tests__/)) {
+     var file = query().file || 'browser_test_files/base.js';
+     if (file.match(/^browser_test_files/)) {
          $.getScript(file);
      }
     </script>
