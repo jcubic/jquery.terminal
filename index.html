@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>jQuery Terminal</title>
+    <meta name="robots" content="noindex"/>
+    <meta name="googlebot" content="noindex"/>
+    <link rel="stylesheet" href="https://rawgit.com/jcubic/jquery.terminal/master/css/jquery.terminal.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/prismjs@1.14.0/themes/prism.css"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://unpkg.com/js-polyfills/keyboard.js"></script>
+    <script src="https://unpkg.com/prismjs@1.8.1/prism.js"></script>
+    <script src="js/jquery.terminal.js"></script>
+    <script src="js/jquery.mousewheel-min.js"></script>
+    <script src="js/less.js"></script>
+    <script src="js/prism.js"></script>
+    <script src="js/unix_formatting.js"></script>
+    <script>
+     function query() {
+         var result = {};
+         var search = document.location.search;
+         if (search) {
+             search.substring(1).split('&').map(function(pair) {
+                 pair = pair.split('=');
+                 var key = decodeURIComponent(pair[0]);
+                 var value = decodeURIComponent(pair.slice(1).join('='));
+                 result[key] = value;
+             });
+         }
+         return result;
+     }
+     var file = query().file || '__tests__/browser/base.js';
+     if (file.match(/^__tests__/)) {
+         $.getScript(file);
+     }
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
