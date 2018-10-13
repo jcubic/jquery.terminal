@@ -2180,7 +2180,7 @@
                 return history;
             },
             'delete': function(n, stay) {
-                var removed;
+                var removed, string;
                 if (n === 0) {
                     return "";
                 } else if (n < 0) {
@@ -2188,18 +2188,25 @@
                         // this may look weird but if n is negative we need
                         // to use +
                         removed = command.slice(0, position).slice(n);
-                        command = command.slice(0, position + n) +
-                            command.slice(position, text(command).length);
+                        string = text(command);
+                        string = string.slice(0, position + n) +
+                            string.slice(position, string.length);
                         if (!stay) {
                             self.position(position + n);
                         }
                         fire_change_command();
                     }
-                } else if (command !== '' && position < text(command).length) {
-                    removed = command.slice(position).slice(0, n);
-                    command = command.slice(0, position) +
-                        command.slice(position + n, text(command).length);
+                } else if (command !== '') {
+                    string = text(command);
+                    if (position < string.length) {
+                        removed = string.slice(position).slice(0, n);
+                        string = string.slice(0, position) +
+                            string.slice(position + n, string.length);
+                    }
                     fire_change_command();
+                }
+                if (removed) {
+                    command = clean(string);
                 }
                 redraw();
                 fix_textarea();
@@ -4135,6 +4142,7 @@
         },
         // ---------------------------------------------------------------------
         // :: return string where array items are in columns padded spaces
+        // :: after adding align tabs arr.join('\t\t') looks much better
         // ---------------------------------------------------------------------
         columns: function(array, cols, space) {
             var no_formatting = array.map(function(string) {
@@ -6716,7 +6724,7 @@
                                 }
                             } else if (options.doubleTab !== false) {
                                 echo_command();
-                                var text = matched.reverse().join('\t');
+                                var text = matched.slice().reverse().join('\t\t');
                                 self.echo($.terminal.escape_brackets(text), {
                                     keepWords: true,
                                     formatters: false
