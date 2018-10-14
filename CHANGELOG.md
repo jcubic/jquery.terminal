@@ -1,4 +1,6 @@
 ## 1.24.0
+### Breaking
+* braking/not breaking - from now on if terminal is added to body it's in fact added to div inside body
 ### Features
 * new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting words
 * use setTimeout instead of alert to show exception that can be shown in terminal
@@ -14,6 +16,7 @@
 * fix slash as last character in formatting when generation command line with slash and cursor just after
 * fix escape bracket in command line
 * fix relative and absolute urls with default `anyLinks: false`
+* fix android and iPhone issues
 
 ## 1.23.2
 ### Bugfix

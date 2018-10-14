@@ -2868,8 +2868,6 @@
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
-    var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    // -------------------------------------------------------------------------
     var is_key_native = (function is_key_native() {
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             return false;
@@ -6255,6 +6253,10 @@
         }
         // ---------------------------------------------------------------------
         var self = this;
+        if (self.is('body,html')) {
+            self = $('<div/>').appendTo('body');
+            $('body').addClass('full-screen-terminal');
+        }
         if (this.length > 1) {
             return this.each(function() {
                 $.fn.terminal.call(
@@ -6273,7 +6275,6 @@
             throw new $.terminal.Exception(msg);
         }
         // var names = []; // stack if interpreter names
-        var scroll_object;
         var prev_command; // used for name on the terminal if not defined
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
@@ -7468,18 +7469,18 @@
             scroll: function(amount) {
                 var pos;
                 amount = Math.round(amount);
-                if (scroll_object.prop) { // work with jQuery > 1.6
-                    if (amount > scroll_object.prop('scrollTop') && amount > 0) {
-                        scroll_object.prop('scrollTop', 0);
+                if (self.prop) { // work with jQuery > 1.6
+                    if (amount > self.prop('scrollTop') && amount > 0) {
+                        self.prop('scrollTop', 0);
                     }
-                    pos = scroll_object.prop('scrollTop');
-                    scroll_object.scrollTop(pos + amount);
+                    pos = self.prop('scrollTop');
+                    self.scrollTop(pos + amount);
                 } else {
-                    if (amount > scroll_object.attr('scrollTop') && amount > 0) {
-                        scroll_object.attr('scrollTop', 0);
+                    if (amount > self.attr('scrollTop') && amount > 0) {
+                        self.attr('scrollTop', 0);
                     }
-                    pos = scroll_object.attr('scrollTop');
-                    scroll_object.scrollTop(pos + amount);
+                    pos = self.attr('scrollTop');
+                    self.scrollTop(pos + amount);
                 }
                 return self;
             },
@@ -7899,12 +7900,12 @@
             // -------------------------------------------------------------
             scroll_to_bottom: function() {
                 var scrollHeight;
-                if (scroll_object.prop) {
-                    scrollHeight = scroll_object.prop('scrollHeight');
+                if (self.prop) {
+                    scrollHeight = self.prop('scrollHeight');
                 } else {
-                    scrollHeight = scroll_object.attr('scrollHeight');
+                    scrollHeight = self.attr('scrollHeight');
                 }
-                scroll_object.scrollTop(scrollHeight);
+                self.scrollTop(scrollHeight);
                 return self;
             },
             // -------------------------------------------------------------
@@ -7916,15 +7917,9 @@
                     return false;
                 } else {
                     var scroll_height, scroll_top, height;
-                    if (self.is('body')) {
-                        scroll_height = $(document).height();
-                        scroll_top = $(window).scrollTop();
-                        height = window.innerHeight;
-                    } else {
-                        scroll_height = scroll_object[0].scrollHeight;
-                        scroll_top = scroll_object.scrollTop();
-                        height = scroll_object.outerHeight();
-                    }
+                    scroll_height = self[0].scrollHeight;
+                    scroll_top = self.scrollTop();
+                    height = self.outerHeight();
                     var limit = scroll_height - settings.scrollBottomOffset;
                     return scroll_top + height > limit;
                 }
@@ -8054,16 +8049,6 @@
         }
         if (settings.height) {
             self.height(settings.height);
-        }
-        // scrollTop need be on html but scrollHeight taken from body
-        // on Safari both on body it's easier to just put both in selector and it works
-        if (settings.scrollObject !== null) {
-            scroll_object = $(settings.scrollObject);
-        } else {
-            scroll_object = self;
-        }
-        if (scroll_object.is('body') && !is_safari) {
-            scroll_object = $('html,body');
         }
         // register ajaxSend for cancel requests on CTRL+D
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
@@ -8280,10 +8265,10 @@
                     var scroll_top;
                     self.find('.cmd textarea').on('focus', function() {
                         if (typeof scroll_top !== 'undefined') {
-                            scroll_object.scrollTop(scroll_top);
+                            self.scrollTop(scroll_top);
                         }
                     }).on('blur', function() {
-                        scroll_top = scroll_object.scrollTop();
+                        scroll_top = self.scrollTop();
                     });
                     self.mousedown(function(e) {
                         if (!scrollbar_event(e, fill)) {

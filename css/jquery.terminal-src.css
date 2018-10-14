@@ -78,6 +78,9 @@
     overflow-y: auto;
     /* overflow-x: hidden; */
 }
+terminal.temp {
+    visibility: hidden;
+}
 .terminal {
     contain: content;
 }
@@ -85,10 +88,17 @@ body.terminal {
     min-height: 100vh;
     height: 100%;
 }
-body.terminal {
-    margin: 0;
+html {
+    height: 100%;
 }
-.terminal > div {
+body.terminal, body.full-screen-terminal {
+    margin: 0;
+    height: 100%;
+}
+body.full-screen-terminal .terminal {
+    height: 100%;
+}
+.terminal > div:not(.font) {
     min-height: 100%;
 }
 .terminal > .resizer, .terminal > .font .resizer {
