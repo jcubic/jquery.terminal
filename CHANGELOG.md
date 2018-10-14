@@ -3,6 +3,7 @@
 * new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting words
 * use setTimeout instead of alert to show exception that can be shown in terminal
 * allow to move cursor when regex formatter don't change length of the string
+* don't style links if they don't have href
 ### Bugfix
 * fix delay when using arrow keys by filtering keys that have delay when hold
 * fix skipping lines that have emoji as last character inside formatting
@@ -12,6 +13,7 @@
 * fix echo newline as first character of formatting
 * fix slash as last character in formatting when generation command line with slash and cursor just after
 * fix escape bracket in command line
+* fix relative and absolute urls with default `anyLinks: false`
 
 ## 1.23.2
 ### Bugfix

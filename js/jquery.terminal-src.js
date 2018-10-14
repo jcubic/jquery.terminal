@@ -4061,10 +4061,13 @@
                                     result = '<a href="mailto:' + data + '"';
                                 } else {
                                     if (!settings.anyLinks &&
-                                        !data.match(/^(https?|ftp):\/\//)) {
+                                        !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
                                         data = '';
                                     }
-                                    result = '<a target="_blank" href="' + data + '"';
+                                    result = '<a target="_blank"';
+                                    if (data) {
+                                        result += ' href="' + data + '"';
+                                    }
                                     var rel = ["noopener"];
                                     if (settings.linksNoReferrer) {
                                         rel.unshift("noreferrer");

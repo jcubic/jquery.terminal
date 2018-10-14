@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 14 Oct 2018 11:49:28 +0000
+ * Date: Sun, 14 Oct 2018 15:04:42 +0000
  */
 
 /* TODO:
@@ -3250,7 +3250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 14 Oct 2018 11:49:28 +0000',
+        date: 'Sun, 14 Oct 2018 15:04:42 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4061,10 +4061,13 @@
                                     result = '<a href="mailto:' + data + '"';
                                 } else {
                                     if (!settings.anyLinks &&
-                                        !data.match(/^(https?|ftp):\/\//)) {
+                                        !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
                                         data = '';
                                     }
-                                    result = '<a target="_blank" href="' + data + '"';
+                                    result = '<a target="_blank"';
+                                    if (data) {
+                                        result += ' href="' + data + '"';
+                                    }
                                     var rel = ["noopener"];
                                     if (settings.linksNoReferrer) {
                                         rel.unshift("noreferrer");
