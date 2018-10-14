@@ -677,27 +677,23 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
-                    '<a target="_blank" href=""' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                    '<a target="_blank" rel="noopener"' +
+                        ' tabindex="1000">xss</a>'
                 ],
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
                     '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                        ' rel="noopener" tabindex="1000">xss</a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
-                    '<a target="_blank" href=""' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                    '<a target="_blank" rel="noopener"' +
+                        ' tabindex="1000">xss</a>'
                 ],
                 [
                     "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
-                    '<a target="_blank" href=""' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                    '<a target="_blank" rel="noopener"' +
+                        ' tabindex="1000">xss</a>'
                 ],
             ];
             tests.forEach(function(spec) {
