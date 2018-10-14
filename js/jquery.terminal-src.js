@@ -2259,16 +2259,17 @@
                 }
             },
             insert: function(string, stay) {
-                string = clean(string);
+                var bare_command = text(command);
                 var len = text(string).length;
-                if (position === len) {
-                    command += string;
+                if (position === bare_command.length) {
+                    string = bare_command + string;
                 } else if (position === 0) {
-                    command = string + command;
+                    string = string + bare_command;
                 } else {
-                    command = command.slice(0, position) +
-                        string + command.slice(position);
+                    string = bare_command.slice(0, position) +
+                        string + bare_command.slice(position);
                 }
+                command = clean(string);
                 if (!stay) {
                     self.position(len, true, true);
                 } else {

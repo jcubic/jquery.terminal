@@ -252,7 +252,7 @@
         var settings = $.extend({
             onExit: $.noop
         }, options);
-        if (!this.terminal) {
+        if (!(this instanceof $.fn.init && this.terminal)) {
             throw new Error('This plugin require jQuery Terminal');
         }
         var term = this.terminal();
