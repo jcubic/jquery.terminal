@@ -16,7 +16,7 @@
 * fix slash as last character in formatting when generation command line with slash and cursor just after
 * fix escape bracket in command line
 * fix relative and absolute urls with default `anyLinks: false`
-* fix android and iPhone issues
+* fix android and iPhone issues [#443](https://github.com/jcubic/jquery.terminal/issues/443) [#414](https://github.com/jcubic/jquery.terminal/issues/414)
 
 ## 1.23.2
 ### Bugfix
