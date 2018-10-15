@@ -519,7 +519,7 @@
                         result.push(parts[i]);
                     } else {
                         var len = parts[i].length;
-                        if (len >= n) {
+                        if (len > n) {
                             result.push(parts[i].substring(0, n));
                             break;
                         } else {
