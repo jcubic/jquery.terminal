@@ -255,7 +255,7 @@
             white: '#818181'
         },
         bold: {
-            black: '#000',
+            black: '#444',
             red: '#F55',
             green: '#44D544',
             yellow: '#FF5',
@@ -339,12 +339,9 @@
 
             49: 'transparent' // default background
         };
-        function format_ansi(code) {
+        function format_ansi(code, state) {
             var controls = code.split(';');
             var num;
-            var faited = false;
-            var reverse = false;
-            var bold = false;
             var styles = [];
             var output_color = '';
             var output_background = '';
@@ -355,10 +352,15 @@
             var palette = $.terminal.ansi_colors.palette;
             function set_styles(num) {
                 switch (num) {
+                    case 0:
+                        Object.keys(state).forEach(function(key) {
+                            delete state[key];
+                        });
+                        break;
                     case 1:
                         styles.push('b');
-                        bold = true;
-                        faited = false;
+                        state.bold = true;
+                        state.faited = false;
                         break;
                     case 4:
                         styles.push('u');
@@ -381,12 +383,12 @@
                         if (_ex_color || _ex_background) {
                             _process_true_color = 0;
                         } else {
-                            faited = true;
-                            bold = false;
+                            state.faited = true;
+                            state.bold = false;
                         }
                         break;
                     case 7:
-                        reverse = true;
+                        state.reverse = true;
                         break;
                     default:
                         if (controls.indexOf('5') === -1) {
@@ -451,7 +453,7 @@
                     }
                 }
             }
-            if (reverse) {
+            if (state.reverse) {
                 if (output_color || output_background) {
                     var tmp = output_background;
                     output_background = output_color;
@@ -461,29 +463,38 @@
                     output_background = 'white';
                 }
             }
-            var colors, color, background, backgrounds;
-            if (bold) {
-                colors = backgrounds = $.terminal.ansi_colors.bold;
-            } else if (faited) {
-                colors = backgrounds = $.terminal.ansi_colors.faited;
+            output_color = output_color || state.color;
+            output_background = output_background || state.background;
+            state.background = output_background;
+            state.color = output_color;
+            var colors, color, background;
+            if (state.bold) {
+                colors = $.terminal.ansi_colors.bold;
+            } else if (state.faited) {
+                colors = $.terminal.ansi_colors.faited;
             } else {
-                colors = backgrounds = $.terminal.ansi_colors.normal;
+                colors = $.terminal.ansi_colors.normal;
             }
-            if (_ex_color) {
-                color = output_color;
-            } else if (output_color === 'inherit') {
-                color = output_color;
-            } else {
-                color = colors[output_color];
+            if (typeof output_color !== 'undefined') {
+                if (_ex_color) {
+                    color = output_color;
+                } else if (output_color === 'inherit') {
+                    color = output_color;
+                } else {
+                    color = colors[output_color];
+                }
             }
-            if (_ex_background) {
-                background = output_background;
-            } else if (output_background === 'transparent') {
-                background = output_background;
-            } else {
-                background = backgrounds[output_background];
+            if (typeof output_background !== 'undefined') {
+                if (_ex_background) {
+                    background = output_background;
+                } else if (output_background === 'transparent') {
+                    background = output_background;
+                } else {
+                    background = $.terminal.ansi_colors.normal[output_background];
+                }
             }
-            return [styles.join(''), color, background];
+            var ret = [styles.join(''), color, background];
+            return ret;
         }
         return function from_ansi(input, options) {
             options = options || {};
@@ -492,13 +503,11 @@
                 unixFormattingEscapeBrackets: false,
                 position: 0
             }, options);
+            var state = {}; // used to inherit vales from previous formatting
             var new_position = settings.position;
             var position = new_position;
             var result;
-            //merge multiple codes
-            /*input = input.replace(/((?:\x1B\[[0-9;]*[A-Za-z])*)/g, function(group) {
-              return group.replace(/m\x1B\[/g, ';');
-              });*/
+            input = input.replace(/\r\n\x1b\[1A/g, '');
             var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
             if (splitted.length === 1) {
                 if (settings.unixFormattingEscapeBrackets) {
@@ -519,7 +528,7 @@
                     splitted = splitted.slice(3);
                 }
             }
-            var prev_color, prev_background, code, match;
+            var code, match;
             var inside = false;
             for (var i = 0; i < splitted.length; ++i) {
                 match = splitted[i].match(/^\x1B\[([0-9;]*)([A-Za-z])$/);
@@ -542,40 +551,17 @@
                     }
                     switch (match[2]) {
                         case 'm':
-                            if (+match[1] !== 0) {
-                                code = format_ansi(match[1]);
-                            }
+                            code = format_ansi(match[1], state);
                             if (inside) {
                                 output.push(']');
                                 if (+match[1] === 0) {
-                                    //just closing
                                     inside = false;
-                                    prev_color = prev_background = '';
                                 } else {
-                                    // someone forget to close - move to next
-                                    code[1] = code[1] || prev_color;
-                                    code[2] = code[2] || prev_background;
                                     output.push('[[' + code.join(';') + ']');
-                                    // store colors to next use
-                                    if (code[1]) {
-                                        prev_color = code[1];
-                                    }
-                                    if (code[2]) {
-                                        prev_background = code[2];
-                                    }
                                 }
                             } else if (+match[1] !== 0) {
-                                inside = true;
-                                code[1] = code[1] || prev_color;
-                                code[2] = code[2] || prev_background;
                                 output.push('[[' + code.join(';') + ']');
-                                // store colors to next use
-                                if (code[1]) {
-                                    prev_color = code[1];
-                                }
-                                if (code[2]) {
-                                    prev_background = code[2];
-                                }
+                                inside = true;
                             }
                             break;
                     }
@@ -595,7 +581,7 @@
             return result;
         };
     })();
-
+    $.terminal.from_ansi.__meta__ = true;
     $.terminal.defaults.formatters.unshift($.terminal.from_ansi);
     $.terminal.defaults.formatters.unshift($.terminal.overtyping);
 });

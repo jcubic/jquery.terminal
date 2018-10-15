@@ -4039,7 +4039,7 @@
                                 }
                             }
                             if ($.terminal.valid_color(background)) {
-                                style_str += 'background-color:' + background;
+                                style_str += 'background-color:' + background + ';';
                             }
                             var data;
                             if (data_text === '') {
