@@ -17,6 +17,7 @@
 * fix escape bracket in command line
 * fix relative and absolute urls with default `anyLinks: false`
 * fix android and iPhone issues [#443](https://github.com/jcubic/jquery.terminal/issues/443) [#414](https://github.com/jcubic/jquery.terminal/issues/414)
+* fix ANSI escapes in unix_formatting [$444](https://github.com/jcubic/jquery.terminal/issues/444)
 
 ## 1.23.2
 ### Bugfix

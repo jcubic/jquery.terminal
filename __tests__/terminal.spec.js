@@ -630,12 +630,12 @@ describe('Terminal utils', function() {
             expect(string).toEqual('<span style="font-weight:bold;text-decorat'+
                                    'ion:underline line-through;font-style:ital'+
                                    'ic;color:#fff;--color:#fff;text-shadow:0 0'+
-                                   ' 5px #fff;background-color:#000" data-text'+
-                                   '="Foo">Foo</span><span style="font-style:i'+
-                                   'talic;" class="foo" data-text="Bar">Bar</s'+
-                                   'pan><span style="text-decoration:underline'+
-                                   ' line-through overline;" data-text="Baz">B'+
-                                   'az</span>');
+                                   ' 5px #fff;background-color:#000;" data-tex'+
+                                   't="Foo">Foo</span><span style="font-style:'+
+                                   'italic;" class="foo" data-text="Bar">Bar</'+
+                                   'span><span style="text-decoration:underlin'+
+                                   'e line-through overline;" data-text="Baz">'+
+                                   'Baz</span>');
         });
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
