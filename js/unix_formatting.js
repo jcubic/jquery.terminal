@@ -507,11 +507,34 @@
             var new_position = settings.position;
             var position = new_position;
             var result;
-            input = input.replace(/\r\n\x1b\[1A/g, '');
+            var ansi_re = /(\x1B\[[0-9;]*[A-Za-z])/g;
+            var cursor_re = /(.*)\r?\n\x1b\[1A\x1b\[([0-9]+)C/g;
+            // move up and right we need to delete what's after in previous line
+            input = input.replace(cursor_re, function(_, line, n) {
+                n = parseInt(n, 10);
+                var parts = line.split(ansi_re).filter(Boolean);
+                var result = [];
+                for (var i = 0; i < parts.length; ++i) {
+                    if (parts[i].match(ansi_re)) {
+                        result.push(parts[i]);
+                    } else {
+                        var len = parts[i].length;
+                        if (len >= n) {
+                            result.push(parts[i].substring(0, n));
+                            break;
+                        } else {
+                            result.push(parts[i]);
+                        }
+                        n -= len;
+                    }
+                }
+                return result.join('');
+            });
+            // move right is just repate space
             input = input.replace(/\x1b\[([0-9]+)C/g, function(_, num) {
                 return new Array(+num + 1).join(' ');
             });
-            var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
+            var splitted = input.split(ansi_re);
             if (splitted.length === 1) {
                 if (settings.unixFormattingEscapeBrackets) {
                     result = $.terminal.escape_formatting(input);
