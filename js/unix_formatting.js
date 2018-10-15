@@ -508,6 +508,9 @@
             var position = new_position;
             var result;
             input = input.replace(/\r\n\x1b\[1A/g, '');
+            input = input.replace(/\x1b\[([0-9]+)C/g, function(_, num) {
+                return new Array(+num + 1).join(' ');
+            });
             var splitted = input.split(/(\x1B\[[0-9;]*[A-Za-z])/g);
             if (splitted.length === 1) {
                 if (settings.unixFormattingEscapeBrackets) {
