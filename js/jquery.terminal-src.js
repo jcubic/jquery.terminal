@@ -765,11 +765,11 @@
     // :: resizeObserver
     // -----------------------------------------------------------------------
     $.fn.resizer = function(callback) {
+        var trigger = arguments.length === 0;
         var unbind = arguments[0] === "unbind";
-        if (!unbind && !is_function(callback)) {
-            throw new Error(
-                'Invalid argument, it need to a function or string "unbind".'
-            );
+        if (!trigger && !unbind && !is_function(callback)) {
+            throw new Error('Invalid argument, it need to a function or string ' +
+                            '"unbind" or no arguments.');
         }
         if (unbind) {
             callback = is_function(arguments[1]) ? arguments[1] : null;
@@ -781,32 +781,36 @@
             function resize_handler() {
                 callbacks.fire();
             }
-            if (unbind) {
+            if (trigger || unbind) {
                 callbacks = $this.data('callbacks');
-                if (callback && callbacks) {
-                    callbacks.remove(callback);
-                    if (!callbacks.has()) {
-                        callbacks = null;
-                    }
+                if (trigger) {
+                    callbacks.fire();
                 } else {
-                    callbacks = null;
-                }
-                if (!callbacks) {
-                    $this.removeData('callbacks');
-                    if (window.ResizeObserver) {
-                        var observer = $this.data('observer');
-                        if (observer) {
-                            observer.unobserve(this);
-                            $this.removeData('observer');
+                    if (callback && callbacks) {
+                        callbacks.remove(callback);
+                        if (!callbacks.has()) {
+                            callbacks = null;
                         }
                     } else {
-                        iframe = $this.find('> iframe');
-                        if (iframe.length) {
-                            // just in case of memory leaks in IE
-                            $(iframe[0].contentWindow).off('resize').remove();
-                            iframe.remove();
-                        } else if ($this.is('body')) {
-                            $(window).off('resize.resizer');
+                        callbacks = null;
+                    }
+                    if (!callbacks) {
+                        $this.removeData('callbacks');
+                        if (window.ResizeObserver) {
+                            var observer = $this.data('observer');
+                            if (observer) {
+                                observer.unobserve(this);
+                                $this.removeData('observer');
+                            }
+                        } else {
+                            iframe = $this.find('> iframe');
+                            if (iframe.length) {
+                                // just in case of memory leaks in IE
+                                $(iframe[0].contentWindow).off('resize').remove();
+                                iframe.remove();
+                            } else if ($this.is('body')) {
+                                $(window).off('resize.resizer');
+                            }
                         }
                     }
                 }
@@ -1161,7 +1165,8 @@
         if (settings.width) {
             self.width(settings.width);
         }
-        var num_chars; // calculated by draw_prompt
+        var num_chars; // calculated by resize
+        var char_width;
         var last_rendered_prompt;
         var prompt_last_line;
         var prompt_len;
@@ -1569,14 +1574,14 @@
             self.oneTime(10, function() {
                 // we use space before command to show select all context menu
                 // idea taken from CodeMirror
-                if (clip.val() !== command && !position_only) {
+                if (!is_mobile && clip.val() !== command && !position_only) {
                     clip.val(' ' + command);
                 }
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
                             // we check first to improve performance
-                            if (clip.caret() !== position + 1) {
+                            if (!is_mobile && clip.caret() !== position + 1) {
                                 clip.caret(position + 1);
                             }
                         } catch (e) {
@@ -1682,13 +1687,22 @@
             rev_search_str = ''; // clear if not found any
         }
         // ---------------------------------------------------------------------
-        // :: Recalculate number of characters in command line
+        // :: calculate width of hte character
         // ---------------------------------------------------------------------
-        function change_num_chars() {
-            var $prompt = self.find('.prompt').html('<span>&nbsp;</span>');
-            var W = self.width();
-            var w = $prompt.find('span')[0].getBoundingClientRect().width;
-            num_chars = Math.floor(W / w);
+        function get_char_width() {
+            var $prompt = self.find('.prompt');
+            var html = $prompt.html();
+            $prompt.html('<span>&nbsp;</span>');
+            var width = $prompt.find('span')[0].getBoundingClientRect().width;
+            $prompt.html(html);
+            return width;
+        }
+        // ---------------------------------------------------------------------
+        // :: return number of characters in command line
+        // ---------------------------------------------------------------------
+        function get_num_chars(char_width) {
+            var width = self.width();
+            return Math.floor(width / char_width);
         }
         // ---------------------------------------------------------------------
         // :: Split String that fit into command line where first line need to
@@ -1854,6 +1868,9 @@
                 var position = settings.position;
                 var len = length(string);
                 var prompt = settings.prompt;
+                if (ch_unit_bug) {
+                    cursor.width(char_width);
+                }
                 var c;
                 if (position === len) {
                     before.html(format(string));
@@ -1940,6 +1957,7 @@
                 }
                 var i;
                 self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
+                self.css('visibility', 'hidden');
                 before.html('');
                 // long line
                 if (strlen(text(formatted)) > num_chars - prompt_len - 1 ||
@@ -2033,6 +2051,7 @@
                 } else {
                     draw_cursor_line(formatted, {position: pos});
                 }
+                self.css('visibility', '');
             };
         })();
         // ---------------------------------------------------------------------
@@ -2180,7 +2199,7 @@
                 return history;
             },
             'delete': function(n, stay) {
-                var removed;
+                var removed, string;
                 if (n === 0) {
                     return "";
                 } else if (n < 0) {
@@ -2188,18 +2207,25 @@
                         // this may look weird but if n is negative we need
                         // to use +
                         removed = command.slice(0, position).slice(n);
-                        command = command.slice(0, position + n) +
-                            command.slice(position, text(command).length);
+                        string = text(command);
+                        string = string.slice(0, position + n) +
+                            string.slice(position, string.length);
                         if (!stay) {
                             self.position(position + n);
                         }
                         fire_change_command();
                     }
-                } else if (command !== '' && position < text(command).length) {
-                    removed = command.slice(position).slice(0, n);
-                    command = command.slice(0, position) +
-                        command.slice(position + n, text(command).length);
+                } else if (command !== '') {
+                    string = text(command);
+                    if (position < string.length) {
+                        removed = string.slice(position).slice(0, n);
+                        string = string.slice(0, position) +
+                            string.slice(position + n, string.length);
+                    }
                     fire_change_command();
+                }
+                if (removed) {
+                    command = clean(string);
                 }
                 redraw();
                 fix_textarea();
@@ -2252,16 +2278,17 @@
                 }
             },
             insert: function(string, stay) {
-                string = clean(string);
+                var bare_command = text(command);
                 var len = text(string).length;
-                if (position === len) {
-                    command += string;
+                if (position === bare_command.length) {
+                    string = bare_command + string;
                 } else if (position === 0) {
-                    command = string + command;
+                    string = string + bare_command;
                 } else {
-                    command = command.slice(0, position) +
-                        string + command.slice(position);
+                    string = bare_command.slice(0, position) +
+                        string + bare_command.slice(position);
                 }
+                command = clean(string);
                 if (!stay) {
                     self.position(len, true, true);
                 } else {
@@ -2398,10 +2425,11 @@
                 };
             })(),
             resize: function(num) {
+                char_width = get_char_width();
                 if (num) {
                     num_chars = num;
                 } else {
-                    change_num_chars();
+                    num_chars = get_num_chars(char_width);
                 }
                 redraw();
                 draw_prompt();
@@ -2673,7 +2701,10 @@
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
             // correct for fake space used for select all context menu hack
-            var val = clip.val().replace(/^ /, '');
+            var val = clip.val();
+            if (!is_mobile) {
+                val = val.replace(/^ /, '');
+            }
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
@@ -2860,8 +2891,6 @@
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
-    var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    // -------------------------------------------------------------------------
     var is_key_native = (function is_key_native() {
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             return false;
@@ -2878,6 +2907,19 @@
         }
         return check;
     })(navigator.userAgent || navigator.vendor || window.opera);
+
+    // -------------------------------------------------------------------------
+    // IE ch unit bug detection - better that UserAgent that can be changed
+    var ch_unit_bug = false;
+    $(function() {
+        var base = '<span style="font-family: monospace;visibility:hidden;';
+        var ch = $(base + 'width:1ch;overflow: hidden">&nbsp;</span>').appendTo('body');
+        var space = $(base + '">&nbsp;</span>').appendTo('body');
+        ch_unit_bug = ch.width() !== space.width();
+        ch.remove();
+        space.remove();
+    });
+
     // -------------------------------------------------------------------------
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
@@ -4033,7 +4075,7 @@
                                 }
                             }
                             if ($.terminal.valid_color(background)) {
-                                style_str += 'background-color:' + background;
+                                style_str += 'background-color:' + background + ';';
                             }
                             var data;
                             if (data_text === '') {
@@ -4053,10 +4095,13 @@
                                     result = '<a href="mailto:' + data + '"';
                                 } else {
                                     if (!settings.anyLinks &&
-                                        !data.match(/^(https?|ftp):\/\//)) {
+                                        !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
                                         data = '';
                                     }
-                                    result = '<a target="_blank" href="' + data + '"';
+                                    result = '<a target="_blank"';
+                                    if (data) {
+                                        result += ' href="' + data + '"';
+                                    }
                                     var rel = ["noopener"];
                                     if (settings.linksNoReferrer) {
                                         rel.unshift("noreferrer");
@@ -4135,6 +4180,7 @@
         },
         // ---------------------------------------------------------------------
         // :: return string where array items are in columns padded spaces
+        // :: after adding align tabs arr.join('\t\t') looks much better
         // ---------------------------------------------------------------------
         columns: function(array, cols, space) {
             var no_formatting = array.map(function(string) {
@@ -6243,6 +6289,10 @@
         }
         // ---------------------------------------------------------------------
         var self = this;
+        if (self.is('body,html')) {
+            self = $('<div/>').appendTo('body');
+            $('body').addClass('full-screen-terminal');
+        }
         if (this.length > 1) {
             return this.each(function() {
                 $.fn.terminal.call(
@@ -6261,7 +6311,6 @@
             throw new $.terminal.Exception(msg);
         }
         // var names = []; // stack if interpreter names
-        var scroll_object;
         var prev_command; // used for name on the terminal if not defined
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
@@ -6716,7 +6765,7 @@
                                 }
                             } else if (options.doubleTab !== false) {
                                 echo_command();
-                                var text = matched.reverse().join('\t');
+                                var text = matched.slice().reverse().join('\t\t');
                                 self.echo($.terminal.escape_brackets(text), {
                                     keepWords: true,
                                     formatters: false
@@ -7456,18 +7505,18 @@
             scroll: function(amount) {
                 var pos;
                 amount = Math.round(amount);
-                if (scroll_object.prop) { // work with jQuery > 1.6
-                    if (amount > scroll_object.prop('scrollTop') && amount > 0) {
-                        scroll_object.prop('scrollTop', 0);
+                if (self.prop) { // work with jQuery > 1.6
+                    if (amount > self.prop('scrollTop') && amount > 0) {
+                        self.prop('scrollTop', 0);
                     }
-                    pos = scroll_object.prop('scrollTop');
-                    scroll_object.scrollTop(pos + amount);
+                    pos = self.prop('scrollTop');
+                    self.scrollTop(pos + amount);
                 } else {
-                    if (amount > scroll_object.attr('scrollTop') && amount > 0) {
-                        scroll_object.attr('scrollTop', 0);
+                    if (amount > self.attr('scrollTop') && amount > 0) {
+                        self.attr('scrollTop', 0);
                     }
-                    pos = scroll_object.attr('scrollTop');
-                    scroll_object.scrollTop(pos + amount);
+                    pos = self.attr('scrollTop');
+                    self.scrollTop(pos + amount);
                 }
                 return self;
             },
@@ -7887,12 +7936,12 @@
             // -------------------------------------------------------------
             scroll_to_bottom: function() {
                 var scrollHeight;
-                if (scroll_object.prop) {
-                    scrollHeight = scroll_object.prop('scrollHeight');
+                if (self.prop) {
+                    scrollHeight = self.prop('scrollHeight');
                 } else {
-                    scrollHeight = scroll_object.attr('scrollHeight');
+                    scrollHeight = self.attr('scrollHeight');
                 }
-                scroll_object.scrollTop(scrollHeight);
+                self.scrollTop(scrollHeight);
                 return self;
             },
             // -------------------------------------------------------------
@@ -7904,15 +7953,9 @@
                     return false;
                 } else {
                     var scroll_height, scroll_top, height;
-                    if (self.is('body')) {
-                        scroll_height = $(document).height();
-                        scroll_top = $(window).scrollTop();
-                        height = window.innerHeight;
-                    } else {
-                        scroll_height = scroll_object[0].scrollHeight;
-                        scroll_top = scroll_object.scrollTop();
-                        height = scroll_object.outerHeight();
-                    }
+                    scroll_height = self[0].scrollHeight;
+                    scroll_top = self.scrollTop();
+                    height = self.outerHeight();
                     var limit = scroll_height - settings.scrollBottomOffset;
                     return scroll_top + height > limit;
                 }
@@ -8042,16 +8085,6 @@
         }
         if (settings.height) {
             self.height(settings.height);
-        }
-        // scrollTop need be on html but scrollHeight taken from body
-        // on Safari both on body it's easier to just put both in selector and it works
-        if (settings.scrollObject !== null) {
-            scroll_object = $(settings.scrollObject);
-        } else {
-            scroll_object = self;
-        }
-        if (scroll_object.is('body') && !is_safari) {
-            scroll_object = $('html,body');
         }
         // register ajaxSend for cancel requests on CTRL+D
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
@@ -8190,6 +8223,9 @@
                 keypress: key_press,
                 tabs: settings.tabs,
                 onCommandChange: function(command) {
+                    if (num_chars !== get_num_chars(self, char_size)) {
+                        self.resizer();
+                    }
                     if (is_function(settings.onCommandChange)) {
                         try {
                             settings.onCommandChange.call(self, command, self);
@@ -8268,10 +8304,10 @@
                     var scroll_top;
                     self.find('.cmd textarea').on('focus', function() {
                         if (typeof scroll_top !== 'undefined') {
-                            scroll_object.scrollTop(scroll_top);
+                            self.scrollTop(scroll_top);
                         }
                     }).on('blur', function() {
-                        scroll_top = scroll_object.scrollTop();
+                        scroll_top = self.scrollTop();
                     });
                     self.mousedown(function(e) {
                         if (!scrollbar_event(e, fill)) {

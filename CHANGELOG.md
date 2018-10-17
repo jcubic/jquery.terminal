@@ -1,8 +1,11 @@
 ## 1.24.0
+### Breaking
+* braking/not breaking - from now on if terminal is added to body it's in fact added to div inside body
 ### Features
 * new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting words
 * use setTimeout instead of alert to show exception that can be shown in terminal
 * allow to move cursor when regex formatter don't change length of the string
+* don't style links if they don't have href
 ### Bugfix
 * fix delay when using arrow keys by filtering keys that have delay when hold
 * fix skipping lines that have emoji as last character inside formatting
@@ -12,6 +15,12 @@
 * fix echo newline as first character of formatting
 * fix slash as last character in formatting when generation command line with slash and cursor just after
 * fix escape bracket in command line
+* fix relative and absolute urls with default `anyLinks: false`
+* fix android and iPhone issues [#443](https://github.com/jcubic/jquery.terminal/issues/443) [#414](https://github.com/jcubic/jquery.terminal/issues/414)
+* fix ANSI escapes in unix_formatting [$444](https://github.com/jcubic/jquery.terminal/issues/444)
+* fix jumping cursor when there are no text before cursor line in Chrome
+* fix selection menu in latest Android
+* fix wrong number of chars per line when insert called after init and scrollbar appear
 
 ## 1.23.2
 ### Bugfix

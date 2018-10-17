@@ -78,6 +78,9 @@
     overflow-y: auto;
     /* overflow-x: hidden; */
 }
+terminal.temp {
+    visibility: hidden;
+}
 .terminal {
     contain: content;
 }
@@ -85,10 +88,17 @@ body.terminal {
     min-height: 100vh;
     height: 100%;
 }
-body.terminal {
-    margin: 0;
+html {
+    height: 100%;
 }
-.terminal > div {
+body.terminal, body.full-screen-terminal {
+    margin: 0;
+    height: 100%;
+}
+body.full-screen-terminal .terminal {
+    height: 100%;
+}
+.terminal > div:not(.font) {
     min-height: 100%;
 }
 .terminal > .resizer, .terminal > .font .resizer {
@@ -133,10 +143,20 @@ body.terminal {
     border-left: 1px solid transparent;
     position: absolute;
     top: 0;
-    margin-left: -1px;
+    /* margin-left: -1px; */
     background-color: inherit;
     color: inherit;
     bottom: 0;
+    left: -1px;
+}
+.cmd .cursor-line > span:empty {
+    /* display: none; */
+}
+.cmd .cursor-line > span:empty + .cursor + span {
+    /*margin-left: -1px;*/
+}
+.cmd .cursor-line > span:not(.cursor):not(:empty) {
+    /* margin-left: -1px; */
 }
 .cmd .cursor-line > span {
     display: inline-block;
@@ -373,12 +393,6 @@ terminal .terminal-output > div {
       border-bottom-color: var(--background, #000);
   }
 }
-.cursor-line > :first-child {
-    white-space: nowrap;
-}
-.cursor-line > :first-child [data-text]:last-child {
-    margin-right: -1px;
-}
 .underline-animation .cursor.blink span span {
     /* margin-top: 2px; */
     border-left: none;
@@ -530,11 +544,12 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
-.terminal a {
+.terminal a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
+    cursor: pointer;
 }
-.terminal a:hover {
+.terminal a[href]:hover {
     background-color: #0F60FF;
     background-color: var(--link-color, #0F60FF);
     color: var(--background, #000);

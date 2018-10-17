@@ -349,17 +349,17 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.from_ansi', function() {
-        var ansi_string = '\x1b[38;5;12mHello\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz\x1b[48;2;255;255;0;38;2;0;100;0mQuux\x1b[m';
+        var ansi_string = '\x1b[38;5;12mHello\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz\x1b[0;48;2;255;255;0;38;2;0;100;0mQuux\x1b[m';
         it('should convert ansi to terminal formatting', function() {
             var string = $.terminal.from_ansi(ansi_string);
-            expect(string).toEqual('[[;#5555FF;]Hello][[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
+            expect(string).toEqual('[[;#5555FF;]Hello][[;#640000;#0AA]Foo][[biu;#44D544;#A0A]'+
                                    'B[[sb;;]a]r][[;#000;#AAA]Baz][[;#006400;#ffff00]Quux]');
         });
         it('should convert ansi to terminal formatting and escape the remaining brackets', function() {
             var string = $.terminal.from_ansi(ansi_string, {
                 unixFormattingEscapeBrackets: true
             });
-            expect(string).toEqual('[[;#5555FF;]Hello][[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
+            expect(string).toEqual('[[;#5555FF;]Hello][[;#640000;#0AA]Foo][[biu;#44D544;#A0A]'+
                                    'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz][[;#006400;#ffff00]Quux]');
         });
         it('should return uncahnged string', function() {
@@ -630,12 +630,12 @@ describe('Terminal utils', function() {
             expect(string).toEqual('<span style="font-weight:bold;text-decorat'+
                                    'ion:underline line-through;font-style:ital'+
                                    'ic;color:#fff;--color:#fff;text-shadow:0 0'+
-                                   ' 5px #fff;background-color:#000" data-text'+
-                                   '="Foo">Foo</span><span style="font-style:i'+
-                                   'talic;" class="foo" data-text="Bar">Bar</s'+
-                                   'pan><span style="text-decoration:underline'+
-                                   ' line-through overline;" data-text="Baz">B'+
-                                   'az</span>');
+                                   ' 5px #fff;background-color:#000;" data-tex'+
+                                   't="Foo">Foo</span><span style="font-style:'+
+                                   'italic;" class="foo" data-text="Bar">Bar</'+
+                                   'span><span style="text-decoration:underlin'+
+                                   'e line-through overline;" data-text="Baz">'+
+                                   'Baz</span>');
         });
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
@@ -677,27 +677,23 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
-                    '<a target="_blank" href=""' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                    '<a target="_blank" rel="noopener"' +
+                        ' tabindex="1000">xss</a>'
                 ],
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
                     '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                        ' rel="noopener" tabindex="1000">xss</a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
-                    '<a target="_blank" href=""' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                    '<a target="_blank" rel="noopener"' +
+                        ' tabindex="1000">xss</a>'
                 ],
                 [
                     "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
-                    '<a target="_blank" href=""' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                    '<a target="_blank" rel="noopener"' +
+                        ' tabindex="1000">xss</a>'
                 ],
             ];
             tests.forEach(function(spec) {

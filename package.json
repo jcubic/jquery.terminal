@@ -217,10 +217,6 @@
         "error",
         "never"
       ],
-      "consistent-this": [
-        "error",
-        "self"
-      ],
       "eol-last": [
         "error",
         "always"
