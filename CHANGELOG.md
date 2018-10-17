@@ -19,6 +19,8 @@
 * fix android and iPhone issues [#443](https://github.com/jcubic/jquery.terminal/issues/443) [#414](https://github.com/jcubic/jquery.terminal/issues/414)
 * fix ANSI escapes in unix_formatting [$444](https://github.com/jcubic/jquery.terminal/issues/444)
 * fix jumping cursor when there are no text before cursor line in Chrome
+* fix selection menu in latest Android
+* fix wrong number of chars per line when insert called after init and scrollbar appear
 
 ## 1.23.2
 ### Bugfix

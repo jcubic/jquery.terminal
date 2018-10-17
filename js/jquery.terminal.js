@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 17 Oct 2018 17:04:22 +0000
+ * Date: Wed, 17 Oct 2018 17:38:16 +0000
  */
 
 /* TODO:
@@ -765,11 +765,11 @@
     // :: resizeObserver
     // -----------------------------------------------------------------------
     $.fn.resizer = function(callback) {
+        var trigger = arguments.length === 0;
         var unbind = arguments[0] === "unbind";
-        if (!unbind && !is_function(callback)) {
-            throw new Error(
-                'Invalid argument, it need to a function or string "unbind".'
-            );
+        if (!trigger && !unbind && !is_function(callback)) {
+            throw new Error('Invalid argument, it need to a function or string ' +
+                            '"unbind" or no arguments.');
         }
         if (unbind) {
             callback = is_function(arguments[1]) ? arguments[1] : null;
@@ -781,32 +781,36 @@
             function resize_handler() {
                 callbacks.fire();
             }
-            if (unbind) {
+            if (trigger || unbind) {
                 callbacks = $this.data('callbacks');
-                if (callback && callbacks) {
-                    callbacks.remove(callback);
-                    if (!callbacks.has()) {
-                        callbacks = null;
-                    }
+                if (trigger) {
+                    callbacks.fire();
                 } else {
-                    callbacks = null;
-                }
-                if (!callbacks) {
-                    $this.removeData('callbacks');
-                    if (window.ResizeObserver) {
-                        var observer = $this.data('observer');
-                        if (observer) {
-                            observer.unobserve(this);
-                            $this.removeData('observer');
+                    if (callback && callbacks) {
+                        callbacks.remove(callback);
+                        if (!callbacks.has()) {
+                            callbacks = null;
                         }
                     } else {
-                        iframe = $this.find('> iframe');
-                        if (iframe.length) {
-                            // just in case of memory leaks in IE
-                            $(iframe[0].contentWindow).off('resize').remove();
-                            iframe.remove();
-                        } else if ($this.is('body')) {
-                            $(window).off('resize.resizer');
+                        callbacks = null;
+                    }
+                    if (!callbacks) {
+                        $this.removeData('callbacks');
+                        if (window.ResizeObserver) {
+                            var observer = $this.data('observer');
+                            if (observer) {
+                                observer.unobserve(this);
+                                $this.removeData('observer');
+                            }
+                        } else {
+                            iframe = $this.find('> iframe');
+                            if (iframe.length) {
+                                // just in case of memory leaks in IE
+                                $(iframe[0].contentWindow).off('resize').remove();
+                                iframe.remove();
+                            } else if ($this.is('body')) {
+                                $(window).off('resize.resizer');
+                            }
                         }
                     }
                 }
@@ -1570,14 +1574,14 @@
             self.oneTime(10, function() {
                 // we use space before command to show select all context menu
                 // idea taken from CodeMirror
-                if (clip.val() !== command && !position_only) {
+                if (!is_mobile && clip.val() !== command && !position_only) {
                     clip.val(' ' + command);
                 }
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
                             // we check first to improve performance
-                            if (clip.caret() !== position + 1) {
+                            if (!is_mobile && clip.caret() !== position + 1) {
                                 clip.caret(position + 1);
                             }
                         } catch (e) {
@@ -2697,7 +2701,10 @@
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
             // correct for fake space used for select all context menu hack
-            var val = clip.val().replace(/^ /, '');
+            var val = clip.val();
+            if (!is_mobile) {
+                val = val.replace(/^ /, '');
+            }
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
@@ -3277,7 +3284,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 17 Oct 2018 17:04:22 +0000',
+        date: 'Wed, 17 Oct 2018 17:38:16 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8216,6 +8223,9 @@
                 keypress: key_press,
                 tabs: settings.tabs,
                 onCommandChange: function(command) {
+                    if (num_chars !== get_num_chars(self, char_size)) {
+                        self.resizer();
+                    }
                     if (is_function(settings.onCommandChange)) {
                         try {
                             settings.onCommandChange.call(self, command, self);
