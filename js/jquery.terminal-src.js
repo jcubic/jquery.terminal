@@ -784,7 +784,7 @@
             if (trigger || unbind) {
                 callbacks = $this.data('callbacks');
                 if (trigger) {
-                    callbacks.fire();
+                    callbacks && callbacks.fire();
                 } else {
                     if (callback && callbacks) {
                         callbacks.remove(callback);
@@ -840,6 +840,20 @@
                 }
             }
         });
+    };
+    // -----------------------------------------------------------------------
+    // :: ref: https://codepen.io/chdeliens/pen/BJxeQG
+    // :: based on https://medium.com/@cdeliens/nicely-done-3c414c2b98ec
+    // -----------------------------------------------------------------------
+    $.fn.isFullyInViewport = function(container) {
+        container = container || $(window);
+        var elementTop = $(this).offset().top;
+        var elementBottom = elementTop + $(this).outerHeight();
+
+        var viewportTop = container.scrollTop();
+        var viewportBottom = viewportTop + container.height();
+
+        return elementTop >= viewportTop && elementBottom <= viewportBottom;
     };
     // -----------------------------------------------------------------------
     // :: hide elements from screen readers
@@ -1161,7 +1175,10 @@
             autocapitalize: 'off',
             spellcheck: 'false',
             tabindex: 1
-        }).addClass('clipboard').appendTo(self).val(' ');
+        }).addClass('clipboard').appendTo(self);
+        if (!is_mobile) {
+            clip.val(' ');
+        }
         if (settings.width) {
             self.width(settings.width);
         }
@@ -2051,6 +2068,12 @@
                 } else {
                     draw_cursor_line(formatted, {position: pos});
                 }
+                var in_line = cursor_line.prevUntil('.prompt').length;
+                if (is_css_variables_supported) {
+                    self[0].style.setProperty('--cursor-line', in_line);
+                } else {
+                    clip.css('top', in_line * 14 + 'px');
+                }
                 self.css('visibility', '');
             };
         })();
@@ -2213,7 +2236,6 @@
                         if (!stay) {
                             self.position(position + n);
                         }
-                        fire_change_command();
                     }
                 } else if (command !== '') {
                     string = text(command);
@@ -2222,13 +2244,13 @@
                         string = string.slice(0, position) +
                             string.slice(position + n, string.length);
                     }
-                    fire_change_command();
                 }
                 if (removed) {
                     command = clean(string);
                 }
                 redraw();
                 fix_textarea();
+                fire_change_command();
                 return removed;
             },
             set: function(string, stay, silent) {
@@ -2295,8 +2317,8 @@
                     fix_textarea();
                 }
                 redraw();
-                fire_change_command();
                 fix_textarea();
+                fire_change_command();
                 return self;
             },
             get: function() {
@@ -2912,10 +2934,13 @@
     // IE ch unit bug detection - better that UserAgent that can be changed
     var ch_unit_bug = false;
     $(function() {
+        function width(e) {
+            return e[0].getBoundingClientRect().width;
+        }
         var base = '<span style="font-family: monospace;visibility:hidden;';
         var ch = $(base + 'width:1ch;overflow: hidden">&nbsp;</span>').appendTo('body');
         var space = $(base + '">&nbsp;</span>').appendTo('body');
-        ch_unit_bug = ch.width() !== space.width();
+        ch_unit_bug = width(ch) !== width(space);
         ch.remove();
         space.remove();
     });
@@ -8222,6 +8247,12 @@
                 repeatTimeoutKeys: settings.repeatTimeoutKeys,
                 keypress: key_press,
                 tabs: settings.tabs,
+                onPositionChange: function() {
+                    var cursor = self.find('.cursor');
+                    if (!cursor.isFullyInViewport(self)) {
+                        self.scrollTop(cursor.position().top - 5);
+                    }
+                },
                 onCommandChange: function(command) {
                     if (num_chars !== get_num_chars(self, char_size)) {
                         self.resizer();
@@ -8355,12 +8386,18 @@
                                 }
                                 self.stopTime('textarea');
                                 self.oneTime(100, 'textarea', function() {
-                                    clip.css({
+                                    var props = {
                                         left: '',
                                         top: '',
                                         width: '',
                                         height: ''
-                                    });
+                                    };
+                                    if (!is_css_variables_supported) {
+                                        var in_line = self.find('.cmd .cursor-line')
+                                            .prevUntil('.prompt').length;
+                                        props.top = in_line * 14 + 'px';
+                                    }
+                                    clip.css(props);
                                 });
                                 self.stopTime('selection');
                                 self.everyTime(20, 'selection', function() {

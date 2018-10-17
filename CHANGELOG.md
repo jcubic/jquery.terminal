@@ -1,11 +1,14 @@
 ## 1.24.0
 ### Breaking
 * braking/not breaking - from now on if terminal is added to body it's in fact added to div inside body
+  `$('body').terminal().is('body');` will be false
 ### Features
 * new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting words
 * use setTimeout instead of alert to show exception that can be shown in terminal
 * allow to move cursor when regex formatter don't change length of the string
 * don't style links if they don't have href
+* new plugin isFullyInViewport (link to source in comment)
+* scroll terminal to always view cursor in multiline command
 ### Bugfix
 * fix delay when using arrow keys by filtering keys that have delay when hold
 * fix skipping lines that have emoji as last character inside formatting

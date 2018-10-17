@@ -53,7 +53,7 @@ Object.defineProperties(window.HTMLElement.prototype, {
             var self = this;
             var attr = {};
             function set_style_attr() {
-                self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]};`));
+                self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';'));
             }
             var mapping = {
                 backgroundClip: 'background-clip',
@@ -2303,16 +2303,26 @@ describe('Terminal plugin', function() {
         describe('contextmenu', function() {
             var term = $('<div/>').terminal();
             it('should move textarea', function(done) {
+                function have_props(props) {
+                    var style = clip.attr('style');
+                    var style_props = style.split(/\s*;\s*/).filter(Boolean).map(function(pair) {
+                        pair = pair.split(/\s*:\s*/);
+                        return pair[0];
+                    });
+                    return props.every(function(prop) {
+                        return style_props.includes(prop);
+                    });
+                }
                 var cmd = term.cmd();
                 var clip = term.find('textarea');
                 var event = new $.Event('contextmenu');
-                expect(clip.attr('style')).toBeFalsy();
+                expect(have_props(['height', 'width'])).toBeFalsy();
                 event.pageX = 100;
                 event.pageY = 100;
                 cmd.trigger(event);
-                expect(clip.attr('style')).toBeTruthy();
+                expect(have_props(['height', 'width'])).toBeTruthy();
                 setTimeout(function() {
-                    expect(clip.attr('style')).toBeFalsy();
+                    expect(have_props(['height', 'width'])).toBeFalsy();
                     done();
                 }, 200);
             });

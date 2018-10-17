@@ -56,6 +56,7 @@
     overflow: hidden;
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
+    top: calc(var(--cursor-line, 0) * 1em);
 }
 .cmd .noselect, .cmd [role="presentation"]:not(.cursor-line) > span:last-child,
 .cmd .cursor-line > span:last-child > span:last-child {
@@ -586,6 +587,9 @@ terminal .terminal-output > div {
     .terminal, .terminal *, .cmd, .cmd * {
         font-size: calc(var(--size, 1) * 12px);
         line-height: calc(var(--size, 1) * 14px);
+    }
+    .cmd .clipboard {
+        top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
     }
     .terminal .terminal-output > div > div {
         min-height: calc(var(--size, 1) * 14px);
