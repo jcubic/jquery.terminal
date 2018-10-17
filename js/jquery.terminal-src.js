@@ -1161,7 +1161,8 @@
         if (settings.width) {
             self.width(settings.width);
         }
-        var num_chars; // calculated by draw_prompt
+        var num_chars; // calculated by resize
+        var char_width;
         var last_rendered_prompt;
         var prompt_last_line;
         var prompt_len;
@@ -1682,13 +1683,22 @@
             rev_search_str = ''; // clear if not found any
         }
         // ---------------------------------------------------------------------
-        // :: Recalculate number of characters in command line
+        // :: calculate width of hte character
         // ---------------------------------------------------------------------
-        function change_num_chars() {
-            var $prompt = self.find('.prompt').html('<span>&nbsp;</span>');
-            var W = self.width();
-            var w = $prompt.find('span')[0].getBoundingClientRect().width;
-            num_chars = Math.floor(W / w);
+        function get_char_width() {
+            var $prompt = self.find('.prompt');
+            var html = $prompt.html();
+            $prompt.html('<span>&nbsp;</span>');
+            var width = $prompt.find('span')[0].getBoundingClientRect().width;
+            $prompt.html(html);
+            return width;
+        }
+        // ---------------------------------------------------------------------
+        // :: return number of characters in command line
+        // ---------------------------------------------------------------------
+        function get_num_chars(char_width) {
+            var width = self.width();
+            return Math.floor(width / char_width);
         }
         // ---------------------------------------------------------------------
         // :: Split String that fit into command line where first line need to
@@ -1854,6 +1864,9 @@
                 var position = settings.position;
                 var len = length(string);
                 var prompt = settings.prompt;
+                if (ch_unit_bug) {
+                    cursor.width(char_width);
+                }
                 var c;
                 if (position === len) {
                     before.html(format(string));
@@ -1940,6 +1953,7 @@
                 }
                 var i;
                 self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
+                self.css('visibility', 'hidden');
                 before.html('');
                 // long line
                 if (strlen(text(formatted)) > num_chars - prompt_len - 1 ||
@@ -2033,6 +2047,7 @@
                 } else {
                     draw_cursor_line(formatted, {position: pos});
                 }
+                self.css('visibility', '');
             };
         })();
         // ---------------------------------------------------------------------
@@ -2406,10 +2421,11 @@
                 };
             })(),
             resize: function(num) {
+                char_width = get_char_width();
                 if (num) {
                     num_chars = num;
                 } else {
-                    change_num_chars();
+                    num_chars = get_num_chars(char_width);
                 }
                 redraw();
                 draw_prompt();
@@ -2884,6 +2900,19 @@
         }
         return check;
     })(navigator.userAgent || navigator.vendor || window.opera);
+
+    // -------------------------------------------------------------------------
+    // IE ch unit bug detection - better that UserAgent that can be changed
+    var ch_unit_bug = false;
+    $(function() {
+        var base = '<span style="font-family: monospace;visibility:hidden;';
+        var ch = $(base + 'width:1ch;overflow: hidden">&nbsp;</span>').appendTo('body');
+        var space = $(base + '">&nbsp;</span>').appendTo('body');
+        ch_unit_bug = ch.width() !== space.width();
+        ch.remove();
+        space.remove();
+    });
+
     // -------------------------------------------------------------------------
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
