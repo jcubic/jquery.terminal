@@ -8254,7 +8254,10 @@
                     }
                 },
                 onCommandChange: function(command) {
-                    if (num_chars !== get_num_chars(self, char_size)) {
+                    // resize is not triggered when insert called just after init
+                    //  and scrollbar appear
+                    if (old_width !== fill.width()) {
+                        // resizer handler will update old_width
                         self.resizer();
                     }
                     if (is_function(settings.onCommandChange)) {

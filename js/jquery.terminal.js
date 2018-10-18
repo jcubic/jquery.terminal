@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 17 Oct 2018 20:28:00 +0000
+ * Date: Thu, 18 Oct 2018 07:24:38 +0000
  */
 
 /* TODO:
@@ -3309,7 +3309,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 17 Oct 2018 20:28:00 +0000',
+        date: 'Thu, 18 Oct 2018 07:24:38 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8254,7 +8254,10 @@
                     }
                 },
                 onCommandChange: function(command) {
-                    if (num_chars !== get_num_chars(self, char_size)) {
+                    // resize is not triggered when insert called just after init
+                    //  and scrollbar appear
+                    if (old_width !== fill.width()) {
+                        // resizer handler will update old_width
                         self.resizer();
                     }
                     if (is_function(settings.onCommandChange)) {
