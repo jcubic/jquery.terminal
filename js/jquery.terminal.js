@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 19 Oct 2018 16:47:51 +0000
+ * Date: Fri, 19 Oct 2018 17:37:43 +0000
  */
 
 /* TODO:
@@ -2458,17 +2458,20 @@
                 draw_prompt();
                 return self;
             },
-            enable: function(silient) {
+            enable: function() {
                 if (!enabled) {
                     enabled = true;
                     self.addClass('enabled');
                     try {
+                        if (clip.is(':not(:focus)')) {
+                            clip.focus();
+                        }
                         clip.caret(position);
                     } catch (e) {
                         // firefox throw NS_ERROR_FAILURE ignore
                     }
                     animation(true);
-                    if (!silient) {
+                    if (is_function(settings.prompt)) {
                         draw_prompt();
                     }
                     fix_cursor();
@@ -3310,7 +3313,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 19 Oct 2018 16:47:51 +0000',
+        date: 'Fri, 19 Oct 2018 17:37:43 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6876,7 +6879,7 @@
                 cmd_ready(function ready() {
                     paused = false;
                     if (enabled && terminals.front() === self) {
-                        command_line.enable(true);
+                        command_line.enable();
                     }
                     command_line.find('.prompt').visible();
                     var original = delayed_commands;
@@ -7058,7 +7061,7 @@
                         if (!silent && ret === undefined || silent) {
                             enabled = true;
                             if (!self.paused()) {
-                                command_line.enable(true);
+                                command_line.enable();
                             }
                         }
                     });
