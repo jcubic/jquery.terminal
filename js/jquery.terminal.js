@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 18 Oct 2018 07:24:38 +0000
+ * Date: Fri, 19 Oct 2018 15:41:51 +0000
  */
 
 /* TODO:
@@ -1163,7 +1163,7 @@
         self.append('<span class="prompt"></span>');
         self.append('<div class="cursor-line">' +
                     '<span></span>' +
-                    '<span class="cursor">&nbsp;</span>' +
+                    '<span class="cursor"><span><span>&nbsp;</span></span></span>' +
                     '<span></span>' +
                     '</div>');
         // a11y: don't read command it's in textarea that's in focus
@@ -3309,7 +3309,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 18 Oct 2018 07:24:38 +0000',
+        date: 'Fri, 19 Oct 2018 15:41:51 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

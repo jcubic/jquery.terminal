@@ -24,6 +24,7 @@
 * fix jumping cursor when there are no text before cursor line in Chrome
 * fix selection menu in latest Android
 * fix wrong number of chars per line when insert called after init and scrollbar appear
+* fix missing cursor when init cmd plugin (without calling refresh)
 
 ## 1.23.2
 ### Bugfix

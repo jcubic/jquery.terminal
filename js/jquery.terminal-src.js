@@ -1163,7 +1163,7 @@
         self.append('<span class="prompt"></span>');
         self.append('<div class="cursor-line">' +
                     '<span></span>' +
-                    '<span class="cursor">&nbsp;</span>' +
+                    '<span class="cursor"><span><span>&nbsp;</span></span></span>' +
                     '<span></span>' +
                     '</div>');
         // a11y: don't read command it's in textarea that's in focus
