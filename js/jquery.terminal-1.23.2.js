@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 19 Oct 2018 15:41:51 +0000
+ * Date: Fri, 19 Oct 2018 16:47:51 +0000
  */
 
 /* TODO:
@@ -1148,6 +1148,7 @@
             holdTimeout: 400,
             holdRepeatTimeout: 200,
             repeatTimeoutKeys: ['HOLD+BACKSPACE'],
+            tabindex: 1,
             tabs: 4
         }
     };
@@ -1174,7 +1175,7 @@
         var clip = $('<textarea>').attr({
             autocapitalize: 'off',
             spellcheck: 'false',
-            tabindex: 1
+            tabindex: settings.tabindex
         }).addClass('clipboard').appendTo(self);
         if (!is_mobile) {
             clip.val(' ');
@@ -3309,7 +3310,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 19 Oct 2018 15:41:51 +0000',
+        date: 'Fri, 19 Oct 2018 16:47:51 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4780,6 +4781,7 @@
         wrap: true,
         checkArity: true,
         raw: false,
+        tabindex: 1,
         invokeMethods: false,
         exceptionHandler: null,
         pauseEvents: true,
@@ -4793,6 +4795,7 @@
         processRPCResponse: null,
         completionEscape: true,
         onCommandChange: null,
+        onPositionChange: null,
         convertLinks: true,
         extra: {},
         tabs: 4,
@@ -5656,12 +5659,7 @@
                     command_line.before(detached_output); // reinsert output
                 }
                 self.flush(options);
-                try {
-                    settings.onAfterRedraw.call(self, self);
-                } catch (e) {
-                    settings.onAfterRedraw = $.noop;
-                    display_exception(e, 'onAfterRedraw');
-                }
+                fire_event('onAfterRedraw');
             } catch (e) {
                 if (is_function(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
@@ -5747,12 +5745,7 @@
             var options = {
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
-                    try {
-                        settings.onEchoCommand.call(self, div, command);
-                    } catch (e) {
-                        settings.onEchoCommand = $.noop;
-                        self.exception(e);
-                    }
+                    fire_event('onEchoCommand', [div, command]);
                 }
             };
             if (is_function(prompt)) {
@@ -5847,9 +5840,7 @@
                     change_hash = saved_change_hash;
                 }
                 deferred.resolve();
-                if (is_function(settings.onAfterCommand)) {
-                    settings.onAfterCommand.call(self, self, command);
-                }
+                fire_event('onAfterCommand', [command]);
             }
             // -----------------------------------------------------------------
             function show(result) {
@@ -5890,10 +5881,8 @@
             }
             try {
                 // this callback can disable commands
-                if (is_function(settings.onBeforeCommand)) {
-                    if (settings.onBeforeCommand.call(self, self, command) === false) {
-                        return;
-                    }
+                if (fire_event('onBeforeCommand', [command]) === false) {
+                    return;
                 }
                 if (!exec) {
                     prev_command = $.terminal.split_command(command);
@@ -6049,6 +6038,35 @@
             init_queue.resolve();
             if (!silent && is_function(interpreter.onStart)) {
                 interpreter.onStart.call(self, self);
+            }
+        }
+        // ---------------------------------------------------------------------
+        function fire_event(name, args) {
+            args = (args || []).concat([self]); // create new array
+            // even can be fired before interpreters is created
+            var top = interpreters && interpreters.top();
+            if (top && is_function(top[name])) {
+                try {
+                    return top[name].apply(self, args);
+                } catch (e) {
+                    delete top[name];
+                    display_exception(e, name);
+                }
+            } else if (is_function(settings[name])) {
+                try {
+                    return settings[name].apply(self, args);
+                } catch (e) {
+                    settings[name] = null;
+                    display_exception(e, name);
+                }
+            }
+        }
+        // ---------------------------------------------------------------------
+        function move_cursor_visible() {
+            var cursor = self.find('.cursor');
+            if (!cursor.isFullyInViewport(self)) {
+                self.scrollTop(cursor.position().top - 5);
+                return true;
             }
         }
         // ---------------------------------------------------------------------
@@ -6391,11 +6409,7 @@
             clear: function() {
                 output.html('');
                 lines = [];
-                try {
-                    settings.onClear.call(self, self);
-                } catch (e) {
-                    display_exception(e, 'onClear');
-                }
+                fire_event('onClear');
                 self.attr({scrollTop: 0});
                 return self;
             },
@@ -6404,14 +6418,8 @@
             // :: restore the state
             // -------------------------------------------------------------
             export_view: function() {
-                var user_export = {};
-                if (is_function(settings.onExport)) {
-                    try {
-                        user_export = settings.onExport.call(self);
-                    } catch (e) {
-                        display_exception(e, 'onExport');
-                    }
-                }
+                var user_export = fire_event('onExport');
+                user_export = user_export || {};
                 return $.extend({}, {
                     focus: enabled,
                     mask: command_line.mask(),
@@ -6430,14 +6438,7 @@
                 if (in_login) {
                     throw new Error(sprintf(strings().notWhileLogin, 'import_view'));
                 }
-                if (is_function(settings.onImport)) {
-                    try {
-                        settings.onImport.call(self, view);
-                    } catch (e) {
-                        settings.onImport = $.noop;
-                        display_exception(e, 'onImport');
-                    }
-                }
+                fire_event('onImport', [view]);
                 when_ready(function ready() {
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
@@ -6864,9 +6865,7 @@
                     if (!visible) {
                         command_line.find('.prompt').hidden();
                     }
-                    if (is_function(settings.onPause)) {
-                        settings.onPause.call(self);
-                    }
+                    fire_event('onPause');
                 });
                 return self;
             },
@@ -6891,9 +6890,7 @@
                         fn();
                     }
                     self.scroll_to_bottom();
-                    if (is_function(settings.onResume)) {
-                        settings.onResume.call(self);
-                    }
+                    fire_event('onResume');
                 });
                 return self;
             },
@@ -7056,12 +7053,7 @@
                     cmd_ready(function ready() {
                         var ret;
                         if (!silent && !enabled) {
-                            try {
-                                ret = settings.onFocus.call(self, self);
-                            } catch (e) {
-                                settings.onFocus = $.noop;
-                                display_exception(e, 'onFocus');
-                            }
+                            fire_event('onFocus');
                         }
                         if (!silent && ret === undefined || silent) {
                             enabled = true;
@@ -7080,12 +7072,7 @@
                 cmd_ready(function ready() {
                     var ret;
                     if (!silent && enabled) {
-                        try {
-                            ret = settings.onBlur.call(self, self);
-                        } catch (e) {
-                            settings.onBlur = $.noop;
-                            display_exception(e, 'onBlur');
-                        }
+                        ret = fire_event('onBlur');
                     }
                     if (!silent && ret === undefined || silent) {
                         enabled = false;
@@ -7258,12 +7245,7 @@
                         num_rows = new_num_rows;
                         command_line.resize(num_chars);
                         self.refresh();
-                        var top = interpreters.top();
-                        if (is_function(top.resize)) {
-                            top.resize.call(self, self);
-                        } else if (is_function(settings.onResize)) {
-                            settings.onResize.call(self, self);
-                        }
+                        fire_event('onResize');
                     }
                 }
                 return self;
@@ -7315,22 +7297,22 @@
                         }
                     });
                     limit_lines();
-                    try {
-                        settings.onFlush.call(self, self);
-                    } catch (e) {
-                        settings.onFlush = $.noop;
-                        display_exception(e, 'onFlush');
-                    }
+                    fire_event('onFlush');
                     //num_rows = get_num_rows(self, char_size);
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
                     }
                     output_buffer = [];
-                } catch (e) {
+                } catch (e1) {
                     if (is_function(settings.exceptionHandler)) {
-                        settings.exceptionHandler.call(self, e, 'TERMINAL (Flush)');
+                        try {
+                            settings.exceptionHandler.call(self, e1, 'TERMINAL (Flush)');
+                        } catch (e2) {
+                            settings.exceptionHandler = $.noop;
+                            alert_exception('[exceptionHandler]', e2);
+                        }
                     } else {
-                        alert_exception('[Flush]', e);
+                        alert_exception('[Flush]', e1);
                     }
                 }
                 return self;
@@ -7688,7 +7670,7 @@
                     }
                     var was_paused = paused;
                     function init() {
-                        settings.onPush.call(self, top, interpreters.top(), self);
+                        fire_event('onPush', [top, interpreters.top()]);
                         prepare_top_interpreter();
                     }
                     // self.pause();
@@ -7749,17 +7731,10 @@
                     top = interpreters.top();
                     if (settings.login) {
                         if (!silent) {
-                            settings.onPop.call(self, top, null, self);
+                            fire_event('onPop', [top, null]);
                         }
                         global_logout();
-                        if (is_function(settings.onExit)) {
-                            try {
-                                settings.onExit.call(self, self);
-                            } catch (e) {
-                                settings.onExit = $.noop;
-                                display_exception(e, 'onExit');
-                            }
-                        }
+                        fire_event('onExit');
                     } else {
                         self.error(strings().canExitError);
                     }
@@ -7771,7 +7746,7 @@
                     top = interpreters.top();
                     prepare_top_interpreter();
                     if (!silent) {
-                        settings.onPop.call(self, current, top);
+                        fire_event('onPop', [current, top]);
                     }
                     // we check in case if you don't pop from password interpreter
                     if (in_login && self.get_prompt() !== strings().login + ': ') {
@@ -8122,15 +8097,8 @@
             .appendTo(wrapper);
         self.addClass('terminal');
         // before login event
-        if (settings.login && is_function(settings.onBeforeLogin)) {
-            try {
-                if (settings.onBeforeLogin.call(self, self) === false) {
-                    autologin = false;
-                }
-            } catch (e) {
-                settings.onBeforeLogin = $.noop;
-                display_exception(e, 'onBeforeLogin');
-            }
+        if (settings.login && fire_event('onBeforeLogin') === false) {
+            autologin = false;
         }
         // create json-rpc authentication function
         var base_interpreter;
@@ -8231,6 +8199,7 @@
             }, itrp));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
+                tabindex: settings.tabindex,
                 prompt: settings.prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
@@ -8248,10 +8217,9 @@
                 keypress: key_press,
                 tabs: settings.tabs,
                 onPositionChange: function() {
-                    var cursor = self.find('.cursor');
-                    if (!cursor.isFullyInViewport(self)) {
-                        self.scrollTop(cursor.position().top - 5);
-                    }
+                    var args = [].slice.call(arguments);
+                    move_cursor_visible();
+                    fire_event('onPositionChange', args);
                 },
                 onCommandChange: function(command) {
                     // resize is not triggered when insert called just after init
@@ -8260,15 +8228,10 @@
                         // resizer handler will update old_width
                         self.resizer();
                     }
-                    if (is_function(settings.onCommandChange)) {
-                        try {
-                            settings.onCommandChange.call(self, command, self);
-                        } catch (e) {
-                            settings.onCommandChange = $.noop;
-                            display_exception(e, 'onCommandChange');
-                        }
+                    fire_event('onCommandChange', [command]);
+                    if (!move_cursor_visible()) {
+                        self.scroll_to_bottom();
                     }
-                    self.scroll_to_bottom();
                 },
                 commands: commands
             });

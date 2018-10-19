@@ -53,7 +53,7 @@ Object.defineProperties(window.HTMLElement.prototype, {
             var self = this;
             var attr = {};
             function set_style_attr() {
-                self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';'));
+                self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';') + ';');
             }
             var mapping = {
                 backgroundClip: 'background-clip',

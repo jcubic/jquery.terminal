@@ -156,7 +156,7 @@ declare namespace JQueryTerminal {
         prompt: ExtendedPrompt;
     }
 
-    type PushPopCallback = (this: JQueryTerminal, before: JQueryTerminal.InterpreterItem, after: JQueryTerminal.InterpreterItem) => void;
+    type PushPopCallback = (this: JQueryTerminal, before: JQueryTerminal.InterpreterItem, after: JQueryTerminal.InterpreterItem, term: JQueryTerminal) => void;
 
     type Lines = Array<{ string: any, options: LineEchoOptions, index: number }>;
 
@@ -343,6 +343,7 @@ type CmdOptions = {
     name?: string;
     keypress?: JQueryTerminal.KeyEventHandler<Cmd>;
     keydown?: JQueryTerminal.KeyEventHandler<Cmd>;
+    tabindex?: number;
 }
 type CmdOption = "mask" | "caseSensitiveSearch" | "historySize" |  "prompt" | "enabled" |
     "history" | "tabs" | "onPositionChange" |  "clickTimeout" |  "holdTimeout" |
@@ -427,6 +428,7 @@ type TerminalOptions = {
     invokeMethods?: boolean;
     anyLinks?: boolean;
     raw?: boolean;
+    tabindex?: number;
     keymap?: JQueryTerminal.keymapObject;
     exceptionHandler?: null | JQueryTerminal.ExceptionHandler;
     pauseEvents?: boolean;
@@ -434,7 +436,8 @@ type TerminalOptions = {
     memory?: boolean;
     cancelableAjax?: boolean;
     processArguments?: boolean;
-    onCommandChange?: (this: JQueryTerminal, command: string) => void;
+    onCommandChange?: (this: JQueryTerminal, command: string, term: JQueryTerminal) => void;
+    onPositionChange?: (this: JQueryTerminal, position: number, display_position: number, term: JQueryTerminal) => void;
     linksNoReferrer?: boolean;
     javascriptLinks?: boolean;
     processRPCResponse?: null | JQueryTerminal.processRPCResponseFunction;
@@ -480,7 +483,7 @@ type TerminalOptions = {
     keypress?: JQueryTerminal.KeyEventHandler;
     keydown?: JQueryTerminal.KeyEventHandler;
     onAfterRedraw?: JQueryTerminal.EventCallback;
-    onEchoCommand?: (this: JQueryTerminal, div: JQuery, command: string) => void;
+    onEchoCommand?: (this: JQueryTerminal, div: JQuery, command: string, term: JQueryTerminal) => void;
     onFlush?: JQueryTerminal.EventCallback;
     strings?: JQueryTerminal.strings;
 }

@@ -9,6 +9,8 @@
 * don't style links if they don't have href
 * new plugin isFullyInViewport (link to source in comment)
 * scroll terminal to always view cursor in multiline command
+* add onPositionChange to option to terminal
+* add tabindex option to cmd and terminal
 ### Bugfix
 * fix delay when using arrow keys by filtering keys that have delay when hold
 * fix skipping lines that have emoji as last character inside formatting
