@@ -2471,7 +2471,7 @@
                         // firefox throw NS_ERROR_FAILURE ignore
                     }
                     animation(true);
-                    if (is_function(settings.prompt)) {
+                    if (is_function(prompt)) {
                         draw_prompt();
                     }
                     fix_cursor();

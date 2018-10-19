@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 19 Oct 2018 17:37:43 +0000
+ * Date: Fri, 19 Oct 2018 17:43:14 +0000
  */
 
 /* TODO:
@@ -2471,7 +2471,7 @@
                         // firefox throw NS_ERROR_FAILURE ignore
                     }
                     animation(true);
-                    if (is_function(settings.prompt)) {
+                    if (is_function(prompt)) {
                         draw_prompt();
                     }
                     fix_cursor();
@@ -3313,7 +3313,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 19 Oct 2018 17:37:43 +0000',
+        date: 'Fri, 19 Oct 2018 17:43:14 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
