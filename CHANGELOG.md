@@ -1,6 +1,6 @@
-## 1.24.0
+## 2.0.0
 ### Breaking
-* braking/not breaking - from now on if terminal is added to body it's in fact added to div inside body
+* from now on if terminal is added to body it's in fact added to div inside body (the API didn't changed)
   `$('body').terminal().is('body');` will be false
 ### Features
 * new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting words
