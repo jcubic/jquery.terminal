@@ -51,7 +51,7 @@
         factory(root.jQuery);
     }
 })(function($) {
-    function less(term, text, exit) {
+    function less(term, text, options) {
         var export_data = term.export_view();
         var cols, rows;
         var pos = 0;
@@ -69,7 +69,10 @@
             term.set_prompt(prompt);
             var to_print = lines.slice(pos, pos + rows - 1);
             to_print = to_print.map(function(line) {
-                return $.terminal.substring(line, left, left + cols - 1);
+                if ($.terminal.length(line) > cols) {
+                    return $.terminal.substring(line, left, left + cols - 1);
+                }
+                return line;
             });
             if (to_print.length < rows - 1) {
                 while (rows - 1 > to_print.length) {
@@ -81,23 +84,37 @@
         function quit() {
             term.pop().import_view(export_data);
             //term.off('mousewheel', wheel);
-            if ($.isFunction(exit)) {
-                exit();
+            if ($.isFunction(options.exit)) {
+                options.exit();
             }
         }
         function refresh_view() {
             cols = term.cols();
             rows = term.rows();
-            if ($.isFunction(text)) {
-                text(cols, function(new_lines) {
-                    original_lines = new_lines;
-                    lines = original_lines.slice();
-                    print();
-                });
-            } else {
-                original_lines = text.split('\n');
+            function run(arg) {
+                var text;
+                if (arg instanceof Array) {
+                    if (options.formatters) {
+                        text = arg.join('\n');
+                    } else {
+                        original_lines = arg;
+                    }
+                } else {
+                    text = arg;
+                }
+                if (text) {
+                    if (options.formatters) {
+                        text = $.terminal.apply_formatters(text);
+                    }
+                    original_lines = text.split('\n');
+                }
                 lines = original_lines.slice();
                 print();
+            }
+            if ($.isFunction(text)) {
+                text(cols, run);
+            } else {
+                run(text);
             }
         }
         refresh_view();
@@ -170,7 +187,7 @@
                     }
                 }
                 print();
-                return false;
+                return true;
             },
             name: 'less',
             keydown: function(e) {
@@ -250,9 +267,10 @@
     }
     $.fn.less = function(text, options) {
         var settings = $.extend({
-            onExit: $.noop
+            onExit: $.noop,
+            formatters: false
         }, options);
-        if (!this.terminal) {
+        if (!(this instanceof $.fn.init && this.terminal)) {
             throw new Error('This plugin require jQuery Terminal');
         }
         var term = this.terminal();
@@ -262,6 +280,6 @@
                 'jQuery Terminal or on jQuery Terminal instance'
             );
         }
-        less(term, text, settings.onExit);
+        less(term, text, settings);
     };
 });

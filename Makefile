@@ -24,7 +24,7 @@ else
   ESLINT=./node_modules/.bin/eslint
   TSC=./node_modules/.bin/tsc
 endif
-SPEC_CHECKSUM=`md5sum __tests__/terminalSpec.js | cut -d' ' -f 1`
+SPEC_CHECKSUM=`md5sum __tests__/terminal.spec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
@@ -63,7 +63,7 @@ css/jquery.terminal.min.css css/jquery.terminal.min.css.map: css/jquery.terminal
 css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal.min.css
 	$(CP) css/jquery.terminal.min.css css/jquery.terminal-$(VERSION).min.css
 
-README.md: templates/README.in .$(VERSION) __tests__/terminalSpec.js
+README.md: templates/README.in .$(VERSION) __tests__/terminal.spec.js
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e \
 	"s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" \
 	-e "s/{{COMMIT}}/$(COMMIT)/g" < templates/README.in > README.md || $(SED) -e \
@@ -89,7 +89,7 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 test:
-	$(JEST) --coverage
+	$(JEST) --coverage --testMatch '**/__tests__/*.spec.js'
 
 coveralls:
 	$(CAT) ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
@@ -106,14 +106,14 @@ eslint:
 	$(ESLINT) js/less.js
 
 skipped_tests:
-	@! grep -E $(skip_re) __tests__/terminalSpec.js
+	@! grep -E $(skip_re) __tests__/terminal.spec.js
 
 tscheck:
 	$(TSC) --noEmit --project tsconfig.json
 
 jsonlint: package.json bower.json
-	$(JSONLINT) package.json > /dev/null
-	$(JSONLINT) bower.json > /dev/null
+	$(JSONLINT) -cq package.json
+	$(JSONLINT) -cq bower.json
 
 publish:
 	$(GIT) clone $(URL) --depth 1 npm

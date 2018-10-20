@@ -56,6 +56,7 @@
     overflow: hidden;
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
+    top: calc(var(--cursor-line, 0) * 1em);
 }
 .cmd .noselect, .cmd [role="presentation"]:not(.cursor-line) > span:last-child,
 .cmd .cursor-line > span:last-child > span:last-child {
@@ -78,6 +79,9 @@
     overflow-y: auto;
     /* overflow-x: hidden; */
 }
+terminal.temp {
+    visibility: hidden;
+}
 .terminal {
     contain: content;
 }
@@ -85,10 +89,17 @@ body.terminal {
     min-height: 100vh;
     height: 100%;
 }
-body.terminal {
-    margin: 0;
+html {
+    height: 100%;
 }
-.terminal > div {
+body.terminal, body.full-screen-terminal {
+    margin: 0;
+    height: 100%;
+}
+body.full-screen-terminal .terminal {
+    height: 100%;
+}
+.terminal > div:not(.font) {
     min-height: 100%;
 }
 .terminal > .resizer, .terminal > .font .resizer {
@@ -133,9 +144,20 @@ body.terminal {
     border-left: 1px solid transparent;
     position: absolute;
     top: 0;
-    margin-left: -1px;
+    /* margin-left: -1px; */
     background-color: inherit;
     color: inherit;
+    bottom: 0;
+    left: -1px;
+}
+.cmd .cursor-line > span:empty {
+    /* display: none; */
+}
+.cmd .cursor-line > span:empty + .cursor + span {
+    /*margin-left: -1px;*/
+}
+.cmd .cursor-line > span:not(.cursor):not(:empty) {
+    /* margin-left: -1px; */
 }
 .cmd .cursor-line > span {
     display: inline-block;
@@ -225,6 +247,11 @@ terminal .terminal-output > div {
 .cmd span[data-text] span {
     background-color: inherit;
     color: inherit;
+}
+.cmd [role="presentation"] {
+    overflow: hidden;
+    padding-bottom: 3px;
+    margin-bottom: -3px;
 }
 /*
  * this is set so animation can select original color as backgound for cursor
@@ -326,15 +353,11 @@ terminal .terminal-output > div {
       border-left: none;
       border-bottom-color: #aaa;
       border-bottom-color: var(--color, #aaa);
-      line-height: 12px;
-      line-height: calc(var(--size, 1) * 12px);
   }
   50.1%, 100% {
       border-left: none;
       border-bottom-color: #000;
       border-bottom-color: var(--background, #000);
-      line-height: 12px;
-      line-height: calc(var(--size, 1) * 12px);
   }
 }
 @-ms-keyframes terminal-underline {
@@ -342,15 +365,11 @@ terminal .terminal-output > div {
       border-left: none;
       border-bottom-color: #aaa;
       border-bottom-color: var(--color, #aaa);
-      line-height: 12px;
-      line-height: calc(var(--size, 1) * 12px);
   }
   50.1%, 100% {
       border-left: none;
       border-bottom-color: #000;
       border-bottom-color: var(--background, #000);
-      line-height: 12px;
-      line-height: calc(var(--size, 1) * 12px);
   }
 }
 @-moz-keyframes terminal-underline {
@@ -358,45 +377,33 @@ terminal .terminal-output > div {
       border-left: none;
       border-bottom-color: #aaa;
       border-bottom-color: var(--color, #aaa);
-      line-height: 12px;
-      line-height: calc(var(--size, 1) * 12px);
   }
   50.1%, 100% {
       border-left: none;
       border-bottom-color: #000;
       border-bottom-color: var(--background, #000);
-      line-height: 12px;
-      line-height: calc(var(--size, 1) * 12px);
   }
 }
 @keyframes terminal-underline {
   0%, 50% {
-      border-left: none;
       border-bottom-color: #aaa;
       border-bottom-color: var(--color, #aaa);
-      line-height: 12px;
-      line-height: calc(var(--size, 1) * 12px);
   }
   50.1%, 100% {
-      border-left: none;
       border-bottom-color: #000;
       border-bottom-color: var(--background, #000);
-      line-height: 12px;
-      line-height: calc(var(--size, 1) * 12px);
   }
 }
-/*
-   Internet Explorer & Edge *, Safari ≤ 6
-   source: https://w3reign.com/internet-explorer-edge-css-hacks/
-*/
 .underline-animation .cursor.blink span span {
-    margin-top: 2px;
+    /* margin-top: 2px; */
     border-left: none;
-    margin-left: 0;
+    /* margin-left: 0; */
+    margin-right: -1px;
     -webkit-animation-name: terminal-underline;
-       -moz-animation-name: terminal-underline;
-        -ms-animation-name: terminal-underline;
-            animation-name: terminal-underline;
+    -moz-animation-name: terminal-underline;
+    -ms-animation-name: terminal-underline;
+    animation-name: terminal-underline;
+    right: 1px;
 }
 .bar-animation .cursor.blink span span {
     -webkit-animation-name: terminal-bar;
@@ -404,12 +411,13 @@ terminal .terminal-output > div {
         -ms-animation-name: terminal-bar;
             animation-name: terminal-bar;
 }
+/*
+   Internet Explorer & Edge *, Safari ≤ 6
+   source: https://w3reign.com/internet-explorer-edge-css-hacks/
+*/
 @supports (-ms-ime-align:auto) {
     .cmd .clipboard {
         margin-left: -9999px;
-    }
-    .underline-animation .cursor.blink span span {
-        margin-top: 0;
     }
     @keyframes terminal-blink {
         0%, 50% {
@@ -537,11 +545,12 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
-.terminal a {
+.terminal a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
+    cursor: pointer;
 }
-.terminal a:hover {
+.terminal a[href]:hover {
     background-color: #0F60FF;
     background-color: var(--link-color, #0F60FF);
     color: var(--background, #000);
@@ -578,6 +587,9 @@ terminal .terminal-output > div {
     .terminal, .terminal *, .cmd, .cmd * {
         font-size: calc(var(--size, 1) * 12px);
         line-height: calc(var(--size, 1) * 14px);
+    }
+    .cmd .clipboard {
+        top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
     }
     .terminal .terminal-output > div > div {
         min-height: calc(var(--size, 1) * 14px);

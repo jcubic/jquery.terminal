@@ -53,7 +53,7 @@ Object.defineProperties(window.HTMLElement.prototype, {
             var self = this;
             var attr = {};
             function set_style_attr() {
-                self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]};`));
+                self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';') + ';');
             }
             var mapping = {
                 backgroundClip: 'background-clip',
@@ -74,6 +74,16 @@ Object.defineProperties(window.HTMLElement.prototype, {
                     }
                     set_style_attr();
                     return true;
+                },
+                get: function(target, name) {
+                    if (name === 'setProperty') {
+                        return function(name, value) {
+                            attr[name] = target[name] = value;
+                            set_style_attr();
+                        };
+                    } else {
+                        return target[name];
+                    }
                 },
                 deleteProperty: function(target, name) {
                     name = reversed_mapping[name] || name;
@@ -339,17 +349,17 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.from_ansi', function() {
-        var ansi_string = '\x1b[38;5;12mHello\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz\x1b[48;2;255;255;0;38;2;0;100;0mQuux\x1b[m';
+        var ansi_string = '\x1b[38;5;12mHello\x1b[2;31;46mFoo\x1b[1;3;4;32;45mB[[sb;;]a]r\x1b[0m\x1b[7mBaz\x1b[0;48;2;255;255;0;38;2;0;100;0mQuux\x1b[m';
         it('should convert ansi to terminal formatting', function() {
             var string = $.terminal.from_ansi(ansi_string);
-            expect(string).toEqual('[[;#5555FF;]Hello][[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
+            expect(string).toEqual('[[;#5555FF;]Hello][[;#640000;#0AA]Foo][[biu;#44D544;#A0A]'+
                                    'B[[sb;;]a]r][[;#000;#AAA]Baz][[;#006400;#ffff00]Quux]');
         });
         it('should convert ansi to terminal formatting and escape the remaining brackets', function() {
             var string = $.terminal.from_ansi(ansi_string, {
                 unixFormattingEscapeBrackets: true
             });
-            expect(string).toEqual('[[;#5555FF;]Hello][[;#640000;#008787]Foo][[biu;#44D544;#F5F]'+
+            expect(string).toEqual('[[;#5555FF;]Hello][[;#640000;#0AA]Foo][[biu;#44D544;#A0A]'+
                                    'B&#91;&#91;sb;;&#93;a&#93;r][[;#000;#AAA]Baz][[;#006400;#ffff00]Quux]');
         });
         it('should return uncahnged string', function() {
@@ -620,12 +630,12 @@ describe('Terminal utils', function() {
             expect(string).toEqual('<span style="font-weight:bold;text-decorat'+
                                    'ion:underline line-through;font-style:ital'+
                                    'ic;color:#fff;--color:#fff;text-shadow:0 0'+
-                                   ' 5px #fff;background-color:#000" data-text'+
-                                   '="Foo">Foo</span><span style="font-style:i'+
-                                   'talic;" class="foo" data-text="Bar">Bar</s'+
-                                   'pan><span style="text-decoration:underline'+
-                                   ' line-through overline;" data-text="Baz">B'+
-                                   'az</span>');
+                                   ' 5px #fff;background-color:#000;" data-tex'+
+                                   't="Foo">Foo</span><span style="font-style:'+
+                                   'italic;" class="foo" data-text="Bar">Bar</'+
+                                   'span><span style="text-decoration:underlin'+
+                                   'e line-through overline;" data-text="Baz">'+
+                                   'Baz</span>');
         });
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
@@ -667,27 +677,23 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
-                    '<a target="_blank" href=""' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                    '<a target="_blank" rel="noopener"' +
+                        ' tabindex="1000">xss</a>'
                 ],
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
                     '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                        ' rel="noopener" tabindex="1000">xss</a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
-                    '<a target="_blank" href=""' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                    '<a target="_blank" rel="noopener"' +
+                        ' tabindex="1000">xss</a>'
                 ],
                 [
                     "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
-                    '<a target="_blank" href=""' +
-                        ' rel="noopener" tabindex="1000">xss<'+
-                        '/a>'
+                    '<a target="_blank" rel="noopener"' +
+                        ' tabindex="1000">xss</a>'
                 ],
             ];
             tests.forEach(function(spec) {
@@ -1681,6 +1687,38 @@ describe('sub plugins', function() {
     });
     // stuff not tested in other places
     describe('cmd', function() {
+        describe('formatting', function() {
+            var formatters = $.terminal.defaults.formatters;
+            var cmd = $('<div/>').cmd();
+            beforeEach(function() {
+                $.terminal.defaults.formatters = formatters.slice();
+                $.terminal.defaults.formatters.push([/((?:[a-z\\\]]|&#93;)+)/g, '[[;red;]$1]']);
+                $.terminal.defaults.formatters.push([/([0-9]]+)/g, '[[;blue;]$1]']);
+                cmd.set('');
+            });
+            afterEach(function() {
+                $.terminal.defaults.formatters = formatters;
+            });
+            it('should have proper formatting', function() {
+                var tests = [
+                    ['foo\\nbar'],
+                    [
+                        'foo\\]bar',
+                        'foo]bar'
+                    ],
+                    ['1111foo\\nbar1111'],
+                    [
+                        '1111foo111foo\\nbarr111baz\\]quux111',
+                        '1111foo111foo\\nbarr111baz]quux111'
+                    ]
+                ];
+                tests.forEach(function(spec) {
+                    cmd.set(spec[0]);
+                    var output = spec[1] || spec[0];
+                    expect(cmd.find('[data-text]').text()).toEqual(nbsp(output));
+                });
+            });
+        });
         describe('display_position', function() {
             var formatters = $.terminal.defaults.formatters, cmd;
             var text = 'hello foo';
@@ -2165,19 +2203,54 @@ describe('Terminal plugin', function() {
                     expect(char.length).toBeGreaterThan(1);
                 });
             });
-            it('should align tabs', function() {
-                var input_str = 'fo\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr';
-                var output_str = 'fo    bar baz \nf       b   baz \nfa      ba  br';
-                term.insert(input_str).focus();
-                for (var pos = 0; pos < input_str.length; ++pos) {
+            function test_click(spec) {
+                var input_str = spec[0];
+                var output_str = spec[1];
+                term.set_command(input_str).focus();
+                for (var pos = 0, len = $.terminal.length(input_str); pos < len; ++pos) {
                     var node = cmd.find('span[data-text]').eq(pos);
                     click(node);
-                    expect(cmd.position()).toBe(pos);
+                    expect(cmd.display_position()).toBe(pos);
                     var output = cmd.find('[role="presentation"]').map(function() {
                         return $(this).text().replace(/\xA0/g, ' ');
                     }).get().join('\n');
                     expect([pos, output]).toEqual([pos, output_str]);
                 }
+            }
+            it('should move cursor when over formatting', function() {
+                var formatters = $.terminal.defaults.formatters;
+                false && ($.terminal.defaults.formatters = [
+                    function(string, options) {
+                        var result = [string, options.position];
+                        ['\u0038\ufe0f\u20e3', '\u263a\ufe0f'].forEach(function(emoji) {
+                            result = $.terminal.tracking_replace(
+                                result[0],
+                                    /(\u0038\ufe0f\u20e3|\u263a\ufe0f)/g,
+                                '[[;;;emoji]$1]',
+                                result[1]);
+                        });
+                        return result;
+                    }
+                ]);
+                var test = [
+                    '\u263a\ufe0foo\tbar\t\t\u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                    '\u263a\ufe0foo   bar     \u263a\ufe0fa\u0038\ufe0f\u20e3 \nfoo     b       baz \nfoobar  ba      br'
+                ];
+                test_click(test);
+                $.terminal.defaults.formatters = formatters;
+            });
+            it('should align tabs', function() {
+                var tests = [
+                    [
+                        'fo\tbar\tbaz\nf\t\tb\tbaz\nfa\t\tba\tbr',
+                        'fo    bar baz \nf       b   baz \nfa      ba  br'
+                    ],
+                    [
+                        '\u263a\ufe0foo\tbar\t\t\u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr',
+                        '\u263a\ufe0foo   bar     \u263a\ufe0fa\u0038\ufe0f\u20e3 \nfoo     b       baz \nfoobar  ba      br'
+                    ]
+                ];
+                tests.forEach(test_click);
             });
             it('should move cursor on text with backspaces', function() {
                 var input = [
@@ -2230,16 +2303,26 @@ describe('Terminal plugin', function() {
         describe('contextmenu', function() {
             var term = $('<div/>').terminal();
             it('should move textarea', function(done) {
+                function have_props(props) {
+                    var style = clip.attr('style');
+                    var style_props = style.split(/\s*;\s*/).filter(Boolean).map(function(pair) {
+                        pair = pair.split(/\s*:\s*/);
+                        return pair[0];
+                    });
+                    return props.every(function(prop) {
+                        return style_props.includes(prop);
+                    });
+                }
                 var cmd = term.cmd();
                 var clip = term.find('textarea');
                 var event = new $.Event('contextmenu');
-                expect(clip.attr('style')).toBeFalsy();
+                expect(have_props(['height', 'width'])).toBeFalsy();
                 event.pageX = 100;
                 event.pageY = 100;
                 cmd.trigger(event);
-                expect(clip.attr('style')).toBeTruthy();
+                expect(have_props(['height', 'width'])).toBeTruthy();
                 setTimeout(function() {
-                    expect(clip.attr('style')).toBeFalsy();
+                    expect(have_props(['height', 'width'])).toBeFalsy();
                     done();
                 }, 200);
             });
@@ -4090,7 +4173,8 @@ describe('Terminal plugin', function() {
         });
         describe('error', function() {
             var term = $('<div/>').terminal($.noop, {
-                greetings: false
+                greetings: false,
+                numChars: 1000
             });
             var defaults = {
                 raw: false,

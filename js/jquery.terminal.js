@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 1.23.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 18 Sep 2018 14:16:35 +0000
+ * Date: Fri, 19 Oct 2018 17:43:14 +0000
  */
 
 /* TODO:
@@ -765,11 +765,11 @@
     // :: resizeObserver
     // -----------------------------------------------------------------------
     $.fn.resizer = function(callback) {
+        var trigger = arguments.length === 0;
         var unbind = arguments[0] === "unbind";
-        if (!unbind && !is_function(callback)) {
-            throw new Error(
-                'Invalid argument, it need to a function or string "unbind".'
-            );
+        if (!trigger && !unbind && !is_function(callback)) {
+            throw new Error('Invalid argument, it need to a function or string ' +
+                            '"unbind" or no arguments.');
         }
         if (unbind) {
             callback = is_function(arguments[1]) ? arguments[1] : null;
@@ -781,32 +781,36 @@
             function resize_handler() {
                 callbacks.fire();
             }
-            if (unbind) {
+            if (trigger || unbind) {
                 callbacks = $this.data('callbacks');
-                if (callback && callbacks) {
-                    callbacks.remove(callback);
-                    if (!callbacks.has()) {
-                        callbacks = null;
-                    }
+                if (trigger) {
+                    callbacks && callbacks.fire();
                 } else {
-                    callbacks = null;
-                }
-                if (!callbacks) {
-                    $this.removeData('callbacks');
-                    if (window.ResizeObserver) {
-                        var observer = $this.data('observer');
-                        if (observer) {
-                            observer.unobserve(this);
-                            $this.removeData('observer');
+                    if (callback && callbacks) {
+                        callbacks.remove(callback);
+                        if (!callbacks.has()) {
+                            callbacks = null;
                         }
                     } else {
-                        iframe = $this.find('> iframe');
-                        if (iframe.length) {
-                            // just in case of memory leaks in IE
-                            $(iframe[0].contentWindow).off('resize').remove();
-                            iframe.remove();
-                        } else if ($this.is('body')) {
-                            $(window).off('resize.resizer');
+                        callbacks = null;
+                    }
+                    if (!callbacks) {
+                        $this.removeData('callbacks');
+                        if (window.ResizeObserver) {
+                            var observer = $this.data('observer');
+                            if (observer) {
+                                observer.unobserve(this);
+                                $this.removeData('observer');
+                            }
+                        } else {
+                            iframe = $this.find('> iframe');
+                            if (iframe.length) {
+                                // just in case of memory leaks in IE
+                                $(iframe[0].contentWindow).off('resize').remove();
+                                iframe.remove();
+                            } else if ($this.is('body')) {
+                                $(window).off('resize.resizer');
+                            }
                         }
                     }
                 }
@@ -838,6 +842,20 @@
         });
     };
     // -----------------------------------------------------------------------
+    // :: ref: https://codepen.io/chdeliens/pen/BJxeQG
+    // :: based on https://medium.com/@cdeliens/nicely-done-3c414c2b98ec
+    // -----------------------------------------------------------------------
+    $.fn.isFullyInViewport = function(container) {
+        container = container || $(window);
+        var elementTop = $(this).offset().top;
+        var elementBottom = elementTop + $(this).outerHeight();
+
+        var viewportTop = container.scrollTop();
+        var viewportBottom = viewportTop + container.height();
+
+        return elementTop >= viewportTop && elementBottom <= viewportBottom;
+    };
+    // -----------------------------------------------------------------------
     // :: hide elements from screen readers
     // -----------------------------------------------------------------------
     function a11y_hide(element) {
@@ -854,7 +872,10 @@
         var message = (label ? label + ': ' : '') + exception_message(e);
         if (excepctions.indexOf(message) === -1) {
             excepctions.push(message);
-            alert(message + (e.stack ? '\n' + e.stack : ''));
+            setTimeout(function() {
+                throw e;
+            }, 0);
+            //alert(message + (e.stack ? '\n' + e.stack : ''));
         }
     }
     // ---------------------------------------------------------------------
@@ -1126,6 +1147,8 @@
             clickTimeout: 200,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
+            repeatTimeoutKeys: ['HOLD+BACKSPACE'],
+            tabindex: 1,
             tabs: 4
         }
     };
@@ -1141,7 +1164,7 @@
         self.append('<span class="prompt"></span>');
         self.append('<div class="cursor-line">' +
                     '<span></span>' +
-                    '<span class="cursor">&nbsp;</span>' +
+                    '<span class="cursor"><span><span>&nbsp;</span></span></span>' +
                     '<span></span>' +
                     '</div>');
         // a11y: don't read command it's in textarea that's in focus
@@ -1152,12 +1175,16 @@
         var clip = $('<textarea>').attr({
             autocapitalize: 'off',
             spellcheck: 'false',
-            tabindex: 1
-        }).addClass('clipboard').appendTo(self).val(' ');
+            tabindex: settings.tabindex
+        }).addClass('clipboard').appendTo(self);
+        if (!is_mobile) {
+            clip.val(' ');
+        }
         if (settings.width) {
             self.width(settings.width);
         }
-        var num_chars; // calculated by draw_prompt
+        var num_chars; // calculated by resize
+        var char_width;
         var last_rendered_prompt;
         var prompt_last_line;
         var prompt_len;
@@ -1348,7 +1375,7 @@
                 var re = /\S[\n\s]{2,}|[\n\s]+\S?/;
                 var match = command.slice(position).match(re);
                 if (!match || match[0].match(/^\s+$/)) {
-                    self.position(command.length);
+                    self.position(text(command).length);
                 } else if (match[0][0] !== ' ') {
                     position += match.index + 1;
                 } else {
@@ -1386,8 +1413,9 @@
             'CTRL+V': paste_event,
             'META+V': paste_event,
             'CTRL+K': function() {
-                if (command.length - position) {
-                    kill_text = self['delete'](command.length - position);
+                var len = text(command).length;
+                if (len > position) {
+                    kill_text = self['delete'](len - position);
                     text_to_clipboard(self, kill_text);
                 }
                 return false;
@@ -1497,7 +1525,7 @@
         }
         // -------------------------------------------------------------------------------
         function right() {
-            if (position < command.length) {
+            if (position < text(command).length) {
                 self.position(1, true);
             }
             return false;
@@ -1508,7 +1536,7 @@
         }
         // -------------------------------------------------------------------------------
         function end() {
-            self.position(command.length);
+            self.position(text(command).length);
         }
         // -------------------------------------------------------------------------------
         function mobile_focus() {
@@ -1564,14 +1592,14 @@
             self.oneTime(10, function() {
                 // we use space before command to show select all context menu
                 // idea taken from CodeMirror
-                if (clip.val() !== command && !position_only) {
+                if (!is_mobile && clip.val() !== command && !position_only) {
                     clip.val(' ' + command);
                 }
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
                             // we check first to improve performance
-                            if (clip.caret() !== position + 1) {
+                            if (!is_mobile && clip.caret() !== position + 1) {
                                 clip.caret(position + 1);
                             }
                         } catch (e) {
@@ -1677,13 +1705,22 @@
             rev_search_str = ''; // clear if not found any
         }
         // ---------------------------------------------------------------------
-        // :: Recalculate number of characters in command line
+        // :: calculate width of hte character
         // ---------------------------------------------------------------------
-        function change_num_chars() {
-            var $prompt = self.find('.prompt').html('<span>&nbsp;</span>');
-            var W = self.width();
-            var w = $prompt.find('span')[0].getBoundingClientRect().width;
-            num_chars = Math.floor(W / w);
+        function get_char_width() {
+            var $prompt = self.find('.prompt');
+            var html = $prompt.html();
+            $prompt.html('<span>&nbsp;</span>');
+            var width = $prompt.find('span')[0].getBoundingClientRect().width;
+            $prompt.html(html);
+            return width;
+        }
+        // ---------------------------------------------------------------------
+        // :: return number of characters in command line
+        // ---------------------------------------------------------------------
+        function get_num_chars(char_width) {
+            var width = self.width();
+            return Math.floor(width / char_width);
         }
         // ---------------------------------------------------------------------
         // :: Split String that fit into command line where first line need to
@@ -1757,18 +1794,18 @@
                     position: position
                 });
                 var formatted = $.terminal.apply_formatters(string, options);
-                string = formatted[0];
+                var output = formatted[0];
+                var max = $.terminal.length(output);
                 if (!skip_formatted_position) {
                     formatted_position = formatted[1];
+                    // fix issue with nested formatting where max length
+                    // is checked before nested_formatting flatten formatting
+                    if (formatted_position > max) {
+                        formatted_position = max;
+                    }
                 }
-                string = $.terminal.normalize(string);
-                var max = $.terminal.length(string);
-                // fix issue with nested formatting where max length is checked before
-                // nested_formatting flatten formatting
-                if (formatted_position > max) {
-                    formatted_position = max;
-                }
-                return string;
+                output = $.terminal.normalize(output);
+                return output;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
                 return string;
@@ -1796,8 +1833,8 @@
         function wrap(string) {
             function formatting(string) {
                 if ($.terminal.is_formatting(string)) {
-                    if (string.match(/\]\\\]/)) {
-                        string = string.replace(/\]\\\]/g, ']\\\\]');
+                    if (string.match(/\\]$/)) {
+                        string = string.replace(/\\]/g, '\\\\]');
                     }
                 } else {
                     if (string.match(/\\$/)) {
@@ -1826,6 +1863,7 @@
         function length(str) {
             return $.terminal.length(str);
         }
+        // ---------------------------------------------------------------------
         function substring(str, start, end) {
             return $.terminal.substring(str, start, end);
         }
@@ -1848,6 +1886,9 @@
                 var position = settings.position;
                 var len = length(string);
                 var prompt = settings.prompt;
+                if (ch_unit_bug) {
+                    cursor.width(char_width);
+                }
                 var c;
                 if (position === len) {
                     before.html(format(string));
@@ -1880,6 +1921,11 @@
                 cursor.toggleClass('noselect', noselect);
                 // fix for animation when changing --animation dynamically
                 fix_cursor();
+                var cursor_len = $.terminal.length(cursor.text());
+                if (cursor_len > 1) {
+                    var node = cursor.find('[data-text]')[0];
+                    node.style.setProperty('--length', cursor_len);
+                }
                 // synchronize css animations (it's not that important because if user
                 // will change animation she should disable animation on span, but it
                 // looks nicer until she disable that inner animation)
@@ -1920,21 +1966,27 @@
                         string = command.replace(/./g, settings.mask);
                         break;
                 }
-                string = formatting(string);
-                var pos = formatted_position;
+                var formatted = formatting(string);
+                var pos;
+                if (length(formatted) === text(string).length) {
+                    pos = position;
+                } else {
+                    pos = formatted_position;
+                }
                 var i;
                 self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
+                self.css('visibility', 'hidden');
                 before.html('');
                 // long line
-                if (strlen(text(string)) > num_chars - prompt_len - 1 ||
-                    string.match(/\n/)) {
-                    var tabs = string.match(/\t/g);
-                    var original_string = string;
+                if (strlen(text(formatted)) > num_chars - prompt_len - 1 ||
+                    formatted.match(/\n/)) {
+                    var tabs = formatted.match(/\t/g);
+                    var original_string = formatted;
                     //quick tabulation hack
                     if (tabs) {
-                        string = string.replace(/\t/g, '\x00\x00\x00\x00');
+                        formatted = formatted.replace(/\t/g, '\x00\x00\x00\x00');
                     }
-                    var array = get_splitted_command_line(string);
+                    var array = get_splitted_command_line(formatted);
                     if (tabs) {
                         array = $.map(array, function(line) {
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
@@ -2010,13 +2062,20 @@
                         }
                     }
                     self.find('.cursor-line ~ div:last-of-type').append('<span></span>');
-                } else if (string === '') {
+                } else if (formatted === '') {
                     before.html('');
                     cursor.html('<span><span>&nbsp;</span></span>');
                     after.html('');
                 } else {
-                    draw_cursor_line(string, {position: pos});
+                    draw_cursor_line(formatted, {position: pos});
                 }
+                var in_line = cursor_line.prevUntil('.prompt').length;
+                if (is_css_variables_supported) {
+                    self[0].style.setProperty('--cursor-line', in_line);
+                } else {
+                    clip.css('top', in_line * 14 + 'px');
+                }
+                self.css('visibility', '');
             };
         })();
         // ---------------------------------------------------------------------
@@ -2116,10 +2175,15 @@
                 });
             }
         }
+        // ---------------------------------------------------------------------
         function fire_change_command() {
             if (is_function(settings.onCommandChange)) {
                 settings.onCommandChange.call(self, command);
             }
+        }
+        // ---------------------------------------------------------------------
+        function clean(string) {
+            return string.replace(/((?!\\).)\\(?:&#93;|])/g, '$1&#93;');
         }
         // ---------------------------------------------------------------------
         // :: Command Line Methods
@@ -2159,7 +2223,7 @@
                 return history;
             },
             'delete': function(n, stay) {
-                var removed;
+                var removed, string;
                 if (n === 0) {
                     return "";
                 } else if (n < 0) {
@@ -2167,28 +2231,34 @@
                         // this may look weird but if n is negative we need
                         // to use +
                         removed = command.slice(0, position).slice(n);
-                        command = command.slice(0, position + n) +
-                            command.slice(position, command.length);
+                        string = text(command);
+                        string = string.slice(0, position + n) +
+                            string.slice(position, string.length);
                         if (!stay) {
                             self.position(position + n);
                         }
-                        fire_change_command();
                     }
-                } else if (command !== '' && position < command.length) {
-                    removed = command.slice(position).slice(0, n);
-                    command = command.slice(0, position) +
-                        command.slice(position + n, command.length);
-                    fire_change_command();
+                } else if (command !== '') {
+                    string = text(command);
+                    if (position < string.length) {
+                        removed = string.slice(position).slice(0, n);
+                        string = string.slice(0, position) +
+                            string.slice(position + n, string.length);
+                    }
+                }
+                if (removed) {
+                    command = clean(string);
                 }
                 redraw();
                 fix_textarea();
+                fire_change_command();
                 return removed;
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
-                    command = string;
+                    command = clean(string);
                     if (!stay) {
-                        self.position(command.length);
+                        self.position(text(command).length);
                     }
                     redraw();
                     fix_textarea();
@@ -2231,22 +2301,25 @@
                 }
             },
             insert: function(string, stay) {
-                if (position === command.length) {
-                    command += string;
+                var bare_command = text(command);
+                var len = text(string).length;
+                if (position === bare_command.length) {
+                    string = bare_command + string;
                 } else if (position === 0) {
-                    command = string + command;
+                    string = string + bare_command;
                 } else {
-                    command = command.slice(0, position) +
-                        string + command.slice(position);
+                    string = bare_command.slice(0, position) +
+                        string + bare_command.slice(position);
                 }
+                command = clean(string);
                 if (!stay) {
-                    self.position(string.length, true, true);
+                    self.position(len, true, true);
                 } else {
                     fix_textarea();
                 }
                 redraw();
-                fire_change_command();
                 fix_textarea();
+                fire_change_command();
                 return self;
             },
             get: function() {
@@ -2296,12 +2369,13 @@
             position: function(n, relative, silent) {
                 if (typeof n === 'number') {
                     var pos = position;
+                    var len = text(command).length;
                     if (relative) {
                         position += n;
                     } else if (n < 0) {
                         position = 0;
-                    } else if (n > command.length) {
-                        position = command.length;
+                    } else if (n > len) {
+                        position = len;
                     } else {
                         position = n;
                     }
@@ -2329,7 +2403,7 @@
                     return formatted_position;
                 } else {
                     var string = formatting(command, true);
-                    var len = $.terminal.length(string);
+                    var len = length(string);
                     var command_len = text(command).length;
                     var new_formatted_pos;
                     if (relative) {
@@ -2338,6 +2412,10 @@
                         new_formatted_pos = len;
                     } else {
                         new_formatted_pos = n;
+                    }
+                    if (text(string).length === length(command)) {
+                        formatted_position = new_formatted_pos;
+                        return self.position(new_formatted_pos);
                     }
                     if (len === new_formatted_pos) {
                         formatted_position = new_formatted_pos;
@@ -2370,26 +2448,30 @@
                 };
             })(),
             resize: function(num) {
+                char_width = get_char_width();
                 if (num) {
                     num_chars = num;
                 } else {
-                    change_num_chars();
+                    num_chars = get_num_chars(char_width);
                 }
                 redraw();
                 draw_prompt();
                 return self;
             },
-            enable: function(silient) {
+            enable: function() {
                 if (!enabled) {
                     enabled = true;
                     self.addClass('enabled');
                     try {
+                        if (clip.is(':not(:focus)')) {
+                            clip.focus();
+                        }
                         clip.caret(position);
                     } catch (e) {
                         // firefox throw NS_ERROR_FAILURE ignore
                     }
                     animation(true);
-                    if (!silient) {
+                    if (is_function(prompt)) {
                         draw_prompt();
                     }
                     fix_cursor();
@@ -2522,7 +2604,8 @@
                     if (hold_pause) {
                         return;
                     }
-                    if (settings.holdRepeatTimeout > 0) {
+                    if (settings.holdRepeatTimeout > 0 &&
+                        key.indexOf(settings.repeatTimeoutKeys) !== -1) {
                         hold_pause = true;
                         self.oneTime(settings.holdRepeatTimeout, 'delay', function() {
                             hold_pause = false;
@@ -2644,7 +2727,10 @@
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
             // correct for fake space used for select all context menu hack
-            var val = clip.val().replace(/^ /, '');
+            var val = clip.val();
+            if (!is_mobile) {
+                val = val.replace(/^ /, '');
+            }
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
@@ -2714,7 +2800,7 @@
                     if (!$target.is('.prompt') && down) {
                         if (enabled) {
                             if ($target.is('.cmd')) {
-                                self.position(command.length);
+                                self.position(text(command).length);
                             } else {
                                 self.display_position(get_char_pos(e));
                             }
@@ -2831,8 +2917,6 @@
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
-    var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    // -------------------------------------------------------------------------
     var is_key_native = (function is_key_native() {
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             return false;
@@ -2849,6 +2933,22 @@
         }
         return check;
     })(navigator.userAgent || navigator.vendor || window.opera);
+
+    // -------------------------------------------------------------------------
+    // IE ch unit bug detection - better that UserAgent that can be changed
+    var ch_unit_bug = false;
+    $(function() {
+        function width(e) {
+            return e[0].getBoundingClientRect().width;
+        }
+        var base = '<span style="font-family: monospace;visibility:hidden;';
+        var ch = $(base + 'width:1ch;overflow: hidden">&nbsp;</span>').appendTo('body');
+        var space = $(base + '">&nbsp;</span>').appendTo('body');
+        ch_unit_bug = width(ch) !== width(space);
+        ch.remove();
+        space.remove();
+    });
+
     // -------------------------------------------------------------------------
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
@@ -2904,7 +3004,7 @@
         }
     }
     // -------------------------------------------------------------------------
-    // normalize position for counting emoji
+    // normalize position for counting emoji and extra chars
     // -------------------------------------------------------------------------
     function normalize_position(string, position) {
         if (position === 0) {
@@ -3212,8 +3312,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '1.23.2',
-        date: 'Tue, 18 Sep 2018 14:16:35 +0000',
+        version: 'DEV',
+        date: 'Fri, 19 Oct 2018 17:43:14 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3306,38 +3406,21 @@
             function length(string) {
                 return $.terminal.strip(string).length;
             }
-            // we need to correct position from regex and match to take into account
-            // characters that are created from more when one code point like
-            // emoji or surogate pairs #422
-            function correct_index(index) {
-                var len = length(string.substring(0, index));
-                for (var i = index; i < string.length; ++i) {
-                    var next_len = length(string.substring(0, i));
-                    if (next_len === len + 1) {
-                        return len;
-                    }
-                    len = next_len;
-                }
-                return len;
-            }
             var new_string = "";
             var match;
             var index = 0;
             var rep_string;
-            var new_position = correct_index(position);
+            var new_position = position;
             var start;
             rex.lastIndex = 0; // Just to be sure
             while ((match = rex.exec(string))) {
                 // if regex don't have g flag lastIndex will not work
                 if (rex.global) {
-                    // fix lastIndex for emoji and characters
-                    // that have more then one codepoint
-                    var i = correct_index(rex.lastIndex);
                     // Add any of the original string we just skipped
-                    var last_index = length(substring(string, 0, i));
+                    var last_index = length(substring(string, 0, rex.lastIndex));
                     start = last_index - length(match[0]);
                 } else {
-                    start = correct_index(match.index);
+                    start = match.index;
                     last_index = start + length(match[0]);
                 }
                 if (index < start) {
@@ -3410,7 +3493,7 @@
             }
             // ----------------------------------------------------------------
             function is_escape_bracket(i) {
-                return string[i] === ']' && string[i - 1] === '\\';
+                return string[i] === '\\' && string[i + 1] === ']';
             }
             // ----------------------------------------------------------------
             function is_text(i) {
@@ -3426,6 +3509,7 @@
             var space = -1;
             var prev_space;
             var length = 0;
+            var offset = 0;
             for (var i = 0; i < string.length; i++) {
                 var substring = string.substring(i);
                 match = substring.match(format_start_re);
@@ -3463,9 +3547,11 @@
                         ++count;
                         ++length;
                     } else if (is_escape_bracket(i)) {
-                        // escape \] counts as one character
-                        --count;
-                        --length;
+                        // escape \] and \\ counts as one character
+                        ++count;
+                        ++length;
+                        offset = 1;
+                        i += 1;
                     } else if (!braket || !have_formatting) {
                         ++count;
                         ++length;
@@ -3477,10 +3563,11 @@
                     }
                     var data = {
                         count: count,
-                        index: i,
+                        index: i - offset,
                         formatting: formatting,
                         length: length,
                         text: in_text,
+                        size: offset + 1,
                         space: space
                     };
                     var ret = callback(data);
@@ -3533,6 +3620,7 @@
             var end_formatting = '';
             var prev_index;
             var re = /(&[^;]+);$/;
+            var offset = 1;
             $.terminal.iterate_formatting(string, function(data) {
                 var m;
                 if (start_index && data.count === start_index + 1) {
@@ -3549,6 +3637,7 @@
                 if (end_index && data.count === end_index) {
                     end_formatting = data.formatting;
                     prev_index = data.index;
+                    offset = data.size;
                 }
                 if (data.count === end_index + 1) {
                     end = data.index;
@@ -3557,7 +3646,7 @@
                         end -= m[1].length;
                     }
                     if (data.formatting) {
-                        end = prev_index + 1;
+                        end = prev_index + offset;
                     }
                 }
             });
@@ -3627,8 +3716,13 @@
                 var line_length = line.length;
                 var chars = $.terminal.split_characters(text(line));
                 var last_char = chars[chars.length - 1];
+                var end_index = line_length - (last_char ? last_char.length : 1);
+                var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);
+                if (last_bracket) {
+                    end_index -= 1;
+                }
                 $.terminal.iterate_formatting(line, function(data) {
-                    var last_iteraction = data.index === line_length - last_char.length;
+                    var last_iteraction = data.index === end_index;
                     var chr, substring;
                     if (data.length >= length || last_iteraction ||
                         (data.length === length - 1 &&
@@ -3656,6 +3750,9 @@
                             substring = line.substring(data.index);
                             chr = get_next_character(substring);
                             output = line.substring(first_index, data.index) + chr;
+                            if (last_iteraction && last_bracket && chr !== ']') {
+                                output += ']';
+                            }
                             new_index = data.index + chr.length - 1;
                         }
                         if (keep_words) {
@@ -4007,7 +4104,7 @@
                                 }
                             }
                             if ($.terminal.valid_color(background)) {
-                                style_str += 'background-color:' + background;
+                                style_str += 'background-color:' + background + ';';
                             }
                             var data;
                             if (data_text === '') {
@@ -4027,10 +4124,13 @@
                                     result = '<a href="mailto:' + data + '"';
                                 } else {
                                     if (!settings.anyLinks &&
-                                        !data.match(/^(https?|ftp):\/\//)) {
+                                        !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
                                         data = '';
                                     }
-                                    result = '<a target="_blank" href="' + data + '"';
+                                    result = '<a target="_blank"';
+                                    if (data) {
+                                        result += ' href="' + data + '"';
+                                    }
                                     var rel = ["noopener"];
                                     if (settings.linksNoReferrer) {
                                         rel.unshift("noreferrer");
@@ -4109,6 +4209,7 @@
         },
         // ---------------------------------------------------------------------
         // :: return string where array items are in columns padded spaces
+        // :: after adding align tabs arr.join('\t\t') looks much better
         // ---------------------------------------------------------------------
         columns: function(array, cols, space) {
             var no_formatting = array.map(function(string) {
@@ -4683,6 +4784,7 @@
         wrap: true,
         checkArity: true,
         raw: false,
+        tabindex: 1,
         invokeMethods: false,
         exceptionHandler: null,
         pauseEvents: true,
@@ -4696,6 +4798,7 @@
         processRPCResponse: null,
         completionEscape: true,
         onCommandChange: null,
+        onPositionChange: null,
         convertLinks: true,
         extra: {},
         tabs: 4,
@@ -4718,6 +4821,7 @@
         clickTimeout: 200,
         holdTimeout: 400,
         holdRepeatTimeout: 200,
+        repeatTimeoutKeys: ['HOLD+BACKSPACE'],
         request: $.noop,
         response: $.noop,
         describe: 'procs',
@@ -5368,8 +5472,9 @@
                     anyLinks: settings.anyLinks,
                     char_width: char_size.width
                 };
+                string = $.terminal.normalize(string);
                 var cols = self.cols();
-                if ((strlen(string) > cols ||
+                if ((strlen(text(string)) > cols ||
                      string.match(/\n/)) &&
                     ((settings.wrap === true && options.wrap === undefined) ||
                      settings.wrap === false && options.wrap === true)) {
@@ -5386,7 +5491,6 @@
                         }
                     }
                 } else {
-                    string = $.terminal.normalize(string);
                     string = $.terminal.format(string, format_options);
                     string.split(/\n/).forEach(function(string) {
                         output_buffer.push(string);
@@ -5558,12 +5662,7 @@
                     command_line.before(detached_output); // reinsert output
                 }
                 self.flush(options);
-                try {
-                    settings.onAfterRedraw.call(self, self);
-                } catch (e) {
-                    settings.onAfterRedraw = $.noop;
-                    display_exception(e, 'onAfterRedraw');
-                }
+                fire_event('onAfterRedraw');
             } catch (e) {
                 if (is_function(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
@@ -5649,12 +5748,7 @@
             var options = {
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
-                    try {
-                        settings.onEchoCommand.call(self, div, command);
-                    } catch (e) {
-                        settings.onEchoCommand = $.noop;
-                        self.exception(e);
-                    }
+                    fire_event('onEchoCommand', [div, command]);
                 }
             };
             if (is_function(prompt)) {
@@ -5749,9 +5843,7 @@
                     change_hash = saved_change_hash;
                 }
                 deferred.resolve();
-                if (is_function(settings.onAfterCommand)) {
-                    settings.onAfterCommand.call(self, self, command);
-                }
+                fire_event('onAfterCommand', [command]);
             }
             // -----------------------------------------------------------------
             function show(result) {
@@ -5792,10 +5884,8 @@
             }
             try {
                 // this callback can disable commands
-                if (is_function(settings.onBeforeCommand)) {
-                    if (settings.onBeforeCommand.call(self, self, command) === false) {
-                        return;
-                    }
+                if (fire_event('onBeforeCommand', [command]) === false) {
+                    return;
                 }
                 if (!exec) {
                     prev_command = $.terminal.split_command(command);
@@ -5951,6 +6041,35 @@
             init_queue.resolve();
             if (!silent && is_function(interpreter.onStart)) {
                 interpreter.onStart.call(self, self);
+            }
+        }
+        // ---------------------------------------------------------------------
+        function fire_event(name, args) {
+            args = (args || []).concat([self]); // create new array
+            // even can be fired before interpreters is created
+            var top = interpreters && interpreters.top();
+            if (top && is_function(top[name])) {
+                try {
+                    return top[name].apply(self, args);
+                } catch (e) {
+                    delete top[name];
+                    display_exception(e, name);
+                }
+            } else if (is_function(settings[name])) {
+                try {
+                    return settings[name].apply(self, args);
+                } catch (e) {
+                    settings[name] = null;
+                    display_exception(e, name);
+                }
+            }
+        }
+        // ---------------------------------------------------------------------
+        function move_cursor_visible() {
+            var cursor = self.find('.cursor');
+            if (!cursor.isFullyInViewport(self)) {
+                self.scrollTop(cursor.position().top - 5);
+                return true;
             }
         }
         // ---------------------------------------------------------------------
@@ -6216,6 +6335,10 @@
         }
         // ---------------------------------------------------------------------
         var self = this;
+        if (self.is('body,html')) {
+            self = $('<div/>').appendTo('body');
+            $('body').addClass('full-screen-terminal');
+        }
         if (this.length > 1) {
             return this.each(function() {
                 $.fn.terminal.call(
@@ -6234,7 +6357,6 @@
             throw new $.terminal.Exception(msg);
         }
         // var names = []; // stack if interpreter names
-        var scroll_object;
         var prev_command; // used for name on the terminal if not defined
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
@@ -6290,11 +6412,7 @@
             clear: function() {
                 output.html('');
                 lines = [];
-                try {
-                    settings.onClear.call(self, self);
-                } catch (e) {
-                    display_exception(e, 'onClear');
-                }
+                fire_event('onClear');
                 self.attr({scrollTop: 0});
                 return self;
             },
@@ -6303,14 +6421,8 @@
             // :: restore the state
             // -------------------------------------------------------------
             export_view: function() {
-                var user_export = {};
-                if (is_function(settings.onExport)) {
-                    try {
-                        user_export = settings.onExport.call(self);
-                    } catch (e) {
-                        display_exception(e, 'onExport');
-                    }
-                }
+                var user_export = fire_event('onExport');
+                user_export = user_export || {};
                 return $.extend({}, {
                     focus: enabled,
                     mask: command_line.mask(),
@@ -6329,14 +6441,7 @@
                 if (in_login) {
                     throw new Error(sprintf(strings().notWhileLogin, 'import_view'));
                 }
-                if (is_function(settings.onImport)) {
-                    try {
-                        settings.onImport.call(self, view);
-                    } catch (e) {
-                        settings.onImport = $.noop;
-                        display_exception(e, 'onImport');
-                    }
-                }
+                fire_event('onImport', [view]);
                 when_ready(function ready() {
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
@@ -6689,7 +6794,7 @@
                                 }
                             } else if (options.doubleTab !== false) {
                                 echo_command();
-                                var text = matched.reverse().join('\t');
+                                var text = matched.slice().reverse().join('\t\t');
                                 self.echo($.terminal.escape_brackets(text), {
                                     keepWords: true,
                                     formatters: false
@@ -6763,9 +6868,7 @@
                     if (!visible) {
                         command_line.find('.prompt').hidden();
                     }
-                    if (is_function(settings.onPause)) {
-                        settings.onPause.call(self);
-                    }
+                    fire_event('onPause');
                 });
                 return self;
             },
@@ -6776,7 +6879,7 @@
                 cmd_ready(function ready() {
                     paused = false;
                     if (enabled && terminals.front() === self) {
-                        command_line.enable(true);
+                        command_line.enable();
                     }
                     command_line.find('.prompt').visible();
                     var original = delayed_commands;
@@ -6790,9 +6893,7 @@
                         fn();
                     }
                     self.scroll_to_bottom();
-                    if (is_function(settings.onResume)) {
-                        settings.onResume.call(self);
-                    }
+                    fire_event('onResume');
                 });
                 return self;
             },
@@ -6955,17 +7056,12 @@
                     cmd_ready(function ready() {
                         var ret;
                         if (!silent && !enabled) {
-                            try {
-                                ret = settings.onFocus.call(self, self);
-                            } catch (e) {
-                                settings.onFocus = $.noop;
-                                display_exception(e, 'onFocus');
-                            }
+                            fire_event('onFocus');
                         }
                         if (!silent && ret === undefined || silent) {
                             enabled = true;
                             if (!self.paused()) {
-                                command_line.enable(true);
+                                command_line.enable();
                             }
                         }
                     });
@@ -6979,12 +7075,7 @@
                 cmd_ready(function ready() {
                     var ret;
                     if (!silent && enabled) {
-                        try {
-                            ret = settings.onBlur.call(self, self);
-                        } catch (e) {
-                            settings.onBlur = $.noop;
-                            display_exception(e, 'onBlur');
-                        }
+                        ret = fire_event('onBlur');
                     }
                     if (!silent && ret === undefined || silent) {
                         enabled = false;
@@ -7157,12 +7248,7 @@
                         num_rows = new_num_rows;
                         command_line.resize(num_chars);
                         self.refresh();
-                        var top = interpreters.top();
-                        if (is_function(top.resize)) {
-                            top.resize.call(self, self);
-                        } else if (is_function(settings.onResize)) {
-                            settings.onResize.call(self, self);
-                        }
+                        fire_event('onResize');
                     }
                 }
                 return self;
@@ -7214,22 +7300,22 @@
                         }
                     });
                     limit_lines();
-                    try {
-                        settings.onFlush.call(self, self);
-                    } catch (e) {
-                        settings.onFlush = $.noop;
-                        display_exception(e, 'onFlush');
-                    }
+                    fire_event('onFlush');
                     //num_rows = get_num_rows(self, char_size);
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
                     }
                     output_buffer = [];
-                } catch (e) {
+                } catch (e1) {
                     if (is_function(settings.exceptionHandler)) {
-                        settings.exceptionHandler.call(self, e, 'TERMINAL (Flush)');
+                        try {
+                            settings.exceptionHandler.call(self, e1, 'TERMINAL (Flush)');
+                        } catch (e2) {
+                            settings.exceptionHandler = $.noop;
+                            alert_exception('[exceptionHandler]', e2);
+                        }
                     } else {
-                        alert_exception('[Flush]', e);
+                        alert_exception('[Flush]', e1);
                     }
                 }
                 return self;
@@ -7429,18 +7515,18 @@
             scroll: function(amount) {
                 var pos;
                 amount = Math.round(amount);
-                if (scroll_object.prop) { // work with jQuery > 1.6
-                    if (amount > scroll_object.prop('scrollTop') && amount > 0) {
-                        scroll_object.prop('scrollTop', 0);
+                if (self.prop) { // work with jQuery > 1.6
+                    if (amount > self.prop('scrollTop') && amount > 0) {
+                        self.prop('scrollTop', 0);
                     }
-                    pos = scroll_object.prop('scrollTop');
-                    scroll_object.scrollTop(pos + amount);
+                    pos = self.prop('scrollTop');
+                    self.scrollTop(pos + amount);
                 } else {
-                    if (amount > scroll_object.attr('scrollTop') && amount > 0) {
-                        scroll_object.attr('scrollTop', 0);
+                    if (amount > self.attr('scrollTop') && amount > 0) {
+                        self.attr('scrollTop', 0);
                     }
-                    pos = scroll_object.attr('scrollTop');
-                    scroll_object.scrollTop(pos + amount);
+                    pos = self.attr('scrollTop');
+                    self.scrollTop(pos + amount);
                 }
                 return self;
             },
@@ -7587,7 +7673,7 @@
                     }
                     var was_paused = paused;
                     function init() {
-                        settings.onPush.call(self, top, interpreters.top(), self);
+                        fire_event('onPush', [top, interpreters.top()]);
                         prepare_top_interpreter();
                     }
                     // self.pause();
@@ -7648,17 +7734,10 @@
                     top = interpreters.top();
                     if (settings.login) {
                         if (!silent) {
-                            settings.onPop.call(self, top, null, self);
+                            fire_event('onPop', [top, null]);
                         }
                         global_logout();
-                        if (is_function(settings.onExit)) {
-                            try {
-                                settings.onExit.call(self, self);
-                            } catch (e) {
-                                settings.onExit = $.noop;
-                                display_exception(e, 'onExit');
-                            }
-                        }
+                        fire_event('onExit');
                     } else {
                         self.error(strings().canExitError);
                     }
@@ -7670,7 +7749,7 @@
                     top = interpreters.top();
                     prepare_top_interpreter();
                     if (!silent) {
-                        settings.onPop.call(self, current, top);
+                        fire_event('onPop', [current, top]);
                     }
                     // we check in case if you don't pop from password interpreter
                     if (in_login && self.get_prompt() !== strings().login + ': ') {
@@ -7860,12 +7939,12 @@
             // -------------------------------------------------------------
             scroll_to_bottom: function() {
                 var scrollHeight;
-                if (scroll_object.prop) {
-                    scrollHeight = scroll_object.prop('scrollHeight');
+                if (self.prop) {
+                    scrollHeight = self.prop('scrollHeight');
                 } else {
-                    scrollHeight = scroll_object.attr('scrollHeight');
+                    scrollHeight = self.attr('scrollHeight');
                 }
-                scroll_object.scrollTop(scrollHeight);
+                self.scrollTop(scrollHeight);
                 return self;
             },
             // -------------------------------------------------------------
@@ -7877,15 +7956,9 @@
                     return false;
                 } else {
                     var scroll_height, scroll_top, height;
-                    if (self.is('body')) {
-                        scroll_height = $(document).height();
-                        scroll_top = $(window).scrollTop();
-                        height = window.innerHeight;
-                    } else {
-                        scroll_height = scroll_object[0].scrollHeight;
-                        scroll_top = scroll_object.scrollTop();
-                        height = scroll_object.outerHeight();
-                    }
+                    scroll_height = self[0].scrollHeight;
+                    scroll_top = self.scrollTop();
+                    height = self.outerHeight();
                     var limit = scroll_height - settings.scrollBottomOffset;
                     return scroll_top + height > limit;
                 }
@@ -8016,16 +8089,6 @@
         if (settings.height) {
             self.height(settings.height);
         }
-        // scrollTop need be on html but scrollHeight taken from body
-        // on Safari both on body it's easier to just put both in selector and it works
-        if (settings.scrollObject !== null) {
-            scroll_object = $(settings.scrollObject);
-        } else {
-            scroll_object = self;
-        }
-        if (scroll_object.is('body') && !is_safari) {
-            scroll_object = $('html,body');
-        }
         // register ajaxSend for cancel requests on CTRL+D
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
@@ -8037,15 +8100,8 @@
             .appendTo(wrapper);
         self.addClass('terminal');
         // before login event
-        if (settings.login && is_function(settings.onBeforeLogin)) {
-            try {
-                if (settings.onBeforeLogin.call(self, self) === false) {
-                    autologin = false;
-                }
-            } catch (e) {
-                settings.onBeforeLogin = $.noop;
-                display_exception(e, 'onBeforeLogin');
-            }
+        if (settings.login && fire_event('onBeforeLogin') === false) {
+            autologin = false;
         }
         // create json-rpc authentication function
         var base_interpreter;
@@ -8146,6 +8202,7 @@
             }, itrp));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
+                tabindex: settings.tabindex,
                 prompt: settings.prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
@@ -8159,18 +8216,25 @@
                 clickTimeout: settings.clickTimeout,
                 holdTimeout: settings.holdTimeout,
                 holdRepeatTimeout: settings.holdRepeatTimeout,
+                repeatTimeoutKeys: settings.repeatTimeoutKeys,
                 keypress: key_press,
                 tabs: settings.tabs,
+                onPositionChange: function() {
+                    var args = [].slice.call(arguments);
+                    move_cursor_visible();
+                    fire_event('onPositionChange', args);
+                },
                 onCommandChange: function(command) {
-                    if (is_function(settings.onCommandChange)) {
-                        try {
-                            settings.onCommandChange.call(self, command, self);
-                        } catch (e) {
-                            settings.onCommandChange = $.noop;
-                            display_exception(e, 'onCommandChange');
-                        }
+                    // resize is not triggered when insert called just after init
+                    //  and scrollbar appear
+                    if (old_width !== fill.width()) {
+                        // resizer handler will update old_width
+                        self.resizer();
                     }
-                    self.scroll_to_bottom();
+                    fire_event('onCommandChange', [command]);
+                    if (!move_cursor_visible()) {
+                        self.scroll_to_bottom();
+                    }
                 },
                 commands: commands
             });
@@ -8240,10 +8304,10 @@
                     var scroll_top;
                     self.find('.cmd textarea').on('focus', function() {
                         if (typeof scroll_top !== 'undefined') {
-                            scroll_object.scrollTop(scroll_top);
+                            self.scrollTop(scroll_top);
                         }
                     }).on('blur', function() {
-                        scroll_top = scroll_object.scrollTop();
+                        scroll_top = self.scrollTop();
                     });
                     self.mousedown(function(e) {
                         if (!scrollbar_event(e, fill)) {
@@ -8291,12 +8355,18 @@
                                 }
                                 self.stopTime('textarea');
                                 self.oneTime(100, 'textarea', function() {
-                                    clip.css({
+                                    var props = {
                                         left: '',
                                         top: '',
                                         width: '',
                                         height: ''
-                                    });
+                                    };
+                                    if (!is_css_variables_supported) {
+                                        var in_line = self.find('.cmd .cursor-line')
+                                            .prevUntil('.prompt').length;
+                                        props.top = in_line * 14 + 'px';
+                                    }
+                                    clip.css(props);
                                 });
                                 self.stopTime('selection');
                                 self.everyTime(20, 'selection', function() {

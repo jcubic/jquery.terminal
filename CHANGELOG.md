@@ -1,3 +1,34 @@
+## 1.24.0
+### Breaking
+* braking/not breaking - from now on if terminal is added to body it's in fact added to div inside body
+  `$('body').terminal().is('body');` will be false
+### Features
+* new option repeatTimeoutKeys with default of HOLD+BACKSPACE that should have delay when deleting words
+* use setTimeout instead of alert to show exception that can be shown in terminal
+* allow to move cursor when regex formatter don't change length of the string
+* don't style links if they don't have href
+* new plugin isFullyInViewport (link to source in comment)
+* scroll terminal to always view cursor in multiline command
+* add onPositionChange to option to terminal
+* add tabindex option to cmd and terminal
+### Bugfix
+* fix delay when using arrow keys by filtering keys that have delay when hold
+* fix skipping lines that have emoji as last character inside formatting
+* fix cursor over tab
+* fix tracking replace for emoji and extra chars when adding formatting multiple times
+* fix inconsistency of cursor on background formatting between Windows and Linux
+* fix echo newline as first character of formatting
+* fix slash as last character in formatting when generation command line with slash and cursor just after
+* fix escape bracket in command line
+* fix relative and absolute urls with default `anyLinks: false`
+* fix android and iPhone issues [#443](https://github.com/jcubic/jquery.terminal/issues/443) [#414](https://github.com/jcubic/jquery.terminal/issues/414)
+* fix ANSI escapes in unix_formatting [$444](https://github.com/jcubic/jquery.terminal/issues/444)
+* fix jumping cursor when there are no text before cursor line in Chrome
+* fix selection menu in latest Android
+* fix wrong number of chars per line when insert called after init and scrollbar appear
+* fix missing cursor when init cmd plugin (without calling refresh)
+* fix issue with function prompt not updating after resume
+
 ## 1.23.2
 ### Bugfix
 * fix too tall cursor (blink included underline)
@@ -43,7 +74,7 @@
 
 ## 1.22.1
 ### Bugfix
-* fix broken jquery.terminal.js because after last change there was not build
+* fix broken jquery.terminal.js because after last change there was no build
 * fix invocation in xml_formatting and dterm
 * add onCommandChange to defaults file so it's picked up by dterm (update d.ts)
 
