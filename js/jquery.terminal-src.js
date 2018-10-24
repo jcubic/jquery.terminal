@@ -8316,7 +8316,7 @@
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
-                        if ($target.closest(ignore_elements).length) {
+                        if ($target && $target.closest(ignore_elements).length) {
                             if (enabled) {
                                 self.disable();
                             }
