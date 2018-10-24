@@ -1,3 +1,7 @@
+## 2.0.1
+### Bugfix
+* fix focus to textarea or input that was printed using terminal echo function ([reported as question on SO](https://stackoverflow.com/q/52943390/387194))
+
 ## 2.0.0
 ### Breaking
 * from now on if terminal is added to body it's in fact added to div inside body (the API didn't changed)

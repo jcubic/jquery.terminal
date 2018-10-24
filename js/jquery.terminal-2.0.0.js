@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.0.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 20 Oct 2018 12:38:55 +0000
+ * Date: Wed, 24 Oct 2018 17:15:30 +0000
  */
 
 /* TODO:
@@ -3312,8 +3312,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.0.0',
-        date: 'Sat, 20 Oct 2018 12:38:55 +0000',
+        version: 'DEV',
+        date: 'Wed, 24 Oct 2018 17:15:30 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8300,6 +8300,8 @@
                         count = 0;
                         $target = null;
                     }
+                    var ignore_elements = '.terminal-output textarea,' +
+                        '.terminal-output input';
                     // hack for weird jumping on Chrome/windows #402
                     var scroll_top;
                     self.find('.cmd textarea').on('focus', function() {
@@ -8314,7 +8316,11 @@
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
-                        if (get_selected_text() === '' && $target) {
+                        if ($target.closest(ignore_elements).length) {
+                            if (enabled) {
+                                self.disable();
+                            }
+                        } else if (get_selected_text() === '' && $target) {
                             if (++count === 1) {
                                 if (!frozen) {
                                     if (!enabled) {

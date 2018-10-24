@@ -8300,6 +8300,8 @@
                         count = 0;
                         $target = null;
                     }
+                    var ignore_elements = '.terminal-output textarea,' +
+                        '.terminal-output input';
                     // hack for weird jumping on Chrome/windows #402
                     var scroll_top;
                     self.find('.cmd textarea').on('focus', function() {
@@ -8314,7 +8316,11 @@
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
-                        if (get_selected_text() === '' && $target) {
+                        if ($target.closest(ignore_elements).length) {
+                            if (enabled) {
+                                self.disable();
+                            }
+                        } else if (get_selected_text() === '' && $target) {
                             if (++count === 1) {
                                 if (!frozen) {
                                     if (!enabled) {
