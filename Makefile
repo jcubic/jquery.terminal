@@ -25,7 +25,7 @@ else
   TSC=./node_modules/.bin/tsc
 endif
 SPEC_CHECKSUM=`md5sum __tests__/terminal.spec.js | cut -d' ' -f 1`
-COMMIT=`git log -n 1 | grep commit | sed 's/commit //'`
+COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
 
