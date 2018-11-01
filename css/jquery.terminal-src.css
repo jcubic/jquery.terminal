@@ -179,6 +179,7 @@ body.full-screen-terminal .terminal {
 }
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
+    padding-bottom: 1px; /* firefox cut of 1px */
 }
 .cmd .prompt > span {
     float: left;

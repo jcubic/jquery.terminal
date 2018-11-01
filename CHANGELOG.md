@@ -1,6 +1,8 @@
 ## 2.0.1
 ### Bugfix
 * fix focus to textarea or input that was printed using terminal echo function ([reported as question on SO](https://stackoverflow.com/q/52943390/387194))
+* fix cutting of bottom part of greetings lines in Firefox
+* fix keep focus into cursor feature added in 2.0 (up arrow was causing scroll to top) report in firebase chat
 
 ## 2.0.0
 ### Breaking

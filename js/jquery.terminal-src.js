@@ -842,18 +842,16 @@
         });
     };
     // -----------------------------------------------------------------------
-    // :: ref: https://codepen.io/chdeliens/pen/BJxeQG
-    // :: based on https://medium.com/@cdeliens/nicely-done-3c414c2b98ec
+    // :: based on https://github.com/zeusdeux/isInViewport
+    // :: work only vertically and on dom elements
     // -----------------------------------------------------------------------
     $.fn.isFullyInViewport = function(container) {
-        container = container || $(window);
-        var elementTop = $(this).offset().top;
-        var elementBottom = elementTop + $(this).outerHeight();
-
-        var viewportTop = container.scrollTop();
-        var viewportBottom = viewportTop + container.height();
-
-        return elementTop >= viewportTop && elementBottom <= viewportBottom;
+        var box = this[0].getBoundingClientRect();
+        var viewport = container[0].getBoundingClientRect();
+        var top = box.top - viewport.top;
+        var bottom = box.bottom - viewport.top;
+        var height = container.height();
+        return bottom > 0 && top <= height;
     };
     // -----------------------------------------------------------------------
     // :: hide elements from screen readers
@@ -910,7 +908,12 @@
             index: function() {
                 return pos;
             },
-            rotate: function(skip) {
+            rotate: function(skip, init) {
+                if (init === undefined) {
+                    init = pos;
+                } else if (init === pos) {
+                    return;
+                }
                 if (!skip) {
                     var defined = data.filter(function(item) {
                         return typeof item !== 'undefined';
@@ -933,7 +936,7 @@
                     if (typeof data[pos] !== 'undefined') {
                         return data[pos];
                     } else {
-                        return this.rotate(true);
+                        return this.rotate(true, init);
                     }
                 }
             },
@@ -6410,8 +6413,8 @@
             // :: Clear the output
             // -------------------------------------------------------------
             clear: function() {
-                output.html('');
                 lines = [];
+                output.html('');
                 fire_event('onClear');
                 self.attr({scrollTop: 0});
                 return self;
@@ -7899,8 +7902,8 @@
             destroy: function() {
                 when_ready(function ready() {
                     command_line.destroy().remove();
-                    output.remove();
-                    wrapper.remove();
+                    self.resizer('unbind');
+                    font_resizer.resizer('unbind').remove();
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
                     self.unbind('click wheel mousewheel mousedown mouseup');
@@ -7927,11 +7930,11 @@
                     if (mutation_observer) {
                         mutation_observer.disconnect();
                     }
-                    self.resizer('unbind');
-                    font_resizer.resizer('unbind').remove();
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
+                    output.remove();
+                    wrapper.remove();
                     defunct = true;
                 });
                 return self;
