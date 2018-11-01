@@ -1276,11 +1276,11 @@
             'HOLD+SHIFT+DELETE': delete_word(false),
             'ENTER': function() {
                 if (history && command && !settings.mask &&
-                    (is_function(settings.historyFilter) &&
-                     settings.historyFilter(command)) ||
-                    (settings.historyFilter instanceof RegExp &&
-                     command.match(settings.historyFilter)) ||
-                    !settings.historyFilter) {
+                    ((is_function(settings.historyFilter) &&
+                      settings.historyFilter(command)) ||
+                     (settings.historyFilter instanceof RegExp &&
+                      command.match(settings.historyFilter)) ||
+                     !settings.historyFilter)) {
                     history.append(command);
                 }
                 var tmp = command;
