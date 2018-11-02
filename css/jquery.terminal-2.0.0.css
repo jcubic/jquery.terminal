@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Thu, 01 Nov 2018 10:48:50 +0000
+ * Date: Fri, 02 Nov 2018 12:35:14 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -571,6 +571,13 @@ terminal .terminal-output > div {
 }
 .terminal, .terminal .terminal-fill {
     padding: 10px;
+}
+/* padding added as margin to .cmd to fix FireFox bug see: https://stackoverflow.com/q/29986977/387194 */
+.terminal {
+    padding-bottom: 0;
+}
+.terminal .cmd {
+    margin-bottom: 10px;
 }
 @supports (--css: variables) {
     .terminal, .terminal-wrapper *, .cmd, .cmd * {

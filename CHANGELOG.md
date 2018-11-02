@@ -4,6 +4,7 @@
 * fix cutting of bottom part of greetings lines in Firefox
 * fix keep focus into cursor feature added in 2.0 (up arrow was causing scroll to top) report in firebase chat
 * don't add empty string to history
+* fix bottom padding in FireFox
 
 ## 2.0.0
 ### Breaking
