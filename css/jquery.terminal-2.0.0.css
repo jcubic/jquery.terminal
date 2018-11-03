@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sat, 03 Nov 2018 07:55:09 +0000
+ * Date: Sat, 03 Nov 2018 08:26:11 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -133,7 +133,7 @@ body.full-screen-terminal .terminal {
 .cmd .cursor {
     display: inline-block;
     position: relative;
-    height: 15px;
+    height: 14px;
     min-width: 1ch;
     /* box-sizing: border-box; */
 }
@@ -174,7 +174,7 @@ body.full-screen-terminal .terminal {
 }
 .terminal .terminal-output div div, .cmd .prompt {
     display: block;
-    line-height: 15px;
+    line-height: 14px;
     height: auto;
 }
 .terminal .terminal-output > div:not(.raw) div {
@@ -195,7 +195,7 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
     font-size: 12px;
-    line-height: 15px;
+    line-height: 14px;
 }
 .terminal, .cmd {
     box-sizing: border-box;
@@ -210,7 +210,7 @@ body.full-screen-terminal .terminal {
 }
 .cmd div {
     clear: both;
-    min-height: 15px;
+    min-height: 14px;
 }
 .cmd .prompt + div {
     clear: right;
@@ -421,6 +421,8 @@ terminal .terminal-output > div {
    Internet Explorer & Edge *, Safari ≤ 6
    source: https://w3reign.com/internet-explorer-edge-css-hacks/
 */
+
+
 @supports (-ms-ime-align:auto) {
     .cmd .clipboard {
         margin-left: -9999px;
@@ -605,10 +607,10 @@ terminal .terminal-output > div {
     .cmd span,
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
-        line-height: calc(var(--size, 1) * 15px);
+        line-height: calc(var(--size, 1) * 14px);
     }
     .cmd .clipboard {
-        top: calc(var(--size, 1) * 15 * var(--cursor-line, 0) * 1px);
+        top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
     }
     .terminal .terminal-output > div > div {
         min-height: calc(var(--size, 1) * 14px);
@@ -618,7 +620,7 @@ terminal .terminal-output > div {
         color: var(--background, #000);
     }
     .cmd div {
-        min-height: calc(var(--size, 1) * 15px);
+        min-height: calc(var(--size, 1) * 14px);
     }
     .cmd .cursor.blink {
         color: var(--color, #aaa);
@@ -631,7 +633,7 @@ terminal .terminal-output > div {
                 animation: var(--animation, terminal-blink) 1s infinite linear;
     }
     .cmd .cursor {
-        height: calc(var(--size, 1) * 15px);
+        height: calc(var(--size, 1) * 14px);
         min-width: calc(var(--char-width, 7.23438) * 1px);
     }
     .terminal h1::-moz-selection,
@@ -716,4 +718,16 @@ terminal .terminal-output > div {
 .cmd .style .token.string,
 .cmd .token.token {
     background-color: inherit;
+}
+/* FireFox hack */
+@supports (-moz-animation: foo) {
+    .terminal,
+    .terminal .terminal-wrapper > :not(.raw) span,
+    .terminal .terminal-wrapper > :not(.raw) a,
+    .terminal .terminal-wrapper > :not(.raw) div,
+    .cmd,
+    .cmd span,
+    .cmd div {
+        line-height: calc(var(--size, 1) * 13px);
+    }
 }
