@@ -133,7 +133,7 @@ body.full-screen-terminal .terminal {
 .cmd .cursor {
     display: inline-block;
     position: relative;
-    height: 14px;
+    height: 15px;
     min-width: 1ch;
     /* box-sizing: border-box; */
 }
@@ -174,12 +174,11 @@ body.full-screen-terminal .terminal {
 }
 .terminal .terminal-output div div, .cmd .prompt {
     display: block;
-    line-height: 14px;
+    line-height: 15px;
     height: auto;
 }
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
-    padding-bottom: 1px; /* firefox cut of 1px */
 }
 .cmd .prompt > span {
     float: left;
@@ -190,7 +189,7 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
     font-size: 12px;
-    line-height: 14px;
+    line-height: 15px;
 }
 .terminal, .cmd {
     box-sizing: border-box;
@@ -205,7 +204,7 @@ body.full-screen-terminal .terminal {
 }
 .cmd div {
     clear: both;
-    min-height: 14px;
+    min-height: 15px;
 }
 .cmd .prompt + div {
     clear: right;
@@ -594,10 +593,10 @@ terminal .terminal-output > div {
     }
     .terminal, .terminal *, .cmd, .cmd * {
         font-size: calc(var(--size, 1) * 12px);
-        line-height: calc(var(--size, 1) * 14px);
+        line-height: calc(var(--size, 1) * 15px);
     }
     .cmd .clipboard {
-        top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
+        top: calc(var(--size, 1) * 15 * var(--cursor-line, 0) * 1px);
     }
     .terminal .terminal-output > div > div {
         min-height: calc(var(--size, 1) * 14px);
@@ -607,7 +606,7 @@ terminal .terminal-output > div {
         color: var(--background, #000);
     }
     .cmd div {
-        min-height: calc(var(--size, 1) * 14px);
+        min-height: calc(var(--size, 1) * 15px);
     }
     .cmd .cursor.blink {
         color: var(--color, #aaa);
@@ -620,7 +619,7 @@ terminal .terminal-output > div {
                 animation: var(--animation, terminal-blink) 1s infinite linear;
     }
     .cmd .cursor {
-        height: calc(var(--size, 1) * 14px);
+        height: calc(var(--size, 1) * 15px);
         min-width: calc(var(--char-width, 7.23438) * 1px);
     }
     .terminal h1::-moz-selection,
