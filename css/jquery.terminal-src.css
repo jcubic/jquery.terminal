@@ -183,7 +183,13 @@ body.full-screen-terminal .terminal {
 .cmd .prompt > span {
     float: left;
 }
-.terminal, .terminal-wrapper *, .cmd, .cmd * {
+.terminal,
+.terminal-wrapper > :not(.raw) span,
+.terminal-wrapper > :not(.raw) a,
+.terminal-wrapper > :not(.raw) div,
+.cmd,
+.cmd span,
+.cmd div {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     color: #aaa;
@@ -591,7 +597,13 @@ terminal .terminal-output > div {
         width: calc(var(--length, 1) * var(--char-width, 7.23438) * 1px);
         display: inline-block;
     }
-    .terminal, .terminal *, .cmd, .cmd * {
+    .terminal,
+    .terminal-wrapper > :not(.raw) span,
+    .terminal-wrapper > :not(.raw) a,
+    .terminal-wrapper > :not(.raw) div,
+    .cmd,
+    .cmd span,
+    .cmd div {
         font-size: calc(var(--size, 1) * 12px);
         line-height: calc(var(--size, 1) * 15px);
     }

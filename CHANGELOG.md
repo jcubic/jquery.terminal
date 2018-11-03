@@ -5,6 +5,7 @@
 * fix keep focus into cursor feature added in 2.0 (up arrow was causing scroll to top) report in firebase chat
 * don't add empty string to history
 * fix bottom padding in FireFox
+* don't overwrite wildcard selector that change font with wildcard selector (reported by @ovk on gitter)
 
 ## 2.0.0
 ### Breaking
