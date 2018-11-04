@@ -6,6 +6,7 @@
 * don't add empty string to history
 * fix bottom padding in FireFox
 * don't overwrite wildcard selector that change font with wildcard selector (reported by @ovk on gitter)
+* fix `return true` in mousewheel it now disable JavaScript scrolling (reported by @ovk on gitter)
 
 ## 2.0.0
 ### Breaking

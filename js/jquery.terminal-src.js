@@ -8595,14 +8595,15 @@
                         } else if (is_function(settings.mousewheel)) {
                             ret = settings.mousewheel(event, delta, self);
                         }
+                        if (ret === true) {
+                            return;
+                        }
                         if (have_scrollbar() || ret === false) {
                             event.stopPropagation();
                             event.preventDefault();
                         }
                         if (ret === false) {
                             return false;
-                        } else if (ret === true) {
-                            return;
                         }
                         if (delta > 0) {
                             self.scroll(-40);
