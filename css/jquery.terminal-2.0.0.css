@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sat, 03 Nov 2018 08:26:11 +0000
+ * Date: Mon, 05 Nov 2018 08:06:41 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -172,7 +172,7 @@ body.full-screen-terminal .terminal {
 .bar.terminal .inverted, .bar.cmd .inverted {
     border-left-color: #aaa;
 }
-.terminal .terminal-output div div, .cmd .prompt {
+.terminal .terminal .terminal-output > div > div, .cmd .prompt {
     display: block;
     line-height: 14px;
     height: auto;

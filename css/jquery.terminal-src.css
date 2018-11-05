@@ -172,7 +172,7 @@ body.full-screen-terminal .terminal {
 .bar.terminal .inverted, .bar.cmd .inverted {
     border-left-color: #aaa;
 }
-.terminal .terminal-output div div, .cmd .prompt {
+.terminal .terminal .terminal-output > div > div, .cmd .prompt {
     display: block;
     line-height: 14px;
     height: auto;
