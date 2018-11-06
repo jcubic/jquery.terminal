@@ -587,7 +587,13 @@ terminal .terminal-output > div {
     margin-bottom: 10px;
 }
 @supports (--css: variables) {
-    .terminal, .terminal-wrapper *, .cmd, .cmd * {
+    .terminal,
+    .terminal-wrapper > :not(.raw) span,
+    .terminal-wrapper > :not(.raw) a,
+    .terminal-wrapper > :not(.raw) div,
+    .cmd,
+    .cmd span,
+    .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
