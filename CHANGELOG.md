@@ -7,6 +7,7 @@
 * fix bottom padding in FireFox
 * don't overwrite wildcard selector that change font with wildcard selector (reported by @ovk on gitter)
 * fix `return true` in mousewheel it now disable JavaScript scrolling (reported by @ovk on gitter)
+* fix size down to `--size: 0.6`
 
 ## 2.0.0
 ### Breaking
