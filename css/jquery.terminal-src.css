@@ -70,9 +70,6 @@
 .terminal img, .terminal audio, .terminal object, .terminal canvas {
     cursor: default;
 }
-.terminal .error {
-    color: #f00;
-}
 .terminal {
     position: relative;
     /*overflow: hidden;*/
@@ -531,7 +528,9 @@ terminal .terminal-output > div {
     background-color: rgba(170, 170, 170, 0.99);
     color: #000;
 }
-.terminal .terminal-output div.error, .terminal .terminal-output div.error * {
+
+.terminal .terminal-output > :not(.raw) .error,
+.terminal .terminal-output > :not(.raw) .error * {
     color: red;
     color: var(--error-color, red);
 }
@@ -588,9 +587,9 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-wrapper > :not(.raw) span,
-    .terminal-wrapper > :not(.raw) a,
-    .terminal-wrapper > :not(.raw) div,
+    .terminal-output > :not(.raw) span,
+    .terminal-output > :not(.raw) a,
+    .terminal-output > :not(.raw) div,
     .cmd,
     .cmd span,
     .cmd div {
@@ -606,9 +605,9 @@ terminal .terminal-output > div {
         display: inline-block;
     }
     .terminal,
-    .terminal-wrapper > :not(.raw) span,
-    .terminal-wrapper > :not(.raw) a,
-    .terminal-wrapper > :not(.raw) div,
+    .terminal-output > :not(.raw) span,
+    .terminal-output > :not(.raw) a,
+    .terminal-output > :not(.raw) div,
     .cmd,
     .cmd span,
     .cmd div {
@@ -728,9 +727,9 @@ terminal .terminal-output > div {
 /* FireFox hack */
 @supports (-moz-animation: foo) {
     .terminal,
-    .terminal .terminal-wrapper > :not(.raw) span,
-    .terminal .terminal-wrapper > :not(.raw) a,
-    .terminal .terminal-wrapper > :not(.raw) div,
+    .terminal .terminal-output > :not(.raw) span,
+    .terminal .terminal-output > :not(.raw) a,
+    .terminal .terminal-output > :not(.raw) div,
     .cmd,
     .cmd span,
     .cmd div {
