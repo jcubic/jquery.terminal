@@ -181,9 +181,9 @@ body.full-screen-terminal .terminal {
     float: left;
 }
 .terminal,
-.terminal-wrapper > :not(.raw) span,
-.terminal-wrapper > :not(.raw) a,
-.terminal-wrapper > :not(.raw) div,
+.terminal-output > :not(.raw) span,
+.terminal-output > :not(.raw) a,
+.terminal-output > :not(.raw) div,
 .cmd,
 .cmd span,
 .cmd div {
