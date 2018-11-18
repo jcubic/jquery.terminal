@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.0.0
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sat, 20 Oct 2018 12:38:55 +0000
+ * Date: Sun, 18 Nov 2018 11:58:40 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -69,9 +69,6 @@
 }
 .terminal img, .terminal audio, .terminal object, .terminal canvas {
     cursor: default;
-}
-.terminal .error {
-    color: #f00;
 }
 .terminal {
     position: relative;
@@ -172,7 +169,7 @@ body.full-screen-terminal .terminal {
 .bar.terminal .inverted, .bar.cmd .inverted {
     border-left-color: #aaa;
 }
-.terminal .terminal-output div div, .cmd .prompt {
+.terminal .terminal .terminal-output > div > div, .cmd .prompt {
     display: block;
     line-height: 14px;
     height: auto;
@@ -183,7 +180,13 @@ body.full-screen-terminal .terminal {
 .cmd .prompt > span {
     float: left;
 }
-.terminal, .terminal-wrapper *, .cmd, .cmd * {
+.terminal,
+.terminal-output > :not(.raw) span,
+.terminal-output > :not(.raw) a,
+.terminal-output > :not(.raw) div,
+.cmd,
+.cmd span,
+.cmd div {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     color: #aaa;
@@ -415,6 +418,8 @@ terminal .terminal-output > div {
    Internet Explorer & Edge *, Safari ≤ 6
    source: https://w3reign.com/internet-explorer-edge-css-hacks/
 */
+
+
 @supports (-ms-ime-align:auto) {
     .cmd .clipboard {
         margin-left: -9999px;
@@ -523,7 +528,9 @@ terminal .terminal-output > div {
     background-color: rgba(170, 170, 170, 0.99);
     color: #000;
 }
-.terminal .terminal-output div.error, .terminal .terminal-output div.error * {
+
+.terminal .terminal-output > :not(.raw) .error,
+.terminal .terminal-output > :not(.raw) .error * {
     color: red;
     color: var(--error-color, red);
 }
@@ -545,12 +552,12 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
-.terminal a[href] {
+.terminal .terminal-output > :not(.raw) a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
     cursor: pointer;
 }
-.terminal a[href]:hover {
+.terminal .terminal-output > :not(.raw) a[href]:hover {
     background-color: #0F60FF;
     background-color: var(--link-color, #0F60FF);
     color: var(--background, #000);
@@ -571,8 +578,21 @@ terminal .terminal-output > div {
 .terminal, .terminal .terminal-fill {
     padding: 10px;
 }
+/* padding added as margin to .cmd to fix FireFox bug see: https://stackoverflow.com/q/29986977/387194 */
+.terminal {
+    padding-bottom: 0;
+}
+.terminal .cmd {
+    margin-bottom: 10px;
+}
 @supports (--css: variables) {
-    .terminal, .terminal-wrapper *, .cmd, .cmd * {
+    .terminal,
+    .terminal-output > :not(.raw) span,
+    .terminal-output > :not(.raw) a,
+    .terminal-output > :not(.raw) div,
+    .cmd,
+    .cmd span,
+    .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
@@ -584,7 +604,13 @@ terminal .terminal-output > div {
         width: calc(var(--length, 1) * var(--char-width, 7.23438) * 1px);
         display: inline-block;
     }
-    .terminal, .terminal *, .cmd, .cmd * {
+    .terminal,
+    .terminal-output > :not(.raw) span,
+    .terminal-output > :not(.raw) a,
+    .terminal-output > :not(.raw) div,
+    .cmd,
+    .cmd span,
+    .cmd div {
         font-size: calc(var(--size, 1) * 12px);
         line-height: calc(var(--size, 1) * 14px);
     }
@@ -697,4 +723,16 @@ terminal .terminal-output > div {
 .cmd .style .token.string,
 .cmd .token.token {
     background-color: inherit;
+}
+/* FireFox hack */
+@supports (-moz-animation: foo) {
+    .terminal,
+    .terminal .terminal-output > :not(.raw) span,
+    .terminal .terminal-output > :not(.raw) a,
+    .terminal .terminal-output > :not(.raw) div,
+    .cmd,
+    .cmd span,
+    .cmd div {
+        line-height: calc(var(--size, 1) * 13px);
+    }
 }

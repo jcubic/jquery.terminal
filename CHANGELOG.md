@@ -1,3 +1,14 @@
+## 2.0.1
+### Bugfix
+* fix focus to textarea or input that was printed using terminal echo function ([reported as question on SO](https://stackoverflow.com/q/52943390/387194))
+* fix cutting of bottom part of greetings lines in Firefox
+* fix keep focus into cursor feature added in 2.0 (up arrow was causing scroll to top) report in firebase chat
+* don't add empty string to history
+* fix bottom padding in FireFox
+* don't overwrite wildcard selector that change font with wildcard selector (reported by @ovk on gitter)
+* fix `return true` in mousewheel it now disable JavaScript scrolling (reported by @ovk on gitter)
+* fix size down to `--size: 0.6`
+
 ## 2.0.0
 ### Breaking
 * from now on if terminal is added to body it's in fact added to div inside body (the API didn't changed)
