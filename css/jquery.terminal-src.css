@@ -552,12 +552,12 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
-.terminal a[href] {
+.terminal .terminal-output > :not(.raw) a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
     cursor: pointer;
 }
-.terminal a[href]:hover {
+.terminal .terminal-output > :not(.raw) a[href]:hover {
     background-color: #0F60FF;
     background-color: var(--link-color, #0F60FF);
     color: var(--background, #000);

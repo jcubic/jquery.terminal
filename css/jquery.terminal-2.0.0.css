@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 18 Nov 2018 11:39:23 +0000
+ * Date: Sun, 18 Nov 2018 11:58:40 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -552,12 +552,12 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
-.terminal a[href] {
+.terminal .terminal-output > :not(.raw) a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
     cursor: pointer;
 }
-.terminal a[href]:hover {
+.terminal .terminal-output > :not(.raw) a[href]:hover {
     background-color: #0F60FF;
     background-color: var(--link-color, #0F60FF);
     color: var(--background, #000);
