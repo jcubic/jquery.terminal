@@ -356,6 +356,8 @@
                         Object.keys(state).forEach(function(key) {
                             delete state[key];
                         });
+                        state.bold = false;
+                        state.faited = false;
                         break;
                     case 1:
                         styles.push('b');
@@ -391,7 +393,7 @@
                         state.reverse = true;
                         break;
                     default:
-                        if (controls.indexOf('5') === -1) {
+                        if (controls[1] !== '5') {
                             if (color_list[num]) {
                                 output_color = color_list[num];
                             }

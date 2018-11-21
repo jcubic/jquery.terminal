@@ -1,3 +1,7 @@
+## 2.0.2
+### Bugfix
+* fix ansi escapes in unix formatting for sequence `ESC[5;1;47m` that fixes rendering ANSI art
+
 ## 2.0.1
 ### Bugfix
 * fix focus to textarea or input that was printed using terminal echo function ([reported as question on SO](https://stackoverflow.com/q/52943390/387194))
