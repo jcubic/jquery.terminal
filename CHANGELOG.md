@@ -1,6 +1,7 @@
 ## 2.0.2
 ### Bugfix
-* fix ansi escapes in unix formatting for sequence `ESC[5;1;47m` that fixes rendering ANSI art
+* fix ansi escapes in unix formatting for sequence `5;1;47m` that fixes rendering ANSI art
+* fix cutting of underline from ASCII art
 
 ## 2.0.1
 ### Bugfix

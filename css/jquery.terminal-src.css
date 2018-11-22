@@ -552,6 +552,9 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
+.terminal .terminal-output > :not(.raw) > div {
+    padding-bottom: 1px;
+}
 .terminal .terminal-output > :not(.raw) a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
