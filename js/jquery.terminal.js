@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 22 Nov 2018 10:34:10 +0000
+ * Date: Mon, 03 Dec 2018 09:56:11 +0000
  */
 
 /* TODO:
@@ -95,7 +95,7 @@
                     case 'e': arg = match[7] ? arg.toExponential(match[7]) : arg.toExponential(); break;
                     case 'f': arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg); break;
                     case 'o': arg = arg.toString(8); break;
-                    case 's': arg = ((arg = String(arg)) && match[7] ? arg.substring(0, match[7]) : arg); break;
+                    case 's': arg = ((arg = String(arg)) && match[7] ? arg.slice(0, match[7]) : arg); break;
                     case 'u': arg = arg >>> 0; break;
                     case 'x': arg = arg.toString(16); break;
                     case 'X': arg = arg.toString(16).toUpperCase(); break;
@@ -127,7 +127,7 @@
                     var field_list = [], replacement_field = match[2], field_match = [];
                     if ((field_match = /^([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
                         field_list.push(field_match[1]);
-                        while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
+                        while ((replacement_field = replacement_field.slice(field_match[0].length)) !== '') {
                             if ((field_match = /^\.([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
                                 field_list.push(field_match[1]);
                             }
@@ -155,7 +155,7 @@
             else {
                 throw('[sprintf] huh?');
             }
-            _fmt = _fmt.substring(match[0].length);
+            _fmt = _fmt.slice(match[0].length);
         }
         return parse_tree;
     };
@@ -379,10 +379,10 @@
             for (i = 0; i < ca.length; i++) {
                 c = ca[i];
                 while (c.charAt(0) === ' ') {
-                    c = c.substring(1, c.length);
+                    c = c.slice(1, c.length);
                 }
                 if (c.indexOf(nn) === 0) {
-                    return c.substring(nn.length, c.length);
+                    return c.slice(nn.length, c.length);
                 }
             }
             return null;
@@ -1684,7 +1684,7 @@
             }
             if (rev_search_str.length > 0) {
                 for (var j = rev_search_str.length; j > 0; j--) {
-                    save_string = $.terminal.escape_regex(rev_search_str.substring(0, j));
+                    save_string = $.terminal.escape_regex(rev_search_str.slice(0, j));
                     if (settings.caseSensitiveSearch) {
                         regex = new RegExp(save_string);
                     } else {
@@ -1697,7 +1697,7 @@
                             self.set(history_data[i], true);
                             redraw();
                             if (rev_search_str.length !== j) {
-                                rev_search_str = rev_search_str.substring(0, j);
+                                rev_search_str = rev_search_str.slice(0, j);
                                 draw_reverse_prompt();
                             }
                             return;
@@ -2744,14 +2744,14 @@
                 // backspace is set in keydown if no keydown we need to get new one
                 if (no_keydown) {
                     var cmd = prev_command;
-                    backspace = cmd.substring(0, cmd.length - 1).length === val.length;
+                    backspace = cmd.slice(0, cmd.length - 1).length === val.length;
                 }
                 if (reverse_search) {
                     rev_search_str = val;
                     reverse_history_search();
                     draw_reverse_prompt();
                 } else {
-                    var chr = val.substring(position);
+                    var chr = val.slice(position);
                     if (chr.length === 1 || backspace) {
                         // we trigger events so keypress and keydown callback work
                         if (no_keydown) {
@@ -2993,11 +2993,11 @@
         var match_emoji = string.match(emoji_re);
         if (match_emoji) {
             return match_emoji[1];
-        } else if (string.substring(0, 2).replace(astral_symbols_re, '_') === 1) {
-            if (string.substring(1).match(combine_chr_re)) {
-                return string.substring(0, 3);
+        } else if (string.slice(0, 2).replace(astral_symbols_re, '_') === 1) {
+            if (string.slice(1).match(combine_chr_re)) {
+                return string.slice(0, 3);
             }
-            return string.substring(0, 2);
+            return string.slice(0, 2);
         } else {
             var match_combo = string.match(combine_chr_re);
             if (match_combo) {
@@ -3295,7 +3295,7 @@
                 var m = arg.match(/^(['"]).*\1$/);
                 return m && m[1] || '';
             });
-            var rest = string.substring(name.length).trim();
+            var rest = string.slice(name.length).trim();
             return {
                 command: string,
                 name: name,
@@ -3316,7 +3316,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 22 Nov 2018 10:34:10 +0000',
+        date: 'Mon, 03 Dec 2018 09:56:11 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3404,7 +3404,7 @@
         // ---------------------------------------------------------------------
         tracking_replace: function tracking_replace(string, rex, replacement, position) {
             function substring(string, start, end) {
-                return string.substring(start, end);
+                return string.slice(start, end);
             }
             function length(string) {
                 return $.terminal.strip(string).length;
@@ -3482,13 +3482,13 @@
         // ---------------------------------------------------------------------
         iterate_formatting: function iterate_formatting(string, callback) {
             function is_space(i) {
-                return string.substring(i - 6, i) === '&nbsp;' ||
-                    string.substring(i - 1, i).match(/\s/);
+                return string.slice(i - 6, i) === '&nbsp;' ||
+                    string.slice(i - 1, i).match(/\s/);
             }
             // ----------------------------------------------------------------
             var entity_re = /^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
             function match_entity(index) {
-                return string.substring(index).match(entity_re);
+                return string.slice(index).match(entity_re);
             }
             // ----------------------------------------------------------------
             function is_open_formatting(i) {
@@ -3514,7 +3514,7 @@
             var length = 0;
             var offset = 0;
             for (var i = 0; i < string.length; i++) {
-                var substring = string.substring(i);
+                var substring = string.slice(i);
                 match = substring.match(format_start_re);
                 if (match) {
                     formatting = match[1];
@@ -3629,7 +3629,7 @@
                 if (start_index && data.count === start_index + 1) {
                     start = data.index;
                     // correct index for html entity
-                    m = string.substring(0, start + 1).match(re);
+                    m = string.slice(0, start + 1).match(re);
                     if (m) {
                         start -= m[1].length;
                     }
@@ -3644,7 +3644,7 @@
                 }
                 if (data.count === end_index + 1) {
                     end = data.index;
-                    m = string.substring(0, end + 1).match(re);
+                    m = string.slice(0, end + 1).match(re);
                     if (m) {
                         end -= m[1].length;
                     }
@@ -3659,7 +3659,7 @@
             if (end === undefined) {
                 end = string.length;
             }
-            string = start_formatting + string.substring(start, end);
+            string = start_formatting + string.slice(start, end);
             if (end_formatting) {
                 string = string.replace(/(\[\[^\]]+)?\]$/, '');
                 string += ']';
@@ -3733,11 +3733,11 @@
                         var can_break = false;
                         if (keep_words && data.space !== -1) {
                             // replace html entities with characters
-                            var stripped = text(line.substring(data.space));
+                            var stripped = text(line.slice(data.space));
                             // real length, not counting formatting
                             var text_len = stripped.length;
                             var limit = data.index + length + 1;
-                            stripped = stripped.substring(0, limit);
+                            stripped = stripped.slice(0, limit);
                             if (stripped.match(/\s|&nbsp;/) || limit > text_len) {
                                 can_break = true;
                             }
@@ -3747,12 +3747,12 @@
                         var new_index;
                         if (keep_words && data.space !== -1 &&
                             data.index !== line_length - 1 && can_break) {
-                            output = line.substring(first_index, data.space);
+                            output = line.slice(first_index, data.space);
                             new_index = data.space - 1;
                         } else {
-                            substring = line.substring(data.index);
+                            substring = line.slice(data.index);
                             chr = get_next_character(substring);
-                            output = line.substring(first_index, data.index) + chr;
+                            output = line.slice(first_index, data.index) + chr;
                             if (last_iteraction && last_bracket && chr !== ']') {
                                 output += ']';
                             }
@@ -4205,7 +4205,7 @@
             var result = [];
             while (string.length) {
                 var chr = get_next_character(string);
-                string = string.substring(chr.length);
+                string = string.slice(chr.length);
                 result.push(chr);
             }
             return result;
@@ -6174,8 +6174,8 @@
                 if (get_selected_text() === '') {
                     var command = self.get_command();
                     var position = self.get_position();
-                    command = command.substring(0, position) + '^C' +
-                        command.substring(position + 2);
+                    command = command.slice(0, position) + '^C' +
+                        command.slice(position + 2);
                     echo_command(command);
                     self.set_command('');
                 }
@@ -6647,7 +6647,7 @@
             // -------------------------------------------------------------
             before_cursor: function(word) {
                 var pos = command_line.position();
-                var command = command_line.get().substring(0, pos);
+                var command = command_line.get().slice(0, pos);
                 var cmd_strings = command.split(' ');
                 var string; // string before cursor that will be completed
                 if (word) {
@@ -6765,8 +6765,8 @@
                     var text = self.get_command();
                     var pos = self.get_position();
                     var re = new RegExp('^' + input, 'i');
-                    var pre = text.substring(0, pos);
-                    var post = text.substring(pos);
+                    var pre = text.slice(0, pos);
+                    var post = text.slice(pos);
                     var to_insert = replacement.replace(re, '') + (quote || '');
                     self.set_command(pre + to_insert + post);
                     self.set_position((pre + to_insert).length);
