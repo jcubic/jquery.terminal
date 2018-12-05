@@ -2,6 +2,7 @@
 ### Bugfix
 * fix ansi escapes in unix formatting for sequence `5;1;47m` that fixes rendering ANSI art
 * fix cutting of underline from ASCII art
+* fix cutting ASCII art underscores in Codepen/Linux/Chromium on GNU/LINUX
 
 ## 2.0.1
 ### Bugfix
