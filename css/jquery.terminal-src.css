@@ -171,7 +171,7 @@ body.full-screen-terminal .terminal {
 }
 .terminal .terminal .terminal-output > div > div, .cmd .prompt {
     display: block;
-    line-height: 14px;
+    line-height: 15px;
     height: auto;
 }
 .terminal .terminal-output > div:not(.raw) div {
@@ -192,7 +192,7 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
     font-size: 12px;
-    line-height: 14px;
+    line-height: 15px;
 }
 .terminal, .cmd {
     box-sizing: border-box;
@@ -614,7 +614,7 @@ terminal .terminal-output > div {
     .cmd span,
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
-        line-height: calc(var(--size, 1) * 14px);
+        line-height: calc(var(--size, 1) * 12px + 3px);
     }
     .cmd .clipboard {
         top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
