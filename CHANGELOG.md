@@ -3,6 +3,7 @@
 * fix ansi escapes in unix formatting for sequence `5;1;47m` that fixes rendering ANSI art
 * fix cutting of underline from ASCII art
 * fix cutting ASCII art underscores in Codepen/Linux/Chromium on GNU/LINUX
+* fix ascii_table when text have \r
 
 ## 2.0.1
 ### Bugfix
