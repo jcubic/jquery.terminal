@@ -4,6 +4,7 @@
 * fix cutting of underline from ASCII art
 * fix cutting ASCII art underscores in Codepen/Linux/Chromium on GNU/LINUX
 * fix ascii_table when text have \r
+* fix prism highlighting in echo (terminal rules were stronger than Prism)
 
 ## 2.0.1
 ### Bugfix

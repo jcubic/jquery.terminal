@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Fri, 07 Dec 2018 12:38:49 +0000
+ * Date: Sat, 22 Dec 2018 13:50:04 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -181,7 +181,7 @@ body.full-screen-terminal .terminal {
     float: left;
 }
 .terminal,
-.terminal-output > :not(.raw) span,
+.terminal-output > :not(.raw) span:not(.token),
 .terminal-output > :not(.raw) a,
 .terminal-output > :not(.raw) div,
 .cmd,
@@ -589,7 +589,7 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-output > :not(.raw) span,
+    .terminal-output > :not(.raw) span:not(.token),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
@@ -607,7 +607,7 @@ terminal .terminal-output > div {
         display: inline-block;
     }
     .terminal,
-    .terminal-output > :not(.raw) span,
+    .terminal-output > :not(.raw) span:not(.token),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
