@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.0.1
+ *           \/              /____/                              version 2.0.2
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Sun, 18 Nov 2018 12:07:32 +0000
+ * Date: Sat, 22 Dec 2018 15:04:14 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -171,7 +171,7 @@ body.full-screen-terminal .terminal {
 }
 .terminal .terminal .terminal-output > div > div, .cmd .prompt {
     display: block;
-    line-height: 14px;
+    line-height: 15px;
     height: auto;
 }
 .terminal .terminal-output > div:not(.raw) div {
@@ -181,7 +181,7 @@ body.full-screen-terminal .terminal {
     float: left;
 }
 .terminal,
-.terminal-output > :not(.raw) span,
+.terminal-output > :not(.raw) span:not(.token),
 .terminal-output > :not(.raw) a,
 .terminal-output > :not(.raw) div,
 .cmd,
@@ -192,7 +192,7 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
     font-size: 12px;
-    line-height: 14px;
+    line-height: 15px;
 }
 .terminal, .cmd {
     box-sizing: border-box;
@@ -207,13 +207,12 @@ body.full-screen-terminal .terminal {
 }
 .cmd div {
     clear: both;
-    min-height: 14px;
 }
 .cmd .prompt + div {
     clear: right;
 }
-.terminal-output > div > div {
-    min-height: 14px;
+.terminal-output > div > div, .cmd div {
+    min-height: 15px;
 }
 terminal .terminal-output > div {
     margin-top: -1px;
@@ -552,6 +551,9 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
+.terminal .terminal-output > :not(.raw) > div {
+    padding-bottom: 1px;
+}
 .terminal .terminal-output > :not(.raw) a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
@@ -587,7 +589,7 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-output > :not(.raw) span,
+    .terminal-output > :not(.raw) span:not(.token),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
@@ -605,20 +607,20 @@ terminal .terminal-output > div {
         display: inline-block;
     }
     .terminal,
-    .terminal-output > :not(.raw) span,
+    .terminal-output > :not(.raw) span:not(.token),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
     .cmd span,
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
-        line-height: calc(var(--size, 1) * 14px);
+        line-height: calc(var(--size, 1) * 12px + 3px);
     }
     .cmd .clipboard {
         top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
     }
-    .terminal .terminal-output > div > div {
-        min-height: calc(var(--size, 1) * 14px);
+    .terminal .terminal-output > div > div, .cmd div{
+        min-height: calc(var(--size, 1) * 15px);
     }
     .terminal .inverted, .cmd .inverted {
         background-color: var(--color, #aaa);
@@ -724,7 +726,7 @@ terminal .terminal-output > div {
 .cmd .token.token {
     background-color: inherit;
 }
-/* FireFox hack */
+/* FireFox hack
 @supports (-moz-animation: foo) {
     .terminal,
     .terminal .terminal-output > :not(.raw) span,
@@ -736,3 +738,4 @@ terminal .terminal-output > div {
         line-height: calc(var(--size, 1) * 13px);
     }
 }
+*/
