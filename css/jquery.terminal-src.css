@@ -250,8 +250,10 @@ terminal .terminal-output > div {
     background-color: inherit;
     color: inherit;
 }
-.cmd [role="presentation"] {
+.cmd [role="presentation"]:not(.cursor-line) {
     overflow: hidden;
+}
+.cmd [role="presentation"] {
     padding-bottom: 3px;
     margin-bottom: -3px;
 }
@@ -262,19 +264,8 @@ terminal .terminal-output > div {
 .cmd {
     --original-color: var(--color, #aaa);
 }
+/* DEFAULT ANIMATION */
 @-webkit-keyframes terminal-blink {
-    0%, 50% {
-        background-color: #bbb;
-        background-color: var(--original-color, #bbb);
-        color: #000;
-        color: var(--background, #000);
-    }
-    50.1%, 100% {
-        background-color: inherit;
-        color: inherit;
-    }
-}
-@-ms-keyframes terminal-blink {
     0%, 50% {
         background-color: #bbb;
         background-color: var(--original-color, #bbb);
@@ -310,17 +301,82 @@ terminal .terminal-output > div {
         color: inherit;
     }
 }
-@-webkit-keyframes terminal-bar {
-  0%, 50% {
-      border-left-color: #aaa;
-      border-left-color: var(--color, #aaa);
-  }
-  50.1%, 100% {
-      border-left-color: #000;
-      border-left-color: var(--background, #000);
-  }
+/* GLOW ANIMATION */
+@-webkit-keyframes terminal-glow {
+    0%, 50% {
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
+        color: #000;
+        color: var(--background, #000);
+        box-shadow: 0 0 3px #aaa;
+        -webkit-box-shadow: 0 0 3px var(--color, #aaa);
+        box-shadow: 0 0 3px var(--color, #aaa);
+        border: none;
+        margin: 0;
+        padding: 0;
+        border-bottom: 2px solid #aaa;
+        border-bottom: 2px solid var(--color, #aaa);
+    }
+    50.1%, 100% {
+        background-color: inherit;
+        color: inherit;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
 }
-@-ms-keyframes terminal-bar {
+@-moz-keyframes terminal-glow {
+    0%, 50% {
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
+        color: #000;
+        color: var(--background, #000);
+        box-shadow: 0 0 3px #aaa;
+        -moz-box-shadow: 0 0 3px var(--color, #aaa);
+        box-shadow: 0 0 3px var(--color, #aaa);
+        border: none;
+        margin: 0;
+        padding: 0;
+        border-bottom: 2px solid #aaa;
+        border-bottom: 2px solid var(--color, #aaa);
+    }
+    50.1%, 100% {
+        background-color: inherit;
+        color: inherit;
+        -moz-box-shadow: none;
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+@keyframes terminal-glow {
+    0%, 50% {
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
+        color: #000;
+        color: var(--background, #000);
+        box-shadow: 0 0 3px #aaa;
+        box-shadow: 0 0 3px var(--color, #aaa);
+        border: none;
+        margin: 0;
+        padding: 0;
+        border-bottom: 2px solid #aaa;
+        border-bottom: 2px solid var(--color, #aaa);
+    }
+    50.1%, 100% {
+        background-color: inherit;
+        color: inherit;
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+/* BAR ANIMATION */
+@-webkit-keyframes terminal-bar {
   0%, 50% {
       border-left-color: #aaa;
       border-left-color: var(--color, #aaa);
@@ -350,19 +406,8 @@ terminal .terminal-output > div {
       border-left-color: var(--background, #000);
   }
 }
+/* UNDERLINE ANIMATION */
 @-webkit-keyframes terminal-underline {
-  0%, 50% {
-      border-left: none;
-      border-bottom-color: #aaa;
-      border-bottom-color: var(--color, #aaa);
-  }
-  50.1%, 100% {
-      border-left: none;
-      border-bottom-color: #000;
-      border-bottom-color: var(--background, #000);
-  }
-}
-@-ms-keyframes terminal-underline {
   0%, 50% {
       border-left: none;
       border-bottom-color: #aaa;
@@ -406,6 +451,15 @@ terminal .terminal-output > div {
     -ms-animation-name: terminal-underline;
     animation-name: terminal-underline;
     right: 1px;
+}
+.glow-animation .cursor.blink span span {
+    border: none;
+    margin: 0;
+    padding: 0;
+    -webkit-animation-name: terminal-glow;
+    -moz-animation-name: terminal-glow;
+    -ms-animation-name: terminal-glow;
+    animation-name: terminal-glow;
 }
 .bar-animation .cursor.blink span span {
     -webkit-animation-name: terminal-bar;
