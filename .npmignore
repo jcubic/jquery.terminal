@@ -1,6 +1,10 @@
 .*
 *~
+\#*
+.\#*
+tmp
 scripts
+tsconfig.json
 www
 bower.*
 package.in
@@ -11,6 +15,10 @@ README.in
 terminal.jquery.json
 SpecRunner.html
 __tests__
+reports
+node_modules
+bower_components
+coverage
 examples
 bin
 css/jquery.terminal-*.css
