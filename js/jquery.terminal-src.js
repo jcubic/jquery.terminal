@@ -4652,31 +4652,50 @@
     }
     */
     // -----------------------------------------------------------------------
+    function terminal_ready(term) {
+        return !!(term.closest('body').length &&
+                  term.is(':visible') &&
+                  term.find('.prompt').length);
+    }
+    // -----------------------------------------------------------------------
     // :: Create fake terminal to calcualte the dimention of one character
     // :: this will make terminal work if terminal div is not added to the
     // :: DOM at init like with:
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
-    function get_char_size(div) {
-        var temp = $('<div class="terminal temp"><div class="terminal-output">' +
-                     '<div><div class="line" style="float: left"><span>&nbsp;</span>' +
-                     '</div></div></div></div>').appendTo('body');
-        temp.addClass(div.attr('class'));
-        if (div) {
-            var style = div.attr('style');
-            if (style) {
-                style = style.split(/\s*;\s*/).filter(function(s) {
-                    return !s.match(/display\s*:\s*none/i);
-                }).join(';');
-                temp.attr('style', style);
+    function get_char_size(term) {
+        var rect;
+        if (terminal_ready(term)) {
+            var $prompt = term.find('.prompt').clone().css({
+                visiblity: 'hidden',
+                position: 'absolute'
+            });
+            $prompt.appendTo(term.find('.cmd')).html('&nbsp;');
+            rect = $prompt[0].getBoundingClientRect();
+            $prompt.remove();
+        } else {
+            var temp = $('<div class="terminal temp"><div class="terminal-output">' +
+                         '<div><div class="line" style="float: left"><span>&nbsp;</span>' +
+                         '</div></div></div></div>').appendTo('body');
+            temp.addClass(term.attr('class')).attr('id', term.attr('id'));
+            if (term) {
+                var style = term.attr('style');
+                if (style) {
+                    style = style.split(/\s*;\s*/).filter(function(s) {
+                        return !s.match(/display\s*:\s*none/i);
+                    }).join(';');
+                    temp.attr('style', style);
+                }
             }
+            rect = temp.find('.line')[0].getBoundingClientRect();
         }
-        var rect = temp.find('.line')[0].getBoundingClientRect();
         var result = {
             width: rect.width,
             height: rect.height
         };
-        temp.remove();
+        if (temp) {
+            temp.remove();
+        }
         return result;
     }
     // -----------------------------------------------------------------------
