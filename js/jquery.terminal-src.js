@@ -1603,7 +1603,10 @@
                 self.oneTime(100, function() {
                     var value = clip.val();
                     if (is_function(settings.onPaste)) {
-                        var ret = settings.onPaste.call(self, {target: self, text: value});
+                        var ret = settings.onPaste.call(self, {
+                            target: self,
+                            text: value
+                        });
                         if (ret !== undefined) {
                             if (ret && is_function(ret.then)) {
                                 ret.then(insert);

@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 02 Jan 2019 20:36:03 +0000
+ * Date: Wed, 02 Jan 2019 20:42:34 +0000
  */
 
 /* TODO:
@@ -1603,7 +1603,10 @@
                 self.oneTime(100, function() {
                     var value = clip.val();
                     if (is_function(settings.onPaste)) {
-                        var ret = settings.onPaste.call(self, {target: self, text: value});
+                        var ret = settings.onPaste.call(self, {
+                            target: self,
+                            text: value
+                        });
                         if (ret !== undefined) {
                             if (ret && is_function(ret.then)) {
                                 ret.then(insert);
@@ -3456,7 +3459,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 02 Jan 2019 20:36:03 +0000',
+        date: 'Wed, 02 Jan 2019 20:42:34 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
