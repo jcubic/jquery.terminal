@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 02 Jan 2019 20:24:22 +0000
+ * Date: Wed, 02 Jan 2019 20:36:03 +0000
  */
 
 /* TODO:
@@ -1147,8 +1147,8 @@
             history: true,
             onPositionChange: $.noop,
             onCommandChange: $.noop,
-            clickTimeout: 200,
             onPaste: $.noop,
+            clickTimeout: 200,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
             repeatTimeoutKeys: ['HOLD+BACKSPACE'],
@@ -1603,7 +1603,7 @@
                 self.oneTime(100, function() {
                     var value = clip.val();
                     if (is_function(settings.onPaste)) {
-                        var ret = settings.onPaste({target: self, text: value});
+                        var ret = settings.onPaste.call(self, {target: self, text: value});
                         if (ret !== undefined) {
                             if (ret && is_function(ret.then)) {
                                 ret.then(insert);
@@ -3456,7 +3456,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 02 Jan 2019 20:24:22 +0000',
+        date: 'Wed, 02 Jan 2019 20:36:03 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8217,7 +8217,7 @@
                     } else if (object instanceof Blob) {
                         event['image'] = data_uri(object);
                     }
-                    var ret = settings.onPaste(event);
+                    var ret = fire_event('onPaste', [event]);
                     if (ret && is_function(ret.then)) {
                         return ret.then(function(ret) {
                             echo(ret, true);
@@ -8298,6 +8298,7 @@
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
                 caseSensitiveSearch: settings.caseSensitiveSearch,
+                onPaste: settings.onPaste,
                 width: '100%',
                 enabled: false,
                 char_width: char_size.width,
