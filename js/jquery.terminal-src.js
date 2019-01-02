@@ -2879,6 +2879,7 @@
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
     var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*')/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
+    var entity_re = /^(&(?:[a-z]+|#\d+|#x[a-f\d]+);)/i;
     /* eslint-enable */
     // -------------------------------------------------------------------------
     // :: TOOLS
@@ -3486,7 +3487,6 @@
                     string.slice(i - 1, i).match(/\s/);
             }
             // ----------------------------------------------------------------
-            var entity_re = /^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
             function match_entity(index) {
                 return string.slice(index).match(entity_re);
             }
@@ -3622,14 +3622,13 @@
             var start_formatting = '';
             var end_formatting = '';
             var prev_index;
-            var re = /(&[^;]+);$/;
             var offset = 1;
             $.terminal.iterate_formatting(string, function(data) {
                 var m;
                 if (start_index && data.count === start_index + 1) {
                     start = data.index;
                     // correct index for html entity
-                    m = string.slice(0, start + 1).match(re);
+                    m = string.slice(0, start + 1).match(entity_re);
                     if (m) {
                         start -= m[1].length;
                     }
@@ -3644,7 +3643,7 @@
                 }
                 if (data.count === end_index + 1) {
                     end = data.index;
-                    m = string.slice(0, end + 1).match(re);
+                    m = string.slice(0, end + 1).match(entity_re);
                     if (m) {
                         end -= m[1].length;
                     }

@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic.pl>
  * Released under the MIT license
  *
- * Date: Tue, 01 Jan 2019 16:45:02 +0000
+ * Date: Wed, 02 Jan 2019 09:17:46 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -304,6 +304,7 @@ terminal .terminal-output > div {
 /* GLOW ANIMATION */
 @-webkit-keyframes terminal-glow {
     0%, 50% {
+        left: 0;
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
@@ -318,6 +319,7 @@ terminal .terminal-output > div {
         border-bottom: 2px solid var(--color, #aaa);
     }
     50.1%, 100% {
+        left: 0;
         background-color: inherit;
         color: inherit;
         -webkit-box-shadow: none;
@@ -329,6 +331,7 @@ terminal .terminal-output > div {
 }
 @-moz-keyframes terminal-glow {
     0%, 50% {
+        left: 0;
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
@@ -343,6 +346,7 @@ terminal .terminal-output > div {
         border-bottom: 2px solid var(--color, #aaa);
     }
     50.1%, 100% {
+        left: 0;
         background-color: inherit;
         color: inherit;
         -moz-box-shadow: none;
@@ -354,6 +358,7 @@ terminal .terminal-output > div {
 }
 @keyframes terminal-glow {
     0%, 50% {
+        left: 0;
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
@@ -367,6 +372,7 @@ terminal .terminal-output > div {
         border-bottom: 2px solid var(--color, #aaa);
     }
     50.1%, 100% {
+        left: 0;
         background-color: inherit;
         color: inherit;
         box-shadow: none;

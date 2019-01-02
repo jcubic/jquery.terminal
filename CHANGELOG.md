@@ -1,6 +1,8 @@
 ## 2.1.0
 ### Features
 * cursor glow animation
+### Bugfix
+* fix wrapping when command have `&` and `;` but it's not entity [#454](https://github.com/jcubic/jquery.terminal/issues/454)
 
 ## 2.0.2
 ### Bugfix
