@@ -4680,8 +4680,8 @@
             $prompt.remove();
         } else {
             var temp = $('<div class="terminal temp"><div class="terminal-output">' +
-                         '<div><div class="line" style="float: left"><span>&nbsp;</span>' +
-                         '</div></div></div></div>').appendTo('body');
+                         '<div><div class="line" style="float: left"><span>&nbsp;' +
+                         '</span></div></div></div></div>').appendTo('body');
             temp.addClass(term.attr('class')).attr('id', term.attr('id'));
             if (term) {
                 var style = term.attr('style');

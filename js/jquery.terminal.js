@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 02 Jan 2019 17:51:13 +0000
+ * Date: Wed, 02 Jan 2019 18:34:02 +0000
  */
 
 /* TODO:
@@ -3316,7 +3316,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 02 Jan 2019 17:51:13 +0000',
+        date: 'Wed, 02 Jan 2019 18:34:02 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4680,8 +4680,8 @@
             $prompt.remove();
         } else {
             var temp = $('<div class="terminal temp"><div class="terminal-output">' +
-                         '<div><div class="line" style="float: left"><span>&nbsp;</span>' +
-                         '</div></div></div></div>').appendTo('body');
+                         '<div><div class="line" style="float: left"><span>&nbsp;' +
+                         '</span></div></div></div></div>').appendTo('body');
             temp.addClass(term.attr('class')).attr('id', term.attr('id'));
             if (term) {
                 var style = term.attr('style');
