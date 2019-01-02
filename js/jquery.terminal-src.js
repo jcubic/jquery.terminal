@@ -2879,7 +2879,6 @@
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
     var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*')/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
-    var entity_re = /^(&(?:[a-z]+|#\d+|#x[a-f\d]+);)/i;
     /* eslint-enable */
     // -------------------------------------------------------------------------
     // :: TOOLS
@@ -3487,6 +3486,7 @@
                     string.slice(i - 1, i).match(/\s/);
             }
             // ----------------------------------------------------------------
+            var entity_re = /^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
             function match_entity(index) {
                 return string.slice(index).match(entity_re);
             }
@@ -3510,6 +3510,7 @@
             var count = 0;
             var match;
             var space = -1;
+            var space_count = -1;
             var prev_space;
             var length = 0;
             var offset = 0;
@@ -3536,6 +3537,7 @@
                 if (is_space(i) && (not_formatting || opening)) {
                     if (space === -1 && prev_space !== i || space !== -1) {
                         space = i;
+                        space_count = count;
                     }
                 }
                 var braket = string[i].match(/[[\]]/);
@@ -3571,7 +3573,8 @@
                         length: length,
                         text: in_text,
                         size: offset + 1,
-                        space: space
+                        space: space,
+                        space_count: space_count
                     };
                     var ret = callback(data);
                     if (ret === false) {
@@ -3622,13 +3625,14 @@
             var start_formatting = '';
             var end_formatting = '';
             var prev_index;
+            var re = /(&[^;]+);$/;
             var offset = 1;
             $.terminal.iterate_formatting(string, function(data) {
                 var m;
                 if (start_index && data.count === start_index + 1) {
                     start = data.index;
                     // correct index for html entity
-                    m = string.slice(0, start + 1).match(entity_re);
+                    m = string.slice(0, start + 1).match(re);
                     if (m) {
                         start -= m[1].length;
                     }
@@ -3643,7 +3647,7 @@
                 }
                 if (data.count === end_index + 1) {
                     end = data.index;
-                    m = string.slice(0, end + 1).match(entity_re);
+                    m = string.slice(0, end + 1).match(re);
                     if (m) {
                         end -= m[1].length;
                     }
@@ -3730,14 +3734,15 @@
                         (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
+                        // TODO: this need work
                         if (keep_words && data.space !== -1) {
                             // replace html entities with characters
-                            var stripped = text(line.slice(data.space));
+                            var stripped = text(line).slice(data.space_count);
                             // real length, not counting formatting
                             var text_len = stripped.length;
-                            var limit = data.index + length + 1;
-                            stripped = stripped.slice(0, limit);
-                            if (stripped.match(/\s|&nbsp;/) || limit > text_len) {
+                            var limit = data.count + length + 1;
+                            stripped = stripped.slice(0, limit).trim();
+                            if (stripped.match(/\s/) || limit < text_len) {
                                 can_break = true;
                             }
                         }
