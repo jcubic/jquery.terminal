@@ -10,7 +10,7 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&e7530661786f55e4696eaf66c122e43bf0f181e3)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&648b6d8c6abc642a132ff579155982159f38800c)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&067b246650536ff07ffb621580438c60)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
@@ -229,4 +229,4 @@ If you want to contrubite read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
-Copyright (c) 2011-2018 [Jakub Jankiewicz](http://jcubic.pl/jakub-jankiewicz)
+Copyright (c) 2011-2019 [Jakub Jankiewicz](https://jcubic.pl/jakub-jankiewicz)

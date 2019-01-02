@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2018 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2019 Jakub Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 02 Jan 2019 20:42:34 +0000
+ * Date: Wed, 02 Jan 2019 20:49:52 +0000
  */
 
 /* TODO:
@@ -3459,7 +3459,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 02 Jan 2019 20:42:34 +0000',
+        date: 'Wed, 02 Jan 2019 20:49:52 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
