@@ -1,9 +1,12 @@
 ## 2.1.0
 ### Features
 * cursor glow animation
+* add invoke_key to cmd
+* onPaste event
 ### Bugfix
 * fix wrapping when command have `&` and `;` but it's not entity [#454](https://github.com/jcubic/jquery.terminal/issues/454)
 * fix wrapping when css style created using id [#454](https://github.com/jcubic/jquery.terminal/issues/454)
+* fix calculating number of characters on init in bare cmd
 
 ## 2.0.2
 ### Bugfix

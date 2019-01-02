@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Wed, 02 Jan 2019 18:34:02 +0000
+ * Date: Wed, 02 Jan 2019 20:24:22 +0000
  */
 
 /* TODO:
@@ -50,7 +50,7 @@
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
-         module, require, define, setInterval, clearInterval */
+         module, require, define, setInterval, clearInterval, Blob */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -1148,6 +1148,7 @@
             onPositionChange: $.noop,
             onCommandChange: $.noop,
             clickTimeout: 200,
+            onPaste: $.noop,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
             repeatTimeoutKeys: ['HOLD+BACKSPACE'],
@@ -1269,6 +1270,100 @@
                 }
             }
         }
+        // -----------------------------------------------------------------
+        // for invoking shortcuts using terminal::keydown
+        // taken from https://github.com/cvan/keyboardevent-key-polyfill/
+        var keycodes = {
+            3: 'Cancel',
+            6: 'Help',
+            8: 'Backspace',
+            9: 'Tab',
+            12: 'Clear',
+            13: 'Enter',
+            16: 'Shift',
+            17: 'Control',
+            18: 'Alt',
+            19: 'Pause',
+            20: 'CapsLock',
+            27: 'Escape',
+            28: 'Convert',
+            29: 'NonConvert',
+            30: 'Accept',
+            31: 'ModeChange',
+            32: ' ',
+            33: 'PageUp',
+            34: 'PageDown',
+            35: 'End',
+            36: 'Home',
+            37: 'ArrowLeft',
+            38: 'ArrowUp',
+            39: 'ArrowRight',
+            40: 'ArrowDown',
+            41: 'Select',
+            42: 'Print',
+            43: 'Execute',
+            44: 'PrintScreen',
+            45: 'Insert',
+            46: 'Delete',
+            48: ['0', ')'],
+            49: ['1', '!'],
+            50: ['2', '@'],
+            51: ['3', '#'],
+            52: ['4', '$'],
+            53: ['5', '%'],
+            54: ['6', '^'],
+            55: ['7', '&'],
+            56: ['8', '*'],
+            57: ['9', '('],
+            91: 'OS',
+            93: 'ContextMenu',
+            144: 'NumLock',
+            145: 'ScrollLock',
+            181: 'VolumeMute',
+            182: 'VolumeDown',
+            183: 'VolumeUp',
+            186: [';', ':'],
+            187: ['=', '+'],
+            188: [',', '<'],
+            189: ['-', '_'],
+            190: ['.', '>'],
+            191: ['/', '?'],
+            192: ['`', '~'],
+            219: ['[', '{'],
+            220: ['\\', '|'],
+            221: [']', '}'],
+            222: ["'", '"'],
+            224: 'Meta',
+            225: 'AltGraph',
+            246: 'Attn',
+            247: 'CrSel',
+            248: 'ExSel',
+            249: 'EraseEof',
+            250: 'Play',
+            251: 'ZoomOut'
+        };
+        var i;
+        // Function keys (F1-24).
+        for (i = 1; i < 25; i++) {
+            keycodes[111 + i] = 'F' + i;
+        }
+        // Printable ASCII characters.
+        var letter = '';
+        for (i = 65; i < 91; i++) {
+            letter = String.fromCharCode(i);
+            keycodes[i] = [letter.toLowerCase(), letter.toUpperCase()];
+        }
+        var reversed_keycodes = {};
+        Object.keys(keycodes).forEach(function(which) {
+            if (keycodes[which] instanceof Array) {
+                keycodes[which].forEach(function(key) {
+                    reversed_keycodes[key.toUpperCase()] = which;
+                });
+            } else {
+                reversed_keycodes[keycodes[which].toUpperCase()] = which;
+            }
+        });
+        // -----------------------------------------------------------------
         var keymap;
         var default_keymap = {
             'ALT+D': delete_word(true),
@@ -1487,6 +1582,42 @@
             }
             clip.one('input', paste);
             return true;
+        }
+        // ---------------------------------------------------------------------
+        // :: Paste content to terminal using hidden textarea
+        // ---------------------------------------------------------------------
+        function paste() {
+            if (paste_count++ > 0) {
+                return;
+            }
+            function set() {
+                clip.val(command);
+                fix_textarea();
+            }
+            function insert(text) {
+                self.insert(text);
+                set();
+            }
+            if (self.isenabled()) {
+                //wait until Browser insert text to textarea
+                self.oneTime(100, function() {
+                    var value = clip.val();
+                    if (is_function(settings.onPaste)) {
+                        var ret = settings.onPaste({target: self, text: value});
+                        if (ret !== undefined) {
+                            if (ret && is_function(ret.then)) {
+                                ret.then(insert);
+                            } else if (typeof ret === 'string') {
+                                insert(ret);
+                            } else if (ret === false) {
+                                set();
+                            }
+                            return;
+                        }
+                    }
+                    insert(value);
+                });
+            }
         }
         // -------------------------------------------------------------------------------
         function prev_history() {
@@ -2163,22 +2294,6 @@
             };
         })();
         // ---------------------------------------------------------------------
-        // :: Paste content to terminal using hidden textarea
-        // ---------------------------------------------------------------------
-        function paste() {
-            if (paste_count++ > 0) {
-                return;
-            }
-            if (self.isenabled()) {
-                //wait until Browser insert text to textarea
-                self.oneTime(100, function() {
-                    self.insert(clip.val());
-                    clip.val(command);
-                    fix_textarea();
-                });
-            }
-        }
-        // ---------------------------------------------------------------------
         function fire_change_command() {
             if (is_function(settings.onCommandChange)) {
                 settings.onCommandChange.call(self, command);
@@ -2461,6 +2576,29 @@
                 draw_prompt();
                 return self;
             },
+            invoke_key: function(shortcut) {
+                var keys = shortcut.toUpperCase().split('+');
+                var key = keys.pop();
+                var ctrl = keys.indexOf('CTRL') !== -1;
+                var shift = keys.indexOf('SHIFT') !== -1;
+                var alt = keys.indexOf('ALT') !== -1;
+                var meta = keys.indexOf('META') !== -1;
+                var e = $.Event("keydown", {
+                    ctrlKey: ctrl,
+                    shiftKey: shift,
+                    altKey: alt,
+                    metaKey: meta,
+                    which: reversed_keycodes[key],
+                    key: key
+                });
+                var doc = $(document.documentElement || window);
+                doc.trigger(e);
+                e = $.Event("keypress");
+                e.key = key;
+                e.which = e.keyCode = 0;
+                doc.trigger(e);
+                return self;
+            },
             enable: function() {
                 if (!enabled) {
                     enabled = true;
@@ -2519,6 +2657,8 @@
         if (settings.enabled === true) {
             self.enable();
         }
+        char_width = get_char_width();
+        num_chars = get_num_chars(char_width);
         if (!settings.history) {
             history.disable();
         }
@@ -3316,7 +3456,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 02 Jan 2019 18:34:02 +0000',
+        date: 'Wed, 02 Jan 2019 20:24:22 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4866,6 +5006,7 @@
         keydown: $.noop,
         onAfterRedraw: $.noop,
         onEchoCommand: $.noop,
+        onPaste: $.noop,
         onFlush: $.noop,
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
@@ -7818,26 +7959,7 @@
             // :: invoke keydown shorcut
             // -------------------------------------------------------------
             invoke_key: function(shortcut) {
-                var keys = shortcut.toUpperCase().split('+');
-                var key = keys.pop();
-                var ctrl = keys.indexOf('CTRL') !== -1;
-                var shift = keys.indexOf('SHIFT') !== -1;
-                var alt = keys.indexOf('ALT') !== -1;
-                var meta = keys.indexOf('META') !== -1;
-                var e = $.Event("keydown", {
-                    ctrlKey: ctrl,
-                    shiftKey: shift,
-                    altKey: alt,
-                    metaKey: meta,
-                    which: reversed_keycodes[key],
-                    key: key
-                });
-                var doc = $(document.documentElement || window);
-                doc.trigger(e);
-                e = $.Event("keypress");
-                e.key = key;
-                e.which = e.keyCode = 0;
-                doc.trigger(e);
+                command_line.invoke_key(shortcut);
                 return self;
             },
             // -------------------------------------------------------------
@@ -8010,97 +8132,6 @@
                 }
             };
         }));
-        // for invoking shortcuts using terminal::keydown
-        // taken from https://github.com/cvan/keyboardevent-key-polyfill/
-        var keycodes = {
-            3: 'Cancel',
-            6: 'Help',
-            8: 'Backspace',
-            9: 'Tab',
-            12: 'Clear',
-            13: 'Enter',
-            16: 'Shift',
-            17: 'Control',
-            18: 'Alt',
-            19: 'Pause',
-            20: 'CapsLock',
-            27: 'Escape',
-            28: 'Convert',
-            29: 'NonConvert',
-            30: 'Accept',
-            31: 'ModeChange',
-            32: ' ',
-            33: 'PageUp',
-            34: 'PageDown',
-            35: 'End',
-            36: 'Home',
-            37: 'ArrowLeft',
-            38: 'ArrowUp',
-            39: 'ArrowRight',
-            40: 'ArrowDown',
-            41: 'Select',
-            42: 'Print',
-            43: 'Execute',
-            44: 'PrintScreen',
-            45: 'Insert',
-            46: 'Delete',
-            48: ['0', ')'],
-            49: ['1', '!'],
-            50: ['2', '@'],
-            51: ['3', '#'],
-            52: ['4', '$'],
-            53: ['5', '%'],
-            54: ['6', '^'],
-            55: ['7', '&'],
-            56: ['8', '*'],
-            57: ['9', '('],
-            91: 'OS',
-            93: 'ContextMenu',
-            144: 'NumLock',
-            145: 'ScrollLock',
-            181: 'VolumeMute',
-            182: 'VolumeDown',
-            183: 'VolumeUp',
-            186: [';', ':'],
-            187: ['=', '+'],
-            188: [',', '<'],
-            189: ['-', '_'],
-            190: ['.', '>'],
-            191: ['/', '?'],
-            192: ['`', '~'],
-            219: ['[', '{'],
-            220: ['\\', '|'],
-            221: [']', '}'],
-            222: ["'", '"'],
-            224: 'Meta',
-            225: 'AltGraph',
-            246: 'Attn',
-            247: 'CrSel',
-            248: 'ExSel',
-            249: 'EraseEof',
-            250: 'Play',
-            251: 'ZoomOut'
-        };
-        // Function keys (F1-24).
-        for (i = 1; i < 25; i++) {
-            keycodes[111 + i] = 'F' + i;
-        }
-        // Printable ASCII characters.
-        var letter = '';
-        for (i = 65; i < 91; i++) {
-            letter = String.fromCharCode(i);
-            keycodes[i] = [letter.toLowerCase(), letter.toUpperCase()];
-        }
-        var reversed_keycodes = {};
-        Object.keys(keycodes).forEach(function(which) {
-            if (keycodes[which] instanceof Array) {
-                keycodes[which].forEach(function(key) {
-                    reversed_keycodes[key.toUpperCase()] = which;
-                });
-            } else {
-                reversed_keycodes[keycodes[which].toUpperCase()] = which;
-            }
-        });
 
         // -----------------------------------------------------------------
         // INIT CODE
@@ -8169,6 +8200,41 @@
             function is_type(item, type) {
                 return item.type.indexOf(type) !== -1;
             }
+            function echo_image(image) {
+                self.echo('<img src="' + image + '"/>', {raw: true});
+            }
+            function data_uri(blob) {
+                var URL = window.URL || window.webkitURL;
+                return URL.createObjectURL(blob);
+            }
+            function echo(object, ignoreEvents) {
+                if (!ignoreEvents && is_function(settings.onPaste)) {
+                    var event = {
+                        target: self
+                    };
+                    if (typeof object === 'string') {
+                        event['text'] = object;
+                    } else if (object instanceof Blob) {
+                        event['image'] = data_uri(object);
+                    }
+                    var ret = settings.onPaste(event);
+                    if (ret && is_function(ret.then)) {
+                        return ret.then(function(ret) {
+                            echo(ret, true);
+                        });
+                    } else {
+                        echo(ret, true);
+                    }
+                } else if (object instanceof Blob) {
+                    echo_image(data_uri(object));
+                } else if (typeof object === 'string') {
+                    if (object.match(/^data:/)) {
+                        echo_image(object);
+                    } else {
+                        self.insert(object);
+                    }
+                }
+            }
             if (e.clipboardData) {
                 if (self.enabled()) {
                     var items = e.clipboardData.items;
@@ -8176,16 +8242,14 @@
                         for (var i = 0; i < items.length; i++) {
                             if (is_type(items[i], 'image') && settings.pasteImage) {
                                 var blob = items[i].getAsFile();
-                                var URL = window.URL || window.webkitURL;
-                                var source = URL.createObjectURL(blob);
-                                self.echo('<img src="' + source + '"/>', {raw: true});
+                                echo(blob);
                             } else if (is_type(items[i], 'text/plain')) {
-                                items[i].getAsString(self.insert);
+                                items[i].getAsString(echo);
                             }
                         }
                     } else if (e.clipboardData.getData) {
                         var text = e.clipboardData.getData('text/plain');
-                        self.insert(text);
+                        echo(text);
                     }
                     return false;
                 }
