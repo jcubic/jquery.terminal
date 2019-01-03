@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Wed, 02 Jan 2019 20:49:53 +0000
+ * Date: Thu, 03 Jan 2019 16:25:20 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -182,7 +182,7 @@ body.full-screen-terminal .terminal {
     float: left;
 }
 .terminal,
-.terminal-output > :not(.raw) span:not(.token),
+.terminal-output > :not(.raw) span,
 .terminal-output > :not(.raw) a,
 .terminal-output > :not(.raw) div,
 .cmd,
@@ -190,16 +190,19 @@ body.full-screen-terminal .terminal {
 .cmd div {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
-    color: #aaa;
-    background-color: #000;
     font-size: 12px;
     line-height: 15px;
+}
+.terminal-output > :not(.raw) span:not(.token):not(.inverted),
+.cmd span:not(.inverted) {
+    color: #aaa;
+    background-color: #000;
 }
 .terminal, .cmd {
     box-sizing: border-box;
     cursor: text;
 }
-.cmd .cursor span:not(.token) {
+.cmd .cursor span:not(.token):not(.inverted) {
     color: inherit;
     background-color: inherit;
 }
@@ -650,11 +653,11 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token),
+    .terminal-output > :not(.raw) span:not(.token):not(.inverted),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
-    .cmd span,
+    .cmd span:not(.inverted),
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
