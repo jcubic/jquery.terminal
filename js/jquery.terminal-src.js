@@ -8226,7 +8226,7 @@
                             echo(ret, true);
                         });
                     } else {
-                        echo(ret, true);
+                        echo(event.image || event.text, true);
                     }
                 } else if (object instanceof Blob) {
                     echo_image(data_uri(object));
