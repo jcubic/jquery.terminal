@@ -12,10 +12,10 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 05 Jan 2019 21:32:17 +0000
+ * Date: Sat, 05 Jan 2019 21:57:21 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
-.cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
+.cmd .prompt, .cmd .prompt div {
     display: inline-block;
 }
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6, .terminal pre, .cmd {
