@@ -427,11 +427,13 @@ terminal .terminal-output > div {
       border-left: none;
       border-bottom-color: #aaa;
       border-bottom-color: var(--color, #aaa);
+      left: 0;
   }
   50.1%, 100% {
       border-left: none;
       border-bottom-color: #000;
       border-bottom-color: var(--background, #000);
+      left: 0;
   }
 }
 @-moz-keyframes terminal-underline {
@@ -439,21 +441,25 @@ terminal .terminal-output > div {
       border-left: none;
       border-bottom-color: #aaa;
       border-bottom-color: var(--color, #aaa);
+      left: 0;
   }
   50.1%, 100% {
       border-left: none;
       border-bottom-color: #000;
       border-bottom-color: var(--background, #000);
+      left: 0;
   }
 }
 @keyframes terminal-underline {
   0%, 50% {
       border-bottom-color: #aaa;
       border-bottom-color: var(--color, #aaa);
+      left: 0;
   }
   50.1%, 100% {
       border-bottom-color: #000;
       border-bottom-color: var(--background, #000);
+      left: 0;
   }
 }
 .underline-animation .cursor.blink span span {
@@ -465,7 +471,7 @@ terminal .terminal-output > div {
     -moz-animation-name: terminal-underline;
     -ms-animation-name: terminal-underline;
     animation-name: terminal-underline;
-    right: 1px;
+    left: 0;
 }
 .glow-animation .cursor.blink span span {
     border: none;
