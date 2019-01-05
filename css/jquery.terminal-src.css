@@ -175,6 +175,10 @@ body.full-screen-terminal .terminal {
     line-height: 15px;
     height: auto;
 }
+.terminal .terminal-output > div > div, .cmd div {
+    min-height: 12px;
+    min-height: calc(var(--size, 1) * 12px);
+}
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
 }
@@ -615,9 +619,6 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
-.terminal .terminal-output > :not(.raw) > div {
-    padding-bottom: 1px;
-}
 .terminal .terminal-output > :not(.raw) a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
@@ -682,9 +683,6 @@ terminal .terminal-output > div {
     }
     .cmd .clipboard {
         top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
-    }
-    .terminal .terminal-output > div > div, .cmd div{
-        min-height: calc(var(--size, 1) * 15px);
     }
     .terminal .inverted, .cmd .inverted {
         background-color: var(--color, #aaa);

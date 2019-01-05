@@ -11,6 +11,7 @@
 * fix background color on selection (when using --color)
 * fix hidden bar cursor when command is empty
 * fix copy terminal output to clipboard (newlines issue) [#456](https://github.com/jcubic/jquery.terminal/issues/456)
+* remove weird space between lines of selection
 
 ## 2.0.2
 ### Bugfix
