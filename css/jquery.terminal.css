@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Thu, 03 Jan 2019 16:25:20 +0000
+ * Date: Sat, 05 Jan 2019 21:32:17 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div, .terminal .terminal-output div div{
@@ -717,7 +717,6 @@ terminal .terminal-output > div {
     .terminal td::-moz-selection,
     .terminal .terminal-output div div::-moz-selection,
     .terminal .terminal-output div span::-moz-selection,
-    .terminal .terminal-output div div a::-moz-selection,
     .cmd div::-moz-selection,
     .cmd > span::-moz-selection,
     .cmd > span span::-moz-selection,
@@ -726,6 +725,13 @@ terminal .terminal-output > div {
     .cmd .prompt span::-moz-selection {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
+    }
+    .terminal .terminal-output div div a::-moz-selection {
+        background-color: var(--link-color, rgba(15, 96, 255, 0.99)) !important;
+        color: var(--background, #000) !important;
+    }
+    .terminal .terminal-output div div a:hover::-moz-selection {
+        background-color: var(--link-color, rgba(2, 50, 144, 0.99)) !important;
     }
     .terminal h1::selection,
     .terminal h2::selection,
@@ -736,7 +742,6 @@ terminal .terminal-output > div {
     .terminal pre::selection,
     .terminal td::selection,
     .terminal .terminal-output div div::selection,
-    .terminal .terminal-output div div a::selection,
     .terminal .terminal-output div span::selection,
     .cmd div::selection,
     .cmd > span::selection,
@@ -744,8 +749,15 @@ terminal .terminal-output > div {
     .cmd > div::selection,
     .cmd > div span::selection,
     .cmd .prompt span::selection {
-        background-color: var(--color, rgba(170, 170, 170, 0.99));
+        background-color: var(--color, rgba(170, 170, 170, 0.99)) !important;
         color: var(--background, #000) !important;
+    }
+    .terminal .terminal-output div div a::selection {
+        background-color: var(--link-color, rgba(15, 96, 255, 0.99)) !important;
+        color: var(--background, #000) !important;
+    }
+    .terminal .terminal-output div div a:hover::selection {
+        background-color: var(--link-color, rgba(2, 50, 144, 0.99)) !important;
     }
 }
 /*
