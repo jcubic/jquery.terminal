@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 05 Jan 2019 22:17:14 +0000
+ * Date: Sat, 05 Jan 2019 22:28:14 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div {
@@ -21,6 +21,7 @@
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6, .terminal pre, .cmd {
     margin: 0;
 }
+/*
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
     line-height: 1.2em;
 }
@@ -172,7 +173,7 @@ body.full-screen-terminal .terminal {
 }
 .terminal .terminal .terminal-output > div > div, .cmd .prompt {
     display: block;
-    line-height: 15px;
+    /*line-height: 15px;*/
     height: auto;
 }
 .terminal .terminal-output > div > div, .cmd div {
@@ -195,7 +196,7 @@ body.full-screen-terminal .terminal {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     font-size: 12px;
-    line-height: 15px;
+    /*line-height: 15px;*/
 }
 .terminal-output > :not(.raw) span:not(.token):not(.inverted),
 .cmd span:not(.inverted) {
@@ -679,7 +680,7 @@ terminal .terminal-output > div {
     .cmd span,
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
-        line-height: calc(var(--size, 1) * 12px + 3px);
+        /*line-height: calc(var(--size, 1) * 12px + 3px);*/
     }
     .cmd .clipboard {
         top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
