@@ -91,15 +91,8 @@ or
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@{{VER}}/css/jquery.terminal.min.css">
 ```
 
-If you always want latest version, you can grab the files directly from github using rawgit.com (that service grab the files from github and use propert MIME type so you can use it in your page, you can also grab from devel branch):
-
-```html
-<script src="https://cdn.rawgit.com/jcubic/jquery.terminal/master/js/jquery.terminal.min.js"></script>
-<link href="https://cdn.rawgit.com/jcubic/jquery.terminal/master/css/jquery.terminal.min.css" rel="stylesheet"/>
-```
-
-or get it from [unpkg](https://unpkg.com/) without specifying version, it will redirect
-to the latest version:
+If you always want latest version, you can get it from [unpkg](https://unpkg.com/) without specifying version,
+it will redirect to the latest ones:
 
 
 ```html
@@ -107,12 +100,43 @@ to the latest version:
 <link href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
+#### Bleeding Edge Version
 
-**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key).
+If you want to test bleeding edge, development version of jQuery Terminal. You can use those files:
+
+```html
+<script src="https://cdn.rawgit.com/jcubic/jquery.terminal/devel/js/jquery.terminal.min.js"></script>
+<link href="https://cdn.rawgit.com/jcubic/jquery.terminal/devel/css/jquery.terminal.min.css" rel="stylesheet"/>
+```
+
+but the service will be [shutdown in October 2019](https://rawgit.com/), and it don't accept new files. Great things
+about rawgit that (at least when you don't put cdn subdomain) you can get lastest version very fast after the commit
+is pushed on GitHub (sometimes you need to add no cache query string, anything unique, for faster refresh).
+
+there is also alternative from jsdelivr:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js"></script>
+<link href="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/css/jquery.terminal.min.css" rel="stylesheet"/>
+```
+
+#### Keyboard key polyfill
+
+but it's not refreshed too fast because it's CDN and need to be propagated to different servers.
+
+**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key) (as you can see in chart it's required by Android so it's good to add).
 
 ```html
 <script src="https://cdn.rawgit.com/inexorabletash/polyfill/master/keyboard.js"></script>
 ```
+
+or
+
+```html
+<script src="https://unpkg.com/js-polyfills@0.x.x/keyboard.js"></script>
+```
+
+#### Command Line
 
 
 You can also install jQuery Terminal using command line, from [bower repository](https://bower.io/):
@@ -189,21 +213,27 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 
 ### Security
 
-Because of security in version 1.20.0 links with protocols different then ftp or http(s) (it was possible to enter
-javascript protocol, that could lead to XSS if author of hte app echo user input and save it in DB) was turn off
-by default. To enable it, you need to use `anyLinks: true` option.
+Because of security in version 1.20.0 links with protocols different then ftp or http(s) (it was
+possible to enter javascript protocol, that could lead to XSS if author of hte app echo user input
+and save it in DB) was turn off by default. To enable it, you need to use `anyLinks: true` option.
 
-In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was also disabled
-by default because attacker (depending on your application) could execute `terminal::echo` with raw option to enter
-any html and execute any javascript. To enable this feature from this version you need to use `invokeMethods: true`
-option.
+In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was
+also disabled by default because attacker (depending on your application) could execute
+`terminal::echo` with raw option to enter any html and execute any javascript. To enable this
+feature from this version you need to use `invokeMethods: true` option.
 
-The features are safe to enable, if you don't save user input in DB and don't echo it back to different users
-(like with chat application). It's also safe if you escape formatting before you echo stuff.
+The features are safe to enable, if you don't save user input in DB and don't echo it back to
+different users (like with chat application). It's also safe if you escape formatting before you
+echo stuff.
 
-If you don't save user input in DB but allow to echo back what user types and have enabled `execHash` options,
-you may have reflected XSS vulnerability if you enable this features. If you escape formatting this options are
-also safe.
+If you don't save user input in DB but allow to echo back what user types and have enabled
+`execHash` options, you may have reflected XSS vulnerability if you enable this features. If you
+escape formatting this options are also safe.
+
+**NOTE**: To disable exec if you have `execHash` (or echo stuff from users with `invokeMethods: true`),
+you can also set option `{exec: false}` to your `echo` call and use it only when you get
+values from server (not from DB indireclty from users). If you do this you will be able to echo stuff
+from users and execute terminal methods from server (this feature is mostly done just for that).
 
 ### Contributors
 
