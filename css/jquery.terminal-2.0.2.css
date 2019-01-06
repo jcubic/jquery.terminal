@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 06 Jan 2019 11:22:11 +0000
+ * Date: Sun, 06 Jan 2019 22:03:46 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div {
@@ -200,7 +200,7 @@ body.full-screen-terminal .terminal {
     /*line-height: 15px;*/
 }
 .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error),
-.cmd span:not(.inverted) {
+.cmd span:not(.inverted):not(.token) {
     color: #aaa;
     background-color: #000;
 }
@@ -257,8 +257,8 @@ terminal .terminal-output > div {
     border: 1px solid #aaa;
 }
 .cmd span[data-text] span {
-    background-color: inherit;
-    color: inherit;
+    background-color: inherit !important;
+    color: inherit !important;
 }
 .cmd [role="presentation"]:not(.cursor-line) {
     overflow: hidden;
@@ -666,7 +666,7 @@ terminal .terminal-output > div {
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
-    .cmd span:not(.inverted),
+    .cmd span:not(.inverted):not(.token),
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);

@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2019 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2019 Jakub T. Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 06 Jan 2019 11:22:11 +0000
+ * Date: Sun, 06 Jan 2019 22:03:45 +0000
  */
 
 /* TODO:
@@ -1147,6 +1147,7 @@
             history: true,
             onPositionChange: $.noop,
             onCommandChange: $.noop,
+            inputStyle: 'textarea',
             onPaste: $.noop,
             clickTimeout: 200,
             holdTimeout: 400,
@@ -2054,7 +2055,7 @@
                     }
                 }
                 // fix for command line selection
-                var cond = settings.last || settings.length == 1;
+                var cond = settings.last || settings.length === 1;
                 var noselect = settings.position === (cond ? len : len - 1);
                 cursor.toggleClass('noselect', noselect);
                 // fix for animation when changing --animation dynamically
@@ -3470,7 +3471,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 06 Jan 2019 11:22:11 +0000',
+        date: 'Sun, 06 Jan 2019 22:03:45 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4908,8 +4909,8 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic' +
-        '.pl/me>';
+    var copyright = 'Copyright (c) 2011-2019 Jakub T. Jankiewicz ' +
+        '<http://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
     var reg = new RegExp(' {' + version_string.length + '}$');
@@ -4919,7 +4920,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2018 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2019 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         [
