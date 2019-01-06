@@ -2054,7 +2054,7 @@
                     }
                 }
                 // fix for command line selection
-                var cond = settings.last || settings.length == 1;
+                var cond = settings.last || settings.length === 1;
                 var noselect = settings.position === (cond ? len : len - 1);
                 cursor.toggleClass('noselect', noselect);
                 // fix for animation when changing --animation dynamically
