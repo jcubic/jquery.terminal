@@ -199,7 +199,7 @@ body.full-screen-terminal .terminal {
     font-size: 12px;
     /*line-height: 15px;*/
 }
-.terminal-output > :not(.raw) span:not(.token):not(.inverted),
+.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error),
 .cmd span:not(.inverted) {
     color: #aaa;
     background-color: #000;
@@ -662,7 +662,7 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token):not(.inverted),
+    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,

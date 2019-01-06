@@ -14,6 +14,7 @@
 * remove weird space between lines of selection
 * fix jumping of cursor with underline animation
 * fix selection of command line
+* fix error color when --color is used
 
 ## 2.0.2
 ### Bugfix
