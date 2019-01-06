@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 05 Jan 2019 21:57:21 +0000
+ * Date: Sun, 06 Jan 2019 10:29:53 +0000
  */
 
 /* TODO:
@@ -2054,7 +2054,8 @@
                     }
                 }
                 // fix for command line selection
-                var noselect = settings.position === (settings.last ? len : len - 1);
+                var cond = settings.last || settings.length == 1;
+                var noselect = settings.position === (cond ? len : len - 1);
                 cursor.toggleClass('noselect', noselect);
                 // fix for animation when changing --animation dynamically
                 fix_cursor();
@@ -2135,6 +2136,7 @@
                         // skip empty line
                     } else if (pos < first_len) {
                         draw_cursor_line(array[0], {
+                            length: array.length,
                             position: pos,
                             prompt: prompt_last_line
                         });
@@ -2142,8 +2144,12 @@
                     } else if (pos === first_len) {
                         // first char acter of second line
                         cursor_line.before(div(array[0], prompt_last_line));
-                        draw_cursor_line(array[1] || '', {position: 0});
-                        if (array.length > 1) {
+                        draw_cursor_line(array[1] || '', {
+                            length: array.length,
+                            position: 0,
+                            last: array.length <= 2
+                        });
+                        if (array.length > 2) {
                             lines_after(array.slice(2));
                         }
                     } else {
@@ -2163,6 +2169,7 @@
                                 new_pos = last_len - from_last;
                             }
                             draw_cursor_line(last, {
+                                length: array.length,
                                 position: new_pos,
                                 last: true
                             });
@@ -2192,6 +2199,7 @@
                                 }
                             }
                             draw_cursor_line(current, {
+                                length: array.length,
                                 position: new_pos
                             });
                             lines_before(array.slice(0, line_index));
@@ -2204,7 +2212,10 @@
                     cursor.html('<span><span>&nbsp;</span></span>');
                     after.html('');
                 } else {
-                    draw_cursor_line(formatted, {position: pos});
+                    draw_cursor_line(formatted, {
+                        length: 1,
+                        position: pos
+                    });
                 }
                 var in_line = cursor_line.prevUntil('.prompt').length;
                 if (is_css_variables_supported) {
@@ -3459,7 +3470,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 05 Jan 2019 21:57:21 +0000',
+        date: 'Sun, 06 Jan 2019 10:29:53 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

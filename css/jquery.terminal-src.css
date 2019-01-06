@@ -59,7 +59,8 @@
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
     top: calc(var(--cursor-line, 0) * 1em);
 }
-.cmd .noselect, .cmd [role="presentation"]:not(.cursor-line) > span:last-child,
+.cmd .noselect, .cmd .noselect span,
+.cmd [role="presentation"]:not(.cursor-line) > span:last-child,
 .cmd .cursor-line > span:last-child > span:last-child {
     -webkit-touch-callout: none; /* iOS Safari */
       -webkit-user-select: none; /* Safari */

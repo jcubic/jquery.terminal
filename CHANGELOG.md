@@ -13,6 +13,7 @@
 * fix copy terminal output to clipboard (newlines issue) [#456](https://github.com/jcubic/jquery.terminal/issues/456)
 * remove weird space between lines of selection
 * fix jumping of cursor with underline animation
+* fix selection of command line
 
 ## 2.0.2
 ### Bugfix

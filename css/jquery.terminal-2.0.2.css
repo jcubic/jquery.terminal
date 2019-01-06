@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 05 Jan 2019 22:34:18 +0000
+ * Date: Sun, 06 Jan 2019 10:29:54 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div {
@@ -59,7 +59,8 @@
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
     top: calc(var(--cursor-line, 0) * 1em);
 }
-.cmd .noselect, .cmd [role="presentation"]:not(.cursor-line) > span:last-child,
+.cmd .noselect, .cmd .noselect span,
+.cmd [role="presentation"]:not(.cursor-line) > span:last-child,
 .cmd .cursor-line > span:last-child > span:last-child {
     -webkit-touch-callout: none; /* iOS Safari */
       -webkit-user-select: none; /* Safari */
