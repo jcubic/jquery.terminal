@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2019 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2019 Jakub T. Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -1147,6 +1147,7 @@
             history: true,
             onPositionChange: $.noop,
             onCommandChange: $.noop,
+            inputStyle: 'textarea',
             onPaste: $.noop,
             clickTimeout: 200,
             holdTimeout: 400,
@@ -4908,8 +4909,8 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic' +
-        '.pl/me>';
+    var copyright = 'Copyright (c) 2011-2019 Jakub T. Jankiewicz ' +
+        '<http://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
     var reg = new RegExp(' {' + version_string.length + '}$');
@@ -4919,7 +4920,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2018 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2019 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         [
