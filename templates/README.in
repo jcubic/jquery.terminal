@@ -120,9 +120,9 @@ there is also alternative from jsdelivr:
 <link href="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
-#### Keyboard key polyfill
+but it's not refreshed as fast as rawgit does, because it's CDN and need to be propagated to different servers.
 
-but it's not refreshed too fast because it's CDN and need to be propagated to different servers.
+#### Keyboard key polyfill
 
 **NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key) (as you can see in chart it's required by Android so it's good to add).
 
