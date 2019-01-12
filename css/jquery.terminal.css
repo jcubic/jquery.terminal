@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 06 Jan 2019 22:03:46 +0000
+ * Date: Sat, 12 Jan 2019 18:33:07 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div {
@@ -163,11 +163,17 @@ body.full-screen-terminal .terminal {
     display: inline-block;
     float: left;
 }
-.cmd .cursor.blink span span {
+.cmd .cursor.blink span:not(.emoji) span {
     -webkit-animation: terminal-blink 1s infinite linear;
        -moz-animation: terminal-blink 1s infinite linear;
         -ms-animation: terminal-blink 1s infinite linear;
             animation: terminal-blink 1s infinite linear;
+}
+.cmd .cursor .emoji {
+        -webkit-animation: terminal-blink 1s infinite linear;
+           -moz-animation: terminal-blink 1s infinite linear;
+            -ms-animation: terminal-blink 1s infinite linear;
+                animation: terminal-blink 1s infinite linear;
 }
 .bar.terminal .inverted, .bar.cmd .inverted {
     border-left-color: #aaa;
@@ -199,10 +205,18 @@ body.full-screen-terminal .terminal {
     font-size: 12px;
     /*line-height: 15px;*/
 }
-.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error),
-.cmd span:not(.inverted):not(.token) {
+.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error):not(.emoji),
+.cmd span:not(.inverted):not(.token):not(.emoji) {
     color: #aaa;
     background-color: #000;
+}
+.terminal-output > :not(.raw) .emoji, .cmd .emoji {
+    width: 14px;
+    height: 14px;
+    background-size: cover;
+    display: inline-block;
+    color: transparent;
+    position: relative;
 }
 .terminal, .cmd {
     box-sizing: border-box;
@@ -211,6 +225,10 @@ body.full-screen-terminal .terminal {
 .cmd .cursor span:not(.token):not(.inverted) {
     color: inherit;
     background-color: inherit;
+}
+.cmd .emoji.emoji.emoji.emoji, .cmd .emoji.emoji.emoji.emoji span {
+    color: transparent;
+    background-color: transparent;
 }
 .cmd .cursor * {
     background-color: transparent;
@@ -256,7 +274,7 @@ terminal .terminal-output > div {
 .terminal td {
     border: 1px solid #aaa;
 }
-.cmd span[data-text] span {
+.cmd span[data-text]:not(.emoji) span {
     background-color: inherit !important;
     color: inherit !important;
 }
@@ -662,11 +680,11 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error),
+    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error):not(.emoji),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
-    .cmd span:not(.inverted):not(.token),
+    .cmd span:not(.inverted):not(.token):not(.emoji),
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
@@ -680,7 +698,7 @@ terminal .terminal-output > div {
         display: inline-block;
     }
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token),
+    .terminal-output > :not(.raw) span:not(.token):not(.emoji),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
@@ -688,6 +706,10 @@ terminal .terminal-output > div {
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
         /*line-height: calc(var(--size, 1) * 12px + 3px);*/
+    }
+    .terminal-output > :not(.raw) .emoji, .cmd .emoji {
+        width: calc(var(--size, 1) * 14px) !important;
+        height: calc(var(--size, 1) * 14px);
     }
     .cmd .clipboard {
         top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
@@ -703,11 +725,20 @@ terminal .terminal-output > div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
-    .cmd .cursor.blink span span {
+    .cmd .cursor.blink span:not(.emoji) span {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
             -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
                 animation: var(--animation, terminal-blink) 1s infinite linear;
+    }
+    .cmd .cursor.blink .emoji {
+        -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
+           -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
+            -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
+                animation: var(--animation, terminal-blink) 1s infinite linear;
+    }
+    .cmd .cursor.blink .emoji span {
+        color: transparent;
     }
     .cmd .cursor {
         height: calc(var(--size, 1) * 14px);
