@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const http = require('http');
+const http = require('https');
 const url = require('url');
 
 function get({path, host}, callback) {
@@ -10,8 +10,9 @@ function get({path, host}, callback) {
     }, function(response) {
         if (response.headers.location) {
             var loc = response.headers.location;
+            console.log(loc);
             if (loc.match(/^http/)) {
-                loc = new Url(loc);
+                loc = new url.Url(loc);
                 host = loc.host;
                 path = loc.path;
             } else {
@@ -23,9 +24,6 @@ function get({path, host}, callback) {
         }
     });
 }
-
-
-
 
 get({
     host: 'unpkg.com',
@@ -46,7 +44,9 @@ get({
         emoji.map(function(emoji) {
             var url = 'https://unpkg.com/emoji-datasource-twitter/img/' +
                 'twitter/64/' + emoji.image;
-            console.log(`.emoji.${emoji.short_name} { background-image: url(${url}); }`);
+            // escape special characters in class name https://mathiasbynens.be/notes/css-escapes
+            var class_name = emoji.short_name.replace(/\+/g, '\\+').replace(/^(\d)/i, '\\3$1 ');
+            console.log(`.emoji.${class_name} { background-image: url(${url}); }`);
         });
     });
 });

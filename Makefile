@@ -31,7 +31,7 @@ skip_re="[xfi]it\\(|[fdx]describe\\("
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck emoji
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile css/emoji.css
 
 bower.json: templates/bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
@@ -88,7 +88,9 @@ terminal.jquery.json: manifest .$(VERSION)
 www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
-emoji:
+css/emoji.css: emoji
+
+emoji: mkemoji
 	mkemoji > css/emoji.css
 
 test:
