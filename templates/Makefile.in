@@ -89,10 +89,10 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 css/emoji.css: mkemoji
-	mkemoji > css/emoji.css
+	./mkemoji > css/emoji.css
 
 emoji:
-	mkemoji > css/emoji.css
+	./mkemoji > css/emoji.css
 
 test:
 	$(JEST) --coverage --testMatch '**/__tests__/*.spec.js'
