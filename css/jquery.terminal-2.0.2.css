@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Wed, 16 Jan 2019 10:33:17 +0000
+ * Date: Wed, 16 Jan 2019 14:58:47 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div {
@@ -705,7 +705,7 @@ terminal .terminal-output > div {
     .cmd span,
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
-        /*line-height: calc(var(--size, 1) * 12px + 3px);*/
+        line-height: calc(var(--size, 1) * 12px + 3px);
     }
     .terminal-output .emoji, .cmd .emoji {
         width: calc(var(--size, 1) * 14px) !important;

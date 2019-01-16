@@ -705,7 +705,7 @@ terminal .terminal-output > div {
     .cmd span,
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
-        /*line-height: calc(var(--size, 1) * 12px + 3px);*/
+        line-height: calc(var(--size, 1) * 12px + 3px);
     }
     .terminal-output .emoji, .cmd .emoji {
         width: calc(var(--size, 1) * 14px) !important;
