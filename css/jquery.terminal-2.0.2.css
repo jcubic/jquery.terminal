@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 12 Jan 2019 18:33:07 +0000
+ * Date: Wed, 16 Jan 2019 10:33:17 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div {
@@ -210,7 +210,7 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
 }
-.terminal-output > :not(.raw) .emoji, .cmd .emoji {
+.terminal-output .emoji, .cmd .emoji {
     width: 14px;
     height: 14px;
     background-size: cover;
@@ -698,7 +698,7 @@ terminal .terminal-output > div {
         display: inline-block;
     }
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token):not(.emoji),
+    .terminal-output > :not(.raw) span:not(.token),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
@@ -707,7 +707,7 @@ terminal .terminal-output > div {
         font-size: calc(var(--size, 1) * 12px);
         /*line-height: calc(var(--size, 1) * 12px + 3px);*/
     }
-    .terminal-output > :not(.raw) .emoji, .cmd .emoji {
+    .terminal-output .emoji, .cmd .emoji {
         width: calc(var(--size, 1) * 14px) !important;
         height: calc(var(--size, 1) * 14px);
     }
