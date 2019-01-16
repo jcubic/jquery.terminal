@@ -110,6 +110,7 @@ eslint:
 	$(ESLINT) js/unix_formatting.js
 	$(ESLINT) js/prims.js
 	$(ESLINT) js/less.js
+	$(ESLINT) js/emoji.js
 
 skipped_tests:
 	@! grep -E $(skip_re) __tests__/terminal.spec.js
