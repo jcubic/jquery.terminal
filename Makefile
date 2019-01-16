@@ -130,4 +130,4 @@ publish:
 lint: eslint jsonlint
 
 checkout:
-	@bash -c 'git status | sed "1,/not staged/d" | grep modified | sed "s/.*modified:\s*\(.*\)/\1/" | while read file; do git checkout $$file; touch $$file; done'
+	@git status | sed "1,/not staged/d" | grep modified | sed "s/.*modified:\s*\(.*\)/\1/" | tr '\n' ' ' | sed -e "s/.*/git checkout &; touch &/" | bash
