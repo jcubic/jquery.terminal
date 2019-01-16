@@ -10,7 +10,6 @@ function get({path, host}, callback) {
     }, function(response) {
         if (response.headers.location) {
             var loc = response.headers.location;
-            console.log(loc);
             if (loc.match(/^http/)) {
                 loc = new url.Url(loc);
                 host = loc.host;

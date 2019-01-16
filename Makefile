@@ -88,9 +88,10 @@ terminal.jquery.json: manifest .$(VERSION)
 www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
-css/emoji.css: emoji
+css/emoji.css: mkemoji
+	mkemoji > css/emoji.css
 
-emoji: mkemoji
+emoji:
 	mkemoji > css/emoji.css
 
 test:
@@ -126,3 +127,6 @@ publish:
 	$(RM) -rf npm
 
 lint: eslint jsonlint
+
+checkout:
+	@bash -c 'git status | sed "1,/not staged/d" | grep modified | sed "s/.*modified:\s*\(.*\)/\1/" | while read file; do git checkout $$file; touch $$file; done'
