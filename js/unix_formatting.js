@@ -482,6 +482,8 @@
                     color = output_color;
                 } else if (output_color === 'inherit') {
                     color = output_color;
+                } else if (output_color.match(/^#/)) {
+                    color = output_color;
                 } else {
                     color = colors[output_color];
                 }
@@ -490,6 +492,8 @@
                 if (_ex_background) {
                     background = output_background;
                 } else if (output_background === 'transparent') {
+                    background = output_background;
+                } else if (output_background.match(/^#/)) { // already 8bit color #460
                     background = output_background;
                 } else {
                     background = $.terminal.ansi_colors.normal[output_background];
