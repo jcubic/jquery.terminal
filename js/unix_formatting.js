@@ -594,10 +594,11 @@
                             break;
                     }
                 } else if (splitted[i] !== '') {
+                    var text = splitted[i].replace(/\x1b\[[0-9;]*/g, '');
                     if (settings.unixFormattingEscapeBrackets) {
-                        output.push($.terminal.escape_formatting(splitted[i]));
+                        output.push($.terminal.escape_formatting(text));
                     } else {
-                        output.push(splitted[i]);
+                        output.push(text);
                     }
                 }
             } // for

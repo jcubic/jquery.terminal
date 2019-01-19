@@ -4205,16 +4205,7 @@
         // ---------------------------------------------------------------------
         format: function format(str, options) {
             function safe_text(string) {
-                if (string.match(/\\]/)) {
-                    string = string.replace(/(\\+)]/g, function(_, slashes) {
-                        if (slashes.length % 2 === 1) {
-                            return ']';
-                        } else {
-                            return slashes.replace(/../, '\\');
-                        }
-                    });
-                }
-                return safe(string);
+                return safe(string.replace(/\\\\/g, '\\'));
             }
             var settings = $.extend({}, {
                 linksNoReferrer: false,
