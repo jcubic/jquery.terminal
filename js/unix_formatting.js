@@ -593,16 +593,18 @@
                             }
                             break;
                     }
-                } else if (settings.unixFormattingEscapeBrackets) {
-                    output.push($.terminal.escape_formatting(splitted[i]));
-                } else {
-                    output.push(splitted[i]);
+                } else if (splitted[i] !== '') {
+                    if (settings.unixFormattingEscapeBrackets) {
+                        output.push($.terminal.escape_formatting(splitted[i]));
+                    } else {
+                        output.push(splitted[i]);
+                    }
                 }
-            }
+            } // for
             if (inside) {
                 output.push(']');
             }
-            result = output.join('');
+            result = output.join('').replace(/\\/g, '\\\\');
             if (options && typeof options.position === 'number') {
                 return [result, new_position];
             }
