@@ -3877,10 +3877,6 @@
                 var output;
                 var line_length = line.length;
                 var chars = $.terminal.split_characters(text(line));
-                if (chars.length <= length) {
-                    result.push(line);
-                    continue;
-                }
                 var last_char = chars[chars.length - 1];
                 var end_index = line_length - (last_char ? last_char.length : 1);
                 var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);

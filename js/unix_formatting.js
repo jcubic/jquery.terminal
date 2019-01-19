@@ -605,7 +605,12 @@
             if (inside) {
                 output.push(']');
             }
-            result = output.join('').replace(/\\/g, '\\\\');
+            result = $.terminal.format_split(output.join('')).map(function(str) {
+                if (str.match(/^\[\[/)) {
+                    return str.replace(/\\/g, '\\\\');
+                }
+                return str;
+            }).join('');
             if (options && typeof options.position === 'number') {
                 return [result, new_position];
             }
