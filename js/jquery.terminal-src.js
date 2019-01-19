@@ -3867,7 +3867,6 @@
             var prev_format = '';
             var result = [];
             var array = $.terminal.normalize(str).split(/\n/g);
-            var first = true;
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');
@@ -3877,9 +3876,6 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
-                if (line.match(/\\\\/)) {
-                    //console.log(line);
-                }
                 var chars = $.terminal.split_characters(text(line));
                 if (chars.length <= length) {
                     result.push(line);
@@ -4204,9 +4200,6 @@
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
         format: function format(str, options) {
-            function safe_text(string) {
-                return safe(string.replace(/\\\\/g, '\\'));
-            }
             var settings = $.extend({}, {
                 linksNoReferrer: false,
                 linksNoFollow: false,
@@ -4236,7 +4229,8 @@
                             if (text === '') {
                                 return ''; //'<span>&nbsp;</span>';
                             }
-                            text = safe_text(text);
+                            // inside formatting we need to unescape escaped slashes
+                            text = safe(text).replace(/\\\\/g, '\\');
                             var style_str = '';
                             if (style.indexOf('b') !== -1) {
                                 style_str += 'font-weight:bold;';
@@ -4324,7 +4318,7 @@
                             return result;
                         });
                     } else {
-                        text = safe_text(text);
+                        text = safe(text);
                         var extra = extra_css(text, options);
                         if (extra.length) {
                             text = wide_characters(text, options);
