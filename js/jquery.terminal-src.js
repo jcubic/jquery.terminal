@@ -2451,7 +2451,6 @@
                     fix_textarea();
                 }
                 redraw();
-                fix_textarea();
                 fire_change_command();
                 return self;
             },
