@@ -1,3 +1,7 @@
+## 2.1.1
+### Bugfix
+* don't apply emoji css inside .raw class (addded by `echo('string', {raw: true})`) [#461](https://github.com/jcubic/jquery.terminal/issues/461)
+
 ## 2.1.0
 ### Features
 * cursor glow animation
