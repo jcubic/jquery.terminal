@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version DEV
+ *           \/              /____/                              version 2.1.0
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 19 Jan 2019 12:18:31 +0000
+ * Date: Sun, 20 Jan 2019 10:58:06 +0000
  */
 
 /* TODO:
@@ -3469,8 +3469,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: 'DEV',
-        date: 'Sat, 19 Jan 2019 12:18:31 +0000',
+        version: '2.1.0',
+        date: 'Sun, 20 Jan 2019 10:58:06 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
