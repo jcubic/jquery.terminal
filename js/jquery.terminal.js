@@ -4,11 +4,11 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.0.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2018 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2019 Jakub T. Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 22 Dec 2018 15:04:13 +0000
+ * Date: Sat, 19 Jan 2019 12:18:31 +0000
  */
 
 /* TODO:
@@ -50,7 +50,7 @@
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
-         module, require, define, setInterval, clearInterval */
+         module, require, define, setInterval, clearInterval, Blob */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -1147,6 +1147,8 @@
             history: true,
             onPositionChange: $.noop,
             onCommandChange: $.noop,
+            inputStyle: 'textarea',
+            onPaste: $.noop,
             clickTimeout: 200,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
@@ -1269,6 +1271,100 @@
                 }
             }
         }
+        // -----------------------------------------------------------------
+        // for invoking shortcuts using terminal::keydown
+        // taken from https://github.com/cvan/keyboardevent-key-polyfill/
+        var keycodes = {
+            3: 'Cancel',
+            6: 'Help',
+            8: 'Backspace',
+            9: 'Tab',
+            12: 'Clear',
+            13: 'Enter',
+            16: 'Shift',
+            17: 'Control',
+            18: 'Alt',
+            19: 'Pause',
+            20: 'CapsLock',
+            27: 'Escape',
+            28: 'Convert',
+            29: 'NonConvert',
+            30: 'Accept',
+            31: 'ModeChange',
+            32: ' ',
+            33: 'PageUp',
+            34: 'PageDown',
+            35: 'End',
+            36: 'Home',
+            37: 'ArrowLeft',
+            38: 'ArrowUp',
+            39: 'ArrowRight',
+            40: 'ArrowDown',
+            41: 'Select',
+            42: 'Print',
+            43: 'Execute',
+            44: 'PrintScreen',
+            45: 'Insert',
+            46: 'Delete',
+            48: ['0', ')'],
+            49: ['1', '!'],
+            50: ['2', '@'],
+            51: ['3', '#'],
+            52: ['4', '$'],
+            53: ['5', '%'],
+            54: ['6', '^'],
+            55: ['7', '&'],
+            56: ['8', '*'],
+            57: ['9', '('],
+            91: 'OS',
+            93: 'ContextMenu',
+            144: 'NumLock',
+            145: 'ScrollLock',
+            181: 'VolumeMute',
+            182: 'VolumeDown',
+            183: 'VolumeUp',
+            186: [';', ':'],
+            187: ['=', '+'],
+            188: [',', '<'],
+            189: ['-', '_'],
+            190: ['.', '>'],
+            191: ['/', '?'],
+            192: ['`', '~'],
+            219: ['[', '{'],
+            220: ['\\', '|'],
+            221: [']', '}'],
+            222: ["'", '"'],
+            224: 'Meta',
+            225: 'AltGraph',
+            246: 'Attn',
+            247: 'CrSel',
+            248: 'ExSel',
+            249: 'EraseEof',
+            250: 'Play',
+            251: 'ZoomOut'
+        };
+        var i;
+        // Function keys (F1-24).
+        for (i = 1; i < 25; i++) {
+            keycodes[111 + i] = 'F' + i;
+        }
+        // Printable ASCII characters.
+        var letter = '';
+        for (i = 65; i < 91; i++) {
+            letter = String.fromCharCode(i);
+            keycodes[i] = [letter.toLowerCase(), letter.toUpperCase()];
+        }
+        var reversed_keycodes = {};
+        Object.keys(keycodes).forEach(function(which) {
+            if (keycodes[which] instanceof Array) {
+                keycodes[which].forEach(function(key) {
+                    reversed_keycodes[key.toUpperCase()] = which;
+                });
+            } else {
+                reversed_keycodes[keycodes[which].toUpperCase()] = which;
+            }
+        });
+        // -----------------------------------------------------------------
         var keymap;
         var default_keymap = {
             'ALT+D': delete_word(true),
@@ -1487,6 +1583,45 @@
             }
             clip.one('input', paste);
             return true;
+        }
+        // ---------------------------------------------------------------------
+        // :: Paste content to terminal using hidden textarea
+        // ---------------------------------------------------------------------
+        function paste() {
+            if (paste_count++ > 0) {
+                return;
+            }
+            function set() {
+                clip.val(command);
+                fix_textarea();
+            }
+            function insert(text) {
+                self.insert(text);
+                set();
+            }
+            if (self.isenabled()) {
+                //wait until Browser insert text to textarea
+                self.oneTime(100, function() {
+                    var value = clip.val();
+                    if (is_function(settings.onPaste)) {
+                        var ret = settings.onPaste.call(self, {
+                            target: self,
+                            text: value
+                        });
+                        if (ret !== undefined) {
+                            if (ret && is_function(ret.then)) {
+                                ret.then(insert);
+                            } else if (typeof ret === 'string') {
+                                insert(ret);
+                            } else if (ret === false) {
+                                set();
+                            }
+                            return;
+                        }
+                    }
+                    insert(value);
+                });
+            }
         }
         // -------------------------------------------------------------------------------
         function prev_history() {
@@ -1920,7 +2055,8 @@
                     }
                 }
                 // fix for command line selection
-                var noselect = settings.position === (settings.last ? len : len - 1);
+                var cond = settings.last || settings.length === 1;
+                var noselect = settings.position === (cond ? len : len - 1);
                 cursor.toggleClass('noselect', noselect);
                 // fix for animation when changing --animation dynamically
                 fix_cursor();
@@ -2001,6 +2137,7 @@
                         // skip empty line
                     } else if (pos < first_len) {
                         draw_cursor_line(array[0], {
+                            length: array.length,
                             position: pos,
                             prompt: prompt_last_line
                         });
@@ -2008,8 +2145,12 @@
                     } else if (pos === first_len) {
                         // first char acter of second line
                         cursor_line.before(div(array[0], prompt_last_line));
-                        draw_cursor_line(array[1] || '', {position: 0});
-                        if (array.length > 1) {
+                        draw_cursor_line(array[1] || '', {
+                            length: array.length,
+                            position: 0,
+                            last: array.length <= 2
+                        });
+                        if (array.length > 2) {
                             lines_after(array.slice(2));
                         }
                     } else {
@@ -2029,6 +2170,7 @@
                                 new_pos = last_len - from_last;
                             }
                             draw_cursor_line(last, {
+                                length: array.length,
                                 position: new_pos,
                                 last: true
                             });
@@ -2058,6 +2200,7 @@
                                 }
                             }
                             draw_cursor_line(current, {
+                                length: array.length,
                                 position: new_pos
                             });
                             lines_before(array.slice(0, line_index));
@@ -2070,7 +2213,10 @@
                     cursor.html('<span><span>&nbsp;</span></span>');
                     after.html('');
                 } else {
-                    draw_cursor_line(formatted, {position: pos});
+                    draw_cursor_line(formatted, {
+                        length: 1,
+                        position: pos
+                    });
                 }
                 var in_line = cursor_line.prevUntil('.prompt').length;
                 if (is_css_variables_supported) {
@@ -2162,22 +2308,6 @@
                 }
             };
         })();
-        // ---------------------------------------------------------------------
-        // :: Paste content to terminal using hidden textarea
-        // ---------------------------------------------------------------------
-        function paste() {
-            if (paste_count++ > 0) {
-                return;
-            }
-            if (self.isenabled()) {
-                //wait until Browser insert text to textarea
-                self.oneTime(100, function() {
-                    self.insert(clip.val());
-                    clip.val(command);
-                    fix_textarea();
-                });
-            }
-        }
         // ---------------------------------------------------------------------
         function fire_change_command() {
             if (is_function(settings.onCommandChange)) {
@@ -2321,7 +2451,6 @@
                     fix_textarea();
                 }
                 redraw();
-                fix_textarea();
                 fire_change_command();
                 return self;
             },
@@ -2461,6 +2590,29 @@
                 draw_prompt();
                 return self;
             },
+            invoke_key: function(shortcut) {
+                var keys = shortcut.toUpperCase().split('+');
+                var key = keys.pop();
+                var ctrl = keys.indexOf('CTRL') !== -1;
+                var shift = keys.indexOf('SHIFT') !== -1;
+                var alt = keys.indexOf('ALT') !== -1;
+                var meta = keys.indexOf('META') !== -1;
+                var e = $.Event("keydown", {
+                    ctrlKey: ctrl,
+                    shiftKey: shift,
+                    altKey: alt,
+                    metaKey: meta,
+                    which: reversed_keycodes[key],
+                    key: key
+                });
+                var doc = $(document.documentElement || window);
+                doc.trigger(e);
+                e = $.Event("keypress");
+                e.key = key;
+                e.which = e.keyCode = 0;
+                doc.trigger(e);
+                return self;
+            },
             enable: function() {
                 if (!enabled) {
                     enabled = true;
@@ -2519,6 +2671,8 @@
         if (settings.enabled === true) {
             self.enable();
         }
+        char_width = get_char_width();
+        num_chars = get_num_chars(char_width);
         if (!settings.history) {
             history.disable();
         }
@@ -2861,7 +3015,7 @@
     var mobile_re = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i;
     var tablet_re = /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i;
     var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*[^\\](\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?)/i;
-    var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
+    var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]\\]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]+)\]?/gi;
     var format_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
     var format_exist_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]/gi;
     var format_full_re = /^\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]$/gi;
@@ -3315,8 +3469,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.0.2',
-        date: 'Sat, 22 Dec 2018 15:04:13 +0000',
+        version: 'DEV',
+        date: 'Sat, 19 Jan 2019 12:18:31 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3496,7 +3650,8 @@
             }
             // ----------------------------------------------------------------
             function is_escape_bracket(i) {
-                return string[i] === '\\' && string[i + 1] === ']';
+                return string[i - 1] !== '\\' && string[i] === '\\' &&
+                    string[i + 1] === ']';
             }
             // ----------------------------------------------------------------
             function is_text(i) {
@@ -3510,6 +3665,7 @@
             var count = 0;
             var match;
             var space = -1;
+            var space_count = -1;
             var prev_space;
             var length = 0;
             var offset = 0;
@@ -3536,6 +3692,7 @@
                 if (is_space(i) && (not_formatting || opening)) {
                     if (space === -1 && prev_space !== i || space !== -1) {
                         space = i;
+                        space_count = count;
                     }
                 }
                 var braket = string[i].match(/[[\]]/);
@@ -3571,7 +3728,8 @@
                         length: length,
                         text: in_text,
                         size: offset + 1,
-                        space: space
+                        space: space,
+                        space_count: space_count
                     };
                     var ret = callback(data);
                     if (ret === false) {
@@ -3731,14 +3889,15 @@
                         (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
+                        // TODO: this need work
                         if (keep_words && data.space !== -1) {
                             // replace html entities with characters
-                            var stripped = text(line.slice(data.space));
+                            var stripped = text(line).slice(data.space_count);
                             // real length, not counting formatting
                             var text_len = stripped.length;
-                            var limit = data.index + length + 1;
-                            stripped = stripped.slice(0, limit);
-                            if (stripped.match(/\s|&nbsp;/) || limit > text_len) {
+                            var limit = data.count + length + 1;
+                            stripped = stripped.slice(0, limit).trim();
+                            if (stripped.match(/\s/) || limit < text_len) {
                                 can_break = true;
                             }
                         }
@@ -4036,18 +4195,6 @@
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
         format: function format(str, options) {
-            function safe_text(string) {
-                if (string.match(/\\]/)) {
-                    string = string.replace(/(\\+)]/g, function(_, slashes) {
-                        if (slashes.length % 2 === 1) {
-                            return ']';
-                        } else {
-                            return slashes.replace(/../, '\\');
-                        }
-                    });
-                }
-                return safe(string);
-            }
             var settings = $.extend({}, {
                 linksNoReferrer: false,
                 linksNoFollow: false,
@@ -4077,7 +4224,8 @@
                             if (text === '') {
                                 return ''; //'<span>&nbsp;</span>';
                             }
-                            text = safe_text(text);
+                            // inside formatting we need to unescape escaped slashes
+                            text = safe(text).replace(/\\\\/g, '\\');
                             var style_str = '';
                             if (style.indexOf('b') !== -1) {
                                 style_str += 'font-weight:bold;';
@@ -4165,7 +4313,7 @@
                             return result;
                         });
                     } else {
-                        text = safe_text(text);
+                        text = safe(text);
                         var extra = extra_css(text, options);
                         if (extra.length) {
                             text = wide_characters(text, options);
@@ -4653,31 +4801,50 @@
     }
     */
     // -----------------------------------------------------------------------
+    function terminal_ready(term) {
+        return !!(term.closest('body').length &&
+                  term.is(':visible') &&
+                  term.find('.prompt').length);
+    }
+    // -----------------------------------------------------------------------
     // :: Create fake terminal to calcualte the dimention of one character
     // :: this will make terminal work if terminal div is not added to the
     // :: DOM at init like with:
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
-    function get_char_size(div) {
-        var temp = $('<div class="terminal temp"><div class="terminal-output">' +
-                     '<div><div class="line" style="float: left"><span>&nbsp;</span>' +
-                     '</div></div></div></div>').appendTo('body');
-        temp.addClass(div.attr('class'));
-        if (div) {
-            var style = div.attr('style');
-            if (style) {
-                style = style.split(/\s*;\s*/).filter(function(s) {
-                    return !s.match(/display\s*:\s*none/i);
-                }).join(';');
-                temp.attr('style', style);
+    function get_char_size(term) {
+        var rect;
+        if (terminal_ready(term)) {
+            var $prompt = term.find('.prompt').clone().css({
+                visiblity: 'hidden',
+                position: 'absolute'
+            });
+            $prompt.appendTo(term.find('.cmd')).html('&nbsp;');
+            rect = $prompt[0].getBoundingClientRect();
+            $prompt.remove();
+        } else {
+            var temp = $('<div class="terminal temp"><div class="terminal-output">' +
+                         '<div><div class="line" style="float: left"><span>&nbsp;' +
+                         '</span></div></div></div></div>').appendTo('body');
+            temp.addClass(term.attr('class')).attr('id', term.attr('id'));
+            if (term) {
+                var style = term.attr('style');
+                if (style) {
+                    style = style.split(/\s*;\s*/).filter(function(s) {
+                        return !s.match(/display\s*:\s*none/i);
+                    }).join(';');
+                    temp.attr('style', style);
+                }
             }
+            rect = temp.find('.line')[0].getBoundingClientRect();
         }
-        var rect = temp.find('.line')[0].getBoundingClientRect();
         var result = {
             width: rect.width,
             height: rect.height
         };
-        temp.remove();
+        if (temp) {
+            temp.remove();
+        }
         return result;
     }
     // -----------------------------------------------------------------------
@@ -4731,8 +4898,8 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2018 Jakub Jankiewicz <http://jcubic' +
-        '.pl/me>';
+    var copyright = 'Copyright (c) 2011-2019 Jakub T. Jankiewicz ' +
+        '<http://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
     var reg = new RegExp(' {' + version_string.length + '}$');
@@ -4742,7 +4909,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2018 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2019 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         [
@@ -4843,6 +5010,7 @@
         keydown: $.noop,
         onAfterRedraw: $.noop,
         onEchoCommand: $.noop,
+        onPaste: $.noop,
         onFlush: $.noop,
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
@@ -7795,26 +7963,7 @@
             // :: invoke keydown shorcut
             // -------------------------------------------------------------
             invoke_key: function(shortcut) {
-                var keys = shortcut.toUpperCase().split('+');
-                var key = keys.pop();
-                var ctrl = keys.indexOf('CTRL') !== -1;
-                var shift = keys.indexOf('SHIFT') !== -1;
-                var alt = keys.indexOf('ALT') !== -1;
-                var meta = keys.indexOf('META') !== -1;
-                var e = $.Event("keydown", {
-                    ctrlKey: ctrl,
-                    shiftKey: shift,
-                    altKey: alt,
-                    metaKey: meta,
-                    which: reversed_keycodes[key],
-                    key: key
-                });
-                var doc = $(document.documentElement || window);
-                doc.trigger(e);
-                e = $.Event("keypress");
-                e.key = key;
-                e.which = e.keyCode = 0;
-                doc.trigger(e);
+                command_line.invoke_key(shortcut);
                 return self;
             },
             // -------------------------------------------------------------
@@ -7987,97 +8136,6 @@
                 }
             };
         }));
-        // for invoking shortcuts using terminal::keydown
-        // taken from https://github.com/cvan/keyboardevent-key-polyfill/
-        var keycodes = {
-            3: 'Cancel',
-            6: 'Help',
-            8: 'Backspace',
-            9: 'Tab',
-            12: 'Clear',
-            13: 'Enter',
-            16: 'Shift',
-            17: 'Control',
-            18: 'Alt',
-            19: 'Pause',
-            20: 'CapsLock',
-            27: 'Escape',
-            28: 'Convert',
-            29: 'NonConvert',
-            30: 'Accept',
-            31: 'ModeChange',
-            32: ' ',
-            33: 'PageUp',
-            34: 'PageDown',
-            35: 'End',
-            36: 'Home',
-            37: 'ArrowLeft',
-            38: 'ArrowUp',
-            39: 'ArrowRight',
-            40: 'ArrowDown',
-            41: 'Select',
-            42: 'Print',
-            43: 'Execute',
-            44: 'PrintScreen',
-            45: 'Insert',
-            46: 'Delete',
-            48: ['0', ')'],
-            49: ['1', '!'],
-            50: ['2', '@'],
-            51: ['3', '#'],
-            52: ['4', '$'],
-            53: ['5', '%'],
-            54: ['6', '^'],
-            55: ['7', '&'],
-            56: ['8', '*'],
-            57: ['9', '('],
-            91: 'OS',
-            93: 'ContextMenu',
-            144: 'NumLock',
-            145: 'ScrollLock',
-            181: 'VolumeMute',
-            182: 'VolumeDown',
-            183: 'VolumeUp',
-            186: [';', ':'],
-            187: ['=', '+'],
-            188: [',', '<'],
-            189: ['-', '_'],
-            190: ['.', '>'],
-            191: ['/', '?'],
-            192: ['`', '~'],
-            219: ['[', '{'],
-            220: ['\\', '|'],
-            221: [']', '}'],
-            222: ["'", '"'],
-            224: 'Meta',
-            225: 'AltGraph',
-            246: 'Attn',
-            247: 'CrSel',
-            248: 'ExSel',
-            249: 'EraseEof',
-            250: 'Play',
-            251: 'ZoomOut'
-        };
-        // Function keys (F1-24).
-        for (i = 1; i < 25; i++) {
-            keycodes[111 + i] = 'F' + i;
-        }
-        // Printable ASCII characters.
-        var letter = '';
-        for (i = 65; i < 91; i++) {
-            letter = String.fromCharCode(i);
-            keycodes[i] = [letter.toLowerCase(), letter.toUpperCase()];
-        }
-        var reversed_keycodes = {};
-        Object.keys(keycodes).forEach(function(which) {
-            if (keycodes[which] instanceof Array) {
-                keycodes[which].forEach(function(key) {
-                    reversed_keycodes[key.toUpperCase()] = which;
-                });
-            } else {
-                reversed_keycodes[keycodes[which].toUpperCase()] = which;
-            }
-        });
 
         // -----------------------------------------------------------------
         // INIT CODE
@@ -8146,6 +8204,41 @@
             function is_type(item, type) {
                 return item.type.indexOf(type) !== -1;
             }
+            function echo_image(image) {
+                self.echo('<img src="' + image + '"/>', {raw: true});
+            }
+            function data_uri(blob) {
+                var URL = window.URL || window.webkitURL;
+                return URL.createObjectURL(blob);
+            }
+            function echo(object, ignoreEvents) {
+                if (!ignoreEvents && is_function(settings.onPaste)) {
+                    var event = {
+                        target: self
+                    };
+                    if (typeof object === 'string') {
+                        event['text'] = object;
+                    } else if (object instanceof Blob) {
+                        event['image'] = data_uri(object);
+                    }
+                    var ret = fire_event('onPaste', [event]);
+                    if (ret && is_function(ret.then)) {
+                        return ret.then(function(ret) {
+                            echo(ret, true);
+                        });
+                    } else {
+                        echo(event.image || event.text, true);
+                    }
+                } else if (object instanceof Blob) {
+                    echo_image(data_uri(object));
+                } else if (typeof object === 'string') {
+                    if (object.match(/^data:/)) {
+                        echo_image(object);
+                    } else {
+                        self.insert(object);
+                    }
+                }
+            }
             if (e.clipboardData) {
                 if (self.enabled()) {
                     var items = e.clipboardData.items;
@@ -8153,16 +8246,14 @@
                         for (var i = 0; i < items.length; i++) {
                             if (is_type(items[i], 'image') && settings.pasteImage) {
                                 var blob = items[i].getAsFile();
-                                var URL = window.URL || window.webkitURL;
-                                var source = URL.createObjectURL(blob);
-                                self.echo('<img src="' + source + '"/>', {raw: true});
+                                echo(blob);
                             } else if (is_type(items[i], 'text/plain')) {
-                                items[i].getAsString(self.insert);
+                                items[i].getAsString(echo);
                             }
                         }
                     } else if (e.clipboardData.getData) {
                         var text = e.clipboardData.getData('text/plain');
-                        self.insert(text);
+                        echo(text);
                     }
                     return false;
                 }
@@ -8211,6 +8302,7 @@
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
                 caseSensitiveSearch: settings.caseSensitiveSearch,
+                onPaste: settings.onPaste,
                 width: '100%',
                 enabled: false,
                 char_width: char_size.width,

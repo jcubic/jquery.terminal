@@ -1,3 +1,22 @@
+## 2.1.0
+### Features
+* cursor glow animation
+* add invoke_key to cmd
+* onPaste event
+* integrate emoji into terminal
+### Bugfix
+* fix wrapping when command have `&` and `;` but it's not entity [#454](https://github.com/jcubic/jquery.terminal/issues/454)
+* fix wrapping when css style created using id [#454](https://github.com/jcubic/jquery.terminal/issues/454)
+* fix calculating number of characters on init in bare cmd
+* fix .inverted class [#457](https://github.com/jcubic/jquery.terminal/issues/457)
+* fix background color on selection (when using --color)
+* fix hidden bar cursor when command is empty
+* fix copy terminal output to clipboard (newlines issue) [#456](https://github.com/jcubic/jquery.terminal/issues/456)
+* remove weird space between lines of selection
+* fix jumping of cursor with underline animation
+* fix selection of command line
+* fix error color when --color is used
+
 ## 2.0.2
 ### Bugfix
 * fix ansi escapes in unix formatting for sequence `5;1;47m` that fixes rendering ANSI art

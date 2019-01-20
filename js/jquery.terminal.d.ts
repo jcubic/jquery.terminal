@@ -335,6 +335,7 @@ type CmdOptions = {
     holdTimeout?: number;
     holdRepeatTimeout?: number;
     repeatTimeoutKeys?: string[];
+    onPaste?: (this: Cmd, value: string) => TypeOrPromise<string | Blob> | void;
     width?: number;
     historyFilter?: JQueryTerminal.historyFilter;
     commands?: JQueryTerminal.commandsCmdFunction;
@@ -346,7 +347,7 @@ type CmdOptions = {
     tabindex?: number;
 }
 type CmdOption = "mask" | "caseSensitiveSearch" | "historySize" |  "prompt" | "enabled" |
-    "history" | "tabs" | "onPositionChange" |  "clickTimeout" |  "holdTimeout" |
+    "history" | "tabs" | "onPositionChange" |  "clickTimeout" |  "holdTimeout" | "onPaste" |
     "holdRepeatTimeout" |  "repeatTimeoutKeys" | "width" | "historyFilter" | "commands" |
     "char_width" | "onCommandChange" | "name" | "keypress" | "keydown";
 
@@ -373,6 +374,7 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     commands(fn: JQueryTerminal.commandsCmdFunction): Cmd;
     commands(): JQueryTerminal.commandsCmdFunction<void>;
     destroy(): Cmd;
+    invoke_key(shorcut: string): Cmd;
     prompt(prompt: JQueryTerminal.cmdPrompt): Cmd;
     prompt(last_render: true): string;
     prompt<T extends JQueryTerminal.cmdPrompt<void>>(): T;
@@ -410,7 +412,7 @@ type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabl
     "outputLimit" | "onAjaxError" | "pasteImage" | "scrollBottomOffset" | "wordAutocomplete" |
     "caseSensitiveAutocomplete" | "caseSensitiveSearch" | "clickTimeout" | "holdTimeout" |
     "holdRepeatTimeout" | "request" | "describe" | "onRPCError" | "doubleTab" | "completion" |
-    "onInit" | "onClear" | "onBlur" | "onFocus" | "onExit" | "onTerminalChange" | "onPush" |
+    "onInit" | "onClear" | "onBlur" | "onFocus" | "onExit" | "onTerminalChange" | "onPush" | "onPaste" |
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
     "repeatTimeoutKeys";
 
@@ -436,6 +438,7 @@ type TerminalOptions = {
     memory?: boolean;
     cancelableAjax?: boolean;
     processArguments?: boolean;
+    onPaste?: (this: JQueryTerminal, value: string) => TypeOrPromise<string | Blob> | void;
     onCommandChange?: (this: JQueryTerminal, command: string, term: JQueryTerminal) => void;
     onPositionChange?: (this: JQueryTerminal, position: number, display_position: number, term: JQueryTerminal) => void;
     linksNoReferrer?: boolean;

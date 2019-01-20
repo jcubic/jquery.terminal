@@ -9,7 +9,7 @@
  *
  * This is example of how to create custom formatter for jQuery Terminal
  *
- * Copyright (c) 2014-2018 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2014-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
@@ -478,7 +478,7 @@
                 colors = $.terminal.ansi_colors.normal;
             }
             if (typeof output_color !== 'undefined') {
-                if (_ex_color) {
+                if (output_color.match(/^#/)) {
                     color = output_color;
                 } else if (output_color === 'inherit') {
                     color = output_color;
@@ -487,7 +487,7 @@
                 }
             }
             if (typeof output_background !== 'undefined') {
-                if (_ex_background) {
+                if (output_background.match(/^#/)) { // already 8bit color #460
                     background = output_background;
                 } else if (output_background === 'transparent') {
                     background = output_background;
@@ -593,16 +593,24 @@
                             }
                             break;
                     }
-                } else if (settings.unixFormattingEscapeBrackets) {
-                    output.push($.terminal.escape_formatting(splitted[i]));
-                } else {
-                    output.push(splitted[i]);
+                } else if (splitted[i] !== '') {
+                    var text = splitted[i].replace(/\x1b\[[0-9;]*/g, '');
+                    if (settings.unixFormattingEscapeBrackets) {
+                        output.push($.terminal.escape_formatting(text));
+                    } else {
+                        output.push(text);
+                    }
                 }
-            }
+            } // for
             if (inside) {
                 output.push(']');
             }
-            result = output.join('');
+            result = $.terminal.format_split(output.join('')).map(function(str) {
+                if (str.match(/^\[\[/)) {
+                    return str.replace(/\\/g, '\\\\');
+                }
+                return str;
+            }).join('');
             if (options && typeof options.position === 'number') {
                 return [result, new_position];
             }

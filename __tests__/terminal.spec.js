@@ -898,6 +898,7 @@ describe('Terminal utils', function() {
                         ' tellus]'].join('\n');
             var formatting = /^\[\[bui;#fff;;;Lorem ipsum dolor sit amet, consectetur adipi\\nscing elit. Nulla sed dolor nisl, in suscipit justo. Donec a enim\\n et est porttitor semper at vitae augue. Proin at nulla at dui ma\\nttis mattis. Nam a volutpat ante. Aliquam consequat dui eu sem co\\nnvallis ullamcorper. Nulla suscipit, massa vitae suscipit ornare,\\n tellus\]/;
             $.terminal.split_equal(text, 100).forEach(function(line, i) {
+                console.log(line);
                 if (!line.match(formatting)) {
                     throw new Error("Line nr " + i + " " + line + " don't have correct " +
                                     "formatting");
@@ -3933,7 +3934,7 @@ describe('Terminal plugin', function() {
                 expect(term.signature()).toEqual('');
             });
             it('should return proper max length of signature', function() {
-                var numbers = {20: 20, 36: 30, 60: 52, 70: 64, 100: 75};
+                var numbers = {20: 20, 36: 33, 60: 55, 70: 65, 100: 75};
                 Object.keys(numbers).forEach(function(numChars) {
                     var length = numbers[numChars];
                     term.option('numChars', numChars);

@@ -4,14 +4,14 @@
  __ / / // / // / _  / _/ // / / / _  / _/     / /  \/ / _ \/ /
 /  / / // / // / ___/ // // / / / ___/ // / / / / /\  / // / /__
 \___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/_/_/  \/\__\_\___/
-         \/          /____/                      version 2.0.2
+         \/          /____/                      version DEV
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-2.0.2-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-2.0.2-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&cf06f5d4999b9c75638f378d988c274d4e9c1caa)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&067b246650536ff07ffb621580438c60)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
+[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&a05c6685ef8c77bc9091794eda7889acefbc9d2f)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&c3a4cf2a558e9f9e67efe1d85a7152c3)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -75,31 +75,24 @@ Include jQuery library, you can use cdn from http://jquery.com/download/
 ```
 
 
-Then include js/jquery.terminal-2.0.2.min.js and css/jquery.terminal-2.0.2.min.css
+Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.min.css
 
 You can grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.0.2/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.0.2/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.0.2/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.0.2/css/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/css/jquery.terminal.min.css">
 ```
 
-If you always want latest version, you can grab the files directly from github using rawgit.com (that service grab the files from github and use propert MIME type so you can use it in your page, you can also grab from devel branch):
-
-```html
-<script src="https://cdn.rawgit.com/jcubic/jquery.terminal/master/js/jquery.terminal.min.js"></script>
-<link href="https://cdn.rawgit.com/jcubic/jquery.terminal/master/css/jquery.terminal.min.css" rel="stylesheet"/>
-```
-
-or get it from [unpkg](https://unpkg.com/) without specifying version, it will redirect
-to the latest version:
+If you always want latest version, you can get it from [unpkg](https://unpkg.com/) without specifying version,
+it will redirect to the latest ones:
 
 
 ```html
@@ -107,12 +100,43 @@ to the latest version:
 <link href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
+#### Bleeding Edge Version
 
-**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key).
+If you want to test bleeding edge, development version of jQuery Terminal. You can use those files:
+
+```html
+<script src="https://cdn.rawgit.com/jcubic/jquery.terminal/devel/js/jquery.terminal.min.js"></script>
+<link href="https://cdn.rawgit.com/jcubic/jquery.terminal/devel/css/jquery.terminal.min.css" rel="stylesheet"/>
+```
+
+but the service will be [shutdown in October 2019](https://rawgit.com/), and it don't accept new files. Great things
+about rawgit that (at least when you don't put cdn subdomain) you can get lastest version very fast after the commit
+is pushed on GitHub (sometimes you need to add no cache query string, anything unique, for faster refresh).
+
+there is also alternative from jsdelivr:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js"></script>
+<link href="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/css/jquery.terminal.min.css" rel="stylesheet"/>
+```
+
+but it's not refreshed as fast as rawgit does, because it's CDN and need to be propagated to different servers.
+
+#### Keyboard key polyfill
+
+**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key) (as you can see in chart it's required by Android so it's good to add).
 
 ```html
 <script src="https://cdn.rawgit.com/inexorabletash/polyfill/master/keyboard.js"></script>
 ```
+
+or
+
+```html
+<script src="https://unpkg.com/js-polyfills@0.x.x/keyboard.js"></script>
+```
+
+#### Command Line
 
 
 You can also install jQuery Terminal using command line, from [bower repository](https://bower.io/):
@@ -185,25 +209,32 @@ $('#term_demo').terminal('service.php', {login: true});
 ```
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
-[full documentation](http://terminal.jcubic.pl/api_reference.php).
+[Full Documentation](http://terminal.jcubic.pl/api_reference.php) or
+[Getting Started Guide in Wiki](https://github.com/jcubic/jquery.terminal/wiki/Getting-Started).
 
 ### Security
 
-Because of security in version 1.20.0 links with protocols different then ftp or http(s) (it was possible to enter
-javascript protocol, that could lead to XSS if author of hte app echo user input and save it in DB) was turn off
-by default. To enable it, you need to use `anyLinks: true` option.
+Because of security in version 1.20.0 links with protocols different then ftp or http(s) (it was
+possible to enter javascript protocol, that could lead to XSS if author of hte app echo user input
+and save it in DB) was turn off by default. To enable it, you need to use `anyLinks: true` option.
 
-In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was also disabled
-by default because attacker (depending on your application) could execute `terminal::echo` with raw option to enter
-any html and execute any javascript. To enable this feature from this version you need to use `invokeMethods: true`
-option.
+In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was
+also disabled by default because attacker (depending on your application) could execute
+`terminal::echo` with raw option to enter any html and execute any javascript. To enable this
+feature from this version you need to use `invokeMethods: true` option.
 
-The features are safe to enable, if you don't save user input in DB and don't echo it back to different users
-(like with chat application). It's also safe if you escape formatting before you echo stuff.
+The features are safe to enable, if you don't save user input in DB and don't echo it back to
+different users (like with chat application). It's also safe if you escape formatting before you
+echo stuff.
 
-If you don't save user input in DB but allow to echo back what user types and have enabled `execHash` options,
-you may have reflected XSS vulnerability if you enable this features. If you escape formatting this options are
-also safe.
+If you don't save user input in DB but allow to echo back what user types and have enabled
+`execHash` options, you may have reflected XSS vulnerability if you enable this features. If you
+escape formatting this options are also safe.
+
+**NOTE**: To disable exec if you have `execHash` (or echo stuff from users with `invokeMethods: true`),
+you can also set option `{exec: false}` to your `echo` call and use it only when you get
+values from server (not from DB indireclty from users). If you do this you will be able to echo stuff
+from users and execute terminal methods from server (this feature is mostly done just for that).
 
 ### Contributors
 
@@ -229,4 +260,4 @@ If you want to contrubite read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
-Copyright (c) 2011-2018 [Jakub Jankiewicz](http://jcubic.pl/jakub-jankiewicz)
+Copyright (c) 2011-2019 [Jakub Jankiewicz](https://jcubic.pl/jakub-jankiewicz)
