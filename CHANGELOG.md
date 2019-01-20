@@ -16,6 +16,7 @@
 * fix jumping of cursor with underline animation
 * fix selection of command line
 * fix error color when --color is used
+* fix ANSI art issue [#460](https://github.com/jcubic/jquery.terminal/issues/460)
 
 ## 2.0.2
 ### Bugfix
