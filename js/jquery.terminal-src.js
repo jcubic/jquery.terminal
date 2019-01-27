@@ -4833,7 +4833,7 @@
             height: rect.height
         };
         if (temp) {
-           // temp.remove();
+            temp.remove();
         }
         return result;
     }
