@@ -37,17 +37,6 @@
  *
  * Date: {{DATE}}
  */
-
-/* TODO:
- *
- * Debug interpreters names in LocalStorage
- *
- * TEST: login + promises/exec
- *       json-rpc/object + promises
- *
- * NOTE: json-rpc don't need promises and delegate resume/pause because only
- *       exec can call it and exec call interpreter that work with resume/pause
- */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
          module, require, define, setInterval, clearInterval, Blob */
@@ -4823,9 +4812,10 @@
             rect = $prompt[0].getBoundingClientRect();
             $prompt.remove();
         } else {
-            var temp = $('<div class="terminal temp"><div class="terminal-output">' +
-                         '<div><div class="line" style="float: left"><span>&nbsp;' +
-                         '</span></div></div></div></div>').appendTo('body');
+            var temp = $('<div class="terminal temp"><div class="terminal-wrapper">' +
+                         '<div class="terminal-output"><div><div class="line" style' +
+                         '="float: left"><span>&nbsp;</span></div></div></div></div>')
+                .appendTo('body');
             temp.addClass(term.attr('class')).attr('id', term.attr('id'));
             if (term) {
                 var style = term.attr('style');
@@ -4843,7 +4833,7 @@
             height: rect.height
         };
         if (temp) {
-            temp.remove();
+           // temp.remove();
         }
         return result;
     }
@@ -6523,53 +6513,6 @@
         if (self.data('terminal')) {
             return self.data('terminal');
         }
-        if (self.length === 0) {
-            var msg = sprintf(strings().invalidSelector);
-            throw new $.terminal.Exception(msg);
-        }
-        // var names = []; // stack if interpreter names
-        var prev_command; // used for name on the terminal if not defined
-        var tab_count = 0; // for tab completion
-        var output; // .terminal-output jquery object
-        var terminal_id = terminals.length();
-        var num_chars; // numer of chars in line
-        var num_rows; // number of lines that fit without scrollbar
-        var command; // for tab completion
-        var logins = new Stack(); // stack of logins
-        var command_queue = new DelayQueue();
-        var init_queue = new DelayQueue();
-        var when_ready = ready(init_queue);
-        var char_size = get_char_size(self);
-        var cmd_ready = ready(command_queue);
-        var in_login = false;// some Methods should not be called when login
-        // TODO: Try to use mutex like counter for pause/resume
-        var onPause = $.noop;// used to indicate that user call pause onInit
-        var old_width, old_height;
-        var delayed_commands = []; // used when exec commands while paused
-        var settings = $.extend(
-            {},
-            $.terminal.defaults,
-            {
-                name: self.selector,
-                exit: !!(options && options.login || !options)
-            },
-            options || {}
-        );
-        // so it's the same as in TypeScript definition for options
-        delete settings.formatters;
-        // used to throw error when calling methods on destroyed terminal
-        var defunct = false;
-        var lines = [];
-        var storage = new StorageHelper(settings.memory);
-        var enabled = settings.enabled;
-        var frozen = false;
-        var paused = false;
-        var autologin = true; // set to false if onBeforeLogin return false
-        var interpreters;
-        var command_line;
-        var old_enabled;
-        var visibility_observer;
-        var mutation_observer;
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
@@ -8136,19 +8079,65 @@
                 }
             };
         }));
-
         // -----------------------------------------------------------------
         // INIT CODE
         // -----------------------------------------------------------------
+        if (self.length === 0) {
+            var msg = sprintf(strings().invalidSelector);
+            throw new $.terminal.Exception(msg);
+        }
+        // var names = []; // stack if interpreter names
+        var prev_command; // used for name on the terminal if not defined
+        var tab_count = 0; // for tab completion
+        var output; // .terminal-output jquery object
+        var terminal_id = terminals.length();
+        var num_chars; // numer of chars in line
+        var num_rows; // number of lines that fit without scrollbar
+        var command; // for tab completion
+        var logins = new Stack(); // stack of logins
+        var command_queue = new DelayQueue();
+        var init_queue = new DelayQueue();
+        var when_ready = ready(init_queue);
+        var cmd_ready = ready(command_queue);
+        var in_login = false;// some Methods should not be called when login
+        // TODO: Try to use mutex like counter for pause/resume
+        var onPause = $.noop;// used to indicate that user call pause onInit
+        var old_width, old_height;
+        var delayed_commands = []; // used when exec commands while paused
+        var settings = $.extend(
+            {},
+            $.terminal.defaults,
+            {
+                name: self.selector,
+                exit: !!(options && options.login || !options)
+            },
+            options || {}
+        );
+        if (typeof settings.width === 'number') {
+            self.width(settings.width);
+        }
+        if (typeof settings.height === 'number') {
+            self.height(settings.height);
+        }
+        var char_size = get_char_size(self);
+        // so it's the same as in TypeScript definition for options
+        delete settings.formatters;
+        // used to throw error when calling methods on destroyed terminal
+        var defunct = false;
+        var lines = [];
+        var storage = new StorageHelper(settings.memory);
+        var enabled = settings.enabled;
+        var frozen = false;
+        var paused = false;
+        var autologin = true; // set to false if onBeforeLogin return false
+        var interpreters;
+        var command_line;
+        var old_enabled;
+        var visibility_observer;
+        var mutation_observer;
         // backward compatibility
         if (settings.ignoreSystemDescribe === true) {
             settings.describe = false;
-        }
-        if (settings.width) {
-            self.width(settings.width);
-        }
-        if (settings.height) {
-            self.height(settings.height);
         }
         // register ajaxSend for cancel requests on CTRL+D
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
