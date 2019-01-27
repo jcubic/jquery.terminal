@@ -9,21 +9,12 @@ DATE=`date -uR`
 GIT=git
 BRANCH=`git branch | grep '^*' | sed 's/* //'`
 
-ifdef SYSTEMROOT
-  UGLIFY=.\node_modules\.bin\uglifyjs
-  JSONLINT=.\node_modules\.bin\jsonlint
-  JEST=.\node_modules\.bin\jest
-  CSSNANO=node .\scripts\cssnano.js
-  ESLINT=.\node_modules\.bin\eslint
-  TSC=.\node_modules\.bin\tsc
-else
   UGLIFY=./node_modules/.bin/uglifyjs
   JSONLINT=./node_modules/.bin/jsonlint
   JEST=./node_modules/.bin/jest
   CSSNANO=node ./scripts/cssnano.js
   ESLINT=./node_modules/.bin/eslint
   TSC=./node_modules/.bin/tsc
-endif
 SPEC_CHECKSUM=`md5sum __tests__/terminal.spec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
@@ -89,10 +80,10 @@ www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
 css/emoji.css: mkemoji
-	./mkemoji > css/emoji.css
+	./mkemoji $(VERSION) > css/emoji.css
 
 emoji:
-	./mkemoji > css/emoji.css
+	./mkemoji $(VERSION) > css/emoji.css
 
 test:
 	$(JEST) --coverage --testMatch '**/__tests__/*.spec.js'
