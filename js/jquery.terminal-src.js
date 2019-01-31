@@ -8386,15 +8386,6 @@
                     }
                     var ignore_elements = '.terminal-output textarea,' +
                         '.terminal-output input';
-                    // hack for weird jumping on Chrome/windows #402
-                    var scroll_top;
-                    self.find('.cmd textarea').on('focus', function() {
-                        if (typeof scroll_top !== 'undefined') {
-                            self.scrollTop(scroll_top);
-                        }
-                    }).on('blur', function() {
-                        scroll_top = self.scrollTop();
-                    });
                     self.mousedown(function(e) {
                         if (!scrollbar_event(e, fill)) {
                             $target = $(e.target);
