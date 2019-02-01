@@ -5,7 +5,7 @@
 
 ## 2.1.1
 ### Bugfix
-* don't apply emoji css inside .raw class (addded by `echo('string', {raw: true})`) [#461](https://github.com/jcubic/jquery.terminal/issues/461)
+* don't apply emoji css inside .raw class (added by `echo('string', {raw: true})`) [#461](https://github.com/jcubic/jquery.terminal/issues/461)
 * fix wrapping when using font-family wildcard css rule
 
 ## 2.1.0
