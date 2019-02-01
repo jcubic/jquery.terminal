@@ -1,3 +1,8 @@
+## 2.1.2
+### Bugfix
+* remove bugfix for [#402](https://github.com/jcubic/jquery.terminal/issues/402) that should never land in the code
+* fix removing temp terminal (used to calculate char size)
+
 ## 2.1.1
 ### Bugfix
 * don't apply emoji css inside .raw class (addded by `echo('string', {raw: true})`) [#461](https://github.com/jcubic/jquery.terminal/issues/461)
