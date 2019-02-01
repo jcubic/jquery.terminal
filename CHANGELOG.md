@@ -1,6 +1,7 @@
 ## 2.1.2
 ### Bugfix
 * remove bugfix for [#402](https://github.com/jcubic/jquery.terminal/issues/402) that should never land in the code
+* fix removing temp terminal (used to calculate char size)
 
 ## 2.1.1
 ### Bugfix
