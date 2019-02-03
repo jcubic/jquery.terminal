@@ -1,3 +1,7 @@
+## 2.2.0
+### Features
+* Handle unclosed entities [#462](https://github.com/jcubic/jquery.terminal/issues/462)
+
 ## 2.1.2
 ### Bugfix
 * remove bugfix for [#402](https://github.com/jcubic/jquery.terminal/issues/402) that should never land in the code

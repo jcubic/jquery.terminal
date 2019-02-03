@@ -3815,10 +3815,10 @@
         },
         // ---------------------------------------------------------------------
         // :: add format text as 5th paramter to formatting it's used for
-        // :: data attribute in format function
+        // :: data attribute in format function - and fix unclosed &
         // ---------------------------------------------------------------------
         normalize: function normalize(string) {
-            return string.replace(format_re, function(_, format, text) {
+            string = string.replace(format_re, function(_, format, text) {
                 if (text === '') {
                     return '';
                 }
@@ -3846,6 +3846,7 @@
                 // those using html entity equvalent
                 return '[[' + format + semicolons + safe(text) + ']' + text + ']';
             });
+            return $.terminal.amp(string);
         },
         // ---------------------------------------------------------------------
         // :: split text into lines with equal length so each line can be
@@ -3940,7 +3941,7 @@
         // :: Escape & that's not part of entity
         // ---------------------------------------------------------------------
         amp: function amp(str) {
-            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
+            return str.replace(/&(?!#[0-9]+;|#x[0-9a-f]+;|[a-z]+;)/gi, '&amp;');
         },
         // ---------------------------------------------------------------------
         // :: Encode formating as html for insertion into DOM

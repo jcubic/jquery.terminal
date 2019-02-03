@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.1.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 01 Feb 2019 12:14:30 +0000
+ * Date: Sun, 03 Feb 2019 10:47:01 +0000
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
@@ -3458,8 +3458,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.1.2',
-        date: 'Fri, 01 Feb 2019 12:14:30 +0000',
+        version: 'DEV',
+        date: 'Sun, 03 Feb 2019 10:47:01 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3815,10 +3815,10 @@
         },
         // ---------------------------------------------------------------------
         // :: add format text as 5th paramter to formatting it's used for
-        // :: data attribute in format function
+        // :: data attribute in format function - and fix unclosed &
         // ---------------------------------------------------------------------
         normalize: function normalize(string) {
-            return string.replace(format_re, function(_, format, text) {
+            string = string.replace(format_re, function(_, format, text) {
                 if (text === '') {
                     return '';
                 }
@@ -3846,6 +3846,7 @@
                 // those using html entity equvalent
                 return '[[' + format + semicolons + safe(text) + ']' + text + ']';
             });
+            return $.terminal.amp(string);
         },
         // ---------------------------------------------------------------------
         // :: split text into lines with equal length so each line can be
@@ -3940,7 +3941,7 @@
         // :: Escape & that's not part of entity
         // ---------------------------------------------------------------------
         amp: function amp(str) {
-            return str.replace(/&(?!#[0-9]+;|[a-zA-Z]+;)/g, '&amp;');
+            return str.replace(/&(?!#[0-9]+;|#x[0-9a-f]+;|[a-z]+;)/gi, '&amp;');
         },
         // ---------------------------------------------------------------------
         // :: Encode formating as html for insertion into DOM
