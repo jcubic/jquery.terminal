@@ -5701,7 +5701,7 @@
                     return str.replace(format_parts_re, format);
                 } else {
                     return str.replace(email_re, '[[!;;]$1]').
-                            replace(url_nf_re, '[[!;;]$1]');
+                        replace(url_nf_re, '[[!;;]$1]');
                 }
             }).join('');
         }
