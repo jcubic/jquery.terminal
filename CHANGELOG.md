@@ -1,6 +1,8 @@
 ## 2.2.0
 ### Features
 * Handle unclosed entities [#462](https://github.com/jcubic/jquery.terminal/issues/462)
+### Bugfix
+* don't complete default commands as argument [#465](https://github.com/jcubic/jquery.terminal/issues/465)
 
 ## 2.1.2
 ### Bugfix

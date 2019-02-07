@@ -813,6 +813,7 @@
                 var first = true;
                 if (window.ResizeObserver) {
                     resizer = new ResizeObserver(function() {
+                        console.log(arguments);
                         if (!first) {
                             resize_handler();
                         }
@@ -6808,6 +6809,7 @@
                 var sensitive = options.caseSensitive;
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
+                var command = self.before_cursor(false);
                 var string = self.before_cursor(options.word).replace(/\\"/g, '"');
                 var quote = false;
                 if (options.word) {
@@ -6822,11 +6824,14 @@
                 }
                 // local copy
                 commands = commands.slice();
-                if (settings.clear && $.inArray('clear', commands) === -1) {
-                    commands.push('clear');
-                }
-                if (settings.exit && $.inArray('exit', commands) === -1) {
-                    commands.push('exit');
+                // default commands should not match for arguments
+                if (!command.match(/\s/)) {
+                    if (settings.clear && $.inArray('clear', commands) === -1) {
+                        commands.push('clear');
+                    }
+                    if (settings.exit && $.inArray('exit', commands) === -1) {
+                        commands.push('exit');
+                    }
                 }
                 if (tab_count % 2 === 0) {
                     command = self.before_cursor(options.word);
