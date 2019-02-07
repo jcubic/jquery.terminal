@@ -3,6 +3,7 @@
 * Handle unclosed entities [#462](https://github.com/jcubic/jquery.terminal/issues/462)
 ### Bugfix
 * don't complete default commands as argument [#465](https://github.com/jcubic/jquery.terminal/issues/465)
+* don't show links in echo command + format links inside formatting [#464](https://github.com/jcubic/jquery.terminal/issues/464)
 
 ## 2.1.2
 ### Bugfix

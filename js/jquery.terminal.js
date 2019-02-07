@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 07 Feb 2019 16:06:55 +0000
+ * Date: Thu, 07 Feb 2019 17:40:21 +0000
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
@@ -813,7 +813,6 @@
                 var first = true;
                 if (window.ResizeObserver) {
                     resizer = new ResizeObserver(function() {
-                        console.log(arguments);
                         if (!first) {
                             resize_handler();
                         }
@@ -3013,6 +3012,8 @@
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var url_nf_re = /\b(?![^\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
+    var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)$/gi;
+    var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
     var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
     var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
     var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
@@ -3460,7 +3461,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 07 Feb 2019 16:06:55 +0000',
+        date: 'Thu, 07 Feb 2019 17:40:21 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4191,6 +4192,100 @@
                 linksNoFollow: false,
                 anyLinks: false
             }, options || {});
+            function format(s, style, color, background, _class, data_text, text) {
+                if (text === '') {
+                    return ''; //'<span>&nbsp;</span>';
+                }
+                // inside formatting we need to unescape escaped slashes
+                text = safe(text).replace(/\\\\/g, '\\');
+                var style_str = '';
+                if (style.indexOf('b') !== -1) {
+                    style_str += 'font-weight:bold;';
+                }
+                var text_decoration = [];
+                if (style.indexOf('u') !== -1) {
+                    text_decoration.push('underline');
+                }
+                if (style.indexOf('s') !== -1) {
+                    text_decoration.push('line-through');
+                }
+                if (style.indexOf('o') !== -1) {
+                    text_decoration.push('overline');
+                }
+                if (text_decoration.length) {
+                    style_str += 'text-decoration:' +
+                        text_decoration.join(' ') + ';';
+                }
+                if (style.indexOf('i') !== -1) {
+                    style_str += 'font-style:italic;';
+                }
+                if ($.terminal.valid_color(color)) {
+                    style_str += 'color:' + color + ';' +
+                        '--color:' + color + ';';
+                    if (style.indexOf('!') !== -1) {
+                        style_str += '--link-color:' + color + ';';
+                    }
+                    if (style.indexOf('g') !== -1) {
+                        style_str += 'text-shadow:0 0 5px ' + color + ';';
+                    }
+                }
+                if ($.terminal.valid_color(background)) {
+                    style_str += 'background-color:' + background + ';';
+                }
+                var data;
+                if (data_text === '') {
+                    data = text;
+                } else {
+                    data = data_text.replace(/&#93;/g, ']')
+                        .replace(/>/g, '&gt;').replace(/</g, '&lt;');
+                }
+                var extra = extra_css(text, options);
+                if (extra) {
+                    text = wide_characters(text, options);
+                    style_str += extra;
+                }
+                var result;
+                if (style.indexOf('!') !== -1) {
+                    if (data.match(email_re)) {
+                        result = '<a href="mailto:' + data + '"';
+                    } else {
+                        if (!settings.anyLinks &&
+                            !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
+                            data = '';
+                        }
+                        result = '<a target="_blank"';
+                        if (data) {
+                            result += ' href="' + data + '"';
+                        }
+                        var rel = ["noopener"];
+                        if (settings.linksNoReferrer) {
+                            rel.unshift("noreferrer");
+                        }
+                        if (settings.linksNoFollow) {
+                            rel.unshift("nofollow");
+                        }
+                        result += ' rel="' + rel.join(' ') + '"';
+                    }
+                    // make focus to terminal textarea that will enable
+                    // terminal when pressing tab and terminal is disabled
+                    result += ' tabindex="1000"';
+                } else {
+                    result = '<span';
+                }
+                if (style_str !== '') {
+                    result += ' style="' + style_str + '"';
+                }
+                if (_class !== '') {
+                    result += ' class="' + _class + '"';
+                }
+                if (style.indexOf('!') !== -1) {
+                    result += '>' + text + '</a>';
+                } else {
+                    result += ' data-text="' + data.replace(/"/g, '&quote;') + '">' +
+                        text + '</span>';
+                }
+                return result;
+            }
             if (typeof str === 'string') {
                 // support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
                 var splitted = $.terminal.format_split(str);
@@ -4203,106 +4298,7 @@
                         text = text.replace(/\[\[[^\]]+\]/, function(text) {
                             return text.replace(/&nbsp;/g, ' ');
                         });
-                        return text.replace(format_parts_re, function(
-                            s,
-                            style,
-                            color,
-                            background,
-                            _class,
-                            data_text,
-                            text
-                        ) {
-                            if (text === '') {
-                                return ''; //'<span>&nbsp;</span>';
-                            }
-                            // inside formatting we need to unescape escaped slashes
-                            text = safe(text).replace(/\\\\/g, '\\');
-                            var style_str = '';
-                            if (style.indexOf('b') !== -1) {
-                                style_str += 'font-weight:bold;';
-                            }
-                            var text_decoration = [];
-                            if (style.indexOf('u') !== -1) {
-                                text_decoration.push('underline');
-                            }
-                            if (style.indexOf('s') !== -1) {
-                                text_decoration.push('line-through');
-                            }
-                            if (style.indexOf('o') !== -1) {
-                                text_decoration.push('overline');
-                            }
-                            if (text_decoration.length) {
-                                style_str += 'text-decoration:' +
-                                    text_decoration.join(' ') + ';';
-                            }
-                            if (style.indexOf('i') !== -1) {
-                                style_str += 'font-style:italic;';
-                            }
-                            if ($.terminal.valid_color(color)) {
-                                style_str += 'color:' + color + ';' +
-                                    '--color:' + color + ';';
-                                if (style.indexOf('g') !== -1) {
-                                    style_str += 'text-shadow:0 0 5px ' + color + ';';
-                                }
-                            }
-                            if ($.terminal.valid_color(background)) {
-                                style_str += 'background-color:' + background + ';';
-                            }
-                            var data;
-                            if (data_text === '') {
-                                data = text;
-                            } else {
-                                data = data_text.replace(/&#93;/g, ']')
-                                    .replace(/>/g, '&gt;').replace(/</g, '&lt;');
-                            }
-                            var extra = extra_css(text, options);
-                            if (extra) {
-                                text = wide_characters(text, options);
-                                style_str += extra;
-                            }
-                            var result;
-                            if (style.indexOf('!') !== -1) {
-                                if (data.match(email_re)) {
-                                    result = '<a href="mailto:' + data + '"';
-                                } else {
-                                    if (!settings.anyLinks &&
-                                        !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
-                                        data = '';
-                                    }
-                                    result = '<a target="_blank"';
-                                    if (data) {
-                                        result += ' href="' + data + '"';
-                                    }
-                                    var rel = ["noopener"];
-                                    if (settings.linksNoReferrer) {
-                                        rel.unshift("noreferrer");
-                                    }
-                                    if (settings.linksNoFollow) {
-                                        rel.unshift("nofollow");
-                                    }
-                                    result += ' rel="' + rel.join(' ') + '"';
-                                }
-                                // make focus to terminal textarea that will enable
-                                // terminal when pressing tab and terminal is disabled
-                                result += ' tabindex="1000"';
-                            } else {
-                                result = '<span';
-                            }
-                            if (style_str !== '') {
-                                result += ' style="' + style_str + '"';
-                            }
-                            if (_class !== '') {
-                                result += ' class="' + _class + '"';
-                            }
-                            if (style.indexOf('!') !== -1) {
-                                result += '>' + text + '</a>';
-                            } else {
-                                result += ' data-text="' +
-                                    data.replace(/"/g, '&quote;') + '">' +
-                                    text + '</span>';
-                            }
-                            return result;
-                        });
+                        return text.replace(format_parts_re, format);
                     } else {
                         text = safe(text);
                         var extra = extra_css(text, options);
@@ -5668,13 +5664,56 @@
             });
         }
         // ---------------------------------------------------------------------
+        function links(string) {
+            function format(_, style, color, background, _class, data, text) {
+                function formatting(s, text) {
+                    return '[[' + [
+                        style + (s || ''),
+                        color,
+                        background,
+                        _class,
+                        data || text
+                    ].join(';') + ']';
+                }
+                function escaped(_) {
+                    return ']' + formatting('!', _) + _ + ']' + formatting();
+                }
+                if (!style.match(/!/)) {
+                    if (text.match(email_full_re) || text.match(url_full_re)) {
+                        return formatting('!', text) + text + ']';
+                    } else if (text.match(email_re) || text.match(url_nf_re)) {
+                        var output = text.replace(email_re, escaped)
+                            .replace(url_nf_re, escaped);
+                        return formatting('', data) + output + ']';
+                    }
+                }
+                return _;
+            }
+            if (!(string.match(email_re) || string.match(url_nf_re))) {
+                return string;
+            }
+            if (!$.terminal.have_formatting(string)) {
+                return string.replace(email_re, '[[!;;]$1]').
+                    replace(url_nf_re, '[[!;;]$1]');
+            }
+            return $.terminal.format_split(string).map(function(str) {
+                if ($.terminal.is_formatting(str)) {
+                    return str.replace(format_parts_re, format);
+                } else {
+                    return str.replace(email_re, '[[!;;]$1]').
+                            replace(url_nf_re, '[[!;;]$1]');
+                }
+            }).join('');
+        }
+        // ---------------------------------------------------------------------
         function process_line(line) {
             // prevent exception in display exception
             try {
                 var line_settings = $.extend({
                     exec: true,
                     raw: false,
-                    finalize: $.noop
+                    finalize: $.noop,
+                    convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string;
                 var arg = line.string;
@@ -5700,10 +5739,6 @@
                     // string can be empty after removing extended commands
                     if (string !== '') {
                         if (!line_settings.raw) {
-                            if (settings.convertLinks) {
-                                string = string.replace(email_re, '[[!;;]$1]').
-                                    replace(url_nf_re, '[[!;;]$1]');
-                            }
                             if (line_settings.formatters) {
                                 try {
                                     string = $.terminal.apply_formatters(
@@ -5739,6 +5774,9 @@
                                     return string;
                                 }
                             }).join('');
+                            if (line_settings.convertLinks) {
+                                string = links(string);
+                            }
                             if (string !== '') {
                                 string = crlf($.terminal.normalize(string));
                                 string = $.terminal.encode(string, {
@@ -5894,6 +5932,7 @@
             if (typeof command === 'undefined') {
                 command = self.get_command();
             }
+            // true will return last rendered string
             var prompt = command_line.prompt(true);
             var mask = command_line.mask();
             switch (typeof mask) {
@@ -5909,25 +5948,13 @@
                     break;
             }
             var options = {
+                convertLinks: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('command'));
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
-            if (is_function(prompt)) {
-                var ret = prompt(function(string) {
-                    self.echo(string + command, options);
-                });
-                if (ret && is_function(ret.then)) {
-                    ret.then(function(string) {
-                        if (typeof string === 'string') {
-                            self.echo(string + command, options);
-                        }
-                    });
-                }
-            } else {
-                self.echo(prompt + command, options);
-            }
+            self.echo(prompt + command, options);
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
@@ -6809,7 +6836,6 @@
                 var sensitive = options.caseSensitive;
                 // cursor can be in the middle of the command
                 // so we need to get the text before the cursor
-                var command = self.before_cursor(false);
                 var string = self.before_cursor(options.word).replace(/\\"/g, '"');
                 var quote = false;
                 if (options.word) {
@@ -6825,7 +6851,7 @@
                 // local copy
                 commands = commands.slice();
                 // default commands should not match for arguments
-                if (!command.match(/\s/)) {
+                if (!self.before_cursor(false).match(/\s/)) {
                     if (settings.clear && $.inArray('clear', commands) === -1) {
                         commands.push('clear');
                     }
