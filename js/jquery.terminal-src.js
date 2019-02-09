@@ -7894,6 +7894,8 @@
                     var current = interpreters.pop();
                     top = interpreters.top();
                     prepare_top_interpreter();
+                    // restore mask
+                    self.set_mask(top.mask);
                     if (!silent) {
                         fire_event('onPop', [current, top]);
                     }
@@ -7909,8 +7911,6 @@
                             display_exception(e, 'onExit');
                         }
                     }
-                    // restore mask
-                    self.set_mask(top.mask);
                 }
                 return self;
             },

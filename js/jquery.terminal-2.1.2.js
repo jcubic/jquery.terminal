@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 07 Feb 2019 18:01:28 +0000
+ * Date: Sat, 09 Feb 2019 17:21:48 +0000
  */
 /* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
          setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
@@ -3461,7 +3461,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 07 Feb 2019 18:01:28 +0000',
+        date: 'Sat, 09 Feb 2019 17:21:48 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7894,6 +7894,8 @@
                     var current = interpreters.pop();
                     top = interpreters.top();
                     prepare_top_interpreter();
+                    // restore mask
+                    self.set_mask(top.mask);
                     if (!silent) {
                         fire_event('onPop', [current, top]);
                     }
@@ -7909,8 +7911,6 @@
                             display_exception(e, 'onExit');
                         }
                     }
-                    // restore mask
-                    self.set_mask(top.mask);
                 }
                 return self;
             },
