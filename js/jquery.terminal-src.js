@@ -37,9 +37,9 @@
  *
  * Date: {{DATE}}
  */
-/* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
-         setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
-         module, require, define, setInterval, clearInterval, Blob */
+/* global location, setTimeout, window, global, sprintf, setImmediate,
+          IntersectionObserver,  ResizeObserver, module, require, define,
+          setInterval, clearInterval, Blob */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {

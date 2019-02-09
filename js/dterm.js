@@ -10,7 +10,7 @@
  * Released under the MIT license
  *
  */
-/* global jQuery, setTimeout, IntersectionObserver, define, global, require, module */
+/* global setTimeout, IntersectionObserver, define, global, require, module */
 (function(factory, undefined) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {
