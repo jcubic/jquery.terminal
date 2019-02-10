@@ -3496,7 +3496,7 @@
             'seagreen', 'seashell', 'sienna', 'silver', 'skyblue', 'slateblue',
             'slategray', 'slategrey', 'snow', 'springgreen', 'steelblue', 'tan',
             'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat',
-            'white', 'whitesmoke', 'yellow', 'yellowgreen'],
+            'white', 'whitesmoke', 'yellow', 'yellowgreen', 'rebeccapurple'],
         // for unit tests
         Cycle: Cycle,
         History: History,

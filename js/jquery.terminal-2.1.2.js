@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 10 Feb 2019 18:18:08 +0000
+ * Date: Sun, 10 Feb 2019 18:36:56 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3461,7 +3461,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 10 Feb 2019 18:18:08 +0000',
+        date: 'Sun, 10 Feb 2019 18:36:56 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -3496,7 +3496,7 @@
             'seagreen', 'seashell', 'sienna', 'silver', 'skyblue', 'slateblue',
             'slategray', 'slategrey', 'snow', 'springgreen', 'steelblue', 'tan',
             'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat',
-            'white', 'whitesmoke', 'yellow', 'yellowgreen'],
+            'white', 'whitesmoke', 'yellow', 'yellowgreen', 'rebeccapurple'],
         // for unit tests
         Cycle: Cycle,
         History: History,
