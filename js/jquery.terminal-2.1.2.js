@@ -6,9 +6,9 @@
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
  *           \/              /____/                              version DEV
  *
- * This file is part of jQuery Terminal. http://terminal.jcubic.pl
+ * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2019 Jakub T. Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2019 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 10 Feb 2019 18:15:59 +0000
+ * Date: Sun, 10 Feb 2019 18:18:08 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3461,8 +3461,8 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 10 Feb 2019 18:15:59 +0000',
-        // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
+        date: 'Sun, 10 Feb 2019 18:18:08 +0000',
+        // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
             'maroon', 'red', 'purple', 'fuchsia', 'green', 'lime', 'olive',
@@ -4887,7 +4887,7 @@
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
     var copyright = 'Copyright (c) 2011-2019 Jakub T. Jankiewicz ' +
-        '<http://jcubic.pl/me>';
+        '<https://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
     var reg = new RegExp(' {' + version_string.length + '}$');
