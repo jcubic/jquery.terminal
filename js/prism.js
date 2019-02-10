@@ -34,7 +34,7 @@
  * Released under the MIT license
  *
  */
-/* global jQuery, Prism, define, global, require, module */
+/* global define, global, require, module */
 (function(factory, undefined) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {
@@ -80,11 +80,11 @@
     }
     var _ = $.extend({}, Prism);
 
-    _.Token = function(type, content, alias, matchedStr, greedy) {
+    _.Token = function() {
         Token.apply(this, [].slice.call(arguments));
     };
-    _.Token.stringify = function(o, language, parent, recur) {
-        if (typeof o == 'string') {
+    _.Token.stringify = function(o, language, parent) {
+        if (typeof o === 'string') {
             return o;
         }
 
@@ -95,7 +95,6 @@
         }
 
         var env = {
-            type: o.type,
             content: _.Token.stringify(o.content, language, parent),
             tag: 'span',
             classes: ['token', o.type],
@@ -104,7 +103,7 @@
             parent: parent
         };
 
-        if (env.type == 'comment') {
+        if (env.type === 'comment') {
             env.attributes['spellcheck'] = 'true';
         }
 
@@ -117,7 +116,8 @@
 
         return env.content.split(/\n/).map(function(content) {
             if (content) {
-                return '\x00\x00\x00\x00[[b;;;' + env.classes.join(' ') + ']' + content + '\x00\x00\x00\x00]';
+                return '\x00\x00\x00\x00[[b;;;' + env.classes.join(' ') + ']' +
+                    content + '\x00\x00\x00\x00]';
             }
             return '';
         }).join('\n');
@@ -128,10 +128,12 @@
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');
     }
-    // we use 0x00 character so we know which one of the formatting came from prism so we can escape the reset
-    // because we unescape original values, the values need to be escape in cmd plugin so you can't type in
-    // formatting
+    // we use 0x00 character so we know which one of the formatting came from prism
+    // so we can escape the reset because we unescape original values, the values
+    // need to be escape in cmd plugin so you can't type in formatting
+    /* eslint-disable */
     var format_split_re = /(\x00\x00\x00\x00(?:\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*[^\\](\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?|\]))/i;
+    /* eslint-enable */
     $.terminal.prism = function prism(language, string) {
         if (language === 'website') {
             var re = /(<\/?\s*(?:script|style)[^>]*>)/g;

@@ -35,11 +35,11 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 09 Feb 2019 17:21:48 +0000
+ * Date: Sun, 10 Feb 2019 18:15:59 +0000
  */
-/* global location, jQuery, setTimeout, window, global, localStorage, sprintf,
-         setImmediate, IntersectionObserver, MutationObserver, ResizeObserver,
-         module, require, define, setInterval, clearInterval, Blob */
+/* global location, setTimeout, window, global, sprintf, setImmediate,
+          IntersectionObserver,  ResizeObserver, module, require, define,
+          setInterval, clearInterval, Blob */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -3461,7 +3461,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 09 Feb 2019 17:21:48 +0000',
+        date: 'Sun, 10 Feb 2019 18:15:59 +0000',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

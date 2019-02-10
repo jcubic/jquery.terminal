@@ -13,7 +13,7 @@
  * Released under the MIT license
  *
  */
-/* global jQuery, define, global, require, module */
+/* global define, global, require, module */
 (function(factory) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {

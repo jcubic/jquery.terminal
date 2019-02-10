@@ -298,12 +298,11 @@
     "wcwidth": "^1.0.1"
   },
   "devDependencies": {
-    "coveralls": "^3.0.1",
-    "cssnano": "^4.1.0",
-    "eslint": "^4.19.1",
-    "jest": "^23.6.0",
+    "cssnano": "^4.1.8",
+    "eslint": "^5.13.0",
+    "jest": "^24.1.0",
     "jsonlint": "^1.6.3",
-    "typescript": "^3.0.1",
-    "uglify-js": "^3.4.0"
+    "typescript": "^3.3.3",
+    "uglify-js": "^3.4.9"
   }
 }

@@ -99,7 +99,7 @@ eslint:
 	$(ESLINT) js/dterm.js
 	$(ESLINT) js/xml_formatting.js
 	$(ESLINT) js/unix_formatting.js
-	$(ESLINT) js/prims.js
+	$(ESLINT) js/prism.js
 	$(ESLINT) js/less.js
 	$(ESLINT) js/emoji.js
 
