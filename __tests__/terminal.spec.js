@@ -3933,7 +3933,7 @@ describe('Terminal plugin', function() {
                 expect(term.signature()).toEqual('');
             });
             it('should return proper max length of signature', function() {
-                var numbers = {20: 20, 36: 33, 60: 56, 70: 66, 100: 75};
+                var numbers = {21: 20, 36: 33, 60: 56, 70: 66, 100: 75};
                 Object.keys(numbers).forEach(function(numChars) {
                     var length = numbers[numChars];
                     term.option('numChars', numChars);

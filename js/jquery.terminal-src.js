@@ -7243,7 +7243,7 @@
                 var cols = self.cols();
                 for (var i = signatures.length; i--;) {
                     var lenghts = signatures[i].map(function(line) {
-                        return line.length;
+                        return line.length + 1;
                     });
                     if (Math.max.apply(null, lenghts) <= cols) {
                         return signatures[i].join('\n') + '\n';
