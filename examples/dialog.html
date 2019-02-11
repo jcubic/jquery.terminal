@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>Text based input box using jQuery Terminal</title>
     <link href="../css/jquery.terminal-src.css" rel="stylesheet"/>
-    <script src="https://rawgit.com/cvan/keyboardevent-key-polyfill/master/index.js"></script>
+    <script src="https://unpkg.com/js-polyfills/keyboard.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="dialog.js"></script>
     <link href="dialog.css" rel="stylesheet"/>
@@ -15,8 +15,6 @@
      }
     </style>
     <script>
-     // for browsers that don't support key property
-     keyboardeventKeyPolyfill.polyfill();
      $(function() {
          $('body').dialog(function(input) {
              setTimeout(function() {
