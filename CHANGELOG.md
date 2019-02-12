@@ -5,7 +5,6 @@
 * don't complete default commands as argument [#465](https://github.com/jcubic/jquery.terminal/issues/465)
 * don't show links in echo command + format links inside formatting [#464](https://github.com/jcubic/jquery.terminal/issues/464)
 * fix calling set_mask in onPop
-* fix flickering of signature when resizing the terminal when scrollbar is visible
 
 ## 2.1.2
 ### Bugfix
