@@ -8554,6 +8554,9 @@
                 }
                 var was_enabled = self.enabled();
                 var visible = self.is(':visible');
+                if (was_enabled && !visible) {
+                    self.disable();
+                }
                 if (visible) {
                     create_resizers();
                 }
@@ -8572,13 +8575,13 @@
                         self.disable();
                     }
                 }
-                if (window.IntersectionObserver) {
+                if (window.IntersectionObserver && self.css('position') !== 'fixed') {
                     visibility_observer = new IntersectionObserver(visibility_checker, {
                         root: document.body
                     });
                     visibility_observer.observe(self[0]);
                 } else {
-                    visibility_observer = setInterval(visibility_checker, 400);
+                    visibility_observer = setInterval(visibility_checker, 100);
                 }
             }
             var in_dom = !!self.closest('body').length;

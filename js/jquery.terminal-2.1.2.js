@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 12 Feb 2019 08:25:04 +0000
+ * Date: Tue, 12 Feb 2019 20:07:03 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3461,7 +3461,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 12 Feb 2019 08:25:04 +0000',
+        date: 'Tue, 12 Feb 2019 20:07:03 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8554,6 +8554,9 @@
                 }
                 var was_enabled = self.enabled();
                 var visible = self.is(':visible');
+                if (was_enabled && !visible) {
+                    self.disable();
+                }
                 if (visible) {
                     create_resizers();
                 }
@@ -8572,13 +8575,13 @@
                         self.disable();
                     }
                 }
-                if (window.IntersectionObserver) {
+                if (window.IntersectionObserver && self.css('position') !== 'fixed') {
                     visibility_observer = new IntersectionObserver(visibility_checker, {
                         root: document.body
                     });
                     visibility_observer.observe(self[0]);
                 } else {
-                    visibility_observer = setInterval(visibility_checker, 400);
+                    visibility_observer = setInterval(visibility_checker, 100);
                 }
             }
             var in_dom = !!self.closest('body').length;
