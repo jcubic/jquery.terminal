@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 12 Feb 2019 20:07:03 +0000
+ * Date: Sat, 16 Feb 2019 08:57:43 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3461,7 +3461,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 12 Feb 2019 20:07:03 +0000',
+        date: 'Sat, 16 Feb 2019 08:57:43 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5620,11 +5620,7 @@
             // urls should always have formatting to keep url if split
             var i, len;
             output_buffer.push(NEW_LINE);
-            if (string === '') {
-                // ignore empty string, it can happen if line was a function
-                // that returned empty string in this case whe need to add container
-                // because on update/resize it can return content
-            } else if (!options.raw) {
+            if (!options.raw) {
                 var format_options = {
                     linksNoReferrer: settings.linksNoReferrer,
                     linksNoFollow: settings.linksNoFollow,
@@ -5736,62 +5732,55 @@
                     string = arg;
                 }
                 if (string !== '') {
-                    // string can be empty after removing extended commands
-                    if (string !== '') {
-                        if (!line_settings.raw) {
-                            if (line_settings.formatters) {
-                                try {
-                                    string = $.terminal.apply_formatters(
-                                        string,
-                                        settings
-                                    );
-                                } catch (e) {
-                                    display_exception(e, 'FORMATTING');
-                                }
+                    if (!line_settings.raw) {
+                        if (line_settings.formatters) {
+                            try {
+                                string = $.terminal.apply_formatters(
+                                    string,
+                                    settings
+                                );
+                            } catch (e) {
+                                display_exception(e, 'FORMATTING');
                             }
-                            var parts = string.split(format_exec_re);
-                            string = $.map(parts, function(string) {
-                                if (string && string.match(format_exec_re) &&
-                                    !$.terminal.is_formatting(string)) {
-                                    // redraw should not execute commands and it have
-                                    // and lines variable have all extended commands
-                                    string = string.replace(/^\[\[|\]\]$/g, '');
-                                    if (line_settings.exec) {
-                                        var prev_cmd;
-                                        if (prev_command) {
-                                            prev_command = prev_command.command.trim();
-                                        }
-                                        if (prev_cmd === string.trim()) {
-                                            self.error(strings().recursiveCall);
-                                        } else {
-                                            $.terminal.extended_command(self, string, {
-                                                invokeMethods: settings.invokeMethods
-                                            });
-                                        }
+                        }
+                        var parts = string.split(format_exec_re);
+                        string = $.map(parts, function(string) {
+                            if (string && string.match(format_exec_re) &&
+                                !$.terminal.is_formatting(string)) {
+                                // redraw should not execute commands and it have
+                                // and lines variable have all extended commands
+                                string = string.replace(/^\[\[|\]\]$/g, '');
+                                if (line_settings.exec) {
+                                    var prev_cmd;
+                                    if (prev_command) {
+                                        prev_command = prev_command.command.trim();
                                     }
-                                    return '';
-                                } else {
-                                    return string;
+                                    if (prev_cmd === string.trim()) {
+                                        self.error(strings().recursiveCall);
+                                    } else {
+                                        $.terminal.extended_command(self, string, {
+                                            invokeMethods: settings.invokeMethods
+                                        });
+                                    }
                                 }
-                            }).join('');
-                            if (line_settings.convertLinks) {
-                                string = links(string);
+                                return '';
+                            } else {
+                                return string;
                             }
-                            if (string !== '') {
-                                string = crlf($.terminal.normalize(string));
-                                string = $.terminal.encode(string, {
-                                    tabs: settings.tabs
-                                });
-                            }
+                        }).join('');
+                        if (string === '') {
+                            return;
                         }
-                        if (string !== '') {
-                            buffer_line(string, line.index, line_settings);
+                        if (line_settings.convertLinks) {
+                            string = links(string);
                         }
+                        string = crlf($.terminal.normalize(string));
+                        string = $.terminal.encode(string, {
+                            tabs: settings.tabs
+                        });
                     }
                 }
-                if (string === '' && is_fn) {
-                    buffer_line(string, line.index, line_settings);
-                }
+                buffer_line(string, line.index, line_settings);
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
@@ -7553,6 +7542,8 @@
                         }
                         if (typeof arg === 'function') {
                             arg = arg.bind(self);
+                        } else if (typeof arg === 'undefined') {
+                            arg = '';
                         }
                         process_line({
                             string: arg,

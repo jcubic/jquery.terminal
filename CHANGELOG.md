@@ -6,6 +6,7 @@
 * don't show links in echo command + format links inside formatting [#464](https://github.com/jcubic/jquery.terminal/issues/464)
 * fix calling set_mask in onPop
 * fix visibility change when terminal have `position:fixed` [#466](https://github.com/jcubic/jquery.terminal/issues/466)
+* echo undefined and empty string - to create blank line [#467](https://github.com/jcubic/jquery.terminal/issues/467)
 
 ## 2.1.2
 ### Bugfix
