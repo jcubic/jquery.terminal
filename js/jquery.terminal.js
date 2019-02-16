@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 16 Feb 2019 08:57:43 +0000
+ * Date: Sat, 16 Feb 2019 17:47:54 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3461,7 +3461,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 16 Feb 2019 08:57:43 +0000',
+        date: 'Sat, 16 Feb 2019 17:47:54 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7440,7 +7440,6 @@
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
                     }
-                    output_buffer = [];
                 } catch (e1) {
                     if (is_function(settings.exceptionHandler)) {
                         try {
@@ -7452,6 +7451,8 @@
                     } else {
                         alert_exception('[Flush]', e1);
                     }
+                } finally {
+                    output_buffer = [];
                 }
                 return self;
             },
@@ -7500,15 +7501,18 @@
                 return lines.length - 1;
             },
             // -------------------------------------------------------------
-            // :: Print data to the terminal output. It can have two options
-            // :: a function that is called with the container div that
-            // :: holds the output (as a jquery object) every time the
-            // :: output is printed (including resize and scrolling)
-            // :: If the line is a function it will be called for every
-            // :: redraw.
-            // :: it use $.when so you can echo a promise
+            // :: Print data to the terminal output. It can have options
+            // :: * flush - indicate that arg should be send to DOM
+            // :: * raw - indicate if it should handle input as html
+            // :: * finalize - function call with container div
+            // :: * keepWords - inform how to wrap text
+            // :: * formatters - inform function if it should use formatters
+            // ::   on input string - good to prevent XSS when you want
+            // ::   advanced server side controling of terminal
+            // :: you can echo: promise, function, strings array or string
             // -------------------------------------------------------------
             echo: function(arg, options) {
+                var arg_defined = arguments.length > 0;
                 function echo(arg) {
                     try {
                         var locals = $.extend({
@@ -7538,12 +7542,15 @@
                             if (output_buffer.length) {
                                 self.flush();
                             }
-                            output_buffer = [];
                         }
                         if (typeof arg === 'function') {
                             arg = arg.bind(self);
                         } else if (typeof arg === 'undefined') {
-                            arg = '';
+                            if (arg_defined) {
+                                arg = String(arg);
+                            } else {
+                                arg = '';
+                            }
                         }
                         process_line({
                             string: arg,
