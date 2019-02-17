@@ -1,3 +1,7 @@
+## 2.2.1
+### Bugfix
+* fix selecting whole text of single .cmd line
+
 ## 2.2.0
 ### Features
 * Handle unclosed entities [#462](https://github.com/jcubic/jquery.terminal/issues/462)
