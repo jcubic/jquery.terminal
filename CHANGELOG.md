@@ -1,3 +1,13 @@
+## 2.2.0
+### Features
+* Handle unclosed entities [#462](https://github.com/jcubic/jquery.terminal/issues/462)
+### Bugfix
+* don't complete default commands as argument [#465](https://github.com/jcubic/jquery.terminal/issues/465)
+* don't show links in echo command + format links inside formatting [#464](https://github.com/jcubic/jquery.terminal/issues/464)
+* fix calling set_mask in onPop
+* fix visibility change when terminal have `position:fixed` [#466](https://github.com/jcubic/jquery.terminal/issues/466)
+* echo without argument or with empty string - to create blank line [#467](https://github.com/jcubic/jquery.terminal/issues/467)
+
 ## 2.1.2
 ### Bugfix
 * remove bugfix for [#402](https://github.com/jcubic/jquery.terminal/issues/402) that should never land in the code

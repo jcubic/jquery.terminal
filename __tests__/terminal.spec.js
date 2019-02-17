@@ -3933,7 +3933,7 @@ describe('Terminal plugin', function() {
                 expect(term.signature()).toEqual('');
             });
             it('should return proper max length of signature', function() {
-                var numbers = {20: 20, 36: 33, 60: 55, 70: 65, 100: 75};
+                var numbers = {20: 20, 36: 33, 60: 56, 70: 66, 100: 75};
                 Object.keys(numbers).forEach(function(numChars) {
                     var length = numbers[numChars];
                     term.option('numChars', numChars);
@@ -4001,8 +4001,8 @@ describe('Terminal plugin', function() {
                 numChars: numChars,
                 numRows: numRows
             });
-            function output() {
-                return term.find('.terminal-output > div div span').map(function() {
+            function output(selector = '.terminal-output > div div span') {
+                return term.find(selector).map(function() {
                     return $(this).text().replace(/\xA0/g, ' ');
                 }).get();
             }
@@ -4083,6 +4083,19 @@ describe('Terminal plugin', function() {
                 term.clear().echo(input);
                 expect(output().join('\n')).toEqual(input);
             });
+            it('should print undefined', function() {
+                term.clear().echo(undefined);
+                expect(output().join('\n')).toEqual('undefined');
+            });
+            it('should print empty line', function() {
+                function test() {
+                    expect(output('.terminal-output > div div')).toEqual(['']);
+                }
+                term.clear().echo();
+                test();
+                term.clear().echo('');
+                test();
+            });
             it('should align tabs', function() {
                 var tests = [
                     [
@@ -4108,7 +4121,7 @@ describe('Terminal plugin', function() {
                 ];
                 tests.forEach(function(test) {
                     term.clear().echo(test[0]);
-                    expect(output(term).join('\n')).toEqual(test[1]);
+                    expect(output().join('\n')).toEqual(test[1]);
                 });
             });
             describe('extended commands', function() {
