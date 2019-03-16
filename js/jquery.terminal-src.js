@@ -1376,10 +1376,12 @@
                 no_keydown = true;
 
                 self.set('');
+                var promise;
                 if (settings.commands) {
-                    settings.commands.call(self, tmp);
+                    promise = settings.commands.call(self, tmp);
                 }
-                if (is_function(prompt)) {
+                if (is_function(prompt) &&
+                    (promise && promise.isResolved() || !promise)) {
                     draw_prompt();
                 }
                 clip.val('');
