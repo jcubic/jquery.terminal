@@ -5332,7 +5332,7 @@
                 var procs = response;
                 // we check if it's false before we call this function but
                 // it don't hurt to be explicit here
-                if (settings.describe !== '') {
+                if (settings.describe !== false && settings.describe !== '') {
                     settings.describe.split('.').forEach(function(field) {
                         procs = procs[field];
                     });
@@ -5504,7 +5504,7 @@
                     });
                 });
             } else if (type === 'string') {
-                if (settings.ignoreSystemDescribe) {
+                if (settings.describe === false) {
                     object = {
                         interpreter: make_basic_json_rpc(user_intrp, login)
                     };
