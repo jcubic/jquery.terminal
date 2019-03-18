@@ -2842,7 +2842,7 @@ describe('Terminal plugin', function() {
             });
             it('should ignore system.describe method', function() {
                 term = $('<div/>').appendTo('body').terminal('/test', {
-                    ignoreSystemDescribe: true,
+                    describe: false,
                     completion: true
                 });
                 expect(term.export_view().interpreters.top().completion).toBeFalsy();
@@ -3165,9 +3165,9 @@ describe('Terminal plugin', function() {
                 done();
             }, 200);
         });
-        it('should insert tab when ignoreSystemDescribe', function() {
+        it('should insert tab when describe === false', function() {
             term = $('<div/>').appendTo('body').terminal('/test', {
-                ignoreSystemDescribe: true,
+                describe: false,
                 completion: true
             });
             term.insert('f');

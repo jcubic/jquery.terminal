@@ -471,7 +471,7 @@ type TerminalOptions = {
     repeatTimeoutKeys?: string[];
     request?: JQueryTerminal.RequestResponseCallback;
     response?: JQueryTerminal.RequestResponseCallback;
-    describe?: string;
+    describe?: string | false;
     onRPCError?: JQueryTerminal.RPCErrorCallback;
     doubleTab?: JQueryTerminal.DoubleTabFunction;
     completion?: JQueryTerminal.Completion;

@@ -3,6 +3,7 @@
 * fix selecting whole text of single .cmd line
 * fix double call of async prompt with async interpreter [#474](https://github.com/jcubic/jquery.terminal/issues/474)
 * fix async + RPC + exec + no system.describe [#475](https://github.com/jcubic/jquery.terminal/issues/475)
+* fix describe === false (exception in js and typscript definition)
 
 ## 2.2.0
 ### Features
