@@ -134,6 +134,9 @@ jest.setTimeout(10000);
 function nbsp(string) {
     return string.replace(/ /g, '\xA0');
 }
+function a0(string) {
+    return string.replace(/\xA0/g, ' ');
+}
 function spy(obj, method) {
     var spy = spyOn(obj, method);
     if (spy.andCallThrough) {
@@ -768,7 +771,7 @@ describe('Terminal utils', function() {
     describe('$.terminal.apply_formatters', function() {
         var formatters;
         beforeEach(function() {
-            formatters = $.terminal.defaults.formatters;
+            formatters = $.terminal.defaults.formatters.slice();
         });
         afterEach(function() {
             $.terminal.defaults.formatters = formatters;
@@ -1604,6 +1607,178 @@ describe('Terminal utils', function() {
             test_positions('foo foo foo', /f/g, 'bar', [
                 0, 3, 4, 5, 6, 9, 10, 11, 12, 15, 16, 17
             ]);
+        });
+    });
+    describe('$.terminal.iterator', function() {
+        var input = ["\u263a\ufe0f", "x", "x", "x" ,"x", "\u261d\ufe0f", "x", "x", "x", "x",
+                     "\u0038\ufe0f\u20e3", "x","x","x","\u0038\ufe0f\u20e3"];
+        it('should work with for of', function() {
+            var i = 0;
+            for (let item of $.terminal.iterator(input.join(''))) {
+                expect(item).toEqual(input[i++]);
+            }
+            expect(input).toEqual($.terminal.split_characters(input.join('')));
+        });
+        it('should work with iterator protocol', function() {
+            var iterator = $.terminal.iterator(input.join(''))[Symbol.iterator]();
+            var i = 0;
+            while (true) {
+                var item = iterator.next();
+                if (item.done) {
+                    break;
+                }
+                expect(item.value).toEqual(input[i++]);
+            }
+        });
+    });
+    
+    describe('$.terminal.new_formatter', function() {
+        function nested_index() {
+            var formatters = $.terminal.defaults.formatters;
+            for (let i in formatters) {
+                if (formatters[i] === $.terminal.nested_formatting) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        var formatters;
+        beforeEach(function() {
+            formatters = $.terminal.defaults.formatters.slice();
+        });
+        afterEach(function() {
+            $.terminal.defaults.formatters = formatters;
+        });
+        it('should add new formatters', function() {
+            var formatter_1 = function() {};
+            var formatter_2 = [/xxx/, 'xxx'];
+            $.terminal.new_formatter(formatter_1);
+            var formatters = $.terminal.defaults.formatters;
+            var n = nested_index();
+            expect(n !== -1).toBeTruthy();
+            expect(formatters[n]).toBe($.terminal.nested_formatting);
+            expect(formatters[n - 1]).toBe(formatter_1);
+            $.terminal.new_formatter(formatter_2);
+            n = nested_index();
+            expect(formatters[n]).toBe($.terminal.nested_formatting);
+            expect(formatters[n - 1]).toBe(formatter_2);
+            expect(formatters[n - 2]).toBe(formatter_1);
+        });
+        it('should add formatter when no nested_formatting', function() {
+            var formatter_1 = function() {};
+            var formatter_2 = [/xxx/, 'xxx'];
+            var formatters = $.terminal.defaults.formatters;
+            var n = nested_index();
+            expect(n !== -1).toBeTruthy();
+            formatters.splice(n, 1);
+            expect(nested_index()).toEqual(-1);
+            $.terminal.new_formatter(formatter_1);
+            $.terminal.new_formatter(formatter_2);
+            expect(formatters[formatters.length - 2]).toBe(formatter_1);
+            expect(formatters[formatters.length - 1]).toBe(formatter_2);
+        });
+    });
+    describe('$.terminal.pipe', function() {
+        function get_lines(term) {
+            return term.find('.terminal-output .command').last().nextUntil().map(function() {
+                return a0($(this).text());
+            }).get();
+        };
+        it('should pipe sync command', function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                output: function() {
+                    this.echo('foo');
+                },
+                grep: function(re) {
+                    return this.read('').then((str) => {
+                        var lines = str.split('\n');
+                        lines.forEach((str) => {
+                            if (str.match(re)) {
+                                this.echo(str);
+                            }
+                        });
+                    });
+                },
+                input: function() {
+                    return this.read('').then((str) => {
+                        this.echo('sync: ' + str);
+                    });
+                }
+            }));
+            return term.exec('output | grep /foo/').then(function() {
+                expect(get_lines(term)).toEqual(['foo']);
+            });
+        });
+        it('should filter lines', function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                output: function(arg) {
+                    this.echo(arg);
+                },
+                grep: function(re) {
+                    return this.read('').then((str) => {
+                        var lines = str.split('\n');
+                        lines.forEach((str) => {
+                            if (str.match(re)) {
+                                this.echo(str);
+                            }
+                        });
+                    });
+                },
+                input: function() {
+                    return this.read('').then((str) => {
+                        str.split('\n').forEach((str, i) => {
+                            this.echo(i + ':' + str);
+                        });
+                    });
+                }
+            }));
+            return term.exec('output "foo\\nquux\\nbaz\\nfoo\\nbar" | grep /foo|bar/').then(() => {
+                expect(get_lines(term)).toEqual(['foo', 'foo', 'bar']);
+                return term.exec('output "foo\\nquux\\nbaz\\nfoo\\nbar" | grep /foo|bar/ | input').then(() => {
+                    expect(get_lines(term)).toEqual([
+                        '0:foo',
+                        '1:foo',
+                        '2:bar'
+                    ]);
+                });
+            });
+        });
+        it('should work with async commands', function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                output: function(arg) {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            this.echo(arg);
+                            setTimeout(() => resolve(arg), 200);
+                        }, 200);
+                    });
+                },
+                grep: function(re) {
+                    return this.read('').then((str) => {
+                        return new Promise((resolve) => {
+                            setTimeout(() => {
+                                var lines = str.split('\n');
+                                lines.forEach((str) => {
+                                    if (str.match(re)) {
+                                        this.echo(str);
+                                    }
+                                });
+                                resolve();
+                            }, 200);
+                        });
+                    });
+                },
+                input: function() {
+                    return this.read('').then((str) => {
+                        str.split('\n').forEach((str, i) => {
+                            this.echo(i + ':' + str);
+                        });
+                    });
+                }
+            }));
+            return term.exec('output "foo\\nbar" | grep foo | input').then(() => {
+                expect(get_lines(term)).toEqual(['0:foo', '1:foo']);
+            });
         });
     });
 });

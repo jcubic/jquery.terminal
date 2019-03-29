@@ -4540,7 +4540,7 @@
             return result;
         },
         // ---------------------------------------------------------------------
-        // :: function executed for each text inside [{ .... }]
+        // :: function executed for each text inside [[ .... ]] in echo
         // ---------------------------------------------------------------------
         extended_command: function extended_command(term, string, options) {
             var settings = $.extend({
@@ -4615,6 +4615,8 @@
             }
         },
         // ---------------------------------------------------------------------
+        // :: object that can be used in string methods intead of regex
+        // ---------------------------------------------------------------------
         formatter: new (function() {
             try {
                 this[Symbol.split] = function(string) {
@@ -4644,6 +4646,119 @@
                 }
             }
             formatters.push(formatter);
+        },
+        // ---------------------------------------------------------------------
+        // :: Bash pipe operator on top of user commands
+        // ---------------------------------------------------------------------
+        pipe: function pipe(interpreter, options) {
+            var settings = $.extend({
+                processArguments: true
+            }, options);
+            return function(command, term) {
+                var orig = {
+                    echo: term.echo,
+                    read: term.read
+                };
+                var tty = {
+                    read: function(message, callback) {
+                        if (typeof tty.buffer === 'undefined') {
+                            return orig.read.apply(term, arguments);
+                        } else {
+                            var text = tty.buffer.replace(/\n$/, '');
+                            delete tty.buffer;
+                            var d = new $.Deferred();
+                            if ($.isFunction(callback)) {
+                                callback(text);
+                            }
+                            d.resolve(text);
+                            return d.promise();
+                        }
+                    },
+                    echo: function(string) {
+                        tty.buffer = (tty.buffer || '') + string + '\n';
+                    }
+                };
+                var tokens;
+                if (settings.processArguments) {
+                    tokens = $.terminal.parse_arguments(command);
+                } else {
+                    tokens = $.terminal.split_arguments(command);
+                }
+                var commands = array_split(tokens, '|').map(function(args) {
+                    return {
+                        name: args[0],
+                        args: args.slice(1)
+                    };
+                });
+                function loop(callback) {
+                    var i = 0;
+                    var d = new $.Deferred();
+                    return function inner() {
+                        var command = commands[i++];
+                        if (command) {
+                            if (!commands[i]) {
+                                $.extend(term, {echo: orig.echo});
+                            }
+                            var ret = callback(command);
+                            if (ret && ret.then) {
+                                ret.then(inner);
+                            } else {
+                                inner();
+                            }
+                        } else {
+                            d.resolve();
+                        }
+                        return d.promise();
+                    };
+                }
+                if (commands.length === 1) {
+                    var cmd = commands[0];
+                    if (typeof interpreter === 'function') {
+                        interpreter.call(term, command, term);
+                    } else if (typeof interpreter[cmd.name] === 'function') {
+                        interpreter[cmd.name].apply(term, cmd.args);
+                    } else if ($.isPlainObject(interpreter[cmd.name])) {
+                        term.push(interpreter[cmd.name], {
+                            prompt: cmd.name + '> ',
+                            name: cmd.name,
+                            completion: Object.keys(interpreter[cmd.name])
+                        });
+                    }
+                } else {
+                    $.extend(term, tty);
+                    var promise;
+                    if (typeof interpreter === 'function') {
+                        promise = loop(function(command) {
+                            return interpreter.call(term, command.command, term);
+                        })();
+                    } else if ($.isPlainObject(interpreter)) {
+                        promise = loop(function(command) {
+                            var inter = interpreter[command.name];
+                            if (typeof inter === 'function') {
+                                var ret = inter.apply(term, command.args);
+                                if (ret && ret.then) {
+                                    ret.then(function(value) {
+                                        if (typeof value !== 'undefined') {
+                                            term.echo(value);
+                                        }
+                                    });
+                                }
+                                return ret;
+                            } else if ($.isPlainObject(inter)) {
+                                throw new Error('You can\'t pipe nested ' +
+                                                'interpreter');
+                            } else {
+                                throw new Error('Command not found');
+                            }
+                        })();
+                    }
+                    if (promise) {
+                        return promise.then(function() {
+                            $.extend(term, orig);
+                        });
+                    }
+                }
+            };
         }
     };
     // -------------------------------------------------------------------------
@@ -4883,6 +4998,31 @@
     // -----------------------------------------------------------------------
     function get_type(object) {
         return typeof object === 'function' ? 'function' : $.type(object);
+    }
+    // -----------------------------------------------------------------------
+    // :: split over array - returns array of arrays
+    // -----------------------------------------------------------------------
+    function array_split(array, splitter) {
+        var test_fn;
+        if (splitter instanceof RegExp) {
+            test_fn = splitter.test.bind(splitter);
+        } else {
+            test_fn = function(item) {
+                return splitter === item;
+            };
+        }
+        var output = [];
+        var sub = [];
+        array.forEach(function(item) {
+            if (test_fn(item)) {
+                output.push(sub);
+                sub = [];
+            } else {
+                sub.push(item);
+            }
+        });
+        output.push(sub);
+        return output;
     }
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE

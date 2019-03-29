@@ -1,4 +1,6 @@
-## 2.2.1
+## 2.3.0
+### Features
+* add $.terminal.pipe function
 ### Bugfix
 * fix selecting whole text of single .cmd line
 * fix double call of async prompt with async interpreter [#474](https://github.com/jcubic/jquery.terminal/issues/474)
