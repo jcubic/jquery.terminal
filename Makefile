@@ -102,6 +102,7 @@ eslint:
 	$(ESLINT) js/prism.js
 	$(ESLINT) js/less.js
 	$(ESLINT) js/emoji.js
+	$(ESLINT) js/pipe.js
 
 skipped_tests:
 	@! grep -E $(skip_re) __tests__/terminal.spec.js

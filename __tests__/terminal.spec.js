@@ -128,6 +128,7 @@ global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
+require('../js/pipe')(global.$);
 
 jest.setTimeout(10000);
 
@@ -1778,6 +1779,132 @@ describe('Terminal utils', function() {
             }));
             return term.exec('output "foo\\nbar" | grep foo | input').then(() => {
                 expect(get_lines(term)).toEqual(['0:foo', '1:foo']);
+            });
+        });
+        it('should prompt for input', function() {
+            var fn = jest.fn();
+            var term = $('<div/>').terminal($.terminal.pipe({
+                command_1: fn,
+                command_2: function() {
+                    this.read('input: ').then(fn);
+                }
+            }));
+            return term.exec('command_1 | command_2').then(() => {
+                expect(term.get_prompt()).toEqual('input: ');
+                expect(fn.mock.calls.length).toEqual(1);
+                return term.exec('foo').then(function() {
+                    expect(fn.mock.calls.length).toEqual(2);
+                    expect(fn.mock.calls[1][0]).toEqual('foo');
+                });
+            });
+        });
+        describe('redirects', function() {
+            var commands = {
+                async_output: function(x) {
+                    return new Promise((resolve) => {
+                        setTimeout(() => resolve(x), 100);
+                    });
+                },
+                output: function(x) {
+                    this.echo(x);
+                },
+                grep: function(re) {
+                    return this.read('').then((str) => {
+                        var lines = str.split('\n');
+                        lines.forEach((str) => {
+                            if (str.match(re)) {
+                                this.echo(str);
+                            }
+                        });
+                    });
+                },
+                input: function() {
+                    return this.read('').then((str) => {
+                        str.split('\n').forEach((str, i) => {
+                            this.echo(i + ':' + str);
+                        });
+                    });
+                }
+            };
+            it('should redirect simple sync input', function() {
+                var term = $('<div/>').terminal($.terminal.pipe(commands, {
+                    redirects: [
+                        {
+                            name: '<<<',
+                            callback: function(...args) {
+                                args.forEach(this.echo);
+                            }
+                        }
+                    ]
+                }));
+                return term.exec('input <<< "hello" world').then(() => {
+                    expect(get_lines(term)).toEqual(['0:hello', '1:world']);
+                });
+            });
+            it('should redirect async input', function() {
+                var term = $('<div/>').terminal($.terminal.pipe(commands, {
+                    redirects: [
+                        {
+                            name: '<echo',
+                            callback: function(...args) {
+                                return new Promise((resolve) => {
+                                    setTimeout(() => {
+                                        args.forEach(this.echo);
+                                        resolve();
+                                    }, 100);
+                                });
+                            }
+                        },
+                        {
+                            name: '<promise',
+                            callback: function(...args) {
+                                return new Promise((resolve) => {
+                                    setTimeout(() => resolve(args.join('\n')), 100);
+                                });
+                            }
+                        }
+                    ]
+                }));
+                return term.exec('input <echo "hello" world').then(() => {
+                    expect(get_lines(term)).toEqual(['0:hello', '1:world']);
+                    return term.exec('input <promise "hello" world').then(() => {
+                        expect(get_lines(term)).toEqual(['0:hello', '1:world']);
+                    });
+                });
+            });
+            it('should pipe with redirect', function() {
+                var term = $('<div/>').terminal($.terminal.pipe(commands, {
+                    redirects: [
+                        {
+                            name: '<echo',
+                            callback: function(...args) {
+                                return new Promise((resolve) => {
+                                    setTimeout(() => {
+                                        args.forEach(this.echo);
+                                        resolve();
+                                    }, 100);
+                                });
+                            }
+                        },
+                        {
+                            name: '<promise',
+                            callback: function(...args) {
+                                return new Promise((resolve) => {
+                                    setTimeout(() => resolve(args.join('\n')), 100);
+                                });
+                            }
+                        }
+                    ]
+                }));
+                return term.exec('input <echo "hello" world | grep /^[0-9]:h/').then(() => {
+                    expect(get_lines(term)).toEqual(['0:hello']);
+                    return term.exec('input <promise "hello" world | grep /^[0-9]:h/').then(() => {
+                        expect(get_lines(term)).toEqual(['0:hello']);
+                        return term.exec('input <promise "hello" world | grep /^h/ <echo "hi"').then(() => {
+                            expect(get_lines(term)).toEqual(['hi']);
+                        });
+                    });
+                });
             });
         });
     });
