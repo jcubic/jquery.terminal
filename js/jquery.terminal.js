@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 29 Mar 2019 21:08:29 +0000
+ * Date: Sat, 30 Mar 2019 00:16:05 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3463,7 +3463,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 29 Mar 2019 21:08:29 +0000',
+        date: 'Sat, 30 Mar 2019 00:16:05 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4652,13 +4652,116 @@
         // ---------------------------------------------------------------------
         pipe: function pipe(interpreter, options) {
             var settings = $.extend({
-                processArguments: true
+                processArguments: true,
+                overwrite: undefined,
+                redirects: {}
             }, options);
-            return function(command, term) {
-                var orig = {
-                    echo: term.echo,
-                    read: term.read
-                };
+            if (!$.isPlainObject(interpreter)) {
+                throw new Error('Only plain objects supported');
+            }
+            // -----------------------------------------------------------------
+            function parse_command(command) {
+                var tokens;
+                if (settings.processArguments) {
+                    tokens = $.terminal.parse_arguments(command);
+                } else {
+                    tokens = $.terminal.split_arguments(command);
+                }
+                return array_split(tokens, '|').map(function(args) {
+                    var cmd = {
+                        redirects: []
+                    };
+                    if (settings.redirects.length) {
+                        var redirect_names = settings.redirects.map(function(redirect) {
+                            return $.terminal.escape_regex(redirect.name);
+                        });
+                        var re = new RegExp('^(' + redirect_names.join('|') + ')$');
+                        var arg_redirects = array_split(args, re);
+                        if (arg_redirects.length > 1) {
+                            args = arg_redirects[0];
+                            var cmd_redirect, settings_redirect;
+                            for (var i = 1; i < arg_redirects.length; ++i) {
+                                var operator = false;
+                                if (arg_redirects[i].length === 1 && arg_redirects[i][0].match(re)) {
+                                    operator = arg_redirects[i][0];
+                                }
+                                if (operator) {
+                                    settings_redirect = settings.redirects.filter(function(redirect) {
+                                        return operator === redirect.name;
+                                    })[0];
+                                    cmd_redirect = {
+                                        fn: settings_redirect.callback,
+                                        args: []
+                                    };
+                                    cmd.redirects.push(cmd_redirect);
+                                } else {
+                                    cmd_redirect.args = arg_redirects[i];
+                                }
+                            }
+                        }
+                    }
+                    cmd.name = args[0];
+                    cmd.args = args.slice(1);
+                    return cmd;
+                });
+            }
+            // -----------------------------------------------------------------
+            function overwrite(command) {
+                return command.overwrite === true ||
+                    typeof command.overwrite === 'undefined' ||
+                    settings.overwrite === true;
+            }
+            // -----------------------------------------------------------------
+            function redirects(command) {
+                var defer = $.Deferred();
+                if (overwrite(command)) {
+                    overwrite_buffer = true;
+                }
+                function resolve() {
+                    overwrite_buffer = false;
+                    defer.resolve();
+                }
+                if (command.redirects.length) {
+                    var i = 0;
+                    (function loop() {
+                        var redirect = command.redirects[i++];
+                        if (redirect) {
+                            var fn = redirect.fn;
+                            var args = redirect.args;
+                            continuation(fn.apply(term, args), function(value) {
+                                echo_non_empty(value);
+                                loop();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    })();
+                } else {
+                    resolve();
+                }
+                return defer.promise();
+            }
+            // -----------------------------------------------------------------
+            function continuation(promise, callback) {
+                if (promise && promise.then) {
+                    promise.then(callback);
+                    return promise;
+                } else {
+                    callback();
+                }
+            }
+            // -----------------------------------------------------------------
+            function echo_non_empty(value) {
+                if (typeof value !== 'undefined') {
+                    term.echo(value);
+                }
+            }
+            // -----------------------------------------------------------------
+            function single_command(commands) {
+                return commands.length === 1 && !commands[0].redirects.length;
+            }
+            // -----------------------------------------------------------------
+            function make_tty() {
                 var tty = {
                     read: function(message, callback) {
                         if (typeof tty.buffer === 'undefined') {
@@ -4667,7 +4770,7 @@
                             var text = tty.buffer.replace(/\n$/, '');
                             delete tty.buffer;
                             var d = new $.Deferred();
-                            if ($.isFunction(callback)) {
+                            if (typeof callback === 'function') {
                                 callback(text);
                             }
                             d.resolve(text);
@@ -4675,43 +4778,46 @@
                         }
                     },
                     echo: function(string) {
+                        if (overwrite_buffer) {
+                            overwrite_buffer = false;
+                            tty.buffer = '';
+                        }
                         tty.buffer = (tty.buffer || '') + string + '\n';
                     }
                 };
-                var tokens;
-                if (settings.processArguments) {
-                    tokens = $.terminal.parse_arguments(command);
-                } else {
-                    tokens = $.terminal.split_arguments(command);
-                }
-                var commands = array_split(tokens, '|').map(function(args) {
-                    return {
-                        name: args[0],
-                        args: args.slice(1)
-                    };
-                });
+                return tty;
+            }
+            // -----------------------------------------------------------------
+            var overwrite_buffer;
+            var term;
+            var orig;
+            return function(command, t) {
+                term = t; // for echo_non_empty and function that call it
+                orig = {
+                    echo: term.echo,
+                    read: term.read
+                };
+                var tty = make_tty();
+                var commands = parse_command(command);
                 function loop(callback) {
                     var i = 0;
                     var d = new $.Deferred();
                     return function inner() {
                         var command = commands[i++];
                         if (command) {
-                            if (!commands[i]) {
-                                $.extend(term, {echo: orig.echo});
-                            }
-                            var ret = callback(command);
-                            if (ret && ret.then) {
-                                ret.then(inner);
-                            } else {
-                                inner();
-                            }
+                            redirects(command).then(function() {
+                                if (!commands[i]) {
+                                    $.extend(term, {echo: orig.echo});
+                                }
+                                continuation(callback(command), inner);
+                            });
                         } else {
                             d.resolve();
                         }
                         return d.promise();
                     };
                 }
-                if (commands.length === 1) {
+                if (single_command(commands)) {
                     var cmd = commands[0];
                     if (typeof interpreter === 'function') {
                         interpreter.call(term, command, term);
@@ -4727,23 +4833,12 @@
                 } else {
                     $.extend(term, tty);
                     var promise;
-                    if (typeof interpreter === 'function') {
-                        promise = loop(function(command) {
-                            return interpreter.call(term, command.command, term);
-                        })();
-                    } else if ($.isPlainObject(interpreter)) {
+                    if ($.isPlainObject(interpreter)) {
                         promise = loop(function(command) {
                             var inter = interpreter[command.name];
                             if (typeof inter === 'function') {
                                 var ret = inter.apply(term, command.args);
-                                if (ret && ret.then) {
-                                    ret.then(function(value) {
-                                        if (typeof value !== 'undefined') {
-                                            term.echo(value);
-                                        }
-                                    });
-                                }
-                                return ret;
+                                return continuation(ret, echo_non_empty);
                             } else if ($.isPlainObject(inter)) {
                                 throw new Error('You can\'t pipe nested ' +
                                                 'interpreter');
@@ -5005,7 +5100,20 @@
     function array_split(array, splitter) {
         var test_fn;
         if (splitter instanceof RegExp) {
-            test_fn = splitter.test.bind(splitter);
+            test_fn = function(item) {
+                if (item instanceof RegExp) {
+                    item = item.source;
+                } else if (typeof item !== 'string') {
+                    item = item.toString();
+                }
+                var m = item.match(splitter);
+                if (m) {
+                    if (m.length > 1) {
+                        return m.slice(1);
+                    }
+                    return true;
+                }
+            };
         } else {
             test_fn = function(item) {
                 return splitter === item;
@@ -5014,9 +5122,13 @@
         var output = [];
         var sub = [];
         array.forEach(function(item) {
-            if (test_fn(item)) {
+            var check = test_fn(item);
+            if (check) {
                 output.push(sub);
                 sub = [];
+                if (check instanceof Array) {
+                    output.push(check);
+                }
             } else {
                 sub.push(item);
             }
@@ -5024,6 +5136,7 @@
         output.push(sub);
         return output;
     }
+    window.array_split = array_split;
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
