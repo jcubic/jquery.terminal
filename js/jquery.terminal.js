@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 30 Mar 2019 15:18:11 +0000
+ * Date: Sun, 31 Mar 2019 21:21:07 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3463,7 +3463,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 30 Mar 2019 15:18:11 +0000',
+        date: 'Sun, 31 Mar 2019 21:21:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6042,7 +6042,11 @@
                 var result = interpreter.interpreter.call(self, command, self);
                 if (result) {
                     // auto pause/resume when user return promises
-                    self.pause(settings.softPause);
+                    // it should not pause when user return promise from read()
+                    if (!force_awake) {
+                        self.pause(settings.softPause);
+                    }
+                    force_awake = false;
                     // when for native Promise object work only in jQuery 3.x
                     if (is_function(result.done || result.then)) {
                         (result.done || result.then).call(result, show);
@@ -7767,6 +7771,8 @@
             // :: wrapper for common use case
             // -------------------------------------------------------------
             read: function(message, success, cancel) {
+                // return from read() should not pause terminal
+                force_awake = true;
                 var defer = jQuery.Deferred();
                 var read = false;
                 self.push(function(string) {
@@ -8125,6 +8131,7 @@
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
         var terminal_id = terminals.length();
+        var force_awake = false; // flag used to don't pause when user return read() call
         var num_chars; // numer of chars in line
         var num_rows; // number of lines that fit without scrollbar
         var command; // for tab completion
