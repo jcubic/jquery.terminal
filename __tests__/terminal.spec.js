@@ -1681,10 +1681,13 @@ describe('Terminal utils', function() {
     });
     describe('$.terminal.pipe', function() {
         function get_lines(term) {
-            return term.find('.terminal-output .command').last().nextUntil().map(function() {
+            return last_divs(term).map(function() {
                 return a0($(this).text());
             }).get();
         };
+        function last_divs(term) {
+            return term.find('.terminal-output .command').last().nextUntil();
+        }
         it('should pipe sync command', function() {
             var term = $('<div/>').terminal($.terminal.pipe({
                 output: function() {
@@ -1797,6 +1800,80 @@ describe('Terminal utils', function() {
                     expect(fn.mock.calls[1][0]).toEqual('foo');
                 });
             });
+        });
+        it('should create nested interpeter', function() {
+            var foo = jest.fn();
+            var term = $('<div/>').terminal($.terminal.pipe({
+                push: function() {
+                    this.push({
+                        foo
+                    }, {
+                        prompt: 'push> '
+                    });
+                },
+                'new': {
+                    foo
+                }
+            }), {
+                checkArity: false
+            });
+            return term.exec(['push', 'foo "hello"']).then(() => {
+                expect(foo.mock.calls.length).toEqual(1);
+                expect(term.get_prompt()).toEqual('push> ');
+                expect(foo.mock.calls[0][0]).toEqual('hello');
+                return term.pop().exec(['new', 'foo "hello"']).then(() => {
+                    expect(foo.mock.calls.length).toEqual(2);
+                    expect(term.get_prompt()).toEqual('new> ');
+                    expect(foo.mock.calls[1][0]).toEqual('hello');
+                });
+            });
+        });
+        it('should show errors', function() {
+            var foo = jest.fn();
+            var term = $('<div/>').terminal($.terminal.pipe({
+                push: function() {
+                    this.push({
+                        foo
+                    }, {
+                        prompt: 'push> '
+                    });
+                },
+                'new': {
+                    foo
+                }
+            }), {
+                checkArity: false
+            });
+            var strings = $.terminal.defaults.strings;
+            return term.exec('push | new').then(() => {
+                expect(get_lines(term)).toEqual([strings.pipeNestedInterpreterError]);
+                expect(last_divs(term).last().find('.error').length).toEqual(1);
+                return term.exec('hello | baz').then(() => {
+                    expect(get_lines(term)).toEqual([
+                        sprintf(strings.commandNotFound, 'hello'),
+                        sprintf(strings.commandNotFound, 'baz')
+                    ]);
+                    expect(last_divs(term).last().find('.error').length).toEqual(1);
+                    return term.exec('quux').then(() => {
+                        expect(get_lines(term)).toEqual([sprintf(strings.commandNotFound, 'quux')]);
+                        expect(last_divs(term).last().find('.error').length).toEqual(1);
+                        var fn = jest.fn();
+                        term.settings().onCommandNotFound = fn;
+                        return term.exec('quux').then(() => {
+                            expect(get_lines(term)).toEqual([]);
+                            expect(fn.mock.calls.length).toEqual(1);
+                            expect(fn.mock.calls[0][0]).toEqual('quux');
+                            return term.exec('hello | quux').then(() => {
+                                expect(fn.mock.calls.length).toEqual(2);
+                                expect(fn.mock.calls[1][0]).toEqual('hello | quux');
+                            });
+                        });
+                    });
+                });
+            });
+        });
+        it('should throw', function() {
+            expect(() => $.terminal.pipe($.noop)).toThrow();
         });
         describe('redirects', function() {
             var commands = {

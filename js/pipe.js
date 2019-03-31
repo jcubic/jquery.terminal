@@ -13,7 +13,7 @@
  * Released under the MIT license
  *
  */
-/* global define, global, require, module */
+/* global define, global, require, module, sprintf */
 (function(factory) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {
@@ -50,9 +50,9 @@
         factory(root.jQuery);
     }
 })(function($) {
-    // -----------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------
     // :: split over array - returns array of arrays
-    // -----------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------
     function array_split(array, splitter) {
         var test_fn;
         if (splitter instanceof RegExp) {
@@ -92,16 +92,26 @@
         output.push(sub);
         return output;
     }
+    // -----------------------------------------------------------------------------------
+    function is_function(obj) {
+        return typeof obj === 'function';
+    }
+    // -----------------------------------------------------------------------------------
+    $.terminal.defaults.strings.pipeNestedInterpreterError = 'You can\'t pipe nested ' +
+        'interpreter';
     $.terminal.pipe = function pipe(interpreter, options) {
+        if (!$.isPlainObject(interpreter)) {
+            throw new Error('Pipe can be used only with plain objects!');
+        }
         var settings = $.extend({
             processArguments: true,
             overwrite: undefined,
             redirects: {}
         }, options);
-        if (!$.isPlainObject(interpreter)) {
-            throw new Error('Only plain objects supported');
-        }
-        // -----------------------------------------------------------------
+        var overwrite_buffer;
+        var term;
+        var orig;
+        // -------------------------------------------------------------------------------
         function parse_redirect(args, re) {
             var redirects = [];
             if (args.length) {
@@ -130,7 +140,7 @@
             }
             return redirects;
         }
-        // -----------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         function parse_command(command) {
             var tokens;
             if (settings.processArguments) {
@@ -158,13 +168,13 @@
                 return cmd;
             });
         }
-        // -----------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         function overwrite(command) {
             return command.overwrite === true ||
                 typeof command.overwrite === 'undefined' ||
                 settings.overwrite === true;
         }
-        // -----------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         function redirects(command) {
             var defer = $.Deferred();
             if (overwrite(command)) {
@@ -194,7 +204,7 @@
             }
             return defer.promise();
         }
-        // -----------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         function continuation(promise, callback) {
             if (promise && promise.then) {
                 promise.then(callback);
@@ -203,27 +213,31 @@
                 callback();
             }
         }
-        // -----------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         function echo_non_empty(value) {
             if (typeof value !== 'undefined') {
                 term.echo(value);
             }
         }
-        // -----------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         function single_command(commands) {
             return commands.length === 1 && !commands[0].redirects.length;
         }
-        // -----------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         function make_tty() {
             var tty = {
                 read: function(message, callback) {
                     if (typeof tty.buffer === 'undefined') {
-                        return orig.read.apply(term, arguments);
+                        term.resume();
+                        term.push = orig.push;
+                        var ret = orig.read.apply(term, arguments);
+                        term.push = this.push;
+                        return ret;
                     } else {
                         var text = tty.buffer.replace(/\n$/, '');
                         delete tty.buffer;
                         var d = new $.Deferred();
-                        if (typeof callback === 'function') {
+                        if (is_function(callback)) {
                             callback(text);
                         }
                         d.resolve(text);
@@ -236,19 +250,37 @@
                         tty.buffer = '';
                     }
                     tty.buffer = (tty.buffer || '') + string + '\n';
+                },
+                push: function() {
+                    this.error(strings(this).pipeNestedInterpreterError);
                 }
             };
             return tty;
         }
-        // -----------------------------------------------------------------
-        var overwrite_buffer;
-        var term;
-        var orig;
+        // -------------------------------------------------------------------------------
+        function strings(term) {
+            var term_settings = term.settings();
+            return $.extend(
+                {},
+                $.terminal.defaults.strings,
+                term_settings && term_settings.strings || {}
+            );
+        }
+        // -------------------------------------------------------------------------------
+        function error(message) {
+            var echo = term.echo;
+            term.echo = orig.echo;
+            term.error(message);
+            term.echo = echo;
+        }
+        // -------------------------------------------------------------------------------
         return function(command, t) {
             term = t; // for echo_non_empty and function that call it
+            var term_settings = term.settings();
             orig = {
                 echo: term.echo,
-                read: term.read
+                read: term.read,
+                push: term.push
             };
             var tty = make_tty();
             var commands = parse_command(command);
@@ -260,9 +292,14 @@
                     if (command) {
                         redirects(command).then(function() {
                             if (!commands[i]) {
-                                $.extend(term, {echo: orig.echo});
+                                $.extend(term, {echo: orig.echo, push: orig.push});
                             }
-                            continuation(callback(command), inner);
+                            var ret = callback(command);
+                            if (ret === false) {
+                                inner();
+                            } else {
+                                return continuation(ret, inner);
+                            }
                         });
                     } else {
                         d.resolve();
@@ -272,28 +309,41 @@
             }
             if (single_command(commands)) {
                 var cmd = commands[0];
-                term.push(interpreter[cmd.name], {
-                    prompt: cmd.name + '> ',
-                    name: cmd.name,
-                    completion: Object.keys(interpreter[cmd.name])
-                });
+                if (is_function(interpreter[cmd.name])) {
+                    interpreter[cmd.name].apply(term, cmd.args);
+                } else if ($.isPlainObject(interpreter[cmd.name])) {
+                    term.push(interpreter[cmd.name], {
+                        prompt: cmd.name + '> ',
+                        name: cmd.name,
+                        completion: Object.keys(interpreter[cmd.name])
+                    });
+                } else if (is_function(term_settings.onCommandNotFound)) {
+                    term_settings.onCommandNotFound.call(term, command, term);
+                } else {
+                    error(sprintf(strings(term).commandNotFound, cmd.name));
+                }
             } else {
                 $.extend(term, tty);
-                var promise;
-                if ($.isPlainObject(interpreter)) {
-                    promise = loop(function(command) {
-                        var inter = interpreter[command.name];
-                        if (typeof inter === 'function') {
-                            var ret = inter.apply(term, command.args);
-                            return continuation(ret, echo_non_empty);
-                        } else if ($.isPlainObject(inter)) {
-                            throw new Error('You can\'t pipe nested ' +
-                                            'interpreter');
+                var stop_error = false;
+                var promise = loop(function(cmd) {
+                    var inter = interpreter[cmd.name];
+                    if (is_function(inter)) {
+                        var ret = inter.apply(term, cmd.args);
+                        return continuation(ret, echo_non_empty);
+                    } else {
+                        if ($.isPlainObject(inter)) {
+                            error(strings(term).pipeNestedInterpreterError);
+                        } else if (is_function(term_settings.onCommandNotFound)) {
+                            if (!stop_error) {
+                                term_settings.onCommandNotFound.call(term, command, term);
+                                stop_error = true;
+                            }
                         } else {
-                            throw new Error('Command not found');
+                            error(sprintf(strings(term).commandNotFound, cmd.name));
                         }
-                    })();
-                }
+                        return false;
+                    }
+                })();
                 if (promise) {
                     return promise.then(function() {
                         $.extend(term, orig);
