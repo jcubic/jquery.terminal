@@ -111,6 +111,8 @@
         var overwrite_buffer;
         var term;
         var orig;
+        var command_index;
+        var process_redirect = false;
         // -------------------------------------------------------------------------------
         function parse_redirect(args, re) {
             var redirects = [];
@@ -143,7 +145,7 @@
         // -------------------------------------------------------------------------------
         function parse_command(command) {
             var tokens;
-            if (settings.processArguments) {
+            if (term.settings().processArguments) {
                 tokens = $.terminal.parse_arguments(command);
             } else {
                 tokens = $.terminal.split_arguments(command);
@@ -227,15 +229,24 @@
         function make_tty() {
             var tty = {
                 read: function(message, callback) {
-                    if (typeof tty.buffer === 'undefined') {
+                    // in case we return read() call from interpreter
+                    // we can't access force_awake flag in term (it's invoked later)
+                    if (term.paused()) {
                         term.resume();
+                    }
+                    if ((command_index === 0 && !tty.buffer) || process_redirect) {
                         term.push = orig.push;
+                        term.echo = orig.echo;
                         var ret = orig.read.apply(term, arguments);
+                        term.echo = this.echo;
                         term.push = this.push;
                         return ret;
                     } else {
-                        var text = tty.buffer.replace(/\n$/, '');
-                        delete tty.buffer;
+                        var text;
+                        if (tty.buffer) {
+                            text = tty.buffer.replace(/\n$/, '');
+                            delete tty.buffer;
+                        }
                         var d = new $.Deferred();
                         if (is_function(callback)) {
                             callback(text);
@@ -275,6 +286,7 @@
         }
         // -------------------------------------------------------------------------------
         return function(command, t) {
+            command_index = -1;
             term = t; // for echo_non_empty and function that call it
             var term_settings = term.settings();
             orig = {
@@ -287,14 +299,17 @@
             function loop(callback) {
                 var i = 0;
                 var d = new $.Deferred();
-                return function inner() {
-                    var command = commands[i++];
-                    if (command) {
-                        redirects(command).then(function() {
+                return (function inner() {
+                    var cmd = commands[i++];
+                    if (cmd) {
+                        process_redirect = true;
+                        redirects(cmd).then(function() {
+                            process_redirect = false;
                             if (!commands[i]) {
                                 $.extend(term, {echo: orig.echo, push: orig.push});
                             }
-                            var ret = callback(command);
+                            command_index++;
+                            var ret = callback(cmd);
                             if (ret === false) {
                                 inner();
                             } else {
@@ -305,12 +320,12 @@
                         d.resolve();
                     }
                     return d.promise();
-                };
+                })();
             }
             if (single_command(commands)) {
                 var cmd = commands[0];
                 if (is_function(interpreter[cmd.name])) {
-                    interpreter[cmd.name].apply(term, cmd.args);
+                    return interpreter[cmd.name].apply(term, cmd.args);
                 } else if ($.isPlainObject(interpreter[cmd.name])) {
                     term.push(interpreter[cmd.name], {
                         prompt: cmd.name + '> ',
@@ -343,12 +358,10 @@
                         }
                         return false;
                     }
-                })();
-                if (promise) {
-                    return promise.then(function() {
-                        $.extend(term, orig);
-                    });
-                }
+                });
+                return promise.then(function() {
+                    $.extend(term, orig);
+                });
             }
         };
     };

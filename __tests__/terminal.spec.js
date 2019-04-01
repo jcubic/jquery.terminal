@@ -147,6 +147,11 @@ function spy(obj, method) {
     }
     return spy;
 }
+function delay(delay, fn = $.noop) {
+    return new Promise((resolve) => {
+        setTimeout(() => {fn();resolve();}, delay);
+    });
+}
 function count(spy) {
     if (spy.calls.count) {
         return spy.calls.count();
@@ -1680,13 +1685,16 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.pipe', function() {
-        function get_lines(term) {
-            return last_divs(term).map(function() {
+        function get_lines(term, fn = last_divs) {
+            return fn(term).map(function() {
                 return a0($(this).text());
             }).get();
-        };
+        }
         function last_divs(term) {
             return term.find('.terminal-output .command').last().nextUntil();
+        }
+        function out(term) {
+            return get_lines(term, term => term.find('.terminal-output > div'));
         }
         it('should pipe sync command', function() {
             var term = $('<div/>').terminal($.terminal.pipe({
@@ -1784,22 +1792,35 @@ describe('Terminal utils', function() {
                 expect(get_lines(term)).toEqual(['0:foo', '1:foo']);
             });
         });
-        it('should prompt for input', function() {
+        it('should swallow and prompt for input', async function() {
+            function de(...args) {
+                return new Promise((resolve) => {
+                    $.when.apply($, args).then(resolve);
+                });
+            }
             var fn = jest.fn();
+            var prompt = '>>> ';
             var term = $('<div/>').terminal($.terminal.pipe({
                 command_1: fn,
-                command_2: function() {
-                    this.read('input: ').then(fn);
+                command_2: function(arg) {
+                    return this.read('input: ').then(fn);
                 }
-            }));
-            return term.exec('command_1 | command_2').then(() => {
-                expect(term.get_prompt()).toEqual('input: ');
-                expect(fn.mock.calls.length).toEqual(1);
-                return term.exec('foo').then(function() {
-                    expect(fn.mock.calls.length).toEqual(2);
-                    expect(fn.mock.calls[1][0]).toEqual('foo');
-                });
+            }), {
+                prompt,
+                greetings: false
             });
+            await term.exec('command_1 | command_2');
+            expect(term.get_prompt()).toEqual(prompt);
+            expect(fn.mock.calls.length).toEqual(2);
+            expect(fn.mock.calls[1][0]).toEqual(undefined);
+            term.exec('command_2 | command_1 x');
+            await delay(100);
+            expect(term.get_prompt()).toEqual('input: ');
+            await de(term.exec('foo'));
+            await delay(100);
+            expect(fn.mock.calls.length).toEqual(4);
+            expect(fn.mock.calls[2][0]).toEqual('foo');
+            expect(fn.mock.calls[3][0]).toEqual('x');
         });
         it('should create nested interpeter', function() {
             var foo = jest.fn();
@@ -1874,6 +1895,19 @@ describe('Terminal utils', function() {
         });
         it('should throw', function() {
             expect(() => $.terminal.pipe($.noop)).toThrow();
+        });
+        it('should split command', function() {
+            var fn = jest.fn();
+            var term = $('<div/>').terminal($.terminal.pipe({
+                foo: fn
+            }), {
+                processArguments: false
+            });
+            return term.exec('foo 10 20 /xx/').then(() => {
+                ['10', '20', '/xx/'].forEach((arg, i) => {
+                    expect(fn.mock.calls[0][i]).toEqual(arg);
+                });
+            });
         });
         describe('redirects', function() {
             var commands = {
@@ -1973,7 +2007,7 @@ describe('Terminal utils', function() {
                         }
                     ]
                 }));
-                return term.exec('input <echo "hello" world | grep /^[0-9]:h/').then(() => {
+                return term.exec('input <echo "hello" world 10 | grep /^[0-9]:h/').then(() => {
                     expect(get_lines(term)).toEqual(['0:hello']);
                     return term.exec('input <promise "hello" world | grep /^[0-9]:h/').then(() => {
                         expect(get_lines(term)).toEqual(['0:hello']);
