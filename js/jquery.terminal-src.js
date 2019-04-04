@@ -8252,10 +8252,14 @@
                         event['image'] = data_uri(object);
                     }
                     var ret = fire_event('onPaste', [event]);
-                    if (ret && is_function(ret.then)) {
-                        return ret.then(function(ret) {
+                    if (ret) {
+                        if (is_function(ret.then)) {
+                            return ret.then(function(ret) {
+                                echo(ret, true);
+                            });
+                        } else {
                             echo(ret, true);
-                        });
+                        }
                     } else {
                         echo(event.image || event.text, true);
                     }
