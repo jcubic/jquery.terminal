@@ -128,11 +128,15 @@ global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
+require('../js/pipe')(global.$);
 
 jest.setTimeout(10000);
 
 function nbsp(string) {
     return string.replace(/ /g, '\xA0');
+}
+function a0(string) {
+    return string.replace(/\xA0/g, ' ');
 }
 function spy(obj, method) {
     var spy = spyOn(obj, method);
@@ -142,6 +146,11 @@ function spy(obj, method) {
         spy.and.callThrough();
     }
     return spy;
+}
+function delay(delay, fn = $.noop) {
+    return new Promise((resolve) => {
+        setTimeout(() => {fn();resolve();}, delay);
+    });
 }
 function count(spy) {
     if (spy.calls.count) {
@@ -751,6 +760,48 @@ describe('Terminal utils', function() {
                                    'bold;" data-text="y">y</span><span styl' +
                                    'e="font-weight:bold;" data-text="z">z</span>');
         });
+        it('should handle JSON', function() {
+            var input = '[[;;;;;{"title": "foo", "data-foo": "bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: [/^data-/, 'title']
+            });
+            expect(output).toEqual('<span title="foo" data-foo="bar" data-text=' +
+                                   '"foo">foo</span>');
+        });
+        it('should not allow attributes', function() {
+            var input = '[[;;;;;{"title": "foo", "data-foo": "bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: []
+            });
+            expect(output).toEqual('<span data-text="foo">foo</span>');
+        });
+        it('should filter out attribute in JSON', function() {
+            var input = '[[;;;;;{"title": "foo", "data-foo": "bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: ['title']
+            });
+            expect(output).toEqual('<span title="foo" data-text=' +
+                                   '"foo">foo</span>');
+        });
+        it('should parse JSON if semicolon in value', function() {
+            var input = '[[;;;;;{"title": "foo ; bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: ['title']
+            });
+            expect(output).toEqual('<span title="foo ; bar" data-text=' +
+                                   '"foo">foo</span>');
+        });
+        it("should not duplicate and don't overwrite data-text", function() {
+            var input = '[[;;;;;{"data-text": "bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: []
+            });
+            expect(output).toEqual('<span data-text="foo">foo</span>');
+            output = $.terminal.format(input, {
+                allowedAttributes: ['data-text']
+            });
+            expect(output).toEqual('<span data-text="foo">foo</span>');
+        });
     });
     describe('$.terminal.strip', function() {
         it('should remove formatting', function() {
@@ -768,7 +819,7 @@ describe('Terminal utils', function() {
     describe('$.terminal.apply_formatters', function() {
         var formatters;
         beforeEach(function() {
-            formatters = $.terminal.defaults.formatters;
+            formatters = $.terminal.defaults.formatters.slice();
         });
         afterEach(function() {
             $.terminal.defaults.formatters = formatters;
@@ -1604,6 +1655,410 @@ describe('Terminal utils', function() {
             test_positions('foo foo foo', /f/g, 'bar', [
                 0, 3, 4, 5, 6, 9, 10, 11, 12, 15, 16, 17
             ]);
+        });
+    });
+    describe('$.terminal.iterator', function() {
+        var input = ["\u263a\ufe0f", "x", "x", "x" ,"x", "\u261d\ufe0f", "x", "x", "x", "x",
+                     "\u0038\ufe0f\u20e3", "x","x","x","\u0038\ufe0f\u20e3"];
+        it('should work with for of', function() {
+            var i = 0;
+            for (let item of $.terminal.iterator(input.join(''))) {
+                expect(item).toEqual(input[i++]);
+            }
+            expect(input).toEqual($.terminal.split_characters(input.join('')));
+        });
+        it('should work with iterator protocol', function() {
+            var iterator = $.terminal.iterator(input.join(''))[Symbol.iterator]();
+            var i = 0;
+            while (true) {
+                var item = iterator.next();
+                if (item.done) {
+                    break;
+                }
+                expect(item.value).toEqual(input[i++]);
+            }
+        });
+    });
+    
+    describe('$.terminal.new_formatter', function() {
+        function nested_index() {
+            var formatters = $.terminal.defaults.formatters;
+            for (let i in formatters) {
+                if (formatters[i] === $.terminal.nested_formatting) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        var formatters;
+        beforeEach(function() {
+            formatters = $.terminal.defaults.formatters.slice();
+        });
+        afterEach(function() {
+            $.terminal.defaults.formatters = formatters;
+        });
+        it('should add new formatters', function() {
+            var formatter_1 = function() {};
+            var formatter_2 = [/xxx/, 'xxx'];
+            $.terminal.new_formatter(formatter_1);
+            var formatters = $.terminal.defaults.formatters;
+            var n = nested_index();
+            expect(n !== -1).toBeTruthy();
+            expect(formatters[n]).toBe($.terminal.nested_formatting);
+            expect(formatters[n - 1]).toBe(formatter_1);
+            $.terminal.new_formatter(formatter_2);
+            n = nested_index();
+            expect(formatters[n]).toBe($.terminal.nested_formatting);
+            expect(formatters[n - 1]).toBe(formatter_2);
+            expect(formatters[n - 2]).toBe(formatter_1);
+        });
+        it('should add formatter when no nested_formatting', function() {
+            var formatter_1 = function() {};
+            var formatter_2 = [/xxx/, 'xxx'];
+            var formatters = $.terminal.defaults.formatters;
+            var n = nested_index();
+            expect(n !== -1).toBeTruthy();
+            formatters.splice(n, 1);
+            expect(nested_index()).toEqual(-1);
+            $.terminal.new_formatter(formatter_1);
+            $.terminal.new_formatter(formatter_2);
+            expect(formatters[formatters.length - 2]).toBe(formatter_1);
+            expect(formatters[formatters.length - 1]).toBe(formatter_2);
+        });
+    });
+    describe('$.terminal.pipe', function() {
+        function get_lines(term, fn = last_divs) {
+            return fn(term).map(function() {
+                return a0($(this).text());
+            }).get();
+        }
+        function last_divs(term) {
+            return term.find('.terminal-output .command').last().nextUntil();
+        }
+        function out(term) {
+            return get_lines(term, term => term.find('.terminal-output > div'));
+        }
+        it('should pipe sync command', function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                output: function() {
+                    this.echo('foo');
+                },
+                grep: function(re) {
+                    return this.read('').then((str) => {
+                        var lines = str.split('\n');
+                        lines.forEach((str) => {
+                            if (str.match(re)) {
+                                this.echo(str);
+                            }
+                        });
+                    });
+                },
+                input: function() {
+                    return this.read('').then((str) => {
+                        this.echo('sync: ' + str);
+                    });
+                }
+            }));
+            return term.exec('output | grep /foo/').then(function() {
+                expect(get_lines(term)).toEqual(['foo']);
+            });
+        });
+        it('should filter lines', function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                output: function(arg) {
+                    this.echo(arg);
+                },
+                grep: function(re) {
+                    return this.read('').then((str) => {
+                        var lines = str.split('\n');
+                        lines.forEach((str) => {
+                            if (str.match(re)) {
+                                this.echo(str);
+                            }
+                        });
+                    });
+                },
+                input: function() {
+                    return this.read('').then((str) => {
+                        str.split('\n').forEach((str, i) => {
+                            this.echo(i + ':' + str);
+                        });
+                    });
+                }
+            }));
+            return term.exec('output "foo\\nquux\\nbaz\\nfoo\\nbar" | grep /foo|bar/').then(() => {
+                expect(get_lines(term)).toEqual(['foo', 'foo', 'bar']);
+                return term.exec('output "foo\\nquux\\nbaz\\nfoo\\nbar" | grep /foo|bar/ | input').then(() => {
+                    expect(get_lines(term)).toEqual([
+                        '0:foo',
+                        '1:foo',
+                        '2:bar'
+                    ]);
+                });
+            });
+        });
+        it('should work with async commands', function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                output: function(arg) {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            this.echo(arg);
+                            setTimeout(() => resolve(arg), 200);
+                        }, 200);
+                    });
+                },
+                grep: function(re) {
+                    return this.read('').then((str) => {
+                        return new Promise((resolve) => {
+                            setTimeout(() => {
+                                var lines = str.split('\n');
+                                lines.forEach((str) => {
+                                    if (str.match(re)) {
+                                        this.echo(str);
+                                    }
+                                });
+                                resolve();
+                            }, 200);
+                        });
+                    });
+                },
+                input: function() {
+                    return this.read('').then((str) => {
+                        str.split('\n').forEach((str, i) => {
+                            this.echo(i + ':' + str);
+                        });
+                    });
+                }
+            }));
+            return term.exec('output "foo\\nbar" | grep foo | input').then(() => {
+                expect(get_lines(term)).toEqual(['0:foo', '1:foo']);
+            });
+        });
+        it('should swallow and prompt for input', async function() {
+            function de(...args) {
+                return new Promise((resolve) => {
+                    $.when.apply($, args).then(resolve);
+                });
+            }
+            var fn = jest.fn();
+            var prompt = '>>> ';
+            var term = $('<div/>').terminal($.terminal.pipe({
+                command_1: fn,
+                command_2: function(arg) {
+                    return this.read('input: ').then(fn);
+                }
+            }), {
+                prompt,
+                greetings: false
+            });
+            await term.exec('command_1 | command_2');
+            expect(term.get_prompt()).toEqual(prompt);
+            expect(fn.mock.calls.length).toEqual(2);
+            expect(fn.mock.calls[1][0]).toEqual(undefined);
+            term.exec('command_2 | command_1 x');
+            await delay(100);
+            expect(term.get_prompt()).toEqual('input: ');
+            await de(term.exec('foo'));
+            await delay(100);
+            expect(fn.mock.calls.length).toEqual(4);
+            expect(fn.mock.calls[2][0]).toEqual('foo');
+            expect(fn.mock.calls[3][0]).toEqual('x');
+        });
+        it('should create nested interpeter', function() {
+            var foo = jest.fn();
+            var term = $('<div/>').terminal($.terminal.pipe({
+                push: function() {
+                    this.push({
+                        foo
+                    }, {
+                        prompt: 'push> '
+                    });
+                },
+                'new': {
+                    foo
+                }
+            }), {
+                checkArity: false
+            });
+            return term.exec(['push', 'foo "hello"']).then(() => {
+                expect(foo.mock.calls.length).toEqual(1);
+                expect(term.get_prompt()).toEqual('push> ');
+                expect(foo.mock.calls[0][0]).toEqual('hello');
+                return term.pop().exec(['new', 'foo "hello"']).then(() => {
+                    expect(foo.mock.calls.length).toEqual(2);
+                    expect(term.get_prompt()).toEqual('new> ');
+                    expect(foo.mock.calls[1][0]).toEqual('hello');
+                });
+            });
+        });
+        it('should show errors', function() {
+            var foo = jest.fn();
+            var term = $('<div/>').terminal($.terminal.pipe({
+                push: function() {
+                    this.push({
+                        foo
+                    }, {
+                        prompt: 'push> '
+                    });
+                },
+                'new': {
+                    foo
+                }
+            }), {
+                checkArity: false
+            });
+            var strings = $.terminal.defaults.strings;
+            return term.exec('push | new').then(() => {
+                expect(get_lines(term)).toEqual([strings.pipeNestedInterpreterError]);
+                expect(last_divs(term).last().find('.error').length).toEqual(1);
+                return term.exec('hello | baz').then(() => {
+                    expect(get_lines(term)).toEqual([
+                        sprintf(strings.commandNotFound, 'hello'),
+                        sprintf(strings.commandNotFound, 'baz')
+                    ]);
+                    expect(last_divs(term).last().find('.error').length).toEqual(1);
+                    return term.exec('quux').then(() => {
+                        expect(get_lines(term)).toEqual([sprintf(strings.commandNotFound, 'quux')]);
+                        expect(last_divs(term).last().find('.error').length).toEqual(1);
+                        var fn = jest.fn();
+                        term.settings().onCommandNotFound = fn;
+                        return term.exec('quux').then(() => {
+                            expect(get_lines(term)).toEqual([]);
+                            expect(fn.mock.calls.length).toEqual(1);
+                            expect(fn.mock.calls[0][0]).toEqual('quux');
+                            return term.exec('hello | quux').then(() => {
+                                expect(fn.mock.calls.length).toEqual(2);
+                                expect(fn.mock.calls[1][0]).toEqual('hello | quux');
+                            });
+                        });
+                    });
+                });
+            });
+        });
+        it('should throw', function() {
+            expect(() => $.terminal.pipe($.noop)).toThrow();
+        });
+        it('should split command', function() {
+            var fn = jest.fn();
+            var term = $('<div/>').terminal($.terminal.pipe({
+                foo: fn
+            }), {
+                processArguments: false
+            });
+            return term.exec('foo 10 20 /xx/').then(() => {
+                ['10', '20', '/xx/'].forEach((arg, i) => {
+                    expect(fn.mock.calls[0][i]).toEqual(arg);
+                });
+            });
+        });
+        describe('redirects', function() {
+            var commands = {
+                async_output: function(x) {
+                    return new Promise((resolve) => {
+                        setTimeout(() => resolve(x), 100);
+                    });
+                },
+                output: function(x) {
+                    this.echo(x);
+                },
+                grep: function(re) {
+                    return this.read('').then((str) => {
+                        var lines = str.split('\n');
+                        lines.forEach((str) => {
+                            if (str.match(re)) {
+                                this.echo(str);
+                            }
+                        });
+                    });
+                },
+                input: function() {
+                    return this.read('').then((str) => {
+                        str.split('\n').forEach((str, i) => {
+                            this.echo(i + ':' + str);
+                        });
+                    });
+                }
+            };
+            it('should redirect simple sync input', function() {
+                var term = $('<div/>').terminal($.terminal.pipe(commands, {
+                    redirects: [
+                        {
+                            name: '<<<',
+                            callback: function(...args) {
+                                args.forEach(this.echo);
+                            }
+                        }
+                    ]
+                }));
+                return term.exec('input <<< "hello" world').then(() => {
+                    expect(get_lines(term)).toEqual(['0:hello', '1:world']);
+                });
+            });
+            it('should redirect async input', function() {
+                var term = $('<div/>').terminal($.terminal.pipe(commands, {
+                    redirects: [
+                        {
+                            name: '<echo',
+                            callback: function(...args) {
+                                return new Promise((resolve) => {
+                                    setTimeout(() => {
+                                        args.forEach(this.echo);
+                                        resolve();
+                                    }, 100);
+                                });
+                            }
+                        },
+                        {
+                            name: '<promise',
+                            callback: function(...args) {
+                                return new Promise((resolve) => {
+                                    setTimeout(() => resolve(args.join('\n')), 100);
+                                });
+                            }
+                        }
+                    ]
+                }));
+                return term.exec('input <echo "hello" world').then(() => {
+                    expect(get_lines(term)).toEqual(['0:hello', '1:world']);
+                    return term.exec('input <promise "hello" world').then(() => {
+                        expect(get_lines(term)).toEqual(['0:hello', '1:world']);
+                    });
+                });
+            });
+            it('should pipe with redirect', function() {
+                var term = $('<div/>').terminal($.terminal.pipe(commands, {
+                    redirects: [
+                        {
+                            name: '<echo',
+                            callback: function(...args) {
+                                return new Promise((resolve) => {
+                                    setTimeout(() => {
+                                        args.forEach(this.echo);
+                                        resolve();
+                                    }, 100);
+                                });
+                            }
+                        },
+                        {
+                            name: '<promise',
+                            callback: function(...args) {
+                                return new Promise((resolve) => {
+                                    setTimeout(() => resolve(args.join('\n')), 100);
+                                });
+                            }
+                        }
+                    ]
+                }));
+                return term.exec('input <echo "hello" world 10 | grep /^[0-9]:h/').then(() => {
+                    expect(get_lines(term)).toEqual(['0:hello']);
+                    return term.exec('input <promise "hello" world | grep /^[0-9]:h/').then(() => {
+                        expect(get_lines(term)).toEqual(['0:hello']);
+                        return term.exec('input <promise "hello" world | grep /^h/ <echo "hi"').then(() => {
+                            expect(get_lines(term)).toEqual(['hi']);
+                        });
+                    });
+                });
+            });
         });
     });
 });
@@ -2842,7 +3297,7 @@ describe('Terminal plugin', function() {
             });
             it('should ignore system.describe method', function() {
                 term = $('<div/>').appendTo('body').terminal('/test', {
-                    ignoreSystemDescribe: true,
+                    describe: false,
                     completion: true
                 });
                 expect(term.export_view().interpreters.top().completion).toBeFalsy();
@@ -3165,9 +3620,9 @@ describe('Terminal plugin', function() {
                 done();
             }, 200);
         });
-        it('should insert tab when ignoreSystemDescribe', function() {
+        it('should insert tab when describe === false', function() {
             term = $('<div/>').appendTo('body').terminal('/test', {
-                ignoreSystemDescribe: true,
+                describe: false,
                 completion: true
             });
             term.insert('f');

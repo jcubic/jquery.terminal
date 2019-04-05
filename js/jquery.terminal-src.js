@@ -1376,10 +1376,12 @@
                 no_keydown = true;
 
                 self.set('');
+                var promise;
                 if (settings.commands) {
-                    settings.commands.call(self, tmp);
+                    promise = settings.commands.call(self, tmp);
                 }
-                if (is_function(prompt)) {
+                if (is_function(prompt) &&
+                    (promise && promise.isResolved() || !promise)) {
                     draw_prompt();
                 }
                 clip.val('');
@@ -1475,10 +1477,12 @@
                 redraw();
             },
             'F12': return_true, // Allow Firebug
-            'END': end,
-            'CTRL+E': end,
-            'HOME': home,
-            'CTRL+A': home,
+            'END': end(true),
+            'CTRL+END': end(),
+            'CTRL+E': end(),
+            'HOME': home(true),
+            'CTRL+HOME': home(),
+            'CTRL+A': home(),
             'SHIFT+INSERT': paste_event,
             'CTRL+SHIFT+T': return_true, // open closed tab
             'CTRL+W': delete_word_backward(true),
@@ -1658,12 +1662,47 @@
             return false;
         }
         // -------------------------------------------------------------------------------
-        function home() {
-            self.position(0);
+        function home(line) {
+            function home() {
+                self.position(0);
+            }
+            if (line) {
+                return function() {
+                    if (command.match(/\n/)) {
+                        var string = command.substring(0, self.position());
+                        self.position(string.lastIndexOf('\n') + 1);
+                    } else {
+                        home();
+                    }
+                };
+            } else {
+                return home;
+            }
         }
         // -------------------------------------------------------------------------------
-        function end() {
-            self.position(text(command).length);
+        function end(line) {
+            function end() {
+                self.position(text(command).length);
+            }
+            if (line) {
+                return function() {
+                    if (command.match(/\n/)) {
+                        var lines = command.split('\n');
+                        var pos = self.position();
+                        var sum = 0;
+                        for (var i = 0; i < lines.length; ++i) {
+                            sum += lines[i].length;
+                            if (sum > pos) {
+                                self.position(sum + i);
+                                return;
+                            }
+                        }
+                    }
+                    end();
+                };
+            } else {
+                return end;
+            }
         }
         // -------------------------------------------------------------------------------
         function mobile_focus() {
@@ -4190,9 +4229,19 @@
             var settings = $.extend({}, {
                 linksNoReferrer: false,
                 linksNoFollow: false,
+                allowedAttributes: [],
                 anyLinks: false
             }, options || {});
             function format(s, style, color, background, _class, data_text, text) {
+                var attrs;
+                if (data_text.match(/;/)) {
+                    try {
+                        var splitted = data_text.split(';');
+                        attrs = JSON.parse(splitted.slice(1).join(';'));
+                        data_text = splitted[0];
+                    } catch (e) {
+                    }
+                }
                 if (text === '') {
                     return ''; //'<span>&nbsp;</span>';
                 }
@@ -4249,6 +4298,8 @@
                     if (data.match(email_re)) {
                         result = '<a href="mailto:' + data + '"';
                     } else {
+                        // only http and ftp links (prevent javascript)
+                        // unless user force it with anyLinks option
                         if (!settings.anyLinks &&
                             !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
                             data = '';
@@ -4275,13 +4326,45 @@
                 if (style_str !== '') {
                     result += ' style="' + style_str + '"';
                 }
+                if (attrs) {
+                    var keys = Object.keys(attrs);
+                    if (keys.length && settings.allowedAttributes.length) {
+                        // filter JSON attributes by regex or string
+                        // in allowedAttributes options
+                        keys = keys.filter(function(name) {
+                            if (name === 'data-text') {
+                                return false;
+                            }
+                            var allowed = false;
+                            var filters = settings.allowedAttributes;
+                            for (var i = 0; i < filters.length; ++i) {
+                                if (filters[i] instanceof RegExp) {
+                                    if (filters[i].test(name)) {
+                                        allowed = true;
+                                        break;
+                                    }
+                                } else if (filters[i] === name) {
+                                    allowed = true;
+                                    break;
+                                }
+                            }
+                            return allowed;
+                        });
+                        if (keys.length) {
+                            result += ' ' + keys.map(function(name) {
+                                var value = attrs[name].replace(/"/g, '&quot;');
+                                return name + '="' + value + '"';
+                            }).join(' ');
+                        }
+                    }
+                }
                 if (_class !== '') {
                     result += ' class="' + _class + '"';
                 }
                 if (style.indexOf('!') !== -1) {
                     result += '>' + text + '</a>';
                 } else {
-                    result += ' data-text="' + data.replace(/"/g, '&quote;') + '">' +
+                    result += ' data-text="' + data.replace(/"/g, '&quot;') + '">' +
                         text + '</span>';
                 }
                 return result;
@@ -4538,7 +4621,7 @@
             return result;
         },
         // ---------------------------------------------------------------------
-        // :: function executed for each text inside [{ .... }]
+        // :: function executed for each text inside [[ .... ]] in echo
         // ---------------------------------------------------------------------
         extended_command: function extended_command(term, string, options) {
             var settings = $.extend({
@@ -4612,6 +4695,8 @@
                 return obj;
             }
         },
+        // ---------------------------------------------------------------------
+        // :: object that can be used in string methods intead of regex
         // ---------------------------------------------------------------------
         formatter: new (function() {
             try {
@@ -5000,6 +5085,7 @@
         onEchoCommand: $.noop,
         onPaste: $.noop,
         onFlush: $.noop,
+        allowedAttributes: ['title', /^aria-/, 'id', /^data-/],
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
                 ' have two arguments',
@@ -5330,7 +5416,7 @@
                 var procs = response;
                 // we check if it's false before we call this function but
                 // it don't hurt to be explicit here
-                if (settings.describe !== '') {
+                if (settings.describe !== false && settings.describe !== '') {
                     settings.describe.split('.').forEach(function(field) {
                         procs = procs[field];
                     });
@@ -5502,7 +5588,7 @@
                     });
                 });
             } else if (type === 'string') {
-                if (settings.ignoreSystemDescribe) {
+                if (settings.describe === false) {
                     object = {
                         interpreter: make_basic_json_rpc(user_intrp, login)
                     };
@@ -5625,7 +5711,8 @@
                     linksNoReferrer: settings.linksNoReferrer,
                     linksNoFollow: settings.linksNoFollow,
                     anyLinks: settings.anyLinks,
-                    char_width: char_size.width
+                    char_width: char_size.width,
+                    allowedAttributes: options.allowedAttributes || []
                 };
                 string = $.terminal.normalize(string);
                 var cols = self.cols();
@@ -6038,7 +6125,11 @@
                 var result = interpreter.interpreter.call(self, command, self);
                 if (result) {
                     // auto pause/resume when user return promises
-                    self.pause(settings.softPause);
+                    // it should not pause when user return promise from read()
+                    if (!force_awake) {
+                        self.pause(settings.softPause);
+                    }
+                    force_awake = false;
                     // when for native Promise object work only in jQuery 3.x
                     if (is_function(result.done || result.then)) {
                         (result.done || result.then).call(result, show);
@@ -6247,7 +6338,9 @@
         function move_cursor_visible() {
             var cursor = self.find('.cursor');
             if (!cursor.isFullyInViewport(self)) {
-                self.scrollTop(cursor.position().top - 5);
+                var offset = cursor.offset();
+                var term_offset = self.offset();
+                self.scrollTop(offset.top - term_offset.top - 5);
                 return true;
             }
         }
@@ -6433,6 +6526,7 @@
                 self.scroll(-self.height());
             }
         };
+        // ---------------------------------------------------------------------
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
@@ -7520,7 +7614,8 @@
                             raw: settings.raw,
                             finalize: $.noop,
                             keepWords: false,
-                            formatters: true
+                            formatters: true,
+                            allowedAttributes: settings.allowedAttributes
                         }, options || {});
                         (function(finalize) {
                             locals.finalize = function(div) {
@@ -7763,6 +7858,8 @@
             // :: wrapper for common use case
             // -------------------------------------------------------------
             read: function(message, success, cancel) {
+                // return from read() should not pause terminal
+                force_awake = true;
                 var defer = jQuery.Deferred();
                 var read = false;
                 self.push(function(string) {
@@ -8121,6 +8218,7 @@
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
         var terminal_id = terminals.length();
+        var force_awake = false; // flag used to don't pause when user return read() call
         var num_chars; // numer of chars in line
         var num_rows; // number of lines that fit without scrollbar
         var command; // for tab completion
@@ -8241,10 +8339,14 @@
                         event['image'] = data_uri(object);
                     }
                     var ret = fire_event('onPaste', [event]);
-                    if (ret && is_function(ret.then)) {
-                        return ret.then(function(ret) {
+                    if (ret) {
+                        if (is_function(ret.then)) {
+                            return ret.then(function(ret) {
+                                echo(ret, true);
+                            });
+                        } else {
                             echo(ret, true);
-                        });
+                        }
                     } else {
                         echo(event.image || event.text, true);
                     }
@@ -8703,7 +8805,7 @@
                         if (ret === true) {
                             return;
                         }
-                        if (have_scrollbar() || ret === false) {
+                        if (have_scrollbar() || ret === false || !event.ctrlKey) {
                             event.stopPropagation();
                             event.preventDefault();
                         }

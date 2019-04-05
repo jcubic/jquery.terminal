@@ -69,6 +69,14 @@
           -ms-user-select: none; /* Internet Explorer/Edge */
               user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
+.cmd .cursor-line:first-of-type:last-of-type > span:last-child > span:last-child {
+    -webkit-touch-callout: initial;
+      -webkit-user-select: initial;
+       -khtml-user-select: initial;
+         -moz-user-select: initial;
+          -ms-user-select: initial;
+              user-select: initial;
+}
 .terminal img, .terminal audio, .terminal object, .terminal canvas {
     cursor: default;
 }

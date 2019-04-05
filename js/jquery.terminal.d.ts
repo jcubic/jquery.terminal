@@ -182,6 +182,7 @@ declare namespace JQueryTerminal {
     type LineEchoOptions = {
         exec: boolean;
         finalize: JQueryTerminal.EchoFinalizeFunction;
+        allowedAttributes: Array<RegExp | string>;
         flush: boolean;
         formatters: boolean;
         keepWords: boolean;
@@ -191,6 +192,7 @@ declare namespace JQueryTerminal {
     type EchoOptions = {
         flush?: boolean;
         raw?: boolean;
+        allowedAttributes?: Array<RegExp | string>;
         finalize?: JQueryTerminal.EchoFinalizeFunction;
         keepWords?: boolean;
         formatters?: boolean;
@@ -414,7 +416,7 @@ type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabl
     "holdRepeatTimeout" | "request" | "describe" | "onRPCError" | "doubleTab" | "completion" |
     "onInit" | "onClear" | "onBlur" | "onFocus" | "onExit" | "onTerminalChange" | "onPush" | "onPaste" |
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
-    "repeatTimeoutKeys";
+    "repeatTimeoutKeys" | "allowedAttributes";
 
 
 type TerminalOptions = {
@@ -430,6 +432,7 @@ type TerminalOptions = {
     invokeMethods?: boolean;
     anyLinks?: boolean;
     raw?: boolean;
+    allowedAttributes?: Array<RegExp | string>;
     tabindex?: number;
     keymap?: JQueryTerminal.keymapObject;
     exceptionHandler?: null | JQueryTerminal.ExceptionHandler;
@@ -471,7 +474,7 @@ type TerminalOptions = {
     repeatTimeoutKeys?: string[];
     request?: JQueryTerminal.RequestResponseCallback;
     response?: JQueryTerminal.RequestResponseCallback;
-    describe?: string;
+    describe?: string | false;
     onRPCError?: JQueryTerminal.RPCErrorCallback;
     doubleTab?: JQueryTerminal.DoubleTabFunction;
     completion?: JQueryTerminal.Completion;
