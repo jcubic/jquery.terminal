@@ -3,7 +3,8 @@
 * add $.terminal.pipe function
 * allow to return string from onPaste (not only a promise)
 * add CTRL+Home and CTRL+End keys + HOME and END move cursor to the end and beginning of the line [#479](https://github.com/jcubic/jquery.terminal/issues/479)
-* Zoom page when using mousewheel + CTRL key (browser default) [#468](https://github.com/jcubic/jquery.terminal/issues/468)
+* zoom page when using mousewheel + CTRL key (browser default) [#468](https://github.com/jcubic/jquery.terminal/issues/468)
+* allow to set attributes from formatting with filtering options (to prevent unwanted onclick or other attrs by echo untrusted text) [#472](https://github.com/jcubic/jquery.terminal/issues/472)
 ### Bugfix
 * fix selecting whole text of single .cmd line
 * fix double call of async prompt with async interpreter [#474](https://github.com/jcubic/jquery.terminal/issues/474)
@@ -12,6 +13,7 @@
 * don't pause terminal when user code return result of calling terminal::read()
 * fix jumping while using up/down arrows [#477](https://github.com/jcubic/jquery.terminal/issues/477) [#478](https://github.com/jcubic/jquery.terminal/issues/478)
 * fix issue with echo brackets inside formatting when using unix formatting [#470](https://github.com/jcubic/jquery.terminal/issues/470)
+* fix wrong `&quote;` entity in formatting tag data-text attribute (it should be `&quot;`)
 
 ## 2.2.0
 ### Features

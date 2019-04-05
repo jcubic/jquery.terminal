@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 05 Apr 2019 15:02:18 +0000
+ * Date: Fri, 05 Apr 2019 16:03:36 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3500,7 +3500,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 05 Apr 2019 15:02:18 +0000',
+        date: 'Fri, 05 Apr 2019 16:03:36 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4229,9 +4229,19 @@
             var settings = $.extend({}, {
                 linksNoReferrer: false,
                 linksNoFollow: false,
+                allowedAttributes: [],
                 anyLinks: false
             }, options || {});
             function format(s, style, color, background, _class, data_text, text) {
+                var attrs;
+                if (data_text.match(/;/)) {
+                    try {
+                        var splitted = data_text.split(';');
+                        attrs = JSON.parse(splitted.slice(1).join(';'));
+                        data_text = splitted[0];
+                    } catch (e) {
+                    }
+                }
                 if (text === '') {
                     return ''; //'<span>&nbsp;</span>';
                 }
@@ -4288,6 +4298,8 @@
                     if (data.match(email_re)) {
                         result = '<a href="mailto:' + data + '"';
                     } else {
+                        // only http and ftp links (prevent javascript)
+                        // unless user force it with anyLinks option
                         if (!settings.anyLinks &&
                             !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
                             data = '';
@@ -4314,13 +4326,45 @@
                 if (style_str !== '') {
                     result += ' style="' + style_str + '"';
                 }
+                if (attrs) {
+                    var keys = Object.keys(attrs);
+                    if (keys.length && settings.allowedAttributes.length) {
+                        // filter JSON attributes by regex or string
+                        // in allowedAttributes options
+                        keys = keys.filter(function(name) {
+                            if (name === 'data-text') {
+                                return false;
+                            }
+                            var allowed = false;
+                            var filters = settings.allowedAttributes;
+                            for (var i = 0; i < filters.length; ++i) {
+                                if (filters[i] instanceof RegExp) {
+                                    if (filters[i].test(name)) {
+                                        allowed = true;
+                                        break;
+                                    }
+                                } else if (filters[i] === name) {
+                                    allowed = true;
+                                    break;
+                                }
+                            }
+                            return allowed;
+                        });
+                        if (keys.length) {
+                            result += ' ' + keys.map(function(name) {
+                                var value = attrs[name].replace(/"/g, '&quot;');
+                                return name + '="' + value + '"';
+                            }).join(' ');
+                        }
+                    }
+                }
                 if (_class !== '') {
                     result += ' class="' + _class + '"';
                 }
                 if (style.indexOf('!') !== -1) {
                     result += '>' + text + '</a>';
                 } else {
-                    result += ' data-text="' + data.replace(/"/g, '&quote;') + '">' +
+                    result += ' data-text="' + data.replace(/"/g, '&quot;') + '">' +
                         text + '</span>';
                 }
                 return result;
@@ -5041,6 +5085,7 @@
         onEchoCommand: $.noop,
         onPaste: $.noop,
         onFlush: $.noop,
+        allowedAttributes: ['title', /^aria-/, 'id', /^data-/],
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
                 ' have two arguments',
@@ -5666,7 +5711,8 @@
                     linksNoReferrer: settings.linksNoReferrer,
                     linksNoFollow: settings.linksNoFollow,
                     anyLinks: settings.anyLinks,
-                    char_width: char_size.width
+                    char_width: char_size.width,
+                    allowedAttributes: options.allowedAttributes || []
                 };
                 string = $.terminal.normalize(string);
                 var cols = self.cols();
@@ -7568,7 +7614,8 @@
                             raw: settings.raw,
                             finalize: $.noop,
                             keepWords: false,
-                            formatters: true
+                            formatters: true,
+                            allowedAttributes: settings.allowedAttributes
                         }, options || {});
                         (function(finalize) {
                             locals.finalize = function(div) {

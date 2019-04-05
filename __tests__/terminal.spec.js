@@ -760,6 +760,48 @@ describe('Terminal utils', function() {
                                    'bold;" data-text="y">y</span><span styl' +
                                    'e="font-weight:bold;" data-text="z">z</span>');
         });
+        it('should handle JSON', function() {
+            var input = '[[;;;;;{"title": "foo", "data-foo": "bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: [/^data-/, 'title']
+            });
+            expect(output).toEqual('<span title="foo" data-foo="bar" data-text=' +
+                                   '"foo">foo</span>');
+        });
+        it('should not allow attributes', function() {
+            var input = '[[;;;;;{"title": "foo", "data-foo": "bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: []
+            });
+            expect(output).toEqual('<span data-text="foo">foo</span>');
+        });
+        it('should filter out attribute in JSON', function() {
+            var input = '[[;;;;;{"title": "foo", "data-foo": "bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: ['title']
+            });
+            expect(output).toEqual('<span title="foo" data-text=' +
+                                   '"foo">foo</span>');
+        });
+        it('should parse JSON if semicolon in value', function() {
+            var input = '[[;;;;;{"title": "foo ; bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: ['title']
+            });
+            expect(output).toEqual('<span title="foo ; bar" data-text=' +
+                                   '"foo">foo</span>');
+        });
+        it("should not duplicate and don't overwrite data-text", function() {
+            var input = '[[;;;;;{"data-text": "bar"}]foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: []
+            });
+            expect(output).toEqual('<span data-text="foo">foo</span>');
+            output = $.terminal.format(input, {
+                allowedAttributes: ['data-text']
+            });
+            expect(output).toEqual('<span data-text="foo">foo</span>');
+        });
     });
     describe('$.terminal.strip', function() {
         it('should remove formatting', function() {
