@@ -9,7 +9,7 @@
 * fix async + RPC + exec + no system.describe [#475](https://github.com/jcubic/jquery.terminal/issues/475)
 * fix describe === false (exception in js and typscript definition)
 * don't pause terminal when user code return result of calling terminal::read()
-
+* fix jumping while using up/down arrows [#477](https://github.com/jcubic/jquery.terminal/issues/477) [#478](https://github.com/jcubic/jquery.terminal/issues/478)
 
 ## 2.2.0
 ### Features

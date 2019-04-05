@@ -35,7 +35,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 05 Apr 2019 13:21:52 +0000
+ * Date: Fri, 05 Apr 2019 13:45:55 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3500,7 +3500,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 05 Apr 2019 13:21:52 +0000',
+        date: 'Fri, 05 Apr 2019 13:45:55 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6292,7 +6292,9 @@
         function move_cursor_visible() {
             var cursor = self.find('.cursor');
             if (!cursor.isFullyInViewport(self)) {
-                self.scrollTop(cursor.position().top - 5);
+                var offset = cursor.offset();
+                var term_offset = self.offset();
+                self.scrollTop(offset.top - term_offset.top - 5);
                 return true;
             }
         }
@@ -6478,6 +6480,7 @@
                 self.scroll(-self.height());
             }
         };
+        // ---------------------------------------------------------------------
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)

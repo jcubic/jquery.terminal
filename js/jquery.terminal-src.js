@@ -6292,7 +6292,9 @@
         function move_cursor_visible() {
             var cursor = self.find('.cursor');
             if (!cursor.isFullyInViewport(self)) {
-                self.scrollTop(cursor.position().top - 5);
+                var offset = cursor.offset();
+                var term_offset = self.offset();
+                self.scrollTop(offset.top - term_offset.top - 5);
                 return true;
             }
         }
@@ -6478,6 +6480,7 @@
                 self.scroll(-self.height());
             }
         };
+        // ---------------------------------------------------------------------
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
