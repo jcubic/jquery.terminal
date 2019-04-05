@@ -617,7 +617,7 @@
             return result;
         };
     })();
-    $.terminal.from_ansi.__meta__ = true;
+    $.terminal.from_ansi.__no_warn__ = true;
     $.terminal.defaults.formatters.unshift($.terminal.from_ansi);
     $.terminal.defaults.formatters.unshift($.terminal.overtyping);
 });
