@@ -2,6 +2,7 @@
 ### Features
 * add $.terminal.pipe function
 * allow to return string from onPaste (not only a promise)
+* add CTRL+Home and CTRL+End keys + HOME and END move cursor to the end and beginning of the line [#479](https://github.com/jcubic/jquery.terminal/issues/479)
 ### Bugfix
 * fix selecting whole text of single .cmd line
 * fix double call of async prompt with async interpreter [#474](https://github.com/jcubic/jquery.terminal/issues/474)

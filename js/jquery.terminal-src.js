@@ -1477,10 +1477,12 @@
                 redraw();
             },
             'F12': return_true, // Allow Firebug
-            'END': end,
-            'CTRL+E': end,
-            'HOME': home,
-            'CTRL+A': home,
+            'END': end(true),
+            'CTRL+END': end(),
+            'CTRL+E': end(),
+            'HOME': home(true),
+            'CTRL+HOME': home(),
+            'CTRL+A': home(),
             'SHIFT+INSERT': paste_event,
             'CTRL+SHIFT+T': return_true, // open closed tab
             'CTRL+W': delete_word_backward(true),
@@ -1660,12 +1662,47 @@
             return false;
         }
         // -------------------------------------------------------------------------------
-        function home() {
-            self.position(0);
+        function home(line) {
+            function home() {
+                self.position(0);
+            }
+            if (line) {
+                return function() {
+                    if (command.match(/\n/)) {
+                        var string = command.substring(0, self.position());
+                        self.position(string.lastIndexOf('\n') + 1);
+                    } else {
+                        home();
+                    }
+                };
+            } else {
+                return home;
+            }
         }
         // -------------------------------------------------------------------------------
-        function end() {
-            self.position(text(command).length);
+        function end(line) {
+            function end() {
+                self.position(text(command).length);
+            }
+            if (line) {
+                return function() {
+                    if (command.match(/\n/)) {
+                        var lines = command.split('\n');
+                        var pos = self.position();
+                        var sum = 0;
+                        for (var i = 0; i < lines.length; ++i) {
+                            sum += lines[i].length;
+                            if (sum > pos) {
+                                self.position(sum + i);
+                                return;
+                            }
+                        }
+                    }
+                    end();
+                };
+            } else {
+                return end;
+            }
         }
         // -------------------------------------------------------------------------------
         function mobile_focus() {
