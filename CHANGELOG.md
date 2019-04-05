@@ -1,6 +1,6 @@
 ## 2.3.0
 ### Features
-* add $.terminal.pipe function
+* add experimental $.terminal.pipe function
 * allow to return string from onPaste (not only a promise)
 * add CTRL+Home and CTRL+End keys + HOME and END move cursor to the end and beginning of the line [#479](https://github.com/jcubic/jquery.terminal/issues/479)
 * zoom page when using mousewheel + CTRL key (browser default) [#468](https://github.com/jcubic/jquery.terminal/issues/468)
