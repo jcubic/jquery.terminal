@@ -1,3 +1,9 @@
+## 2.4.0
+### Features
+* Some improvements to performance of rendering command line
+### Bugfix
+* fix scrollbar flicker on right click on right/bottom edge of terminal when no scrollbar
+
 ## 2.3.0
 ### Features
 * add $.terminal.pipe function

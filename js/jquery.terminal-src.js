@@ -8597,6 +8597,7 @@
                                     self.enable();
                                 }
                                 var offset = command_line.offset();
+                                wrapper.css('overflow', 'hidden');
                                 clip.css({
                                     left: e.pageX - offset.left - 20,
                                     top: e.pageY - offset.top - 20,
@@ -8620,6 +8621,7 @@
                                         props.top = in_line * 14 + 'px';
                                     }
                                     clip.css(props);
+                                    wrapper.css('overflow', '');
                                 });
                                 self.stopTime('selection');
                                 self.everyTime(20, 'selection', function() {
