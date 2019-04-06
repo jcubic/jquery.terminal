@@ -12,7 +12,7 @@
  */
 /* global global, it, expect, describe, require, spyOn, setTimeout, location,
           beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest  */
-/* TODO: test caseSensitivity */
+/* TODO: test caseSensitiveSearch option */
 
 function Storage() {}
 Storage.prototype.getItem = function(name) {
@@ -4174,6 +4174,7 @@ describe('Terminal plugin', function() {
                 spy(object, 'login');
                 term.set_prompt('$ ');
                 term.set_interpreter('/async', true).focus();
+                // we need to wait for interpreter to initialize but Promise callback is async
                 return new Promise((resolve) => {
                     setTimeout(function() {
                         if (term.token(true)) {
