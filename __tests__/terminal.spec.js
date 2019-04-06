@@ -2555,13 +2555,19 @@ describe('Terminal plugin', function() {
                     fn: $.noop
                 };
                 spy(test, 'fn');
+                i_callback = [];
                 window.IntersectionObserver = function(callback) {
-                    i_callback = callback;
+                    i_callback.push(callback);
                     return {
                         observe: function() {
                         },
                         unobserve: function() {
-                            i_callback = null;
+                            for (var i = i_callback.length; --i;) {
+                                if (i_callback[i] === callback) {
+                                    i_callback.slice(i, 1);
+                                    break;
+                                }
+                            }
                         }
                     };
                 };
@@ -2602,20 +2608,20 @@ describe('Terminal plugin', function() {
             init();
             it('should enable/disable terminal', function() {
                 expect(term.enabled()).toBe(true);
-                i_callback();
+                i_callback[0]();
                 term.hide();
-                i_callback();
+                i_callback[0]();
                 expect(term.enabled()).toBe(false);
                 term.show();
-                i_callback();
+                i_callback[0]();
                 expect(term.enabled()).toBe(true);
             });
             it('should call resize', function() {
-                i_callback();
+                i_callback[0]();
                 term.hide();
-                i_callback();
+                i_callback[0]();
                 term.show();
-                i_callback();
+                i_callback[0]();
                 expect(test.fn).toHaveBeenCalled();
             });
         });
@@ -3182,7 +3188,7 @@ describe('Terminal plugin', function() {
                     }
                     resp = JSON.stringify(resp);
                     if (settings.async) {
-                        setTimeout(done, 100);
+                        setTimeout(done, 5);
                     } else {
                         done();
                     }
@@ -4148,6 +4154,8 @@ describe('Terminal plugin', function() {
                 term.destroy().remove();
             });
         });
+        // this test long to fix, this function should be not used since it's flacky
+        // and it don't return promise when interpreter is created
         describe('set_interpreter', function() {
             var term = $('<div/>').appendTo('body').terminal($.noop);
             it('should change intepreter', function() {
@@ -4161,27 +4169,28 @@ describe('Terminal plugin', function() {
                 term.exec('foo');
                 expect(test.interpreter).toHaveBeenCalledWith('foo', term);
             });
-            it('should create async JSON-RPC with login', function(done) {
+            it('should create async JSON-RPC with login', function() {
                 spy(object, 'echo');
                 spy(object, 'login');
                 term.set_prompt('$ ');
                 term.set_interpreter('/async', true).focus();
-                if (term.token(true)) {
-                    term.logout(true);
-                }
-                enter(term, 'demo');
-                enter(term, 'demo');
-                setTimeout(function() {
-                    expect(term.get_prompt()).toEqual('$ ');
-                    expect(object.login).toHaveBeenCalledWith('demo', 'demo');
-                    enter(term, 'echo foo');
+                return new Promise((resolve) => {
                     setTimeout(function() {
-                        expect(object.echo).toHaveBeenCalledWith(token, 'foo');
-                        term.destroy().remove();
-                        done();
+                        if (term.token(true)) {
+                            term.logout(true);
+                        }
+                        term.exec(['demo', 'demo']).then(() => {
+                            expect(term.get_prompt()).toEqual('$ ');
+                            expect(object.login).toHaveBeenCalledWith('demo', 'demo');
+                            term.exec('echo foo').then(() => {
+                                expect(object.echo).toHaveBeenCalledWith(token, 'foo');
+                                term.destroy().remove();
+                                resolve();
+                            });
+                        });
                     }, 500);
-                }, 500);
-            }, 5000);
+                });
+            });
         });
         describe('greetings', function() {
             it('should show greetings', function(done) {
