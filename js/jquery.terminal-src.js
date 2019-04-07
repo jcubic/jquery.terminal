@@ -1556,9 +1556,12 @@
                 if (settings.commands) {
                     promise = settings.commands.call(self, tmp);
                 }
-                if (is_function(prompt) &&
-                    (promise && promise.isResolved() || !promise)) {
-                    draw_prompt();
+                if (is_function(prompt)) {
+                    if (promise && is_function(promise.then)) {
+                        promise.then(draw_prompt);
+                    } else {
+                        draw_prompt();
+                    }
                 }
                 clip.val('');
                 return false;
@@ -2980,7 +2983,6 @@
                         });
                     }
                 } else {
-                    self.stopTime('hold');
                     self.oneTime(settings.holdTimeout, 'hold', function() {
                         hold = true;
                     });
@@ -8778,7 +8780,7 @@
                     bind('contextmenu.terminal_' + self.id(), disable);
             });
             var $win = $(window);
-            // cordova application, if keyboard was open and we resume it will be
+            // cordova application, if keyboard was open and we resume, it will be
             // closed so we need to disable terminal so you can enable it with tap
             document.addEventListener("resume", function() {
                 self.disable();

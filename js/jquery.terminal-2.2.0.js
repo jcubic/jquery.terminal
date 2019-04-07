@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 07 Apr 2019 16:34:11 +0000
+ * Date: Sun, 07 Apr 2019 19:16:52 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1556,9 +1556,12 @@
                 if (settings.commands) {
                     promise = settings.commands.call(self, tmp);
                 }
-                if (is_function(prompt) &&
-                    (promise && promise.isResolved() || !promise)) {
-                    draw_prompt();
+                if (is_function(prompt)) {
+                    if (promise && is_function(promise.then)) {
+                        promise.then(draw_prompt);
+                    } else {
+                        draw_prompt();
+                    }
                 }
                 clip.val('');
                 return false;
@@ -2980,7 +2983,6 @@
                         });
                     }
                 } else {
-                    self.stopTime('hold');
                     self.oneTime(settings.holdTimeout, 'hold', function() {
                         hold = true;
                     });
@@ -3750,7 +3752,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 07 Apr 2019 16:34:11 +0000',
+        date: 'Sun, 07 Apr 2019 19:16:52 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8778,7 +8780,7 @@
                     bind('contextmenu.terminal_' + self.id(), disable);
             });
             var $win = $(window);
-            // cordova application, if keyboard was open and we resume it will be
+            // cordova application, if keyboard was open and we resume, it will be
             // closed so we need to disable terminal so you can enable it with tap
             document.addEventListener("resume", function() {
                 self.disable();

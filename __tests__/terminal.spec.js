@@ -5610,8 +5610,11 @@ describe('Terminal plugin', function() {
                 term = $('<div/>').terminal($.noop, {
                     keymap: {
                         'CTRL+C': test.original,
-                        'CTRL+D': test.original
-                    }
+                        'CTRL+D': test.original,
+                        'HOLD+CTRL+I': test.empty,
+                        'HOLD+CTRL+B': test.empty
+                    },
+                    repeatTimeoutKeys: ['HOLD+CTRL+B']
                 });
                 term.focus();
             });
@@ -5628,6 +5631,44 @@ describe('Terminal plugin', function() {
                 term.keymap('CTRL+T', test.empty);
                 shortcut(true, false, false, 84, 't');
                 expect(test.empty).toHaveBeenCalled();
+            });
+            // testing hold key
+            function repeat_ctrl_key(key, count) {
+                var doc = $(document.documentElement || window);
+                var which = key.toUpperCase().charCodeAt(0);
+                doc.trigger(keydown(true, false, false, which, key));
+                return new Promise(resolve => {
+                    setTimeout(function() {
+                        (function loop(i) {
+                            if (i) {
+                                doc.trigger(keydown(true, false, false, which, key));
+                                delay(10, function() {
+                                    loop(--i);
+                                });
+                            } else {
+                                doc.trigger(keypress(key));
+                                doc.trigger($.Event("keyup"));
+                                resolve();
+                            }
+                        })(count);
+                    }, 300);
+                });
+            }
+            it('should create new keymap', function() {
+                var keys = 10;
+                return repeat_ctrl_key('i', keys).then(() => {
+                    expect(test.empty.calls.count()).toEqual(keys - 1);
+                });
+            });
+            it('should limit rate of repeat keys', function() {
+                // testing hold key
+                return repeat_ctrl_key('b', 10).then(() => {
+                    return delay(200, function() {
+                        return repeat_ctrl_key('b', 10).then(() => {
+                            expect(test.empty.calls.count()).toEqual(2);
+                        });
+                    });
+                });
             });
             it('should create keymap from object', function() {
                 term.keymap({
