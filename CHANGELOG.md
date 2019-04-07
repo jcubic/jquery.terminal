@@ -1,11 +1,12 @@
 ## 2.4.0
 ### Features
 * some improvements to performance of rendering command line
+* CTRL+C now retain newlines inside cmd and terminal output
 ### Bugfix
 * fix scrollbar flicker on right click on right/bottom edge of terminal when no scrollbar
 * fix text selections on multi line text without line breaks
 * fix small bugs in animations (replace all of them with box-shadow)
-* debounce HOLD+ARROWS (left/right)so they are usable again
+* debounce HOLD+ARROWS (left/right) so they are usable again
 
 ## 2.3.0
 ### Features

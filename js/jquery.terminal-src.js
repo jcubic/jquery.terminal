@@ -217,6 +217,7 @@
     // :: debug functions
     // -----------------------------------------------------------------------
     /* eslint-disable */
+    /* istanbul ignore next */
     function debug(str) {
         if (false) {
             console.log(str);
@@ -975,6 +976,7 @@
             }
         });
     };
+    // -----------------------------------------------------------------------
     function jquery_resolve(value) {
         var defer = jQuery.Deferred();
         defer.resolve(value);
@@ -1682,14 +1684,14 @@
                 var len = text(command).length;
                 if (len > position) {
                     kill_text = self['delete'](len - position);
-                    text_to_clipboard(self, kill_text);
+                    text_to_clipboard(clip, kill_text);
                 }
                 return false;
             },
             'CTRL+U': function() {
                 if (command !== '' && position !== 0) {
                     kill_text = self['delete'](-position);
-                    text_to_clipboard(self, kill_text);
+                    text_to_clipboard(clip, kill_text);
                 }
                 return false;
             },
@@ -1709,7 +1711,7 @@
                 if (m) {
                     kill_text = m[0];
                     if (clipboard) {
-                        text_to_clipboard(self, kill_text);
+                        text_to_clipboard(clip, kill_text);
                     }
                 }
                 self.set(
@@ -1730,7 +1732,7 @@
                     if (m[0].length) {
                         kill_text = self['delete'](-m[0].length);
                         if (clipboard) {
-                            text_to_clipboard(self, kill_text);
+                            text_to_clipboard(clip, kill_text);
                         }
                     }
                 }
@@ -2791,13 +2793,17 @@
             })(),
             resize: function(num) {
                 char_width = get_char_width();
+                var new_num_chars;
                 if (num) {
-                    num_chars = num;
+                    new_num_chars = num;
                 } else {
-                    num_chars = get_num_chars(char_width);
+                    new_num_chars = get_num_chars(char_width);
                 }
-                redraw();
-                draw_prompt();
+                if (num_chars !== new_num_chars) {
+                    num_chars = new_num_chars;
+                    redraw();
+                    draw_prompt();
+                }
                 return self;
             },
             invoke_key: function(shortcut) {
@@ -2872,12 +2878,10 @@
         // :: INIT
         // ---------------------------------------------------------------------
         self.name(settings.name || settings.prompt || '');
-        if (typeof settings.prompt === 'string') {
+        if (settings.prompt !== false) {
             prompt = settings.prompt;
-        } else {
-            prompt = '> ';
+            draw_prompt();
         }
-        draw_prompt();
         if (settings.enabled === true) {
             self.enable();
         }
@@ -2962,10 +2966,7 @@
                     return result;
                 }
             }
-            if (enabled) {
-                self.oneTime(settings.holdTimeout, 'hold', function() {
-                    hold = true;
-                });
+            if (enabled || key === 'CTRL+C') {
                 if (hold) {
                     key = 'HOLD+' + key;
                     if (hold_pause) {
@@ -2978,6 +2979,11 @@
                             hold_pause = false;
                         });
                     }
+                } else {
+                    self.stopTime('hold');
+                    self.oneTime(settings.holdTimeout, 'hold', function() {
+                        hold = true;
+                    });
                 }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
@@ -3182,7 +3188,7 @@
                 } else {
                     button = e.originalEvent.button;
                 }
-                if (button === 0 && get_selected_text() === '') {
+                if (button === 0 && get_selected_html() === '') {
                     var name = 'click_' + id;
                     if (++count === 1) {
                         var down = was_down;
@@ -3306,6 +3312,7 @@
 
     // -------------------------------------------------------------------------
     // IE ch unit bug detection - better that UserAgent that can be changed
+    // -------------------------------------------------------------------------
     var ch_unit_bug = false;
     $(function() {
         function width(e) {
@@ -3507,39 +3514,105 @@
             return -1;
         }
     }
-    // ---------------------------------------------------------------------
-    // :: Cross-Browser selection utils
-    // ---------------------------------------------------------------------
-    var get_selected_text = (function() {
-        if (window.getSelection || document.getSelection) {
-            return function() {
-                var selection = (window.getSelection || document.getSelection)();
-                if (selection.text) {
-                    return selection.text;
-                } else {
-                    return selection.toString();
+    // -----------------------------------------------------------------
+    // :: selection utilities - should work in modern browser including IE9
+    // -----------------------------------------------------------------
+    function get_selected_html() {
+        var html = '';
+        if (is_function(window.getSelection)) {
+            var sel = window.getSelection();
+            if (sel.rangeCount) {
+                var container = document.createElement('div');
+                for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                    container.appendChild(sel.getRangeAt(i).cloneContents());
                 }
-            };
-        } else if (document.selection && document.selection.type !== "Control") {
-            return function() {
-                return document.selection.createRange().text;
-            };
+                html = container.innerHTML;
+            }
         }
-        return function() {
-            return '';
-        };
-    })();
+        return html;
+    }
+    // -----------------------------------------------------------------
+    function with_selection(fn) {
+        var html = '';
+        var ranges = [];
+        if (is_function(window.getSelection)) {
+            var selection = window.getSelection();
+            if (selection.rangeCount) {
+                var container = document.createElement("div");
+                for (var i = 0, len = selection.rangeCount; i < len; ++i) {
+                    var range = selection.getRangeAt(i).cloneRange();
+                    ranges.push(range);
+                    container.appendChild(range.cloneContents());
+                }
+                html = container.innerHTML;
+            }
+        }
+        fn(html);
+        if (ranges.length) {
+            selection.removeAllRanges();
+            ranges.forEach(function(range) {
+                selection.addRange(range);
+            });
+        }
+        return html !== '';
+    }
+    // -----------------------------------------------------------------
+    function process_selected_line() {
+        var $self = $(this);
+        var result = $self.text();
+        if ($self.hasClass('end-line')) {
+            result += '\n';
+        }
+        return result;
+    }
+    // -----------------------------------------------------------------
+    function process_selected_html(html) {
+        var stdout;
+        var text = '';
+        var $html = $('<div>' + html + '</div>');
+        if (html.match(/<\/div>/)) {
+            stdout = $html.find('div[data-index]').map(function() {
+                return $(this).find('> div').map(process_selected_line).get().join('');
+            }).get().join('\n');
+            text = stdout;
+        }
+        var $prompt = $html.find('.prompt');
+        if ($prompt.length) {
+            if (text.length) {
+                text += '\n';
+            }
+            text += $prompt.text();
+        }
+        var $cmd_lines = $html.find('[role="presentation"]');
+        if ($cmd_lines.length) {
+            text += $cmd_lines.map(process_selected_line).get().join('');
+        }
+        if (!text.length && html) {
+            text = $html.text();
+        }
+        return text.replace(/\xA0/g, ' '); // fix &nbsp; space
+    }
     // ---------------------------------------------------------------------
-    // :: try to copy given DOM element text to clipboard
-    // -----------------------------------------------------------------------
-    function text_to_clipboard(container, text) {
-        var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
-        $div.appendTo('body');
-        select_all($div[0]);
-        try {
+    // :: copy given DOM element text to clipboard
+    // ---------------------------------------------------------------------
+    var text_to_clipboard;
+    if (is_function(document.queryCommandSupported) &&
+        document.queryCommandSupported('copy')) {
+        text_to_clipboard = function text_to_clipboard($textarea, text) {
+            var val = $textarea.val();
+            var had_focus = $textarea.is(':focus');
+            var pos = $textarea.caret();
+            $textarea.val(text).focus();
+            $textarea[0].select();
             document.execCommand('copy');
-        } catch (e) {}
-        $div.remove();
+            $textarea.val(val);
+            if (had_focus) {
+                $textarea.caret(pos);
+            }
+            return true;
+        };
+    } else {
+        text_to_clipboard = $.noop;
     }
     // ---------------------------------------------------------------------
     var get_textarea_selection = (function() {
@@ -3639,20 +3712,6 @@
             return $.noop;
         }
     })();
-    // ---------------------------------------------------------------------
-    function select_all(element) {
-        if (window.getSelection) {
-            var selection = window.getSelection();
-            if (selection.setBaseAndExtent) {
-                selection.setBaseAndExtent(element, 0, element, 1);
-            } else if (document.createRange) {
-                var range = document.createRange();
-                range.selectNodeContents(element);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-        }
-    }
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
         var array = string.match(command_re) || [];
@@ -4072,8 +4131,6 @@
                     semicolons = ';;';
                 } else if (semicolons === 3) {
                     semicolons = ';';
-                } else {
-                    semicolons = '';
                 }
                 // return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting so we need to escape
@@ -5325,6 +5382,7 @@
     var change_hash = false; // don't change hash on Init
     var fire_hash_change = true;
     var first_instance = true; // used by history state
+    //object_debugger($.fn, 'jquery')();
     $.fn.terminal = function(init_interpreter, options) {
         function StorageHelper(memory) {
             if (memory) {
@@ -5893,6 +5951,10 @@
         // :: NOTE: it formats and appends lines to output_buffer. The actual
         // :: append to terminal output happens in the flush function
         // ---------------------------------------------------------------------
+        function push_line(string) {
+            output_buffer.push({line: string});
+        }
+        // ---------------------------------------------------------------------
         var output_buffer = [];
         var NEW_LINE = 1;
         function buffer_line(string, index, options) {
@@ -5919,20 +5981,24 @@
                         if (array[i] === '' || array[i] === '\r') {
                             output_buffer.push('<span></span>');
                         } else {
-                            output_buffer.push($.terminal.format(
-                                array[i],
-                                format_options
-                            ));
+                            var data = {
+                                line: $.terminal.format(
+                                    array[i],
+                                    format_options
+                                )
+                            };
+                            if (i === len - 1) {
+                                data.newline = true;
+                            }
+                            output_buffer.push(data);
                         }
                     }
                 } else {
                     string = $.terminal.format(string, format_options);
-                    string.split(/\n/).forEach(function(string) {
-                        output_buffer.push(string);
-                    });
+                    string.split(/\n/).forEach(push_line);
                 }
             } else {
-                output_buffer.push(string);
+                push_line(string);
             }
             output_buffer.push({
                 finalize: options.finalize,
@@ -6469,21 +6535,12 @@
             }
             var login = self.login_name(true);
             command_line.name(name + (login ? '_' + login : ''));
-            if (interpreter.prompt !== command_line.prompt()) {
-                if (is_function(interpreter.prompt)) {
-                    command_line.prompt(function(callback) {
-                        var ret = interpreter.prompt.call(self, callback, self);
-                        if (ret && is_function(ret.then)) {
-                            ret.then(function(string) {
-                                if (typeof string === 'string') {
-                                    callback(string);
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    command_line.prompt(interpreter.prompt);
-                }
+            var prompt = interpreter.prompt;
+            if (is_function(prompt)) {
+                prompt = context_callback_proxy(prompt, 'string');
+            }
+            if (prompt !== command_line.prompt()) {
+                command_line.prompt(interpreter.prompt);
             }
             if (typeof interpreter.history !== 'undefined') {
                 self.history().toggle(interpreter.history);
@@ -6655,14 +6712,20 @@
                 return false;
             },
             'CTRL+C': function() {
-                if (get_selected_text() === '') {
-                    var command = self.get_command();
-                    var position = self.get_position();
-                    command = command.slice(0, position) + '^C' +
-                        command.slice(position + 2);
-                    echo_command(command);
-                    self.set_command('');
-                }
+                with_selection(function(html) {
+                    if (html === '') {
+                        var command = self.get_command();
+                        var position = self.get_position();
+                        command = command.slice(0, position) + '^C' +
+                            command.slice(position + 2);
+                        echo_command(command);
+                        self.set_command('');
+                    } else {
+                        var clip = self.find('textarea');
+                        text_to_clipboard(clip, process_selected_html(html));
+                    }
+                });
+                return false;
             },
             'CTRL+L': function() {
                 self.clear();
@@ -7723,13 +7786,13 @@
                     var wrapper;
                     // print all lines
                     // var output_buffer = lines.flush();
-                    $.each(output_buffer, function(i, line) {
-                        if (line === NEW_LINE) {
+                    $.each(output_buffer, function(i, data) {
+                        if (data === NEW_LINE) {
                             wrapper = $('<div></div>');
-                        } else if ($.isPlainObject(line) && is_function(line.finalize)) {
+                        } else if ($.isPlainObject(data) && is_function(data.finalize)) {
                             // this is finalize function from echo
                             if (options.update) {
-                                var selector = '> div[data-index=' + line.index + ']';
+                                var selector = '> div[data-index=' + data.index + ']';
                                 var node = output.find(selector);
                                 if (node.html() !== wrapper.html()) {
                                     node.replaceWith(wrapper);
@@ -7737,10 +7800,14 @@
                             } else {
                                 wrapper.appendTo(output);
                             }
-                            line.finalize(wrapper.attr('data-index', line.index));
+                            data.finalize(wrapper.attr('data-index', data.index));
                         } else {
-                            $('<div/>').html(line)
+                            var line = data.line;
+                            var div = $('<div/>').html(line)
                                 .appendTo(wrapper).width('100%');
+                            if (data.newline) {
+                                div.addClass('end-line');
+                            }
                         }
                     });
                     limit_lines();
@@ -8526,6 +8593,23 @@
             old_enabled = enabled;
             self.disable().find('.cmd textarea').trigger('blur', [true]);
         }
+        function context_callback_proxy(fn, type) {
+            if (fn.proxy) {
+                return fn;
+            }
+            var wrapper = function(callback) {
+                var ret = fn.call(self, callback, self);
+                if (ret && is_function(ret.then)) {
+                    ret.then(function(string) {
+                        if (typeof string === type) {
+                            callback(string);
+                        }
+                    });
+                }
+            };
+            wrapper.proxy = true;
+            return wrapper;
+        }
         // paste event is not testable in node
         // istanbul ignore next
         function paste_event(e) {
@@ -8619,9 +8703,13 @@
                 // so we are able to change it using option API method
                 itrp.completion = 'settings';
             }
+            var prompt = settings.prompt;
+            if (is_function(prompt)) {
+                prompt = context_callback_proxy(prompt, 'string');
+            }
             interpreters = new Stack($.extend({}, settings.extra, {
                 name: settings.name,
-                prompt: settings.prompt,
+                prompt: prompt,
                 keypress: settings.keypress,
                 keydown: settings.keydown,
                 resize: settings.onResize,
@@ -8633,7 +8721,7 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
-                prompt: settings.prompt,
+                prompt: prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
@@ -8745,7 +8833,7 @@
                             if (enabled) {
                                 self.disable();
                             }
-                        } else if (get_selected_text() === '' && $target) {
+                        } else if (get_selected_html() === '' && $target) {
                             if (++count === 1) {
                                 if (!frozen) {
                                     if (!enabled) {
@@ -8769,7 +8857,7 @@
                 (function() {
                     var clip = self.find('.cmd textarea');
                     self.on('contextmenu.terminal', function(e) {
-                        if (get_selected_text() === '') {
+                        if (get_selected_html() === '') {
                             if (!$(e.target).is('img,value,audio,object,canvas,a')) {
                                 if (!self.enabled()) {
                                     self.enable();

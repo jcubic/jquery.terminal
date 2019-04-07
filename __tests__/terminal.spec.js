@@ -12,7 +12,41 @@
  */
 /* global global, it, expect, describe, require, spyOn, setTimeout, location,
           beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest, setImmediate  */
-/* TODO: test caseSensitiveSearch option */
+/* TODO missing tests:
+      test caseSensitiveSearch option
+      is_fully_in_viewport sanity check or usage
+      alert_exception Error & string - usage
+      keys:
+        get_key - META, lonely CTRL, ALT, SPACEBAR
+        DELETE key
+        CTRL+R and BACKSPACE when in reverse_search
+        CTRL+H
+        delete_word:
+           one: ALT+D, HOLD+DELETE, HOLD+SHIFT+DELETE
+        delete_word_backward:
+          one: CTRL+W, HOLD+BACKSPACE, HOLD+SHIFT+BACKSPACE
+        HOME, CTRL+HOME, END, CTRL+END
+      paste and CTRL+C ????
+      fix_cursor ???? need update animation check into function
+      better reverse_history_search
+      better get_splitted_command_line
+      exception in formatting (instide command line) - formatting ignored
+      Multiline prompt
+      cmd::option() - 0 cover
+      cmd::keymap('CTRL+C') get not overwritten keymap
+      cmd::insert(0) cmd::insert(middle) - covered position at end
+      cmd::commands() - setter/getter
+      cmd::prompt(x) where x is number, regex object, null, NaN - should throw
+      cmd::position(-10) cmd::position() === 0
+      cmd::refresh() - draw_prompt as function is called
+      cmd::show()
+      click on .cmd move to end
+      test Astral symbols & combine characters
+      get_selected_html, with_selection, process_selected_html CTRL+C- mock window.getSelection
+      parse_command empty string command / split_command with string
+      tracking_replace - with function
+      iterate_formatting with html entity and escape brackets
+ */
 
 function Storage() {}
 Storage.prototype.getItem = function(name) {
@@ -567,6 +601,18 @@ describe('Terminal utils', function() {
             ];
             test(tests);
         });
+        it('should not change formatting', function() {
+            var tests = [
+                '[[;;]Lorem] [[;;]Ipsum] [[;;;]Dolor]',
+                '[[;;;;]Lorem Ipsum Dolor] [[;;;;]Amet]',
+                '[[;;;;Lorem Ipsum Dolor]Lorem Ipsum Dolor] [[;;;;Amet]Amet]',
+                '[[;;]]Lorem Ipsum [[;;]]Dolor Sit [[;;;;]]Amet',
+                'Lorem Ipsum Dolor Sit Amet'
+            ].forEach(function(string) {
+                var normalized = $.terminal.normalize(string);
+                expect($.terminal.normalize(normalized)).toEqual(normalized);
+            });
+        });
     });
     describe('$.terminal.is_formatting', function() {
         it('should detect terminal formatting', function() {
@@ -863,6 +909,12 @@ describe('Terminal utils', function() {
                                             (formatters.length - 1) +
                                             ']'));
             $.terminal.defaults.formatters.pop();
+        });
+        it('should process in a loop', function() {
+            $.terminal.defaults.formatters.push([/(^|x)[0-9]/, '$1x', {loop: true}]);
+            var input = '00000000000000000000000000';
+            var output = $.terminal.apply_formatters(input);
+            expect(output).toEqual(input.replace(/0/g, 'x'));
         });
     });
     describe('$.terminal.split_equal', function() {
@@ -1678,8 +1730,30 @@ describe('Terminal utils', function() {
                 expect(item.value).toEqual(input[i++]);
             }
         });
+        it('should iterate over formatting', function() {
+            var input = '[[;blue;]abc][[;red;]def]';
+            var arr = [
+                '[[;blue;]a]',
+                '[[;blue;]b]',
+                '[[;blue;]c]',
+                '[[;red;]d]',
+                '[[;red;]e]',
+                '[[;red;]f]'
+            ];
+            var i = 0;
+            for (var x of $.terminal.iterator(input)) {
+                expect(x).toEqual(arr[i++]);
+            }
+        });
+        it('should handle escape bracket', function() {
+            var input = '[[;blue;]foo \\ bar]';
+            var arr = 'foo \\ bar'.split('').map(x => '[[;blue;]' + (x === '\\' ? '\\\\' : x) + ']');
+            var i = 0;
+            for (var x of $.terminal.iterator('[[;blue;]foo \\ bar]')) {
+                expect(x).toEqual(arr[i++]);
+            }
+        });
     });
-    
     describe('$.terminal.new_formatter', function() {
         function nested_index() {
             var formatters = $.terminal.defaults.formatters;
