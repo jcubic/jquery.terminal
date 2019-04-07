@@ -11,7 +11,7 @@
  * Released under the MIT license
  */
 /* global global, it, expect, describe, require, spyOn, setTimeout, location,
-          beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest  */
+          beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest, setImmediate  */
 /* TODO: test caseSensitiveSearch option */
 
 function Storage() {}
@@ -4174,9 +4174,10 @@ describe('Terminal plugin', function() {
                 spy(object, 'login');
                 term.set_prompt('$ ');
                 term.set_interpreter('/async', true).focus();
-                // we need to wait for interpreter to initialize but Promise callback is async
                 return new Promise((resolve) => {
-                    setTimeout(function() {
+                    // there seems to be bug in setTimeout in Node or in Terminal code
+                    // that sometimes don't invoke code when using setTimeout
+                    setImmediate(function() {
                         if (term.token(true)) {
                             term.logout(true);
                         }
@@ -4189,7 +4190,7 @@ describe('Terminal plugin', function() {
                                 resolve();
                             });
                         });
-                    }, 500);
+                    });
                 });
             });
         });

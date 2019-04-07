@@ -32,14 +32,18 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
+ * debounce function from Lodash
+ * Copyright JS Foundation and other contributors <https://js.foundation/>
+ * The MIT License
+ *
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 06 Apr 2019 19:04:24 +0000
+ * Date: Sun, 07 Apr 2019 00:00:25 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
-          setInterval, clearInterval, Blob */
+          setInterval, clearInterval, clearTimeout, Blob */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -173,6 +177,7 @@
     ctx.sprintf = sprintf;
     ctx.vsprintf = vsprintf;
 })(typeof global !== "undefined" ? global : window);
+// -----------------------------------------------------------------------
 /* eslint-enable */
 // UMD taken from https://github.com/umdjs/umd
 (function(factory, undefined) {
@@ -410,6 +415,146 @@
                 }
             });
         }
+    })();
+    // -----------------------------------------------------------------------
+    // :: Debounce from Lodash
+    // -----------------------------------------------------------------------
+    /* istanbul ignore next */
+    var debounce = (function() {
+        var FUNC_ERROR_TEXT = 'Expected a function';
+        function isObject(value) {
+            var type = typeof value;
+            return value != null && (type == 'object' || type == 'function');
+        }
+        function now() {
+            return Date.now();
+        }
+        return function debounce(func, wait, options) {
+            var nativeMax = Math.max,
+                nativeMin = Math.min;
+
+            var lastArgs,
+                lastThis,
+                maxWait,
+                result,
+                timerId,
+                lastCallTime,
+                lastInvokeTime = 0,
+                leading = false,
+                maxing = false,
+                trailing = true;
+
+            if (typeof func != 'function') {
+                throw new TypeError(FUNC_ERROR_TEXT);
+            }
+            wait = wait || 0;
+            if (isObject(options)) {
+                leading = !!options.leading;
+                maxing = 'maxWait' in options;
+                maxWait = maxing ? nativeMax(options.maxWait || 0, wait) : maxWait;
+                trailing = 'trailing' in options ? !!options.trailing : trailing;
+            }
+
+            function invokeFunc(time) {
+                var args = lastArgs,
+                    thisArg = lastThis;
+
+                lastArgs = lastThis = undefined;
+                lastInvokeTime = time;
+                result = func.apply(thisArg, args);
+                return result;
+            }
+
+            function leadingEdge(time) {
+                // Reset any `maxWait` timer.
+                lastInvokeTime = time;
+                // Start the timer for the trailing edge.
+                timerId = setTimeout(timerExpired, wait);
+                // Invoke the leading edge.
+                return leading ? invokeFunc(time) : result;
+            }
+
+            function remainingWait(time) {
+                var timeSinceLastCall = time - lastCallTime,
+                    timeSinceLastInvoke = time - lastInvokeTime,
+                    timeWaiting = wait - timeSinceLastCall;
+
+                return maxing
+                    ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
+                    : timeWaiting;
+            }
+
+            function shouldInvoke(time) {
+                var timeSinceLastCall = time - lastCallTime,
+                    timeSinceLastInvoke = time - lastInvokeTime;
+
+                // Either this is the first call, activity has stopped and we're at the
+                // trailing edge, the system time has gone backwards and we're treating
+                // it as the trailing edge, or we've hit the `maxWait` limit.
+                return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
+                        (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
+            }
+
+            function timerExpired() {
+                var time = now();
+                if (shouldInvoke(time)) {
+                    return trailingEdge(time);
+                }
+                // Restart the timer.
+                timerId = setTimeout(timerExpired, remainingWait(time));
+            }
+
+            function trailingEdge(time) {
+                timerId = undefined;
+
+                // Only invoke if we have `lastArgs` which means `func` has been
+                // debounced at least once.
+                if (trailing && lastArgs) {
+                    return invokeFunc(time);
+                }
+                lastArgs = lastThis = undefined;
+                return result;
+            }
+
+            function cancel() {
+                if (timerId !== undefined) {
+                    clearTimeout(timerId);
+                }
+                lastInvokeTime = 0;
+                lastArgs = lastCallTime = lastThis = timerId = undefined;
+            }
+
+            function flush() {
+                return timerId === undefined ? result : trailingEdge(now());
+            }
+
+            function debounced() {
+                var time = now(),
+                    isInvoking = shouldInvoke(time);
+
+                lastArgs = arguments;
+                lastThis = this;
+                lastCallTime = time;
+
+                if (isInvoking) {
+                    if (timerId === undefined) {
+                        return leadingEdge(lastCallTime);
+                    }
+                    if (maxing) {
+                        // Handle invocations in a tight loop.
+                        timerId = setTimeout(timerExpired, wait);
+                        return invokeFunc(lastCallTime);
+                    }
+                }
+                if (timerId === undefined) {
+                    timerId = setTimeout(timerExpired, wait);
+                }
+                return result;
+            }
+            debounced.cancel = cancel;
+            debounced.flush = flush;
+            return debounced;
+        };
     })();
     // -----------------------------------------------------------------------
     // :: jQuery Timers
@@ -852,8 +997,8 @@
             return function(container) {
                 var node = this[0];
                 var defer = jQuery.Deferred();
-                var item_observer = new window.IntersectionObserver(function(entry) {
-                    defer.resolve(entry.isIntersecting);
+                var item_observer = new window.IntersectionObserver(function(entries) {
+                    defer.resolve(entries[0].isIntersecting);
                     item_observer.unobserve(node);
                 }, {
                     root: container[0]
@@ -1225,6 +1370,10 @@
         var animation;
         var restart_animation;
         var paste_count = 0;
+        // use \uFFFF to mark newline extra character
+        // so we can hide it by css when using text selection
+        var line_marker = '\uFFFF';
+        var line_marker_re = /\uFFFF$/;
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
@@ -1764,7 +1913,8 @@
                         _class += ' ' + className;
                     }
                 }
-                if (_class !== self.attr('class')) {
+                _class = _class.replace(/\s+/g, ' ');
+                if (_class !== self.attr('class').replace(/\s+/g, ' ')) {
                     self.attr('class', _class);
                 }
             }
@@ -1940,7 +2090,7 @@
                 var tmp = string.split('\n');
                 var first_len = num_chars - prompt_len - 1;
                 for (var i = 0; i < tmp.length - 1; ++i) {
-                    tmp[i] += ' ';
+                    tmp[i] += line_marker;
                 }
                 // split first line
                 if (strlen(tmp[0]) > first_len) {
@@ -2069,6 +2219,11 @@
             // :: Draw line with the cursor
             // -----------------------------------------------------------------
             function draw_cursor_line(string, options) {
+                var end_line = string.match(line_marker_re);
+                if (end_line) {
+                    string = string.replace(line_marker_re, ' ');
+                }
+                var cursor_end_line = false;
                 var settings = $.extend({
                     prompt: '',
                     last: false
@@ -2096,6 +2251,7 @@
                     var c_before = (prompt + before_str).replace(/^.*\t/, '');
                     cursor.html(format(c, c_before));
                     if (position === len - 1) {
+                        cursor_end_line = true;
                         after.html('');
                     } else {
                         if (c.match(/\t/)) {
@@ -2106,10 +2262,7 @@
                         after.html(format(substring(string, position + 1), c_before));
                     }
                 }
-                // fix for command line selection
-                var cond = settings.last || settings.length === 1;
-                var noselect = settings.position === (cond ? len : len - 1);
-                cursor.toggleClass('noselect', noselect);
+                cursor.toggleClass('end-line', cursor_end_line);
                 // fix for animation when changing --animation dynamically
                 fix_cursor();
                 var cursor_len = $.terminal.length(cursor.text());
@@ -2123,9 +2276,14 @@
                 restart_animation();
             }
             function div(string, before) {
-                return '<div role="presentation" aria-hidden="true">' +
-                    format(string, before || '') +
-                    '</div>';
+                var end_line = string.match(line_marker_re);
+                var result = '<div role="presentation" aria-hidden="true"';
+                if (end_line) {
+                    string = string.replace(line_marker_re, ' ');
+                    result += ' class="end-line"';
+                }
+                result += '>' + format(string, before || '') + '</div>';
+                return result;
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -3533,7 +3691,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 06 Apr 2019 19:04:24 +0000',
+        date: 'Sun, 07 Apr 2019 00:00:25 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6369,17 +6527,37 @@
                 }
             }
         }
+        var scroll_to_view = (function() {
+            function scroll_to_view(visible) {
+                if (!visible) {
+                    // try catch for Node.js unit tests
+                    try {
+                        var cursor = self.find('.cursor');
+                        var offset = cursor.offset();
+                        var term_offset = self.offset();
+                        self.scrollTop(offset.top - term_offset.top - 5);
+                        return true;
+                    } catch (e) {
+                        return true;
+                    }
+                }
+            }
+            // we don't want debounce in Unit Tests
+            try {
+                if (typeof global.it === 'function') {
+                    return scroll_to_view;
+                }
+            } catch (e) {
+            }
+            return debounce(scroll_to_view, 100, {
+                leading: true,
+                trailing: false
+            });
+        })();
         // ---------------------------------------------------------------------
         function move_cursor_visible() {
             var cursor = self.find('.cursor');
-            return cursor.is_fully_in_viewport(self).then(function(visible) {
-                if (!visible) {
-                    var offset = cursor.offset();
-                    var term_offset = self.offset();
-                    self.scrollTop(offset.top - term_offset.top - 5);
-                    return true;
-                }
-            });
+            return cursor.is_fully_in_viewport(self).then(scroll_to_view);
         }
         // ---------------------------------------------------------------------
         function hashchange() {
