@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 07 Apr 2019 00:00:25 +0000
+ * Date: Sun, 07 Apr 2019 00:22:10 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1583,7 +1583,7 @@
             'ARROWDOWN': next_history,
             'CTRL+N': next_history,
             'ARROWLEFT': left,
-            'HOLD+ARROWLEFT': left,
+            'HOLD+ARROWLEFT': debounce(left, 10),
             'CTRL+B': left,
             'CTRL+ARROWLEFT': function() {
                 // jump to one character after last space before prevoius word
@@ -1629,7 +1629,7 @@
                 }
             },
             'ARROWRIGHT': right,
-            'HOLD+ARROWRIGHT': right,
+            'HOLD+ARROWRIGHT': debounce(right, 10),
             'CTRL+F': right,
             'CTRL+ARROWRIGHT': function() {
                 // jump to beginning or end of the word
@@ -3691,7 +3691,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 07 Apr 2019 00:00:25 +0000',
+        date: 'Sun, 07 Apr 2019 00:22:10 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

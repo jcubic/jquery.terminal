@@ -1583,7 +1583,7 @@
             'ARROWDOWN': next_history,
             'CTRL+N': next_history,
             'ARROWLEFT': left,
-            'HOLD+ARROWLEFT': left,
+            'HOLD+ARROWLEFT': debounce(left, 10),
             'CTRL+B': left,
             'CTRL+ARROWLEFT': function() {
                 // jump to one character after last space before prevoius word
@@ -1629,7 +1629,7 @@
                 }
             },
             'ARROWRIGHT': right,
-            'HOLD+ARROWRIGHT': right,
+            'HOLD+ARROWRIGHT': debounce(right, 10),
             'CTRL+F': right,
             'CTRL+ARROWRIGHT': function() {
                 // jump to beginning or end of the word
