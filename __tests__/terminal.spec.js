@@ -156,10 +156,18 @@ Object.defineProperty(global, 'localStorage', { value: storage });
 global.alert = window.alert = function(string) {
     console.log(string);
 };
+
+// fake native key prop
+var proto = window.KeyboardEvent.prototype;
+var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
+get.toString = function() { return 'function() { [native code] }'; };
+Object.defineProperty(proto, 'key', {get: get});
+
 global.location = global.window.location = {hash: ''};
 global.document = window.document;
 global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
+
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
@@ -5638,7 +5646,7 @@ describe('Terminal plugin', function() {
                 var which = key.toUpperCase().charCodeAt(0);
                 doc.trigger(keydown(true, false, false, which, key));
                 return new Promise(resolve => {
-                    setTimeout(function() {
+                    delay(50, function() {
                         (function loop(i) {
                             if (i) {
                                 doc.trigger(keydown(true, false, false, which, key));
@@ -5651,7 +5659,7 @@ describe('Terminal plugin', function() {
                                 resolve();
                             }
                         })(count);
-                    }, 300);
+                    });
                 });
             }
             it('should create new keymap', function() {

@@ -3059,7 +3059,7 @@
                 // key polyfill is not correct for keypress
                 // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
                 var key;
-                if (is_key_native || e.fake) {
+                if (is_key_native) {
                     key = e.key;
                     // fixing IE inconsistency #362
                     var normalized = key.toUpperCase();
@@ -3301,7 +3301,7 @@
         }
         var proto = window.KeyboardEvent.prototype;
         var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
-        return get.toString().match(/\[native code\]/);
+        return !!get.toString().match(/\[native code\]/);
     })();
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {

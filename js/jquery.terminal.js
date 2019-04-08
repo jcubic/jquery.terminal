@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 07 Apr 2019 19:16:52 +0000
+ * Date: Mon, 08 Apr 2019 08:44:19 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3059,7 +3059,7 @@
                 // key polyfill is not correct for keypress
                 // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
                 var key;
-                if (is_key_native || e.fake) {
+                if (is_key_native) {
                     key = e.key;
                     // fixing IE inconsistency #362
                     var normalized = key.toUpperCase();
@@ -3301,7 +3301,7 @@
         }
         var proto = window.KeyboardEvent.prototype;
         var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
-        return get.toString().match(/\[native code\]/);
+        return !!get.toString().match(/\[native code\]/);
     })();
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
@@ -3752,7 +3752,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 07 Apr 2019 19:16:52 +0000',
+        date: 'Mon, 08 Apr 2019 08:44:19 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
