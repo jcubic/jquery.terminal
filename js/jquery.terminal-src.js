@@ -6057,6 +6057,7 @@
                     exec: true,
                     raw: false,
                     finalize: $.noop,
+                    invokeMethods: false,
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string;
@@ -6107,7 +6108,7 @@
                                         self.error(strings().recursiveCall);
                                     } else {
                                         $.terminal.extended_command(self, string, {
-                                            invokeMethods: settings.invokeMethods
+                                            invokeMethods: line_settings.invokeMethods
                                         });
                                     }
                                 }
@@ -7895,9 +7896,11 @@
                     try {
                         var locals = $.extend({
                             flush: true,
+                            exec: true,
                             raw: settings.raw,
                             finalize: $.noop,
                             keepWords: false,
+                            invokeMethods: settings.invokeMethods,
                             formatters: true,
                             allowedAttributes: settings.allowedAttributes
                         }, options || {});

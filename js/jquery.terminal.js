@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Mon, 08 Apr 2019 08:44:19 +0000
+ * Date: Tue, 09 Apr 2019 16:40:25 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3752,7 +3752,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 08 Apr 2019 08:44:19 +0000',
+        date: 'Tue, 09 Apr 2019 16:40:25 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6057,6 +6057,7 @@
                     exec: true,
                     raw: false,
                     finalize: $.noop,
+                    invokeMethods: false,
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string;
@@ -6107,7 +6108,7 @@
                                         self.error(strings().recursiveCall);
                                     } else {
                                         $.terminal.extended_command(self, string, {
-                                            invokeMethods: settings.invokeMethods
+                                            invokeMethods: line_settings.invokeMethods
                                         });
                                     }
                                 }
@@ -7895,9 +7896,11 @@
                     try {
                         var locals = $.extend({
                             flush: true,
+                            exec: true,
                             raw: settings.raw,
                             finalize: $.noop,
                             keepWords: false,
+                            invokeMethods: settings.invokeMethods,
                             formatters: true,
                             allowedAttributes: settings.allowedAttributes
                         }, options || {});
