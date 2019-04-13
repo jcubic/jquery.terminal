@@ -1,7 +1,7 @@
 ## 2.4.0
 ### Features
-* some improvements to performance of rendering command line
-* CTRL+C now retain newlines inside cmd and terminal output
+* improvements to performance of rendering and navigating longer command lines
+* CTRL+C now retain newlines inside cmd and terminal output (modern browsers only)
 * more control over server side calls by using invokeMethods option in echo
 * warn users when they try to complete commands with newlines and word complete is set
 ### Bugfix
