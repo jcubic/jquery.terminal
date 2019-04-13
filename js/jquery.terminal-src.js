@@ -1028,6 +1028,10 @@
     // ---------------------------------------------------------------------
     var excepctions = [];
     function alert_exception(label, e) {
+        if (arguments[0] instanceof $.terminal.Exception) {
+            label = arguments[0].type;
+            e = arguments[0];
+        }
         var message = (label ? label + ': ' : '') + exception_message(e);
         if (excepctions.indexOf(message) === -1) {
             excepctions.push(message);
@@ -6772,8 +6776,12 @@
                                 return false;
                             }
                             var result = completion.call(self, string, resolve);
-                            if (result && is_function(result.then)) {
-                                result.then(resolve);
+                            if (result) {
+                                if (is_function(result.then)) {
+                                    result.then(resolve);
+                                } else if (result instanceof Array) {
+                                    resolve(result);
+                                }
                             }
                             break;
                         case 'array':
@@ -7242,17 +7250,25 @@
                         }
                     });
                 }
+                function escape(string) {
+                    if (quote === '"') {
+                        string = string.replace(/"/g, '\\"');
+                    }
+                    if (!quote && options.escape) {
+                        string = string.replace(/(["'() ])/g, '\\$1');
+                    }
+                    return string;
+                }
                 function matched_strings() {
                     var matched = [];
                     for (var i = commands.length; i--;) {
+                        if (commands[i].match(/\n/) && options.word) {
+                            warn('If you use commands with newlines you ' +
+                                 'should use word option for complete or' +
+                                 ' wordAutocomplete terminal option');
+                        }
                         if (regex.test(commands[i])) {
-                            var match = commands[i];
-                            if (quote === '"') {
-                                match = match.replace(/"/g, '\\"');
-                            }
-                            if (!quote && options.escape) {
-                                match = match.replace(/(["'() ])/g, '\\$1');
-                            }
+                            var match = escape(commands[i]);
                             if (!sensitive && same_case(match)) {
                                 if (string.toLowerCase() === string) {
                                     match = match.toLowerCase();
@@ -7313,9 +7329,9 @@
                             return true;
                         }
                     } else {
-                        var common = common_string(string, matched, sensitive);
+                        var common = common_string(escape(string), matched, sensitive);
                         if (common) {
-                            replace(string, common);
+                            replace(safe, common);
                             command = self.before_cursor(options.word);
                             return true;
                         }

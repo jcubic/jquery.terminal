@@ -3746,6 +3746,36 @@ describe('Terminal plugin', function() {
             expect(term.get_command()).toEqual('asd "foo bar baz"');
             term.destroy().remove();
         });
+        it('should complete special regex characters', function() {
+            term = $('<div/>').appendTo('body').terminal({}, {
+                completion: ['(macroexpand', '(macroexpand-1', '[regex]', '{tag}'],
+                greetings: '',
+                completionEscape: false
+            });
+            return new Promise((resolve) => {
+                var specs = [
+                    ['(macro', '(macroexpand'],
+                    ['[reg', '[regex]'],
+                    ['{ta', '{tag}']
+                ];
+                (function loop() {
+                    var spec = specs.pop();
+                    if (!spec) {
+                        resolve();
+                    } else {
+                        var [input, output] = spec;
+                        term.set_command('').insert(input).focus();
+                        shortcut(false, false, false, 9, 'tab');
+                        delay(100, () => {
+                            expect(term.get_output()).toEqual('');
+                            expect(term.get_command()).toEqual(output);
+                            loop();
+                        });
+                    }
+                })();
+            });
+            term.destroy().remove();
+        });
         it('should complete when text have escaped quotes', function() {
             term = $('<div/>').appendTo('body').terminal({}, {
                 completion: ['foo "bar" baz']

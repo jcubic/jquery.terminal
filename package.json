@@ -300,7 +300,6 @@
   "devDependencies": {
     "coveralls": "^3.0.2",
     "cssnano": "^4.1.8",
-    "emoji-datasource-twitter": "^4.1.0",
     "eslint": "^5.13.0",
     "jest": "^24.1.0",
     "jsonlint": "^1.6.3",
