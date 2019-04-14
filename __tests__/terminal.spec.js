@@ -4286,21 +4286,18 @@ describe('Terminal plugin', function() {
                 spy(object, 'login');
                 term.set_prompt('$ ');
                 term.set_interpreter('/async', true).focus();
-                return new Promise((resolve) => {
-                    // there seems to be bug in setTimeout in Node or in Terminal code
-                    // that sometimes don't invoke code when using setTimeout
-                    setImmediate(function() {
-                        if (term.token(true)) {
-                            term.logout(true);
-                        }
-                        term.exec(['demo', 'demo']).then(() => {
-                            expect(term.get_prompt()).toEqual('$ ');
-                            expect(object.login).toHaveBeenCalledWith('demo', 'demo');
-                            term.exec('echo foo').then(() => {
-                                expect(object.echo).toHaveBeenCalledWith(token, 'foo');
-                                term.destroy().remove();
-                                resolve();
-                            });
+                // there seems to be bug in setTimeout in Node or in Terminal code
+                // that sometimes don't invoke code when using setTimeout
+                return delay(500, () => {
+                    if (term.token(true)) {
+                        term.logout(true);
+                    }
+                    return term.exec(['demo', 'demo']).then(() => {
+                        expect(term.get_prompt()).toEqual('$ ');
+                        expect(object.login).toHaveBeenCalledWith('demo', 'demo');
+                        return term.exec('echo foo').then(() => {
+                            expect(object.echo).toHaveBeenCalledWith(token, 'foo');
+                            term.destroy().remove();
                         });
                     });
                 });
