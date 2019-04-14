@@ -11,8 +11,42 @@
  * Released under the MIT license
  */
 /* global global, it, expect, describe, require, spyOn, setTimeout, location,
-          beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest  */
-/* TODO: test caseSensitivity */
+          beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest, setImmediate  */
+/* TODO missing tests:
+      test caseSensitiveSearch option
+      is_fully_in_viewport sanity check or usage
+      alert_exception Error & string - usage
+      keys:
+        get_key - META, lonely CTRL, ALT, SPACEBAR
+        DELETE key
+        CTRL+R and BACKSPACE when in reverse_search
+        CTRL+H
+        delete_word:
+           one: ALT+D, HOLD+DELETE, HOLD+SHIFT+DELETE
+        delete_word_backward:
+          one: CTRL+W, HOLD+BACKSPACE, HOLD+SHIFT+BACKSPACE
+        HOME, CTRL+HOME, END, CTRL+END
+      paste and CTRL+C ????
+      fix_cursor ???? need update animation check into function
+      better reverse_history_search
+      better get_splitted_command_line
+      exception in formatting (instide command line) - formatting ignored
+      Multiline prompt
+      cmd::option() - 0 cover
+      cmd::keymap('CTRL+C') get not overwritten keymap
+      cmd::insert(0) cmd::insert(middle) - covered position at end
+      cmd::commands() - setter/getter
+      cmd::prompt(x) where x is number, regex object, null, NaN - should throw
+      cmd::position(-10) cmd::position() === 0
+      cmd::refresh() - draw_prompt as function is called
+      cmd::show()
+      click on .cmd move to end
+      test Astral symbols & combine characters
+      get_selected_html, with_selection, process_selected_html CTRL+C- mock window.getSelection
+      parse_command empty string command / split_command with string
+      tracking_replace - with function
+      iterate_formatting with html entity and escape brackets
+ */
 
 function Storage() {}
 Storage.prototype.getItem = function(name) {
@@ -122,10 +156,18 @@ Object.defineProperty(global, 'localStorage', { value: storage });
 global.alert = window.alert = function(string) {
     console.log(string);
 };
+
+// fake native key prop
+var proto = window.KeyboardEvent.prototype;
+var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
+get.toString = function() { return 'function() { [native code] }'; };
+Object.defineProperty(proto, 'key', {get: get});
+
 global.location = global.window.location = {hash: ''};
 global.document = window.document;
 global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
+
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
@@ -567,6 +609,18 @@ describe('Terminal utils', function() {
             ];
             test(tests);
         });
+        it('should not change formatting', function() {
+            var tests = [
+                '[[;;]Lorem] [[;;]Ipsum] [[;;;]Dolor]',
+                '[[;;;;]Lorem Ipsum Dolor] [[;;;;]Amet]',
+                '[[;;;;Lorem Ipsum Dolor]Lorem Ipsum Dolor] [[;;;;Amet]Amet]',
+                '[[;;]]Lorem Ipsum [[;;]]Dolor Sit [[;;;;]]Amet',
+                'Lorem Ipsum Dolor Sit Amet'
+            ].forEach(function(string) {
+                var normalized = $.terminal.normalize(string);
+                expect($.terminal.normalize(normalized)).toEqual(normalized);
+            });
+        });
     });
     describe('$.terminal.is_formatting', function() {
         it('should detect terminal formatting', function() {
@@ -863,6 +917,12 @@ describe('Terminal utils', function() {
                                             (formatters.length - 1) +
                                             ']'));
             $.terminal.defaults.formatters.pop();
+        });
+        it('should process in a loop', function() {
+            $.terminal.defaults.formatters.push([/(^|x)[0-9]/, '$1x', {loop: true}]);
+            var input = '00000000000000000000000000';
+            var output = $.terminal.apply_formatters(input);
+            expect(output).toEqual(input.replace(/0/g, 'x'));
         });
     });
     describe('$.terminal.split_equal', function() {
@@ -1678,8 +1738,30 @@ describe('Terminal utils', function() {
                 expect(item.value).toEqual(input[i++]);
             }
         });
+        it('should iterate over formatting', function() {
+            var input = '[[;blue;]abc][[;red;]def]';
+            var arr = [
+                '[[;blue;]a]',
+                '[[;blue;]b]',
+                '[[;blue;]c]',
+                '[[;red;]d]',
+                '[[;red;]e]',
+                '[[;red;]f]'
+            ];
+            var i = 0;
+            for (var x of $.terminal.iterator(input)) {
+                expect(x).toEqual(arr[i++]);
+            }
+        });
+        it('should handle escape bracket', function() {
+            var input = '[[;blue;]foo \\ bar]';
+            var arr = 'foo \\ bar'.split('').map(x => '[[;blue;]' + (x === '\\' ? '\\\\' : x) + ']');
+            var i = 0;
+            for (var x of $.terminal.iterator('[[;blue;]foo \\ bar]')) {
+                expect(x).toEqual(arr[i++]);
+            }
+        });
     });
-    
     describe('$.terminal.new_formatter', function() {
         function nested_index() {
             var formatters = $.terminal.defaults.formatters;
@@ -2555,13 +2637,19 @@ describe('Terminal plugin', function() {
                     fn: $.noop
                 };
                 spy(test, 'fn');
+                i_callback = [];
                 window.IntersectionObserver = function(callback) {
-                    i_callback = callback;
+                    i_callback.push(callback);
                     return {
                         observe: function() {
                         },
                         unobserve: function() {
-                            i_callback = null;
+                            for (var i = i_callback.length; --i;) {
+                                if (i_callback[i] === callback) {
+                                    i_callback.slice(i, 1);
+                                    break;
+                                }
+                            }
                         }
                     };
                 };
@@ -2602,20 +2690,20 @@ describe('Terminal plugin', function() {
             init();
             it('should enable/disable terminal', function() {
                 expect(term.enabled()).toBe(true);
-                i_callback();
+                i_callback[0]();
                 term.hide();
-                i_callback();
+                i_callback[0]();
                 expect(term.enabled()).toBe(false);
                 term.show();
-                i_callback();
+                i_callback[0]();
                 expect(term.enabled()).toBe(true);
             });
             it('should call resize', function() {
-                i_callback();
+                i_callback[0]();
                 term.hide();
-                i_callback();
+                i_callback[0]();
                 term.show();
-                i_callback();
+                i_callback[0]();
                 expect(test.fn).toHaveBeenCalled();
             });
         });
@@ -3182,7 +3270,7 @@ describe('Terminal plugin', function() {
                     }
                     resp = JSON.stringify(resp);
                     if (settings.async) {
-                        setTimeout(done, 100);
+                        setTimeout(done, 5);
                     } else {
                         done();
                     }
@@ -3656,6 +3744,36 @@ describe('Terminal plugin', function() {
             term.insert('asd "foo b');
             shortcut(false, false, false, 9, 'tab');
             expect(term.get_command()).toEqual('asd "foo bar baz"');
+            term.destroy().remove();
+        });
+        it('should complete special regex characters', function() {
+            term = $('<div/>').appendTo('body').terminal({}, {
+                completion: ['(macroexpand', '(macroexpand-1', '[regex]', '{tag}'],
+                greetings: '',
+                completionEscape: false
+            });
+            return new Promise((resolve) => {
+                var specs = [
+                    ['(macro', '(macroexpand'],
+                    ['[reg', '[regex]'],
+                    ['{ta', '{tag}']
+                ];
+                (function loop() {
+                    var spec = specs.pop();
+                    if (!spec) {
+                        resolve();
+                    } else {
+                        var [input, output] = spec;
+                        term.set_command('').insert(input).focus();
+                        shortcut(false, false, false, 9, 'tab');
+                        delay(100, () => {
+                            expect(term.get_output()).toEqual('');
+                            expect(term.get_command()).toEqual(output);
+                            loop();
+                        });
+                    }
+                })();
+            });
             term.destroy().remove();
         });
         it('should complete when text have escaped quotes', function() {
@@ -4148,6 +4266,8 @@ describe('Terminal plugin', function() {
                 term.destroy().remove();
             });
         });
+        // this test long to fix, this function should be not used since it's flacky
+        // and it don't return promise when interpreter is created
         describe('set_interpreter', function() {
             var term = $('<div/>').appendTo('body').terminal($.noop);
             it('should change intepreter', function() {
@@ -4161,27 +4281,27 @@ describe('Terminal plugin', function() {
                 term.exec('foo');
                 expect(test.interpreter).toHaveBeenCalledWith('foo', term);
             });
-            it('should create async JSON-RPC with login', function(done) {
+            it('should create async JSON-RPC with login', function() {
                 spy(object, 'echo');
                 spy(object, 'login');
                 term.set_prompt('$ ');
                 term.set_interpreter('/async', true).focus();
-                if (term.token(true)) {
-                    term.logout(true);
-                }
-                enter(term, 'demo');
-                enter(term, 'demo');
-                setTimeout(function() {
-                    expect(term.get_prompt()).toEqual('$ ');
-                    expect(object.login).toHaveBeenCalledWith('demo', 'demo');
-                    enter(term, 'echo foo');
-                    setTimeout(function() {
-                        expect(object.echo).toHaveBeenCalledWith(token, 'foo');
-                        term.destroy().remove();
-                        done();
-                    }, 500);
-                }, 500);
-            }, 5000);
+                // there seems to be bug in setTimeout in Node or in Terminal code
+                // that sometimes don't invoke code when using setTimeout
+                return delay(500, () => {
+                    if (term.token(true)) {
+                        term.logout(true);
+                    }
+                    return term.exec(['demo', 'demo']).then(() => {
+                        expect(term.get_prompt()).toEqual('$ ');
+                        expect(object.login).toHaveBeenCalledWith('demo', 'demo');
+                        return term.exec('echo foo').then(() => {
+                            expect(object.echo).toHaveBeenCalledWith(token, 'foo');
+                            term.destroy().remove();
+                        });
+                    });
+                });
+            });
         });
         describe('greetings', function() {
             it('should show greetings', function(done) {
@@ -5525,8 +5645,11 @@ describe('Terminal plugin', function() {
                 term = $('<div/>').terminal($.noop, {
                     keymap: {
                         'CTRL+C': test.original,
-                        'CTRL+D': test.original
-                    }
+                        'CTRL+D': test.original,
+                        'HOLD+CTRL+I': test.empty,
+                        'HOLD+CTRL+B': test.empty
+                    },
+                    repeatTimeoutKeys: ['HOLD+CTRL+B']
                 });
                 term.focus();
             });
@@ -5543,6 +5666,44 @@ describe('Terminal plugin', function() {
                 term.keymap('CTRL+T', test.empty);
                 shortcut(true, false, false, 84, 't');
                 expect(test.empty).toHaveBeenCalled();
+            });
+            // testing hold key
+            function repeat_ctrl_key(key, count) {
+                var doc = $(document.documentElement || window);
+                var which = key.toUpperCase().charCodeAt(0);
+                doc.trigger(keydown(true, false, false, which, key));
+                return new Promise(resolve => {
+                    delay(50, function() {
+                        (function loop(i) {
+                            if (i) {
+                                doc.trigger(keydown(true, false, false, which, key));
+                                delay(10, function() {
+                                    loop(--i);
+                                });
+                            } else {
+                                doc.trigger(keypress(key));
+                                doc.trigger($.Event("keyup"));
+                                resolve();
+                            }
+                        })(count);
+                    });
+                });
+            }
+            it('should create new keymap', function() {
+                var keys = 10;
+                return repeat_ctrl_key('i', keys).then(() => {
+                    expect(test.empty.calls.count()).toEqual(keys - 1);
+                });
+            });
+            it('should limit rate of repeat keys', function() {
+                // testing hold key
+                return repeat_ctrl_key('b', 10).then(() => {
+                    return delay(200, function() {
+                        return repeat_ctrl_key('b', 10).then(() => {
+                            expect(test.empty.calls.count()).toEqual(2);
+                        });
+                    });
+                });
             });
             it('should create keymap from object', function() {
                 term.keymap({

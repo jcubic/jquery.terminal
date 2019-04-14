@@ -32,6 +32,10 @@
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
+ * debounce function from Lodash
+ * Copyright JS Foundation and other contributors <https://js.foundation/>
+ * The MIT License
+ *
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
@@ -39,7 +43,7 @@
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
-          setInterval, clearInterval, Blob */
+          setInterval, clearInterval, clearTimeout, Blob */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -173,6 +177,7 @@
     ctx.sprintf = sprintf;
     ctx.vsprintf = vsprintf;
 })(typeof global !== "undefined" ? global : window);
+// -----------------------------------------------------------------------
 /* eslint-enable */
 // UMD taken from https://github.com/umdjs/umd
 (function(factory, undefined) {
@@ -212,6 +217,7 @@
     // :: debug functions
     // -----------------------------------------------------------------------
     /* eslint-disable */
+    /* istanbul ignore next */
     function debug(str) {
         if (false) {
             console.log(str);
@@ -410,6 +416,146 @@
                 }
             });
         }
+    })();
+    // -----------------------------------------------------------------------
+    // :: Debounce from Lodash
+    // -----------------------------------------------------------------------
+    /* istanbul ignore next */
+    var debounce = (function() {
+        var FUNC_ERROR_TEXT = 'Expected a function';
+        function isObject(value) {
+            var type = typeof value;
+            return value != null && (type == 'object' || type == 'function');
+        }
+        function now() {
+            return Date.now();
+        }
+        return function debounce(func, wait, options) {
+            var nativeMax = Math.max,
+                nativeMin = Math.min;
+
+            var lastArgs,
+                lastThis,
+                maxWait,
+                result,
+                timerId,
+                lastCallTime,
+                lastInvokeTime = 0,
+                leading = false,
+                maxing = false,
+                trailing = true;
+
+            if (typeof func != 'function') {
+                throw new TypeError(FUNC_ERROR_TEXT);
+            }
+            wait = wait || 0;
+            if (isObject(options)) {
+                leading = !!options.leading;
+                maxing = 'maxWait' in options;
+                maxWait = maxing ? nativeMax(options.maxWait || 0, wait) : maxWait;
+                trailing = 'trailing' in options ? !!options.trailing : trailing;
+            }
+
+            function invokeFunc(time) {
+                var args = lastArgs,
+                    thisArg = lastThis;
+
+                lastArgs = lastThis = undefined;
+                lastInvokeTime = time;
+                result = func.apply(thisArg, args);
+                return result;
+            }
+
+            function leadingEdge(time) {
+                // Reset any `maxWait` timer.
+                lastInvokeTime = time;
+                // Start the timer for the trailing edge.
+                timerId = setTimeout(timerExpired, wait);
+                // Invoke the leading edge.
+                return leading ? invokeFunc(time) : result;
+            }
+
+            function remainingWait(time) {
+                var timeSinceLastCall = time - lastCallTime,
+                    timeSinceLastInvoke = time - lastInvokeTime,
+                    timeWaiting = wait - timeSinceLastCall;
+
+                return maxing
+                    ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
+                    : timeWaiting;
+            }
+
+            function shouldInvoke(time) {
+                var timeSinceLastCall = time - lastCallTime,
+                    timeSinceLastInvoke = time - lastInvokeTime;
+
+                // Either this is the first call, activity has stopped and we're at the
+                // trailing edge, the system time has gone backwards and we're treating
+                // it as the trailing edge, or we've hit the `maxWait` limit.
+                return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
+                        (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
+            }
+
+            function timerExpired() {
+                var time = now();
+                if (shouldInvoke(time)) {
+                    return trailingEdge(time);
+                }
+                // Restart the timer.
+                timerId = setTimeout(timerExpired, remainingWait(time));
+            }
+
+            function trailingEdge(time) {
+                timerId = undefined;
+
+                // Only invoke if we have `lastArgs` which means `func` has been
+                // debounced at least once.
+                if (trailing && lastArgs) {
+                    return invokeFunc(time);
+                }
+                lastArgs = lastThis = undefined;
+                return result;
+            }
+
+            function cancel() {
+                if (timerId !== undefined) {
+                    clearTimeout(timerId);
+                }
+                lastInvokeTime = 0;
+                lastArgs = lastCallTime = lastThis = timerId = undefined;
+            }
+
+            function flush() {
+                return timerId === undefined ? result : trailingEdge(now());
+            }
+
+            function debounced() {
+                var time = now(),
+                    isInvoking = shouldInvoke(time);
+
+                lastArgs = arguments;
+                lastThis = this;
+                lastCallTime = time;
+
+                if (isInvoking) {
+                    if (timerId === undefined) {
+                        return leadingEdge(lastCallTime);
+                    }
+                    if (maxing) {
+                        // Handle invocations in a tight loop.
+                        timerId = setTimeout(timerExpired, wait);
+                        return invokeFunc(lastCallTime);
+                    }
+                }
+                if (timerId === undefined) {
+                    timerId = setTimeout(timerExpired, wait);
+                }
+                return result;
+            }
+            debounced.cancel = cancel;
+            debounced.flush = flush;
+            return debounced;
+        };
     })();
     // -----------------------------------------------------------------------
     // :: jQuery Timers
@@ -831,17 +977,43 @@
         });
     };
     // -----------------------------------------------------------------------
+    function jquery_resolve(value) {
+        var defer = jQuery.Deferred();
+        defer.resolve(value);
+        return defer.promise();
+    }
+    // -----------------------------------------------------------------------
     // :: based on https://github.com/zeusdeux/isInViewport
     // :: work only vertically and on dom elements
     // -----------------------------------------------------------------------
-    $.fn.isFullyInViewport = function(container) {
-        var box = this[0].getBoundingClientRect();
-        var viewport = container[0].getBoundingClientRect();
-        var top = box.top - viewport.top;
-        var bottom = box.bottom - viewport.top;
-        var height = container.height();
-        return bottom > 0 && top <= height;
-    };
+    $.fn.is_fully_in_viewport = (function() {
+        function is_visible(node, container) {
+            var box = node.getBoundingClientRect();
+            var viewport = container[0].getBoundingClientRect();
+            var top = box.top - viewport.top;
+            var bottom = box.bottom - viewport.top;
+            var height = container.height();
+            return bottom > 0 && top <= height;
+        }
+        if (window.IntersectionObserver) {
+            return function(container) {
+                var node = this[0];
+                var defer = jQuery.Deferred();
+                var item_observer = new window.IntersectionObserver(function(entries) {
+                    defer.resolve(entries[0].isIntersecting);
+                    item_observer.unobserve(node);
+                }, {
+                    root: container[0]
+                });
+                item_observer.observe(node);
+                return defer.promise();
+            };
+        } else {
+            return function(container) {
+                return jquery_resolve(is_visible(this[0], container));
+            };
+        }
+    })();
     // -----------------------------------------------------------------------
     // :: hide elements from screen readers
     // -----------------------------------------------------------------------
@@ -856,6 +1028,10 @@
     // ---------------------------------------------------------------------
     var excepctions = [];
     function alert_exception(label, e) {
+        if (arguments[0] instanceof $.terminal.Exception) {
+            label = arguments[0].type;
+            e = arguments[0];
+        }
         var message = (label ? label + ': ' : '') + exception_message(e);
         if (excepctions.indexOf(message) === -1) {
             excepctions.push(message);
@@ -1200,6 +1376,10 @@
         var animation;
         var restart_animation;
         var paste_count = 0;
+        // use \uFFFF to mark newline extra character
+        // so we can hide it by css when using text selection
+        var line_marker = '\uFFFF';
+        var line_marker_re = /\uFFFF$/;
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span')) {
@@ -1380,9 +1560,12 @@
                 if (settings.commands) {
                     promise = settings.commands.call(self, tmp);
                 }
-                if (is_function(prompt) &&
-                    (promise && promise.isResolved() || !promise)) {
-                    draw_prompt();
+                if (is_function(prompt)) {
+                    if (promise && is_function(promise.then)) {
+                        promise.then(draw_prompt);
+                    } else {
+                        draw_prompt();
+                    }
                 }
                 clip.val('');
                 return false;
@@ -1409,7 +1592,7 @@
             'ARROWDOWN': next_history,
             'CTRL+N': next_history,
             'ARROWLEFT': left,
-            'HOLD+ARROWLEFT': left,
+            'HOLD+ARROWLEFT': debounce(left, 10),
             'CTRL+B': left,
             'CTRL+ARROWLEFT': function() {
                 // jump to one character after last space before prevoius word
@@ -1455,7 +1638,7 @@
                 }
             },
             'ARROWRIGHT': right,
-            'HOLD+ARROWRIGHT': right,
+            'HOLD+ARROWRIGHT': debounce(right, 10),
             'CTRL+F': right,
             'CTRL+ARROWRIGHT': function() {
                 // jump to beginning or end of the word
@@ -1508,14 +1691,14 @@
                 var len = text(command).length;
                 if (len > position) {
                     kill_text = self['delete'](len - position);
-                    text_to_clipboard(self, kill_text);
+                    text_to_clipboard(clip, kill_text);
                 }
                 return false;
             },
             'CTRL+U': function() {
                 if (command !== '' && position !== 0) {
                     kill_text = self['delete'](-position);
-                    text_to_clipboard(self, kill_text);
+                    text_to_clipboard(clip, kill_text);
                 }
                 return false;
             },
@@ -1535,7 +1718,7 @@
                 if (m) {
                     kill_text = m[0];
                     if (clipboard) {
-                        text_to_clipboard(self, kill_text);
+                        text_to_clipboard(clip, kill_text);
                     }
                 }
                 self.set(
@@ -1556,7 +1739,7 @@
                     if (m[0].length) {
                         kill_text = self['delete'](-m[0].length);
                         if (clipboard) {
-                            text_to_clipboard(self, kill_text);
+                            text_to_clipboard(clip, kill_text);
                         }
                     }
                 }
@@ -1651,7 +1834,6 @@
         function left() {
             if (position > 0) {
                 self.position(-1, true);
-                redraw();
             }
         }
         // -------------------------------------------------------------------------------
@@ -1740,7 +1922,8 @@
                         _class += ' ' + className;
                     }
                 }
-                if (_class !== self.attr('class')) {
+                _class = _class.replace(/\s+/g, ' ');
+                if (_class !== self.attr('class').replace(/\s+/g, ' ')) {
                     self.attr('class', _class);
                 }
             }
@@ -1916,7 +2099,7 @@
                 var tmp = string.split('\n');
                 var first_len = num_chars - prompt_len - 1;
                 for (var i = 0; i < tmp.length - 1; ++i) {
-                    tmp[i] += ' ';
+                    tmp[i] += line_marker;
                 }
                 // split first line
                 if (strlen(tmp[0]) > first_len) {
@@ -2045,6 +2228,11 @@
             // :: Draw line with the cursor
             // -----------------------------------------------------------------
             function draw_cursor_line(string, options) {
+                var end_line = string.match(line_marker_re);
+                if (end_line) {
+                    string = string.replace(line_marker_re, ' ');
+                }
+                var cursor_end_line = false;
                 var settings = $.extend({
                     prompt: '',
                     last: false
@@ -2072,6 +2260,7 @@
                     var c_before = (prompt + before_str).replace(/^.*\t/, '');
                     cursor.html(format(c, c_before));
                     if (position === len - 1) {
+                        cursor_end_line = true;
                         after.html('');
                     } else {
                         if (c.match(/\t/)) {
@@ -2082,10 +2271,7 @@
                         after.html(format(substring(string, position + 1), c_before));
                     }
                 }
-                // fix for command line selection
-                var cond = settings.last || settings.length === 1;
-                var noselect = settings.position === (cond ? len : len - 1);
-                cursor.toggleClass('noselect', noselect);
+                cursor.toggleClass('end-line', cursor_end_line);
                 // fix for animation when changing --animation dynamically
                 fix_cursor();
                 var cursor_len = $.terminal.length(cursor.text());
@@ -2099,9 +2285,14 @@
                 restart_animation();
             }
             function div(string, before) {
-                return '<div role="presentation" aria-hidden="true">' +
-                    format(string, before || '') +
-                    '</div>';
+                var end_line = string.match(line_marker_re);
+                var result = '<div role="presentation" aria-hidden="true"';
+                if (end_line) {
+                    string = string.replace(line_marker_re, ' ');
+                    result += ' class="end-line"';
+                }
+                result += '>' + format(string, before || '') + '</div>';
+                return result;
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -2609,13 +2800,17 @@
             })(),
             resize: function(num) {
                 char_width = get_char_width();
+                var new_num_chars;
                 if (num) {
-                    num_chars = num;
+                    new_num_chars = num;
                 } else {
-                    num_chars = get_num_chars(char_width);
+                    new_num_chars = get_num_chars(char_width);
                 }
-                redraw();
-                draw_prompt();
+                if (num_chars !== new_num_chars) {
+                    num_chars = new_num_chars;
+                    redraw();
+                    draw_prompt();
+                }
                 return self;
             },
             invoke_key: function(shortcut) {
@@ -2690,12 +2885,10 @@
         // :: INIT
         // ---------------------------------------------------------------------
         self.name(settings.name || settings.prompt || '');
-        if (typeof settings.prompt === 'string') {
+        if (settings.prompt !== false) {
             prompt = settings.prompt;
-        } else {
-            prompt = '> ';
+            draw_prompt();
         }
-        draw_prompt();
         if (settings.enabled === true) {
             self.enable();
         }
@@ -2780,10 +2973,7 @@
                     return result;
                 }
             }
-            if (enabled) {
-                self.oneTime(settings.holdTimeout, 'hold', function() {
-                    hold = true;
-                });
+            if (enabled || key === 'CTRL+C') {
                 if (hold) {
                     key = 'HOLD+' + key;
                     if (hold_pause) {
@@ -2796,6 +2986,10 @@
                             hold_pause = false;
                         });
                     }
+                } else {
+                    self.oneTime(settings.holdTimeout, 'hold', function() {
+                        hold = true;
+                    });
                 }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
@@ -2869,7 +3063,7 @@
                 // key polyfill is not correct for keypress
                 // https://github.com/cvan/keyboardevent-key-polyfill/issues/15
                 var key;
-                if (is_key_native || e.fake) {
+                if (is_key_native) {
                     key = e.key;
                     // fixing IE inconsistency #362
                     var normalized = key.toUpperCase();
@@ -3000,7 +3194,7 @@
                 } else {
                     button = e.originalEvent.button;
                 }
-                if (button === 0 && get_selected_text() === '') {
+                if (button === 0 && get_selected_html() === '') {
                     var name = 'click_' + id;
                     if (++count === 1) {
                         var down = was_down;
@@ -3039,6 +3233,7 @@
     var astral_symbols_re = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
     // source: https://github.com/mathiasbynens/emoji-regex
     var emoji_re = /^(\uD83C\uDFF4(?:\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74)\uDB40\uDC7F|\u200D\u2620\uFE0F)|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3]))|\uD83D\uDC69\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\uD83D\uDC68(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83D\uDC69\u200D[\u2695\u2696\u2708])\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC68(?:\u200D(?:(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D[\uDC66\uDC67])|\uD83C[\uDFFB-\uDFFF])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83C\uDDF6\uD83C\uDDE6|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])\uFE0F|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDD1-\uDDDD]))/;
+    var entity_re = /^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
     // https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
     var mobile_re = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i;
     var tablet_re = /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i;
@@ -3110,7 +3305,7 @@
         }
         var proto = window.KeyboardEvent.prototype;
         var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
-        return get.toString().match(/\[native code\]/);
+        return !!get.toString().match(/\[native code\]/);
     })();
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
@@ -3123,6 +3318,7 @@
 
     // -------------------------------------------------------------------------
     // IE ch unit bug detection - better that UserAgent that can be changed
+    // -------------------------------------------------------------------------
     var ch_unit_bug = false;
     $(function() {
         function width(e) {
@@ -3170,10 +3366,18 @@
         return string.replace(/\r/g, '');
     }
     // -------------------------------------------------------------------------
+    function char_len(chr) {
+        return entity_re.test(chr) ? 1 : chr.length;
+    }
+    // -------------------------------------------------------------------------
     // :: function that return character from beginning of the string
     // :: counting emoji, suroggate pairs and combine characters
     // -------------------------------------------------------------------------
     function get_next_character(string) {
+        var match_entity = string.match(entity_re);
+        if (match_entity) {
+            return match_entity[1];
+        }
         var match_emoji = string.match(emoji_re);
         if (match_emoji) {
             return match_emoji[1];
@@ -3202,7 +3406,7 @@
             if (typeof acc === 'number') {
                 return acc;
             }
-            var length = acc.length + chr.length;
+            var length = acc.length + char_len(chr);
             if (length >= position) {
                 return acc.position + 1;
             }
@@ -3316,39 +3520,105 @@
             return -1;
         }
     }
-    // ---------------------------------------------------------------------
-    // :: Cross-Browser selection utils
-    // ---------------------------------------------------------------------
-    var get_selected_text = (function() {
-        if (window.getSelection || document.getSelection) {
-            return function() {
-                var selection = (window.getSelection || document.getSelection)();
-                if (selection.text) {
-                    return selection.text;
-                } else {
-                    return selection.toString();
+    // -----------------------------------------------------------------
+    // :: selection utilities - should work in modern browser including IE9
+    // -----------------------------------------------------------------
+    function get_selected_html() {
+        var html = '';
+        if (is_function(window.getSelection)) {
+            var sel = window.getSelection();
+            if (sel.rangeCount) {
+                var container = document.createElement('div');
+                for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                    container.appendChild(sel.getRangeAt(i).cloneContents());
                 }
-            };
-        } else if (document.selection && document.selection.type !== "Control") {
-            return function() {
-                return document.selection.createRange().text;
-            };
+                html = container.innerHTML;
+            }
         }
-        return function() {
-            return '';
-        };
-    })();
+        return html;
+    }
+    // -----------------------------------------------------------------
+    function with_selection(fn) {
+        var html = '';
+        var ranges = [];
+        if (is_function(window.getSelection)) {
+            var selection = window.getSelection();
+            if (selection.rangeCount) {
+                var container = document.createElement("div");
+                for (var i = 0, len = selection.rangeCount; i < len; ++i) {
+                    var range = selection.getRangeAt(i).cloneRange();
+                    ranges.push(range);
+                    container.appendChild(range.cloneContents());
+                }
+                html = container.innerHTML;
+            }
+        }
+        fn(html);
+        if (ranges.length) {
+            selection.removeAllRanges();
+            ranges.forEach(function(range) {
+                selection.addRange(range);
+            });
+        }
+        return html !== '';
+    }
+    // -----------------------------------------------------------------
+    function process_selected_line() {
+        var $self = $(this);
+        var result = $self.text();
+        if ($self.hasClass('end-line')) {
+            result += '\n';
+        }
+        return result;
+    }
+    // -----------------------------------------------------------------
+    function process_selected_html(html) {
+        var stdout;
+        var text = '';
+        var $html = $('<div>' + html + '</div>');
+        if (html.match(/<\/div>/)) {
+            stdout = $html.find('div[data-index]').map(function() {
+                return $(this).find('> div').map(process_selected_line).get().join('');
+            }).get().join('\n');
+            text = stdout;
+        }
+        var $prompt = $html.find('.prompt');
+        if ($prompt.length) {
+            if (text.length) {
+                text += '\n';
+            }
+            text += $prompt.text();
+        }
+        var $cmd_lines = $html.find('[role="presentation"]');
+        if ($cmd_lines.length) {
+            text += $cmd_lines.map(process_selected_line).get().join('');
+        }
+        if (!text.length && html) {
+            text = $html.text();
+        }
+        return text.replace(/\xA0/g, ' '); // fix &nbsp; space
+    }
     // ---------------------------------------------------------------------
-    // :: try to copy given DOM element text to clipboard
-    // -----------------------------------------------------------------------
-    function text_to_clipboard(container, text) {
-        var $div = $('<div>' + text.replace(/\n/, '<br/>') + '<div>');
-        $div.appendTo('body');
-        select_all($div[0]);
-        try {
+    // :: copy given DOM element text to clipboard
+    // ---------------------------------------------------------------------
+    var text_to_clipboard;
+    if (is_function(document.queryCommandSupported) &&
+        document.queryCommandSupported('copy')) {
+        text_to_clipboard = function text_to_clipboard($textarea, text) {
+            var val = $textarea.val();
+            var had_focus = $textarea.is(':focus');
+            var pos = $textarea.caret();
+            $textarea.val(text).focus();
+            $textarea[0].select();
             document.execCommand('copy');
-        } catch (e) {}
-        $div.remove();
+            $textarea.val(val);
+            if (had_focus) {
+                $textarea.caret(pos);
+            }
+            return true;
+        };
+    } else {
+        text_to_clipboard = $.noop;
     }
     // ---------------------------------------------------------------------
     var get_textarea_selection = (function() {
@@ -3448,20 +3718,6 @@
             return $.noop;
         }
     })();
-    // ---------------------------------------------------------------------
-    function select_all(element) {
-        if (window.getSelection) {
-            var selection = window.getSelection();
-            if (selection.setBaseAndExtent) {
-                selection.setBaseAndExtent(element, 0, element, 1);
-            } else if (document.createRange) {
-                var range = document.createRange();
-                range.selectNodeContents(element);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-        }
-    }
     // -------------------------------------------------------------------------
     function process_command(string, fn) {
         var array = string.match(command_re) || [];
@@ -3670,7 +3926,6 @@
                     string.slice(i - 1, i).match(/\s/);
             }
             // ----------------------------------------------------------------
-            var entity_re = /^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
             function match_entity(index) {
                 return string.slice(index).match(entity_re);
             }
@@ -3801,9 +4056,12 @@
         // :: formatting aware substring function
         // ---------------------------------------------------------------------
         substring: function substring(string, start_index, end_index) {
-            var chars = $.terminal.split_characters(text(string));
+            var chars = $.terminal.split_characters(string);
             if (!chars.slice(start_index, end_index).length) {
                 return '';
+            }
+            if (!$.terminal.have_formatting(string)) {
+                return chars.slice(start_index, end_index).join('');
             }
             var start = 0;
             var end;
@@ -3879,8 +4137,6 @@
                     semicolons = ';;';
                 } else if (semicolons === 3) {
                     semicolons = ';';
-                } else {
-                    semicolons = '';
                 }
                 // return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting so we need to escape
@@ -5132,6 +5388,7 @@
     var change_hash = false; // don't change hash on Init
     var fire_hash_change = true;
     var first_instance = true; // used by history state
+    //object_debugger($.fn, 'jquery')();
     $.fn.terminal = function(init_interpreter, options) {
         function StorageHelper(memory) {
             if (memory) {
@@ -5467,7 +5724,7 @@
                     var login = typeof auth === 'string' ? auth : 'login';
                     interpreter_object.help = interpreter_object.help || function(fn) {
                         if (typeof fn === 'undefined') {
-                            var names = response.procs.map(function(proc) {
+                            var names = procs.map(function(proc) {
                                 return proc.name;
                             }).join(', ') + ', help';
                             self.echo('Available commands: ' + names);
@@ -5700,6 +5957,10 @@
         // :: NOTE: it formats and appends lines to output_buffer. The actual
         // :: append to terminal output happens in the flush function
         // ---------------------------------------------------------------------
+        function push_line(string) {
+            output_buffer.push({line: string});
+        }
+        // ---------------------------------------------------------------------
         var output_buffer = [];
         var NEW_LINE = 1;
         function buffer_line(string, index, options) {
@@ -5726,20 +5987,24 @@
                         if (array[i] === '' || array[i] === '\r') {
                             output_buffer.push('<span></span>');
                         } else {
-                            output_buffer.push($.terminal.format(
-                                array[i],
-                                format_options
-                            ));
+                            var data = {
+                                line: $.terminal.format(
+                                    array[i],
+                                    format_options
+                                )
+                            };
+                            if (i === len - 1) {
+                                data.newline = true;
+                            }
+                            output_buffer.push(data);
                         }
                     }
                 } else {
                     string = $.terminal.format(string, format_options);
-                    string.split(/\n/).forEach(function(string) {
-                        output_buffer.push(string);
-                    });
+                    string.split(/\n/).forEach(push_line);
                 }
             } else {
-                output_buffer.push(string);
+                push_line(string);
             }
             output_buffer.push({
                 finalize: options.finalize,
@@ -5796,6 +6061,7 @@
                     exec: true,
                     raw: false,
                     finalize: $.noop,
+                    invokeMethods: false,
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string;
@@ -5846,7 +6112,7 @@
                                         self.error(strings().recursiveCall);
                                     } else {
                                         $.terminal.extended_command(self, string, {
-                                            invokeMethods: settings.invokeMethods
+                                            invokeMethods: line_settings.invokeMethods
                                         });
                                     }
                                 }
@@ -6276,21 +6542,12 @@
             }
             var login = self.login_name(true);
             command_line.name(name + (login ? '_' + login : ''));
-            if (interpreter.prompt !== command_line.prompt()) {
-                if (is_function(interpreter.prompt)) {
-                    command_line.prompt(function(callback) {
-                        var ret = interpreter.prompt.call(self, callback, self);
-                        if (ret && is_function(ret.then)) {
-                            ret.then(function(string) {
-                                if (typeof string === 'string') {
-                                    callback(string);
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    command_line.prompt(interpreter.prompt);
-                }
+            var prompt = interpreter.prompt;
+            if (is_function(prompt)) {
+                prompt = context_callback_proxy(prompt, 'string');
+            }
+            if (prompt !== command_line.prompt()) {
+                command_line.prompt(interpreter.prompt);
             }
             if (typeof interpreter.history !== 'undefined') {
                 self.history().toggle(interpreter.history);
@@ -6334,15 +6591,37 @@
                 }
             }
         }
+        var scroll_to_view = (function() {
+            function scroll_to_view(visible) {
+                if (!visible) {
+                    // try catch for Node.js unit tests
+                    try {
+                        var cursor = self.find('.cursor');
+                        var offset = cursor.offset();
+                        var term_offset = self.offset();
+                        self.scrollTop(offset.top - term_offset.top - 5);
+                        return true;
+                    } catch (e) {
+                        return true;
+                    }
+                }
+            }
+            // we don't want debounce in Unit Tests
+            try {
+                if (typeof global.it === 'function') {
+                    return scroll_to_view;
+                }
+            } catch (e) {
+            }
+            return debounce(scroll_to_view, 100, {
+                leading: true,
+                trailing: false
+            });
+        })();
         // ---------------------------------------------------------------------
         function move_cursor_visible() {
             var cursor = self.find('.cursor');
-            if (!cursor.isFullyInViewport(self)) {
-                var offset = cursor.offset();
-                var term_offset = self.offset();
-                self.scrollTop(offset.top - term_offset.top - 5);
-                return true;
-            }
+            return cursor.is_fully_in_viewport(self).then(scroll_to_view);
         }
         // ---------------------------------------------------------------------
         function hashchange() {
@@ -6440,14 +6719,20 @@
                 return false;
             },
             'CTRL+C': function() {
-                if (get_selected_text() === '') {
-                    var command = self.get_command();
-                    var position = self.get_position();
-                    command = command.slice(0, position) + '^C' +
-                        command.slice(position + 2);
-                    echo_command(command);
-                    self.set_command('');
-                }
+                with_selection(function(html) {
+                    if (html === '') {
+                        var command = self.get_command();
+                        var position = self.get_position();
+                        command = command.slice(0, position) + '^C' +
+                            command.slice(position + 2);
+                        echo_command(command);
+                        self.set_command('');
+                    } else {
+                        var clip = self.find('textarea');
+                        text_to_clipboard(clip, process_selected_html(html));
+                    }
+                });
+                return false;
             },
             'CTRL+L': function() {
                 self.clear();
@@ -6491,8 +6776,12 @@
                                 return false;
                             }
                             var result = completion.call(self, string, resolve);
-                            if (result && is_function(result.then)) {
-                                result.then(resolve);
+                            if (result) {
+                                if (is_function(result.then)) {
+                                    result.then(resolve);
+                                } else if (result instanceof Array) {
+                                    resolve(result);
+                                }
                             }
                             break;
                         case 'array':
@@ -6961,17 +7250,25 @@
                         }
                     });
                 }
+                function escape(string) {
+                    if (quote === '"') {
+                        string = string.replace(/"/g, '\\"');
+                    }
+                    if (!quote && options.escape) {
+                        string = string.replace(/(["'() ])/g, '\\$1');
+                    }
+                    return string;
+                }
                 function matched_strings() {
                     var matched = [];
                     for (var i = commands.length; i--;) {
+                        if (commands[i].match(/\n/) && options.word) {
+                            warn('If you use commands with newlines you ' +
+                                 'should use word option for complete or' +
+                                 ' wordAutocomplete terminal option');
+                        }
                         if (regex.test(commands[i])) {
-                            var match = commands[i];
-                            if (quote === '"') {
-                                match = match.replace(/"/g, '\\"');
-                            }
-                            if (!quote && options.escape) {
-                                match = match.replace(/(["'() ])/g, '\\$1');
-                            }
+                            var match = escape(commands[i]);
                             if (!sensitive && same_case(match)) {
                                 if (string.toLowerCase() === string) {
                                     match = match.toLowerCase();
@@ -7032,9 +7329,9 @@
                             return true;
                         }
                     } else {
-                        var common = common_string(string, matched, sensitive);
+                        var common = common_string(escape(string), matched, sensitive);
                         if (common) {
-                            replace(string, common);
+                            replace(safe, common);
                             command = self.before_cursor(options.word);
                             return true;
                         }
@@ -7508,13 +7805,13 @@
                     var wrapper;
                     // print all lines
                     // var output_buffer = lines.flush();
-                    $.each(output_buffer, function(i, line) {
-                        if (line === NEW_LINE) {
+                    $.each(output_buffer, function(i, data) {
+                        if (data === NEW_LINE) {
                             wrapper = $('<div></div>');
-                        } else if ($.isPlainObject(line) && is_function(line.finalize)) {
+                        } else if ($.isPlainObject(data) && is_function(data.finalize)) {
                             // this is finalize function from echo
                             if (options.update) {
-                                var selector = '> div[data-index=' + line.index + ']';
+                                var selector = '> div[data-index=' + data.index + ']';
                                 var node = output.find(selector);
                                 if (node.html() !== wrapper.html()) {
                                     node.replaceWith(wrapper);
@@ -7522,10 +7819,14 @@
                             } else {
                                 wrapper.appendTo(output);
                             }
-                            line.finalize(wrapper.attr('data-index', line.index));
+                            data.finalize(wrapper.attr('data-index', data.index));
                         } else {
-                            $('<div/>').html(line)
+                            var line = data.line;
+                            var div = $('<div/>').html(line)
                                 .appendTo(wrapper).width('100%');
+                            if (data.newline) {
+                                div.addClass('end-line');
+                            }
                         }
                     });
                     limit_lines();
@@ -7611,9 +7912,11 @@
                     try {
                         var locals = $.extend({
                             flush: true,
+                            exec: true,
                             raw: settings.raw,
                             finalize: $.noop,
                             keepWords: false,
+                            invokeMethods: settings.invokeMethods,
                             formatters: true,
                             allowedAttributes: settings.allowedAttributes
                         }, options || {});
@@ -8311,6 +8614,23 @@
             old_enabled = enabled;
             self.disable().find('.cmd textarea').trigger('blur', [true]);
         }
+        function context_callback_proxy(fn, type) {
+            if (fn.proxy) {
+                return fn;
+            }
+            var wrapper = function(callback) {
+                var ret = fn.call(self, callback, self);
+                if (ret && is_function(ret.then)) {
+                    ret.then(function(string) {
+                        if (typeof string === type) {
+                            callback(string);
+                        }
+                    });
+                }
+            };
+            wrapper.proxy = true;
+            return wrapper;
+        }
         // paste event is not testable in node
         // istanbul ignore next
         function paste_event(e) {
@@ -8404,9 +8724,13 @@
                 // so we are able to change it using option API method
                 itrp.completion = 'settings';
             }
+            var prompt = settings.prompt;
+            if (is_function(prompt)) {
+                prompt = context_callback_proxy(prompt, 'string');
+            }
             interpreters = new Stack($.extend({}, settings.extra, {
                 name: settings.name,
-                prompt: settings.prompt,
+                prompt: prompt,
                 keypress: settings.keypress,
                 keydown: settings.keydown,
                 resize: settings.onResize,
@@ -8418,7 +8742,7 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
-                prompt: settings.prompt,
+                prompt: prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
@@ -8448,9 +8772,12 @@
                         self.resizer();
                     }
                     fire_event('onCommandChange', [command]);
-                    if (!move_cursor_visible()) {
-                        self.scroll_to_bottom();
-                    }
+                    var visible = move_cursor_visible();
+                    visible.then(function(visible) {
+                        if (!visible) {
+                            self.scroll_to_bottom();
+                        }
+                    });
                 },
                 commands: commands
             });
@@ -8472,7 +8799,7 @@
                     bind('contextmenu.terminal_' + self.id(), disable);
             });
             var $win = $(window);
-            // cordova application, if keyboard was open and we resume it will be
+            // cordova application, if keyboard was open and we resume, it will be
             // closed so we need to disable terminal so you can enable it with tap
             document.addEventListener("resume", function() {
                 self.disable();
@@ -8527,7 +8854,7 @@
                             if (enabled) {
                                 self.disable();
                             }
-                        } else if (get_selected_text() === '' && $target) {
+                        } else if (get_selected_html() === '' && $target) {
                             if (++count === 1) {
                                 if (!frozen) {
                                     if (!enabled) {
@@ -8551,12 +8878,13 @@
                 (function() {
                     var clip = self.find('.cmd textarea');
                     self.on('contextmenu.terminal', function(e) {
-                        if (get_selected_text() === '') {
+                        if (get_selected_html() === '') {
                             if (!$(e.target).is('img,value,audio,object,canvas,a')) {
                                 if (!self.enabled()) {
                                     self.enable();
                                 }
                                 var offset = command_line.offset();
+                                wrapper.css('overflow', 'hidden');
                                 clip.css({
                                     left: e.pageX - offset.left - 20,
                                     top: e.pageY - offset.top - 20,
@@ -8580,6 +8908,7 @@
                                         props.top = in_line * 14 + 'px';
                                     }
                                     clip.css(props);
+                                    wrapper.css('overflow', '');
                                 });
                                 self.stopTime('selection');
                                 self.everyTime(20, 'selection', function() {

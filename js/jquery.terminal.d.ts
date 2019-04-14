@@ -182,6 +182,7 @@ declare namespace JQueryTerminal {
     type LineEchoOptions = {
         exec: boolean;
         finalize: JQueryTerminal.EchoFinalizeFunction;
+        invokeMethods: boolean;
         allowedAttributes: Array<RegExp | string>;
         flush: boolean;
         formatters: boolean;
@@ -192,6 +193,8 @@ declare namespace JQueryTerminal {
     type EchoOptions = {
         flush?: boolean;
         raw?: boolean;
+        exec?: boolean;
+        invokeMethods?: boolean;
         allowedAttributes?: Array<RegExp | string>;
         finalize?: JQueryTerminal.EchoFinalizeFunction;
         keepWords?: boolean;

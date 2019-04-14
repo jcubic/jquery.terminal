@@ -1,3 +1,16 @@
+## 2.4.0
+### Features
+* improvements to performance of rendering and navigating longer command lines
+* CTRL+C now retain newlines inside cmd and terminal output (modern browsers only)
+* more control over server side calls by using invokeMethods option in echo
+* warn users when they try to complete commands with newlines and word complete is set
+### Bugfix
+* fix scrollbar flicker on right click on right/bottom edge of terminal when no scrollbar
+* fix text selections on multi line text without line breaks
+* fix small bugs in animations (replace all of them with box-shadow)
+* debounce HOLD+ARROWS (left/right) so they are usable again
+* fix exception when completion characters not safe for regular exception
+
 ## 2.3.0
 ### Features
 * add experimental $.terminal.pipe function
