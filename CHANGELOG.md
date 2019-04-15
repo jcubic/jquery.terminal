@@ -1,6 +1,7 @@
 ## 2.4.1
 ### Bugfix
 * show terminal content after it's resized when initially not visible (fix jumping of text)
+* fix pipe when using read + echo in first command and read in next
 
 ## 2.4.0
 ### Features

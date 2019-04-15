@@ -1916,6 +1916,32 @@ describe('Terminal utils', function() {
                 expect(get_lines(term)).toEqual(['0:foo', '1:foo']);
             });
         });
+        it('should work with async read write in first command', async function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                wc: async function(...args) {
+                    var opts = $.terminal.parse_options(args);
+                    var text = await this.read('');
+                    if (text && opts.l) {
+                        this.echo(text.split('\n').length);
+                    }
+                },
+                cat: function() {
+                    return this.read('').then(text => {
+                        this.echo(text);
+                    });
+                }
+            }));
+            term.clear().exec('cat | wc -l');
+            await delay(50);
+            await term.exec('foo\nbar');
+            await delay(50);
+            expect(term.get_output().split('\n')).toEqual([
+                '> cat | wc -l',
+                'foo',
+                'bar',
+                '2'
+            ]);
+        });
         it('should swallow and prompt for input', async function() {
             function de(...args) {
                 return new Promise((resolve) => {

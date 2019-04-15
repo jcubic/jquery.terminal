@@ -196,7 +196,7 @@
                         continuation(fn.apply(term, args), function(value) {
                             echo_non_empty(value);
                             loop();
-                        });
+                        }, 'redirect loop');
                     } else {
                         resolve();
                     }
@@ -238,9 +238,11 @@
                         term.push = orig.push;
                         term.echo = orig.echo;
                         var ret = orig.read.apply(term, arguments);
-                        term.echo = this.echo;
-                        term.push = this.push;
-                        return ret;
+                        return ret.then(function(value) {
+                            term.push = tty.push;
+                            term.echo = tty.echo;
+                            return value;
+                        });
                     } else {
                         var text;
                         if (tty.buffer) {
@@ -313,7 +315,7 @@
                             if (ret === false) {
                                 inner();
                             } else {
-                                return continuation(ret, inner);
+                                return continuation(ret, inner, 'inner');
                             }
                         });
                     } else {
