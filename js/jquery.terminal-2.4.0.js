@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.4.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 14 Apr 2019 12:02:41 +0000
+ * Date: Mon, 15 Apr 2019 17:10:21 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3755,8 +3755,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.4.0',
-        date: 'Sun, 14 Apr 2019 12:02:41 +0000',
+        version: 'DEV',
+        date: 'Mon, 15 Apr 2019 17:10:21 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8988,6 +8988,9 @@
                 }
                 if (visible) {
                     create_resizers();
+                } else {
+                    // hide terminal content until it's resized (and num chars calculated)
+                    wrapper.css('visibility', 'hidden');
                 }
                 function visibility_checker() {
                     if (self.is(':visible') && !visible) {
@@ -8998,10 +9001,12 @@
                         if (was_enabled) {
                             self.enable();
                         }
+                        wrapper.css('visibility', '');
                     } else if (visible && !self.is(':visible')) {
                         visible = false;
                         was_enabled = $.terminal.active() === self && self.enabled();
                         self.disable();
+                        wrapper.css('visibility', 'hidden');
                     }
                 }
                 if (window.IntersectionObserver && self.css('position') !== 'fixed') {

@@ -1,3 +1,7 @@
+## 2.4.1
+### Bugfix
+* show terminal content after it's resized when initially not visible (fix jumping of text)
+
 ## 2.4.0
 ### Features
 * improvements to performance of rendering and navigating longer command lines

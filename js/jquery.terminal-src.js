@@ -8988,6 +8988,9 @@
                 }
                 if (visible) {
                     create_resizers();
+                } else {
+                    // hide terminal content until it's resized (and num chars calculated)
+                    wrapper.css('visibility', 'hidden');
                 }
                 function visibility_checker() {
                     if (self.is(':visible') && !visible) {
@@ -8998,10 +9001,12 @@
                         if (was_enabled) {
                             self.enable();
                         }
+                        wrapper.css('visibility', '');
                     } else if (visible && !self.is(':visible')) {
                         visible = false;
                         was_enabled = $.terminal.active() === self && self.enabled();
                         self.disable();
+                        wrapper.css('visibility', 'hidden');
                     }
                 }
                 if (window.IntersectionObserver && self.css('position') !== 'fixed') {
