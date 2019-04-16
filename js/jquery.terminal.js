@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 16 Apr 2019 16:21:09 +0000
+ * Date: Tue, 16 Apr 2019 16:37:18 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3763,7 +3763,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 16 Apr 2019 16:21:09 +0000',
+        date: 'Tue, 16 Apr 2019 16:37:18 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6762,6 +6762,17 @@
                     completion = settings.completion;
                 }
                 function resolve(commands) {
+                    // local copy
+                    commands = commands.slice();
+                    // default commands should not match for arguments
+                    if (!self.before_cursor(false).match(/\s/)) {
+                        if (settings.clear && $.inArray('clear', commands) === -1) {
+                            commands.push('clear');
+                        }
+                        if (settings.exit && $.inArray('exit', commands) === -1) {
+                            commands.push('exit');
+                        }
+                    }
                     self.complete(commands, {
                         echo: true,
                         word: settings.wordAutocomplete,
@@ -7222,17 +7233,6 @@
                     }
                     if (quote) {
                         string = string.replace(/^["']/, '');
-                    }
-                }
-                // local copy
-                commands = commands.slice();
-                // default commands should not match for arguments
-                if (!self.before_cursor(false).match(/\s/)) {
-                    if (settings.clear && $.inArray('clear', commands) === -1) {
-                        commands.push('clear');
-                    }
-                    if (settings.exit && $.inArray('exit', commands) === -1) {
-                        commands.push('exit');
                     }
                 }
                 if (tab_count % 2 === 0) {

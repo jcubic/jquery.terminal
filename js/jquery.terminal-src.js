@@ -6762,6 +6762,17 @@
                     completion = settings.completion;
                 }
                 function resolve(commands) {
+                    // local copy
+                    commands = commands.slice();
+                    // default commands should not match for arguments
+                    if (!self.before_cursor(false).match(/\s/)) {
+                        if (settings.clear && $.inArray('clear', commands) === -1) {
+                            commands.push('clear');
+                        }
+                        if (settings.exit && $.inArray('exit', commands) === -1) {
+                            commands.push('exit');
+                        }
+                    }
                     self.complete(commands, {
                         echo: true,
                         word: settings.wordAutocomplete,
@@ -7222,17 +7233,6 @@
                     }
                     if (quote) {
                         string = string.replace(/^["']/, '');
-                    }
-                }
-                // local copy
-                commands = commands.slice();
-                // default commands should not match for arguments
-                if (!self.before_cursor(false).match(/\s/)) {
-                    if (settings.clear && $.inArray('clear', commands) === -1) {
-                        commands.push('clear');
-                    }
-                    if (settings.exit && $.inArray('exit', commands) === -1) {
-                        commands.push('exit');
                     }
                 }
                 if (tab_count % 2 === 0) {
