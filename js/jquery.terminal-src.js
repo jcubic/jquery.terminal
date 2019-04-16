@@ -9146,7 +9146,7 @@
                         if (ret === true) {
                             return;
                         }
-                        if (have_scrollbar() || ret === false || !event.ctrlKey) {
+                        if ((have_scrollbar() || ret === false) && !event.ctrlKey) {
                             event.stopPropagation();
                             event.preventDefault();
                         }
