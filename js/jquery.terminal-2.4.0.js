@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Mon, 15 Apr 2019 17:10:21 +0000
+ * Date: Tue, 16 Apr 2019 11:32:16 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1000,7 +1000,7 @@
                 var node = this[0];
                 var defer = jQuery.Deferred();
                 var item_observer = new window.IntersectionObserver(function(entries) {
-                    defer.resolve(entries[0].isIntersecting);
+                    defer.resolve(entries[0].isIntersecting && entries[0].ratio === 1);
                     item_observer.unobserve(node);
                 }, {
                     root: container[0]
@@ -3756,7 +3756,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 15 Apr 2019 17:10:21 +0000',
+        date: 'Tue, 16 Apr 2019 11:32:16 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6596,10 +6596,7 @@
                 if (!visible) {
                     // try catch for Node.js unit tests
                     try {
-                        var cursor = self.find('.cursor');
-                        var offset = cursor.offset();
-                        var term_offset = self.offset();
-                        self.scrollTop(offset.top - term_offset.top - 5);
+                        self.scroll_to(self.find('.cursor'));
                         return true;
                     } catch (e) {
                         return true;
@@ -6619,8 +6616,8 @@
             });
         })();
         // ---------------------------------------------------------------------
-        function move_cursor_visible() {
-            var cursor = self.find('.cursor');
+        function make_cursor_visible() {
+            var cursor = self.find('.cursor-line');
             return cursor.is_fully_in_viewport(self).then(scroll_to_view);
         }
         // ---------------------------------------------------------------------
@@ -8462,6 +8459,14 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: ref: https://stackoverflow.com/a/18927969/387194
+            // -------------------------------------------------------------
+            scroll_to: function(elem) {
+                var scroll = self.scrollTop() - self.offset().top + $(elem).offset().top;
+                self.scrollTop(scroll);
+                return self;
+            },
+            // -------------------------------------------------------------
             scroll_to_bottom: function() {
                 var scrollHeight;
                 if (self.prop) {
@@ -8761,7 +8766,7 @@
                 tabs: settings.tabs,
                 onPositionChange: function() {
                     var args = [].slice.call(arguments);
-                    move_cursor_visible();
+                    make_cursor_visible();
                     fire_event('onPositionChange', args);
                 },
                 onCommandChange: function(command) {
@@ -8772,12 +8777,7 @@
                         self.resizer();
                     }
                     fire_event('onCommandChange', [command]);
-                    var visible = move_cursor_visible();
-                    visible.then(function(visible) {
-                        if (!visible) {
-                            self.scroll_to_bottom();
-                        }
-                    });
+                    make_cursor_visible();
                 },
                 commands: commands
             });
