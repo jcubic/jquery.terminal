@@ -1537,6 +1537,7 @@
         var keymap;
         var default_keymap = {
             'ALT+D': delete_word(true),
+            'HOLD+ALT+D': delete_word(true),
             'HOLD+DELETE': delete_word(false),
             'HOLD+SHIFT+DELETE': delete_word(false),
             'ENTER': function() {
@@ -2914,6 +2915,7 @@
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
         var prev_command = '';
+        var prev_key;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
@@ -2975,6 +2977,7 @@
             }
             if (enabled || key === 'CTRL+C') {
                 if (hold) {
+                    prev_key = key;
                     key = 'HOLD+' + key;
                     if (hold_pause) {
                         return;
@@ -2987,9 +2990,13 @@
                         });
                     }
                 } else {
+                    if (key !== prev_key) {
+                        self.stopTime('hold');
+                    }
                     self.oneTime(settings.holdTimeout, 'hold', function() {
                         hold = true;
                     });
+                    prev_key = key;
                 }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11

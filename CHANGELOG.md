@@ -3,6 +3,7 @@
 * show terminal content after it's resized when initially not visible (fix jumping of text)
 * fix pipe when using read + echo in first command and read in next
 * fix issue with jumping of terminal on keypress [#486](https://github.com/jcubic/jquery.terminal/issues/486)
+* fix hold key when key change fast (manifested by jumping to address bar on ALT+D) [#485](https://github.com/jcubic/jquery.terminal/issues/485)
 
 ## 2.4.0
 ### Features

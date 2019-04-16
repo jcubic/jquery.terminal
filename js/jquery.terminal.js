@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 16 Apr 2019 11:32:16 +0000
+ * Date: Tue, 16 Apr 2019 14:47:58 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1537,6 +1537,7 @@
         var keymap;
         var default_keymap = {
             'ALT+D': delete_word(true),
+            'HOLD+ALT+D': delete_word(true),
             'HOLD+DELETE': delete_word(false),
             'HOLD+SHIFT+DELETE': delete_word(false),
             'ENTER': function() {
@@ -2914,6 +2915,7 @@
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
         var prev_command = '';
+        var prev_key;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
@@ -2975,6 +2977,7 @@
             }
             if (enabled || key === 'CTRL+C') {
                 if (hold) {
+                    prev_key = key;
                     key = 'HOLD+' + key;
                     if (hold_pause) {
                         return;
@@ -2987,9 +2990,13 @@
                         });
                     }
                 } else {
+                    if (key !== prev_key) {
+                        self.stopTime('hold');
+                    }
                     self.oneTime(settings.holdTimeout, 'hold', function() {
                         hold = true;
                     });
+                    prev_key = key;
                 }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
@@ -3756,7 +3763,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 16 Apr 2019 11:32:16 +0000',
+        date: 'Tue, 16 Apr 2019 14:47:58 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
