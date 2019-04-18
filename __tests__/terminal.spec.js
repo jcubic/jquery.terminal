@@ -5735,7 +5735,6 @@ describe('Terminal plugin', function() {
                                     loop(++i);
                                 });
                             } else {
-                                console.log('up');
                                 doc.trigger(keypress(key));
                                 doc.trigger($.Event("keyup"));
                                 resolve();
