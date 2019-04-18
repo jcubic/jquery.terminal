@@ -2488,6 +2488,7 @@
         // ---------------------------------------------------------------------
         // :: Draw prompt that can be a function or a string
         // ---------------------------------------------------------------------
+        var prev_prompt_data;
         var draw_prompt = (function() {
             function set(prompt) {
                 prompt = $.terminal.apply_formatters(prompt, {});
@@ -2518,12 +2519,25 @@
                 }
             }
             return function() {
+                // the data is used as cancelable reference because we have ref
+                // data object that is hold in closure and we remove `set` function
+                // so previous call to function prompt will be ignored
+                if (prev_prompt_data && prev_prompt_data.set) {
+                    prev_prompt_data.set = $.noop;
+                    // remove reference for garbage collector
+                    prev_prompt_data = null;
+                }
                 switch (typeof prompt) {
                     case 'string':
                         set(prompt);
                         break;
                     case 'function':
-                        prompt.call(self, set);
+                        var data = prev_prompt_data = {
+                            set: set
+                        };
+                        prompt.call(self, function(string) {
+                            data.set(string);
+                        });
                         break;
                 }
             };
@@ -2837,7 +2851,7 @@
                 doc.trigger(e);
                 return self;
             },
-            enable: function() {
+            enable: function(silent) {
                 if (!enabled) {
                     enabled = true;
                     self.addClass('enabled');
@@ -2847,10 +2861,10 @@
                         }
                         clip.caret(position);
                     } catch (e) {
-                        // firefox throw NS_ERROR_FAILURE ignore
+                        // firefox throw NS_ERROR_FAILURE - ignore
                     }
                     animation(true);
-                    if (is_function(prompt)) {
+                    if (!silent && is_function(prompt)) {
                         draw_prompt();
                     }
                     fix_cursor();
@@ -6554,6 +6568,10 @@
                 prompt = context_callback_proxy(prompt, 'string');
             }
             if (prompt !== command_line.prompt()) {
+                if (is_function(interpreter.prompt)) {
+                    // prevent flicker of old prompt until async prompt finishes
+                    command_line.prompt('');
+                }
                 command_line.prompt(interpreter.prompt);
             }
             if (typeof interpreter.history !== 'undefined') {
@@ -6673,7 +6691,7 @@
                         // resume login if user didn't call pause in onInit
                         // if user pause in onInit wait with exec until it
                         // resume
-                        self.resume();
+                        self.resume(true);
                     }
                 }
             }
@@ -7405,11 +7423,11 @@
             // -------------------------------------------------------------
             // :: Resume the previously paused terminal
             // -------------------------------------------------------------
-            resume: function() {
+            resume: function(silent) {
                 cmd_ready(function ready() {
                     paused = false;
                     if (enabled && terminals.front() === self) {
-                        command_line.enable();
+                        command_line.enable(silent);
                     }
                     command_line.find('.prompt').visible();
                     var original = delayed_commands;
@@ -7591,7 +7609,7 @@
                         if (!silent && ret === undefined || silent) {
                             enabled = true;
                             if (!self.paused()) {
-                                command_line.enable();
+                                command_line.enable(true);
                             }
                         }
                     });
@@ -8728,13 +8746,13 @@
                 };
             })
         );
-        make_interpreter(init_interpreter, settings.login, function(itrp) {
+        make_interpreter(init_interpreter, settings.login, function(interpreter) {
             if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
                 // overwrite interpreter completion by global setting #224
                 // we use string to indicate that it need to be taken from settings
                 // so we are able to change it using option API method
-                itrp.completion = 'settings';
+                interpreter.completion = 'settings';
             }
             var prompt = settings.prompt;
             if (is_function(prompt)) {
@@ -8750,11 +8768,11 @@
                 mousewheel: settings.mousewheel,
                 history: settings.history,
                 keymap: new_keymap
-            }, itrp));
+            }, interpreter));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
-                prompt: prompt,
+                prompt: global_login_fn ? false : prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,

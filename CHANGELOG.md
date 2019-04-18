@@ -7,6 +7,7 @@
 * fix scroll page when terminal don't have scrollbar [#484](https://github.com/jcubic/jquery.terminal/issues/484)
 * fix issue with call `.complete(['cd']);` because of default "clear" (moved code outside of `complete`)
 * fix Prism formatter when highlighted code have brackets
+* fix few async prompt issues including [#474](https://github.com/jcubic/jquery.terminal/issues/474)
 
 ## 2.4.0
 ### Features
