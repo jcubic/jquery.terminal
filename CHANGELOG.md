@@ -1,3 +1,14 @@
+## 2.4.1
+### Bugfix
+* show terminal content after it's resized when initially not visible (fix jumping of text)
+* fix pipe when using read + echo in first command and read in next
+* fix issue with jumping of terminal on keypress [#486](https://github.com/jcubic/jquery.terminal/issues/486)
+* fix hold key when key change fast (manifested by jumping to address bar on ALT+D) [#485](https://github.com/jcubic/jquery.terminal/issues/485)
+* fix scroll page when terminal don't have scrollbar [#484](https://github.com/jcubic/jquery.terminal/issues/484)
+* fix issue with call `.complete(['cd']);` because of default "clear" (moved code outside of `complete`)
+* fix Prism formatter when highlighted code have brackets
+* fix few async prompt issues including [#474](https://github.com/jcubic/jquery.terminal/issues/474)
+
 ## 2.4.0
 ### Features
 * improvements to performance of rendering and navigating longer command lines

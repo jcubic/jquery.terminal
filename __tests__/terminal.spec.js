@@ -1916,6 +1916,32 @@ describe('Terminal utils', function() {
                 expect(get_lines(term)).toEqual(['0:foo', '1:foo']);
             });
         });
+        it('should work with async read write in first command', async function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                wc: async function(...args) {
+                    var opts = $.terminal.parse_options(args);
+                    var text = await this.read('');
+                    if (text && opts.l) {
+                        this.echo(text.split('\n').length);
+                    }
+                },
+                cat: function() {
+                    return this.read('').then(text => {
+                        this.echo(text);
+                    });
+                }
+            }));
+            term.clear().exec('cat | wc -l');
+            await delay(50);
+            await term.exec('foo\nbar');
+            await delay(50);
+            expect(term.get_output().split('\n')).toEqual([
+                '> cat | wc -l',
+                'foo',
+                'bar',
+                '2'
+            ]);
+        });
         it('should swallow and prompt for input', async function() {
             function de(...args) {
                 return new Promise((resolve) => {
@@ -5647,8 +5673,11 @@ describe('Terminal plugin', function() {
                         'CTRL+C': test.original,
                         'CTRL+D': test.original,
                         'HOLD+CTRL+I': test.empty,
-                        'HOLD+CTRL+B': test.empty
+                        'HOLD+CTRL+B': test.empty,
+                        'HOLD+CTRL+C': test.empty,
+                        'HOLD+CTRL+D': test.empty
                     },
+                    holdRepeatTimeout: 40,
                     repeatTimeoutKeys: ['HOLD+CTRL+B']
                 });
                 term.focus();
@@ -5673,7 +5702,7 @@ describe('Terminal plugin', function() {
                 var which = key.toUpperCase().charCodeAt(0);
                 doc.trigger(keydown(true, false, false, which, key));
                 return new Promise(resolve => {
-                    delay(50, function() {
+                    delay(60, function() {
                         (function loop(i) {
                             if (i) {
                                 doc.trigger(keydown(true, false, false, which, key));
@@ -5689,6 +5718,32 @@ describe('Terminal plugin', function() {
                     });
                 });
             }
+            function ctrl_key_seq(keys) {
+                var key = keys[0];
+                var doc = $(document.documentElement || window);
+                var which = key.toUpperCase().charCodeAt(0);
+                doc.trigger(keydown(true, false, false, which, key));
+                return new Promise(resolve => {
+                    delay(50, function() {
+                        var key;
+                        (function loop(i) {
+                            if (keys[i]) {
+                                key = keys[i];
+                                var which = key.toUpperCase().charCodeAt(0);
+                                doc.trigger(keydown(true, false, false, which, key));
+                                process.nextTick(function() {
+                                    loop(++i);
+                                });
+                            } else {
+                                console.log('up');
+                                doc.trigger(keypress(key));
+                                doc.trigger($.Event("keyup"));
+                                resolve();
+                            }
+                        })(0);
+                    });
+                });
+            }
             it('should create new keymap', function() {
                 var keys = 10;
                 return repeat_ctrl_key('i', keys).then(() => {
@@ -5698,10 +5753,24 @@ describe('Terminal plugin', function() {
             it('should limit rate of repeat keys', function() {
                 // testing hold key
                 return repeat_ctrl_key('b', 10).then(() => {
-                    return delay(200, function() {
+                    return delay(100, function() {
                         return repeat_ctrl_key('b', 10).then(() => {
                             expect(test.empty.calls.count()).toEqual(2);
                         });
+                    });
+                });
+            });
+            it('should not repeat keys', function() {
+                var keys = [];
+                for (var i = 0; i < 10; ++i) {
+                    keys.push('c');
+                    keys.push('d');
+                }
+                return ctrl_key_seq(keys).then(() => {
+                    return delay(100, function() {
+                        expect(test.empty.calls.count()).toEqual(0);
+                        // why + 1 ????
+                        expect(test.original.calls.count()).toEqual(keys.length + 1);
                     });
                 });
             });

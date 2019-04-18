@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.4.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 14 Apr 2019 12:02:41 +0000
+ * Date: Thu, 18 Apr 2019 08:36:05 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1000,7 +1000,7 @@
                 var node = this[0];
                 var defer = jQuery.Deferred();
                 var item_observer = new window.IntersectionObserver(function(entries) {
-                    defer.resolve(entries[0].isIntersecting);
+                    defer.resolve(entries[0].isIntersecting && entries[0].ratio === 1);
                     item_observer.unobserve(node);
                 }, {
                     root: container[0]
@@ -1537,6 +1537,7 @@
         var keymap;
         var default_keymap = {
             'ALT+D': delete_word(true),
+            'HOLD+ALT+D': delete_word(true),
             'HOLD+DELETE': delete_word(false),
             'HOLD+SHIFT+DELETE': delete_word(false),
             'ENTER': function() {
@@ -2487,6 +2488,7 @@
         // ---------------------------------------------------------------------
         // :: Draw prompt that can be a function or a string
         // ---------------------------------------------------------------------
+        var prev_prompt_data;
         var draw_prompt = (function() {
             function set(prompt) {
                 prompt = $.terminal.apply_formatters(prompt, {});
@@ -2517,12 +2519,25 @@
                 }
             }
             return function() {
+                // the data is used as cancelable reference because we have ref
+                // data object that is hold in closure and we remove `set` function
+                // so previous call to function prompt will be ignored
+                if (prev_prompt_data && prev_prompt_data.set) {
+                    prev_prompt_data.set = $.noop;
+                    // remove reference for garbage collector
+                    prev_prompt_data = null;
+                }
                 switch (typeof prompt) {
                     case 'string':
                         set(prompt);
                         break;
                     case 'function':
-                        prompt.call(self, set);
+                        var data = prev_prompt_data = {
+                            set: set
+                        };
+                        prompt.call(self, function(string) {
+                            data.set(string);
+                        });
                         break;
                 }
             };
@@ -2836,7 +2851,7 @@
                 doc.trigger(e);
                 return self;
             },
-            enable: function() {
+            enable: function(silent) {
                 if (!enabled) {
                     enabled = true;
                     self.addClass('enabled');
@@ -2846,10 +2861,10 @@
                         }
                         clip.caret(position);
                     } catch (e) {
-                        // firefox throw NS_ERROR_FAILURE ignore
+                        // firefox throw NS_ERROR_FAILURE - ignore
                     }
                     animation(true);
-                    if (is_function(prompt)) {
+                    if (!silent && is_function(prompt)) {
                         draw_prompt();
                     }
                     fix_cursor();
@@ -2914,6 +2929,7 @@
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
         var prev_command = '';
+        var prev_key;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
@@ -2975,6 +2991,7 @@
             }
             if (enabled || key === 'CTRL+C') {
                 if (hold) {
+                    prev_key = key;
                     key = 'HOLD+' + key;
                     if (hold_pause) {
                         return;
@@ -2987,9 +3004,13 @@
                         });
                     }
                 } else {
+                    if (key !== prev_key) {
+                        self.stopTime('hold');
+                    }
                     self.oneTime(settings.holdTimeout, 'hold', function() {
                         hold = true;
                     });
+                    prev_key = key;
                 }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
@@ -3755,8 +3776,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.4.0',
-        date: 'Sun, 14 Apr 2019 12:02:41 +0000',
+        version: 'DEV',
+        date: 'Thu, 18 Apr 2019 08:36:05 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6547,6 +6568,10 @@
                 prompt = context_callback_proxy(prompt, 'string');
             }
             if (prompt !== command_line.prompt()) {
+                if (is_function(interpreter.prompt)) {
+                    // prevent flicker of old prompt until async prompt finishes
+                    command_line.prompt('');
+                }
                 command_line.prompt(interpreter.prompt);
             }
             if (typeof interpreter.history !== 'undefined') {
@@ -6596,10 +6621,7 @@
                 if (!visible) {
                     // try catch for Node.js unit tests
                     try {
-                        var cursor = self.find('.cursor');
-                        var offset = cursor.offset();
-                        var term_offset = self.offset();
-                        self.scrollTop(offset.top - term_offset.top - 5);
+                        self.scroll_to(self.find('.cursor'));
                         return true;
                     } catch (e) {
                         return true;
@@ -6619,8 +6641,8 @@
             });
         })();
         // ---------------------------------------------------------------------
-        function move_cursor_visible() {
-            var cursor = self.find('.cursor');
+        function make_cursor_visible() {
+            var cursor = self.find('.cursor-line');
             return cursor.is_fully_in_viewport(self).then(scroll_to_view);
         }
         // ---------------------------------------------------------------------
@@ -6669,7 +6691,7 @@
                         // resume login if user didn't call pause in onInit
                         // if user pause in onInit wait with exec until it
                         // resume
-                        self.resume();
+                        self.resume(true);
                     }
                 }
             }
@@ -6758,6 +6780,17 @@
                     completion = settings.completion;
                 }
                 function resolve(commands) {
+                    // local copy
+                    commands = commands.slice();
+                    // default commands should not match for arguments
+                    if (!self.before_cursor(false).match(/\s/)) {
+                        if (settings.clear && $.inArray('clear', commands) === -1) {
+                            commands.push('clear');
+                        }
+                        if (settings.exit && $.inArray('exit', commands) === -1) {
+                            commands.push('exit');
+                        }
+                    }
                     self.complete(commands, {
                         echo: true,
                         word: settings.wordAutocomplete,
@@ -7220,17 +7253,6 @@
                         string = string.replace(/^["']/, '');
                     }
                 }
-                // local copy
-                commands = commands.slice();
-                // default commands should not match for arguments
-                if (!self.before_cursor(false).match(/\s/)) {
-                    if (settings.clear && $.inArray('clear', commands) === -1) {
-                        commands.push('clear');
-                    }
-                    if (settings.exit && $.inArray('exit', commands) === -1) {
-                        commands.push('exit');
-                    }
-                }
                 if (tab_count % 2 === 0) {
                     command = self.before_cursor(options.word);
                 } else {
@@ -7401,11 +7423,11 @@
             // -------------------------------------------------------------
             // :: Resume the previously paused terminal
             // -------------------------------------------------------------
-            resume: function() {
+            resume: function(silent) {
                 cmd_ready(function ready() {
                     paused = false;
                     if (enabled && terminals.front() === self) {
-                        command_line.enable();
+                        command_line.enable(silent);
                     }
                     command_line.find('.prompt').visible();
                     var original = delayed_commands;
@@ -7587,7 +7609,7 @@
                         if (!silent && ret === undefined || silent) {
                             enabled = true;
                             if (!self.paused()) {
-                                command_line.enable();
+                                command_line.enable(true);
                             }
                         }
                     });
@@ -8462,6 +8484,14 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: ref: https://stackoverflow.com/a/18927969/387194
+            // -------------------------------------------------------------
+            scroll_to: function(elem) {
+                var scroll = self.scrollTop() - self.offset().top + $(elem).offset().top;
+                self.scrollTop(scroll);
+                return self;
+            },
+            // -------------------------------------------------------------
             scroll_to_bottom: function() {
                 var scrollHeight;
                 if (self.prop) {
@@ -8716,13 +8746,13 @@
                 };
             })
         );
-        make_interpreter(init_interpreter, settings.login, function(itrp) {
+        make_interpreter(init_interpreter, settings.login, function(interpreter) {
             if (settings.completion && typeof settings.completion !== 'boolean' ||
                 !settings.completion) {
                 // overwrite interpreter completion by global setting #224
                 // we use string to indicate that it need to be taken from settings
                 // so we are able to change it using option API method
-                itrp.completion = 'settings';
+                interpreter.completion = 'settings';
             }
             var prompt = settings.prompt;
             if (is_function(prompt)) {
@@ -8738,11 +8768,11 @@
                 mousewheel: settings.mousewheel,
                 history: settings.history,
                 keymap: new_keymap
-            }, itrp));
+            }, interpreter));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
-                prompt: prompt,
+                prompt: global_login_fn ? false : prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
@@ -8761,7 +8791,7 @@
                 tabs: settings.tabs,
                 onPositionChange: function() {
                     var args = [].slice.call(arguments);
-                    move_cursor_visible();
+                    make_cursor_visible();
                     fire_event('onPositionChange', args);
                 },
                 onCommandChange: function(command) {
@@ -8772,12 +8802,7 @@
                         self.resizer();
                     }
                     fire_event('onCommandChange', [command]);
-                    var visible = move_cursor_visible();
-                    visible.then(function(visible) {
-                        if (!visible) {
-                            self.scroll_to_bottom();
-                        }
-                    });
+                    make_cursor_visible();
                 },
                 commands: commands
             });
@@ -8988,6 +9013,9 @@
                 }
                 if (visible) {
                     create_resizers();
+                } else {
+                    // hide terminal content until it's resized (and num chars calculated)
+                    wrapper.css('visibility', 'hidden');
                 }
                 function visibility_checker() {
                     if (self.is(':visible') && !visible) {
@@ -8998,10 +9026,12 @@
                         if (was_enabled) {
                             self.enable();
                         }
+                        wrapper.css('visibility', '');
                     } else if (visible && !self.is(':visible')) {
                         visible = false;
                         was_enabled = $.terminal.active() === self && self.enabled();
                         self.disable();
+                        wrapper.css('visibility', 'hidden');
                     }
                 }
                 if (window.IntersectionObserver && self.css('position') !== 'fixed') {
@@ -9134,7 +9164,7 @@
                         if (ret === true) {
                             return;
                         }
-                        if (have_scrollbar() || ret === false || !event.ctrlKey) {
+                        if ((have_scrollbar() || ret === false) && !event.ctrlKey) {
                             event.stopPropagation();
                             event.preventDefault();
                         }
