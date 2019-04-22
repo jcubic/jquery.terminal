@@ -1,3 +1,7 @@
+## 2.4.2
+### Bugfix
+* fix wrong array detection in completion when array passed across iframes
+
 ## 2.4.1
 ### Bugfix
 * show terminal content after it's resized when initially not visible (fix jumping of text)

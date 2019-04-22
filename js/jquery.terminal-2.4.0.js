@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 18 Apr 2019 08:36:05 +0000
+ * Date: Mon, 22 Apr 2019 15:19:50 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1162,7 +1162,7 @@
     // :: STACK DATA STRUCTURE
     // -----------------------------------------------------------------------
     function Stack(init) {
-        var data = init instanceof Array ? init : init ? [init] : [];
+        var data = is_array(init) ? init : init ? [init] : [];
         $.extend(this, {
             data: function() {
                 return data;
@@ -1228,7 +1228,7 @@
                 }
             },
             set: function(new_data) {
-                if (new_data instanceof Array) {
+                if (is_array(new_data)) {
                     data = new_data;
                     if (!memory) {
                         $.Storage.set(storage_key, JSON.stringify(data));
@@ -1525,7 +1525,7 @@
         }
         var reversed_keycodes = {};
         Object.keys(keycodes).forEach(function(which) {
-            if (keycodes[which] instanceof Array) {
+            if (is_array(keycodes[which])) {
                 keycodes[which].forEach(function(key) {
                     reversed_keycodes[key.toUpperCase()] = which;
                 });
@@ -3777,7 +3777,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 18 Apr 2019 08:36:05 +0000',
+        date: 'Mon, 22 Apr 2019 15:19:50 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4370,7 +4370,7 @@
                         return [ret, options.position];
                     }
                     return input;
-                } else if (ret instanceof Array && ret.length === 2) {
+                } else if (is_array(ret) && ret.length === 2) {
                     return ret;
                 } else {
                     return input;
@@ -4414,7 +4414,7 @@
                             if ($.terminal.is_formatting(string)) {
                                 return [string, -1];
                             } else {
-                                if (formatter instanceof Array) {
+                                if (is_array(formatter)) {
                                     var options = formatter[2] || {};
                                     result = [string, position < 0 ? 0 : position];
                                     if (result[0].match(formatter[0])) {
@@ -5241,6 +5241,10 @@
         return get_type(object) === 'function';
     }
     // -----------------------------------------------------------------------
+    function is_array(object) {
+        return get_type(object) === 'array';
+    }
+    // -----------------------------------------------------------------------
     function get_type(object) {
         return typeof object === 'function' ? 'function' : $.type(object);
     }
@@ -5459,7 +5463,7 @@
         function display_object(object) {
             if (typeof object === 'string') {
                 self.echo(object);
-            } else if (object instanceof Array) {
+            } else if (is_array(object)) {
                 self.echo($.map(object, function(object) {
                     return JSON.stringify(object);
                 }).join(' '));
@@ -6097,7 +6101,7 @@
                         if (get_type(ret) === 'string') {
                             string = ret;
                         }
-                    } else if (arg instanceof Array) {
+                    } else if (is_array(arg)) {
                         string = $.terminal.columns(arg, self.cols(), settings.tabs);
                     } else {
                         string = String(arg);
@@ -6629,11 +6633,8 @@
                 }
             }
             // we don't want debounce in Unit Tests
-            try {
-                if (typeof global.it === 'function') {
-                    return scroll_to_view;
-                }
-            } catch (e) {
+            if (typeof global !== 'undefined' && typeof global.it === 'function') {
+                return scroll_to_view;
             }
             return debounce(scroll_to_view, 100, {
                 leading: true,
@@ -6812,7 +6813,7 @@
                             if (result) {
                                 if (is_function(result.then)) {
                                     result.then(resolve);
-                                } else if (result instanceof Array) {
+                                } else if (is_array(result)) {
                                     resolve(result);
                                 }
                             }
@@ -8618,7 +8619,7 @@
         var base_interpreter;
         if (typeof init_interpreter === 'string') {
             base_interpreter = init_interpreter;
-        } else if (init_interpreter instanceof Array) {
+        } else if (is_array(init_interpreter)) {
             // first JSON-RPC
             for (var i = 0, len = init_interpreter.length; i < len; ++i) {
                 if (typeof init_interpreter[i] === 'string') {
