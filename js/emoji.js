@@ -19,13 +19,10 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
-        define(['prismjs', 'jquery', 'jquery.terminal'], factory);
+        define(['jquery', 'jquery.terminal'], factory);
     } else if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
-        module.exports = function(root, jQuery, Prism) {
-            if (Prism === undefined) {
-                Prism = require('prismjs');
-            }
+        module.exports = function(root, jQuery) {
             if (jQuery === undefined) {
                 // require('jQuery') returns a factory that requires window to
                 // build a jQuery instance, we normalize how we use modules
@@ -44,7 +41,7 @@
                     require('jquery.terminal')(jQuery);
                 }
             }
-            factory(jQuery, Prism);
+            factory(jQuery);
             return jQuery;
         };
     } else {

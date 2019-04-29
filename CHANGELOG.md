@@ -1,6 +1,7 @@
 ## 2.4.2
 ### Bugfix
 * fix wrong array detection in completion when array passed across iframes
+* fix prism.js and emoji.js dependencies when run with webpack
 
 ## 2.4.1
 ### Bugfix
