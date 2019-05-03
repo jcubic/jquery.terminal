@@ -1,4 +1,6 @@
 ## 2.4.2
+### Feature
+* Better API option `doubleTabEchoCommand` so you don't need to call `echo_command()` function in `doubleTab`.
 ### Bugfix
 * fix wrong array detection in completion when array passed across iframes
 * fix prism.js and emoji.js dependencies when run with webpack

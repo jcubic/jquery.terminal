@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 03 May 2019 15:37:13 +0000
+ * Date: Fri, 03 May 2019 15:45:04 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3777,7 +3777,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 03 May 2019 15:37:13 +0000',
+        date: 'Fri, 03 May 2019 15:45:04 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5352,6 +5352,7 @@
         describe: 'procs',
         onRPCError: null,
         doubleTab: null,
+        doubleTabEchoCommand: false,
         completion: false,
         onInit: $.noop,
         onClear: $.noop,
@@ -6798,6 +6799,7 @@
                         word: settings.wordAutocomplete,
                         escape: settings.completionEscape,
                         caseSensitive: caseSensitive,
+                        echoCommand: settings.doubleTabEchoCommand,
                         doubleTab: settings.doubleTab
                     });
                 }
@@ -7237,6 +7239,7 @@
                     word: true,
                     echo: false,
                     escape: true,
+                    echoCommand: false,
                     caseSensitive: true,
                     doubleTab: null
                 }, options || {});
@@ -7331,6 +7334,10 @@
                         tab_count = 0;
                         if (options.echo) {
                             if (is_function(options.doubleTab)) {
+                                // new API old is keep for backward compatibility
+                                if (options.echoCommand) {
+                                    echo_command();
+                                }
                                 var ret = options.doubleTab.call(
                                     self,
                                     string,

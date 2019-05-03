@@ -5352,6 +5352,7 @@
         describe: 'procs',
         onRPCError: null,
         doubleTab: null,
+        doubleTabEchoCommand: false,
         completion: false,
         onInit: $.noop,
         onClear: $.noop,
@@ -6798,6 +6799,7 @@
                         word: settings.wordAutocomplete,
                         escape: settings.completionEscape,
                         caseSensitive: caseSensitive,
+                        echoCommand: settings.doubleTabEchoCommand,
                         doubleTab: settings.doubleTab
                     });
                 }
@@ -7237,6 +7239,7 @@
                     word: true,
                     echo: false,
                     escape: true,
+                    echoCommand: false,
                     caseSensitive: true,
                     doubleTab: null
                 }, options || {});
@@ -7331,6 +7334,10 @@
                         tab_count = 0;
                         if (options.echo) {
                             if (is_function(options.doubleTab)) {
+                                // new API old is keep for backward compatibility
+                                if (options.echoCommand) {
+                                    echo_command();
+                                }
                                 var ret = options.doubleTab.call(
                                     self,
                                     string,

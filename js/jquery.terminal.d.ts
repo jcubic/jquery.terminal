@@ -176,6 +176,7 @@ declare namespace JQueryTerminal {
         echo?: boolean;
         escape?: boolean;
         caseSensitive?: boolean;
+        echoCommand?: boolean;
         doubleTab?: DoubleTabFunction;
     }
 
@@ -419,7 +420,7 @@ type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabl
     "holdRepeatTimeout" | "request" | "describe" | "onRPCError" | "doubleTab" | "completion" |
     "onInit" | "onClear" | "onBlur" | "onFocus" | "onExit" | "onTerminalChange" | "onPush" | "onPaste" |
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
-    "repeatTimeoutKeys" | "allowedAttributes";
+    "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand";
 
 
 type TerminalOptions = {
@@ -480,6 +481,7 @@ type TerminalOptions = {
     describe?: string | false;
     onRPCError?: JQueryTerminal.RPCErrorCallback;
     doubleTab?: JQueryTerminal.DoubleTabFunction;
+    doubleTabEchoCommand?: boolean;
     completion?: JQueryTerminal.Completion;
     onInit?: JQueryTerminal.EventCallback;
     onClear?: JQueryTerminal.EventCallback;
