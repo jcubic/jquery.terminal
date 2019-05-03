@@ -148,7 +148,7 @@ global.window.Element.prototype.getClientRects = function() {
         }
         node = node.parentNode;
     }
-    return [{width: self.width(), height: self.height()}];
+    return [{width: self.offseWidth, height: self.offsetHeight}];
 };
 var storage = new Storage();
 Object.defineProperty(window, 'localStorage', { value: storage });

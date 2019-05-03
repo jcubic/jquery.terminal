@@ -293,7 +293,7 @@
   },
   "dependencies": {
     "@types/jquery": "^3.3.6",
-    "jquery": "~3",
+    "jquery": "^3.4.1",
     "prismjs": "^1.15.0",
     "wcwidth": "^1.0.1"
   },
