@@ -2,6 +2,7 @@
 ### Bugfix
 * fix wrong array detection in completion when array passed across iframes
 * fix prism.js and emoji.js dependencies when run with webpack
+* fix `keepWord` option for echo (`iterate_formatting` function that is called by `split_equal`) [#491](https://github.com/jcubic/jquery.terminal/issues/491)
 
 ## 2.4.1
 ### Bugfix

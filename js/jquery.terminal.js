@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Mon, 29 Apr 2019 21:57:47 +0000
+ * Date: Fri, 03 May 2019 15:37:13 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3777,7 +3777,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 29 Apr 2019 21:57:47 +0000',
+        date: 'Fri, 03 May 2019 15:37:13 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4002,6 +4002,7 @@
                     }
                 }
                 var braket = string[i].match(/[[\]]/);
+                offset = 0;
                 if (not_formatting) {
                     // treat entity as one character
                     if (string[i] === '&') {

@@ -4002,6 +4002,7 @@
                     }
                 }
                 var braket = string[i].match(/[[\]]/);
+                offset = 0;
                 if (not_formatting) {
                     // treat entity as one character
                     if (string[i] === '&') {
