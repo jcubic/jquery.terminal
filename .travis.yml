@@ -2,7 +2,7 @@ language: node_js
 node_js:
   - 10.15.0
 install:
-  - npm install
+  - npm ci
 script:
   - make
   - make lint
