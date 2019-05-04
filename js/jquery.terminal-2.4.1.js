@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 03 May 2019 15:45:04 +0000
+ * Date: Sat, 04 May 2019 08:52:14 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1588,9 +1588,11 @@
                 self['delete'](1);
                 return true;
             },
-            'ARROWUP': prev_history,
+            'HOLD+ARROWUP': up_arrow,
+            'ARROWUP': up_arrow,
             'CTRL+P': prev_history,
-            'ARROWDOWN': next_history,
+            'ARROWDOWN': down_arrow,
+            'HOLD+ARROWDOWN': down_arrow,
             'CTRL+N': next_history,
             'ARROWLEFT': left,
             'HOLD+ARROWLEFT': debounce(left, 10),
@@ -1815,6 +1817,60 @@
         function next_history() {
             self.set(history.end() ? last_command : history.next());
             return false;
+        }
+        // -------------------------------------------------------------------------------
+        function have_newlines(string) {
+            return string.match(/\n/);
+        }
+        // -------------------------------------------------------------------------------
+        function match_column(re, string, col) {
+            var match = string.match(re);
+            if (have_newlines(string)) {
+                return match && match[1].length <= col;
+            } else {
+                return match && match[1].length <= col - prompt_len;
+            }
+        }
+        // -------------------------------------------------------------------------------
+        function up_arrow() {
+            var before = command.substring(0, position);
+            var re = /\n?([^\n]+)$/;
+            var col = self.column();
+            if (have_newlines(before)) {
+                for (var i = before.length - col - 1; i--;) {
+                    if (before[i] === '\n') {
+                        break;
+                    }
+                    var str = before.substring(0, i);
+                    if (match_column(re, str, col)) {
+                        break;
+                    }
+                }
+                self.position(i);
+                return false;
+            } else {
+                return prev_history();
+            }
+        }
+        // -------------------------------------------------------------------------------
+        function down_arrow() {
+            var after = command.substring(position);
+            var re = /\n?([^\n]+)$/;
+            var col = self.column();
+            if (have_newlines(after)) {
+                var before = command.substring(0, position);
+                var match = after.match(/^[^\n]*\n/);
+                if (match) {
+                    var new_pos = col + match[0].length;
+                    if (!have_newlines(before)) {
+                        new_pos += prompt_len;
+                    }
+                    self.position(new_pos, true);
+                }
+                return false;
+            } else {
+                return next_history();
+            }
         }
         // -------------------------------------------------------------------------------
         function backspace_key() {
@@ -2709,6 +2765,19 @@
                 self.find('.prompt, .clipboard').remove();
                 self.removeClass('cmd').removeData('cmd').off('.cmd');
                 return self;
+            },
+            column: function(include_prompt) {
+                var before = command.substring(0, position);
+                if (position === 0 || !command.length) {
+                    return 0;
+                }
+                var re = /\n?([^\n]*)$/;
+                var match = before.match(re);
+                var col = match[1].length;
+                if (!have_newlines(before) && include_prompt) {
+                    col += prompt_len;
+                }
+                return col;
             },
             prompt: function(user_prompt) {
                 if (user_prompt === true) {
@@ -3777,7 +3846,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 03 May 2019 15:45:04 +0000',
+        date: 'Sat, 04 May 2019 08:52:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

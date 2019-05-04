@@ -3145,6 +3145,52 @@ describe('Terminal plugin', function() {
             expect(cmd.prompt()).toEqual("(reverse-i-search)`': ");
             shortcut(false, false, false, 36, 'Home');
             expect(cmd.prompt()).toEqual("> ");
+        });
+        it('should move cursor', function() {
+            var key = shortcut.bind(null, false, false, false);
+            function left() {
+                key(37, 'arrowleft');
+            }
+            function right() {
+                key(39, 'arrowright');
+            }
+            function up() {
+                key(38, 'arrowup');
+            }
+            function down() {
+                key(40, 'arrowdown');
+            }
+            function with_newlines(i) {
+                return lines.slice(0, i).map(function(line) {
+                    return line.length + 1;
+                }).reduce(function(a, b) {
+                    return a + b;
+                });
+            }
+            var lines = [
+                'First Line of Text',
+                'Second Line of Text',
+                'Thrid Line of Text'
+            ];
+            var command = lines.join('\n');
+            term.focus();
+            cmd.set(command);
+            cmd.position(0);
+            right();
+            right();
+            right();
+            right();
+            right();
+            expect(cmd.position()).toEqual(5);
+            down();
+            expect(cmd.position()).toEqual(with_newlines(1) + 5 + cmd.prompt().length);
+            down();
+            expect(cmd.position()).toEqual(with_newlines(2) + 5 + cmd.prompt().length);
+            left();
+            up();
+            expect(cmd.position()).toEqual(with_newlines(1) + 4 + cmd.prompt().length);
+            up();
+            expect(cmd.position()).toEqual(4);
             cmd.purge();
             term.destroy().remove();
         });

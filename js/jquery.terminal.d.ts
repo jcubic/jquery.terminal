@@ -381,6 +381,7 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     commands(): JQueryTerminal.commandsCmdFunction<void>;
     destroy(): Cmd;
     invoke_key(shorcut: string): Cmd;
+    column(include_prompt: boolean): number;
     prompt(prompt: JQueryTerminal.cmdPrompt): Cmd;
     prompt(last_render: true): string;
     prompt<T extends JQueryTerminal.cmdPrompt<void>>(): T;

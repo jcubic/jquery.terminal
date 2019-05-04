@@ -1,6 +1,8 @@
-## 2.4.2
+## 2.5.0
 ### Feature
 * Better API option `doubleTabEchoCommand` so you don't need to call `echo_command()` function in `doubleTab`.
+* new API `Cmd::column(boolean): number`
+* moving cursor up down in multiline command (line in Chrome Dev tools)
 ### Bugfix
 * fix wrong array detection in completion when array passed across iframes
 * fix prism.js and emoji.js dependencies when run with webpack
