@@ -1855,7 +1855,6 @@
         // -------------------------------------------------------------------------------
         function down_arrow() {
             var after = command.substring(position);
-            var re = /\n?([^\n]+)$/;
             var col = self.column();
             if (have_newlines(after)) {
                 var before = command.substring(0, position);
