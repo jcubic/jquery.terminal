@@ -3058,6 +3058,10 @@
                 }
             }
             if (enabled || key === 'CTRL+C') {
+                if (key !== prev_key) {
+                    self.stopTime('hold');
+                    hold = false;
+                }
                 if (hold) {
                     prev_key = key;
                     key = 'HOLD+' + key;
@@ -3072,9 +3076,6 @@
                         });
                     }
                 } else {
-                    if (key !== prev_key) {
-                        self.stopTime('hold');
-                    }
                     self.oneTime(settings.holdTimeout, 'hold', function() {
                         hold = true;
                     });
