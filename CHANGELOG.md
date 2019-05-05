@@ -2,11 +2,12 @@
 ### Feature
 * Better API option `doubleTabEchoCommand` so you don't need to call `echo_command()` function in `doubleTab`.
 * new API `Cmd::column(boolean): number`
-* moving cursor up down in multiline command (line in Chrome Dev tools)
+* moving cursor up down in multiline command (like in Chrome Dev tools)
 ### Bugfix
 * fix wrong array detection in completion when array passed across iframes
 * fix prism.js and emoji.js dependencies when run with webpack
 * fix `keepWord` option for echo (`iterate_formatting` function that is called by `split_equal`) [#491](https://github.com/jcubic/jquery.terminal/issues/491)
+* fix press key after hold different key [#488](https://github.com/jcubic/jquery.terminal/issues/488)
 
 ## 2.4.1
 ### Bugfix
