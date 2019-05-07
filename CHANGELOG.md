@@ -10,6 +10,7 @@
 * fix press key after hold different key [#488](https://github.com/jcubic/jquery.terminal/issues/488)
 * fix echo empty line on longer lines (issue only happen in examples page in scheme inside dialog)
 * fix for jQuery UI dialog visibility change detection
+* fix hidden cursor in FireFox
 
 ## 2.4.1
 ### Bugfix
