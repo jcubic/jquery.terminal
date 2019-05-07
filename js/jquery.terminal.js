@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.4.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 18 Apr 2019 16:43:44 +0000
+ * Date: Tue, 07 May 2019 15:40:00 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1162,7 +1162,7 @@
     // :: STACK DATA STRUCTURE
     // -----------------------------------------------------------------------
     function Stack(init) {
-        var data = init instanceof Array ? init : init ? [init] : [];
+        var data = is_array(init) ? init : init ? [init] : [];
         $.extend(this, {
             data: function() {
                 return data;
@@ -1228,7 +1228,7 @@
                 }
             },
             set: function(new_data) {
-                if (new_data instanceof Array) {
+                if (is_array(new_data)) {
                     data = new_data;
                     if (!memory) {
                         $.Storage.set(storage_key, JSON.stringify(data));
@@ -1525,7 +1525,7 @@
         }
         var reversed_keycodes = {};
         Object.keys(keycodes).forEach(function(which) {
-            if (keycodes[which] instanceof Array) {
+            if (is_array(keycodes[which])) {
                 keycodes[which].forEach(function(key) {
                     reversed_keycodes[key.toUpperCase()] = which;
                 });
@@ -1588,9 +1588,11 @@
                 self['delete'](1);
                 return true;
             },
-            'ARROWUP': prev_history,
+            'HOLD+ARROWUP': up_arrow,
+            'ARROWUP': up_arrow,
             'CTRL+P': prev_history,
-            'ARROWDOWN': next_history,
+            'ARROWDOWN': down_arrow,
+            'HOLD+ARROWDOWN': down_arrow,
             'CTRL+N': next_history,
             'ARROWLEFT': left,
             'HOLD+ARROWLEFT': debounce(left, 10),
@@ -1815,6 +1817,59 @@
         function next_history() {
             self.set(history.end() ? last_command : history.next());
             return false;
+        }
+        // -------------------------------------------------------------------------------
+        function have_newlines(string) {
+            return string.match(/\n/);
+        }
+        // -------------------------------------------------------------------------------
+        function match_column(re, string, col) {
+            var match = string.match(re);
+            if (have_newlines(string)) {
+                return match && match[1].length <= col;
+            } else {
+                return match && match[1].length <= col - prompt_len;
+            }
+        }
+        // -------------------------------------------------------------------------------
+        function up_arrow() {
+            var before = command.substring(0, position);
+            var re = /\n?([^\n]+)$/;
+            var col = self.column();
+            if (have_newlines(before)) {
+                for (var i = before.length - col - 1; i--;) {
+                    if (before[i] === '\n') {
+                        break;
+                    }
+                    var str = before.substring(0, i);
+                    if (match_column(re, str, col)) {
+                        break;
+                    }
+                }
+                self.position(i);
+                return false;
+            } else {
+                return prev_history();
+            }
+        }
+        // -------------------------------------------------------------------------------
+        function down_arrow() {
+            var after = command.substring(position);
+            var col = self.column();
+            if (have_newlines(after)) {
+                var before = command.substring(0, position);
+                var match = after.match(/^[^\n]*\n/);
+                if (match) {
+                    var new_pos = col + match[0].length;
+                    if (!have_newlines(before)) {
+                        new_pos += prompt_len;
+                    }
+                    self.position(new_pos, true);
+                }
+                return false;
+            } else {
+                return next_history();
+            }
         }
         // -------------------------------------------------------------------------------
         function backspace_key() {
@@ -2710,6 +2765,19 @@
                 self.removeClass('cmd').removeData('cmd').off('.cmd');
                 return self;
             },
+            column: function(include_prompt) {
+                var before = command.substring(0, position);
+                if (position === 0 || !command.length) {
+                    return 0;
+                }
+                var re = /\n?([^\n]*)$/;
+                var match = before.match(re);
+                var col = match[1].length;
+                if (!have_newlines(before) && include_prompt) {
+                    col += prompt_len;
+                }
+                return col;
+            },
             prompt: function(user_prompt) {
                 if (user_prompt === true) {
                     return last_rendered_prompt;
@@ -2990,6 +3058,10 @@
                 }
             }
             if (enabled || key === 'CTRL+C') {
+                if (key !== prev_key) {
+                    self.stopTime('hold');
+                    hold = false;
+                }
                 if (hold) {
                     prev_key = key;
                     key = 'HOLD+' + key;
@@ -3004,9 +3076,6 @@
                         });
                     }
                 } else {
-                    if (key !== prev_key) {
-                        self.stopTime('hold');
-                    }
                     self.oneTime(settings.holdTimeout, 'hold', function() {
                         hold = true;
                     });
@@ -3776,8 +3845,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.4.1',
-        date: 'Thu, 18 Apr 2019 16:43:44 +0000',
+        version: 'DEV',
+        date: 'Tue, 07 May 2019 15:40:00 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4002,6 +4071,7 @@
                     }
                 }
                 var braket = string[i].match(/[[\]]/);
+                offset = 0;
                 if (not_formatting) {
                     // treat entity as one character
                     if (string[i] === '&') {
@@ -4370,7 +4440,7 @@
                         return [ret, options.position];
                     }
                     return input;
-                } else if (ret instanceof Array && ret.length === 2) {
+                } else if (is_array(ret) && ret.length === 2) {
                     return ret;
                 } else {
                     return input;
@@ -4414,7 +4484,7 @@
                             if ($.terminal.is_formatting(string)) {
                                 return [string, -1];
                             } else {
-                                if (formatter instanceof Array) {
+                                if (is_array(formatter)) {
                                     var options = formatter[2] || {};
                                     result = [string, position < 0 ? 0 : position];
                                     if (result[0].match(formatter[0])) {
@@ -5241,6 +5311,10 @@
         return get_type(object) === 'function';
     }
     // -----------------------------------------------------------------------
+    function is_array(object) {
+        return get_type(object) === 'array';
+    }
+    // -----------------------------------------------------------------------
     function get_type(object) {
         return typeof object === 'function' ? 'function' : $.type(object);
     }
@@ -5347,6 +5421,7 @@
         describe: 'procs',
         onRPCError: null,
         doubleTab: null,
+        doubleTabEchoCommand: false,
         completion: false,
         onInit: $.noop,
         onClear: $.noop,
@@ -5459,7 +5534,7 @@
         function display_object(object) {
             if (typeof object === 'string') {
                 self.echo(object);
-            } else if (object instanceof Array) {
+            } else if (is_array(object)) {
                 self.echo($.map(object, function(object) {
                     return JSON.stringify(object);
                 }).join(' '));
@@ -6006,7 +6081,7 @@
                     var array = $.terminal.split_equal(string, cols, words);
                     for (i = 0, len = array.length; i < len; ++i) {
                         if (array[i] === '' || array[i] === '\r') {
-                            output_buffer.push('<span></span>');
+                            output_buffer.push({line: '<span></span>'});
                         } else {
                             var data = {
                                 line: $.terminal.format(
@@ -6097,7 +6172,7 @@
                         if (get_type(ret) === 'string') {
                             string = ret;
                         }
-                    } else if (arg instanceof Array) {
+                    } else if (is_array(arg)) {
                         string = $.terminal.columns(arg, self.cols(), settings.tabs);
                     } else {
                         string = String(arg);
@@ -6629,11 +6704,8 @@
                 }
             }
             // we don't want debounce in Unit Tests
-            try {
-                if (typeof global.it === 'function') {
-                    return scroll_to_view;
-                }
-            } catch (e) {
+            if (typeof global !== 'undefined' && typeof global.it === 'function') {
+                return scroll_to_view;
             }
             return debounce(scroll_to_view, 100, {
                 leading: true,
@@ -6796,6 +6868,7 @@
                         word: settings.wordAutocomplete,
                         escape: settings.completionEscape,
                         caseSensitive: caseSensitive,
+                        echoCommand: settings.doubleTabEchoCommand,
                         doubleTab: settings.doubleTab
                     });
                 }
@@ -6812,7 +6885,7 @@
                             if (result) {
                                 if (is_function(result.then)) {
                                     result.then(resolve);
-                                } else if (result instanceof Array) {
+                                } else if (is_array(result)) {
                                     resolve(result);
                                 }
                             }
@@ -7235,6 +7308,7 @@
                     word: true,
                     echo: false,
                     escape: true,
+                    echoCommand: false,
                     caseSensitive: true,
                     doubleTab: null
                 }, options || {});
@@ -7329,6 +7403,10 @@
                         tab_count = 0;
                         if (options.echo) {
                             if (is_function(options.doubleTab)) {
+                                // new API old is keep for backward compatibility
+                                if (options.echoCommand) {
+                                    echo_command();
+                                }
                                 var ret = options.doubleTab.call(
                                     self,
                                     string,
@@ -8618,7 +8696,7 @@
         var base_interpreter;
         if (typeof init_interpreter === 'string') {
             base_interpreter = init_interpreter;
-        } else if (init_interpreter instanceof Array) {
+        } else if (is_array(init_interpreter)) {
             // first JSON-RPC
             for (var i = 0, len = init_interpreter.length; i < len; ++i) {
                 if (typeof init_interpreter[i] === 'string') {
@@ -9036,7 +9114,7 @@
                 }
                 if (window.IntersectionObserver && self.css('position') !== 'fixed') {
                     visibility_observer = new IntersectionObserver(visibility_checker, {
-                        root: document.body
+                        root: null
                     });
                     visibility_observer.observe(self[0]);
                 } else {

@@ -1,3 +1,17 @@
+## 2.5.0
+### Feature
+* Better API option `doubleTabEchoCommand` so you don't need to call `echo_command()` function in `doubleTab`.
+* new API `Cmd::column(boolean): number`
+* moving cursor up down in multiline command (like in Chrome Dev tools)
+### Bugfix
+* fix wrong array detection in completion when array passed across iframes
+* fix prism.js and emoji.js dependencies when run with webpack
+* fix `keepWord` option for echo (`iterate_formatting` function that is called by `split_equal`) [#491](https://github.com/jcubic/jquery.terminal/issues/491)
+* fix press key after hold different key [#488](https://github.com/jcubic/jquery.terminal/issues/488)
+* fix echo empty line on longer lines (issue only happen in examples page in scheme inside dialog)
+* fix for jQuery UI dialog visibility change detection
+* fix hidden cursor in FireFox
+
 ## 2.4.1
 ### Bugfix
 * show terminal content after it's resized when initially not visible (fix jumping of text)

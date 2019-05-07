@@ -176,6 +176,7 @@ declare namespace JQueryTerminal {
         echo?: boolean;
         escape?: boolean;
         caseSensitive?: boolean;
+        echoCommand?: boolean;
         doubleTab?: DoubleTabFunction;
     }
 
@@ -380,6 +381,7 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     commands(): JQueryTerminal.commandsCmdFunction<void>;
     destroy(): Cmd;
     invoke_key(shorcut: string): Cmd;
+    column(include_prompt: boolean): number;
     prompt(prompt: JQueryTerminal.cmdPrompt): Cmd;
     prompt(last_render: true): string;
     prompt<T extends JQueryTerminal.cmdPrompt<void>>(): T;
@@ -419,7 +421,7 @@ type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabl
     "holdRepeatTimeout" | "request" | "describe" | "onRPCError" | "doubleTab" | "completion" |
     "onInit" | "onClear" | "onBlur" | "onFocus" | "onExit" | "onTerminalChange" | "onPush" | "onPaste" |
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
-    "repeatTimeoutKeys" | "allowedAttributes";
+    "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand";
 
 
 type TerminalOptions = {
@@ -480,6 +482,7 @@ type TerminalOptions = {
     describe?: string | false;
     onRPCError?: JQueryTerminal.RPCErrorCallback;
     doubleTab?: JQueryTerminal.DoubleTabFunction;
+    doubleTabEchoCommand?: boolean;
     completion?: JQueryTerminal.Completion;
     onInit?: JQueryTerminal.EventCallback;
     onClear?: JQueryTerminal.EventCallback;

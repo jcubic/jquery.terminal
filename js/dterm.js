@@ -86,7 +86,7 @@
                     terminal.disable();
                 }
             }, {
-                root: document.body
+                root: null
             });
             visibility_observer.observe(terminal[0]);
         }

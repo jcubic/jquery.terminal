@@ -59,6 +59,7 @@
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
     top: calc(var(--cursor-line, 0) * 1em);
 }
+
 .cmd span.end-line,
 .cmd span.end-line span,
 .cmd div.end-line span[data-text]:last-child,
@@ -249,9 +250,9 @@ terminal .terminal-output > div {
 .terminal td {
     border: 1px solid #aaa;
 }
-.cmd span[data-text]:not(.emoji) span {
-    background-color: inherit !important;
-    color: inherit !important;
+.cmd.cmd span[data-text]:not(.emoji) span {
+    background-color: inherit;
+    color: inherit;
 }
 /* fix for underline on middle line */
 .cmd [role="presentation"].cursor-line {
