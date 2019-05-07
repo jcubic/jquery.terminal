@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 05 May 2019 10:40:47 +0000
+ * Date: Tue, 07 May 2019 15:40:00 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3846,7 +3846,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 05 May 2019 10:40:47 +0000',
+        date: 'Tue, 07 May 2019 15:40:00 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6081,7 +6081,7 @@
                     var array = $.terminal.split_equal(string, cols, words);
                     for (i = 0, len = array.length; i < len; ++i) {
                         if (array[i] === '' || array[i] === '\r') {
-                            output_buffer.push('<span></span>');
+                            output_buffer.push({line: '<span></span>'});
                         } else {
                             var data = {
                                 line: $.terminal.format(
@@ -9114,7 +9114,7 @@
                 }
                 if (window.IntersectionObserver && self.css('position') !== 'fixed') {
                     visibility_observer = new IntersectionObserver(visibility_checker, {
-                        root: document.body
+                        root: null
                     });
                     visibility_observer.observe(self[0]);
                 } else {

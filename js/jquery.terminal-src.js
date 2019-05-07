@@ -6081,7 +6081,7 @@
                     var array = $.terminal.split_equal(string, cols, words);
                     for (i = 0, len = array.length; i < len; ++i) {
                         if (array[i] === '' || array[i] === '\r') {
-                            output_buffer.push('<span></span>');
+                            output_buffer.push({line: '<span></span>'});
                         } else {
                             var data = {
                                 line: $.terminal.format(
@@ -9114,7 +9114,7 @@
                 }
                 if (window.IntersectionObserver && self.css('position') !== 'fixed') {
                     visibility_observer = new IntersectionObserver(visibility_checker, {
-                        root: document.body
+                        root: null
                     });
                     visibility_observer.observe(self[0]);
                 } else {
