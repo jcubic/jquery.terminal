@@ -1,5 +1,5 @@
 ## 2.5.0
-### Feature
+### Features
 * Better API option `doubleTabEchoCommand` so you don't need to call `echo_command()` function in `doubleTab`.
 * new API `Cmd::column(boolean): number`
 * moving cursor up down in multiline command (like in Chrome Dev tools)
