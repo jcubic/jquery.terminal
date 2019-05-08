@@ -234,9 +234,6 @@ terminal .terminal-output > div {
     left: 0;
     margin-bottom: 1px;
 }
-.terminal .terminal-output div span {
-    display: inline-block;
-}
 .cmd > span:not(.prompt) {
     float: left;
 }

@@ -1,3 +1,7 @@
+## 2.5.1
+### Bugfix
+* fix 1px black space in style of selection after prism token
+
 ## 2.5.0
 ### Features
 * Better API option `doubleTabEchoCommand` so you don't need to call `echo_command()` function in `doubleTab`.
