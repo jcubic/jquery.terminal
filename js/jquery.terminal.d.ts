@@ -399,9 +399,8 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     show(duration_complete_options?: JQuery.Duration | ((this: TElement) => void) | JQuery.EffectsOptions<TElement>): this;
     show(): Cmd;
     //jQuery methods
-    resize<TData>(eventData: TData,
-        handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
-    resize(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
+    resize(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'resize'> |
+                     false): this;
     //jQuery Terminal method
     resize(num_chars?: number): Cmd;
     enable(): Cmd;
@@ -528,9 +527,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     clear_history_state(): JQueryTerminal;
     next(selector?: JQuery.Selector): this;
     next(): JQueryTerminal;
-    focus(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
-    focus<TData>(eventData: TData,
-        handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
+    focus(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'focus'> |
+                    false): this;
     focus(toggle?: boolean): JQueryTerminal;
     freeze(toogle?: boolean): JQueryTerminal;
     frozen(): boolean;
@@ -549,9 +547,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     get_prompt<T extends JQueryTerminal.ExtendedPrompt>(): T;
     set_mask(toggle?: boolean | string): JQueryTerminal;
     get_output<T extends JQueryTerminal.Lines | string[]>(raw?: boolean): T;
-    resize<TData>(eventData: TData,
-        handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
-    resize(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
+    resize(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'resize'> |
+                     false): this;
     resize(width?: number, height?: number): JQueryTerminal;
     refresh(): JQueryTerminal;
     flush(options?: { update?: boolean, scroll?: boolean }): JQueryTerminal;
@@ -562,9 +559,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     echo(arg: TypeOrPromise<JQueryTerminal.echoValue>, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     error(arg: JQueryTerminal.errorArgument, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     exception<T extends Error>(e: T, label?: string): JQueryTerminal;
-    scroll<TData>(eventData: TData,
-        handler: JQuery.EventHandler<TElement, TData> | JQuery.EventHandlerBase<any, JQuery.Event<TElement, TData>>): this;
-    scroll(handler?: JQuery.EventHandler<TElement> | JQuery.EventHandlerBase<any, JQuery.Event<TElement>> | false): this;
+    scroll(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'scroll'> |
+                     false): this;
     scroll(amount: number): JQueryTerminal;
     logout(local?: boolean): JQueryTerminal;
     token<T extends string | void>(local?: boolean): T;

@@ -1,3 +1,9 @@
+## 2.5.1
+### Bugfix
+* fix 1px black space in style of selection after prism token
+* additional validate instead of just throw and capture JSON errors in format function (devtools improvement)
+* fix typescript types for version 3.3.29 and freeze the version
+
 ## 2.5.0
 ### Features
 * Better API option `doubleTabEchoCommand` so you don't need to call `echo_command()` function in `doubleTab`.
