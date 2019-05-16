@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 16 May 2019 15:07:57 +0000
+ * Date: Thu, 16 May 2019 15:55:15 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3846,7 +3846,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 16 May 2019 15:07:57 +0000',
+        date: 'Thu, 16 May 2019 15:55:15 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4579,16 +4579,40 @@
                 allowedAttributes: [],
                 anyLinks: false
             }, options || {});
+            function filter_attr_names(names) {
+                if (names.length && settings.allowedAttributes.length) {
+                    return names.filter(function(name) {
+                        if (name === 'data-text') {
+                            return false;
+                        }
+                        var allowed = false;
+                        var filters = settings.allowedAttributes;
+                        for (var i = 0; i < filters.length; ++i) {
+                            if (filters[i] instanceof RegExp) {
+                                if (filters[i].test(name)) {
+                                    allowed = true;
+                                    break;
+                                }
+                            } else if (filters[i] === name) {
+                                allowed = true;
+                                break;
+                            }
+                        }
+                        return allowed;
+                    });
+                }
+                return [];
+            }
             function format(s, style, color, background, _class, data_text, text) {
                 var attrs;
                 if (data_text.match(/;/)) {
                     try {
                         var splitted = data_text.split(';');
                         var str = splitted.slice(1).join(';');
-                        if (str.match(/^\s*\{|\}\s*$/)) {
+                        if (str.match(/^\s*\{[^}]*\}\s*$/)) {
                             attrs = JSON.parse(str);
+                            data_text = splitted[0];
                         }
-                        data_text = splitted[0];
                     } catch (e) {
                     }
                 }
@@ -4677,35 +4701,12 @@
                     result += ' style="' + style_str + '"';
                 }
                 if (attrs) {
-                    var keys = Object.keys(attrs);
-                    if (keys.length && settings.allowedAttributes.length) {
-                        // filter JSON attributes by regex or string
-                        // in allowedAttributes options
-                        keys = keys.filter(function(name) {
-                            if (name === 'data-text') {
-                                return false;
-                            }
-                            var allowed = false;
-                            var filters = settings.allowedAttributes;
-                            for (var i = 0; i < filters.length; ++i) {
-                                if (filters[i] instanceof RegExp) {
-                                    if (filters[i].test(name)) {
-                                        allowed = true;
-                                        break;
-                                    }
-                                } else if (filters[i] === name) {
-                                    allowed = true;
-                                    break;
-                                }
-                            }
-                            return allowed;
-                        });
-                        if (keys.length) {
-                            result += ' ' + keys.map(function(name) {
-                                var value = attrs[name].replace(/"/g, '&quot;');
-                                return name + '="' + value + '"';
-                            }).join(' ');
-                        }
+                    var keys = filter_attr_names(Object.keys(attrs));
+                    if (keys.length) {
+                        result += ' ' + keys.map(function(name) {
+                            var value = attrs[name].replace(/"/g, '&quot;');
+                            return name + '="' + value + '"';
+                        }).join(' ');
                     }
                 }
                 if (_class !== '') {

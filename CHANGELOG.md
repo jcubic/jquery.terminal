@@ -1,7 +1,7 @@
 ## 2.5.1
 ### Bugfix
 * fix 1px black space in style of selection after prism token
-* simple validate instead of throw and capture JSON error in format function (devtools improvement)
+* additional validate instead of just throw and capture JSON errors in format function (devtools improvement)
 
 ## 2.5.0
 ### Features
