@@ -4584,7 +4584,10 @@
                 if (data_text.match(/;/)) {
                     try {
                         var splitted = data_text.split(';');
-                        attrs = JSON.parse(splitted.slice(1).join(';'));
+                        var str = splitted.slice(1).join(';');
+                        if (str.match(/^\s*\{|\}\s*$/)) {
+                            attrs = JSON.parse(str);
+                        }
                         data_text = splitted[0];
                     } catch (e) {
                     }
