@@ -3662,14 +3662,24 @@
         return result;
     }
     // -----------------------------------------------------------------
+    function process_div(element) {
+        return $(element).find('> div')
+            .map(process_selected_line).get().join('\n').replace(/\n$/, '');
+    }
+    // -----------------------------------------------------------------
     function process_selected_html(html) {
         var stdout;
         var text = '';
         var $html = $('<div>' + html + '</div>');
         if (html.match(/<\/div>/)) {
+            // match multiple echo output
             stdout = $html.find('div[data-index]').map(function() {
-                return $(this).find('> div').map(process_selected_line).get().join('');
+                return process_div(this);
             }).get().join('\n');
+            // match insdie single echo output
+            if (!stdout && html.match(/style="width: 100%;?"/)) {
+                stdout = process_div($html);
+            }
             text = stdout;
         }
         var $prompt = $html.find('.prompt');

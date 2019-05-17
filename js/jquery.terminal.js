@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.5.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 16 May 2019 16:14:18 +0000
+ * Date: Fri, 17 May 2019 10:07:59 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3662,14 +3662,24 @@
         return result;
     }
     // -----------------------------------------------------------------
+    function process_div(element) {
+        return $(element).find('> div')
+            .map(process_selected_line).get().join('\n').replace(/\n$/, '');
+    }
+    // -----------------------------------------------------------------
     function process_selected_html(html) {
         var stdout;
         var text = '';
         var $html = $('<div>' + html + '</div>');
         if (html.match(/<\/div>/)) {
+            // match multiple echo output
             stdout = $html.find('div[data-index]').map(function() {
-                return $(this).find('> div').map(process_selected_line).get().join('');
+                return process_div(this);
             }).get().join('\n');
+            // match insdie single echo output
+            if (!stdout && html.match(/style="width: 100%;?"/)) {
+                stdout = process_div($html);
+            }
             text = stdout;
         }
         var $prompt = $html.find('.prompt');
@@ -3845,8 +3855,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.5.1',
-        date: 'Thu, 16 May 2019 16:14:18 +0000',
+        version: 'DEV',
+        date: 'Fri, 17 May 2019 10:07:59 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

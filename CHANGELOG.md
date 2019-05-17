@@ -1,3 +1,7 @@
+## 2.5.2
+### Bugfix
+* fix CTR+C when inside of single echo output is selected
+
 ## 2.5.1
 ### Bugfix
 * fix 1px black space in style of selection after prism token
