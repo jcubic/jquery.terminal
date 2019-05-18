@@ -2736,9 +2736,8 @@
                 command = clean(string);
                 if (!stay) {
                     self.position(len, true, true);
-                } else {
-                    fix_textarea();
                 }
+                fix_textarea();
                 redraw();
                 fire_change_command();
                 return self;
@@ -2828,6 +2827,7 @@
             refresh: function() {
                 draw_prompt();
                 redraw();
+                fix_textarea(true);
                 return self;
             },
             // if formatter change length of the strings (like emoji demo) we need to keep
@@ -3662,14 +3662,24 @@
         return result;
     }
     // -----------------------------------------------------------------
+    function process_div(element) {
+        return $(element).find('> div')
+            .map(process_selected_line).get().join('\n').replace(/\n$/, '');
+    }
+    // -----------------------------------------------------------------
     function process_selected_html(html) {
         var stdout;
         var text = '';
         var $html = $('<div>' + html + '</div>');
         if (html.match(/<\/div>/)) {
+            // match multiple echo output
             stdout = $html.find('div[data-index]').map(function() {
-                return $(this).find('> div').map(process_selected_line).get().join('');
+                return process_div(this);
             }).get().join('\n');
+            // match insdie single echo output
+            if (!stdout && html.match(/style="width: 100%;?"/)) {
+                stdout = process_div($html);
+            }
             text = stdout;
         }
         var $prompt = $html.find('.prompt');
