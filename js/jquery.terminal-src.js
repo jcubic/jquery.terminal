@@ -2736,9 +2736,8 @@
                 command = clean(string);
                 if (!stay) {
                     self.position(len, true, true);
-                } else {
-                    fix_textarea();
                 }
+                fix_textarea();
                 redraw();
                 fire_change_command();
                 return self;
@@ -2828,6 +2827,7 @@
             refresh: function() {
                 draw_prompt();
                 redraw();
+                fix_textarea(true);
                 return self;
             },
             // if formatter change length of the strings (like emoji demo) we need to keep

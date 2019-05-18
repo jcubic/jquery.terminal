@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 17 May 2019 10:07:59 +0000
+ * Date: Sat, 18 May 2019 06:24:11 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -2736,9 +2736,8 @@
                 command = clean(string);
                 if (!stay) {
                     self.position(len, true, true);
-                } else {
-                    fix_textarea();
                 }
+                fix_textarea();
                 redraw();
                 fire_change_command();
                 return self;
@@ -2828,6 +2827,7 @@
             refresh: function() {
                 draw_prompt();
                 redraw();
+                fix_textarea(true);
                 return self;
             },
             // if formatter change length of the strings (like emoji demo) we need to keep
@@ -3856,7 +3856,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 17 May 2019 10:07:59 +0000',
+        date: 'Sat, 18 May 2019 06:24:11 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

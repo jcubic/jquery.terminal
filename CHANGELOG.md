@@ -1,6 +1,7 @@
 ## 2.5.2
 ### Bugfix
 * fix CTR+C when inside of single echo output is selected
+* fix paste + key on Mac/Chrome [#493](https://github.com/jcubic/jquery.terminal/issues/493)
 
 ## 2.5.1
 ### Bugfix
