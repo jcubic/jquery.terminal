@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 21 May 2019 17:08:48 +0000
+ * Date: Tue, 21 May 2019 19:07:29 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3856,7 +3856,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 21 May 2019 17:08:48 +0000',
+        date: 'Tue, 21 May 2019 19:07:29 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8995,9 +8995,8 @@
                 (function() {
                     var clip = self.find('.cmd textarea');
                     function is_context_event(e) {
-                        var e_o = e.originalEvent;
-                        return e_o.type === 'mousedown' && e_o.buttons === 2 ||
-                            e_o.type === 'contextmenu';
+                        return e.type === 'mousedown' && e.buttons === 2 ||
+                            e.type === 'contextmenu';
                     }
                     self.on('contextmenu.terminal mousedown.terminal', function(e) {
                         if (get_selected_html() === '' && is_context_event(e)) {
