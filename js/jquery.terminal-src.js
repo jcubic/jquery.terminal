@@ -8994,8 +8994,13 @@
                 })();
                 (function() {
                     var clip = self.find('.cmd textarea');
-                    self.on('contextmenu.terminal', function(e) {
-                        if (get_selected_html() === '') {
+                    function is_context_event(e) {
+                        var e_o = e.originalEvent;
+                        return e_o.type === 'mousedown' && e_o.buttons === 2 ||
+                            e_o.type === 'contextmenu';
+                    }
+                    self.on('contextmenu.terminal mousedown.terminal', function(e) {
+                        if (get_selected_html() === '' && is_context_event(e)) {
                             if (!$(e.target).is('img,value,audio,object,canvas,a')) {
                                 if (!self.enabled()) {
                                     self.enable();

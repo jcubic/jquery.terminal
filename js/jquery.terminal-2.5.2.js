@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.5.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 18 May 2019 06:27:27 +0000
+ * Date: Tue, 21 May 2019 17:08:48 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3855,8 +3855,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.5.2',
-        date: 'Sat, 18 May 2019 06:27:27 +0000',
+        version: 'DEV',
+        date: 'Tue, 21 May 2019 17:08:48 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8994,8 +8994,13 @@
                 })();
                 (function() {
                     var clip = self.find('.cmd textarea');
-                    self.on('contextmenu.terminal', function(e) {
-                        if (get_selected_html() === '') {
+                    function is_context_event(e) {
+                        var e_o = e.originalEvent;
+                        return e_o.type === 'mousedown' && e_o.buttons === 2 ||
+                            e_o.type === 'contextmenu';
+                    }
+                    self.on('contextmenu.terminal mousedown.terminal', function(e) {
+                        if (get_selected_html() === '' && is_context_event(e)) {
                             if (!$(e.target).is('img,value,audio,object,canvas,a')) {
                                 if (!self.enabled()) {
                                     self.enable();
