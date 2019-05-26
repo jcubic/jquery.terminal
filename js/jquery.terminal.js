@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 26 May 2019 07:15:04 +0000
+ * Date: Sun, 26 May 2019 07:32:45 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1738,8 +1738,8 @@
             return function delete_word_backward() {
                 // don't work in Chromium (can't prevent close tab)
                 if (command !== '' && position !== 0) {
-                    var m = command.slice(0, position).match(/([^ ]+ *$)/);
-                    if (m && m[0].length) {
+                    var m = command.slice(0, position).match(/([^ ]* *$)/);
+                    if (m[0].length) {
                         kill_text = self['delete'](-m[0].length);
                         if (clipboard) {
                             text_to_clipboard(clip, kill_text);
@@ -3856,7 +3856,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 26 May 2019 07:15:04 +0000',
+        date: 'Sun, 26 May 2019 07:32:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
