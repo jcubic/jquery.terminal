@@ -1,3 +1,8 @@
+## 2.6.1
+### Bugfix
+* fix sourcemaps
+* fix prism + `--size`
+
 ## 2.6.0
 ### Features
 * new option `mobileIngoreAutoSpace` to fix issue on Android when typing keys: `, ) .` (default empty array)

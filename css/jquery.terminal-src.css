@@ -623,7 +623,7 @@ terminal .terminal-output > div {
         display: inline-block;
     }
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token),
+    .terminal-output > :not(.raw) span,
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
