@@ -3641,7 +3641,8 @@ describe('Terminal plugin', function() {
                 'foo foo"',
                 'foo "foo\\"foo',
                 "foo 'foo",
-                "foo 'foo\\'foo"
+                "foo 'foo\\'foo",
+                'foo "foo\\\\\\"foo'
             ];
             commands.forEach(function(command) {
                 term.focus().clear();

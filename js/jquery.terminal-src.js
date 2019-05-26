@@ -3559,6 +3559,7 @@
         return '';
     }
     // -------------------------------------------------------------------------
+    // options {char_width}
     function extra_css(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
@@ -3578,7 +3579,10 @@
                 return text;
             }
             var specs = chars.map(function(chr) {
-                return {len: strlen(chr), chr: chr};
+                return {
+                    len: strlen(chr),
+                    chr: chr
+                };
             }).reduce(function(arr, spec) {
                 var last = arr[arr.length - 1];
                 if (last) {
@@ -4621,6 +4625,8 @@
                 linksNoReferrer: false,
                 linksNoFollow: false,
                 allowedAttributes: [],
+                char_width: undefined,
+                escape: true,
                 anyLinks: false
             }, options || {});
             function filter_attr_names(names) {
@@ -4663,8 +4669,12 @@
                 if (text === '') {
                     return ''; //'<span>&nbsp;</span>';
                 }
-                // inside formatting we need to unescape escaped slashes
-                text = safe(text).replace(/\\\\/g, '\\');
+                text = safe(text);
+                if (settings.escape) {
+                    // inside formatting we need to unescape escaped slashes
+                    // but this escape is not needed when echo - don't know why
+                    text = text.replace(/\\\\/g, '\\');
+                }
                 var style_str = '';
                 if (style.indexOf('b') !== -1) {
                     style_str += 'font-weight:bold;';
@@ -6118,6 +6128,7 @@
                     linksNoFollow: settings.linksNoFollow,
                     anyLinks: settings.anyLinks,
                     char_width: char_size.width,
+                    escape: false,
                     allowedAttributes: options.allowedAttributes || []
                 };
                 string = $.terminal.normalize(string);

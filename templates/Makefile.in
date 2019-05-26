@@ -8,13 +8,12 @@ CAT=cat
 DATE=`date -uR`
 GIT=git
 BRANCH=`git branch | grep '^*' | sed 's/* //'`
-
-  UGLIFY=./node_modules/.bin/uglifyjs
-  JSONLINT=./node_modules/.bin/jsonlint
-  JEST=./node_modules/.bin/jest
-  CSSNANO=node ./scripts/cssnano.js
-  ESLINT=./node_modules/.bin/eslint
-  TSC=./node_modules/.bin/tsc
+UGLIFY=../node_modules/.bin/uglifyjs
+JSONLINT=./node_modules/.bin/jsonlint
+JEST=./node_modules/.bin/jest
+CSSNANO=node ./scripts/cssnano.js
+ESLINT=./node_modules/.bin/eslint
+TSC=./node_modules/.bin/tsc
 SPEC_CHECKSUM=`md5sum __tests__/terminal.spec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 URL=`git config --get remote.origin.url`
@@ -40,7 +39,7 @@ js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal.min.js
 	$(CP) js/jquery.terminal.min.js js/jquery.terminal-$(VERSION).min.js
 
 js/jquery.terminal.min.js js/jquery.terminal.min.js.map: js/jquery.terminal-$(VERSION).js
-	$(UGLIFY) -o js/jquery.terminal.min.js --comments --mangle --source-map "includeSources,url='jquery.terminal.min.js.map'" -- js/jquery.terminal.js
+	$(CD) js && $(UGLIFY) -o jquery.terminal.min.js --comments --mangle --source-map "includeSources,url='jquery.terminal.min.js.map'" -- jquery.terminal.js
 
 css/jquery.terminal-$(VERSION).css: css/jquery.terminal-src.css .$(VERSION)
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css
