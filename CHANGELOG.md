@@ -2,6 +2,8 @@
 ### Bugfix
 * fix sourcemaps
 * fix prism + `--size`
+* fix echo double slashes
+* escape options to `$.terminal.format` (default to `true` - same behavior) to fix previous error
 
 ## 2.6.0
 ### Features

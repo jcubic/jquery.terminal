@@ -142,6 +142,8 @@ declare namespace JQueryTerminal {
         anyLinks?: boolean;
         char_width?: number;
         linksNoFollow?: boolean;
+        allowedAttributes: string[];
+        escape: boolean;
     };
 
     type InterpreterItem = {

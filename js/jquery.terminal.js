@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.6.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 26 May 2019 20:24:33 +0000
+ * Date: Sun, 26 May 2019 22:16:49 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3559,6 +3559,7 @@
         return '';
     }
     // -------------------------------------------------------------------------
+    // options {char_width}
     function extra_css(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
@@ -3578,7 +3579,10 @@
                 return text;
             }
             var specs = chars.map(function(chr) {
-                return {len: strlen(chr), chr: chr};
+                return {
+                    len: strlen(chr),
+                    chr: chr
+                };
             }).reduce(function(arr, spec) {
                 var last = arr[arr.length - 1];
                 if (last) {
@@ -3889,8 +3893,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.6.0',
-        date: 'Sun, 26 May 2019 20:24:33 +0000',
+        version: 'DEV',
+        date: 'Sun, 26 May 2019 22:16:49 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4621,6 +4625,8 @@
                 linksNoReferrer: false,
                 linksNoFollow: false,
                 allowedAttributes: [],
+                char_width: undefined,
+                escape: true,
                 anyLinks: false
             }, options || {});
             function filter_attr_names(names) {
@@ -4663,8 +4669,12 @@
                 if (text === '') {
                     return ''; //'<span>&nbsp;</span>';
                 }
-                // inside formatting we need to unescape escaped slashes
-                text = safe(text).replace(/\\\\/g, '\\');
+                text = safe(text);
+                if (settings.escape) {
+                    // inside formatting we need to unescape escaped slashes
+                    // but this escape is not needed when echo - don't know why
+                    text = text.replace(/\\\\/g, '\\');
+                }
                 var style_str = '';
                 if (style.indexOf('b') !== -1) {
                     style_str += 'font-weight:bold;';
@@ -6118,6 +6128,7 @@
                     linksNoFollow: settings.linksNoFollow,
                     anyLinks: settings.anyLinks,
                     char_width: char_size.width,
+                    escape: false,
                     allowedAttributes: options.allowedAttributes || []
                 };
                 string = $.terminal.normalize(string);
