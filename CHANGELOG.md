@@ -3,6 +3,7 @@
 * new option `mobileIngoreAutoSpace` to fix issue on Android when typing keys: `, ) .` (default empty array)
 ### Bugfix
 * fix hold+backspace on command line with whitespace
+* fix context menu on Firefox [#494](https://github.com/jcubic/jquery.terminal/issues/494)
 
 ## 2.5.2
 ### Bugfix
