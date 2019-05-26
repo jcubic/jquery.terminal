@@ -1317,6 +1317,7 @@
             clickTimeout: 200,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
+            mobileIngoreAutoSpace: [],
             repeatTimeoutKeys: ['HOLD+BACKSPACE'],
             tabindex: 1,
             tabs: 4
@@ -1324,6 +1325,10 @@
     };
     $.fn.cmd = function(options) {
         var settings = $.extend({}, $.cmd.defaults, options);
+        function mobile_ignore_key(key) {
+            return settings.mobileIngoreAutoSpace.length &&
+                settings.mobileIngoreAutoSpace.indexOf(key) !== -1 && is_android;
+        }
         var self = this;
         var maybe_data = self.data('cmd');
         if (maybe_data) {
@@ -2981,9 +2986,9 @@
             history.disable();
         }
         var first_up_history = true;
-        // prevent_keypress - hack for Android that was inserting characters on
+        // skip_keypress - hack for Android that was inserting characters on
         // backspace
-        var prevent_keypress = false;
+        var skip_keypress = false;
         var dead_key = false;
         var single_key = false;
         var no_keypress = false;
@@ -3016,11 +3021,14 @@
                 e.which === 39 || e.which === 40 ||
                 e.which === 13 || e.which === 27;
         }
+        var skip_keydown = false;
         // ---------------------------------------------------------------------
+        // function complexicity is 35 when adding this exception
+        // eslint-disable-next-line complexity
         function keydown_event(e) {
             debug('keydown "' + e.key + '" ' + e.fake + ' ' + e.which);
-            process = (e.key || '').toLowerCase() === 'process' || e.which === 0;
             var result;
+            process = (e.key || '').toLowerCase() === 'process' || e.which === 0;
             dead_key = no_keypress && single_key && !is_backspace(e);
             // special keys don't trigger keypress fix #293
             try {
@@ -3050,7 +3058,7 @@
             if (is_function(settings.keydown)) {
                 result = settings.keydown.call(self, e);
                 if (result !== undefined) {
-                    //prevent_keypress = true;
+                    //skip_keypress = true;
                     if (!result) {
                         skip_insert = true;
                     }
@@ -3081,6 +3089,22 @@
                     });
                     prev_key = key;
                 }
+                // if e.fake ignore of space is handled in input and next keydown
+                // is not triggered this is just in case code since on Android
+                // keydown is not triggered only input so event is always fake on Android
+                if (!e.fake && is_android) {
+                    if (skip_keydown) {
+                        clear_hold();
+                        skip_keydown = false;
+                        return false;
+                    }
+                    if (mobile_ignore_key(key)) {
+                        skip_keydown = true;
+                    } else if (mobile_ignore_key(prev_key)) {
+                        // just in case next key is different then space
+                        skip_keydown = false;
+                    }
+                }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
@@ -3108,11 +3132,11 @@
                 } else if (e.altKey) {
                     return;
                 } else {
-                    prevent_keypress = false;
+                    skip_keypress = false;
                     return;
                 }
                 // this will prevent for instance backspace to go back one page
-                //prevent_keypress = true;
+                //skip_keypress = true;
                 //e.preventDefault();
             }
         }
@@ -3132,7 +3156,7 @@
             if ((e.ctrlKey || e.metaKey) && !e.altKey) {
                 return;
             }
-            if (prevent_keypress) {
+            if (skip_keypress) {
                 return;
             }
             if (is_function(settings.keypress)) {
@@ -3191,6 +3215,7 @@
             event.fake = true;
             doc.trigger(event);
         }
+        var skip_input = false;
         function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
@@ -3212,25 +3237,34 @@
                     var cmd = prev_command;
                     backspace = cmd.slice(0, cmd.length - 1).length === val.length;
                 }
+                if (skip_input) {
+                    skip_input = false;
+                    clip.val(command);
+                    return;
+                }
                 if (reverse_search) {
                     rev_search_str = val;
                     reverse_history_search();
                     draw_reverse_prompt();
                 } else {
-                    var chr = val.slice(position);
-                    if (chr.length === 1 || backspace) {
+                    var str = val.slice(position);
+                    if (str.length === 1 || backspace) {
+                        var chr = get_next_character(str);
+                        if (mobile_ignore_key(chr)) {
+                            skip_input = true;
+                        }
                         // we trigger events so keypress and keydown callback work
                         if (no_keydown) {
                             var keycode;
                             if (backspace) {
                                 keycode = 8;
                             } else {
-                                keycode = chr.toUpperCase().charCodeAt(0);
+                                keycode = str.toUpperCase().charCodeAt(0);
                             }
-                            event('keydown', backspace ? 'Backspace' : chr, keycode);
+                            event('keydown', backspace ? 'Backspace' : str, keycode);
                         }
                         if (no_keypress && !backspace) {
-                            event('keypress', chr, chr.charCodeAt(0));
+                            event('keypress', chr, str.charCodeAt(0));
                         }
                     }
                     if (backspace) {
@@ -5430,6 +5464,7 @@
         holdTimeout: 400,
         holdRepeatTimeout: 200,
         repeatTimeoutKeys: ['HOLD+BACKSPACE'],
+        mobileIngoreAutoSpace: [],
         request: $.noop,
         response: $.noop,
         describe: 'procs',
@@ -8864,6 +8899,7 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
+                mobileIngoreAutoSpace: settings.mobileIngoreAutoSpace,
                 prompt: global_login_fn ? false : prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
