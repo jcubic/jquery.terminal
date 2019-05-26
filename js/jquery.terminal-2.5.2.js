@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 21 May 2019 19:07:29 +0000
+ * Date: Sun, 26 May 2019 07:15:04 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1739,7 +1739,7 @@
                 // don't work in Chromium (can't prevent close tab)
                 if (command !== '' && position !== 0) {
                     var m = command.slice(0, position).match(/([^ ]+ *$)/);
-                    if (m[0].length) {
+                    if (m && m[0].length) {
                         kill_text = self['delete'](-m[0].length);
                         if (clipboard) {
                             text_to_clipboard(clip, kill_text);
@@ -3856,7 +3856,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 21 May 2019 19:07:29 +0000',
+        date: 'Sun, 26 May 2019 07:15:04 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

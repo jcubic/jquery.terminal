@@ -1739,7 +1739,7 @@
                 // don't work in Chromium (can't prevent close tab)
                 if (command !== '' && position !== 0) {
                     var m = command.slice(0, position).match(/([^ ]+ *$)/);
-                    if (m[0].length) {
+                    if (m && m[0].length) {
                         kill_text = self['delete'](-m[0].length);
                         if (clipboard) {
                             text_to_clipboard(clip, kill_text);

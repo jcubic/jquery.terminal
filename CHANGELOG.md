@@ -1,3 +1,7 @@
+## 2.5.3
+### Bugfix
+* fix hold+backspace on command line with whitespace
+
 ## 2.5.2
 ### Bugfix
 * fix CTR+C when inside of single echo output is selected
