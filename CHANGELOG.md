@@ -1,7 +1,15 @@
+## 2.6.0
+### Features
+* new option `mobileIngoreAutoSpace` to fix issue on Android when typing keys: `, ) .` (default empty array)
+### Bugfix
+* fix hold+backspace on command line with whitespace
+* fix context menu on Firefox [#494](https://github.com/jcubic/jquery.terminal/issues/494)
+
 ## 2.5.2
 ### Bugfix
 * fix CTR+C when inside of single echo output is selected
 * fix paste + key on Mac/Chrome [#493](https://github.com/jcubic/jquery.terminal/issues/493)
+
 
 ## 2.5.1
 ### Bugfix

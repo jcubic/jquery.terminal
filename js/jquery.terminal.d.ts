@@ -340,6 +340,7 @@ type CmdOptions = {
     clickTimeout?: number;
     holdTimeout?: number;
     holdRepeatTimeout?: number;
+    mobileIngoreAutoSpace?: string[];
     repeatTimeoutKeys?: string[];
     onPaste?: (this: Cmd, value: string) => TypeOrPromise<string | Blob> | void;
     width?: number;
@@ -420,7 +421,7 @@ type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabl
     "holdRepeatTimeout" | "request" | "describe" | "onRPCError" | "doubleTab" | "completion" |
     "onInit" | "onClear" | "onBlur" | "onFocus" | "onExit" | "onTerminalChange" | "onPush" | "onPaste" |
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
-    "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand";
+    "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand" | "mobileIngoreAutoSpace";
 
 
 type TerminalOptions = {
@@ -476,6 +477,7 @@ type TerminalOptions = {
     holdTimeout?: number;
     holdRepeatTimeout?: number;
     repeatTimeoutKeys?: string[];
+    mobileIngoreAutoSpace?: string[];
     request?: JQueryTerminal.RequestResponseCallback;
     response?: JQueryTerminal.RequestResponseCallback;
     describe?: string | false;
