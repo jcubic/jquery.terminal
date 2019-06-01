@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 26 May 2019 22:16:49 +0000
+ * Date: Sat, 01 Jun 2019 15:12:07 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3065,7 +3065,7 @@
                     return result;
                 }
             }
-            if (enabled || key === 'CTRL+C') {
+            if (enabled || (key === 'CTRL+C' && is_terminal_selected())) {
                 if (key !== prev_key) {
                     self.stopTime('hold');
                     hold = false;
@@ -3651,6 +3651,14 @@
     // -----------------------------------------------------------------
     // :: selection utilities - should work in modern browser including IE9
     // -----------------------------------------------------------------
+    function is_terminal_selected() {
+        if (is_function(window.getSelection)) {
+            var node = window.getSelection().getRangeAt(0).startContainer.parentNode;
+            return !!($(node).closest('.terminal').length ||
+                      $(node).closest('.cmd').length);
+        }
+    }
+    // -----------------------------------------------------------------
     function get_selected_html() {
         var html = '';
         if (is_function(window.getSelection)) {
@@ -3894,7 +3902,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 26 May 2019 22:16:49 +0000',
+        date: 'Sat, 01 Jun 2019 15:12:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

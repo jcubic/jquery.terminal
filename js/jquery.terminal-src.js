@@ -3065,7 +3065,7 @@
                     return result;
                 }
             }
-            if (enabled || key === 'CTRL+C') {
+            if (enabled || (key === 'CTRL+C' && is_terminal_selected())) {
                 if (key !== prev_key) {
                     self.stopTime('hold');
                     hold = false;
@@ -3650,6 +3650,14 @@
     }
     // -----------------------------------------------------------------
     // :: selection utilities - should work in modern browser including IE9
+    // -----------------------------------------------------------------
+    function is_terminal_selected() {
+        if (is_function(window.getSelection)) {
+            var node = window.getSelection().getRangeAt(0).startContainer.parentNode;
+            return !!($(node).closest('.terminal').length ||
+                      $(node).closest('.cmd').length);
+        }
+    }
     // -----------------------------------------------------------------
     function get_selected_html() {
         var html = '';
