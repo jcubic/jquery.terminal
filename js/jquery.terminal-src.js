@@ -4329,12 +4329,11 @@
                         // TODO: this need work
                         if (keep_words && data.space !== -1) {
                             // replace html entities with characters
-                            var stripped = text(line).slice(data.space_count);
+                            var stripped = text(line).substring(data.space_count);
                             // real length, not counting formatting
-                            var text_len = stripped.length;
-                            var limit = data.count + length + 1;
-                            stripped = stripped.slice(0, limit).trim();
-                            if (stripped.match(/\s/) || limit < text_len) {
+                            stripped = stripped.slice(0, length).trim();
+                            var text_len = strlen(stripped);
+                            if (stripped.match(/\s/) || text_len < length) {
                                 can_break = true;
                             }
                         }

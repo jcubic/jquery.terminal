@@ -1,6 +1,7 @@
 ## 2.6.2
 ### Bugfix
 * fix CTRL+C when terminal is not in focus (it should bypass enabled flag only when select text is inside terminal) [#499](https://github.com/jcubic/jquery.terminal/issues/499)
+* fix keepWord option in echo of last line [#497](https://github.com/jcubic/jquery.terminal/issues/497)
 
 ## 2.6.1
 ### Bugfix
@@ -20,7 +21,6 @@
 ### Bugfix
 * fix CTR+C when inside of single echo output is selected
 * fix paste + key on Mac/Chrome [#493](https://github.com/jcubic/jquery.terminal/issues/493)
-
 
 ## 2.5.1
 ### Bugfix
