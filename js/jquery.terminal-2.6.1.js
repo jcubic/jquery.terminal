@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 01 Jun 2019 15:16:21 +0000
+ * Date: Sun, 02 Jun 2019 13:01:27 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3065,11 +3065,10 @@
                     return result;
                 }
             }
+            if (key !== prev_key) {
+                clear_hold();
+            }
             if (enabled || (key === 'CTRL+C' && is_terminal_selected())) {
-                if (key !== prev_key) {
-                    self.stopTime('hold');
-                    hold = false;
-                }
                 if (hold) {
                     prev_key = key;
                     key = 'HOLD+' + key;
@@ -3142,6 +3141,7 @@
         }
         function clear_hold() {
             self.stopTime('hold');
+            self.stopTime('delay');
             hold_pause = hold = false;
         }
         var doc = $(document.documentElement || window);
@@ -3653,9 +3653,12 @@
     // -----------------------------------------------------------------
     function is_terminal_selected() {
         if (is_function(window.getSelection)) {
-            var node = window.getSelection().getRangeAt(0).startContainer.parentNode;
-            return !!($(node).closest('.terminal').length ||
-                      $(node).closest('.cmd').length);
+            var selection = window.getSelection();
+            if (selection.toString()) {
+                var node = selection.getRangeAt(0).startContainer.parentNode;
+                return !!($(node).closest('.terminal').length ||
+                          $(node).closest('.cmd').length);
+            }
         }
     }
     // -----------------------------------------------------------------
@@ -3902,7 +3905,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 01 Jun 2019 15:16:21 +0000',
+        date: 'Sun, 02 Jun 2019 13:01:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8692,6 +8695,7 @@
             var msg = sprintf(strings().invalidSelector);
             throw new $.terminal.Exception(msg);
         }
+        self.data('terminal', self);
         // var names = []; // stack if interpreter names
         var prev_command; // used for name on the terminal if not defined
         var tab_count = 0; // for tab completion
@@ -9359,7 +9363,6 @@
                 }
             })();
         }); // make_interpreter
-        self.data('terminal', self);
         return self;
     }; // terminal plugin
 });
