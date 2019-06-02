@@ -3,6 +3,7 @@
 * fix CTRL+C when terminal is not in focus (it should bypass enabled flag only when select text is inside terminal) [#499](https://github.com/jcubic/jquery.terminal/issues/499)
 * fix keepWord option in echo of last line [#497](https://github.com/jcubic/jquery.terminal/issues/497)
 * fix broken formatting in Prism [#496](https://github.com/jcubic/jquery.terminal/issues/496)
+
 ## 2.6.1
 ### Bugfix
 * fix sourcemaps

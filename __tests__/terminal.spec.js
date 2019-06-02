@@ -4561,6 +4561,7 @@ describe('Terminal plugin', function() {
                     if (term.token(true)) {
                         term.logout(true);
                     }
+                    expect(term.get_prompt()).toEqual('login: ');
                     return term.exec(['demo', 'demo']).then(() => {
                         expect(term.get_prompt()).toEqual('$ ');
                         expect(object.login).toHaveBeenCalledWith('demo', 'demo');
