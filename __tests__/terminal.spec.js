@@ -181,20 +181,37 @@ function a0(string) {
     return string.replace(/\xA0/g, ' ');
 }
 function spy(obj, method) {
-    var spy = spyOn(obj, method);
-    if (spy.andCallThrough) {
-        spy.andCallThrough();
+    var spy;
+    if (typeof jest !== 'undefined') {
+        var fn = obj[method];
+        if (fn.mock) {
+            reset(fn);
+            fn = obj[method];
+        }
+        spy = jest.spyOn(obj, method).mockImplementation(fn);
     } else {
-        spy.and.callThrough();
+        spy = spyOn(obj, method);
+        if (spy.andCallThrough) {
+            spy.andCallThrough();
+        } else {
+            spy.and.callThrough();
+        }
     }
     return spy;
 }
-function delay(delay, fn = $.noop) {
+function delay(delay, fn = (x) => x) {
     return new Promise((resolve) => {
-        setTimeout(() => {fn();resolve();}, delay);
-    });
+        if (delay === 0) {
+            setImmediate(resolve);
+        } else {
+            setTimeout(resolve, delay);
+        }
+    }).then(fn);
 }
 function count(spy) {
+    if (spy.mock) {
+        return spy.mock.calls.length;
+    }
     if (spy.calls.count) {
         return spy.calls.count();
     } else if (spy.calls.callCount) {
@@ -204,7 +221,9 @@ function count(spy) {
     }
 }
 function reset(spy) {
-    if (spy.calls.reset) {
+    if (spy.mock) {
+        spy.mockRestore();
+    } else if (spy.calls.reset) {
         spy.calls.reset();
     } else if (spy.calls.callCount) {
         spy.calls.callCount = 0;
@@ -1322,16 +1341,17 @@ describe('Terminal utils', function() {
             });
         });
         describe('forEach', function() {
-            var test = {
-                test: function() {
-                }
-            };
+            var test;
             var a = {a: 1};
             var b = {a: 2};
             var c = {a: 3};
             var d = {a: 4};
             var cycle;
             beforeEach(function() {
+                test = {
+                    test: function() {
+                    }
+                };
                 cycle = new $.terminal.Cycle(a, b, c, d);
                 spy(test, 'test');
             });
@@ -2252,8 +2272,9 @@ describe('sub plugins', function() {
     describe('cmd', function() {
         describe('formatting', function() {
             var formatters = $.terminal.defaults.formatters;
-            var cmd = $('<div/>').cmd();
+            var cmd
             beforeEach(function() {
+                cmd = $('<div/>').cmd();
                 $.terminal.defaults.formatters = formatters.slice();
                 $.terminal.defaults.formatters.push([/((?:[a-z\\\]]|&#93;)+)/g, '[[;red;]$1]']);
                 $.terminal.defaults.formatters.push([/([0-9]]+)/g, '[[;blue;]$1]']);
@@ -2261,6 +2282,7 @@ describe('sub plugins', function() {
             });
             afterEach(function() {
                 $.terminal.defaults.formatters = formatters;
+                cmd.destroy();
             });
             it('should have proper formatting', function() {
                 var tests = [
@@ -2640,19 +2662,18 @@ describe('Terminal plugin', function() {
         });
     });
     describe('cursor', function() {
-        it('only one terminal should have blinking cursor', function(done) {
+        it('only one terminal should have blinking cursor', function() {
             var term1 = $('<div/>').appendTo('body').terminal($.noop);
             term1.focus();
             var term2 = $('<div/>').appendTo('body').terminal($.noop);
             term1.pause();
             term2.focus();
-            setTimeout(function() {
+            return delay(100, function() {
                 term1.resume();
                 expect($('.cursor.blink').length).toEqual(1);
                 term1.destroy().remove();
                 term2.destroy().remove();
-                done();
-            }, 100);
+            });
         });
     });
     describe('observers', function() {
@@ -2871,7 +2892,7 @@ describe('Terminal plugin', function() {
         });
         describe('contextmenu', function() {
             var term = $('<div/>').terminal();
-            it('should move textarea', function(done) {
+            it('should move textarea', function() {
                 function have_props(props) {
                     var style = clip.attr('style');
                     var style_props = style.split(/\s*;\s*/).filter(Boolean).map(function(pair) {
@@ -2890,10 +2911,9 @@ describe('Terminal plugin', function() {
                 event.pageY = 100;
                 cmd.trigger(event);
                 expect(have_props(['height', 'width'])).toBeTruthy();
-                setTimeout(function() {
+                return delay(200, function() {
                     expect(have_props(['height', 'width'])).toBeFalsy();
-                    done();
-                }, 200);
+                });
             });
         });
         describe('input', function() {
@@ -3899,141 +3919,319 @@ describe('Terminal plugin', function() {
         });
     });
     describe('jQuery Terminal methods', function() {
-        var terminal_name = 'methods';
-        var greetings = 'Hello World!';
-        var completion = ['foo', 'bar', 'baz'];
-        var exported_view;
-        var command = 'baz';
-        var prompt = '$ ';
-        var mask = '-';
-        var position;
-        var last_id = $.terminal.last_id();
-        var term = $('<div/>').appendTo('body').terminal($.noop, {
-            name: terminal_name,
-            greetings: greetings,
-            completion: completion
-        });
-        it('should return id of the terminal', function() {
-            expect(term.id()).toEqual(last_id + 1);
-            term.focus();
-        });
-        it('should clear the terminal', function() {
-            term.clear();
-            expect(term.find('.terminal-output').html()).toEqual('');
-        });
-        it('should save commands in hash', function() {
-            location.hash = '';
-            term.save_state(); // initial state
-            term.save_state('foo');
-            term.save_state('bar');
-            var id = term.id();
-            var hash = '#' + JSON.stringify([[id,1,"foo"],[id,2,"bar"]]);
-            expect(decodeURIComponent(location.hash)).toEqual(hash);
-            term.destroy().remove();
-        });
-        describe('import/export view', function() {
-            var term = $('<div/>').appendTo('body').terminal($.noop, {
-                name: terminal_name,
-                greetings: greetings,
-                completion: completion
+        describe('generic', function() {
+            var terminal_name = 'methods';
+            var greetings = 'Hello World!';
+            var completion = ['foo', 'bar', 'baz'];
+            var exported_view;
+            var command = 'baz';
+            var prompt = '$ ';
+            var mask = '-';
+            var position;
+            var last_id;
+            var term;
+            beforeEach(function() {
+                last_id = $.terminal.last_id();
+                term = $('<div/>').appendTo('body').terminal($.noop, {
+                    name: terminal_name,
+                    greetings: greetings,
+                    completion: completion
+                });
             });
-            it('should export view', function() {
-                enter(term, 'foo');
-                enter(term, 'bar');
-                term.insert(command);
-                term.set_prompt(prompt);
-                term.set_mask(mask);
-                position = term.cmd().position();
-                exported_view = term.export_view();
-                expect(exported_view.prompt).toEqual(prompt);
-                expect(exported_view.position).toEqual(position);
-                expect(exported_view.focus).toEqual(true);
-                expect(exported_view.mask).toEqual(mask);
-                expect(exported_view.command).toEqual(command);
-                expect(exported_view.lines[0][0]).toEqual('Hello World!');
-                expect(exported_view.lines[1][0]).toEqual('> foo');
-                expect(exported_view.lines[2][0]).toEqual('> bar');
-                expect(exported_view.interpreters.size()).toEqual(1);
-                var top = exported_view.interpreters.top();
-                expect(top.interpreter).toEqual($.noop);
-                expect(top.name).toEqual(terminal_name);
-                expect(top.prompt).toEqual(prompt);
-                expect(top.greetings).toEqual(greetings);
-                expect(top.completion).toEqual('settings');
+            afterEach(function() {
+                term.destroy().remove();
             });
-            it('should import view', function() {
-                term.clear().push($.noop).set_prompt('# ')
-                    .set_mask(false)
-                    .set_command('foo');
-                var cmd = term.cmd();
-                cmd.position(0);
-                term.import_view(exported_view);
-                expect(cmd.mask()).toEqual(mask);
-                expect(term.get_command()).toEqual(command);
-                expect(term.get_prompt()).toEqual(prompt);
-                expect(cmd.position()).toEqual(position);
-                var html = '<div data-index="0"><div style="width: 100%;"><span>Hello&nbsp;World!</span></div></div>'+
+            it('should return id of the terminal', function() {
+                expect(term.id()).toEqual(last_id + 1);
+                term.focus();
+            });
+            it('should clear the terminal', function() {
+                term.clear();
+                expect(term.find('.terminal-output').html()).toEqual('');
+            });
+            it('should save commands in hash', function() {
+                location.hash = '';
+                term.save_state(); // initial state
+                term.save_state('foo');
+                term.save_state('bar');
+                var id = term.id();
+                var hash = '#' + JSON.stringify([[id,1,"foo"],[id,2,"bar"]]);
+                expect(decodeURIComponent(location.hash)).toEqual(hash);
+            });
+            describe('import/export view', function() {
+                var term = $('<div/>').appendTo('body').terminal($.noop, {
+                    name: terminal_name,
+                    greetings: greetings,
+                    completion: completion
+                });
+                it('should export view', function() {
+                    enter(term, 'foo');
+                    enter(term, 'bar');
+                    term.insert(command);
+                    term.set_prompt(prompt);
+                    term.set_mask(mask);
+                    position = term.cmd().position();
+                    exported_view = term.export_view();
+                    expect(exported_view.prompt).toEqual(prompt);
+                    expect(exported_view.position).toEqual(position);
+                    expect(exported_view.focus).toEqual(true);
+                    expect(exported_view.mask).toEqual(mask);
+                    expect(exported_view.command).toEqual(command);
+                    expect(exported_view.lines[0][0]).toEqual('Hello World!');
+                    expect(exported_view.lines[1][0]).toEqual('> foo');
+                    expect(exported_view.lines[2][0]).toEqual('> bar');
+                    expect(exported_view.interpreters.size()).toEqual(1);
+                    var top = exported_view.interpreters.top();
+                    expect(top.interpreter).toEqual($.noop);
+                    expect(top.name).toEqual(terminal_name);
+                    expect(top.prompt).toEqual(prompt);
+                    expect(top.greetings).toEqual(greetings);
+                    expect(top.completion).toEqual('settings');
+                });
+                it('should import view', function() {
+                    term.clear().push($.noop).set_prompt('# ')
+                        .set_mask(false)
+                        .set_command('foo');
+                    var cmd = term.cmd();
+                    cmd.position(0);
+                    term.import_view(exported_view);
+                    expect(cmd.mask()).toEqual(mask);
+                    expect(term.get_command()).toEqual(command);
+                    expect(term.get_prompt()).toEqual(prompt);
+                    expect(cmd.position()).toEqual(position);
+                    var html = '<div data-index="0"><div style="width: 100%;"><span>Hello&nbsp;World!</span></div></div>'+
                         '<div data-index="1" class="command" role="presentation" aria-hidden="true">'+
                         '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
                         '</div>'+
                         '<div data-index="2" class="command" role="presentation" aria-hidden="true">'+
                         '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
                         '</div>';
-                expect(term.find('.terminal-output').html()).toEqual(html);
+                    expect(term.find('.terminal-output').html()).toEqual(html);
+                });
             });
         });
+        describe('keymap', function() {
+            var term;
+            var test;
+            beforeEach(function() {
+                test = {
+                    empty: function() {},
+                    original: function(e, original) {
+                        original();
+                    }
+                };
+                spy(test, 'empty');
+                spy(test, 'original');
+                term = $('<div/>').terminal($.noop, {
+                    keymap: {
+                        'CTRL+C': test.original,
+                        'CTRL+D': test.original,
+                        'HOLD+CTRL+I': test.empty,
+                        'HOLD+CTRL+B': test.empty,
+                        'HOLD+CTRL+C': test.empty,
+                        'HOLD+CTRL+D': test.empty
+                    },
+                    holdTimeout: 100,
+                    holdRepeatTimeout: 100,
+                    repeatTimeoutKeys: ['HOLD+CTRL+B']
+                });
+                term.focus();
+            });
+            afterEach(function() {
+                term.destroy();
+                term = null;
+            });
+            it('should call init keymap', function() {
+                term.clear().insert('foo');
+                shortcut(true, false, false, 'c');
+                expect(test.original).toHaveBeenCalled();
+                expect(last_div(term).text().match(/foo\^C/)).toBeTruthy();
+                term.pause();
+                shortcut(true, false, false, 'D');
+                expect(term.paused()).toBeFalsy();
+            });
+            it('should set and call keymap shortcut', function() {
+                term.keymap('CTRL+T', test.empty);
+                shortcut(true, false, false, 84, 't');
+                expect(test.empty).toHaveBeenCalled();
+            });
+            // testing hold key
+            function repeat_ctrl_key(key, count) {
+                var doc = $(document.documentElement || window);
+                var which = key.toUpperCase().charCodeAt(0);
+                doc.trigger(keydown(true, false, false, which, key));
+                return new Promise(resolve => {
+                    delay(100, function() {
+                        (function loop(i) {
+                            if (i > 0) {
+                                doc.trigger(keydown(true, false, false, which, key));
+                                process.nextTick(function() {
+                                    loop(--i);
+                                });
+                            } else {
+                                doc.trigger(keypress(key));
+                                doc.trigger($.Event("keyup"));
+                                resolve();
+                            }
+                        })(count - 1);
+                    });
+                });
+            }
+            function ctrl_key_seq(keys) {
+                var key = keys[0];
+                var doc = $(document.documentElement || window);
+                var which = key.toUpperCase().charCodeAt(0);
+                doc.trigger(keydown(true, false, false, which, key));
+                return new Promise(resolve => {
+                    delay(100, function() {
+                        var key;
+                        (function loop(i) {
+                            if (keys[i]) {
+                                key = keys[i];
+                                var which = key.toUpperCase().charCodeAt(0);
+                                doc.trigger(keydown(true, false, false, which, key));
+                                process.nextTick(function() {
+                                    loop(++i);
+                                });
+                            } else {
+                                doc.trigger(keypress(key));
+                                doc.trigger($.Event("keyup"));
+                                resolve();
+                            }
+                        })(1);
+                    });
+                });
+            }
+            it('should create new keymap', function() {
+                var keys = 5;
+                return repeat_ctrl_key('i', keys).then(() => {
+                    expect(count(test.empty)).toEqual(keys - 1);
+                });
+            });
+            it('should limit rate of repeat keys', function() {
+                // testing hold key
+                expect(count(test.empty)).toEqual(0);
+                return repeat_ctrl_key('b', 5).then(() => {
+                    return delay(100, function() {
+                        return repeat_ctrl_key('b', 5).then(() => {
+                            expect(count(test.empty)).toEqual(2);
+                        });
+                    });
+                });
+            });
+            it('should not repeat keys', function() {
+                var keys = [];
+                for (var i = 0; i < 10; ++i) {
+                    keys.push('c');
+                    keys.push('d');
+                }
+                return ctrl_key_seq(keys).then(() => {
+                    return delay(100, function() {
+                        expect(count(test.empty)).toEqual(0);
+                        expect(count(test.original)).toEqual(keys.length);
+                    });
+                });
+            });
+            it('should create keymap from object', function() {
+                term.keymap({
+                    'CTRL+T': test.empty
+                });
+                shortcut(true, false, false, 84, 't');
+                expect(test.empty).toHaveBeenCalled();
+            });
+            it('should overwrite terminal keymap', function() {
+                term.echo('foo');
+                shortcut(true, false, false, 76, 'l');
+                expect(term.get_output()).toEqual('');
+                term.echo('bar');
+                term.keymap('CTRL+L', test.empty);
+                shortcut(true, false, false, 76, 'l');
+                expect(term.get_output()).not.toEqual('');
+            });
+            it('should call default terminal keymap', function() {
+                term.echo('foo');
+                term.keymap('CTRL+L', test.original);
+                shortcut(true, false, false, 76, 'l');
+                expect(term.get_output()).toEqual('');
+            });
+            it('should overwrite cmd keymap', function() {
+                term.set_command('foo');
+                term.keymap('ENTER', test.empty);
+                enter_key();
+                expect(term.get_command()).toEqual('foo');
+            });
+            it('should call default cmd keymap', function() {
+                term.set_command('foo');
+                term.keymap({
+                    'ENTER': test.original
+                });
+                enter_key();
+                expect(term.get_command()).toEqual('');
+            });
+            it('should return keymap', function() {
+                var fn = function() { };
+                var keys = Object.keys(term.keymap());
+                expect(term.keymap('CTRL+S')).toBeFalsy();
+                term.keymap('CTRL+S', fn);
+                expect(term.keymap('CTRL+S')).toBeTruthy();
+                expect(term.keymap()['CTRL+S']).toBeTruthy();
+                expect(Object.keys(term.keymap())).toEqual(keys.concat(['CTRL+S']));
+            });
+        });
+        
         describe('exec', function() {
             var counter = 0;
-            var interpreter = {
-                foo: function() {
-                    this.pause();
-                    setTimeout(function() {
-                        this.echo('Hello ' + counter++).resume();
-                    }.bind(this), 50);
-                },
-                bar: function() {
-                    var d = $.Deferred();
-                    setTimeout(function() {
-                        d.resolve('Foo Bar');
-                    }, 100);
-                    return d.promise();
-                },
-                baz: {
-                    quux: function() {
-                        this.echo('quux');
+            var interpreter;
+            var term;
+            beforeEach(function() {
+                interpreter = {
+                    foo: function() {
+                        this.pause();
+                        setTimeout(() => this.echo('Hello ' + counter++).resume(), 50);
+                    },
+                    bar: function() {
+                        var d = $.Deferred();
+                        setTimeout(function() {
+                            d.resolve('Foo Bar');
+                        }, 100);
+                        return d.promise();
+                    },
+                    baz: {
+                        quux: function() {
+                            this.echo('quux');
+                        }
                     }
-                }
-            };
-
-            var term = $('<div/>').appendTo('body').terminal(interpreter);
-            term.focus();
-            it('should execute function', function(done) {
+                };
                 spy(interpreter, 'foo');
-                term.exec('foo').then(function() {
+                term = $('<div/>').appendTo('body').terminal(interpreter);
+                term.focus();
+            });
+            afterEach(function() {
+                term.destroy();
+                term = null;
+            });
+            it('should execute function', function() {
+                return term.exec('foo').then(function() {
                     expect(interpreter.foo).toHaveBeenCalled();
-                    done();
                 });
             });
-            it('should echo text when promise is resolved', function(done) {
-                term.exec('bar').then(function() {
+            it('should echo text when promise is resolved', function() {
+                return term.exec('bar').then(function() {
                     var last_div = term.find('.terminal-output > div:last-child');
                     expect(last_div.text()).toEqual('Foo Bar');
-                    done();
                 });
             });
-            it('should create nested interpreter', function(done) {
-                term.exec('baz').then(function() {
+            it('should create nested interpreter', function() {
+                return term.exec('baz').then(function() {
                     expect(term.get_prompt()).toEqual('baz> ');
-                    term.exec('quux').then(function() {
+                    return term.exec('quux').then(function() {
                         var last_div = term.find('.terminal-output > div:last-child');
                         expect(last_div.text()).toEqual('quux');
-                        term.pop();
-                        done();
                     });
                 });
             });
             var arr = [];
-            for (i = 0; i<10; i++) {
+            for (var i = 0; i<10; i++) {
                 arr.push('Hello ' + i);
             }
             var test_str = arr.join('\n');
@@ -4043,46 +4241,44 @@ describe('Terminal plugin', function() {
                         return $(this).text();
                     }).get().join('\n');
             }
-            it('should execute functions in order when using exec.then', function(done) {
+            it('should execute functions in order when using exec.then', function() {
                 term.clear();
                 counter = 0;
                 var i = 0;
-                (function recur() {
-                    if (i++ < 10) {
-                        term.exec('foo').then(recur);
-                    } else {
-                        expect(text_echoed()).toEqual(test_str);
-                        done();
-                    }
-                })();
-            }, 10000);
-            it('should execute functions in order when used delayed commands', function(done) {
+                return new Promise(function(resolve) {
+                    (function recur() {
+                        if (i++ < 10) {
+                            term.exec('foo').then(recur);
+                        } else {
+                            expect(text_echoed()).toEqual(test_str);
+                            resolve();
+                        }
+                    })();
+                });
+            });
+            it('should execute functions in order when used delayed commands', function() {
                 term.clear();
                 counter = 0;
                 var promises = [];
                 for (var i = 0; i<10; i++) {
                     promises.push(term.exec('foo'));
                 }
-                $.when.apply($, promises).then(function() {
+                return Promise.all(promises).then(function() {
                     expect(text_echoed()).toEqual(test_str);
-                    done();
                 });
-            }, 10000);
-            it('should execute array', function(done) {
+            });
+            it('should execute array', function() {
                 term.clear();
                 counter = 0;
                 var array = [];
                 for (var i = 0; i<10; i++) {
                     array.push('foo');
                 }
-                term.exec(array).then(function() {
+                return term.exec(array).then(function() {
                     expect(text_echoed()).toEqual(test_str);
-                    term.destroy().remove();
-                    done();
                 });
-            }, 10000);
-            //*/
-            it('should login from exec array', function(done) {
+            });
+            it('should login from exec array', function() {
                 var test = {
                     test: function() {
                     }
@@ -4111,14 +4307,12 @@ describe('Terminal plugin', function() {
                     term.logout();
                 }
                 var array = ['foo', 'bar', 'echo foo'];
-                term.exec(array).then(function() {
+                return term.exec(array).then(function() {
                     expect(options.login).toHaveBeenCalled();
                     expect(test.test).toHaveBeenCalledWith('foo');
-                    term.destroy().remove();
-                    done();
                 });
             });
-            it('should login from hash', function(done) {
+            it('should login from hash', function() {
                 var test = {
                     test: function() {
                     }
@@ -4152,19 +4346,20 @@ describe('Terminal plugin', function() {
                 if (term.token()) {
                     term.logout();
                 }
-                setTimeout(function() {
-                    try {
-                        expect(options.login).toHaveBeenCalled();
-                        expect(test.test).toHaveBeenCalledWith('foo');
-                        term.logout().destroy().remove();
-                    } catch (e) {
-                        console.log(e.stack);
-                    } finally {
-                        done();
-                    }
-                }, 500);
-            }, 5000);
-            it('should exec when paused', function(done) {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        try {
+                            expect(options.login).toHaveBeenCalled();
+                            expect(test.test).toHaveBeenCalledWith('foo');
+                            term.logout();
+                            resolve();
+                        } catch (e) {
+                            reject(e);
+                        }
+                    }, 500);
+                });
+            });
+            it('should exec when paused', function() {
                 var test = {
                     fn: function() {
                     }
@@ -4179,10 +4374,12 @@ describe('Terminal plugin', function() {
                 term.exec('echo foo');
                 expect(test.fn).not.toHaveBeenCalled();
                 term.resume();
-                setTimeout(function() {
-                    expect(test.fn).toHaveBeenCalledWith('foo');
-                    done();
-                }, 10);
+                return new Promise((resolve) => {
+                    setTimeout(function() {
+                        expect(test.fn).toHaveBeenCalledWith('foo');
+                        resolve();
+                    }, 10);
+                });
             });
             it('should throw exception from exec', function() {
                 var error = {
@@ -4200,17 +4397,18 @@ describe('Terminal plugin', function() {
                     term.focus().exec('echo foo');
                 }).toThrow(error);
             });
-            it('should call async rpc methods', function(done) {
+            it('should call async rpc methods', function() {
                 spy(object, 'echo');
                 var term = $('<div/>').terminal('/async');
                 term.focus().exec('echo foo bar');
                 term.insert('foo');
-                setTimeout(function() {
-                    expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
-                    expect(term.get_command()).toEqual('foo');
-                    term.destroy().remove();
-                    done();
-                }, 800);
+                new Promise((resolve) => {
+                    setTimeout(function() {
+                        expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
+                        expect(term.get_command()).toEqual('foo');
+                        resolve();
+                    }, 800);
+                });
             });
         });
         describe('autologin', function() {
@@ -4233,7 +4431,6 @@ describe('Terminal plugin', function() {
                 expect(term.token()).toEqual(token);
                 var last_div = term.find('.terminal-output > div:last-child');
                 expect(last_div.text()).toEqual('You have been logged in');
-                term.destroy().remove();
             });
         });
         describe('login', function() {
@@ -4312,7 +4509,6 @@ describe('Terminal plugin', function() {
                 enter(term, 'bar');
                 expect(term.token(true)).toEqual(token);
                 expect(term.get_prompt()).toEqual('$$$ ');
-                term.destroy().remove();
             });
         });
         describe('settings', function() {
@@ -4351,8 +4547,9 @@ describe('Terminal plugin', function() {
                 expect(term.commands()).toEqual($.noop);
                 term.set_interpreter(test.interpreter);
                 expect(term.commands()).toEqual(test.interpreter);
-                term.exec('foo');
-                expect(test.interpreter).toHaveBeenCalledWith('foo', term);
+                return term.exec('foo').then(() => {
+                    expect(test.interpreter).toHaveBeenCalledWith('foo', term);
+                });
             });
             it('should create async JSON-RPC with login', function() {
                 spy(object, 'echo');
@@ -4365,6 +4562,7 @@ describe('Terminal plugin', function() {
                     if (term.token(true)) {
                         term.logout(true);
                     }
+                    expect(term.get_prompt()).toEqual('login: ');
                     return term.exec(['demo', 'demo']).then(() => {
                         expect(term.get_prompt()).toEqual('$ ');
                         expect(object.login).toHaveBeenCalledWith('demo', 'demo');
@@ -5703,174 +5901,13 @@ describe('Terminal plugin', function() {
                 expect(options.finalize).toHaveBeenCalled();
             });
         });
-        describe('keymap', function() {
-            var term;
-            var test;
-            beforeEach(function() {
-                test = {
-                    empty: function() {},
-                    original: function(e, original) {
-                        original();
-                    }
-                };
-                spy(test, 'empty');
-                spy(test, 'original');
-                term = $('<div/>').terminal($.noop, {
-                    keymap: {
-                        'CTRL+C': test.original,
-                        'CTRL+D': test.original,
-                        'HOLD+CTRL+I': test.empty,
-                        'HOLD+CTRL+B': test.empty,
-                        'HOLD+CTRL+C': test.empty,
-                        'HOLD+CTRL+D': test.empty
-                    },
-                    holdRepeatTimeout: 40,
-                    repeatTimeoutKeys: ['HOLD+CTRL+B']
-                });
-                term.focus();
-            });
-            it('should call init keymap', function() {
-                term.clear().insert('foo');
-                shortcut(true, false, false, 'c');
-                expect(test.original).toHaveBeenCalled();
-                expect(last_div(term).text().match(/foo\^C/)).toBeTruthy();
-                term.pause();
-                shortcut(true, false, false, 'D');
-                expect(term.paused()).toBeFalsy();
-            });
-            it('should set and call keymap shortcut', function() {
-                term.keymap('CTRL+T', test.empty);
-                shortcut(true, false, false, 84, 't');
-                expect(test.empty).toHaveBeenCalled();
-            });
-            // testing hold key
-            function repeat_ctrl_key(key, count) {
-                var doc = $(document.documentElement || window);
-                var which = key.toUpperCase().charCodeAt(0);
-                doc.trigger(keydown(true, false, false, which, key));
-                return new Promise(resolve => {
-                    delay(60, function() {
-                        (function loop(i) {
-                            if (i) {
-                                doc.trigger(keydown(true, false, false, which, key));
-                                delay(10, function() {
-                                    loop(--i);
-                                });
-                            } else {
-                                doc.trigger(keypress(key));
-                                doc.trigger($.Event("keyup"));
-                                resolve();
-                            }
-                        })(count);
-                    });
-                });
-            }
-            function ctrl_key_seq(keys) {
-                var key = keys[0];
-                var doc = $(document.documentElement || window);
-                var which = key.toUpperCase().charCodeAt(0);
-                doc.trigger(keydown(true, false, false, which, key));
-                return new Promise(resolve => {
-                    delay(50, function() {
-                        var key;
-                        (function loop(i) {
-                            if (keys[i]) {
-                                key = keys[i];
-                                var which = key.toUpperCase().charCodeAt(0);
-                                doc.trigger(keydown(true, false, false, which, key));
-                                process.nextTick(function() {
-                                    loop(++i);
-                                });
-                            } else {
-                                doc.trigger(keypress(key));
-                                doc.trigger($.Event("keyup"));
-                                resolve();
-                            }
-                        })(0);
-                    });
-                });
-            }
-            it('should create new keymap', function() {
-                var keys = 10;
-                return repeat_ctrl_key('i', keys).then(() => {
-                    expect(test.empty.calls.count()).toEqual(keys - 1);
-                });
-            });
-            it('should limit rate of repeat keys', function() {
-                // testing hold key
-                return repeat_ctrl_key('b', 10).then(() => {
-                    return delay(100, function() {
-                        return repeat_ctrl_key('b', 10).then(() => {
-                            expect(test.empty.calls.count()).toEqual(2);
-                        });
-                    });
-                });
-            });
-            it('should not repeat keys', function() {
-                var keys = [];
-                for (var i = 0; i < 10; ++i) {
-                    keys.push('c');
-                    keys.push('d');
-                }
-                return ctrl_key_seq(keys).then(() => {
-                    return delay(100, function() {
-                        expect(test.empty.calls.count()).toEqual(0);
-                        // why + 1 ????
-                        expect(test.original.calls.count()).toEqual(keys.length + 1);
-                    });
-                });
-            });
-            it('should create keymap from object', function() {
-                term.keymap({
-                    'CTRL+T': test.empty
-                });
-                shortcut(true, false, false, 84, 't');
-                expect(test.empty).toHaveBeenCalled();
-            });
-            it('should overwrite terminal keymap', function() {
-                term.echo('foo');
-                shortcut(true, false, false, 76, 'l');
-                expect(term.get_output()).toEqual('');
-                term.echo('bar');
-                term.keymap('CTRL+L', test.empty);
-                shortcut(true, false, false, 76, 'l');
-                expect(term.get_output()).not.toEqual('');
-            });
-            it('should call default terminal keymap', function() {
-                term.echo('foo');
-                term.keymap('CTRL+L', test.original);
-                shortcut(true, false, false, 76, 'l');
-                expect(term.get_output()).toEqual('');
-            });
-            it('should overwrite cmd keymap', function() {
-                term.set_command('foo');
-                term.keymap('ENTER', test.empty);
-                enter_key();
-                expect(term.get_command()).toEqual('foo');
-            });
-            it('should call default cmd keymap', function() {
-                term.set_command('foo');
-                term.keymap({
-                    'ENTER': test.original
-                });
-                enter_key();
-                expect(term.get_command()).toEqual('');
-            });
-            it('should return keymap', function() {
-                var fn = function() { };
-                var keys = Object.keys(term.keymap());
-                expect(term.keymap('CTRL+S')).toBeFalsy();
-                term.keymap('CTRL+S', fn);
-                expect(term.keymap('CTRL+S')).toBeTruthy();
-                expect(term.keymap()['CTRL+S']).toBeTruthy();
-                expect(Object.keys(term.keymap())).toEqual(keys.concat(['CTRL+S']));
-            });
-        });
         describe('invoke_key', function() {
-            var term = $('<div/>').terminal();
-            expect(term.find('.terminal-output').html()).toBeTruthy();
-            term.invoke_key('CTRL+L');
-            expect(term.find('.terminal-output').html()).toBeFalsy();
+            it('should invoke key', function() {
+                var term = $('<div/>').terminal();
+                expect(term.find('.terminal-output').html()).toBeTruthy();
+                term.invoke_key('CTRL+L');
+                expect(term.find('.terminal-output').html()).toBeFalsy();
+            });
         });
     });
 });

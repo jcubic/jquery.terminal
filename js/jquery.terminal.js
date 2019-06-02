@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.6.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 26 May 2019 22:32:07 +0000
+ * Date: Sun, 02 Jun 2019 16:36:48 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3065,11 +3065,12 @@
                     return result;
                 }
             }
-            if (enabled || key === 'CTRL+C') {
-                if (key !== prev_key) {
-                    self.stopTime('hold');
-                    hold = false;
-                }
+            if (key !== prev_key) {
+                clear_hold();
+            }
+            // CTRL+C hanlding is only exception of cmd aware terminal logic
+            // cmd need to call CTRL+C keymap when terminal is not enabled
+            if (enabled || (key === 'CTRL+C' && is_terminal_selected(self))) {
                 if (hold) {
                     prev_key = key;
                     key = 'HOLD+' + key;
@@ -3142,6 +3143,7 @@
         }
         function clear_hold() {
             self.stopTime('hold');
+            self.stopTime('delay');
             hold_pause = hold = false;
         }
         var doc = $(document.documentElement || window);
@@ -3651,6 +3653,17 @@
     // -----------------------------------------------------------------
     // :: selection utilities - should work in modern browser including IE9
     // -----------------------------------------------------------------
+    function is_terminal_selected(cmd) {
+        if (is_function(window.getSelection)) {
+            var selection = window.getSelection();
+            if (selection.toString()) {
+                var node = selection.getRangeAt(0).startContainer.parentNode;
+                var term = $(node).closest('.terminal');
+                return term.length && (cmd && term.find('.cmd').is(cmd) || !cmd);
+            }
+        }
+    }
+    // -----------------------------------------------------------------
     function get_selected_html() {
         var html = '';
         if (is_function(window.getSelection)) {
@@ -3893,8 +3906,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.6.1',
-        date: 'Sun, 26 May 2019 22:32:07 +0000',
+        version: 'DEV',
+        date: 'Sun, 02 Jun 2019 16:36:48 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4318,12 +4331,11 @@
                         // TODO: this need work
                         if (keep_words && data.space !== -1) {
                             // replace html entities with characters
-                            var stripped = text(line).slice(data.space_count);
+                            var stripped = text(line).substring(data.space_count);
                             // real length, not counting formatting
-                            var text_len = stripped.length;
-                            var limit = data.count + length + 1;
-                            stripped = stripped.slice(0, limit).trim();
-                            if (stripped.match(/\s/) || limit < text_len) {
+                            stripped = stripped.slice(0, length).trim();
+                            var text_len = strlen(stripped);
+                            if (stripped.match(/\s/) || text_len < length) {
                                 can_break = true;
                             }
                         }
@@ -8684,6 +8696,7 @@
             var msg = sprintf(strings().invalidSelector);
             throw new $.terminal.Exception(msg);
         }
+        self.data('terminal', self);
         // var names = []; // stack if interpreter names
         var prev_command; // used for name on the terminal if not defined
         var tab_count = 0; // for tab completion
@@ -9351,7 +9364,6 @@
                 }
             })();
         }); // make_interpreter
-        self.data('terminal', self);
         return self;
     }; // terminal plugin
 });
