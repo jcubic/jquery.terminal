@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 02 Jun 2019 14:09:48 +0000
+ * Date: Sun, 02 Jun 2019 16:36:48 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3068,7 +3068,9 @@
             if (key !== prev_key) {
                 clear_hold();
             }
-            if (enabled || (key === 'CTRL+C' && is_terminal_selected())) {
+            // CTRL+C hanlding is only exception of cmd aware terminal logic
+            // cmd need to call CTRL+C keymap when terminal is not enabled
+            if (enabled || (key === 'CTRL+C' && is_terminal_selected(self))) {
                 if (hold) {
                     prev_key = key;
                     key = 'HOLD+' + key;
@@ -3651,13 +3653,13 @@
     // -----------------------------------------------------------------
     // :: selection utilities - should work in modern browser including IE9
     // -----------------------------------------------------------------
-    function is_terminal_selected() {
+    function is_terminal_selected(cmd) {
         if (is_function(window.getSelection)) {
             var selection = window.getSelection();
             if (selection.toString()) {
                 var node = selection.getRangeAt(0).startContainer.parentNode;
-                return !!($(node).closest('.terminal').length ||
-                          $(node).closest('.cmd').length);
+                var term = $(node).closest('.terminal');
+                return term.length && (cmd && term.find('.cmd').is(cmd) || !cmd);
             }
         }
     }
@@ -3905,7 +3907,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 02 Jun 2019 14:09:48 +0000',
+        date: 'Sun, 02 Jun 2019 16:36:48 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

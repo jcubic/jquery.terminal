@@ -186,7 +186,7 @@ function spy(obj, method) {
         var fn = obj[method];
         if (fn.mock) {
             reset(fn);
-            return obj[method];
+            fn = obj[method];
         }
         spy = jest.spyOn(obj, method).mockImplementation(fn);
     } else {
@@ -222,7 +222,7 @@ function count(spy) {
 }
 function reset(spy) {
     if (spy.mock) {
-        spy.mockClear();
+        spy.mockRestore();
     } else if (spy.calls.reset) {
         spy.calls.reset();
     } else if (spy.calls.callCount) {
@@ -4547,8 +4547,9 @@ describe('Terminal plugin', function() {
                 expect(term.commands()).toEqual($.noop);
                 term.set_interpreter(test.interpreter);
                 expect(term.commands()).toEqual(test.interpreter);
-                term.exec('foo');
-                expect(test.interpreter).toHaveBeenCalledWith('foo', term);
+                return term.exec('foo').then(() => {
+                    expect(test.interpreter).toHaveBeenCalledWith('foo', term);
+                });
             });
             it('should create async JSON-RPC with login', function() {
                 spy(object, 'echo');
