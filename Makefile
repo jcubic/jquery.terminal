@@ -16,10 +16,11 @@ ESLINT=./node_modules/.bin/eslint
 TSC=./node_modules/.bin/tsc
 SPEC_CHECKSUM=`md5sum __tests__/terminal.spec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
+TOKEN=cat .github.token | tr -d '\n'
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
 
-.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck emoji
+.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck emoji publish-guthub
 
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile css/emoji.css
 
@@ -78,11 +79,10 @@ terminal.jquery.json: manifest .$(VERSION)
 www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
 	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
 
-css/emoji.css: mkemoji
-	./mkemoji $(VERSION) > css/emoji.css
+css/emoji.css: emoji
 
-emoji:
-	./mkemoji $(VERSION) > css/emoji.css
+emoji: ./scripts/mkemoji
+	./scripts/mkemoji $(VERSION) > css/emoji.css
 
 test:
 	$(JEST) --coverage --testMatch '**/__tests__/*.spec.js'
@@ -113,10 +113,29 @@ jsonlint: package.json bower.json
 	$(JSONLINT) -cq package.json
 	$(JSONLINT) -cq bower.json
 
-publish:
-	$(GIT) clone $(URL) --depth 1 npm
+npm:
+	test -e npm && $(CD) npm && $(GIT) pull
+	test -e || $(GIT) clone $(URL) --depth 1 npm
+
+publish: npm
 	$(CD) npm && $(NPM) publish
-	$(RM) -rf npm
+
+publish-guthub: .github.token
+	$(SED) "s/{{TOKEN}}/`$(TOKEN)`/" templates/npmrc.tmpl > .npmrc
+	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/package.git > package.json
+
+contributors.json:
+	./scripts/contributors.js -u jcubic -r jquery.terminal > contributors.json
+
+contributors-www.json:
+	./scripts/contributors.js -u jcubic -r jquery.terminal-www > contributors-www.json
+
+contributors: contributors-www.json contributors.json
+	./scripts/update-contributors-readme contributors.json "CONTRIBUTORS" templates/README.in
+	./scripts/update-contributors-readme contributors-www.json "CONTRIBUTORS-WWW" templates/README.in
+	./scripts/update-contributors-readme contributors-www.json "CONTRIBUTORS" www/README.md
+	./scripts/update-contributors-package.js -j contributors.json -f templates/package.in
+	./scripts/update-contributors-package.js -j contributors.json -f templates/package.git
 
 lint: eslint jsonlint
 

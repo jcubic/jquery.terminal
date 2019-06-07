@@ -47,8 +47,19 @@ function get(url, query) {
     });
 }
 
+function get_file(filename) {
+    return new Promise(function(resolve, reject) {
+        fs.readFile(filename, function(err, data) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(JSON.parse(data.toString()));
+            }
+        });
+    });
+}
 
-if (argv.u && argv.r) {
+function get_api(argv) {
     var user = argv.u;
     var repo = argv.r;
     var path = '/repos/' + user + '/' + repo + '/contributors';
@@ -58,7 +69,7 @@ if (argv.u && argv.r) {
     if (argv.t) {
         query['access_token'] = argv.t;
     }
-    get('https://api.github.com' + path, query).then(function(contributors) {
+    return get('https://api.github.com' + path, query).then(function(contributors) {
         return Promise.all(contributors.map(function(contributor) {
             var path = contributor.url.replace(/https:\/\/[^\/]+/, '');
             return get('https://api.github.com' + path, query).then(function(user) {
@@ -82,7 +93,12 @@ if (argv.u && argv.r) {
                 }
             });
         }).filter(Boolean));
-    }).then(function(contributors) {
+    });
+}
+
+
+if ((argv.f && argv.m) || (argv.u && argv.r)) {
+    (argv.f ? get_file(argv.f) : get_api(argv)).then(function(contributors) {
         if (argv.m) {
             var split = split_equal(contributors, 7);
             var align = new Array(split[0].length + 1).join('| :---: ') + ' |';
@@ -97,12 +113,14 @@ if (argv.u && argv.r) {
             rows.splice(1, 0, align);
             console.log(rows.join('\n'));
         } else {
-            console.log(JSON.stringify(contributors, null, 4));
+            console.log(JSON.stringify(contributors, null, 2));
         }
     }).catch(function(error) {
         console.log('ERROR: ' + error);
     });
 } else {
-    console.log('usage: \n' + path.basename(process.argv[1]) + '-u <user> -r <repo> ' +
-                '[--auth githubUsername:githubPassword] [-m]');
+    var script = path.basename(process.argv[1]);
+    console.log('usage: \n' + script + '-u <user> -r <repo> ' +
+                '[--auth githubUsername:githubPassword] [-m]\n' +
+                script + ' -f <json filename> -m');
 }
