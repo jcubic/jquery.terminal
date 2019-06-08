@@ -3048,9 +3048,9 @@
                 return;
             }
             if (!e.fake) {
-                no_keypress = true;
                 no_keydown = false;
             }
+            no_keypress = true;
             // Meta+V did bind input but it didin't happen because terminal paste
             // prevent native insert action
             clip.off('input', paste);

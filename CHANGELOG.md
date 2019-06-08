@@ -1,3 +1,7 @@
+## 2.6.3
+### Bugfix
+* fix mobile keypress invocation when no keypress (Android)
+
 ## 2.6.2
 ### Bugfix
 * fix CTRL+C when terminal is not in focus (it should bypass enabled flag only when select text is inside terminal) [#499](https://github.com/jcubic/jquery.terminal/issues/499)
