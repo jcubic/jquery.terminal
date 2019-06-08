@@ -1,6 +1,7 @@
 ## 2.6.3
 ### Bugfix
 * fix mobile keypress invocation when no keypress (Android)
+* fix sizing issue with underscores [#501](https://github.com/jcubic/jquery.terminal/issues/501)
 
 ## 2.6.2
 ### Bugfix

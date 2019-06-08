@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 08 Jun 2019 17:56:14 +0000
+ * Date: Sat, 08 Jun 2019 18:21:29 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd .prompt, .cmd .prompt div {
@@ -180,7 +180,7 @@ body.full-screen-terminal .terminal {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     font-size: 12px;
-    line-height: 14px;
+    line-height: 15px;
 }
 .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.error):not(.emoji),
 .cmd span:not(.inverted):not(.token):not(.emoji) {
@@ -630,7 +630,7 @@ terminal .terminal-output > div {
     .cmd span,
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
-        line-height: calc(var(--size, 1) * 14px);
+        line-height: calc(var(--size, 1) * 14px + 1px);
     }
     .terminal-output > :not(.raw) .emoji, .cmd .emoji {
         height: calc(var(--size, 1) * 14px);
