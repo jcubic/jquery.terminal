@@ -115,8 +115,8 @@ jsonlint: package.json bower.json
 	$(JSONLINT) -cq bower.json
 
 npm:
-	test -e npm && $(CD) npm && $(GIT) pull
-	test -e || $(GIT) clone $(URL) --depth 1 npm
+	test -e npm && ( $(CD) npm && $(GIT) pull ) || true
+	test -e npm || $(GIT) clone $(URL) --depth 1 npm
 
 publish: npm
 	$(CD) npm && $(NPM) publish
