@@ -24,7 +24,10 @@ if (argv.f && argv.j) {
                 return usage(err);
             }
             var _package = JSON.parse(data.toString());
-            _package.contributors = contributors;
+            _package.contributors = contributors.map(function(user) {
+                const { name, url } = user;
+                return { name, url };
+            });
             fs.writeFile(argv.f, JSON.stringify(_package, null, 2) + '\n', 'utf8', function(err) { 
                 if (err) {
                     return usage(err);

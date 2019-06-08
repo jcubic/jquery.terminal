@@ -85,10 +85,8 @@ function get_api(argv) {
                     } else {
                         object.url = "https://github.com/" + user.login
                     }
-                    if (argv.m) {
-                        object.avatar = contributor.avatar_url;
-                        object.login = user.login;
-                    }
+                    object.avatar = contributor.avatar_url;
+                    object.login = user.login;
                     return object;
                 }
             });
