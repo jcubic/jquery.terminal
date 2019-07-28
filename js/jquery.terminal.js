@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.6.3
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 08 Jun 2019 17:56:13 +0000
+ * Date: Sun, 28 Jul 2019 19:54:54 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -220,8 +220,7 @@
     /* istanbul ignore next */
     function debug(str) {
         if (false) {
-            console.log(str);
-            //$.terminal.active().echo(str);
+            $.terminal.active().echo(str);
         }
     }
     /* eslint-enable */
@@ -2394,7 +2393,9 @@
                 }
                 var i;
                 self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
-                self.css('visibility', 'hidden');
+                if (is_visibilty_change_safe) {
+                    self.css('visibility', 'hidden');
+                }
                 before.html('');
                 // long line
                 if (strlen(text(formatted)) > num_chars - prompt_len - 1 ||
@@ -2504,7 +2505,9 @@
                 } else {
                     clip.css('top', in_line * 14 + 'px');
                 }
-                self.css('visibility', '');
+                if (is_visibilty_change_safe) {
+                    self.css('visibility', '');
+                }
             };
         })();
         // ---------------------------------------------------------------------
@@ -3292,8 +3295,10 @@
             skip_insert = false;
             no_keydown = true;
         }
-        doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
-            .bind('keyup.cmd', clear_hold).bind('input.cmd', input_event);
+        doc.bind('keypress.cmd', keypress_event);
+        doc.bind('keydown.cmd', keydown_event);
+        doc.bind('keyup.cmd', clear_hold);
+        doc.bind('input.cmd', input_event);
         (function() {
             var was_down = false;
             var count = 0;
@@ -3410,15 +3415,25 @@
         return animation;
     })();
     // -------------------------------------------------------------------------
+    var agent = window.navigator.userAgent;
+    var is_IE = /MSIE|Trident/.test(agent) || /rv:11.0/i.test(agent);
+    var is_IEMobile = /IEMobile/.test(agent);
+    var is_Edge = /Edge\/\d./i.test(agent);
+    // -------------------------------------------------------------------------
     var is_ch_unit_supported = (function() {
-        var agent = window.navigator.userAgent;
-        if (agent.match(/MSIE|Trident/) && !agent.match(/IEMobile/)) {
+        if (is_IE && !is_IEMobile) {
             return false;
         }
         var div = document.createElement('div');
         div.style.width = '1ch';
         return div.style.width === '1ch';
     })();
+    // -------------------------------------------------------------------------
+    // fix for IE and Edge #507: redraw is using visibility: hidden, if called
+    // from keypress, it will scroll the page becasue textarea is no longer
+    // there to prevent scrolling of the page
+    // -------------------------------------------------------------------------
+    var is_visibilty_change_safe = !(is_Edge || is_Edge);
     // -------------------------------------------------------------------------
     var is_css_variables_supported = window.CSS && window.CSS.supports &&
             window.CSS.supports('--fake-var', 0);
@@ -3906,8 +3921,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.6.3',
-        date: 'Sat, 08 Jun 2019 17:56:13 +0000',
+        version: 'DEV',
+        date: 'Sun, 28 Jul 2019 19:54:54 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

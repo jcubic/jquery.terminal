@@ -1,3 +1,7 @@
+## 2.6.4
+### Bugfix
+* fix issue with space in IE and Edge [#507](https://github.com/jcubic/jquery.terminal/issues/507)
+
 ## 2.6.3
 ### Bugfix
 * fix mobile keypress invocation when no keypress (Android)

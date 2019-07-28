@@ -529,6 +529,7 @@ terminal .terminal-output > div {
 .terminal h6::selection,
 .terminal pre::selection,
 .terminal td::selection,
+.terminal .terminal-output::selection,
 .terminal .terminal-output div div::selection,
 .terminal .terminal-output div div a::selection,
 .terminal .terminal-output div span::selection,
