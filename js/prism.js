@@ -117,8 +117,8 @@
         return env.content.split(/\n/).map(function(content) {
             if (content) {
                 return '\x00\x00\x00\x00[[b;;;' + env.classes.join(' ') + ']' +
-                    $.terminal.escape_brackets(content).replace(/\\/g, '&#92;') +
-                    '\x00\x00\x00\x00]';
+                    $.terminal.escape_brackets(content).replace(/\\/g, '&#92;')
+                    + '\x00\x00\x00\x00]';
             }
             return '';
         }).join('\n');
@@ -165,7 +165,7 @@
                 if (string.match(/^\x00/)) {
                     return string.replace(/\x00/g, '');
                 } else {
-                    return $.terminal.escape_brackets(string);
+                    return $.terminal.escape_brackets(string).replace(/\\/g, '&#92;');
                 }
             }).join('');
         }
