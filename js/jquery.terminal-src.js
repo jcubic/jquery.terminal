@@ -1335,14 +1335,15 @@
         }
         var id = cmd_index++;
         self.addClass('cmd');
-        self.append('<span class="prompt"></span>');
-        self.append('<div class="cursor-line">' +
+        var wrapper = $('<div class="cmd-wrapper"/>').appendTo(self);
+        wrapper.append('<span class="prompt"></span>');
+        wrapper.append('<div class="cursor-line">' +
                     '<span></span>' +
                     '<span class="cursor"><span><span>&nbsp;</span></span></span>' +
                     '<span></span>' +
                     '</div>');
         // a11y: don't read command it's in textarea that's in focus
-        a11y_hide(self.find('.cursor-line'));
+        a11y_hide(wrapper.find('.cursor-line'));
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
@@ -2392,10 +2393,8 @@
                     pos = formatted_position;
                 }
                 var i;
-                self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
-                if (is_visibilty_change_safe) {
-                    self.css('visibility', 'hidden');
-                }
+                wrapper.css('visibility', 'hidden');
+                wrapper.find('div:not(.cursor-line)').remove();
                 before.html('');
                 // long line
                 if (strlen(text(formatted)) > num_chars - prompt_len - 1 ||
@@ -2505,9 +2504,7 @@
                 } else {
                     clip.css('top', in_line * 14 + 'px');
                 }
-                if (is_visibilty_change_safe) {
-                    self.css('visibility', '');
-                }
+                wrapper.css('visibility', '');
             };
         })();
         // ---------------------------------------------------------------------
@@ -3418,7 +3415,6 @@
     var agent = window.navigator.userAgent;
     var is_IE = /MSIE|Trident/.test(agent) || /rv:11.0/i.test(agent);
     var is_IEMobile = /IEMobile/.test(agent);
-    var is_Edge = /Edge\/\d./i.test(agent);
     // -------------------------------------------------------------------------
     var is_ch_unit_supported = (function() {
         if (is_IE && !is_IEMobile) {
@@ -3428,12 +3424,6 @@
         div.style.width = '1ch';
         return div.style.width === '1ch';
     })();
-    // -------------------------------------------------------------------------
-    // fix for IE and Edge #507: redraw is using visibility: hidden, if called
-    // from keypress, it will scroll the page becasue textarea is no longer
-    // there to prevent scrolling of the page
-    // -------------------------------------------------------------------------
-    var is_visibilty_change_safe = !(is_Edge || is_Edge);
     // -------------------------------------------------------------------------
     var is_css_variables_supported = window.CSS && window.CSS.supports &&
             window.CSS.supports('--fake-var', 0);
