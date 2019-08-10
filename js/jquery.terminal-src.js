@@ -8868,7 +8868,7 @@
                 } else if (object instanceof Blob) {
                     echo_image(data_uri(object));
                 } else if (typeof object === 'string') {
-                    if (object.match(/^data:/)) {
+                    if (object.match(/^(data:|blob:)/)) {
                         echo_image(object);
                     } else {
                         self.insert(object);
