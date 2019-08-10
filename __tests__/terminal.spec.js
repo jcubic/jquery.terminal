@@ -2465,7 +2465,7 @@ describe('Terminal plugin', function() {
         describe('maskChar', function() {
             function text(term) {
                 // without [data-text] is select before cursor span and spans inside
-                return term.find('.cmd .cursor-line span[data-text]:not(.cursor)').text();
+                return term.find('.cmd .cmd-cursor-line span[data-text]:not(.cmd-cursor)').text();
             }
             it('should use specified character for mask', function() {
                 var mask = '-';
@@ -2607,11 +2607,11 @@ describe('Terminal plugin', function() {
             expect(term.hasClass('terminal')).toBe(true);
             expect(term.find('.terminal-output').length).toBe(1);
             expect(term.find('.cmd').length).toBe(1);
-            var prompt = term.find('.prompt');
+            var prompt = term.find('.cmd-prompt');
             expect(prompt.length).toBe(1);
             expect(prompt.is('span')).toBe(true);
             expect(prompt.children().length).toBe(1);
-            var cursor = term.find('.cursor');
+            var cursor = term.find('.cmd-cursor');
             expect(cursor.length).toBe(1);
             expect(cursor.is('span')).toBe(true);
             expect(cursor.prev().is('span')).toBe(true);
@@ -2619,14 +2619,14 @@ describe('Terminal plugin', function() {
             term.focus().cmd().enable();
             //this check sometimes fail in travis
             //expect(cursor.hasClass('blink')).toBe(true);
-            expect(term.find('.clipboard').length).toBe(1);
+            expect(term.find('.cmd-clipboard').length).toBe(1);
         });
         it('should have signature', function() {
             var sig = term.find('.terminal-output div div').map(function() { return $(this).text(); }).get().join('\n');
             expect(nbsp(term.signature())).toEqual(sig);
         });
         it('should have default prompt', function() {
-            var prompt = term.find('.prompt');
+            var prompt = term.find('.cmd-prompt');
             expect(prompt.html()).toEqual("<span>&gt;&nbsp;</span>");
             expect(prompt.text()).toEqual(nbsp('> '));
         });
@@ -2670,7 +2670,7 @@ describe('Terminal plugin', function() {
             term2.focus();
             return delay(100, function() {
                 term1.resume();
-                expect($('.cursor.blink').length).toEqual(1);
+                expect($('.cmd-cursor.cmd-blink').length).toEqual(1);
                 term1.destroy().remove();
                 term2.destroy().remove();
             });
@@ -2788,7 +2788,7 @@ describe('Terminal plugin', function() {
                     click(node);
                     expect(cmd.display_position()).toBe(pos);
                     var char = chars[pos];
-                    expect(cmd.find('.cursor [data-text] span').text().length)
+                    expect(cmd.find('.cmd-cursor [data-text] span').text().length)
                         .toEqual(char.length);
                     expect(char.length).toBeGreaterThan(1);
                 });
@@ -2980,29 +2980,29 @@ describe('Terminal plugin', function() {
         });
         it('should return prompt', function() {
             expect(term.get_prompt()).toEqual('>>> ');
-            expect(term.find('.prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should set prompt', function() {
             term.set_prompt('||| ');
             expect(term.get_prompt()).toEqual('||| ');
-            expect(term.find('.prompt').html()).toEqual('<span>|||&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span>|||&nbsp;</span>');
             function prompt(callback) {
                 callback('>>> ');
             }
             term.set_prompt(prompt);
             expect(term.get_prompt()).toEqual(prompt);
-            expect(term.find('.prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should format prompt', function() {
             var prompt = '<span style="font-weight:bold;text-decoration:underline;color:'+
                     '#fff;--color:#fff;" data-text=">>>">&gt;&gt;&gt;</span><span>&nbsp;'+
                     '</span>';
             term.set_prompt('[[ub;#fff;]>>>] ');
-            expect(term.find('.prompt').html()).toEqual(prompt);
+            expect(term.find('.cmd-prompt').html()).toEqual(prompt);
             term.set_prompt(function(callback) {
                 callback('[[ub;#fff;]>>>] ');
             });
-            expect(term.find('.prompt').html()).toEqual(prompt);
+            expect(term.find('.cmd-prompt').html()).toEqual(prompt);
             term.destroy().remove();
         });
     });
@@ -3017,15 +3017,15 @@ describe('Terminal plugin', function() {
             term.insert('M');
         }
         var cmd = term.cmd();
-        var line = cmd.find('.prompt').next();
+        var line = cmd.find('.cmd-prompt').next();
         it('text should have 2 lines', function() {
             expect(line.is('div')).toBe(true);
             expect(line.text().length).toBe(term.cols()-2);
         });
         it('cmd plugin moving cursor', function() {
             cmd.position(-8, true);
-            var cursor_line = cmd.find('.cursor-line');
-            var cursor = cmd.find('.cursor');
+            var cursor_line = cmd.find('.cmd-cursor-line');
+            var cursor = cmd.find('.cmd-cursor');
             var before = cursor.prev();
             var after = cursor.next();
             expect(before.is('span')).toBe(true);
@@ -3036,7 +3036,7 @@ describe('Terminal plugin', function() {
         });
         it('should remove characters', function() {
             cmd['delete'](-10);
-            var cursor = cmd.find('.cursor');
+            var cursor = cmd.find('.cmd-cursor');
             var before = cursor.prev();
             var after = cursor.next();
             expect(before.text().length).toEqual(term.cols()-8-10);
@@ -3085,7 +3085,7 @@ describe('Terminal plugin', function() {
         it('should set and remove mask', function() {
             cmd.mask('•');
             cmd.position(6);
-            var before = cmd.find('.cursor').prev();
+            var before = cmd.find('.cmd-cursor').prev();
             expect(before.text()).toEqual('••••••');
             expect(cmd.get()).toEqual('foobar');
             cmd.mask(false);
@@ -3104,7 +3104,7 @@ describe('Terminal plugin', function() {
             shortcut(true, false, false, 85, 'u'); // CTRL+U
             expect(cmd.kill_text()).toEqual('foobar');
             shortcut(false, false, true, 13, 'enter');
-            expect(cmd.find('.prompt').next().text()).toEqual('\xA0');
+            expect(cmd.find('.cmd-prompt').next().text()).toEqual('\xA0');
             expect(cmd.get()).toEqual('\n');
             cmd.set('');
             shortcut(false, false, false, 9, 'tab'); // TAB
