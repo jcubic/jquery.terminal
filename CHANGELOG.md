@@ -1,4 +1,6 @@
-## 2.6.4
+## 2.7.0
+### Breaking/Feature
+* all classes are prefixed with `cmd` or `terminal` except `.token` (PrimsJS internals) and `.emoji` (this may be feature that fix some bugs, that also may break user code - but it's internal html structure and it's not documented as API) [#510](https://github.com/jcubic/jquery.terminal/issues/510)
 ### Bugfix
 * fix issue with space in IE and Edge [#507](https://github.com/jcubic/jquery.terminal/issues/507)
 

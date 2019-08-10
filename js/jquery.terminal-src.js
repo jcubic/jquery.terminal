@@ -898,7 +898,10 @@
     // :: Cross-browser resize element plugin using sentinel iframe or
     // :: resizeObserver
     // -----------------------------------------------------------------------
-    $.fn.resizer = function(callback) {
+    $.fn.resizer = function(callback, options) {
+        var settings = $.extend({}, {
+            prefix: ''
+        }, options);
         var trigger = arguments.length === 0;
         var unbind = arguments[0] === "unbind";
         if (!trigger && !unbind && !is_function(callback)) {
@@ -968,7 +971,8 @@
                 } else if ($this.is('body')) {
                     $(window).on('resize.resizer', resize_handler);
                 } else {
-                    iframe = $('<iframe/>').addClass('resizer').appendTo(this)[0];
+                    iframe = $('<iframe/>').addClass(settings.prefix + 'resizer')
+                        .appendTo(this)[0];
 
                     $(iframe.contentWindow).on('resize', resize_handler);
                 }
@@ -3713,7 +3717,7 @@
     function process_selected_line() {
         var $self = $(this);
         var result = $self.text();
-        if ($self.hasClass('end-line')) {
+        if ($self.hasClass('cmd-end-line')) {
             result += '\n';
         }
         return result;
@@ -5318,10 +5322,10 @@
             rect = $prompt[0].getBoundingClientRect();
             $prompt.remove();
         } else {
-            var temp = $('<div class="terminal temp"><div class="terminal-wrapper">' +
-                         '<div class="terminal-output"><div><div class="line" style' +
-                         '="float: left"><span>&nbsp;</span></div></div></div></div>')
-                .appendTo('body');
+            var temp = $('<div class="terminal terminal-temp"><div class="terminal-' +
+                         'wrapper"><div class="terminal-output"><div><div class="te' +
+                         'rminal-line" style="float: left"><span>&nbsp;</span></div' +
+                         '></div></div></div>').appendTo('body');
             temp.addClass(term.attr('class')).attr('id', term.attr('id'));
             if (term) {
                 var style = term.attr('style');
@@ -5332,7 +5336,7 @@
                     temp.attr('style', style);
                 }
             }
-            rect = temp.find('.line')[0].getBoundingClientRect();
+            rect = temp.find('.terminal-line')[0].getBoundingClientRect();
         }
         var result = {
             width: rect.width,
@@ -6466,7 +6470,7 @@
             var options = {
                 convertLinks: false,
                 finalize: function finalize(div) {
-                    a11y_hide(div.addClass('command'));
+                    a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
@@ -8003,7 +8007,7 @@
                             var div = $('<div/>').html(line)
                                 .appendTo(wrapper).width('100%');
                             if (data.newline) {
-                                div.addClass('end-line');
+                                div.addClass('cmd-end-line');
                             }
                         }
                     });
@@ -8170,8 +8174,8 @@
                     // quick hack to fix trailing backslash
                     var str = $.terminal.escape_brackets(string).
                         replace(/\\$/, '&#92;').
-                        replace(url_re, ']$1[[;;;error]');
-                    return '[[;;;error]' + str + ']';
+                        replace(url_re, ']$1[[;;;terminal-error]');
+                    return '[[;;;terminal-error]' + str + ']';
                 }
                 if (typeof message === 'function') {
                     return self.echo(function() {
@@ -8197,7 +8201,7 @@
                 if (message) {
                     self.error(message, {
                         finalize: function(div) {
-                            div.addClass('exception message');
+                            div.addClass('terminal-exception terminal-message');
                         },
                         keepWords: true
                     });
@@ -8217,12 +8221,16 @@
                 if (e.stack) {
                     var stack = $.terminal.escape_brackets(e.stack);
                     self.echo(stack.split(/\n/g).map(function(trace) {
-                        return '[[;;;error]' + trace.replace(url_re, function(url) {
-                            return ']' + url + '[[;;;error]';
-                        }) + ']';
+                        // nested formatting will handle urls but that formatting
+                        // can be removed - this code was created before
+                        // that formatting existed (see commit ce01c3f5)
+                        return '[[;;;terminal-error]' +
+                            trace.replace(url_re, function(url) {
+                                return ']' + url + '[[;;;terminal-error]';
+                            }) + ']';
                     }).join('\n'), {
                         finalize: function(div) {
-                            div.addClass('exception stack-trace');
+                            div.addClass('terminal-exception terminal-stack-trace');
                         },
                         formatters: false
                     });
@@ -8617,7 +8625,7 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
-                    self.find('.terminal-fill').remove();
+                    self.find('.terminal-fill, .terminal-font').remove();
                     self.stopTime();
                     terminals.remove(terminal_id);
                     if (visibility_observer) {
@@ -8762,7 +8770,7 @@
             requests.push(xhr);
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
-        var font_resizer = $('<div class="font">&nbsp;</div>').appendTo(self);
+        var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var fill = $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
@@ -9117,7 +9125,7 @@
             }
             self.on('click', 'a', function(e) {
                 var $this = $(this);
-                if ($this.closest('.exception').length) {
+                if ($this.closest('.terminal-exception').length) {
                     var href = $this.attr('href');
                     if (href.match(/:[0-9]+$/)) { // display line if specified
                         e.preventDefault();
@@ -9151,11 +9159,14 @@
                 }
             }
             function create_resizers() {
-                self.resizer('unbind').resizer(resize);
+                var options = {
+                    prefix: 'terminal-'
+                };
+                self.resizer('unbind').resizer(resize, options);
                 font_resizer.resizer('unbind').resizer(function() {
                     calculate_char_size();
                     self.resize();
-                });
+                }, options);
             }
             if (self.is(':visible')) {
                 create_resizers();
