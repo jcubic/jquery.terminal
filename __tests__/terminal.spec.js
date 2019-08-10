@@ -719,6 +719,22 @@ describe('Terminal utils', function() {
                                    'e line-through overline;" data-text="Baz">'+
                                    'Baz</span>');
         });
+        it('should escape brackets', function() {
+            var specs = [
+                ['\\]', ']'],
+                ['\\]xxx', ']xxx'],
+                ['xxx\\]xxx', 'xxx]xxx'],
+                ['xxx\\]', 'xxx]'],
+                ['[[;;]\\]xxx]', ']xxx'],
+                ['[[;;]xxx\\]]', 'xxx]'],
+                ['[[;;]\\]]', ']'],
+                ['[[;;]xxx\\]xxx]', 'xxx]xxx']
+            ];
+            specs.forEach(function(spec) {
+                var output = $.terminal.format(spec[0]);
+                expect($('<div>' + output + '</div>').text()).toEqual(spec[1]);
+            });
+        });
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
             var string = $.terminal.format(input, {char_width: 7});
@@ -1835,7 +1851,7 @@ describe('Terminal utils', function() {
             }).get();
         }
         function last_divs(term) {
-            return term.find('.terminal-output .command').last().nextUntil();
+            return term.find('.terminal-output .terminal-command').last().nextUntil();
         }
         function out(term) {
             return get_lines(term, term => term.find('.terminal-output > div'));
@@ -2038,16 +2054,16 @@ describe('Terminal utils', function() {
             var strings = $.terminal.defaults.strings;
             return term.exec('push | new').then(() => {
                 expect(get_lines(term)).toEqual([strings.pipeNestedInterpreterError]);
-                expect(last_divs(term).last().find('.error').length).toEqual(1);
+                expect(last_divs(term).last().find('.terminal-error').length).toEqual(1);
                 return term.exec('hello | baz').then(() => {
                     expect(get_lines(term)).toEqual([
                         sprintf(strings.commandNotFound, 'hello'),
                         sprintf(strings.commandNotFound, 'baz')
                     ]);
-                    expect(last_divs(term).last().find('.error').length).toEqual(1);
+                    expect(last_divs(term).last().find('.terminal-error').length).toEqual(1);
                     return term.exec('quux').then(() => {
                         expect(get_lines(term)).toEqual([sprintf(strings.commandNotFound, 'quux')]);
-                        expect(last_divs(term).last().find('.error').length).toEqual(1);
+                        expect(last_divs(term).last().find('.terminal-error').length).toEqual(1);
                         var fn = jest.fn();
                         term.settings().onCommandNotFound = fn;
                         return term.exec('quux').then(() => {
@@ -2465,7 +2481,7 @@ describe('Terminal plugin', function() {
         describe('maskChar', function() {
             function text(term) {
                 // without [data-text] is select before cursor span and spans inside
-                return term.find('.cmd .cursor-line span[data-text]:not(.cursor)').text();
+                return term.find('.cmd .cmd-cursor-line span[data-text]:not(.cmd-cursor)').text();
             }
             it('should use specified character for mask', function() {
                 var mask = '-';
@@ -2564,7 +2580,7 @@ describe('Terminal plugin', function() {
                     });
                 } catch(e) {}
                 enter(term, 'foo');
-                expect(term.find('.error').length).toEqual(0);
+                expect(term.find('.terminal-error').length).toEqual(0);
                 expect(test.exceptionHandler).toHaveBeenCalledWith(exception, 'USER');
             });
         });
@@ -2607,11 +2623,11 @@ describe('Terminal plugin', function() {
             expect(term.hasClass('terminal')).toBe(true);
             expect(term.find('.terminal-output').length).toBe(1);
             expect(term.find('.cmd').length).toBe(1);
-            var prompt = term.find('.prompt');
+            var prompt = term.find('.cmd-prompt');
             expect(prompt.length).toBe(1);
             expect(prompt.is('span')).toBe(true);
             expect(prompt.children().length).toBe(1);
-            var cursor = term.find('.cursor');
+            var cursor = term.find('.cmd-cursor');
             expect(cursor.length).toBe(1);
             expect(cursor.is('span')).toBe(true);
             expect(cursor.prev().is('span')).toBe(true);
@@ -2619,14 +2635,14 @@ describe('Terminal plugin', function() {
             term.focus().cmd().enable();
             //this check sometimes fail in travis
             //expect(cursor.hasClass('blink')).toBe(true);
-            expect(term.find('.clipboard').length).toBe(1);
+            expect(term.find('.cmd-clipboard').length).toBe(1);
         });
         it('should have signature', function() {
             var sig = term.find('.terminal-output div div').map(function() { return $(this).text(); }).get().join('\n');
             expect(nbsp(term.signature())).toEqual(sig);
         });
         it('should have default prompt', function() {
-            var prompt = term.find('.prompt');
+            var prompt = term.find('.cmd-prompt');
             expect(prompt.html()).toEqual("<span>&gt;&nbsp;</span>");
             expect(prompt.text()).toEqual(nbsp('> '));
         });
@@ -2670,7 +2686,7 @@ describe('Terminal plugin', function() {
             term2.focus();
             return delay(100, function() {
                 term1.resume();
-                expect($('.cursor.blink').length).toEqual(1);
+                expect($('.cmd-cursor.cmd-blink').length).toEqual(1);
                 term1.destroy().remove();
                 term2.destroy().remove();
             });
@@ -2788,7 +2804,7 @@ describe('Terminal plugin', function() {
                     click(node);
                     expect(cmd.display_position()).toBe(pos);
                     var char = chars[pos];
-                    expect(cmd.find('.cursor [data-text] span').text().length)
+                    expect(cmd.find('.cmd-cursor [data-text] span').text().length)
                         .toEqual(char.length);
                     expect(char.length).toBeGreaterThan(1);
                 });
@@ -2968,7 +2984,7 @@ describe('Terminal plugin', function() {
                 enter_key();
                 expect(interpreter.foo).toHaveBeenCalled();
                 var last_div = term.find('.terminal-output > div:last-child');
-                expect(last_div.hasClass('command')).toBe(true);
+                expect(last_div.hasClass('terminal-command')).toBe(true);
                 expect(last_div.children().html()).toEqual('<span>&gt;&nbsp;foo</span>');
                 term.destroy().remove();
             });
@@ -2980,29 +2996,29 @@ describe('Terminal plugin', function() {
         });
         it('should return prompt', function() {
             expect(term.get_prompt()).toEqual('>>> ');
-            expect(term.find('.prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should set prompt', function() {
             term.set_prompt('||| ');
             expect(term.get_prompt()).toEqual('||| ');
-            expect(term.find('.prompt').html()).toEqual('<span>|||&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span>|||&nbsp;</span>');
             function prompt(callback) {
                 callback('>>> ');
             }
             term.set_prompt(prompt);
             expect(term.get_prompt()).toEqual(prompt);
-            expect(term.find('.prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should format prompt', function() {
             var prompt = '<span style="font-weight:bold;text-decoration:underline;color:'+
                     '#fff;--color:#fff;" data-text=">>>">&gt;&gt;&gt;</span><span>&nbsp;'+
                     '</span>';
             term.set_prompt('[[ub;#fff;]>>>] ');
-            expect(term.find('.prompt').html()).toEqual(prompt);
+            expect(term.find('.cmd-prompt').html()).toEqual(prompt);
             term.set_prompt(function(callback) {
                 callback('[[ub;#fff;]>>>] ');
             });
-            expect(term.find('.prompt').html()).toEqual(prompt);
+            expect(term.find('.cmd-prompt').html()).toEqual(prompt);
             term.destroy().remove();
         });
     });
@@ -3017,15 +3033,15 @@ describe('Terminal plugin', function() {
             term.insert('M');
         }
         var cmd = term.cmd();
-        var line = cmd.find('.prompt').next();
+        var line = cmd.find('.cmd-prompt').next();
         it('text should have 2 lines', function() {
             expect(line.is('div')).toBe(true);
             expect(line.text().length).toBe(term.cols()-2);
         });
         it('cmd plugin moving cursor', function() {
             cmd.position(-8, true);
-            var cursor_line = cmd.find('.cursor-line');
-            var cursor = cmd.find('.cursor');
+            var cursor_line = cmd.find('.cmd-cursor-line');
+            var cursor = cmd.find('.cmd-cursor');
             var before = cursor.prev();
             var after = cursor.next();
             expect(before.is('span')).toBe(true);
@@ -3036,7 +3052,7 @@ describe('Terminal plugin', function() {
         });
         it('should remove characters', function() {
             cmd['delete'](-10);
-            var cursor = cmd.find('.cursor');
+            var cursor = cmd.find('.cmd-cursor');
             var before = cursor.prev();
             var after = cursor.next();
             expect(before.text().length).toEqual(term.cols()-8-10);
@@ -3085,7 +3101,7 @@ describe('Terminal plugin', function() {
         it('should set and remove mask', function() {
             cmd.mask('•');
             cmd.position(6);
-            var before = cmd.find('.cursor').prev();
+            var before = cmd.find('.cmd-cursor').prev();
             expect(before.text()).toEqual('••••••');
             expect(cmd.get()).toEqual('foobar');
             cmd.mask(false);
@@ -3104,7 +3120,7 @@ describe('Terminal plugin', function() {
             shortcut(true, false, false, 85, 'u'); // CTRL+U
             expect(cmd.kill_text()).toEqual('foobar');
             shortcut(false, false, true, 13, 'enter');
-            expect(cmd.find('.prompt').next().text()).toEqual('\xA0');
+            expect(cmd.find('.cmd-prompt').next().text()).toEqual('\xA0');
             expect(cmd.get()).toEqual('\n');
             cmd.set('');
             shortcut(false, false, false, 9, 'tab'); // TAB
@@ -3490,7 +3506,7 @@ describe('Terminal plugin', function() {
                     setTimeout(function() {
                         var output = [
                             '> foo',
-                            '[[;;;error]&#91;AJAX&#93; Invalid JSON - Server responded:',
+                            '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON - Server responded:',
                             'Response]'
                         ].join('\n');
                         expect(term.get_output()).toEqual(output);
@@ -3508,7 +3524,7 @@ describe('Terminal plugin', function() {
                     setTimeout(function() {
                         var output = [
                             '> foo',
-                            '[[;;;error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
+                            '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
                             '{"foo": "bar"}]'
                         ].join('\n');
                         expect(term.get_output()).toEqual(output);
@@ -3999,13 +4015,13 @@ describe('Terminal plugin', function() {
                     expect(term.get_command()).toEqual(command);
                     expect(term.get_prompt()).toEqual(prompt);
                     expect(cmd.position()).toEqual(position);
-                    var html = '<div data-index="0"><div style="width: 100%;"><span>Hello&nbsp;World!</span></div></div>'+
-                        '<div data-index="1" class="command" role="presentation" aria-hidden="true">'+
-                        '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
-                        '</div>'+
-                        '<div data-index="2" class="command" role="presentation" aria-hidden="true">'+
-                        '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
-                        '</div>';
+                    var html = '<div data-index="0"><div style="width: 100%;"><span>' +
+                        'Hello&nbsp;World!</span></div></div><div data-index="1" cla' +
+                        'ss="terminal-command" role="presentation" aria-hidden="true' +
+                        '"><div style="width: 100%;"><span>&gt;&nbsp;foo</span></div' +
+                        '></div><div data-index="2" class="terminal-command" role="p' +
+                        'resentation" aria-hidden="true"><div style="width: 100%;"><' +
+                        'span>&gt;&nbsp;bar</span></div></div>';
                     expect(term.find('.terminal-output').html()).toEqual(html);
                 });
             });
@@ -4236,7 +4252,7 @@ describe('Terminal plugin', function() {
             }
             var test_str = arr.join('\n');
             function text_echoed() {
-                return term.find('.terminal-output > div:not(.command)')
+                return term.find('.terminal-output > div:not(.terminal-command)')
                     .map(function() {
                         return $(this).text();
                     }).get().join('\n');
@@ -4566,9 +4582,11 @@ describe('Terminal plugin', function() {
                     return term.exec(['demo', 'demo']).then(() => {
                         expect(term.get_prompt()).toEqual('$ ');
                         expect(object.login).toHaveBeenCalledWith('demo', 'demo');
-                        return term.exec('echo foo').then(() => {
-                            expect(object.echo).toHaveBeenCalledWith(token, 'foo');
-                            term.destroy().remove();
+                        return delay(50, () => {
+                            return term.exec('echo foo').then(() => {
+                                expect(object.echo).toHaveBeenCalledWith(token, 'foo');
+                                term.destroy().remove();
+                            });
                         });
                     });
                 });
@@ -5042,25 +5060,25 @@ describe('Terminal plugin', function() {
             it('should echo error', function() {
                 spy(term, 'echo');
                 term.error('Message');
-                expect(term.echo).toHaveBeenCalledWith('[[;;;error]Message]', defaults);
+                expect(term.echo).toHaveBeenCalledWith('[[;;;terminal-error]Message]', defaults);
             });
             it('should escape brakets', function() {
                 spy(term, 'echo');
                 term.clear().error('[[ Message ]]');
-                expect(term.echo).toHaveBeenCalledWith('[[;;;error]&#91;&#91; Message &#93;&#93;]',
+                expect(term.echo).toHaveBeenCalledWith('[[;;;terminal-error]&#91;&#91; Message &#93;&#93;]',
                                                        defaults);
                 var span = term.find('.terminal-output span');
                 expect(span.length).toEqual(1);
-                expect(span.hasClass('error')).toBeTruthy();
+                expect(span.hasClass('terminal-error')).toBeTruthy();
             });
             it('should handle url', function() {
-                term.clear().error('foo http://jcubic.pl bar');
+                term.clear().error('foo https://jcubic.pl bar');
                 var children = term.find('.terminal-output div div').children();
                 children.filter('span').each(function() {
-                    expect($(this).hasClass('error')).toBeTruthy();
+                    expect($(this).hasClass('terminal-error')).toBeTruthy();
                 });
-                expect(children.filter('a').hasClass('error')).toBeFalsy();
-                expect(term.find('.terminal-output a').attr('href')).toEqual('http://jcubic.pl');
+                expect(children.filter('a').hasClass('terminal-error')).toBeFalsy();
+                expect(term.find('.terminal-output a').attr('href')).toEqual('https://jcubic.pl');
             });
             it('should call finialize', function() {
                 var options = {
@@ -5081,7 +5099,7 @@ describe('Terminal plugin', function() {
                 };
                 term.clear().error('Message', options);
                 options.raw = false;
-                expect(term.echo).toHaveBeenCalledWith('[[;;;error]Message]', options);
+                expect(term.echo).toHaveBeenCalledWith('[[;;;terminal-error]Message]', options);
 
             });
         });
@@ -5111,9 +5129,9 @@ describe('Terminal plugin', function() {
             });
             it('should show exception', function() {
                 term.exception(error, 'ERROR');
-                var message = '[[;;;error]&#91;ERROR&#93;: ';
+                var message = '[[;;;terminal-error]&#91;ERROR&#93;: ';
                 if (error.fileName) {
-                    message += ']' + error.fileName + '[[;;;error]: ' + error.message;
+                    message += ']' + error.fileName + '[[;;;terminal-error]: ' + error.message;
                 } else {
                     message += error.message;
                 }
@@ -5123,16 +5141,16 @@ describe('Terminal plugin', function() {
                 window.term = term;
                 expect(term.get_output().match(re)).toBeTruthy();
                 var div = term.find('.terminal-output > div:eq(0)');
-                expect(div.hasClass('exception')).toBeTruthy();
-                expect(div.hasClass('message')).toBeTruthy();
+                expect(div.hasClass('terminal-exception')).toBeTruthy();
+                expect(div.hasClass('terminal-message')).toBeTruthy();
                 if (error.stack) {
                     var output = term.find('.terminal-output div div').map(function() {
                         return $(this).text().replace(/\xA0/g, ' ');
                     }).get().slice(1);
                     expect(error.stack).toEqual(output.join('\n'));
                     div = term.find('.terminal-output > div:eq(1)');
-                    expect(div.hasClass('exception')).toBeTruthy();
-                    expect(div.hasClass('stack-trace')).toBeTruthy();
+                    expect(div.hasClass('terminal-exception')).toBeTruthy();
+                    expect(div.hasClass('terminal-stack-trace')).toBeTruthy();
                 }
             });
             it('should fetch line from file using AJAX', function(done) {
@@ -5165,7 +5183,7 @@ describe('Terminal plugin', function() {
                     }).get().join('\n');
                 }
                 term.clear().exception(error, 'foo');
-                var stack = term.find('.exception.stack-trace');
+                var stack = term.find('.terminal-exception.terminal-stack-trace');
                 expect(stack.length).toEqual(1);
                 expect(output(stack)).toEqual(nbsp(error.stack));
                 stack.find('a').eq(1).click();

@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.6.3
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 08 Jun 2019 17:56:13 +0000
+ * Date: Sat, 10 Aug 2019 16:39:51 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -220,8 +220,7 @@
     /* istanbul ignore next */
     function debug(str) {
         if (false) {
-            console.log(str);
-            //$.terminal.active().echo(str);
+            $.terminal.active().echo(str);
         }
     }
     /* eslint-enable */
@@ -899,7 +898,10 @@
     // :: Cross-browser resize element plugin using sentinel iframe or
     // :: resizeObserver
     // -----------------------------------------------------------------------
-    $.fn.resizer = function(callback) {
+    $.fn.resizer = function(callback, options) {
+        var settings = $.extend({}, {
+            prefix: ''
+        }, options);
         var trigger = arguments.length === 0;
         var unbind = arguments[0] === "unbind";
         if (!trigger && !unbind && !is_function(callback)) {
@@ -969,7 +971,8 @@
                 } else if ($this.is('body')) {
                     $(window).on('resize.resizer', resize_handler);
                 } else {
-                    iframe = $('<iframe/>').addClass('resizer').appendTo(this)[0];
+                    iframe = $('<iframe/>').addClass(settings.prefix + 'resizer')
+                        .appendTo(this)[0];
 
                     $(iframe.contentWindow).on('resize', resize_handler);
                 }
@@ -1336,14 +1339,16 @@
         }
         var id = cmd_index++;
         self.addClass('cmd');
-        self.append('<span class="prompt"></span>');
-        self.append('<div class="cursor-line">' +
-                    '<span></span>' +
-                    '<span class="cursor"><span><span>&nbsp;</span></span></span>' +
-                    '<span></span>' +
-                    '</div>');
+        var wrapper = $('<div class="cmd-wrapper"/>').appendTo(self);
+        wrapper.append('<span class="cmd-prompt"></span>');
+        wrapper.append('<div class="cmd-cursor-line">' +
+                       '<span></span>' +
+                       '<span class="cmd-cursor"><span>' +
+                       '<span>&nbsp;</span></span></span>' +
+                       '<span></span>' +
+                       '</div>');
         // a11y: don't read command it's in textarea that's in focus
-        a11y_hide(self.find('.cursor-line'));
+        a11y_hide(wrapper.find('.cmd-cursor-line'));
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
@@ -1351,7 +1356,7 @@
             autocapitalize: 'off',
             spellcheck: 'false',
             tabindex: settings.tabindex
-        }).addClass('clipboard').appendTo(self);
+        }).addClass('cmd-clipboard').appendTo(self);
         if (!is_mobile) {
             clip.val(' ');
         }
@@ -1363,7 +1368,7 @@
         var last_rendered_prompt;
         var prompt_last_line;
         var prompt_len;
-        var prompt_node = self.find('.prompt');
+        var prompt_node = self.find('.cmd-prompt');
         var reverse_search = false;
         var rev_search_str = '';
         var reverse_search_position = null;
@@ -1377,7 +1382,7 @@
         var enabled;
         var formatted_position = 0;
         var name, history;
-        var cursor = self.find('.cursor');
+        var cursor = self.find('.cmd-cursor');
         var animation;
         var restart_animation;
         var paste_count = 0;
@@ -1392,11 +1397,11 @@
                 return node.index() +
                     node.parent('span').prevAll().find('[data-text]').length +
                     node.closest('[role="presentation"]')
-                        .prevUntil('.prompt').find('[data-text]').length;
+                        .prevUntil('.cmd-prompt').find('[data-text]').length;
             } else if (node.is('div[role="presentation"]')) {
                 var last = !node.nextUntil('textarea').length;
                 return node.find('span[data-text]').length +
-                    node.prevUntil('.prompt').find('span[data-text]').length -
+                    node.prevUntil('.cmd-prompt').find('span[data-text]').length -
                     (last ? 0 : 1);
             }
         }
@@ -2026,9 +2031,9 @@
         if (animation_supported && !is_android) {
             animation = function(toggle) {
                 if (toggle) {
-                    cursor.addClass('blink');
+                    cursor.addClass('cmd-blink');
                 } else {
-                    cursor.removeClass('blink');
+                    cursor.removeClass('cmd-blink');
                 }
             };
             restart_animation = function() {
@@ -2042,12 +2047,12 @@
             animation = function(toggle) {
                 if (toggle && !animating) {
                     animating = true;
-                    cursor.addClass('inverted blink');
+                    cursor.addClass('cmd-inverted cmd-blink');
                     self.everyTime(500, 'blink', blink);
                 } else if (animating && !toggle) {
                     animating = false;
                     self.stopTime('blink', blink);
-                    cursor.removeClass('inverted blink');
+                    cursor.removeClass('cmd-inverted cmd-blink');
                 }
             };
             restart_animation = function() {
@@ -2059,7 +2064,7 @@
         // :: Blinking cursor function
         // ---------------------------------------------------------------------
         function blink() {
-            cursor.toggleClass('inverted');
+            cursor.toggleClass('cmd-inverted');
         }
         // ---------------------------------------------------------------------
         // :: Set prompt for reverse search
@@ -2118,7 +2123,7 @@
         // :: calculate width of hte character
         // ---------------------------------------------------------------------
         function get_char_width() {
-            var $prompt = self.find('.prompt');
+            var $prompt = self.find('.cmd-prompt');
             var html = $prompt.html();
             $prompt.html('<span>&nbsp;</span>');
             var width = $prompt.find('span')[0].getBoundingClientRect().width;
@@ -2146,10 +2151,10 @@
                     return !$.terminal.strip(line).match(/^ $/);
                 });
             }
-            var line = prompt_node.find('.line');
+            var line = prompt_node.find('.cmd-line');
             var prompt;
             if (line.length) {
-                prompt = line.nextUntil('.line').text();
+                prompt = line.nextUntil('.cmd-line').text();
             } else {
                 prompt = prompt_node.text();
             }
@@ -2332,7 +2337,7 @@
                         after.html(format(substring(string, position + 1), c_before));
                     }
                 }
-                cursor.toggleClass('end-line', cursor_end_line);
+                cursor.toggleClass('cmd-end-line', cursor_end_line);
                 // fix for animation when changing --animation dynamically
                 fix_cursor();
                 var cursor_len = $.terminal.length(cursor.text());
@@ -2350,7 +2355,7 @@
                 var result = '<div role="presentation" aria-hidden="true"';
                 if (end_line) {
                     string = string.replace(line_marker_re, ' ');
-                    result += ' class="end-line"';
+                    result += ' class="cmd-end-line"';
                 }
                 result += '>' + format(string, before || '') + '</div>';
                 return result;
@@ -2393,8 +2398,8 @@
                     pos = formatted_position;
                 }
                 var i;
-                self.find('div:not(.cursor-line,.clipboard-wrapper)').remove();
-                self.css('visibility', 'hidden');
+                wrapper.css('visibility', 'hidden');
+                wrapper.find('div:not(.cmd-cursor-line)').remove();
                 before.html('');
                 // long line
                 if (strlen(text(formatted)) > num_chars - prompt_len - 1 ||
@@ -2487,7 +2492,8 @@
                             lines_after(array.slice(line_index + 1));
                         }
                     }
-                    self.find('.cursor-line ~ div:last-of-type').append('<span></span>');
+                    self.find('.cmd-cursor-line ~ div:last-of-type')
+                        .append('<span></span>');
                 } else if (formatted === '') {
                     before.html('');
                     cursor.html('<span><span>&nbsp;</span></span>');
@@ -2498,13 +2504,13 @@
                         position: pos
                     });
                 }
-                var in_line = cursor_line.prevUntil('.prompt').length;
+                var in_line = cursor_line.prevUntil('.cmd-prompt').length;
                 if (is_css_variables_supported) {
                     self[0].style.setProperty('--cursor-line', in_line);
                 } else {
                     clip.css('top', in_line * 14 + 'px');
                 }
-                self.css('visibility', '');
+                wrapper.css('visibility', '');
             };
         })();
         // ---------------------------------------------------------------------
@@ -2568,7 +2574,7 @@
                     line = $.terminal.encode(line, {
                         tabs: settings.tabs
                     });
-                    return '<span class="line">' +
+                    return '<span class="cmd-line">' +
                         $.terminal.format(line, options) +
                         '</span>';
                 }).concat([last_line]).join('\n');
@@ -2763,9 +2769,8 @@
                 doc.unbind('keydown.cmd', keydown_event);
                 doc.unbind('input.cmd', input_event);
                 self.stopTime('blink', blink);
-                self.find('.cursor').next().remove().end().prev().remove().
-                    end().remove();
-                self.find('.prompt, .clipboard').remove();
+                self.find('.cmd-wrapper').remove();
+                self.find('.cmd-prompt, .cmd-clipboard').remove();
                 self.removeClass('cmd').removeData('cmd').off('.cmd');
                 return self;
             },
@@ -3292,8 +3297,10 @@
             skip_insert = false;
             no_keydown = true;
         }
-        doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event)
-            .bind('keyup.cmd', clear_hold).bind('input.cmd', input_event);
+        doc.bind('keypress.cmd', keypress_event);
+        doc.bind('keydown.cmd', keydown_event);
+        doc.bind('keyup.cmd', clear_hold);
+        doc.bind('input.cmd', input_event);
         (function() {
             var was_down = false;
             var count = 0;
@@ -3302,7 +3309,7 @@
             }).on('mouseup.cmd', function(e) {
                 function trigger() {
                     var $target = $(e.target);
-                    if (!$target.is('.prompt') && down) {
+                    if (!$target.is('.cmd-prompt') && down) {
                         if (enabled) {
                             if ($target.is('.cmd')) {
                                 self.position(text(command).length);
@@ -3363,7 +3370,7 @@
     // https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
     var mobile_re = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i;
     var tablet_re = /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i;
-    var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*[^\\](\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?)/i;
+    var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]\\]*(?:\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?)/i;
     var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]\\]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]+)\]?/gi;
     var format_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
     var format_exist_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]/gi;
@@ -3410,9 +3417,12 @@
         return animation;
     })();
     // -------------------------------------------------------------------------
+    var agent = window.navigator.userAgent;
+    var is_IE = /MSIE|Trident/.test(agent) || /rv:11.0/i.test(agent);
+    var is_IEMobile = /IEMobile/.test(agent);
+    // -------------------------------------------------------------------------
     var is_ch_unit_supported = (function() {
-        var agent = window.navigator.userAgent;
-        if (agent.match(/MSIE|Trident/) && !agent.match(/IEMobile/)) {
+        if (is_IE && !is_IEMobile) {
             return false;
         }
         var div = document.createElement('div');
@@ -3707,7 +3717,7 @@
     function process_selected_line() {
         var $self = $(this);
         var result = $self.text();
-        if ($self.hasClass('end-line')) {
+        if ($self.hasClass('cmd-end-line')) {
             result += '\n';
         }
         return result;
@@ -3733,7 +3743,7 @@
             }
             text = stdout;
         }
-        var $prompt = $html.find('.prompt');
+        var $prompt = $html.find('.cmd-prompt');
         if ($prompt.length) {
             if (text.length) {
                 text += '\n';
@@ -3906,8 +3916,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.6.3',
-        date: 'Sat, 08 Jun 2019 17:56:13 +0000',
+        version: 'DEV',
+        date: 'Sat, 10 Aug 2019 16:39:51 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4682,6 +4692,7 @@
                     return ''; //'<span>&nbsp;</span>';
                 }
                 text = safe(text);
+                text = text.replace(/\\\]/g, '&#93;');
                 if (settings.escape) {
                     // inside formatting we need to unescape escaped slashes
                     // but this escape is not needed when echo - don't know why
@@ -4801,6 +4812,7 @@
                         return text.replace(format_parts_re, format);
                     } else {
                         text = safe(text);
+                        text = text.replace(/\\\]/, '&#93;');
                         var extra = extra_css(text, options);
                         if (extra.length) {
                             text = wide_characters(text, options);
@@ -5293,7 +5305,7 @@
     function terminal_ready(term) {
         return !!(term.closest('body').length &&
                   term.is(':visible') &&
-                  term.find('.prompt').length);
+                  term.find('.cmd-prompt').length);
     }
     // -----------------------------------------------------------------------
     // :: Create fake terminal to calcualte the dimention of one character
@@ -5304,7 +5316,7 @@
     function get_char_size(term) {
         var rect;
         if (terminal_ready(term)) {
-            var $prompt = term.find('.prompt').clone().css({
+            var $prompt = term.find('.cmd-prompt').clone().css({
                 visiblity: 'hidden',
                 position: 'absolute'
             });
@@ -5312,10 +5324,10 @@
             rect = $prompt[0].getBoundingClientRect();
             $prompt.remove();
         } else {
-            var temp = $('<div class="terminal temp"><div class="terminal-wrapper">' +
-                         '<div class="terminal-output"><div><div class="line" style' +
-                         '="float: left"><span>&nbsp;</span></div></div></div></div>')
-                .appendTo('body');
+            var temp = $('<div class="terminal terminal-temp"><div class="terminal-' +
+                         'wrapper"><div class="terminal-output"><div><div class="te' +
+                         'rminal-line" style="float: left"><span>&nbsp;</span></div' +
+                         '></div></div></div>').appendTo('body');
             temp.addClass(term.attr('class')).attr('id', term.attr('id'));
             if (term) {
                 var style = term.attr('style');
@@ -5326,7 +5338,7 @@
                     temp.attr('style', style);
                 }
             }
-            rect = temp.find('.line')[0].getBoundingClientRect();
+            rect = temp.find('.terminal-line')[0].getBoundingClientRect();
         }
         var result = {
             width: rect.width,
@@ -6143,7 +6155,7 @@
                     escape: false,
                     allowedAttributes: options.allowedAttributes || []
                 };
-                string = $.terminal.normalize(string);
+                //string = $.terminal.normalize(string);
                 var cols = self.cols();
                 if ((strlen(text(string)) > cols ||
                      string.match(/\n/)) &&
@@ -6460,7 +6472,7 @@
             var options = {
                 convertLinks: false,
                 finalize: function finalize(div) {
-                    a11y_hide(div.addClass('command'));
+                    a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
@@ -6768,7 +6780,7 @@
                 if (!visible) {
                     // try catch for Node.js unit tests
                     try {
-                        self.scroll_to(self.find('.cursor'));
+                        self.scroll_to(self.find('.cmd-cursor'));
                         return true;
                     } catch (e) {
                         return true;
@@ -6786,7 +6798,7 @@
         })();
         // ---------------------------------------------------------------------
         function make_cursor_visible() {
-            var cursor = self.find('.cursor-line');
+            var cursor = self.find('.cmd-cursor-line');
             return cursor.is_fully_in_viewport(self).then(scroll_to_view);
         }
         // ---------------------------------------------------------------------
@@ -7564,7 +7576,7 @@
                     paused = true;
                     command_line.disable(visible || is_android);
                     if (!visible) {
-                        command_line.find('.prompt').hidden();
+                        command_line.find('.cmd-prompt').hidden();
                     }
                     fire_event('onPause');
                 });
@@ -7579,7 +7591,7 @@
                     if (enabled && terminals.front() === self) {
                         command_line.enable(silent);
                     }
-                    command_line.find('.prompt').visible();
+                    command_line.find('.cmd-prompt').visible();
                     var original = delayed_commands;
                     delayed_commands = [];
                     for (var i = 0; i < original.length; ++i) {
@@ -7997,7 +8009,7 @@
                             var div = $('<div/>').html(line)
                                 .appendTo(wrapper).width('100%');
                             if (data.newline) {
-                                div.addClass('end-line');
+                                div.addClass('cmd-end-line');
                             }
                         }
                     });
@@ -8164,8 +8176,8 @@
                     // quick hack to fix trailing backslash
                     var str = $.terminal.escape_brackets(string).
                         replace(/\\$/, '&#92;').
-                        replace(url_re, ']$1[[;;;error]');
-                    return '[[;;;error]' + str + ']';
+                        replace(url_re, ']$1[[;;;terminal-error]');
+                    return '[[;;;terminal-error]' + str + ']';
                 }
                 if (typeof message === 'function') {
                     return self.echo(function() {
@@ -8191,7 +8203,7 @@
                 if (message) {
                     self.error(message, {
                         finalize: function(div) {
-                            div.addClass('exception message');
+                            div.addClass('terminal-exception terminal-message');
                         },
                         keepWords: true
                     });
@@ -8211,12 +8223,16 @@
                 if (e.stack) {
                     var stack = $.terminal.escape_brackets(e.stack);
                     self.echo(stack.split(/\n/g).map(function(trace) {
-                        return '[[;;;error]' + trace.replace(url_re, function(url) {
-                            return ']' + url + '[[;;;error]';
-                        }) + ']';
+                        // nested formatting will handle urls but that formatting
+                        // can be removed - this code was created before
+                        // that formatting existed (see commit ce01c3f5)
+                        return '[[;;;terminal-error]' +
+                            trace.replace(url_re, function(url) {
+                                return ']' + url + '[[;;;terminal-error]';
+                            }) + ']';
                     }).join('\n'), {
                         finalize: function(div) {
-                            div.addClass('exception stack-trace');
+                            div.addClass('terminal-exception terminal-stack-trace');
                         },
                         formatters: false
                     });
@@ -8611,7 +8627,7 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
-                    self.find('.terminal-fill').remove();
+                    self.find('.terminal-fill, .terminal-font').remove();
                     self.stopTime();
                     terminals.remove(terminal_id);
                     if (visibility_observer) {
@@ -8756,7 +8772,7 @@
             requests.push(xhr);
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
-        var font_resizer = $('<div class="font">&nbsp;</div>').appendTo(self);
+        var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var fill = $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
@@ -8854,7 +8870,7 @@
                 } else if (object instanceof Blob) {
                     echo_image(data_uri(object));
                 } else if (typeof object === 'string') {
-                    if (object.match(/^data:/)) {
+                    if (object.match(/^(data:|blob:)/)) {
                         echo_image(object);
                     } else {
                         self.insert(object);
@@ -9008,7 +9024,7 @@
                             $target.is('.terminal-wrapper')) {
                             var len = self.get_command().length;
                             self.set_position(len);
-                        } else if ($target.closest('.prompt').length) {
+                        } else if ($target.closest('.cmd-prompt').length) {
                             self.set_position(0);
                         }
                         if (!textarea.is(':focus')) {
@@ -9084,8 +9100,8 @@
                                         height: ''
                                     };
                                     if (!is_css_variables_supported) {
-                                        var in_line = self.find('.cmd .cursor-line')
-                                            .prevUntil('.prompt').length;
+                                        var in_line = self.find('.cmd .cmd-cursor-line')
+                                            .prevUntil('.cmd-prompt').length;
                                         props.top = in_line * 14 + 'px';
                                     }
                                     clip.css(props);
@@ -9111,7 +9127,7 @@
             }
             self.on('click', 'a', function(e) {
                 var $this = $(this);
-                if ($this.closest('.exception').length) {
+                if ($this.closest('.terminal-exception').length) {
                     var href = $this.attr('href');
                     if (href.match(/:[0-9]+$/)) { // display line if specified
                         e.preventDefault();
@@ -9145,11 +9161,14 @@
                 }
             }
             function create_resizers() {
-                self.resizer('unbind').resizer(resize);
+                var options = {
+                    prefix: 'terminal-'
+                };
+                self.resizer('unbind').resizer(resize, options);
                 font_resizer.resizer('unbind').resizer(function() {
                     calculate_char_size();
                     self.resize();
-                });
+                }, options);
             }
             if (self.is(':visible')) {
                 create_resizers();

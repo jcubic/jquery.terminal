@@ -117,8 +117,8 @@
         return env.content.split(/\n/).map(function(content) {
             if (content) {
                 return '\x00\x00\x00\x00[[b;;;' + env.classes.join(' ') + ']' +
-                    $.terminal.escape_brackets(content).replace(/\\/g, '&#92;') +
-                    '\x00\x00\x00\x00]';
+                    $.terminal.escape_brackets(content).replace(/\\/g, '&#92;')
+                    + '\x00\x00\x00\x00]';
             }
             return '';
         }).join('\n');
@@ -133,7 +133,7 @@
     // so we can escape the reset because we unescape original values, the values
     // need to be escape in cmd plugin so you can't type in formatting
     /* eslint-disable */
-    var format_split_re = /(\x00\x00\x00\x00(?:\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*[^\\](\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?|\]))/i;
+    var format_split_re = /(\x00\x00\x00\x00(?:\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]\\]*(\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?|\]))/i;
     /* eslint-enable */
     $.terminal.prism = function prism(language, string) {
         if (language === 'website') {
@@ -165,7 +165,16 @@
                 if (string.match(/^\x00/)) {
                     return string.replace(/\x00/g, '');
                 } else {
-                    return $.terminal.escape_brackets(string);
+                    return string.split(/(\\+\])/g).filter(Boolean).map(function(string) {
+                        if (string.match(/^\\+\]$/)) {
+                            if (string.length % 2 === 0) {
+                                string = string.replace(/\\/, '');
+                            }
+                            return string.replace(/\\/g, '&#92;').replace(/\]/, '&#93;');
+                        } else {
+                            return $.terminal.escape_brackets(string);
+                        }
+                    }).join('');
                 }
             }).join('');
         }
