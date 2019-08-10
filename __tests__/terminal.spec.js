@@ -4566,9 +4566,11 @@ describe('Terminal plugin', function() {
                     return term.exec(['demo', 'demo']).then(() => {
                         expect(term.get_prompt()).toEqual('$ ');
                         expect(object.login).toHaveBeenCalledWith('demo', 'demo');
-                        return term.exec('echo foo').then(() => {
-                            expect(object.echo).toHaveBeenCalledWith(token, 'foo');
-                            term.destroy().remove();
+                        return delay(50, () => {
+                            return term.exec('echo foo').then(() => {
+                                expect(object.echo).toHaveBeenCalledWith(token, 'foo');
+                                term.destroy().remove();
+                            });
                         });
                     });
                 });
