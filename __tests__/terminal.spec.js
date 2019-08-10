@@ -1835,7 +1835,7 @@ describe('Terminal utils', function() {
             }).get();
         }
         function last_divs(term) {
-            return term.find('.terminal-output .command').last().nextUntil();
+            return term.find('.terminal-output .terminal-command').last().nextUntil();
         }
         function out(term) {
             return get_lines(term, term => term.find('.terminal-output > div'));
@@ -2038,16 +2038,16 @@ describe('Terminal utils', function() {
             var strings = $.terminal.defaults.strings;
             return term.exec('push | new').then(() => {
                 expect(get_lines(term)).toEqual([strings.pipeNestedInterpreterError]);
-                expect(last_divs(term).last().find('.error').length).toEqual(1);
+                expect(last_divs(term).last().find('.terminal-error').length).toEqual(1);
                 return term.exec('hello | baz').then(() => {
                     expect(get_lines(term)).toEqual([
                         sprintf(strings.commandNotFound, 'hello'),
                         sprintf(strings.commandNotFound, 'baz')
                     ]);
-                    expect(last_divs(term).last().find('.error').length).toEqual(1);
+                    expect(last_divs(term).last().find('.terminal-error').length).toEqual(1);
                     return term.exec('quux').then(() => {
                         expect(get_lines(term)).toEqual([sprintf(strings.commandNotFound, 'quux')]);
-                        expect(last_divs(term).last().find('.error').length).toEqual(1);
+                        expect(last_divs(term).last().find('.terminal-error').length).toEqual(1);
                         var fn = jest.fn();
                         term.settings().onCommandNotFound = fn;
                         return term.exec('quux').then(() => {
@@ -2564,7 +2564,7 @@ describe('Terminal plugin', function() {
                     });
                 } catch(e) {}
                 enter(term, 'foo');
-                expect(term.find('.error').length).toEqual(0);
+                expect(term.find('.terminal-error').length).toEqual(0);
                 expect(test.exceptionHandler).toHaveBeenCalledWith(exception, 'USER');
             });
         });
@@ -2968,7 +2968,7 @@ describe('Terminal plugin', function() {
                 enter_key();
                 expect(interpreter.foo).toHaveBeenCalled();
                 var last_div = term.find('.terminal-output > div:last-child');
-                expect(last_div.hasClass('command')).toBe(true);
+                expect(last_div.hasClass('terminal-command')).toBe(true);
                 expect(last_div.children().html()).toEqual('<span>&gt;&nbsp;foo</span>');
                 term.destroy().remove();
             });
@@ -3490,7 +3490,7 @@ describe('Terminal plugin', function() {
                     setTimeout(function() {
                         var output = [
                             '> foo',
-                            '[[;;;error]&#91;AJAX&#93; Invalid JSON - Server responded:',
+                            '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON - Server responded:',
                             'Response]'
                         ].join('\n');
                         expect(term.get_output()).toEqual(output);
@@ -3508,7 +3508,7 @@ describe('Terminal plugin', function() {
                     setTimeout(function() {
                         var output = [
                             '> foo',
-                            '[[;;;error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
+                            '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
                             '{"foo": "bar"}]'
                         ].join('\n');
                         expect(term.get_output()).toEqual(output);
@@ -3999,13 +3999,13 @@ describe('Terminal plugin', function() {
                     expect(term.get_command()).toEqual(command);
                     expect(term.get_prompt()).toEqual(prompt);
                     expect(cmd.position()).toEqual(position);
-                    var html = '<div data-index="0"><div style="width: 100%;"><span>Hello&nbsp;World!</span></div></div>'+
-                        '<div data-index="1" class="command" role="presentation" aria-hidden="true">'+
-                        '<div style="width: 100%;"><span>&gt;&nbsp;foo</span></div>'+
-                        '</div>'+
-                        '<div data-index="2" class="command" role="presentation" aria-hidden="true">'+
-                        '<div style="width: 100%;"><span>&gt;&nbsp;bar</span></div>'+
-                        '</div>';
+                    var html = '<div data-index="0"><div style="width: 100%;"><span>' +
+                        'Hello&nbsp;World!</span></div></div><div data-index="1" cla' +
+                        'ss="terminal-command" role="presentation" aria-hidden="true' +
+                        '"><div style="width: 100%;"><span>&gt;&nbsp;foo</span></div' +
+                        '></div><div data-index="2" class="terminal-command" role="p' +
+                        'resentation" aria-hidden="true"><div style="width: 100%;"><' +
+                        'span>&gt;&nbsp;bar</span></div></div>';
                     expect(term.find('.terminal-output').html()).toEqual(html);
                 });
             });
@@ -4236,7 +4236,7 @@ describe('Terminal plugin', function() {
             }
             var test_str = arr.join('\n');
             function text_echoed() {
-                return term.find('.terminal-output > div:not(.command)')
+                return term.find('.terminal-output > div:not(.terminal-command)')
                     .map(function() {
                         return $(this).text();
                     }).get().join('\n');
@@ -5044,25 +5044,25 @@ describe('Terminal plugin', function() {
             it('should echo error', function() {
                 spy(term, 'echo');
                 term.error('Message');
-                expect(term.echo).toHaveBeenCalledWith('[[;;;error]Message]', defaults);
+                expect(term.echo).toHaveBeenCalledWith('[[;;;terminal-error]Message]', defaults);
             });
             it('should escape brakets', function() {
                 spy(term, 'echo');
                 term.clear().error('[[ Message ]]');
-                expect(term.echo).toHaveBeenCalledWith('[[;;;error]&#91;&#91; Message &#93;&#93;]',
+                expect(term.echo).toHaveBeenCalledWith('[[;;;terminal-error]&#91;&#91; Message &#93;&#93;]',
                                                        defaults);
                 var span = term.find('.terminal-output span');
                 expect(span.length).toEqual(1);
-                expect(span.hasClass('error')).toBeTruthy();
+                expect(span.hasClass('terminal-error')).toBeTruthy();
             });
             it('should handle url', function() {
-                term.clear().error('foo http://jcubic.pl bar');
+                term.clear().error('foo https://jcubic.pl bar');
                 var children = term.find('.terminal-output div div').children();
                 children.filter('span').each(function() {
-                    expect($(this).hasClass('error')).toBeTruthy();
+                    expect($(this).hasClass('terminal-error')).toBeTruthy();
                 });
-                expect(children.filter('a').hasClass('error')).toBeFalsy();
-                expect(term.find('.terminal-output a').attr('href')).toEqual('http://jcubic.pl');
+                expect(children.filter('a').hasClass('terminal-error')).toBeFalsy();
+                expect(term.find('.terminal-output a').attr('href')).toEqual('https://jcubic.pl');
             });
             it('should call finialize', function() {
                 var options = {
@@ -5083,7 +5083,7 @@ describe('Terminal plugin', function() {
                 };
                 term.clear().error('Message', options);
                 options.raw = false;
-                expect(term.echo).toHaveBeenCalledWith('[[;;;error]Message]', options);
+                expect(term.echo).toHaveBeenCalledWith('[[;;;terminal-error]Message]', options);
 
             });
         });
@@ -5113,9 +5113,9 @@ describe('Terminal plugin', function() {
             });
             it('should show exception', function() {
                 term.exception(error, 'ERROR');
-                var message = '[[;;;error]&#91;ERROR&#93;: ';
+                var message = '[[;;;terminal-error]&#91;ERROR&#93;: ';
                 if (error.fileName) {
-                    message += ']' + error.fileName + '[[;;;error]: ' + error.message;
+                    message += ']' + error.fileName + '[[;;;terminal-error]: ' + error.message;
                 } else {
                     message += error.message;
                 }
@@ -5125,16 +5125,16 @@ describe('Terminal plugin', function() {
                 window.term = term;
                 expect(term.get_output().match(re)).toBeTruthy();
                 var div = term.find('.terminal-output > div:eq(0)');
-                expect(div.hasClass('exception')).toBeTruthy();
-                expect(div.hasClass('message')).toBeTruthy();
+                expect(div.hasClass('terminal-exception')).toBeTruthy();
+                expect(div.hasClass('terminal-message')).toBeTruthy();
                 if (error.stack) {
                     var output = term.find('.terminal-output div div').map(function() {
                         return $(this).text().replace(/\xA0/g, ' ');
                     }).get().slice(1);
                     expect(error.stack).toEqual(output.join('\n'));
                     div = term.find('.terminal-output > div:eq(1)');
-                    expect(div.hasClass('exception')).toBeTruthy();
-                    expect(div.hasClass('stack-trace')).toBeTruthy();
+                    expect(div.hasClass('terminal-exception')).toBeTruthy();
+                    expect(div.hasClass('terminal-stack-trace')).toBeTruthy();
                 }
             });
             it('should fetch line from file using AJAX', function(done) {
@@ -5167,7 +5167,7 @@ describe('Terminal plugin', function() {
                     }).get().join('\n');
                 }
                 term.clear().exception(error, 'foo');
-                var stack = term.find('.exception.stack-trace');
+                var stack = term.find('.terminal-exception.terminal-stack-trace');
                 expect(stack.length).toEqual(1);
                 expect(output(stack)).toEqual(nbsp(error.stack));
                 stack.find('a').eq(1).click();
