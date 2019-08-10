@@ -719,6 +719,22 @@ describe('Terminal utils', function() {
                                    'e line-through overline;" data-text="Baz">'+
                                    'Baz</span>');
         });
+        it('should escape brackets', function() {
+            var specs = [
+                ['\\]', ']'],
+                ['\\]xxx', ']xxx'],
+                ['xxx\\]xxx', 'xxx]xxx'],
+                ['xxx\\]', 'xxx]'],
+                ['[[;;]\\]xxx]', ']xxx'],
+                ['[[;;]xxx\\]]', 'xxx]'],
+                ['[[;;]\\]]', ']'],
+                ['[[;;]xxx\\]xxx]', 'xxx]xxx']
+            ];
+            specs.forEach(function(spec) {
+                var output = $.terminal.format(spec[0]);
+                expect($('<div>' + output + '</div>').text()).toEqual(spec[1]);
+            });
+        });
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
             var string = $.terminal.format(input, {char_width: 7});
