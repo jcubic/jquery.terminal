@@ -4,6 +4,8 @@
 ### Bugfix
 * fix issue with space in IE and Edge [#507](https://github.com/jcubic/jquery.terminal/issues/507)
 * multiple bracket escaping issues [#505](https://github.com/jcubic/jquery.terminal/issues/505)
+* fix paste of images [#505](https://github.com/jcubic/jquery.terminal/issues/503)
+* fix xml formatter in Prism (regression) [#410](https://github.com/jcubic/jquery.terminal/issues/410)
 
 ## 2.6.3
 ### Bugfix
