@@ -6277,30 +6277,32 @@
                             }
                         }
                         var parts = string.split(format_exec_re);
-                        string = $.map(parts, function(string) {
-                            if (string && string.match(format_exec_re) &&
-                                !$.terminal.is_formatting(string)) {
-                                // redraw should not execute commands and it have
-                                // and lines variable have all extended commands
-                                string = string.replace(/^\[\[|\]\]$/g, '');
-                                if (line_settings.exec) {
-                                    var prev_cmd;
-                                    if (prev_command) {
-                                        prev_command = prev_command.command.trim();
+                        if (line_settings.exec) {
+                            string = $.map(parts, function(string) {
+                                if (string && string.match(format_exec_re) &&
+                                    !$.terminal.is_formatting(string)) {
+                                    // redraw should not execute commands and it have
+                                    // and lines variable have all extended commands
+                                    string = string.replace(/^\[\[|\]\]$/g, '');
+                                    if (line_settings.exec) {
+                                        var prev_cmd;
+                                        if (prev_command) {
+                                            prev_command = prev_command.command.trim();
+                                        }
+                                        if (prev_cmd === string.trim()) {
+                                            self.error(strings().recursiveCall);
+                                        } else {
+                                            $.terminal.extended_command(self, string, {
+                                                invokeMethods: line_settings.invokeMethods
+                                            });
+                                        }
                                     }
-                                    if (prev_cmd === string.trim()) {
-                                        self.error(strings().recursiveCall);
-                                    } else {
-                                        $.terminal.extended_command(self, string, {
-                                            invokeMethods: line_settings.invokeMethods
-                                        });
-                                    }
+                                    return '';
+                                } else {
+                                    return string;
                                 }
-                                return '';
-                            } else {
-                                return string;
-                            }
-                        }).join('');
+                            }).join('');
+                        }
                         if (string === '') {
                             return;
                         }
@@ -6471,6 +6473,7 @@
             }
             var options = {
                 convertLinks: false,
+                exec: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);
