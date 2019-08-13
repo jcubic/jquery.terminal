@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.7.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 10 Aug 2019 17:29:07 +0000
+ * Date: Tue, 13 Aug 2019 14:50:22 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3916,8 +3916,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.7.0',
-        date: 'Sat, 10 Aug 2019 17:29:07 +0000',
+        version: 'DEV',
+        date: 'Tue, 13 Aug 2019 14:50:22 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6277,30 +6277,32 @@
                             }
                         }
                         var parts = string.split(format_exec_re);
-                        string = $.map(parts, function(string) {
-                            if (string && string.match(format_exec_re) &&
-                                !$.terminal.is_formatting(string)) {
-                                // redraw should not execute commands and it have
-                                // and lines variable have all extended commands
-                                string = string.replace(/^\[\[|\]\]$/g, '');
-                                if (line_settings.exec) {
-                                    var prev_cmd;
-                                    if (prev_command) {
-                                        prev_command = prev_command.command.trim();
+                        if (line_settings.exec) {
+                            string = $.map(parts, function(string) {
+                                if (string && string.match(format_exec_re) &&
+                                    !$.terminal.is_formatting(string)) {
+                                    // redraw should not execute commands and it have
+                                    // and lines variable have all extended commands
+                                    string = string.replace(/^\[\[|\]\]$/g, '');
+                                    if (line_settings.exec) {
+                                        var prev_cmd;
+                                        if (prev_command) {
+                                            prev_command = prev_command.command.trim();
+                                        }
+                                        if (prev_cmd === string.trim()) {
+                                            self.error(strings().recursiveCall);
+                                        } else {
+                                            $.terminal.extended_command(self, string, {
+                                                invokeMethods: line_settings.invokeMethods
+                                            });
+                                        }
                                     }
-                                    if (prev_cmd === string.trim()) {
-                                        self.error(strings().recursiveCall);
-                                    } else {
-                                        $.terminal.extended_command(self, string, {
-                                            invokeMethods: line_settings.invokeMethods
-                                        });
-                                    }
+                                    return '';
+                                } else {
+                                    return string;
                                 }
-                                return '';
-                            } else {
-                                return string;
-                            }
-                        }).join('');
+                            }).join('');
+                        }
                         if (string === '') {
                             return;
                         }
@@ -6471,6 +6473,7 @@
             }
             var options = {
                 convertLinks: false,
+                exec: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);

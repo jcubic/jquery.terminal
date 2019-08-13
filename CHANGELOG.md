@@ -1,3 +1,8 @@
+## 2.7.1
+### Bugfix
+* fix invoking methods by typing it into terminal [#512](https://github.com/jcubic/jquery.terminal/issues/512)
+* don't remove extended command when using echo with `exec: false`
+
 ## 2.7.0
 ### Breaking/Feature
 * all classes are prefixed with `cmd` or `terminal` except `.token` (PrimsJS internals) and `.emoji` (this may be feature that fix some bugs, that also may break user code - but it's internal html structure and it's not documented as API) [#510](https://github.com/jcubic/jquery.terminal/issues/510)
