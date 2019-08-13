@@ -5005,7 +5005,7 @@ describe('Terminal plugin', function() {
                         [/\x1bfoo/g, '[[ foo ]]']
                     ];
                     spy(interpreter, 'foo');
-                    term.push(interpreter);
+                    term.push(interpreter).clear();
                 });
                 afterEach(function() {
                     term.pop();
@@ -5045,6 +5045,50 @@ describe('Terminal plugin', function() {
                 it('should invoke cmd method', function() {
                     term.echo('[[ cmd::prompt(">>>") ]]');
                     expect(term.cmd().prompt()).toEqual('>>>');
+                });
+                it('should not execute command by typing', function() {
+                    term.exec('[[ foo ]]');
+                    expect(interpreter.foo).not.toHaveBeenCalled();
+                    expect(a0(term.find('.terminal-command').text())).toEqual('> [[ foo ]]');
+                });
+                it('should not execute command when overwrting exec', function() {
+                    term.echo('[[ foo ]]', { exec: false });
+                    expect(interpreter.foo).not.toHaveBeenCalled();
+                    expect(a0(term.find('.terminal-output > div:last-child').text())).toEqual('[[ foo ]]');
+                });
+                it('should not execute methods', function() {
+                    spy(term, 'clear');
+                    term.echo('bar');
+                    term.echo('[[ terminal::clear() ]]', { invokeMethods: false });
+                    term.echo('[[ foo ]]', { invokeMethods: false });
+                    expect(interpreter.foo).toHaveBeenCalled();
+                    expect(a0(term.find('.terminal-output').text())).toEqual('bar');
+                });
+                it('should execute methods by overwriting options', function() {
+                    var interpreter = {
+                        foo: function() {}
+                    };
+                    var term = $('<div/>').terminal(interpreter, {
+                        checkArity: false,
+                        invokeMethods: false,
+                        greetings: false
+                    });
+                    spy(interpreter, 'foo');
+                    term.echo('[[ foo ]]', { exec: false });
+                    expect(interpreter.foo).not.toHaveBeenCalled();
+                    expect(a0(term.find('.terminal-output').text())).toEqual('[[ foo ]]');
+                    term.echo('[[ foo xx ]]', { exec: true });
+                    expect(interpreter.foo).toHaveBeenCalledWith('xx');
+                    spy(term, 'clear');
+                    expect(term.clear).not.toHaveBeenCalled();
+                    term.echo('[[ terminal::clear() ]]');
+                    expect(term.clear).not.toHaveBeenCalled();
+                    term.echo('[[ terminal::clear() ]]', { exec: true });
+                    expect(term.clear).not.toHaveBeenCalled();
+                    term.echo('[[ terminal::clear() ]]', { invokeMethods: true, exec: false });
+                    expect(term.clear).not.toHaveBeenCalled();
+                    term.echo('[[ terminal::clear() ]]', { invokeMethods: true });
+                    expect(term.clear).toHaveBeenCalled();
                 });
             });
         });
