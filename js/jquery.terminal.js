@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.7.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Tue, 13 Aug 2019 16:18:17 +0000
+ * Date: Wed, 14 Aug 2019 13:03:24 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3916,8 +3916,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.7.1',
-        date: 'Tue, 13 Aug 2019 16:18:17 +0000',
+        version: 'DEV',
+        date: 'Wed, 14 Aug 2019 13:03:24 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5520,6 +5520,13 @@
         onEchoCommand: $.noop,
         onPaste: $.noop,
         onFlush: $.noop,
+        onBeforeCommands: null,
+        onAfterCommand: null,
+        onBeforeEcho: null,
+        onAfterEcho: null,
+        onBeforeLogin: null,
+        onAfterLogout: null,
+        onBeforeLogout: null,
         allowedAttributes: ['title', /^aria-/, 'id', /^data-/],
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
@@ -6671,25 +6678,11 @@
         // :: function is defined. The check for this is in the self.pop method
         // ---------------------------------------------------------------------
         function global_logout() {
-            if (is_function(settings.onBeforeLogout)) {
-                try {
-                    if (settings.onBeforeLogout.call(self, self) === false) {
-                        return;
-                    }
-                } catch (e) {
-                    settings.onBeforeLogout = $.noop;
-                    display_exception(e, 'onBeforeLogout');
-                }
+            if (fire_event('onBeforeLogout', [], true) === false) {
+                return;
             }
             clear_loging_storage();
-            if (is_function(settings.onAfterLogout)) {
-                try {
-                    settings.onAfterLogout.call(self, self);
-                } catch (e) {
-                    settings.onAfterLogout = $.noop;
-                    display_exception(e, 'onAfterlogout');
-                }
-            }
+            fire_event('onAfterlogout', [], true);
             self.login(global_login_fn, true, initialize);
         }
         // ---------------------------------------------------------------------
@@ -6758,11 +6751,11 @@
             }
         }
         // ---------------------------------------------------------------------
-        function fire_event(name, args) {
+        function fire_event(name, args, skip_local) {
             args = (args || []).concat([self]); // create new array
             // even can be fired before interpreters is created
             var top = interpreters && interpreters.top();
-            if (top && is_function(top[name])) {
+            if (top && is_function(top[name]) && !skip_local) {
                 try {
                     return top[name].apply(self, args);
                 } catch (e) {
@@ -7269,20 +7262,24 @@
                 if (settings.history) {
                     command_line.history().disable();
                 }
+                function popUserPass() {
+                    while (self.level() > level) {
+                        self.pop(undefined, true);
+                    }
+                    if (settings.history) {
+                        command_line.history().enable();
+                    }
+                }
                 // so we know how many times call pop
                 var level = self.level();
                 function login_callback(user, token, silent) {
                     if (token) {
-                        while (self.level() > level) {
-                            self.pop(undefined, true);
-                        }
-                        if (settings.history) {
-                            command_line.history().enable();
-                        }
+                        popUserPass();
                         var name = self.prefix_name(true) + '_';
                         storage.set(name + 'token', token);
                         storage.set(name + 'login', user);
                         in_login = false;
+                        fire_event('onAfterLogin', [user, token]);
                         if (is_function(success)) {
                             // will be used internaly since users know
                             // when login success (they decide when
@@ -7311,11 +7308,18 @@
                     self.off('terminal.autologin');
                 }
                 self.on('terminal.autologin', function(event, user, token, silent) {
+                    if (fire_event('onBeforeLogin', [user, token]) === false) {
+                        return;
+                    }
                     login_callback(user, token, silent);
                 });
                 self.push(function(user) {
                     self.set_mask(settings.maskChar).push(function(pass) {
                         try {
+                            if (fire_event('onBeforeLogin', [user, pass]) === false) {
+                                popUserPass();
+                                return;
+                            }
                             var ret = auth.call(self, user, pass, function(
                                 token,
                                 silent) {
@@ -8128,27 +8132,34 @@
                                 self.flush();
                             }
                         }
+                        if (fire_event('onBeforeEcho', [arg]) === false) {
+                            return;
+                        }
+                        var value;
                         if (typeof arg === 'function') {
-                            arg = arg.bind(self);
+                            value = arg.bind(self);
                         } else if (typeof arg === 'undefined') {
                             if (arg_defined) {
-                                arg = String(arg);
+                                value = String(arg);
                             } else {
-                                arg = '';
+                                value = '';
                             }
+                        } else {
+                            value = arg;
                         }
                         process_line({
-                            string: arg,
+                            string: value,
                             options: locals,
                             index: lines.length
                         });
                         // extended commands should be processed only
                         // once in echo and not on redraw
-                        lines.push([arg, $.extend(locals, {
+                        lines.push([value, $.extend(locals, {
                             exec: false
                         })]);
                         if (locals.flush) {
                             self.flush();
+                            fire_event('onAfterEcho', [arg]);
                         }
                     } catch (e) {
                         // if echo throw exception we can't use error to

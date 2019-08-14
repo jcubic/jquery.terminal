@@ -423,7 +423,9 @@ type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabl
     "holdRepeatTimeout" | "request" | "describe" | "onRPCError" | "doubleTab" | "completion" |
     "onInit" | "onClear" | "onBlur" | "onFocus" | "onExit" | "onTerminalChange" | "onPush" | "onPaste" |
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
-    "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand" | "mobileIngoreAutoSpace";
+    "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand" | "mobileIngoreAutoSpace" |
+    "onBeforeCommand" | "onAfterCommand" | "onBeforeLogout" |  "onAfterLogout" | "onBeforeLogin" |
+    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho";
 
 
 type TerminalOptions = {
@@ -448,9 +450,6 @@ type TerminalOptions = {
     memory?: boolean;
     cancelableAjax?: boolean;
     processArguments?: boolean;
-    onPaste?: (this: JQueryTerminal, value: string) => TypeOrPromise<string | Blob> | void;
-    onCommandChange?: (this: JQueryTerminal, command: string, term: JQueryTerminal) => void;
-    onPositionChange?: (this: JQueryTerminal, position: number, display_position: number, term: JQueryTerminal) => void;
     linksNoReferrer?: boolean;
     javascriptLinks?: boolean;
     processRPCResponse?: null | JQueryTerminal.processRPCResponseFunction;
@@ -469,7 +468,6 @@ type TerminalOptions = {
     scrollOnEcho?: boolean;
     login?: JQueryTerminal.LoginArgument;
     outputLimit?: number;
-    onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status: string, error: string) => void;
     pasteImage?: boolean;
     scrollBottomOffset?: boolean;
     wordAutocomplete?: boolean;
@@ -487,19 +485,31 @@ type TerminalOptions = {
     doubleTab?: JQueryTerminal.DoubleTabFunction;
     doubleTabEchoCommand?: boolean;
     completion?: JQueryTerminal.Completion;
+    keypress?: JQueryTerminal.KeyEventHandler;
+    keydown?: JQueryTerminal.KeyEventHandler;
+    onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status: string, error: string) => void;
+    onFocus?: JQueryTerminal.EventCallback;
     onInit?: JQueryTerminal.EventCallback;
     onClear?: JQueryTerminal.EventCallback;
     onBlur?: JQueryTerminal.EventCallback;
-    onFocus?: JQueryTerminal.EventCallback;
     onExit?: JQueryTerminal.EventCallback;
+    onPop?: JQueryTerminal.PushPopCallback;
     onTerminalChange?: JQueryTerminal.EventCallback;
     onPush?: JQueryTerminal.PushPopCallback;
-    onPop?: JQueryTerminal.PushPopCallback;
-    keypress?: JQueryTerminal.KeyEventHandler;
-    keydown?: JQueryTerminal.KeyEventHandler;
     onAfterRedraw?: JQueryTerminal.EventCallback;
     onEchoCommand?: (this: JQueryTerminal, div: JQuery, command: string, term: JQueryTerminal) => void;
     onFlush?: JQueryTerminal.EventCallback;
+    onPaste?: (this: JQueryTerminal, value: string) => TypeOrPromise<string | Blob> | void;
+    onCommandChange?: (this: JQueryTerminal, command: string, term: JQueryTerminal) => void;
+    onPositionChange?: (this: JQueryTerminal, position: number, display_position: number, term: JQueryTerminal) => void;
+    onBeforeCommand?: (this: JQueryTerminal, command: string) => (boolean | void);
+    onAfterCommand?: (this: JQueryTerminal, command: string) => void;
+    onBeforeLogout?: (this: JQueryTerminal) => (boolean | void);
+    onAfterLogout?: (this: JQueryTerminal) => void;
+    onBeforeLogin?: (this: JQueryTerminal, user: string, tokenOrPass: string) => (boolean | void);
+    onAfterLogin?: (this: JQueryTerminal, user: string, token: string) => void;
+    onBeforeEcho?: (this: JQueryTerminal, value: JQueryTerminal.echoValue) => (boolean | void);
+    onAfterEcho?: (this: JQueryTerminal, value: JQueryTerminal.echoValue) => void;
     strings?: JQueryTerminal.strings;
 }
 

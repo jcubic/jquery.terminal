@@ -1,3 +1,9 @@
+## 2.8.0
+### Feature
+* new events `onBeforeLogin`, `onAfterLogin`, `onBeforeEcho` and `onAfterEcho`
+### Bugfix
+* add missing `onAfterCommand` and `onBeforeCommand` to d.ts file
+
 ## 2.7.1
 ### Bugfix
 * fix invoking methods by typing it into terminal [#512](https://github.com/jcubic/jquery.terminal/issues/512)
