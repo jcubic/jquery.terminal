@@ -5520,7 +5520,7 @@
         onEchoCommand: $.noop,
         onPaste: $.noop,
         onFlush: $.noop,
-        onBeforeCommands: null,
+        onBeforeCommand: null,
         onAfterCommand: null,
         onBeforeEcho: null,
         onAfterEcho: null,

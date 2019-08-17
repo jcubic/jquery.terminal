@@ -3,6 +3,7 @@
 * new events `onBeforeLogin`, `onAfterLogin`, `onBeforeEcho` and `onAfterEcho`
 ### Bugfix
 * add missing `onAfterCommand` and `onBeforeCommand` to d.ts file
+* fix Emoji [#514](https://github.com/jcubic/jquery.terminal/issues/514)
 
 ## 2.7.1
 ### Bugfix

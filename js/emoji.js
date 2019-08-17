@@ -50,6 +50,26 @@
         factory(root.jQuery, root.Prism);
     }
 })(function($) {
+    // https://2ality.com/2013/09/javascript-unicode.html
+    function toUTF16(codePoint) {
+        var TEN_BITS = parseInt('1111111111', 2);
+        function u(codeUnit) {
+            return '\\u'+codeUnit.toString(16).toUpperCase();
+        }
+
+        if (codePoint <= 0xFFFF) {
+            return u(codePoint);
+        }
+        codePoint -= 0x10000;
+
+        // Shift right to get to most significant 10 bits
+        var leadSurrogate = 0xD800 + (codePoint >> 10);
+
+        // Mask to get least significant 10 bits
+        var tailSurrogate = 0xDC00 + (codePoint & TEN_BITS);
+
+        return u(leadSurrogate) + u(tailSurrogate);
+    }
     // emoji_data param need to be JavaScript object from
     // https://unpkg.com/emoji-datasource-twitter/emoji.json
     $.terminal.emoji = function(emoji_data) {
@@ -85,9 +105,13 @@
             emoji_data.forEach(function(emoji) {
                 if (emoji.unified) {
                     var unicode = emoji.unified.split('-').map(function(u) {
+                        var x = parseInt(u, 16);
+                        if (x > 0xFFFF) {
+                            return toUTF16(x);
+                        }
                         return '\\u' + u;
                     }).join('');
-                    var re = new RegExp('(' + unicode + ')', 'gu');
+                    var re = new RegExp('(' + unicode + ')', 'g');
                     if (re.test(result[0])) {
                         result = $.terminal.tracking_replace(
                             result[0],
