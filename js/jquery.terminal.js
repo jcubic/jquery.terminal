@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 16 Aug 2019 19:21:42 +0000
+ * Date: Sun, 18 Aug 2019 10:00:45 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3917,7 +3917,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 16 Aug 2019 19:21:42 +0000',
+        date: 'Sun, 18 Aug 2019 10:00:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4447,20 +4447,54 @@
             }
             var stack = [];
             var re = /((?:\[\[(?:[^\][]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
-            var format_re = /(\[\[(?:[^\][]|\\\])+\])[\s\S]*/;
-            return string.split(re).filter(Boolean).map(function(string) {
-                if (string.match(/^\[\[/)) {
-                    if (!$.terminal.is_formatting(string)) {
-                        string += ']';
-                        stack.push(string.replace(format_re, '$1'));
+            var format_re = /\[\[((?:[^\][]|\\\])+)\][\s\S]*/;
+            var format_split_re = /^\[\[([^;]*);([^;]*);([^;\]]*)\]/;
+            function get_inherit_style(stack) {
+                var style = ['', '', ''];
+                if (!stack.length) {
+                    return style;
+                }
+                for (var i = stack.length; i--;) {
+                    var formatting = stack[i].split(';');
+                    for (var j = 0; j < style.length; ++j) {
+                        var value = formatting[j].trim();
+                        if (value && !style[j]) {
+                            style[j] = value;
+                        }
                     }
+                }
+                return style;
+            }
+            return string.split(re).filter(Boolean).map(function(string) {
+                var style;
+                if (string.match(/^\[\[/)) {
+                    var formatting = string.replace(format_re, '$1');
+                    var is_formatting = $.terminal.is_formatting(string);
+                    string = string.replace(format_split_re, '');
+                    stack.push(formatting);
+                    if ($.terminal.nested_formatting.__inherit__) {
+                        style = get_inherit_style(stack).join(';');
+                    } else {
+                        style = formatting;
+                    }
+                    if (!is_formatting) {
+                        string += ']';
+                    } else {
+                        stack.pop();
+                    }
+                    string = '[[' + style + ']' + string;
                 } else {
                     var pop = false;
                     if (string.match(/\]/)) {
                         pop = true;
                     }
                     if (stack.length) {
-                        string = stack[stack.length - 1] + string;
+                        if ($.terminal.nested_formatting.__inherit__) {
+                            style = get_inherit_style(stack).join(';');
+                        } else {
+                            style = stack[stack.length - 1];
+                        }
+                        string = '[[' + style + ']' + string;
                     }
                     if (pop) {
                         stack.pop();
@@ -5448,6 +5482,8 @@
     // :: Default options
     // -----------------------------------------------------------------------
     $.terminal.nested_formatting.__meta__ = true;
+    // if set to true nested formatting will inherit styles from styles outside
+    $.terminal.nested_formatting.__inherit__ = false;
     // nested formatting will always return different length so we silent the warning
     $.terminal.nested_formatting.__no_warn__ = true;
     $.terminal.defaults = {
@@ -5520,7 +5556,7 @@
         onEchoCommand: $.noop,
         onPaste: $.noop,
         onFlush: $.noop,
-        onBeforeCommands: null,
+        onBeforeCommand: null,
         onAfterCommand: null,
         onBeforeEcho: null,
         onAfterEcho: null,

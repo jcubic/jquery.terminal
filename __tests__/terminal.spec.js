@@ -500,15 +500,30 @@ describe('Terminal utils', function() {
         var specs = [
             [
                 '[[;red;]foo[[;blue;]bar]baz]',
-                '[[;red;]foo][[;blue;]bar][[;red;]baz]'
+                '[[;red;]foo][[;blue;]bar][[;red;]baz]',
+                true
             ],
             [
                 '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]',
-                '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]'
+                '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]',
+                false
+            ],
+            [
+                '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]',
+                '[[;#fff;] lorem ][[b;#fff;]ipsum ][[s;#fff;]dolor][[b;#fff;] sit][[;#fff;] amet]',
+                true
             ]
         ];
+        var __inherit__;
+        beforeEach(function() {
+            __inherit__ = $.terminal.nested_formatting.__inherit__;
+        });
+        afterEach(function() {
+            $.terminal.nested_formatting.__inherit__ = __inherit__;
+        });
         it('should create list of formatting', function() {
             specs.forEach(function(spec) {
+                $.terminal.nested_formatting.__inherit__ = spec[2];
                 expect($.terminal.nested_formatting(spec[0])).toEqual(spec[1]);
             });
         });
