@@ -4447,7 +4447,7 @@
             }
             var stack = [];
             var re = /((?:\[\[(?:[^\][]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
-            var format_re = /\[\[((?:[^\][]|\\\])+)\][\s\S]*/;
+            var format_re = /\[\[([^\][]+)\][\s\S]*/;
             var format_split_re = /^\[\[([^;]*);([^;]*);([^;\]]*)\]/;
             function get_inherit_style(stack) {
                 var style = ['', '', ''];
