@@ -510,16 +510,17 @@ describe('Terminal utils', function() {
             ],
             [
                 '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]',
-                '[[;#fff;] lorem ][[b;#fff;]ipsum ][[s;#fff;]dolor][[b;#fff;] sit][[;#fff;] amet]',
+                '[[;#fff;] lorem ][[b;#fff;]ipsum ][[sb;#fff;]dolor][[b;#fff;] sit][[;#fff;] amet]',
+                true
+            ],
+            [
+                '[[bu;#fff;]hello [[u-b;;] world] from js]',
+                '[[bu;#fff;]hello ][[u;#fff;] world][[bu;#fff;] from js]',
                 true
             ]
         ];
-        var __inherit__;
-        beforeEach(function() {
-            __inherit__ = $.terminal.nested_formatting.__inherit__;
-        });
         afterEach(function() {
-            $.terminal.nested_formatting.__inherit__ = __inherit__;
+            $.terminal.nested_formatting.__inherit__ = false;
         });
         it('should create list of formatting', function() {
             specs.forEach(function(spec) {
