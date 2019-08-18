@@ -783,3 +783,24 @@ terminal .terminal-output > div {
     }
 }
 */
+/* style for autocomplete menu */
+.cmd .cursor-wrapper ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    float: left;
+    position: absolute;
+    top: 14px;
+    left: 0;
+}
+.cmd .cursor-wrapper li {
+    cursor: pointer;
+    white-space: nowrap;
+}
+.cmd .cursor-wrapper li:hover {
+    background: #aaa;
+    color: #000;
+}
+.cursor-wrapper {
+    position: relative;
+}
