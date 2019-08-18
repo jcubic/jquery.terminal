@@ -1,9 +1,11 @@
 ## 2.8.0
 ### Feature
 * new events `onBeforeLogin`, `onAfterLogin`, `onBeforeEcho` and `onAfterEcho`
+* inherit of style in nesting formatter (with flag `__inherit__ = true` on `nested_formatting`) [#513](https://github.com/jcubic/jquery.terminal/issues/513)
 ### Bugfix
 * add missing `onAfterCommand` and `onBeforeCommand` to d.ts file
 * fix Emoji [#514](https://github.com/jcubic/jquery.terminal/issues/514)
+* fix nesting with prism formatter
 
 ## 2.7.1
 ### Bugfix

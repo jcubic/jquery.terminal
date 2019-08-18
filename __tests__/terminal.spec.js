@@ -514,8 +514,8 @@ describe('Terminal utils', function() {
                 true
             ],
             [
-                '[[bu;#fff;]hello [[u-b;;] world] from js]',
-                '[[bu;#fff;]hello ][[u;#fff;] world][[bu;#fff;] from js]',
+                '[[b;#fff;]hello [[u-b;;] world] from js]',
+                '[[b;#fff;]hello ][[u;#fff;] world][[b;#fff;] from js]',
                 true
             ]
         ];
