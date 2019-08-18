@@ -54,7 +54,7 @@
     function toUTF16(codePoint) {
         var TEN_BITS = parseInt('1111111111', 2);
         function u(codeUnit) {
-            return '\\u'+codeUnit.toString(16).toUpperCase();
+            return '\\u' + codeUnit.toString(16).toUpperCase();
         }
 
         if (codePoint <= 0xFFFF) {
