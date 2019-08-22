@@ -83,7 +83,7 @@
             }
         }
         var ul;
-        if (typeof options.completion !== 'undefined') {
+        if (typeof settings.completion !== 'undefined') {
             var onInit = settings.onInit || $.noop;
             var keydown = settings.keydown || $.noop;
             var completion = settings.completion;

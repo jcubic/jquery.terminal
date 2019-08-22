@@ -14,7 +14,7 @@
  * Released under the MIT license
  *
  */
-/* global define, global, require, module */
+/* global define, global, require, module, Image, URL */
 (function(factory, undefined) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {
@@ -51,20 +51,86 @@
         factory(root.jQuery);
     }
 })(function($) {
+    var img_split_re = /(\[\[(?:@|[^;])*;[^;]*;[^\]]*\]\])/;
+    var img_re = /\[\[(?:@|[^;])*;[^;]*;[^;]*;[^;]*;([^;]*)\]\]/;
+    // slice images into terminal lines - each line is unique blob url
+
+    function slice_image(img_data, width, y1, y2) {
+        // render slice on canvas and get Blob Data URI
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        canvas.width = width;
+        canvas.height = y2 - y1;
+        ctx.putImageData(img_data, 0, 0);
+        var defer = $.Deferred();
+        canvas.toBlob(function(blob) {
+            defer.resolve(URL.createObjectURL(blob));
+        });
+        return defer.promise();
+    }
+    function slice(src, options) {
+        var settings = $.extend({
+            width: null,
+            line_height: null
+        }, options);
+        var img = new Image();
+        var defer = $.Deferred();
+        var slices = [];
+        img.onload = function() {
+            var height, width;
+            if (settings.width < img.width) {
+                height = (img.height * settings.width) / img.width;
+                width = settings.width;
+            } else {
+                height = img.height;
+                width = img.width;
+            }
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+            // scale the image to fit the terminal
+            ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, width, height);
+            (function recur(start) {
+                // loop over slices
+                if (start < height) {
+                    var y1 = start, y2 = start + settings.line_height;
+                    if (y2 > height) {
+                        y2 = height;
+                    }
+                    var img_data = ctx.getImageData(0, y1, width, y2);
+                    slice_image(img_data, width, y1, y2).then(function(uri) {
+                        slices.push(uri);
+                        recur(y2);
+                    });
+                } else {
+                    defer.resolve(slices);
+                }
+            })(0);
+        };
+        // images need to have CORS if on different server,
+        // without this it will throw error
+        img.crossOrigin = "anonymous";
+        img.src = src;
+        return defer.promise();
+    }
+    // -----------------------------------------------------------------------------------
     function less(term, text, options) {
         var export_data = term.export_view();
         var cols, rows;
         var pos = 0;
         var original_lines;
         var lines;
-        var prompt;
+        var prompt = '';
         var left = 0;
+        var $output = term.find('.terminal-output');
+        var cmd = term.cmd();
         function print() {
             term.clear();
             if (lines.length - pos > rows - 1) {
                 prompt = ':';
             } else {
-                prompt = '[[;;;inverted](END)]';
+                prompt = '[[;;;cmd-inverted](END)]';
             }
             term.set_prompt(prompt);
             var to_print = lines.slice(pos, pos + rows - 1);
@@ -83,14 +149,31 @@
         }
         function quit() {
             term.pop().import_view(export_data);
-            //term.off('mousewheel', wheel);
+            clear_cache();
             if ($.isFunction(options.exit)) {
                 options.exit();
             }
         }
+        var cache = {};
+        function clear_cache() {
+            Object.keys(cache).forEach(function(width) {
+                Object.keys(cache[width]).forEach(function(img) {
+                    cache[width][img].forEach(function(uri) {
+                        URL.revokeObjectURL(uri);
+                    });
+                });
+            });
+            cache = {};
+        }
+        function fixed_output() {
+            // this will not change on resize, but the font size may change
+            var height = cmd.outerHeight(true);
+            $output.css('height', 'calc(100% - ' + height + 'px)');
+        }
         function refresh_view() {
             cols = term.cols();
             rows = term.rows();
+            fixed_output();
             function run(arg) {
                 var text;
                 if (arg instanceof Array) {
@@ -106,10 +189,54 @@
                     if (options.formatters) {
                         text = $.terminal.apply_formatters(text);
                     }
-                    original_lines = text.split('\n');
+                    // split images
+                    var defer = $.Deferred();
+                    var parts = text.split(img_split_re).filter(Boolean);
+                    var promise = defer.promise();
+                    if (parts.length === 1) {
+                        defer.resolve(parts);
+                    } else {
+                        var result = [];
+                        (function recur() {
+                            function concat_slices(slices) {
+                                cache[width][img] = slices;
+                                result = result.concat(slices.map(function(uri) {
+                                    return '[[@;;;;' + uri + ']]';
+                                }));
+                                recur();
+                            }
+                            if (!parts.length) {
+                                return defer.resolve(result);
+                            }
+                            var part = parts.shift();
+                            var m = part.match(img_re);
+                            if (m) {
+                                var img = m[1];
+                                var cursor = term.find('.cmd-cursor')[0];
+                                var rect = cursor.getBoundingClientRect();
+                                var width = term.width();
+                                var opts = {width: width, line_height: rect.height};
+                                cache[width] = cache[width] || {};
+                                if (cache[width][img]) {
+                                    concat_slices(cache[width][img]);
+                                } else {
+                                    slice(img, opts).then(concat_slices);
+                                }
+                            } else {
+                                result = result.concat(part.split('\n'));
+                                recur();
+                            }
+                        })();
+                    }
+                    promise.then(function(l) {
+                        original_lines = l;
+                        lines = original_lines.slice();
+                        print();
+                    });
+                } else {
+                    lines = original_lines.slice();
+                    print();
                 }
-                lines = original_lines.slice();
-                print();
             }
             if ($.isFunction(text)) {
                 text(cols, run);
@@ -173,7 +300,7 @@
             return index;
         }
         term.push($.noop, {
-            resize: refresh_view,
+            onResize: refresh_view,
             mousewheel: function(event, delta) {
                 if (delta > 0) {
                     pos -= scroll_by;
@@ -265,6 +392,7 @@
             prompt: prompt
         });
     }
+    // -----------------------------------------------------------------------------------
     $.fn.less = function(text, options) {
         var settings = $.extend({
             onExit: $.noop,

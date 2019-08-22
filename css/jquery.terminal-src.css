@@ -103,6 +103,7 @@ body.full-screen-terminal .terminal {
 }
 .terminal > div:not(.terminal-font) {
     min-height: 100%;
+    height: 100%;
 }
 .terminal > .terminal-resizer, .terminal > .terminal-font .terminal-resizer {
     position: absolute;
@@ -183,7 +184,7 @@ body.full-screen-terminal .terminal {
     font-size: 12px;
     line-height: 15px;
 }
-.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-error):not(.emoji),
+.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
 .cmd span:not(.cmd-inverted):not(.token):not(.emoji) {
     color: #aaa;
     background-color: #000;
@@ -613,7 +614,7 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-error):not(.emoji),
+    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
@@ -803,4 +804,11 @@ terminal .terminal-output > div {
 }
 .cursor-wrapper {
     position: relative;
+}
+/* images */
+.terminal-output div[style*="100%;"] {
+    overflow: hidden;
+}
+.terminal-output img {
+    display: block;
 }

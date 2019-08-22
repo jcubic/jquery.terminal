@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 18 Aug 2019 10:00:45 +0000
+ * Date: Thu, 22 Aug 2019 19:36:49 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3370,11 +3370,15 @@
     // https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
     var mobile_re = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i;
     var tablet_re = /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i;
-    var format_split_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]\\]*(?:\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?)/i;
-    var format_parts_re = /\[\[([!gbiuso]*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]\\]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]+)\]?/gi;
-    var format_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
-    var format_exist_re = /\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]/gi;
-    var format_full_re = /^\[\[([!gbiuso]*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]$/gi;
+    var format_split_re = /(\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\](?:[^\]\\]*(?:\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?)/i;
+    var format_parts_re = /\[\[((?:-?[@!gbiuso])*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]\\]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]+)\]?/gi;
+    var format_re = /\[\[((?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
+    var format_exist_re = /\[\[((?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]/gi;
+    var format_full_re = /^\[\[((?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]$/gi;
+    var format_begin_re = /(\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\])/i;
+    var format_start_re = /^(\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\])/i;
+    var format_end_re = /\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\]?$/i;
+    var self_closing_re = /^(?:\[\[)?[^;]*@[^;]*;/;
     var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var url_nf_re = /\b(?![^\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
@@ -3383,9 +3387,6 @@
     var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
     var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
     var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
-    var format_begin_re = /(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
-    var format_start_re = /^(\[\[[!gbiuso]*;[^;]*;[^\]]*\])/i;
-    var format_end_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\][]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
@@ -3917,7 +3918,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 18 Aug 2019 10:00:45 +0000',
+        date: 'Thu, 22 Aug 2019 19:36:49 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4280,6 +4281,9 @@
         // ---------------------------------------------------------------------
         normalize: function normalize(string) {
             string = string.replace(format_re, function(_, format, text) {
+                if (format.match(self_closing_re) && text === '') {
+                    return '[[' + format + '] ]';
+                }
                 if (text === '') {
                     return '';
                 }
@@ -4303,6 +4307,7 @@
                 // return '[[' + format + ']' + text + ']';
                 // closing braket will break formatting so we need to escape
                 // those using html entity equvalent
+                // space is hack for images that break iterate_formatting
                 return '[[' + format + semicolons + safe(text) + ']' + text + ']';
             });
             return $.terminal.amp(string);
@@ -4447,23 +4452,37 @@
             }
             var stack = [];
             var re = /((?:\[\[(?:[^\][]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
-            var format_re = /\[\[((?:[^\][]|\\\])+)\][\s\S]*/;
-            var format_split_re = /^\[\[([^;]*);([^;]*);([^;\]]*)\]/;
+            var format_re = /\[\[([^\][]+)\][\s\S]*/;
+            var format_split_re = /^\[\[([^;]*);([^;]*);([^\]]*)\]/;
             function get_inherit_style(stack) {
-                var style = ['', '', ''];
+                var output = [[], '', ''];
                 if (!stack.length) {
-                    return style;
+                    return output;
                 }
                 for (var i = stack.length; i--;) {
                     var formatting = stack[i].split(';');
-                    for (var j = 0; j < style.length; ++j) {
+                    var style = formatting[0].split(/(-?[@!gbiuso])/g).filter(Boolean);
+                    style.forEach(function(s) {
+                        if (output[0].indexOf(s) === -1) {
+                            output[0].push(s);
+                        }
+                    });
+                    for (var j = 1; j < output.length; ++j) {
                         var value = formatting[j].trim();
-                        if (value && !style[j]) {
-                            style[j] = value;
+                        if (value && !output[j]) {
+                            output[j] = value;
                         }
                     }
                 }
-                return style;
+                var ignore = output[0].filter(function(s) {
+                    return s[0] === '-';
+                }).map(function(s) {
+                    return s[1];
+                });
+                output[0] = output[0].filter(function(s) {
+                    return ignore.indexOf(s) === -1 && ignore.indexOf(s[1]) === -1;
+                }).join('');
+                return output.join(';');
             }
             return string.split(re).filter(Boolean).map(function(string) {
                 var style;
@@ -4473,7 +4492,7 @@
                     string = string.replace(format_split_re, '');
                     stack.push(formatting);
                     if ($.terminal.nested_formatting.__inherit__) {
-                        style = get_inherit_style(stack).join(';');
+                        style = get_inherit_style(stack);
                     } else {
                         style = formatting;
                     }
@@ -4490,7 +4509,7 @@
                     }
                     if (stack.length) {
                         if ($.terminal.nested_formatting.__inherit__) {
-                            style = get_inherit_style(stack).join(';');
+                            style = get_inherit_style(stack);
                         } else {
                             style = stack[stack.length - 1];
                         }
@@ -4685,6 +4704,7 @@
                 escape: true,
                 anyLinks: false
             }, options || {});
+            // -----------------------------------------------------------------
             function filter_attr_names(names) {
                 if (names.length && settings.allowedAttributes.length) {
                     return names.filter(function(name) {
@@ -4709,6 +4729,40 @@
                 }
                 return [];
             }
+            // -----------------------------------------------------------------
+            function clean_data(data, text) {
+                if (data === '') {
+                    return text;
+                } else {
+                    return data.replace(/&#93;/g, ']')
+                        .replace(/>/g, '&gt;').replace(/</g, '&lt;');
+                }
+            }
+            // -----------------------------------------------------------------
+            function add_attrs(attrs) {
+                if (attrs) {
+                    var keys = filter_attr_names(Object.keys(attrs));
+                    if (keys.length) {
+                        return ' ' + keys.map(function(name) {
+                            var value = attrs[name].replace(/"/g, '&quot;');
+                            return name + '="' + value + '"';
+                        }).join(' ');
+                    }
+                }
+                return '';
+            }
+            // -----------------------------------------------------------------
+            function rel_attr() {
+                var rel = ["noopener"];
+                if (settings.linksNoReferrer) {
+                    rel.unshift("noreferrer");
+                }
+                if (settings.linksNoFollow) {
+                    rel.unshift("nofollow");
+                }
+                return rel;
+            }
+            // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
                 var attrs;
                 if (data_text.match(/;/)) {
@@ -4722,7 +4776,7 @@
                     } catch (e) {
                     }
                 }
-                if (text === '') {
+                if (text === '' && !style.match(/@/)) {
                     return ''; //'<span>&nbsp;</span>';
                 }
                 text = safe(text);
@@ -4766,13 +4820,7 @@
                 if ($.terminal.valid_color(background)) {
                     style_str += 'background-color:' + background + ';';
                 }
-                var data;
-                if (data_text === '') {
-                    data = text;
-                } else {
-                    data = data_text.replace(/&#93;/g, ']')
-                        .replace(/>/g, '&gt;').replace(/</g, '&lt;');
-                }
+                var data = clean_data(data_text, text);
                 var extra = extra_css(text, options);
                 if (extra) {
                     text = wide_characters(text, options);
@@ -4793,38 +4841,30 @@
                         if (data) {
                             result += ' href="' + data + '"';
                         }
-                        var rel = ["noopener"];
-                        if (settings.linksNoReferrer) {
-                            rel.unshift("noreferrer");
-                        }
-                        if (settings.linksNoFollow) {
-                            rel.unshift("nofollow");
-                        }
-                        result += ' rel="' + rel.join(' ') + '"';
+                        result += ' rel="' + rel_attr().join(' ') + '"';
                     }
                     // make focus to terminal textarea that will enable
                     // terminal when pressing tab and terminal is disabled
                     result += ' tabindex="1000"';
+                } else if (style.indexOf('@') !== -1) {
+                    result = '<img';
+                    if (data.match(/^(https?:|blob:|data:)/)) {
+                        result += ' src="' + data + '"';
+                    }
                 } else {
                     result = '<span';
                 }
+                result += add_attrs(attrs);
                 if (style_str !== '') {
                     result += ' style="' + style_str + '"';
-                }
-                if (attrs) {
-                    var keys = filter_attr_names(Object.keys(attrs));
-                    if (keys.length) {
-                        result += ' ' + keys.map(function(name) {
-                            var value = attrs[name].replace(/"/g, '&quot;');
-                            return name + '="' + value + '"';
-                        }).join(' ');
-                    }
                 }
                 if (_class !== '') {
                     result += ' class="' + _class + '"';
                 }
                 if (style.indexOf('!') !== -1) {
                     result += '>' + text + '</a>';
+                } else if (style.indexOf('@') !== -1) {
+                    result += '/>';
                 } else {
                     result += ' data-text="' + data.replace(/"/g, '&quot;') + '">' +
                         text + '</span>';
@@ -5610,7 +5650,6 @@
     var change_hash = false; // don't change hash on Init
     var fire_hash_change = true;
     var first_instance = true; // used by history state
-    //object_debugger($.fn, 'jquery')();
     $.fn.terminal = function(init_interpreter, options) {
         function StorageHelper(memory) {
             if (memory) {
@@ -6319,8 +6358,8 @@
                                 display_exception(e, 'FORMATTING');
                             }
                         }
-                        var parts = string.split(format_exec_re);
                         if (line_settings.exec) {
+                            var parts = string.split(format_exec_re);
                             string = $.map(parts, function(string) {
                                 if (string && string.match(format_exec_re) &&
                                     !$.terminal.is_formatting(string)) {
@@ -7990,6 +8029,7 @@
                         typeof settings.numRows !== 'undefined') {
                         command_line.resize(settings.numChars);
                         self.refresh();
+                        fire_event('onResize');
                         return;
                     }
                     var new_num_chars = get_num_chars(self, char_size);
