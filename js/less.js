@@ -150,6 +150,7 @@
         function quit() {
             term.pop().import_view(export_data);
             clear_cache();
+            $output.css('height', '');
             if ($.isFunction(options.exit)) {
                 options.exit();
             }
