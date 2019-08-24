@@ -79,7 +79,7 @@
         img.onload = function() {
             var height, width;
             if (settings.width < img.width) {
-                height = (img.height * settings.width) / img.width;
+                height = Math.floor((img.height * settings.width) / img.width);
                 width = settings.width;
             } else {
                 height = img.height;
