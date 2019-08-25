@@ -15,9 +15,10 @@
 <body>
 
 <script>
+var term;
 jQuery(function($) {
     var id = 1;
-    $('body').terminal(function(command, term) {
+    term = $('body').terminal(function(command, term) {
         if (command == 'help') {
             term.echo("available commands are mysql, js, test");
         } else if (command == 'test'){
