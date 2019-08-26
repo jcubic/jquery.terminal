@@ -1904,7 +1904,7 @@
         }
         // -------------------------------------------------------------------------------
         function right() {
-            if (position < text(command).length) {
+            if (position < bare_text(command).length) {
                 self.position(1, true);
             }
             return false;
@@ -2522,7 +2522,8 @@
                 var opts = $.extend({}, settings, {
                     position: pos
                 });
-                var guess = $.terminal.apply_formatters(command, opts)[1];
+                var string = $.terminal.escape_brackets(command);
+                var guess = $.terminal.apply_formatters(string, opts)[1];
                 if (guess === search_pos) {
                     return 0;
                 } else if (guess < search_pos) {
@@ -2535,7 +2536,7 @@
                 if (formatted_position === 0) {
                     return 0;
                 }
-                string = text(string);
+                string = bare_text(string);
                 var codepoint_len = string.length;
                 var pos = binary_search(0, codepoint_len, formatted_position, cmp);
                 var chars = $.terminal.split_characters(string);
@@ -2664,7 +2665,7 @@
                         // this may look weird but if n is negative we need
                         // to use +
                         removed = command.slice(0, position).slice(n);
-                        string = text(command);
+                        string = bare_text(command);
                         string = string.slice(0, position + n) +
                             string.slice(position, string.length);
                         if (!stay) {
@@ -2691,7 +2692,7 @@
                 if (string !== undefined) {
                     command = clean(string);
                     if (!stay) {
-                        self.position(text(command).length);
+                        self.position(bare_text(command).length);
                     }
                     redraw();
                     fix_textarea();
@@ -2734,8 +2735,8 @@
                 }
             },
             insert: function(string, stay) {
-                var bare_command = text(command);
-                var len = text(string).length;
+                var bare_command = bare_text(command);
+                var len = bare_text(string).length;
                 if (position === bare_command.length) {
                     string = bare_command + string;
                 } else if (position === 0) {
@@ -2812,7 +2813,7 @@
             position: function(n, relative, silent) {
                 if (typeof n === 'number') {
                     var pos = position;
-                    var len = text(command).length;
+                    var len = bare_text(command).length;
                     if (relative) {
                         position += n;
                     } else if (n < 0) {
@@ -2846,9 +2847,9 @@
                 if (n === undefined) {
                     return formatted_position;
                 } else {
-                    var string = formatting(command, true);
+                    var string = formatting($.terminal.escape_formatting(command), true);
                     var len = length(string);
-                    var command_len = text(command).length;
+                    var command_len = bare_text(command).length;
                     var new_formatted_pos;
                     if (relative) {
                         new_formatted_pos = formatted_position + n;

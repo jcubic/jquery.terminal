@@ -2304,7 +2304,7 @@ describe('sub plugins', function() {
     describe('cmd', function() {
         describe('formatting', function() {
             var formatters = $.terminal.defaults.formatters;
-            var cmd
+            var cmd;
             beforeEach(function() {
                 cmd = $('<div/>').cmd();
                 $.terminal.defaults.formatters = formatters.slice();
@@ -2787,6 +2787,15 @@ describe('Terminal plugin', function() {
             });
         });
     });
+    function without_formatters(fn) {
+        return function() {
+            var formatters = $.terminal.defaults.formatters;
+            $.terminal.defaults.formatters = [];
+            var ret = fn();
+            $.terminal.defaults.formatters = formatters;
+            return ret;
+        };
+    }
     describe('events', function() {
         describe('click', function() {
             var term = $('<div/>').terminal($.noop, {greetings: false, clickTimeout: 0});
@@ -2809,6 +2818,16 @@ describe('Terminal plugin', function() {
                     expect(term.get_position()).toBe(pos);
                 }
             });
+            it('should ignore formatting inside cmd', without_formatters(function() {
+                var text = '[[;;]hello] [[bui;;]world]';
+                term.insert(text).focus();
+                for (var pos = 0; pos < text.length; ++pos) {
+                    var node = cmd.find('span[data-text]').eq(pos);
+                    click(node);
+                    expect(term.get_position()).toBe(pos);
+                    expect(term.cmd().display_position()).toBe(pos);
+                }
+            }));
             it('should move cursor when text have emoji', function() {
                 var text = '\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3';
                 var chars = $.terminal.split_characters(text);
@@ -2839,8 +2858,7 @@ describe('Terminal plugin', function() {
                     expect([pos, output]).toEqual([pos, output_str]);
                 }
             }
-            it('should move cursor when over formatting', function() {
-                var formatters = $.terminal.defaults.formatters;
+            it('should move cursor when over formatting', without_formatters(function() {
                 false && ($.terminal.defaults.formatters = [
                     function(string, options) {
                         var result = [string, options.position];
@@ -2859,8 +2877,7 @@ describe('Terminal plugin', function() {
                     '\u263a\ufe0foo   bar     \u263a\ufe0fa\u0038\ufe0f\u20e3 \nfoo     b       baz \nfoobar  ba      br'
                 ];
                 test_click(test);
-                $.terminal.defaults.formatters = formatters;
-            });
+            }));
             it('should align tabs', function() {
                 var tests = [
                     [
@@ -2907,9 +2924,8 @@ describe('Terminal plugin', function() {
                 }).then(function() {
                     return new Promise(function(resolve) {
                         var line = 5;
-                        var offset = get_count(line);
                         (function loop(i) {
-                            var chars = term.find('.cmd [role="presentation"]')
+                            var chars = term.focus().find('.cmd [role="presentation"]')
                                     .eq(line).find('span[data-text]');
                             if (i === chars.length) {
                                 return resolve();
