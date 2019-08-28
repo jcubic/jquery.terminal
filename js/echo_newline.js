@@ -135,14 +135,12 @@
                 }
                 if (last) {
                     term.__echo(last + arg, options);
-                } else {
+                } else if (!arguments.length) {
                     // original echo check length to test if someone call echo
                     // with value that is undefined
-                    if (!arguments.length) {
-                        term.__echo();
-                    } else {
-                        term.__echo(arg, options);
-                    }
+                    term.__echo();
+                } else {
+                    term.__echo(arg, options);
                 }
                 last = '';
                 prompt = '';
