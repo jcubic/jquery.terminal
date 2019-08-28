@@ -191,6 +191,7 @@ declare namespace JQueryTerminal {
         formatters: boolean;
         keepWords: boolean;
         raw: boolean;
+        newline?: boolean;
     }
 
     type EchoOptions = {
@@ -202,6 +203,7 @@ declare namespace JQueryTerminal {
         finalize?: JQueryTerminal.EchoFinalizeFunction;
         keepWords?: boolean;
         formatters?: boolean;
+        newline?: boolean;
     }
 
 
@@ -425,8 +427,7 @@ type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabl
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
     "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand" | "mobileIngoreAutoSpace" |
     "onBeforeCommand" | "onAfterCommand" | "onBeforeLogout" |  "onAfterLogout" | "onBeforeLogin" |
-    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho";
-
+    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho" | "autocompleteMenu";
 
 type TerminalOptions = {
     prompt?: JQueryTerminal.ExtendedPrompt;
@@ -510,6 +511,7 @@ type TerminalOptions = {
     onAfterLogin?: (this: JQueryTerminal, user: string, token: string) => void;
     onBeforeEcho?: (this: JQueryTerminal, value: JQueryTerminal.echoValue) => (boolean | void);
     onAfterEcho?: (this: JQueryTerminal, value: JQueryTerminal.echoValue) => void;
+    autocompleteMenu?: boolean;
     strings?: JQueryTerminal.strings;
 }
 

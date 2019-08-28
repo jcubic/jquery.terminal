@@ -55,6 +55,9 @@
         return jquery_terminal.call(this, interpreter, autocomplete_menu(options));
     };
     function autocomplete_menu(options) {
+        if (options && !options.autocompleteMenu) {
+            return options;
+        }
         var settings = options || {};
         function complete_menu(term, e, list) {
             var matched = [];
