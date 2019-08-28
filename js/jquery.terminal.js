@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Mon, 26 Aug 2019 15:44:36 +0000
+ * Date: Wed, 28 Aug 2019 19:08:46 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3919,7 +3919,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 26 Aug 2019 15:44:36 +0000',
+        date: 'Wed, 28 Aug 2019 19:08:46 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7916,6 +7916,12 @@
             // -------------------------------------------------------------
             get_command: function() {
                 return command_line.get();
+            },
+            // -------------------------------------------------------------
+            // :: echo command and previous prompt (used by echo_newline.js)
+            // -------------------------------------------------------------
+            echo_command: function(command) {
+                return echo_command(command);
             },
             // -------------------------------------------------------------
             // :: Change the command line to the new one

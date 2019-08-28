@@ -7918,6 +7918,12 @@
                 return command_line.get();
             },
             // -------------------------------------------------------------
+            // :: echo command and previous prompt (used by echo_newline.js)
+            // -------------------------------------------------------------
+            echo_command: function(command) {
+                return echo_command(command);
+            },
+            // -------------------------------------------------------------
             // :: Change the command line to the new one
             // -------------------------------------------------------------
             set_command: function(command, silent) {

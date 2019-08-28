@@ -52,67 +52,78 @@
 })(function($) {
     var init = $.fn.terminal;
     $.fn.terminal = function(interpreter, options) {
-        return init.call(this, interpreter, path_options(options)).each(function() {
-            patch_term($(this).data('terminal'));
+        return init.call(this, interpreter, patch_options(options)).each(function() {
+            patch_term($(this).data('terminal'), should_echo_command(options));
         });
     };
     var last;
     var prompt;
-    function path_options(options) {
+    function should_echo_command(options) {
+        return options && options.echoCommand !== false || !options;
+    }
+    function patch_options(options) {
         var keymap = {
             'ENTER': function(e, original) {
                 var term = this;
-                function set(prompt) {
-                    term.echo(prompt + this.get_command());
-                }
                 if (!last) {
-                    var p = this.get_prompt();
-                    if (typeof p === 'string') {
-                        set(p);
-                    } else {
-                        p(set);
+                    if (should_echo_command(options)) {
+                        term.echo_command();
                     }
                 } else {
+                    this.__echo(last + prompt + this.get_command());
+                    this.set_prompt(prompt);
                     last = '';
-                    this.echo(last + prompt + this.get_command());
                 }
                 if (options && options.keymap && options.keymap.ENTER) {
-                    options.keymap(e, original);
+                    options.keymap.ENTER.call(this, e, original);
                 } else {
-                    original(e);
+                    original.call(this, e);
                 }
             }
         };
-        return $.extend({}, options || {}, {
+        var settings = {
             echoCommand: false,
             keymap: $.extend({}, options && options.keymap || {}, keymap)
-        });
+        };
+        return $.extend({}, options || {}, settings);
     }
-    function patch_term(term) {
-        var echo = term.echo;
+    function patch_term(term, echo_command) {
+        term.__echo = term.echo;
+        term.__exec = term.exec;
+        term.exec = function() {
+            last = '';
+            if (echo_command) {
+                this.settings().echoCommand = true;
+            }
+            var ret = term.__exec.apply(this, arguments);
+            if (echo_command) {
+                this.settings().echoCommand = false;
+            }
+            return ret;
+        };
         term.echo = function(arg, options) {
             var settings = $.extend({
                 newline: true
             }, options);
-            if (!prompt) {
-                prompt = term.get_prompt();
-            }
-            var last_line;
             function process(prompt) {
                 // this probably can be simplify because terminal handle
                 // newlines in prompt
+                var last_line;
                 last += arg;
                 arg = last + prompt;
                 var arr = arg.split('\n');
                 if (arr.length === 1) {
                     last_line = arg;
                 } else {
-                    echo(arr.slice(0, -1).join('\n'), options);
+                    term.__echo(arr.slice(0, -1).join('\n'), options);
                     last_line = arr[arr.length - 1];
                 }
                 term.set_prompt(last_line);
             }
             if (settings.newline === false) {
+                if (!prompt) {
+                    prompt = term.get_prompt();
+                }
                 if (typeof prompt === 'string') {
                     process(prompt);
                 } else {
@@ -123,9 +134,15 @@
                     term.set_prompt(prompt);
                 }
                 if (last) {
-                    echo(last + arg, options);
+                    term.__echo(last + arg, options);
                 } else {
-                    echo(arg, options);
+                    // original echo check length to test if someone call echo
+                    // with value that is undefined
+                    if (!arguments.length) {
+                        term.__echo();
+                    } else {
+                        term.__echo(arg, options);
+                    }
                 }
                 last = '';
                 prompt = '';

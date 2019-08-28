@@ -171,6 +171,8 @@ global.wcwidth = require('wcwidth');
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
+require('../js/echo_newline')(global.$);
+//require('../js/autocomplete_menu')(global.$);
 
 jest.setTimeout(10000);
 
@@ -2219,6 +2221,49 @@ describe('Terminal utils', function() {
                     });
                 });
             });
+        });
+    });
+});
+describe('extensions', function() {
+    describe('echo_newline', function() {
+        var term = $('<div/>').terminal();
+        beforeEach(function() {
+            term.clear();
+        });
+        it('should display single line', async function() {
+            var prompt = '>>> ';
+            term.set_prompt(prompt);
+            term.echo('.', {newline: false});
+            await delay(10);
+            term.echo('.', {newline: false});
+            await delay(10);
+            term.echo('.', {newline: false});
+            await delay(10);
+            term.echo('.');
+            expect(term.get_output()).toEqual('....');
+            expect(term.get_prompt()).toEqual(prompt);
+        });
+        it('should echo prompt and command', function() {
+            var prompt = '>>> ';
+            var command = 'hello';
+            term.set_prompt(prompt);
+            term.echo('.', {newline: false});
+            term.echo('.', {newline: false});
+            term.echo('.', {newline: false});
+            term.exec('hello');
+            expect(term.get_output()).toEqual('...' + prompt + command);
+            expect(term.get_prompt()).toEqual(prompt);
+        });
+        it('should echo prompt on enter', function() {
+            var prompt = '>>> ';
+            var command = 'hello';
+            term.set_prompt(prompt);
+            term.echo('.', {newline: false});
+            term.echo('.', {newline: false});
+            term.echo('.', {newline: false});
+            enter(term, command);
+            expect(term.get_output()).toEqual('...' + prompt + command);
+            expect(term.get_prompt()).toEqual(prompt);
         });
     });
 });
@@ -4567,8 +4612,10 @@ describe('Terminal plugin', function() {
                 term.destroy().remove();
                 for (var key in settings) {
                     // name is selector if not defined
-                    if (settings.hasOwnProperty(key) && key !== 'name') {
-                        expect($.terminal.defaults[key]).toEqual(settings[key]);
+                    if (settings.hasOwnProperty(key) &&
+                        !['name', 'exit', 'keymap', 'echoCommand'].includes(key)) {
+                        // without name and exit + exeptions in newline
+                        expect([key, $.terminal.defaults[key]]).toEqual([key, settings[key]]);
                     }
                 }
             });
