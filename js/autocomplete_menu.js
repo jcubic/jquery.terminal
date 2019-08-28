@@ -7,7 +7,7 @@
  *           \/              /____/
  * http://terminal.jcubic.pl
  *
- * Wwrapper for options that will create autocomplete menu for jQuery Terminal
+ * Wrapper for options that will create autocomplete menu for jQuery Terminal
  *
  * Copyright (c) 2014-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
