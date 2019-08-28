@@ -102,7 +102,7 @@
                 // this probably can be simplify because terminal handle
                 // newlines in prompt
                 last += arg;
-                arg += prompt;
+                arg = last + prompt;
                 var arr = arg.split('\n');
                 if (arr.length === 1) {
                     last_line = arg;
