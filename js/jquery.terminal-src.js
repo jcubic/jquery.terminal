@@ -1017,7 +1017,6 @@
             };
         }
     })();
-    
     // -------------------------------------------------------------------------
     /* eslint-disable */
     // regex that match single character at begining and folowing combine character

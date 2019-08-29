@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 29 Aug 2019 15:19:15 +0000
+ * Date: Thu, 29 Aug 2019 15:20:37 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1017,7 +1017,6 @@
             };
         }
     })();
-    
     // -------------------------------------------------------------------------
     /* eslint-disable */
     // regex that match single character at begining and folowing combine character
@@ -3933,7 +3932,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 29 Aug 2019 15:19:15 +0000',
+        date: 'Thu, 29 Aug 2019 15:20:37 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
