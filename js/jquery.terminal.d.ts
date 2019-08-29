@@ -428,7 +428,7 @@ type TerminalOption =  "prompt" | "name" | "history" | "exit" | "clear" | "enabl
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
     "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand" | "mobileIngoreAutoSpace" |
     "onBeforeCommand" | "onAfterCommand" | "onBeforeLogout" |  "onAfterLogout" | "onBeforeLogin" |
-    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho" | "autocompleteMenu";
+    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho" | "autocompleteMenu" | "mobileDelete";
 
 type TerminalOptions = {
     prompt?: JQueryTerminal.ExtendedPrompt;
@@ -513,6 +513,7 @@ type TerminalOptions = {
     onBeforeEcho?: (this: JQueryTerminal, value: JQueryTerminal.echoValue) => (boolean | void);
     onAfterEcho?: (this: JQueryTerminal, value: JQueryTerminal.echoValue) => void;
     autocompleteMenu?: boolean;
+    mobileDelete?: boolean;
     strings?: JQueryTerminal.strings;
 }
 

@@ -5565,6 +5565,7 @@
         processRPCResponse: null,
         completionEscape: true,
         onCommandChange: null,
+        mobileDelete: is_mobile,
         onPositionChange: null,
         convertLinks: true,
         extra: {},
@@ -9050,6 +9051,7 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
+                mobileDelete: settings.mobileDelete,
                 mobileIngoreAutoSpace: settings.mobileIngoreAutoSpace,
                 prompt: global_login_fn ? false : prompt,
                 history: settings.memory ? 'memory' : settings.history,
