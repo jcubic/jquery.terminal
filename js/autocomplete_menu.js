@@ -13,7 +13,7 @@
  * Released under the MIT license
  *
  */
-/* global define, global, require, module, setTimeout */
+/* global define, global, require, module, setTimeout, clearTimeout */
 (function(factory) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {
@@ -52,20 +52,47 @@
 })(function($) {
     var jquery_terminal = $.fn.terminal;
     $.fn.terminal = function(interpreter, options) {
-        return jquery_terminal.call(this, interpreter, autocomplete_menu(options));
+        function init(node) {
+            return jquery_terminal.call(node, interpreter, autocomplete_menu(options));
+        }
+        if (this.length > 1) {
+            return this.each(init.bind(null, this));
+        } else {
+            return init(this);
+        }
     };
+    // -----------------------------------------------------------------------------------
+    // :: cancableble task for usage in comletion menu to ignore previous async completion
+    // -----------------------------------------------------------------------------------
+    function Task(fn) {
+        this._fn = fn;
+    }
+    Task.prototype.invoke = function() {
+        if (!this._cancel) {
+            this._fn.apply(null, arguments);
+        }
+    };
+    Task.prototype.cancel = function() {
+        this._cancel = true;
+    };
+    // -----------------------------------------------------------------------------------
+    // :: function return patched terminal settings
+    // -----------------------------------------------------------------------------------
     function autocomplete_menu(options) {
         if (options && !options.autocompleteMenu) {
             return options;
         }
         var settings = options || {};
-        function complete_menu(term, e, list) {
+        var last_task;
+        // -------------------------------------------------------------------------------
+        // :: function that do actuall matching and displaying of completion menu
+        // -------------------------------------------------------------------------------
+        function complete_menu(term, e, word, list) {
             var matched = [];
-            var word = term.before_cursor(true);
             var regex = new RegExp('^' + $.terminal.escape_regex(word));
             for (var i = list.length; i--;) {
                 if (regex.test(list[i])) {
-                    matched.push(list[i]);
+                    matched.unshift(list[i]);
                 }
             }
             if (e.which === 9) {
@@ -93,6 +120,7 @@
             delete settings.completion;
             settings.onInit = function(term) {
                 onInit.call(this, term);
+                // init html menu element
                 var wrapper = this.cmd().find('.cmd-cursor').
                     wrap('<span/>').parent().addClass('cursor-wrapper');
                 ul = $('<ul></ul>').appendTo(wrapper);
@@ -101,21 +129,33 @@
                     ul.empty();
                 });
             };
+            var timer;
             settings.keydown = function(e, term) {
                 // setTimeout because terminal is adding characters in keypress
                 // we use keydown because we need to prevent default action
                 // for tab and still execute custom code
-                setTimeout(function() {
+                clearTimeout(timer);
+                timer = setTimeout(function() {
                     ul.empty();
+                    var word = term.before_cursor(true);
+                    if (last_task) {
+                        last_task.cancel(); // ignore previous completion task
+                    }
+                    // we save task in closure for callbacks and promise::then
+                    var task = last_task = new Task(complete_menu);
                     if (typeof completion === 'function') {
-                        var ret = completion.call(term);
+                        var ret = completion.call(term, word, function(list) {
+                            task.invoke(term, e, word, list);
+                        });
                         if (ret && typeof ret.then === 'function') {
-                            ret.then(complete_menu.bind(null, term, e));
+                            ret.then(function(completion) {
+                                task.invoke(term, e, word, completion);
+                            });
                         } else if (ret instanceof Array) {
-                            complete_menu(term, e, ret);
+                            task.invoke(term, e, word, ret);
                         }
                     } else if (completion instanceof Array) {
-                        complete_menu(term, e, completion);
+                        task.invoke(term, e, word, completion);
                     }
                 }, 0);
                 var ret = keydown.call(this, e, term);

@@ -172,7 +172,7 @@ require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
 require('../js/echo_newline')(global.$);
-//require('../js/autocomplete_menu')(global.$);
+require('../js/autocomplete_menu')(global.$);
 
 jest.setTimeout(10000);
 
@@ -2264,6 +2264,84 @@ describe('extensions', function() {
             enter(term, command);
             expect(term.get_output()).toEqual('...' + prompt + command);
             expect(term.get_prompt()).toEqual(prompt);
+        });
+    });
+    describe('autocomplete_menu', function() {
+        function completion(term) {
+            return find_menu(term).find('li').map(function() {
+                return a0($(this).text());
+            }).get();
+        }
+        function find_menu(term) {
+            return term.find('.cmd-cursor-line .cursor-wrapper .cmd-cursor + ul');
+        }
+        function menu_visible(term) {
+            var menu = find_menu(term);
+            expect(menu.length).toEqual(1);
+            expect(menu.is(':visible')).toBeTruthy();
+        }
+        function complete(term, text) {
+            term.focus().insert(text);
+            shortcut(false, false, false, 9, 'tab');
+            return delay(5);
+        }
+        it('should display menu from function with Promise', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                autocompleteMenu: true,
+                completion: function(string) {
+                    if (!string.match(/_/) && string.length > 3) {
+                        return Promise.resolve([string + '_foo', string + '_bar']);
+                    }
+                }
+            });
+            await complete(term, 'hello');
+            menu_visible(term);
+            expect(term.get_command()).toEqual('hello_');
+            expect(completion(term)).toEqual(['foo', 'bar']);
+            term.destroy();
+        });
+        it('should display menu from array', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                autocompleteMenu: true,
+                completion: ['hello_foo', 'hello_bar']
+            });
+            await complete(term, 'hello');
+            menu_visible(term);
+            expect(term.get_command()).toEqual('hello_');
+            expect(completion(term)).toEqual(['foo', 'bar']);
+            term.destroy();
+        });
+        it('should display menu from Promise<array>', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                autocompleteMenu: true,
+                completion: async function() {
+                    await delay(10);
+                    return ['hello_foo', 'hello_bar'];
+                }
+            });
+            complete(term, 'hello');
+            await delay(100);
+            menu_visible(term);
+            expect(term.get_command()).toEqual('hello_');
+            expect(completion(term)).toEqual(['foo', 'bar']);
+            term.destroy();
+        });
+        it('should display menu with one element', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                autocompleteMenu: true,
+                completion: ['hello_foo', 'hello_bar']
+            });
+            await complete(term, 'hello');
+            enter_text('f');
+            await delay(5);
+            menu_visible(term);
+            expect(term.get_command()).toEqual('hello_f');
+            expect(completion(term)).toEqual(['oo']);
+            shortcut(false, false, false, 9, 'tab');
+            await delay(5);
+            expect(completion(term)).toEqual([]);
+            expect(term.get_command()).toEqual('hello_foo');
+            term.destroy();
         });
     });
 });
