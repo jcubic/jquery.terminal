@@ -18,7 +18,7 @@ class Demo {
       throw new Exception("Wrong Password");
     }
   }
-
+  // ---------------------------------------------------------------------------
   static $ls_documentation = "list directory if token is valid";
   public function ls($token, $path = null) {
     if (strcmp(md5("demo:demo"), $token) == 0) {
@@ -26,11 +26,11 @@ class Demo {
         throw new Exception("No directory traversal Dude");
       }
       $base = preg_replace("/(.*\/).*/", "$1", $_SERVER["SCRIPT_FILENAME"]);
-      $path = $base . ($path[0] != '/' ? "/" : "") . $path;
+      $path = realpath($base . ($path[0] != '/' ? "/" : "") . $path);
       $dir = opendir($path);
       while($name = readdir($dir)) {
-        $fname = $path."/".$name;
-        if (!is_dir($name) && !is_dir($fname)) {
+        $fname = $path . "/" . $name;
+        if (!preg_match("/^\\.{1,2}$/", $name) && !is_dir($fname)) {
           $list[] = $name;
         }
       }
@@ -40,6 +40,7 @@ class Demo {
       throw new Exception("Access Denied");
     }
   }
+  // ---------------------------------------------------------------------------
   static $whoami_documentation = "return user information";
   public function whoami($token) {
     return array("your User Agent" => $_SERVER["HTTP_USER_AGENT"],

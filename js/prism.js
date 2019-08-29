@@ -161,6 +161,7 @@
             var grammar = _.languages[language];
             var tokens = _.tokenize(string, grammar);
             string = _.Token.stringify(tokens, language);
+            string = $.terminal.nested_formatting(string);
             string = string.split(format_split_re).filter(Boolean).map(function(string) {
                 if (string.match(/^\x00/)) {
                     return string.replace(/\x00/g, '');
@@ -188,7 +189,6 @@
                               '(string) { return $.terminal.prism("' + language +
                               '", string); }')($);
         // disable warning because it may create nested formatting
-        fn.__no_warn__ = true;
-        $.terminal.new_formatter(fn);
+        $.terminal.defaults.formatters.push(fn);
     };
 });

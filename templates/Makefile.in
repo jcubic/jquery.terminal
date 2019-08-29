@@ -19,10 +19,11 @@ COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 TOKEN=cat .github.token | tr -d '\n'
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
+UPDATE_CONTRIBUTORS=1
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js www/Makefile css/emoji.css
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
 
 bower.json: templates/bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
@@ -76,9 +77,6 @@ js/terminal.widget.js: js/terminal.widget.in
 terminal.jquery.json: manifest .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json
 
-www/Makefile: $(wildcard www/Makefile.in) Makefile .$(VERSION)
-	@test "$(BRANCH)" = "master" -a -d www && $(SED) -e "s/{{VER""SION}}/$(VERSION)/g" www/Makefile.in > www/Makefile || true
-
 css/emoji.css: ./scripts/mkemoji .$(VERSION)
 	./scripts/mkemoji $(VERSION) > css/emoji.css
 
@@ -103,6 +101,8 @@ eslint:
 	$(ESLINT) js/less.js
 	$(ESLINT) js/emoji.js
 	$(ESLINT) js/pipe.js
+	$(ESLINT) js/autocomplete_menu.js
+	$(ESLINT) js/echo_newline.js
 
 skipped_tests:
 	@! grep -E $(skip_re) __tests__/terminal.spec.js
@@ -142,3 +142,12 @@ lint: eslint jsonlint
 
 checkout:
 	@git status | sed "1,/not staged/d" | grep modified | sed "s/.*modified:\s*\(.*\)/\1/" | tr '\n' ' ' | sed -e "s/.*/git checkout &; touch &/" | bash
+
+
+update-contributors:
+	@if [ $(UPDATE_CONTRIBUTORS) = 1 ]; then\
+		echo -e "\x1b[31mUpdate Contributors\x1b[m";\
+		if [ $(BRANCH) = 'master' ]; then \
+			false;\
+		fi;\
+	fi

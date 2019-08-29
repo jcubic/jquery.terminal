@@ -171,6 +171,8 @@ global.wcwidth = require('wcwidth');
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
+require('../js/echo_newline')(global.$);
+require('../js/autocomplete_menu')(global.$);
 
 jest.setTimeout(10000);
 
@@ -500,15 +502,31 @@ describe('Terminal utils', function() {
         var specs = [
             [
                 '[[;red;]foo[[;blue;]bar]baz]',
-                '[[;red;]foo][[;blue;]bar][[;red;]baz]'
+                '[[;red;]foo][[;blue;]bar][[;red;]baz]',
+                true
             ],
             [
                 '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]',
-                '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]'
+                '[[;#fff;] lorem ][[b;;]ipsum ][[s;;]dolor][[b;;] sit][[;#fff;] amet]',
+                false
+            ],
+            [
+                '[[;#fff;] lorem [[b;;]ipsum [[s;;]dolor] sit] amet]',
+                '[[;#fff;] lorem ][[b;#fff;]ipsum ][[sb;#fff;]dolor][[b;#fff;] sit][[;#fff;] amet]',
+                true
+            ],
+            [
+                '[[b;#fff;]hello [[u-b;;] world] from js]',
+                '[[b;#fff;]hello ][[u;#fff;] world][[b;#fff;] from js]',
+                true
             ]
         ];
+        afterEach(function() {
+            $.terminal.nested_formatting.__inherit__ = false;
+        });
         it('should create list of formatting', function() {
             specs.forEach(function(spec) {
+                $.terminal.nested_formatting.__inherit__ = spec[2];
                 expect($.terminal.nested_formatting(spec[0])).toEqual(spec[1]);
             });
         });
@@ -2206,6 +2224,127 @@ describe('Terminal utils', function() {
         });
     });
 });
+describe('extensions', function() {
+    describe('echo_newline', function() {
+        var term = $('<div/>').terminal();
+        beforeEach(function() {
+            term.clear();
+        });
+        it('should display single line', async function() {
+            var prompt = '>>> ';
+            term.set_prompt(prompt);
+            term.echo('.', {newline: false});
+            await delay(10);
+            term.echo('.', {newline: false});
+            await delay(10);
+            term.echo('.', {newline: false});
+            await delay(10);
+            term.echo('.');
+            expect(term.get_output()).toEqual('....');
+            expect(term.get_prompt()).toEqual(prompt);
+        });
+        it('should echo prompt and command', function() {
+            var prompt = '>>> ';
+            var command = 'hello';
+            term.set_prompt(prompt);
+            term.echo('.', {newline: false});
+            term.echo('.', {newline: false});
+            term.echo('.', {newline: false});
+            term.exec('hello');
+            expect(term.get_output()).toEqual('...' + prompt + command);
+            expect(term.get_prompt()).toEqual(prompt);
+        });
+        it('should echo prompt on enter', function() {
+            var prompt = '>>> ';
+            var command = 'hello';
+            term.set_prompt(prompt);
+            term.echo('.', {newline: false});
+            term.echo('.', {newline: false});
+            term.echo('.', {newline: false});
+            enter(term, command);
+            expect(term.get_output()).toEqual('...' + prompt + command);
+            expect(term.get_prompt()).toEqual(prompt);
+        });
+    });
+    describe('autocomplete_menu', function() {
+        function completion(term) {
+            return find_menu(term).find('li').map(function() {
+                return a0($(this).text());
+            }).get();
+        }
+        function find_menu(term) {
+            return term.find('.cmd-cursor-line .cursor-wrapper .cmd-cursor + ul');
+        }
+        function menu_visible(term) {
+            var menu = find_menu(term);
+            expect(menu.length).toEqual(1);
+            expect(menu.is(':visible')).toBeTruthy();
+        }
+        function complete(term, text) {
+            term.focus().insert(text);
+            shortcut(false, false, false, 9, 'tab');
+            return delay(5);
+        }
+        it('should display menu from function with Promise', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                autocompleteMenu: true,
+                completion: function(string) {
+                    if (!string.match(/_/) && string.length > 3) {
+                        return Promise.resolve([string + '_foo', string + '_bar']);
+                    }
+                }
+            });
+            await complete(term, 'hello');
+            menu_visible(term);
+            expect(term.get_command()).toEqual('hello_');
+            expect(completion(term)).toEqual(['foo', 'bar']);
+            term.destroy();
+        });
+        it('should display menu from array', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                autocompleteMenu: true,
+                completion: ['hello_foo', 'hello_bar']
+            });
+            await complete(term, 'hello');
+            menu_visible(term);
+            expect(term.get_command()).toEqual('hello_');
+            expect(completion(term)).toEqual(['foo', 'bar']);
+            term.destroy();
+        });
+        it('should display menu from Promise<array>', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                autocompleteMenu: true,
+                completion: async function() {
+                    await delay(10);
+                    return ['hello_foo', 'hello_bar'];
+                }
+            });
+            complete(term, 'hello');
+            await delay(100);
+            menu_visible(term);
+            expect(term.get_command()).toEqual('hello_');
+            expect(completion(term)).toEqual(['foo', 'bar']);
+            term.destroy();
+        });
+        it('should display menu with one element', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                autocompleteMenu: true,
+                completion: ['hello_foo', 'hello_bar']
+            });
+            await complete(term, 'hello');
+            enter_text('f');
+            await delay(5);
+            menu_visible(term);
+            expect(term.get_command()).toEqual('hello_f');
+            expect(completion(term)).toEqual(['oo']);
+            shortcut(false, false, false, 9, 'tab');
+            await delay(5);
+            expect(completion(term)).toEqual([]);
+            expect(term.get_command()).toEqual('hello_foo');
+            term.destroy();
+        });
+    });
+});
 describe('sub plugins', function() {
     describe('text_length', function() {
         it('should return length of the text in div', function() {
@@ -2288,7 +2427,7 @@ describe('sub plugins', function() {
     describe('cmd', function() {
         describe('formatting', function() {
             var formatters = $.terminal.defaults.formatters;
-            var cmd
+            var cmd;
             beforeEach(function() {
                 cmd = $('<div/>').cmd();
                 $.terminal.defaults.formatters = formatters.slice();
@@ -2771,6 +2910,15 @@ describe('Terminal plugin', function() {
             });
         });
     });
+    function without_formatters(fn) {
+        return function() {
+            var formatters = $.terminal.defaults.formatters;
+            $.terminal.defaults.formatters = [];
+            var ret = fn();
+            $.terminal.defaults.formatters = formatters;
+            return ret;
+        };
+    }
     describe('events', function() {
         describe('click', function() {
             var term = $('<div/>').terminal($.noop, {greetings: false, clickTimeout: 0});
@@ -2793,6 +2941,16 @@ describe('Terminal plugin', function() {
                     expect(term.get_position()).toBe(pos);
                 }
             });
+            it('should ignore formatting inside cmd', without_formatters(function() {
+                var text = '[[;;]hello] [[bui;;]world]';
+                term.insert(text).focus();
+                for (var pos = 0; pos < text.length; ++pos) {
+                    var node = cmd.find('span[data-text]').eq(pos);
+                    click(node);
+                    expect(term.get_position()).toBe(pos);
+                    expect(term.cmd().display_position()).toBe(pos);
+                }
+            }));
             it('should move cursor when text have emoji', function() {
                 var text = '\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3';
                 var chars = $.terminal.split_characters(text);
@@ -2823,8 +2981,7 @@ describe('Terminal plugin', function() {
                     expect([pos, output]).toEqual([pos, output_str]);
                 }
             }
-            it('should move cursor when over formatting', function() {
-                var formatters = $.terminal.defaults.formatters;
+            it('should move cursor when over formatting', without_formatters(function() {
                 false && ($.terminal.defaults.formatters = [
                     function(string, options) {
                         var result = [string, options.position];
@@ -2843,8 +3000,7 @@ describe('Terminal plugin', function() {
                     '\u263a\ufe0foo   bar     \u263a\ufe0fa\u0038\ufe0f\u20e3 \nfoo     b       baz \nfoobar  ba      br'
                 ];
                 test_click(test);
-                $.terminal.defaults.formatters = formatters;
-            });
+            }));
             it('should align tabs', function() {
                 var tests = [
                     [
@@ -2891,9 +3047,8 @@ describe('Terminal plugin', function() {
                 }).then(function() {
                     return new Promise(function(resolve) {
                         var line = 5;
-                        var offset = get_count(line);
                         (function loop(i) {
-                            var chars = term.find('.cmd [role="presentation"]')
+                            var chars = term.focus().find('.cmd [role="presentation"]')
                                     .eq(line).find('span[data-text]');
                             if (i === chars.length) {
                                 return resolve();
@@ -4535,8 +4690,10 @@ describe('Terminal plugin', function() {
                 term.destroy().remove();
                 for (var key in settings) {
                     // name is selector if not defined
-                    if (settings.hasOwnProperty(key) && key !== 'name') {
-                        expect($.terminal.defaults[key]).toEqual(settings[key]);
+                    if (settings.hasOwnProperty(key) &&
+                        !['name', 'exit', 'keymap', 'echoCommand'].includes(key)) {
+                        // without name and exit + exeptions in newline
+                        expect([key, $.terminal.defaults[key]]).toEqual([key, settings[key]]);
                     }
                 }
             });
