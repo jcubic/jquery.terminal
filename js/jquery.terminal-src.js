@@ -5725,7 +5725,7 @@
             }
         }
         // Display line code in the file if line numbers are present
-        function print_line(url_spec) {
+        function print_line(url_spec, cols) {
             var re = /(.*):([0-9]+):([0-9]+)$/;
             // google chrome have line and column after filename
             var m = url_spec.match(re);
@@ -5734,16 +5734,24 @@
                 self.pause(settings.softPause);
                 $.get(m[1], function(response) {
                     var file = m[1];
-                    self.echo('[[b;white;]' + file + ']');
                     var code = response.split('\n');
                     var n = +m[2] - 1;
-                    self.echo(code.slice(n - 2, n + 3).map(function(line, i) {
-                        if (i === 2) {
+                    var start = n > 2 ? n - 2 : 0;
+                    var lines = code.slice(start, n + 3).map(function(line, i) {
+                        var prefix = '[' + (n + i - 1) + ']: ';
+                        var limit = cols - prefix.length - 4;
+                        if (line.length > limit) {
+                            line = line.substring(0, limit) + '...';
+                        }
+                        if (n > 2 ? i === 2 : i === n) {
                             line = '[[;#f00;]' +
                                 $.terminal.escape_brackets(line) + ']';
                         }
-                        return '[' + (n + i - 1) + ']: ' + line;
-                    }).join('\n')).resume();
+                        return prefix + line;
+                    }).filter(Boolean).join('\n');
+                    if (lines.length) {
+                        self.echo('[[b;white;]' + file + ']\n' + lines).resume();
+                    }
                 }, 'text');
             }
         }
@@ -9243,7 +9251,7 @@
                     var href = $this.attr('href');
                     if (href.match(/:[0-9]+$/)) { // display line if specified
                         e.preventDefault();
-                        print_line(href);
+                        print_line(href, self.cols());
                     }
                 }
                 // refocus because links have tabindex in case where user want
