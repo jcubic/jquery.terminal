@@ -195,7 +195,7 @@
                     var parts = text.split(img_split_re).filter(Boolean);
                     var promise = defer.promise();
                     if (parts.length === 1) {
-                        defer.resolve(parts);
+                        defer.resolve(text.split('\n'));
                     } else {
                         var result = [];
                         (function recur() {
