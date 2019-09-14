@@ -8093,7 +8093,8 @@
                     var wrapper;
                     // print all lines
                     // var output_buffer = lines.flush();
-                    $.each(output_buffer, function(i, data) {
+                    while (output_buffer.length) {
+                        var data = output_buffer.shift();
                         if (data === NEW_LINE) {
                             wrapper = $('<div></div>');
                         } else if ($.isPlainObject(data) && is_function(data.finalize)) {
@@ -8116,7 +8117,7 @@
                                 div.addClass('cmd-end-line');
                             }
                         }
-                    });
+                    }
                     limit_lines();
                     fire_event('onFlush');
                     //num_rows = get_num_rows(self, char_size);
@@ -8251,9 +8252,8 @@
                         });
                         // extended commands should be processed only
                         // once in echo and not on redraw
-                        lines.push([value, $.extend(locals, {
-                            exec: false
-                        })]);
+                        locals.exec = false;
+                        lines.push([value, locals]);
                         if (locals.flush) {
                             self.flush();
                             fire_event('onAfterEcho', [arg]);

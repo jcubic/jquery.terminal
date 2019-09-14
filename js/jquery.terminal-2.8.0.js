@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Thu, 29 Aug 2019 17:22:02 +0000
+ * Date: Sat, 14 Sep 2019 21:06:51 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3932,7 +3932,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.8.0',
-        date: 'Thu, 29 Aug 2019 17:22:02 +0000',
+        date: 'Sat, 14 Sep 2019 21:06:51 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8093,7 +8093,8 @@
                     var wrapper;
                     // print all lines
                     // var output_buffer = lines.flush();
-                    $.each(output_buffer, function(i, data) {
+                    while (output_buffer.length) {
+                        var data = output_buffer.shift();
                         if (data === NEW_LINE) {
                             wrapper = $('<div></div>');
                         } else if ($.isPlainObject(data) && is_function(data.finalize)) {
@@ -8116,7 +8117,7 @@
                                 div.addClass('cmd-end-line');
                             }
                         }
-                    });
+                    }
                     limit_lines();
                     fire_event('onFlush');
                     //num_rows = get_num_rows(self, char_size);
@@ -8251,9 +8252,8 @@
                         });
                         // extended commands should be processed only
                         // once in echo and not on redraw
-                        lines.push([value, $.extend(locals, {
-                            exec: false
-                        })]);
+                        locals.exec = false;
+                        lines.push([value, locals]);
                         if (locals.flush) {
                             self.flush();
                             fire_event('onAfterEcho', [arg]);
