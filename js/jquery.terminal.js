@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 14 Sep 2019 22:05:42 +0000
+ * Date: Sun, 15 Sep 2019 13:41:59 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -220,7 +220,8 @@
     /* istanbul ignore next */
     function debug(str) {
         if (false) {
-            $.terminal.active().echo(str);
+            console.log(str);
+            //$.terminal.active().echo(str);
         }
     }
     /* eslint-enable */
@@ -1520,22 +1521,26 @@
         // IE mapping
         var key_mapping = {
             'SPACEBAR': ' ',
-            'UP': 'ARROWUP',
-            'DOWN': 'ARROWDOWN',
-            'LEFT': 'ARROWLEFT',
-            'RIGHT': 'ARROWRIGHT',
-            'DEL': 'DELETE',
+            'UP': 'ArrowUP',
+            'DOWN': 'ArrowDown',
+            'LEFT': 'ArrowLeft',
+            'RIGHT': 'ArrowRight',
+            'DEL': 'Delete',
             'MULTIPLY': '*',
             'DIVIDE': '/',
             'SUBTRACT': '-',
             'ADD': '+'
         };
+        function ie_key_fix(e) {
+            var key = e.key.toUpperCase();
+            if (key_mapping[key]) {
+                return key_mapping[key];
+            }
+            return key;
+        }
         function get_key(e) {
             if (e.key) {
-                var key = e.key.toUpperCase();
-                if (key_mapping[key]) {
-                    key = key_mapping[key];
-                }
+                var key = ie_key_fix(e).toUpperCase();
                 if (key === 'CONTROL') {
                     return 'CTRL';
                 } else {
@@ -2355,6 +2360,11 @@
         // :: format and encode the string
         // ---------------------------------------------------------------------
         function format(string, before) {
+            string = $.terminal.normalize(string);
+            var encoded = $.terminal.encode(wrap(string), {
+                tabs: settings.tabs,
+                before: before
+            });
             var encoded = $.terminal.encode(wrap(string), {
                 tabs: settings.tabs,
                 before: before
@@ -3099,7 +3109,6 @@
                 }
             }
         });
-        //debug_object(self, 'cmd')('display_position');
         // ---------------------------------------------------------------------
         // :: INIT
         // ---------------------------------------------------------------------
@@ -3187,6 +3196,7 @@
             clip.off('input', paste);
             var key = get_key(e);
             if (is_function(settings.keydown)) {
+                e.key = ie_key_fix(e);
                 result = settings.keydown.call(self, e);
                 if (result !== undefined) {
                     //skip_keypress = true;
@@ -3932,7 +3942,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.8.0',
-        date: 'Sat, 14 Sep 2019 22:05:42 +0000',
+        date: 'Sun, 15 Sep 2019 13:41:59 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5750,7 +5760,8 @@
                         return prefix + line;
                     }).filter(Boolean).join('\n');
                     if (lines.length) {
-                        self.echo('[[b;white;]' + file + ']\n' + lines).resume();
+                        self.echo('[[b;white;]' + file + ']');
+                        self.echo(lines).resume();
                     }
                 }, 'text');
             }
