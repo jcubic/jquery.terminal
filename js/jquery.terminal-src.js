@@ -5750,7 +5750,8 @@
                         return prefix + line;
                     }).filter(Boolean).join('\n');
                     if (lines.length) {
-                        self.echo('[[b;white;]' + file + ']\n' + lines).resume();
+                        self.echo('[[b;white;]' + file + ']');
+                        self.echo(lines).resume();
                     }
                 }, 'text');
             }
