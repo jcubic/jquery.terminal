@@ -1,3 +1,12 @@
+## 2.8.1
+### Bugfix
+* fix links from formatters in cmd
+* fix images from formatters in cmd [#519](https://github.com/jcubic/jquery.terminal/issues/519)
+* fix less [#522](https://github.com/jcubic/jquery.terminal/issues/522)
+* fix recursive error when echo finalize throwed exception [#524](https://github.com/jcubic/jquery.terminal/issues/524)
+* fix prism - xml nested formatting and weird wrapping [#523](https://github.com/jcubic/jquery.terminal/issues/523), [#410](https://github.com/jcubic/jquery.terminal/issues/410)
+* limit number of characters in click on exception line [#525](https://github.com/jcubic/jquery.terminal/issues/525)
+
 ## 2.8.0
 ### Feature
 * new events `onBeforeLogin`, `onAfterLogin`, `onBeforeEcho` and `onAfterEcho`

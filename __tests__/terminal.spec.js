@@ -87,7 +87,8 @@ Object.defineProperties(window.HTMLElement.prototype, {
             var self = this;
             var attr = {};
             function set_style_attr() {
-                self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';') + ';');
+                var str = Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';') + ';';
+                self.setAttribute('style', str);
             }
             var mapping = {
                 backgroundClip: 'background-clip',
@@ -115,6 +116,8 @@ Object.defineProperties(window.HTMLElement.prototype, {
                             attr[name] = target[name] = value;
                             set_style_attr();
                         };
+                    } else if (name === '__orig') {
+                        return self;
                     } else {
                         return target[name];
                     }
@@ -173,6 +176,7 @@ require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
 require('../js/echo_newline')(global.$);
 require('../js/autocomplete_menu')(global.$);
+require('../js/less')(global.$);
 
 jest.setTimeout(10000);
 
@@ -262,10 +266,10 @@ function keydown(ctrl, alt, shift, which, key) {
     e.which = e.keyCode = which;
     return e;
 }
-function keypress(key) {
+function keypress(key, code) {
     var e = $.Event("keypress");
     e.key = key;
-    e.which = e.keyCode = 0;
+    e.which = e.keyCode = (code || 0);
     return e;
 }
 function shortcut(ctrl, alt, shift, which, key) {
@@ -284,6 +288,15 @@ function enter_key() {
 function enter(term, text) {
     term.insert(text).focus();
     enter_key();
+}
+function type(text) {
+    var doc = $(document.documentElement || window);
+    text.split('').forEach(function(chr) {
+        var shift = chr.toUpperCase() === chr;
+        doc.trigger(keydown(false, false, shift, chr));
+        doc.trigger(keypress(chr, chr.charCodeAt(0)));
+        doc.trigger($.Event("keyup"));
+    });
 }
 
 function last_div(term) {
@@ -1860,6 +1873,84 @@ describe('Terminal utils', function() {
             $.terminal.new_formatter(formatter_2);
             expect(formatters[formatters.length - 2]).toBe(formatter_1);
             expect(formatters[formatters.length - 1]).toBe(formatter_2);
+        });
+    });
+    fdescribe('$.terminal.less', function() {
+        var term;
+        var greetings = 'Terminal Less Test';
+        var cols = 80, rows = 25;
+        var big_text = (function() {
+            var lines = [];
+            for (var i = 0; i < 100; i++) {
+                lines.push('Less ' + i);
+            }
+            return lines;
+        })();
+        function get_lines() {
+            return term.get_output().split('\n');
+        }
+        beforeEach(function() {
+            term = $('<div/>').terminal($.noop, {
+                greetings: greetings,
+                numChars: cols,
+                numRows: rows
+            });
+            term.focus();
+        });
+        function key(ord, key) {
+            shortcut(false, false, false, ord, key);
+        }
+        function selected() {
+            return term.find('.terminal-output > div div span.inverted');
+        }
+        function search(text) {
+            key('/');
+            type(text);
+            enter_key();
+        }
+        afterEach(function() {
+            term.destroy();
+        });
+        it('should render big text array', function() {
+            term.less(big_text);
+            expect(get_lines()).toEqual(big_text.slice(0, rows - 1));
+        });
+        it('should render big text string', async function() {
+            term.less(big_text.join('\n'));
+            await delay(10);
+            expect(get_lines()).toEqual(big_text.slice(0, rows - 1));
+        });
+        it('should find 80 line', function() {
+            term.less(big_text);
+            search('Less 80');
+            var sel = selected();
+            expect(sel.length).toEqual(1);
+            expect(sel.closest('[data-index]').data('index')).toEqual(0);
+        });
+        it('should ingore case in search', function() {
+            term.less(big_text);
+            search('less 80');
+            var sel = selected();
+            expect(sel.length).toEqual(1);
+            expect(sel.closest('[data-index]').data('index')).toEqual(0);
+        });
+        it('should find every line', function() {
+            term.less(big_text);
+            search('less');
+            var sel = selected();
+            expect(sel.length).toEqual(rows - 1);
+        });
+        it('should find inside formatting', function() {
+            term.less(big_text.concat(['[[;red;]foo bar baz]']));
+            search('bar');
+            var spans = term.find('[data-index="0"] > div:first-child span');
+            ['foo ', 'bar', ' baz'].forEach(function(string, i) {
+                expect(a0(spans.eq(i).text())).toEqual(string);
+            });
+            [true, false, true].forEach(function(check, i) {
+                console.log(spans.get(i).style.__orig.color);
+                expect([i, !!spans.get(i).getAttribute('style').match(/color:\s*red/)]).toEqual([i, check]);
+            });
         });
     });
     describe('$.terminal.pipe', function() {

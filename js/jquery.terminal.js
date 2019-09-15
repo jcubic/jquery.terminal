@@ -39,11 +39,11 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 15 Sep 2019 13:41:59 +0000
+ * Date: Sun, 15 Sep 2019 21:33:50 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
-          setInterval, clearInterval, clearTimeout, Blob */
+          setInterval, clearInterval, clearTimeout, Blob, Map */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -735,7 +735,6 @@
     // -----------------------------------------------------------------------
     /* istanbul ignore next */
     (function(undef) {
-
         // prevent double include
 
         if (!String.prototype.split.toString().match(/\[native/)) {
@@ -1035,7 +1034,7 @@
     var format_parts_re = /\[\[((?:-?[@!gbiuso])*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]\\]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]+)\]?/gi;
     var format_re = /\[\[((?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
     var format_exist_re = /\[\[((?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]/gi;
-    var format_full_re = /^\[\[((?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]$/gi;
+    var format_full_re = /^(\[\[(?:(?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\])([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)(\])$/i;
     var format_begin_re = /(\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\]?$/i;
@@ -1273,6 +1272,13 @@
             }
         });
     }
+    /*
+    function time() {
+        // performance.now almost equal Date.now()- performance.timing.navigationStart
+        // the difference check should be almost the same
+        return performance ? performance.now() : Date.now();
+    }
+    */
     // -----------------------------------------------------------------------
     // :: STACK DATA STRUCTURE
     // -----------------------------------------------------------------------
@@ -1309,6 +1315,44 @@
             }
         });
     }
+    // -------------------------------------------------------------------------
+    // :: Class for Worker that do some computation when needed
+    // :: if validation function return false it mean that condition changed
+    // :: and cache need to be cleared. If value was not prcessed it will run
+    // :: the action
+    // -------------------------------------------------------------------------
+    function WorkerCache(options) {
+        var settings = $.extend({
+            validation: $.noop,
+            action: $.noop,
+            onCache: $.noop
+        }, options);
+        this._onCache = settings.onCache;
+        this._action = settings.action;
+        this._validation = settings.validation;
+        this._cache = new Map();
+    }
+    // -------------------------------------------------------------------------
+    WorkerCache.prototype.validate = function() {
+        var valid = this._validation();
+        var test = valid === undefined || valid === true;
+        if (!test) {
+            this._cache.clear();
+        }
+        return test;
+    };
+    // -------------------------------------------------------------------------
+    WorkerCache.prototype.get = function(key) {
+        var value;
+        if (this.validate() && this._cache.has(key)) {
+            value = this._cache.get(key);
+            this._onCache({cahce: value});
+            return value;
+        }
+        value = this._action(key);
+        this._cache.set(key, value);
+        return value;
+    };
     // -------------------------------------------------------------------------
     // :: HISTORY CLASS
     // -------------------------------------------------------------------------
@@ -1486,6 +1530,46 @@
         var rev_search_str = '';
         var reverse_search_position = null;
         var backup_prompt;
+        // create proper shape for object - V8 optimiztion
+        var format_options = $.extend({}, settings, {
+            unixFormattingEscapeBrackets: true,
+            position: null
+        });
+        // TODO: try to use workerCache with data that don't change like bare_text
+        // or format function.
+        // TODO: remove workerCache for formatters they require dynamic
+        // value of position so data change when you move cursor
+        /*
+        var formatter = new WorkerCache({
+            validation: function() {
+                if (this._formatters instanceof Array) {
+                    var test = this._formatters.every(function(e, i) {
+                        return $.terminal.defaults.formatters[i] === e;
+                    });
+                    if (!test) {
+                        this._formatters = $.terminal.defaults.formatters;
+                    }
+                    return test;
+                }
+                return true;
+            },
+            onCache: function(value) {
+                this._counter = this._counter || 0;
+                this._counter++;
+            },
+            action: function(string) {
+                this._times = this._times || [];
+                var t0 = time();
+                // some optimization - don't change object shape and ref
+                format_options.position = position;
+                string = $.terminal.escape_formatting(string);
+                var value = $.terminal.apply_formatters(string, format_options);
+                var t1 = time();
+                this._times.push(t1 - t0);
+                return value;
+            }
+        });
+        */
         var command = '';
         var last_command;
         // text from selection using CTRL+SHIFT+C (as in Xterm)
@@ -1505,17 +1589,15 @@
         var line_marker_re = /\uFFFF$/;
         function get_char_pos(e) {
             var node = $(e.target);
-            if (node.is('span')) {
+            if (node.is('span,img,a')) {
                 node = node.closest('[data-text]');
                 return node.index() +
                     node.parent('span').prevAll().find('[data-text]').length +
                     node.closest('[role="presentation"]')
                         .prevUntil('.cmd-prompt').find('[data-text]').length;
             } else if (node.is('div[role="presentation"]')) {
-                var last = !node.nextUntil('textarea').length;
-                return node.find('span[data-text]').length +
-                    node.prevUntil('.cmd-prompt').find('span[data-text]').length -
-                    (last ? 0 : 1);
+                return node.find('[data-text]').length +
+                    node.prevUntil('.cmd-prompt').find('[data-text]').length;
             }
         }
         // IE mapping
@@ -2334,11 +2416,9 @@
             // we don't want to format command when user type formatting in
             try {
                 string = $.terminal.escape_formatting(string);
-                var options = $.extend({}, settings, {
-                    unixFormattingEscapeBrackets: true,
-                    position: position
-                });
-                var formatted = $.terminal.apply_formatters(string, options);
+                // small optimization - don't change object shape and ref
+                format_options.position = position;
+                var formatted = $.terminal.apply_formatters(string, format_options);
                 var output = formatted[0];
                 var max = $.terminal.length(output);
                 if (!skip_formatted_position) {
@@ -2361,10 +2441,6 @@
         // ---------------------------------------------------------------------
         function format(string, before) {
             string = $.terminal.normalize(string);
-            var encoded = $.terminal.encode(wrap(string), {
-                tabs: settings.tabs,
-                before: before
-            });
             var encoded = $.terminal.encode(wrap(string), {
                 tabs: settings.tabs,
                 before: before
@@ -2982,6 +3058,7 @@
                 if (n === undefined) {
                     return formatted_position;
                 } else {
+                    // double escape
                     var string = formatting($.terminal.escape_formatting(command), true);
                     var len = length(string);
                     var command_len = bare_text(command).length;
@@ -3531,10 +3608,35 @@
         return entity_re.test(chr) ? 1 : chr.length;
     }
     // -------------------------------------------------------------------------
+    // :: local function used in get_next_character to process single formatting
+    // -------------------------------------------------------------------------
+    /* TODO: remove before release 2.8.1 or 2.9.0
+    function process_single_formatter(string) {
+        return string.replace(format_full_re, function(_, formatting, text, br) {
+            return formatting + get_next_character(text) + br;
+        });
+    }
+    */
+    // -------------------------------------------------------------------------
     // :: function that return character from beginning of the string
     // :: counting emoji, suroggate pairs and combine characters
     // -------------------------------------------------------------------------
     function get_next_character(string) {
+        /*
+        // this is very slow and it's used in iterate formatting when not in formatting
+        if (false && $.terminal.have_formatting(string)) {
+            if ($.terminal.is_formatting(string)) {
+                return process_single_formatter(string);
+            } else {
+                $.terminal.format_split(string).map(function(string) {
+                    if ($.terminal.is_formatting(string)) {
+                        return process_single_formatter(string);
+                    }
+                    return get_next_character(string);
+                }).join('');
+            }
+        }
+        */
         var match_entity = string.match(entity_re);
         if (match_entity) {
             return match_entity[1];
@@ -3942,7 +4044,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.8.0',
-        date: 'Sun, 15 Sep 2019 13:41:59 +0000',
+        date: 'Sun, 15 Sep 2019 21:33:50 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4029,6 +4131,9 @@
         // :: source https://stackoverflow.com/a/46756077/387194
         // ---------------------------------------------------------------------
         tracking_replace: function tracking_replace(string, rex, replacement, position) {
+            if (!(rex instanceof RegExp)) {
+                throw new Error('tracking_replace: Second argument need to be RegExp');
+            }
             function substring(string, start, end) {
                 return string.slice(start, end);
             }
@@ -4128,6 +4233,17 @@
             function is_text(i) {
                 return not_formatting && (string[i] !== ']' || !have_formatting)
                     && !opening;
+            }
+            function next_char() {
+                var char = get_next_character(substring);
+                if ($.terminal.length(substring) > 1) {
+                    if (char.length > 1) {
+                        return char.length - 1;
+                    }
+                } else {
+                    return substring.length - 1;
+                }
+                return 0;
             }
             // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
@@ -4233,9 +4349,8 @@
                     });
                 }
                 // handle emoji, suroggate pairs and combine characters
-                var char = get_next_character(substring);
-                if (char.length > 1) {
-                    i += char.length - 1;
+                if (in_text) {
+                    i += next_char();
                 }
             }
         },
@@ -4885,10 +5000,12 @@
                 if (_class !== '') {
                     result += ' class="' + _class + '"';
                 }
+                // links and image need data-text attribute cmd click behavior
+                // formatter can return links.
                 if (style.indexOf('!') !== -1) {
-                    result += '>' + text + '</a>';
+                    result += ' data-text>' + text + '</a>';
                 } else if (style.indexOf('@') !== -1) {
-                    result += '/>';
+                    result += ' data-text/>';
                 } else {
                     result += ' data-text="' + data.replace(/"/g, '&quot;') + '">' +
                         text + '</span>';

@@ -279,6 +279,9 @@ terminal .terminal-output > div {
 .cmd {
     --original-color: var(--color, #aaa);
 }
+.cmd a[href] {
+    --original-color: var(--link-color, #0F60FF);
+}
 /* DEFAULT ANIMATION */
 @-webkit-keyframes terminal-blink {
     0%, 50% {
@@ -422,19 +425,22 @@ terminal .terminal-output > div {
       box-shadow: none;
   }
 }
-.underline-animation .cmd-cursor.cmd-blink span span {
+.underline-animation .cmd-cursor.cmd-blink span span,
+.underline-animation .cmd-cursor.cmd-blink a {
     -webkit-animation-name: terminal-underline;
        -moz-animation-name: terminal-underline;
         -ms-animation-name: terminal-underline;
             animation-name: terminal-underline;
 }
-.glow-animation .cmd-cursor.cmd-blink span span {
+.glow-animation .cmd-cursor.cmd-blink span span,
+.glow-animation .cmd-cursor.cmd-blink a {
     -webkit-animation-name: terminal-glow;
        -moz-animation-name: terminal-glow;
         -ms-animation-name: terminal-glow;
             animation-name: terminal-glow;
 }
-.bar-animation .cmd-cursor.cmd-blink span span {
+.bar-animation .cmd-cursor.cmd-blink span span,
+.bar-animation .cmd-cursor.cmd-blink a {
     -webkit-animation-name: terminal-bar;
        -moz-animation-name: terminal-bar;
         -ms-animation-name: terminal-bar;
@@ -579,12 +585,12 @@ terminal .terminal-output > div {
 .clear {
     clear: both;
 }
-.terminal .terminal-output > :not(.raw) a[href] {
+.terminal .terminal-output > :not(.raw) a[href], .cmd a[href] {
     color: #0F60FF;
     color: var(--link-color, #0F60FF);
     cursor: pointer;
 }
-.terminal .terminal-output > :not(.raw) a[href]:hover {
+.terminal .terminal-output > :not(.raw) a[href]:hover, .cmd a[href]:hover {
     background-color: #0F60FF;
     background-color: var(--link-color, #0F60FF);
     color: var(--background, #000) !important;
@@ -661,7 +667,8 @@ terminal .terminal-output > div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
-    .cmd .cmd-cursor.cmd-blink span:not(.emoji) span {
+    .cmd .cmd-cursor.cmd-blink span:not(.emoji) span,
+    .cmd .cmd-cursor.cmd-blink a {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
             -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
@@ -811,4 +818,8 @@ terminal .terminal-output > div {
 }
 .terminal-output img {
     display: block;
+}
+.cmd-cursor img {
+    border: 1px solid #ccc;
+    border: 1px solid var(--color, #ccc);
 }

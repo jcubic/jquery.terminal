@@ -320,24 +320,25 @@
             name: 'less',
             keydown: function(e) {
                 var command = term.get_command();
+                var key = e.key.toUpperCase();
                 if (term.get_prompt() !== '/') {
-                    if (e.which === 191) {
+                    if (key === '/') {
                         term.set_prompt('/');
                     } else if (in_search &&
                                $.inArray(e.which, [78, 80]) !== -1) {
-                        if (e.which === 78) { // search_string
+                        if (key === 'N') { // search_string
                             if (last_found !== -1) {
                                 last_found = search(last_found + 1);
                             }
-                        } else if (e.which === 80) { // P
+                        } else if (key === 'P') {
                             last_found = search(0, true);
                         }
-                    } else if (e.which === 81) { //Q
+                    } else if (key === 'Q') {
                         quit();
-                    } else if (e.which === 39) { // right
+                    } else if (key === 'ARROWRIGHT') {
                         left += Math.round(cols / 2);
                         print();
-                    } else if (e.which === 37) { // left
+                    } else if (e.key === 'ARROWLEFT') {
                         left -= Math.round(cols / 2);
                         if (left < 0) {
                             left = 0;
@@ -345,25 +346,24 @@
                         print();
                         // scroll
                     } else if (lines.length > rows) {
-                        if (e.which === 38) { //up
+                        if (e.key === 'ARROWUP') { //up
                             if (pos > 0) {
                                 --pos;
                                 print();
                             }
-                        } else if (e.which === 40) { //down
+                        } else if (e.key === 'ARROWDOWN') { //down
                             if (pos <= lines.length - rows) {
                                 ++pos;
                                 print();
                             }
-                        } else if (e.which === 34) {
-                            // Page up
+                        } else if (e.key === 'PAGEUP') {
                             pos += rows;
                             var limit = lines.length - rows + 1;
                             if (pos > limit) {
                                 pos = limit;
                             }
                             print();
-                        } else if (e.which === 33) {
+                        } else if (e.key === 'PAGEDOWN') {
                             //Page Down
                             pos -= rows;
                             if (pos < 0) {
