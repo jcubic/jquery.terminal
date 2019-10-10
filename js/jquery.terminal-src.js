@@ -6672,7 +6672,7 @@
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     try {
-                        settings.greetings.call(self, self.echo);
+                        settings.greetings.call(this, self, self.echo);
                     } catch (e) {
                         settings.greetings = null;
                         display_exception(e, 'greetings');
