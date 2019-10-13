@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 13 Oct 2019 17:22:18 +0000
+ * Date: Sun, 13 Oct 2019 18:24:31 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -984,6 +984,16 @@
         var defer = jQuery.Deferred();
         defer.resolve(value);
         return defer.promise();
+    }
+    // -----------------------------------------------------------------------
+    function unpromise(value, callback) {
+        if (value) {
+            if (is_function(value.done)) {
+                return value.done(callback);
+            } else if (is_function(value.then)) {
+                return value.then(callback);
+            }
+        }
     }
     // -----------------------------------------------------------------------
     // :: based on https://github.com/zeusdeux/isInViewport
@@ -2007,8 +2017,8 @@
                             text: value
                         });
                         if (ret !== undefined) {
-                            if (ret && is_function(ret.then)) {
-                                ret.then(insert);
+                            if (ret && is_function(ret.then || ret.done)) {
+                                (ret.then || ret.done).call(ret, insert);
                             } else if (typeof ret === 'string') {
                                 insert(ret);
                             } else if (ret === false) {
@@ -4043,7 +4053,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 13 Oct 2019 17:22:18 +0000',
+        date: 'Sun, 13 Oct 2019 18:24:31 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6669,7 +6679,8 @@
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     try {
-                        settings.greetings.call(self, self.echo);
+                        var ret = settings.greetings.call(self, self.echo);
+                        unpromise(ret, self.echo);
                     } catch (e) {
                         settings.greetings = null;
                         display_exception(e, 'greetings');
@@ -7437,11 +7448,9 @@
                         // it will resolve exec promise when user promise
                         // is resolved
                         var ret = commands(command, silent, true);
-                        if (ret && (ret.done || ret.then)) {
-                            (ret.done || ret.then).call(ret, function() {
-                                d.resolve(self);
-                            });
-                        }
+                        unpromise(ret, function() {
+                            d.resolve(self);
+                        });
                     }
                 });
                 // while testing it didn't executed last exec when using this
@@ -7548,9 +7557,9 @@
                                 silent) {
                                 login_callback(user, token, silent);
                             });
-                            if (ret && is_function(ret.then)) {
+                            if (ret && is_function(ret.then || ret.done)) {
                                 self.pause();
-                                ret.then(function(token) {
+                                (ret.then || ret.done).call(ret, function(token) {
                                     login_callback(user, token);
                                     self.resume();
                                 });
@@ -9061,13 +9070,11 @@
             }
             var wrapper = function(callback) {
                 var ret = fn.call(self, callback, self);
-                if (ret && is_function(ret.then)) {
-                    ret.then(function(string) {
-                        if (typeof string === type) {
-                            callback(string);
-                        }
-                    });
-                }
+                unpromise(ret, function(string) {
+                    if (typeof string === type) {
+                        callback(string);
+                    }
+                });
             };
             wrapper.proxy = true;
             return wrapper;
@@ -9101,8 +9108,8 @@
                     }
                     var ret = fire_event('onPaste', [event]);
                     if (ret) {
-                        if (is_function(ret.then)) {
-                            return ret.then(function(ret) {
+                        if (is_function(ret.then || ret.done)) {
+                            return (ret.then || ret.done).call(ret, function(ret) {
                                 echo(ret, true);
                             });
                         } else {

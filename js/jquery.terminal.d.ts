@@ -91,7 +91,7 @@ declare namespace JQueryTerminal {
     type errorArgument = string | (() => string) | PromiseLike<string>;
     type setStringFunction = (value: string) => void;
     type setEchoValueFunction = (value: TypeOrPromise<echoValue>) => void;
-    type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => void) | string | null;
+    type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => (void | TypeOrPromise<JQueryTerminal.echoValue>)) | string | null;
     type cmdPrompt<T = Cmd> = ((this: Cmd, setPrompt: setStringFunction) => void) | string;
 
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;

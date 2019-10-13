@@ -1,4 +1,6 @@
-## 2.8.1
+## 2.9.0
+### features
+* allow to return a promise from greetings function [#531](https://github.com/jcubic/jquery.terminal/issues/531)
 ### Bugfix
 * fix links from formatters in cmd
 * fix images from formatters in cmd [#519](https://github.com/jcubic/jquery.terminal/issues/519)
