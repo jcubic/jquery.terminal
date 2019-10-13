@@ -65,73 +65,92 @@ Storage.prototype.clear = function() {
     });
 };
 // https://github.com/tmpvar/jsdom/issues/135
-Object.defineProperties(window.HTMLElement.prototype, {
-    offsetLeft: {
-        get: function() { return parseFloat(window.getComputedStyle(this).marginLeft) || 0; }
-    },
-    offsetTop: {
-        get: function() { return parseFloat(window.getComputedStyle(this).marginTop) || 0; }
-    },
-    offsetHeight: {
-        get: function() { return parseFloat(window.getComputedStyle(this).height) || 0; }
-    },
-    offsetWidth: {
-        get: function() { return parseFloat(window.getComputedStyle(this).width) || 0; }
-    },
-    // this will test if setting 1ch change value to 1ch which don't work in jsdom used by jest
-    style: {
-        get: function() {
-            if (this.__style) {
-                return this.__style;
-            }
-            var self = this;
-            var attr = {};
-            function set_style_attr() {
-                var str = Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';') + ';';
-                self.setAttribute('style', str);
-            }
-            var mapping = {
-                backgroundClip: 'background-clip',
-                className: 'class'
-            };
-            var reversed_mapping = {};
-            Object.keys(mapping).forEach(key => {
-                reversed_mapping[mapping[key]] = key;
-            });
-            return this.__style = new Proxy({}, {
-                set: function(target, name, value) {
-                    name = mapping[name] || name;
-                    if (!value) {
+
+(function() {
+    var style_descriptor = Object.getOwnPropertyDescriptor(window.HTMLElement.prototype, 'style');
+
+    Object.defineProperties(window.HTMLElement.prototype, {
+        offsetLeft: {
+            get: function() { return parseFloat(window.getComputedStyle(this).marginLeft) || 0; }
+        },
+        offsetTop: {
+            get: function() { return parseFloat(window.getComputedStyle(this).marginTop) || 0; }
+        },
+        offsetHeight: {
+            get: function() { return parseFloat(window.getComputedStyle(this).height) || 0; }
+        },
+        offsetWidth: {
+            get: function() { return parseFloat(window.getComputedStyle(this).width) || 0; }
+        },
+        // this will test if setting 1ch change value to 1ch which don't work in jsdom used by jest
+        style: {
+            get: function getter() {
+                if (this.__style) {
+                    return this.__style;
+                }
+                var self = this;
+                var attr = {};
+                function set_style_attr() {
+                    var str = Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';') + ';';
+                    self.setAttribute('style', str);
+                }
+                var mapping = {
+                    backgroundClip: 'background-clip',
+                    className: 'class'
+                };
+                var reversed_mapping = {};
+                Object.keys(mapping).forEach(key => {
+                    reversed_mapping[mapping[key]] = key;
+                });
+                function disable(fn) {
+                    // temporary disable proxy
+                    Object.defineProperty(window.HTMLElement.prototype, "style", style_descriptor);
+                    var ret = fn();
+                    Object.defineProperty(window.HTMLElement.prototype, "style", {
+                        get: getter
+                    });
+                    return ret;
+                }
+                return this.__style = new Proxy({}, {
+                    set: function(target, name, value) {
+                        name = mapping[name] || name;
+                        if (!value) {
+                            delete target[name];
+                            delete attr[name];
+                        } else {
+                            attr[name] = target[name] = value;
+                        }
+                        set_style_attr();
+                        disable(function() {
+                            self.style[name] = name;
+                        });
+                        return true;
+                    },
+                    get: function(target, name) {
+                        if (name === 'setProperty') {
+                            return function(name, value) {
+                                attr[name] = target[name] = value;
+                                set_style_attr();
+                            };
+                        } else if (target[name]) {
+                            return target[name];
+                        } else {
+                            return disable(function() {
+                                return self.style[name];
+                            });
+                        }
+                    },
+                    deleteProperty: function(target, name) {
+                        name = reversed_mapping[name] || name;
                         delete target[name];
                         delete attr[name];
-                    } else {
-                        attr[name] = target[name] = value;
+                        set_style_attr();
                     }
-                    set_style_attr();
-                    return true;
-                },
-                get: function(target, name) {
-                    if (name === 'setProperty') {
-                        return function(name, value) {
-                            attr[name] = target[name] = value;
-                            set_style_attr();
-                        };
-                    } else if (name === '__orig') {
-                        return self;
-                    } else {
-                        return target[name];
-                    }
-                },
-                deleteProperty: function(target, name) {
-                    name = reversed_mapping[name] || name;
-                    delete target[name];
-                    delete attr[name];
-                    set_style_attr();
-                }
-            });
+                });
+            }
         }
-    }
-});
+    });
+})();
 
 global.window.Element.prototype.getBoundingClientRect = function() {
     var self = $(this);
@@ -269,7 +288,11 @@ function keydown(ctrl, alt, shift, which, key) {
 function keypress(key, code) {
     var e = $.Event("keypress");
     e.key = key;
-    e.which = e.keyCode = (code || 0);
+    if (code === true) {
+        e.which = e.keyCode = key.charCodeAt(0);
+    } else {
+        e.which = e.keyCode = (code || 0);
+    }
     return e;
 }
 function shortcut(ctrl, alt, shift, which, key) {
@@ -779,14 +802,14 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noopener" tabindex="1000">https://terminal.jcubic.pl<'+
-                        '/a>',
+                        ' rel="noopener" tabindex="1000" data-text>https:'+
+                        '//terminal.jcubic.pl</a>',
                     {}
                 ],
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noreferrer noopener" tabindex="1000">https'+
-                        '://terminal.jcubic.pl</a>',
+                        ' rel="noreferrer noopener" tabindex="1000" data-'+
+                        'text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true
                     }
@@ -807,22 +830,22 @@ describe('Terminal utils', function() {
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000">xss</a>'
+                        ' tabindex="1000" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
                     '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="noopener" tabindex="1000">xss</a>'
+                        ' rel="noopener" tabindex="1000" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000">xss</a>'
+                        ' tabindex="1000" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000">xss</a>'
+                        ' tabindex="1000" data-text>xss</a>'
                 ],
             ];
             tests.forEach(function(spec) {
@@ -835,14 +858,14 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noopener" tabindex="1000">https://terminal.jcubic.pl<'+
-                        '/a>',
+                        ' rel="nofollow noopener" tabindex="1000" data-te'+
+                        'xt>https://terminal.jcubic.pl</a>',
                     {linksNoFollow: true}
                 ],
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noreferrer noopener" tabindex="1000">https'+
-                        '://terminal.jcubic.pl</a>',
+                        ' rel="nofollow noreferrer noopener" tabindex="1000"'+
+                        ' data-text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true,
                         linksNoFollow: true
@@ -860,12 +883,12 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '[[!;;]jcubic@onet.pl]',
-                    '<a href="mailto:jcubic@onet.pl" tabindex="1000">jcubic@onet.pl</a>'
+                    '<a href="mailto:jcubic@onet.pl" tabindex="1000" data-text>jcubic@onet.pl</a>'
                 ],
                 [
                     '[[!;;;;jcubic@onet.pl]j][[!;;;;jcubic@onet.pl]cubic@onet.pl]',
-                    '<a href="mailto:jcubic@onet.pl" tabindex="1000">j</a>' +
-                        '<a href="mailto:jcubic@onet.pl" tabindex="1000">c' +
+                    '<a href="mailto:jcubic@onet.pl" tabindex="1000" data-text>j</a>' +
+                        '<a href="mailto:jcubic@onet.pl" tabindex="1000" data-text>c' +
                         'ubic@onet.pl</a>'
                 ]
             ];
@@ -1875,7 +1898,7 @@ describe('Terminal utils', function() {
             expect(formatters[formatters.length - 1]).toBe(formatter_2);
         });
     });
-    fdescribe('$.terminal.less', function() {
+    describe('$.terminal.less', function() {
         var term;
         var greetings = 'Terminal Less Test';
         var cols = 80, rows = 25;
@@ -1901,7 +1924,7 @@ describe('Terminal utils', function() {
             shortcut(false, false, false, ord, key);
         }
         function selected() {
-            return term.find('.terminal-output > div div span.inverted');
+            return term.find('.terminal-output > div div span.cmd-inverted');
         }
         function search(text) {
             key('/');
@@ -1948,9 +1971,9 @@ describe('Terminal utils', function() {
                 expect(a0(spans.eq(i).text())).toEqual(string);
             });
             [true, false, true].forEach(function(check, i) {
-                console.log(spans.get(i).style.__orig.color);
-                expect([i, !!spans.get(i).getAttribute('style').match(/color:\s*red/)]).toEqual([i, check]);
+                expect([i, spans.eq(i).css('color') === 'red']).toEqual([i, check]);
             });
+            expect(spans.eq(1).is('.cmd-inverted')).toBeTruthy();
         });
     });
     describe('$.terminal.pipe', function() {
@@ -2422,6 +2445,7 @@ describe('extensions', function() {
                 autocompleteMenu: true,
                 completion: ['hello_foo', 'hello_bar']
             });
+            term.focus();
             await complete(term, 'hello');
             enter_text('f');
             await delay(5);
@@ -3124,14 +3148,18 @@ describe('Terminal plugin', function() {
                 term.insert(input);
                 return new Promise(function(resolve) {
                     setTimeout(function() {
+                        var given = [];
+                        var expected = [];
                         (function loop(i) {
                             var lines = term.find('.cmd [role="presentation"]');
                             if (i === lines.length) {
+                                expect(given).toEqual(expected);
                                 return resolve();
                             }
                             click(lines.eq(i));
                             var count = get_count(i);
-                            expect([i, cmd.display_position()]).toEqual([i, count]);
+                            given.push(cmd.display_position());
+                            expected.push(count);
                             loop(i+1);
                         })(0);
                     }, 100);
@@ -3209,7 +3237,7 @@ describe('Terminal plugin', function() {
                         expect(term.get_command()).toEqual('foo ba');
                         // the code before will trigger dead key - in Android it's always
                         // no keypress or no keydown for all keys
-                        doc.trigger(keypress('a'));
+                        doc.trigger(keypress('a', true));
                         done();
                     }, 200);
                 });
@@ -3223,7 +3251,7 @@ describe('Terminal plugin', function() {
             };
             var term = $('<div/>').appendTo('body').terminal(interpreter);
             it('text should appear and interpreter function should be called', function() {
-                term.focus(true);
+                term.clear().focus(true);
                 spy(interpreter, 'foo');
                 enter_text('foo');
                 expect(term.get_command()).toEqual('foo');

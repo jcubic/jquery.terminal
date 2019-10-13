@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.8.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 15 Sep 2019 21:33:50 +0000
+ * Date: Sun, 13 Oct 2019 17:16:21 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1531,10 +1531,7 @@
         var reverse_search_position = null;
         var backup_prompt;
         // create proper shape for object - V8 optimiztion
-        var format_options = $.extend({}, settings, {
-            unixFormattingEscapeBrackets: true,
-            position: null
-        });
+        
         // TODO: try to use workerCache with data that don't change like bare_text
         // or format function.
         // TODO: remove workerCache for formatters they require dynamic
@@ -1596,8 +1593,10 @@
                     node.closest('[role="presentation"]')
                         .prevUntil('.cmd-prompt').find('[data-text]').length;
             } else if (node.is('div[role="presentation"]')) {
+                var last = !node.next().length;
                 return node.find('[data-text]').length +
-                    node.prevUntil('.cmd-prompt').find('[data-text]').length;
+                    node.prevUntil('.cmd-prompt').find('[data-text]').length -
+                    (last ? 0 : 1);
             }
         }
         // IE mapping
@@ -2416,8 +2415,10 @@
             // we don't want to format command when user type formatting in
             try {
                 string = $.terminal.escape_formatting(string);
-                // small optimization - don't change object shape and ref
-                format_options.position = position;
+                var format_options = $.extend({}, settings, {
+                    unixFormattingEscapeBrackets: true,
+                    position: position
+                });
                 var formatted = $.terminal.apply_formatters(string, format_options);
                 var output = formatted[0];
                 var max = $.terminal.length(output);
@@ -2440,7 +2441,7 @@
         // :: format and encode the string
         // ---------------------------------------------------------------------
         function format(string, before) {
-            string = $.terminal.normalize(string);
+            //string = $.terminal.normalize(string);
             var encoded = $.terminal.encode(wrap(string), {
                 tabs: settings.tabs,
                 before: before
@@ -4043,8 +4044,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.8.0',
-        date: 'Sun, 15 Sep 2019 21:33:50 +0000',
+        version: 'DEV',
+        date: 'Sun, 13 Oct 2019 17:16:21 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4240,8 +4241,6 @@
                     if (char.length > 1) {
                         return char.length - 1;
                     }
-                } else {
-                    return substring.length - 1;
                 }
                 return 0;
             }

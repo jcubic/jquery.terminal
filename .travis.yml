@@ -6,8 +6,8 @@ install:
 script:
   - make
   - make lint
-  - make tscheck || travis_terminate 1
-  - make skipped_tests || travis_terminate 1
+  - make tscheck
+  - make skipped_tests
   - make test || travis_terminate 1
 after_script:
   - make coveralls

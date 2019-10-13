@@ -280,9 +280,9 @@
                         if (line.substring(j).match(start_re)) {
                             var rep;
                             if (formatting && in_text) {
-                                rep = '][[;;;inverted]$1]' + prev_format;
+                                rep = '][[;;;cmd-inverted]$1]' + prev_format;
                             } else {
-                                rep = '[[;;;inverted]$1]';
+                                rep = '[[;;;cmd-inverted]$1]';
                             }
                             line = line.substring(0, j) +
                                 line.substring(j).replace(start_re, rep);
