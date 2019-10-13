@@ -2397,7 +2397,7 @@ describe('extensions', function() {
         function complete(term, text) {
             term.focus().insert(text);
             shortcut(false, false, false, 9, 'tab');
-            return delay(5);
+            return delay(50);
         }
         it('should display menu from function with Promise', async function() {
             var term = $('<div/>').terminal($.noop, {
@@ -2448,12 +2448,12 @@ describe('extensions', function() {
             term.focus();
             await complete(term, 'hello');
             enter_text('f');
-            await delay(5);
+            await delay(50);
             menu_visible(term);
             expect(term.get_command()).toEqual('hello_f');
             expect(completion(term)).toEqual(['oo']);
             shortcut(false, false, false, 9, 'tab');
-            await delay(5);
+            await delay(50);
             expect(completion(term)).toEqual([]);
             expect(term.get_command()).toEqual('hello_foo');
             term.destroy();
