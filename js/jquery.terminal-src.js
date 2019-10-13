@@ -7345,10 +7345,11 @@
             // :: Clear the output
             // -------------------------------------------------------------
             clear: function() {
-                lines = [];
-                output.html('');
-                fire_event('onClear');
-                self.attr({scrollTop: 0});
+                if (fire_event('onClear') !== false) {
+                    lines = [];
+                    output.html('');
+                    self.attr({scrollTop: 0});
+                }
                 return self;
             },
             // -------------------------------------------------------------

@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 13 Oct 2019 18:24:31 +0000
+ * Date: Sun, 13 Oct 2019 21:34:11 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4053,7 +4053,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 13 Oct 2019 18:24:31 +0000',
+        date: 'Sun, 13 Oct 2019 21:34:11 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7345,10 +7345,11 @@
             // :: Clear the output
             // -------------------------------------------------------------
             clear: function() {
-                lines = [];
-                output.html('');
-                fire_event('onClear');
-                self.attr({scrollTop: 0});
+                if (fire_event('onClear') !== false) {
+                    lines = [];
+                    output.html('');
+                    self.attr({scrollTop: 0});
+                }
                 return self;
             },
             // -------------------------------------------------------------
