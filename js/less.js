@@ -125,6 +125,10 @@
         var left = 0;
         var $output = term.find('.terminal-output');
         var cmd = term.cmd();
+        var scroll_by = 3;
+        //term.on('mousewheel', wheel);
+        var in_search = false, last_found, search_string;
+        // -------------------------------------------------------------------------------
         function print() {
             term.clear();
             if (lines.length - pos > rows - 1) {
@@ -147,6 +151,7 @@
             }
             term.echo(to_print.join('\n'));
         }
+        // -------------------------------------------------------------------------------
         function quit() {
             term.pop().import_view(export_data);
             clear_cache();
@@ -155,6 +160,7 @@
                 options.exit();
             }
         }
+        // -------------------------------------------------------------------------------
         var cache = {};
         function clear_cache() {
             Object.keys(cache).forEach(function(width) {
@@ -166,11 +172,13 @@
             });
             cache = {};
         }
+        // -------------------------------------------------------------------------------
         function fixed_output() {
             // this will not change on resize, but the font size may change
             var height = cmd.outerHeight(true);
             $output.css('height', 'calc(100% - ' + height + 'px)');
         }
+        // -------------------------------------------------------------------------------
         function refresh_view() {
             cols = term.cols();
             rows = term.rows();
@@ -190,49 +198,14 @@
                     if (options.formatters) {
                         text = $.terminal.apply_formatters(text);
                     }
-                    // split images
-                    var defer = $.Deferred();
-                    var parts = text.split(img_split_re).filter(Boolean);
-                    var promise = defer.promise();
-                    if (parts.length === 1) {
-                        defer.resolve(text.split('\n'));
-                    } else {
-                        var result = [];
-                        (function recur() {
-                            function concat_slices(slices) {
-                                cache[width][img] = slices;
-                                result = result.concat(slices.map(function(uri) {
-                                    return '[[@;;;;' + uri + ']]';
-                                }));
-                                recur();
-                            }
-                            if (!parts.length) {
-                                return defer.resolve(result);
-                            }
-                            var part = parts.shift();
-                            var m = part.match(img_re);
-                            if (m) {
-                                var img = m[1];
-                                var cursor = term.find('.cmd-cursor')[0];
-                                var rect = cursor.getBoundingClientRect();
-                                var width = term.width();
-                                var opts = {width: width, line_height: rect.height};
-                                cache[width] = cache[width] || {};
-                                if (cache[width][img]) {
-                                    concat_slices(cache[width][img]);
-                                } else {
-                                    slice(img, opts).then(concat_slices);
-                                }
-                            } else {
-                                result = result.concat(part.split('\n'));
-                                recur();
-                            }
-                        })();
-                    }
-                    promise.then(function(l) {
+                    image_formatter(text).then(function(l) {
                         original_lines = l;
                         lines = original_lines.slice();
-                        print();
+                        if (in_search) {
+                            search(last_found);
+                        } else {
+                            print();
+                        }
                     });
                 } else {
                     lines = original_lines.slice();
@@ -245,10 +218,48 @@
                 run(text);
             }
         }
-        refresh_view();
-        var scroll_by = 3;
-        //term.on('mousewheel', wheel);
-        var in_search = false, last_found, search_string;
+        // -------------------------------------------------------------------------------
+        function image_formatter(text) {
+            var defer = $.Deferred();
+            var parts = text.split(img_split_re).filter(Boolean);
+            if (parts.length === 1) {
+                defer.resolve(text.split('\n'));
+            } else {
+                var result = [];
+                (function recur() {
+                    function concat_slices(slices) {
+                        cache[width][img] = slices;
+                        result = result.concat(slices.map(function(uri) {
+                            return '[[@;;;;' + uri + ']]';
+                        }));
+                        recur();
+                    }
+                    if (!parts.length) {
+                        return defer.resolve(result);
+                    }
+                    var part = parts.shift();
+                    var m = part.match(img_re);
+                    if (m) {
+                        var img = m[1];
+                        var cursor = term.find('.cmd-cursor')[0];
+                        var rect = cursor.getBoundingClientRect();
+                        var width = term.width();
+                        var opts = {width: width, line_height: rect.height};
+                        cache[width] = cache[width] || {};
+                        if (cache[width][img]) {
+                            concat_slices(cache[width][img]);
+                        } else {
+                            slice(img, opts).then(concat_slices);
+                        }
+                    } else {
+                        result = result.concat(part.split('\n'));
+                        recur();
+                    }
+                })();
+            }
+            return defer.promise();
+        }
+        // -------------------------------------------------------------------------------
         function search(start, reset) {
             var escape = $.terminal.escape_brackets(search_string),
                 flag = search_string.toLowerCase() === search_string ? 'i' : '',
@@ -280,14 +291,14 @@
                         if (line.substring(j).match(start_re)) {
                             var rep;
                             if (formatting && in_text) {
-                                rep = '][[;;;cmd-inverted]$1]' + prev_format;
+                                rep = '][[;;;terminal-inverted]$1]' + prev_format;
                             } else {
-                                rep = '[[;;;cmd-inverted]$1]';
+                                rep = '[[;;;terminal-inverted]$1]';
                             }
                             line = line.substring(0, j) +
                                 line.substring(j).replace(start_re, rep);
                             j += rep.length - 2;
-                            if (i > pos && index === -1) {
+                            if (i >= pos && index === -1) {
                                 index = pos = i;
                             }
                         }
@@ -300,6 +311,7 @@
             term.set_prompt(prompt);
             return index;
         }
+        // -------------------------------------------------------------------------------
         term.push($.noop, {
             onResize: refresh_view,
             mousewheel: function(event, delta) {
@@ -392,6 +404,8 @@
             },
             prompt: prompt
         });
+        // -------------------------------------------------------------------------------
+        refresh_view();
     }
     // -----------------------------------------------------------------------------------
     $.fn.less = function(text, options) {

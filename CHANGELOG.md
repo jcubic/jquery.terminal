@@ -8,6 +8,8 @@
 * fix recursive error when echo finalize throwed exception [#524](https://github.com/jcubic/jquery.terminal/issues/524)
 * fix prism - xml nested formatting and weird wrapping [#523](https://github.com/jcubic/jquery.terminal/issues/523), [#410](https://github.com/jcubic/jquery.terminal/issues/410)
 * limit number of characters in click on exception line [#525](https://github.com/jcubic/jquery.terminal/issues/525)
+* fix less search clear on resize [#528](https://github.com/jcubic/jquery.terminal/issues/528)
+* fix less search second instance (move one line to bottom)
 
 ## 2.8.0
 ### Feature

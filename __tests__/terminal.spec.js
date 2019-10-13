@@ -1924,7 +1924,7 @@ describe('Terminal utils', function() {
             shortcut(false, false, false, ord, key);
         }
         function selected() {
-            return term.find('.terminal-output > div div span.cmd-inverted');
+            return term.find('.terminal-output > div div span.terminal-inverted');
         }
         function search(text) {
             key('/');
@@ -1973,7 +1973,7 @@ describe('Terminal utils', function() {
             [true, false, true].forEach(function(check, i) {
                 expect([i, spans.eq(i).css('color') === 'red']).toEqual([i, check]);
             });
-            expect(spans.eq(1).is('.cmd-inverted')).toBeTruthy();
+            expect(spans.eq(1).is('.terminal-inverted')).toBeTruthy();
         });
     });
     describe('$.terminal.pipe', function() {
