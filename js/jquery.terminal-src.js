@@ -1530,8 +1530,6 @@
         var rev_search_str = '';
         var reverse_search_position = null;
         var backup_prompt;
-        // create proper shape for object - V8 optimiztion
-        
         // TODO: try to use workerCache with data that don't change like bare_text
         // or format function.
         // TODO: remove workerCache for formatters they require dynamic
