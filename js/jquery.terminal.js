@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 13 Oct 2019 21:34:11 +0000
+ * Date: Sun, 20 Oct 2019 18:08:17 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1488,7 +1488,7 @@
             holdTimeout: 400,
             holdRepeatTimeout: 200,
             mobileIngoreAutoSpace: [],
-            repeatTimeoutKeys: ['HOLD+BACKSPACE'],
+            repeatTimeoutKeys: [],
             tabindex: 1,
             tabs: 4
         }
@@ -3240,6 +3240,12 @@
             return e.key && e.key.length === 1 && !e.ctrlKey;
         }
         // ---------------------------------------------------------------------
+        function is_delay_key(key) {
+            var specials = ['HOLD+SHIFT+BACKSPACE', 'HOLD+BACKSPACE'];
+            return specials.indexOf(key) !== -1 && settings.mobileDelete ||
+                settings.repeatTimeoutKeys.indexOf(key) !== -1;
+        }
+        // ---------------------------------------------------------------------
         function clear_reverse_search_key(e) {
             // arrows / Home / End / ENTER
             return e.which === 35 || e.which === 36 ||
@@ -3304,8 +3310,7 @@
                     if (hold_pause) {
                         return;
                     }
-                    if (settings.holdRepeatTimeout > 0 &&
-                        key.indexOf(settings.repeatTimeoutKeys) !== -1) {
+                    if (settings.holdRepeatTimeout > 0 && is_delay_key(key)) {
                         hold_pause = true;
                         self.oneTime(settings.holdRepeatTimeout, 'delay', function() {
                             hold_pause = false;
@@ -4053,7 +4058,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 13 Oct 2019 21:34:11 +0000',
+        date: 'Sun, 20 Oct 2019 18:08:17 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5722,7 +5727,7 @@
         clickTimeout: 200,
         holdTimeout: 400,
         holdRepeatTimeout: 200,
-        repeatTimeoutKeys: ['HOLD+BACKSPACE'],
+        repeatTimeoutKeys: [],
         mobileIngoreAutoSpace: [],
         request: $.noop,
         response: $.noop,
