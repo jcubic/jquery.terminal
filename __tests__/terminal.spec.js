@@ -197,7 +197,7 @@ require('../js/echo_newline')(global.$);
 require('../js/autocomplete_menu')(global.$);
 require('../js/less')(global.$);
 
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 
 function nbsp(string) {
     return string.replace(/ /g, '\xA0');
@@ -2100,9 +2100,9 @@ describe('Terminal utils', function() {
                 }
             }));
             term.clear().exec('cat | wc -l');
-            await delay(50);
+            await delay(80);
             await term.exec('foo\nbar');
-            await delay(50);
+            await delay(80);
             expect(term.get_output().split('\n')).toEqual([
                 '> cat | wc -l',
                 'foo',
