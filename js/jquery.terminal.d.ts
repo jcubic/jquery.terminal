@@ -431,7 +431,7 @@ type TerminalOption = "prompt" | "name" | "history" | "exit" | "clear" | "enable
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
     "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand" | "mobileIngoreAutoSpace" |
     "onBeforeCommand" | "onAfterCommand" | "onBeforeLogout" | "onAfterLogout" | "onBeforeLogin" |
-    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho" | "autocompleteMenu" | "mobileDelete";
+    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho" | "autocompleteMenu" | "mobileDelete" | "renderHandler";
 
 type TerminalOptions = {
     prompt?: JQueryTerminal.ExtendedPrompt;
@@ -492,6 +492,7 @@ type TerminalOptions = {
     completion?: JQueryTerminal.Completion;
     keypress?: JQueryTerminal.KeyEventHandler;
     keydown?: JQueryTerminal.KeyEventHandler;
+    renderHandler?: (this: JQueryTerminal, obj: any, term: JQueryTerminal) => (void | string | Element | JQuery<Element> | false);
     onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status: string, error: string) => void;
     onFocus?: JQueryTerminal.EventCallback;
     onInit?: JQueryTerminal.EventCallback;
@@ -576,7 +577,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     // options for remove_line is useless but that's how API look like
     remove_line(line: number): JQueryTerminal;
     last_index(): number;
-    echo(arg: TypeOrPromise<JQueryTerminal.echoValue>, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    echo<TValue = JQueryTerminal.echoValue>(arg: TypeOrPromise<TValue>, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     error(arg: JQueryTerminal.errorArgument, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     exception<T extends Error>(e: T, label?: string): JQueryTerminal;
     scroll(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'scroll'> | false): this;

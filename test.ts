@@ -307,6 +307,27 @@ class Foo {
             this.echo(command.charCodeAt(0).toString());
         }
     });
+    // -------------------------------------------------------------------------
+    // :: renderHandler
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        renderHandler: function(value) {
+            // value here is any you should typecheck the value in JS
+            // and return string, DOM node or jQuery object
+            if (value instanceof Foo) {
+                return $('<span>' + value.x + '</span>');
+            }
+            if (value === true) {
+                this.echo('true value');
+                return false;
+            }
+            if (value === false) {
+                var div = document.createElement('div');
+                div.innerHTML = 'false value';
+                return div;
+            }
+        }
+    });
 });
 
 // -----------------------------------------------------------------------------
@@ -557,10 +578,10 @@ class Foo {
     // -------------------------------------------------------------------------
     term.echo("foo");
     term.echo(["foo", "bar"]);
-    term.echo(function() {
+    term.echo(function(): string {
         return "foo";
     });
-    term.echo(function() {
+    term.echo(function(): string[] {
         return ["foo", "bar"];
     });
     term.echo(Promise.resolve("foo"));
@@ -575,10 +596,9 @@ class Foo {
     term.echo(document.createElement('div'));
     term.echo($('<div/>'));
     term.echo($(document.createElement('div')));
-    // the only way to render the object when using renderHandler
-    term.echo(new Foo('hello') as any);
-    // this don't work - there is problem with extending of JQueryTerminal namespace
-    //term.echo(new Foo('hello'));
+    // special case when Foo class is processed by renderHandler
+    // this is wordaround since echo can accept anything
+    term.echo<Foo>(new Foo('hello'));
     // -------------------------------------------------------------------------
     // :: error
     // -------------------------------------------------------------------------
