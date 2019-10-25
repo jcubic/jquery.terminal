@@ -5746,6 +5746,7 @@
         onPop: $.noop,
         keypress: $.noop,
         keydown: $.noop,
+        renderHandler: null,
         onAfterRedraw: $.noop,
         onEchoCommand: $.noop,
         onPaste: $.noop,
@@ -8390,6 +8391,16 @@
                             } else {
                                 value = '';
                             }
+                        } else if (is_function(settings.renderHandler)) {
+                            var ret = settings.renderHandler.call(self, arg, self);
+                            if (ret === false) {
+                                return self;
+                            }
+                            if (typeof ret === 'string') {
+                                value = ret;
+                            } else {
+                                value = arg;
+                            }
                         } else {
                             value = arg;
                         }
@@ -8422,6 +8433,18 @@
                     echo(arg);
                 }
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: helper function to render DOM nodes objects that should not
+            // :: be re-rendered on window resize - like vide from camera
+            // -------------------------------------------------------------
+            render: function(node) {
+                return self.echo('<div class="terminal-render-item"/>', {
+                    raw: true,
+                    finalize: function(div) {
+                        div.find('.terminal-render-item').replaceWith(node);
+                    }
+                });
             },
             // -------------------------------------------------------------
             // :: echo red text
