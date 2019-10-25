@@ -5849,9 +5849,44 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: helper function that use option to render objects
+        // ---------------------------------------------------------------------
+        function preprocess_value(value) {
+            if (is_function(settings.renderHandler)) {
+                var ret = settings.renderHandler.call(self, value, self);
+                if (ret === false) {
+                    return false;
+                }
+                if (typeof ret === 'string') {
+                    return ret;
+                } else {
+                    return value;
+                }
+            }
+            return value;
+        }
+        // ---------------------------------------------------------------------
+        // :: helper function that render DOM nodes and jQuery objects
+        // ---------------------------------------------------------------------
+        function render(value) {
+            if (value instanceof $.fn.init || value instanceof Element) {
+                self.echo('<div class="terminal-render-item"/>', {
+                    raw: true,
+                    finalize: function(div) {
+                        div.find('.terminal-render-item').replaceWith(value);
+                    }
+                });
+                return true;
+            }
+        }
+        // ---------------------------------------------------------------------
         // :: Display object on terminal
         // ---------------------------------------------------------------------
         function display_object(object) {
+            object = preprocess_value(object);
+            if (object === false) {
+                return;
+            }
             if (typeof object === 'string') {
                 self.echo(object);
             } else if (is_array(object)) {
@@ -8391,26 +8426,15 @@
                             } else {
                                 value = '';
                             }
-                        } else if (is_function(settings.renderHandler)) {
-                            var ret = settings.renderHandler.call(self, arg, self);
+                        } else {
+                            var ret = preprocess_value(arg);
                             if (ret === false) {
                                 return self;
                             }
-                            if (typeof ret === 'string') {
-                                value = ret;
-                            } else {
-                                value = arg;
-                            }
-                        } else {
-                            value = arg;
+                            value = ret;
                         }
-                        if (value instanceof $.fn.init || value instanceof Element) {
-                            return self.echo('<div class="terminal-render-item"/>', {
-                                raw: true,
-                                finalize: function(div) {
-                                    div.find('.terminal-render-item').replaceWith(value);
-                                }
-                            });
+                        if (render(value)) {
+                            return self;
                         }
                         process_line({
                             string: value,
