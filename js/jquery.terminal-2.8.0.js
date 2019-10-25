@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Fri, 25 Oct 2019 10:48:08 +0000
+ * Date: Fri, 25 Oct 2019 10:58:14 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4058,7 +4058,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 25 Oct 2019 10:48:08 +0000',
+        date: 'Fri, 25 Oct 2019 10:58:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8404,6 +8404,14 @@
                         } else {
                             value = arg;
                         }
+                        if (value instanceof $.fn.init || value instanceof Element) {
+                            return self.echo('<div class="terminal-render-item"/>', {
+                                raw: true,
+                                finalize: function(div) {
+                                    div.find('.terminal-render-item').replaceWith(value);
+                                }
+                            });
+                        }
                         process_line({
                             string: value,
                             options: locals,
@@ -8433,18 +8441,6 @@
                     echo(arg);
                 }
                 return self;
-            },
-            // -------------------------------------------------------------
-            // :: helper function to render DOM nodes objects that should not
-            // :: be re-rendered on window resize - like vide from camera
-            // -------------------------------------------------------------
-            render: function(node) {
-                return self.echo('<div class="terminal-render-item"/>', {
-                    raw: true,
-                    finalize: function(div) {
-                        div.find('.terminal-render-item').replaceWith(node);
-                    }
-                });
             },
             // -------------------------------------------------------------
             // :: echo red text

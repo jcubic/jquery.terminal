@@ -8404,6 +8404,14 @@
                         } else {
                             value = arg;
                         }
+                        if (value instanceof $.fn.init || value instanceof Element) {
+                            return self.echo('<div class="terminal-render-item"/>', {
+                                raw: true,
+                                finalize: function(div) {
+                                    div.find('.terminal-render-item').replaceWith(value);
+                                }
+                            });
+                        }
                         process_line({
                             string: value,
                             options: locals,
@@ -8433,18 +8441,6 @@
                     echo(arg);
                 }
                 return self;
-            },
-            // -------------------------------------------------------------
-            // :: helper function to render DOM nodes objects that should not
-            // :: be re-rendered on window resize - like vide from camera
-            // -------------------------------------------------------------
-            render: function(node) {
-                return self.echo('<div class="terminal-render-item"/>', {
-                    raw: true,
-                    finalize: function(div) {
-                        div.find('.terminal-render-item').replaceWith(node);
-                    }
-                });
             },
             // -------------------------------------------------------------
             // :: echo red text
