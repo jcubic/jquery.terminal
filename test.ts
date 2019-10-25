@@ -40,6 +40,13 @@ $('.term').terminal(["foo.php", obj_interpreter]);
 $('.term').terminal(["foo.php", obj_interpreter, function(command) {
 }]);
 
+class Foo {
+    x: string;
+    constructor(x: string) {
+        this.x = x;
+    }
+}
+
 // -----------------------------------------------------------------------------
 // :: Options
 // -----------------------------------------------------------------------------
@@ -564,6 +571,14 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
     term.echo(Promise.resolve(function(): string[] {
         return ["foo"];
     }));
+    // add in version 2.9.0
+    term.echo(document.createElement('div'));
+    term.echo($('<div/>'));
+    term.echo($(document.createElement('div')));
+    // the only way to render the object when using renderHandler
+    term.echo(new Foo('hello') as any);
+    // this don't work - there is problem with extending of JQueryTerminal namespace
+    //term.echo(new Foo('hello'));
     // -------------------------------------------------------------------------
     // :: error
     // -------------------------------------------------------------------------

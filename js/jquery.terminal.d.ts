@@ -87,7 +87,7 @@ declare namespace JQueryTerminal {
     type keymapObjectOptionalArg = { [key: string]: keymapFunctionOptionalArg };
 
     type commandsCmdFunction<T = Cmd> = (this: T, command: string) => any;
-    type echoValue = string | string[] | (() => string | string[]);
+    type echoValue = string | string[] | Element | JQuery<Element> | (() => string | string[]);
     type errorArgument = string | (() => string) | PromiseLike<string>;
     type setStringFunction = (value: string) => void;
     type setEchoValueFunction = (value: TypeOrPromise<echoValue>) => void;
