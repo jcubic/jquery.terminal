@@ -5857,7 +5857,7 @@
                 if (ret === false) {
                     return false;
                 }
-                if (typeof ret === 'string') {
+                if (typeof ret === 'string' || is_node(ret)) {
                     return ret;
                 } else {
                     return value;
@@ -5869,7 +5869,7 @@
         // :: helper function that render DOM nodes and jQuery objects
         // ---------------------------------------------------------------------
         function render(value) {
-            if (value instanceof $.fn.init || value instanceof Element) {
+            if (is_node(value)) {
                 self.echo('<div class="terminal-render-item"/>', {
                     raw: true,
                     finalize: function(div) {
@@ -5880,11 +5880,20 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: test if object can be rendered
+        // ---------------------------------------------------------------------
+        function is_node(object) {
+            return object instanceof $.fn.init || object instanceof Element;
+        }
+        // ---------------------------------------------------------------------
         // :: Display object on terminal
         // ---------------------------------------------------------------------
         function display_object(object) {
             object = preprocess_value(object);
             if (object === false) {
+                return;
+            }
+            if (render(object)) {
                 return;
             }
             if (typeof object === 'string') {
