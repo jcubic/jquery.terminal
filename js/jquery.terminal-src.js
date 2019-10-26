@@ -2495,8 +2495,8 @@
         // ---------------------------------------------------------------------
         // :: shortcut helpers
         // ---------------------------------------------------------------------
-        function length(str) {
-            return $.terminal.length(str);
+        function length(str, raw) {
+            return $.terminal.length(str, raw);
         }
         // ---------------------------------------------------------------------
         function substring(str, start, end) {
@@ -3079,7 +3079,7 @@
                     } else {
                         new_formatted_pos = n;
                     }
-                    if (text(string).length === length(command)) {
+                    if (text(string).length === length(command, true)) {
                         formatted_position = new_formatted_pos;
                         return self.position(new_formatted_pos);
                     }
@@ -5069,8 +5069,8 @@
         // ---------------------------------------------------------------------
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
-        length: function(string) {
-            return $.terminal.split_characters(text(string)).length;
+        length: function(string, raw) {
+            return $.terminal.split_characters(raw ? string : text(string)).length;
         },
         // ---------------------------------------------------------------------
         // :: split characters handling emoji, surogate pairs and combine chars

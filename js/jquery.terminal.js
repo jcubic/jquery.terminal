@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 26 Oct 2019 17:42:01 +0000
+ * Date: Sat, 26 Oct 2019 19:45:31 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -2495,8 +2495,8 @@
         // ---------------------------------------------------------------------
         // :: shortcut helpers
         // ---------------------------------------------------------------------
-        function length(str) {
-            return $.terminal.length(str);
+        function length(str, raw) {
+            return $.terminal.length(str, raw);
         }
         // ---------------------------------------------------------------------
         function substring(str, start, end) {
@@ -3079,7 +3079,7 @@
                     } else {
                         new_formatted_pos = n;
                     }
-                    if (text(string).length === length(command)) {
+                    if (text(string).length === length(command, true)) {
                         formatted_position = new_formatted_pos;
                         return self.position(new_formatted_pos);
                     }
@@ -4058,7 +4058,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 26 Oct 2019 17:42:01 +0000',
+        date: 'Sat, 26 Oct 2019 19:45:31 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5069,8 +5069,8 @@
         // ---------------------------------------------------------------------
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
-        length: function(string) {
-            return $.terminal.split_characters(text(string)).length;
+        length: function(string, raw) {
+            return $.terminal.split_characters(raw ? string : text(string)).length;
         },
         // ---------------------------------------------------------------------
         // :: split characters handling emoji, surogate pairs and combine chars
