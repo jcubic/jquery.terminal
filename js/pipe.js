@@ -55,7 +55,9 @@
     // -----------------------------------------------------------------------------------
     function array_split(array, splitter) {
         var test_fn;
-        if (splitter instanceof RegExp) {
+        if (typeof splitter === 'function') {
+            test_fn = splitter;
+        } else if (splitter instanceof RegExp) {
             test_fn = function(item) {
                 if (item instanceof RegExp) {
                     item = item.source;
@@ -77,8 +79,8 @@
         }
         var output = [];
         var sub = [];
-        array.forEach(function(item) {
-            var check = test_fn(item);
+        array.forEach(function(item, i) {
+            var check = test_fn(item, i);
             if (check) {
                 output.push(sub);
                 sub = [];
@@ -143,14 +145,25 @@
             return redirects;
         }
         // -------------------------------------------------------------------------------
+        function is_pipe(cmd) {
+            var quotes = [''].concat(cmd.args_quotes);
+            return function(string, i) {
+                return string === '|' && !quotes[i];
+            };
+        }
+        // -------------------------------------------------------------------------------
+        function tokens(cmd) {
+            return [cmd.name].concat(cmd.args);
+        }
+        // -------------------------------------------------------------------------------
         function parse_command(command) {
-            var tokens;
+            var cmd;
             if (term.settings().processArguments) {
-                tokens = $.terminal.parse_arguments(command);
+                cmd = $.terminal.parse_command(command);
             } else {
-                tokens = $.terminal.split_arguments(command);
+                cmd = $.terminal.split_command(command);
             }
-            return array_split(tokens, '|').map(function(args) {
+            return array_split(tokens(cmd), is_pipe(cmd)).map(function(args) {
                 var cmd = {
                     redirects: []
                 };

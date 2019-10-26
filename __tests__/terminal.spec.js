@@ -2013,6 +2013,21 @@ describe('Terminal utils', function() {
                 expect(get_lines(term)).toEqual(['foo']);
             });
         });
+        it('should escape pipe', async function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                read: function() {
+                    return this.read('').then((text) => {
+                        this.echo('your text: ' + text);
+                    });
+                },
+                echo: async function(string) {
+                    await delay(10);
+                    return string;
+                }
+            }));
+            await term.exec('echo "|" | read');
+            expect(get_lines(term)).toEqual(['your text: |']);
+        });
         it('should filter lines', function() {
             var term = $('<div/>').terminal($.terminal.pipe({
                 output: function(arg) {
