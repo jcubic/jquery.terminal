@@ -16,7 +16,7 @@ $('.term').terminal(function(command) {
 
 });
 $('.term').terminal([function(command, term) {
-
+    return Promise.resolve(document.createElement('div'));
 }]);
 $('.term').terminal("foo.php");
 $('.term').terminal(["foo.php"]);
@@ -122,6 +122,12 @@ class Foo {
     $('.term').terminal($.noop, {
         greetings: function(cb) {
             cb("hello");
+        }
+    });
+    $('.term').terminal($.noop, {
+        greetings: function() {
+            console.log(this.get_command());
+            return Promise.resolve("Hello");
         }
     });
     // -------------------------------------------------------------------------
@@ -609,9 +615,17 @@ class Foo {
     // function options
     term.echo(document.createElement('canvas'), {
         onClear: function(div) {
+            div.find('canvas');
+            console.log(this.get_command());
             (div[0] as any).pause = true;
         },
+        unmount: function(div) {
+            div.find('canvas');
+            console.log(this.get_command());
+        },
         finalize: function(div) {
+            div.find('canvas');
+            console.log(this.get_command());
             var canvas = <HTMLCanvasElement>(div.find('cavas')[0]);
             canvas.width = canvas.height = 100;
             var ctx = canvas.getContext("2d");
