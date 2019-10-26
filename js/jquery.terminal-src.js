@@ -5866,18 +5866,39 @@
             return value;
         }
         // ---------------------------------------------------------------------
+        // :: call when line is out of view when outputLimit is used
+        // :: NOTE: it's not called when less plugin is used onClear is called
+        // :: instead because less call term::clear() after export old view
+        // ---------------------------------------------------------------------
+        function unmount(node) {
+            var index = node.data('index');
+            var line = lines[index];
+            var options = line[1];
+            if (is_function(options.unmount)) {
+                options.unmount.call(self, node);
+            }
+        }
+        // ---------------------------------------------------------------------
         // :: helper function that render DOM nodes and jQuery objects
         // ---------------------------------------------------------------------
-        function render(value) {
+        function render(value, options) {
             if (is_node(value)) {
-                self.echo('<div class="terminal-render-item"/>', {
+                var settings = $.extend({}, options, {
                     raw: true,
                     finalize: function(div) {
                         div.find('.terminal-render-item').replaceWith(value);
+                        if (is_function(options.finalize)) {
+                            options.finalize(div, self);
+                        }
                     }
                 });
+                self.echo('<div class="terminal-render-item"/>', settings);
                 return true;
             }
+        }
+        // ---------------------------------------------------------------------
+        function get_node(index) {
+            return output.find('[data-index=' + index + ']');
         }
         // ---------------------------------------------------------------------
         // :: test if object can be rendered
@@ -6658,7 +6679,8 @@
                         options: options
                     });
                 });
-                lines_to_show = lines_to_show.slice(lines_to_show.length - limit - 1);
+                var pivot = lines_to_show.length - limit - 1;
+                lines_to_show = lines_to_show.slice(pivot);
             } else {
                 lines_to_show = lines.map(function(line, index) {
                     return {
@@ -6708,6 +6730,7 @@
                     parents.each(function() {
                         var $self = $(this);
                         if ($self.is(':empty')) {
+                            unmount($self);
                             // there can be divs inside parent that
                             // was not removed
                             $self.remove();
@@ -7396,6 +7419,10 @@
             // -------------------------------------------------------------
             clear: function() {
                 if (fire_event('onClear') !== false) {
+                    lines.forEach(function(line, i) {
+                        var options = line[1];
+                        options.onClear.call(self, get_node(i));
+                    });
                     lines = [];
                     output.html('');
                     self.attr({scrollTop: 0});
@@ -8301,7 +8328,8 @@
                             } else {
                                 wrapper.appendTo(output);
                             }
-                            data.finalize(wrapper.attr('data-index', data.index));
+                            wrapper.attr('data-index', data.index);
+                            data.finalize(wrapper);
                         } else {
                             var line = data.line;
                             var div = $('<div/>').html(line)
@@ -8397,11 +8425,15 @@
                             exec: true,
                             raw: settings.raw,
                             finalize: $.noop,
+                            unmount: $.noop,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
+                            onClear: $.noop,
                             formatters: true,
                             allowedAttributes: settings.allowedAttributes
                         }, options || {});
+                        // finalize function is passed around and invoked
+                        // in terminal::flush after content is added to DOM
                         (function(finalize) {
                             locals.finalize = function(div) {
                                 if (locals.raw) {
@@ -8409,7 +8441,7 @@
                                 }
                                 try {
                                     if (is_function(finalize)) {
-                                        finalize(div);
+                                        finalize.call(self, div);
                                     }
                                 } catch (e) {
                                     display_exception(e, 'USER:echo(finalize)');
@@ -8442,7 +8474,7 @@
                             }
                             value = ret;
                         }
-                        if (render(value)) {
+                        if (render(value, locals)) {
                             return self;
                         }
                         process_line({

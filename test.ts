@@ -543,7 +543,9 @@ class Foo {
     var lines: JQueryTerminal.Lines = term.get_output();
     test_type<number>(lines[0].index);
     var div = $('<div/>');
-    lines[0].options.finalize(div);
+    lines[0].options.finalize.call(term, div);
+    lines[0].options.onClear.call(term, div);
+    lines[0].options.unmount.call(term, div);
     // -------------------------------------------------------------------------
     // :: resize
     // -------------------------------------------------------------------------
@@ -599,6 +601,23 @@ class Foo {
     // special case when Foo class is processed by renderHandler
     // this is wordaround since echo can accept anything
     term.echo<Foo>(new Foo('hello'));
+    // function options
+    term.echo(document.createElement('canvas'), {
+        onClear: function(div) {
+            (div[0] as any).pause = true;
+        },
+        finalize: function(div) {
+            var canvas = <HTMLCanvasElement>(div.find('cavas')[0]);
+            canvas.width = canvas.height = 100;
+            var ctx = canvas.getContext("2d");
+            if (ctx === null) {
+                return;
+            }
+            ctx.clearRect(0, 0, 100, 100);
+            ctx.fillStyle = "#00FF00";
+            ctx.fillRect(10, 10, 90, 90);
+        }
+    });
     // -------------------------------------------------------------------------
     // :: error
     // -------------------------------------------------------------------------

@@ -134,7 +134,7 @@ declare namespace JQueryTerminal {
 
     type RequestResponseCallback = (this: JQueryTerminal, xhr: JQuery.jqXHR, json: any, term: JQueryTerminal) => void;
 
-    type EchoFinalizeFunction = (div: JQuery) => void;
+    type EchoEventFunction = (this: JQueryTerminal, div: JQuery<Element>) => void;
     type EventCallback = (this: JQueryTerminal, term: JQueryTerminal) => (void | boolean);
 
     type formatOptions = {
@@ -184,7 +184,9 @@ declare namespace JQueryTerminal {
 
     type LineEchoOptions = {
         exec: boolean;
-        finalize: JQueryTerminal.EchoFinalizeFunction;
+        unmount: JQueryTerminal.EchoEventFunction;
+        onClear: JQueryTerminal.EchoEventFunction;
+        finalize: JQueryTerminal.EchoEventFunction;
         invokeMethods: boolean;
         allowedAttributes: Array<RegExp | string>;
         flush: boolean;
@@ -200,7 +202,9 @@ declare namespace JQueryTerminal {
         exec?: boolean;
         invokeMethods?: boolean;
         allowedAttributes?: Array<RegExp | string>;
-        finalize?: JQueryTerminal.EchoFinalizeFunction;
+        unmount?: JQueryTerminal.EchoEventFunction;
+        onClear?: JQueryTerminal.EchoEventFunction;
+        finalize?: JQueryTerminal.EchoEventFunction;
         keepWords?: boolean;
         formatters?: boolean;
         newline?: boolean;
