@@ -2115,9 +2115,9 @@ describe('Terminal utils', function() {
                 }
             }));
             term.clear().exec('cat | wc -l');
-            await delay(80);
+            await delay(100);
             await term.exec('foo\nbar');
-            await delay(80);
+            await delay(100);
             expect(term.get_output().split('\n')).toEqual([
                 '> cat | wc -l',
                 'foo',
