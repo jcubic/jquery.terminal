@@ -22,15 +22,20 @@ $('.term').terminal("foo.php");
 $('.term').terminal(["foo.php"]);
 var obj_interpreter: JQueryTerminal.ObjectInterpreter = {
     foo: function(...args) {
+        return $('<div/>');
     },
     bar: function(a, b) {
+        // user should typecheck the arguments in JavaScript
+        (<RegExp>a).test('x');
         return Promise.resolve("foo");
     },
     baz: {
         a: function() {
+            return document.createElement('canvas');
         },
         b: {
             c: function() {
+                return "xxx";
             }
         }
     }

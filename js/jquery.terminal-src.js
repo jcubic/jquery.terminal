@@ -5887,7 +5887,7 @@
                     raw: true,
                     finalize: function(div) {
                         div.find('.terminal-render-item').replaceWith(value);
-                        if (is_function(options.finalize)) {
+                        if (options && is_function(options.finalize)) {
                             options.finalize(div, self);
                         }
                     }

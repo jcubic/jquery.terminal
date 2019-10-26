@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sat, 26 Oct 2019 15:38:04 +0000
+ * Date: Sat, 26 Oct 2019 17:42:01 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4058,7 +4058,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 26 Oct 2019 15:38:04 +0000',
+        date: 'Sat, 26 Oct 2019 17:42:01 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5875,7 +5875,7 @@
             var line = lines[index];
             var options = line[1];
             if (is_function(options.unmount)) {
-                options.unmount.call(self, node, self);
+                options.unmount.call(self, node);
             }
         }
         // ---------------------------------------------------------------------
@@ -5887,8 +5887,8 @@
                     raw: true,
                     finalize: function(div) {
                         div.find('.terminal-render-item').replaceWith(value);
-                        if (is_function(options.finalize)) {
-                            options.finalize(div);
+                        if (options && is_function(options.finalize)) {
+                            options.finalize(div, self);
                         }
                     }
                 });
@@ -7421,7 +7421,7 @@
                 if (fire_event('onClear') !== false) {
                     lines.forEach(function(line, i) {
                         var options = line[1];
-                        options.onClear.call(self, get_node(i), self);
+                        options.onClear.call(self, get_node(i));
                     });
                     lines = [];
                     output.html('');
@@ -8329,7 +8329,7 @@
                                 wrapper.appendTo(output);
                             }
                             wrapper.attr('data-index', data.index);
-                            data.finalize.call(self, wrapper, self);
+                            data.finalize(wrapper);
                         } else {
                             var line = data.line;
                             var div = $('<div/>').html(line)
@@ -8441,7 +8441,7 @@
                                 }
                                 try {
                                     if (is_function(finalize)) {
-                                        finalize(div);
+                                        finalize.call(self, div);
                                     }
                                 } catch (e) {
                                     display_exception(e, 'USER:echo(finalize)');
