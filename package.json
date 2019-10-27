@@ -307,7 +307,7 @@
     }
   },
   "dependencies": {
-    "@types/jquery": "^3.3.31",
+    "@types/jquery": "3.3.29",
     "jquery": "~3",
     "prismjs": "^1.16.0",
     "wcwidth": "^1.0.1"
@@ -319,7 +319,7 @@
     "eslint": "^5.16.0",
     "jest": "^24.8.0",
     "jsonlint": "^1.6.3",
-    "typescript": "^3.1.6",
+    "typescript": "~3.1.6",
     "uglify-js": "^3.5.12"
   }
 }

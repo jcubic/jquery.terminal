@@ -172,6 +172,9 @@ body.full-screen-terminal .terminal {
 .cmd .cmd-prompt > span {
     float: left;
 }
+.cmd span[style], .terminal span[style] {
+    display: inline-block;
+}
 .terminal,
 .terminal-output > :not(.raw) span,
 .terminal-output > :not(.raw) a,
