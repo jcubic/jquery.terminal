@@ -350,7 +350,7 @@
                     } else if (key === 'ARROWRIGHT') {
                         left += Math.round(cols / 2);
                         print();
-                    } else if (e.key === 'ARROWLEFT') {
+                    } else if (key === 'ARROWLEFT') {
                         left -= Math.round(cols / 2);
                         if (left < 0) {
                             left = 0;
@@ -358,24 +358,24 @@
                         print();
                         // scroll
                     } else if (lines.length > rows) {
-                        if (e.key === 'ARROWUP') { //up
+                        if (key === 'ARROWUP') { //up
                             if (pos > 0) {
                                 --pos;
                                 print();
                             }
-                        } else if (e.key === 'ARROWDOWN') { //down
+                        } else if (key === 'ARROWDOWN') { //down
                             if (pos <= lines.length - rows) {
                                 ++pos;
                                 print();
                             }
-                        } else if (e.key === 'PAGEUP') {
+                        } else if (key === 'PAGEUP') {
                             pos += rows;
                             var limit = lines.length - rows + 1;
                             if (pos > limit) {
                                 pos = limit;
                             }
                             print();
-                        } else if (e.key === 'PAGEDOWN') {
+                        } else if (key === 'PAGEDOWN') {
                             //Page Down
                             pos -= rows;
                             if (pos < 0) {
