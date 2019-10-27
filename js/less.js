@@ -333,7 +333,6 @@
             keydown: function(e) {
                 var command = term.get_command();
                 var key = e.key.toUpperCase();
-                console.log(key);
                 if (term.get_prompt() !== '/') {
                     if (key === '/') {
                         term.set_prompt('/');
