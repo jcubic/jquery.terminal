@@ -210,7 +210,7 @@ $('#term_demo').terminal('service.php', {login: true});
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [Full Documentation](http://terminal.jcubic.pl/api_reference.php) or
-[Getting Started Guide in Wiki](https://github.com/jcubic/jquery.terminal/wiki/Getting-Started).
+[Getting Started Guide on Wiki](https://github.com/jcubic/jquery.terminal/wiki/Getting-Started).
 
 ### Security
 
