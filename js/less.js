@@ -424,5 +424,6 @@
             );
         }
         less(term, text, settings);
+        return term;
     };
 });

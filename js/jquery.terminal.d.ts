@@ -70,6 +70,19 @@ declare namespace JQueryTerminal {
         rest: string;
     };
 
+    type AnsiColorType = {
+        black: string;
+        red: string;
+        green: string;
+        yellow: string;
+        blue: string;
+        magenta: string;
+        cyan: string;
+        white: string;
+    }
+
+    type LessArgument = string | ((cols: number, cb: (text: string) => void) => void) | string[];
+
     type ParsedOptions = {
         _: string[];
         [key: string]: boolean | string | string[];
@@ -77,7 +90,12 @@ declare namespace JQueryTerminal {
 
     type FormatterRegExpFunction = (...args: string[]) => string;
     type FormaterRegExpReplacement = string | FormatterRegExpFunction;
-    type FormatterFunction = (str: string, options: JSONObject) => (string | [string, number]);
+    type FormatterFunctionPropsInterface = {
+        __inherit__: boolean;
+        __warn__: boolean;
+        __meta__: boolean;
+    };
+    type FormatterFunction = ((str: string, options: JSONObject) => (string | [string, number])) & FormatterFunctionPropsInterface;
 
     type Formatter = [RegExp, FormaterRegExpReplacement] | [RegExp, FormaterRegExpReplacement, { loop: boolean }] | FormatterFunction;
     type keymapFunctionOptionalArg = (event: JQueryKeyEventObject, original?: keymapFunction) => any;
@@ -265,6 +283,8 @@ interface JQuery<TElement = HTMLElement> {
     caret(pos?: number): number;
     visible(): JQuery;
     hidden(): JQuery;
+    // plugins
+    less(text: JQueryTerminal.LessArgument, options?: {formatters?: boolean}): JQueryTerminal;
 }
 
 interface JQueryStatic {
@@ -298,7 +318,7 @@ interface JQueryTerminalStatic {
     split_equal(str: string, len: number, keep_words?: boolean): string[];
     amp(str: string): string;
     encode(str: string): string;
-    nested_formatting(str: string): string;
+    nested_formatting: JQueryTerminal.FormatterFunction;
     escape_formatting(str: string): string;
     /**
      * if options have position it will return [string, display_position]
@@ -325,9 +345,23 @@ interface JQueryTerminalStatic {
     formatter: any;
     Exception: TerminalException;
     /**
-     * Provided by prism
+     * plugins
      */
-    syntax(language: string): void;
+    prism(lang: string, text: string): string;
+    syntax(lang: string): void;
+    pipe(obj: JQueryTerminal.ObjectInterpreter): JQueryTerminal.interpreterFunction;
+    // formatters
+    // unix formatting
+    overtyping: JQueryTerminal.FormatterFunction;
+    from_ansi: JQueryTerminal.FormatterFunction;
+    ansi_colors: {
+        normal: JQueryTerminal.AnsiColorType;
+        faited: JQueryTerminal.AnsiColorType;
+        bold: JQueryTerminal.AnsiColorType;
+        palette: string[];
+    };
+    // xml
+    xml_formatter: JQueryTerminal.FormatterFunction;
 }
 
 type TerminalException = {
