@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Mon, 28 Oct 2019 20:58:25 +0000
+ * Date: Mon, 28 Oct 2019 21:27:12 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4058,7 +4058,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 28 Oct 2019 20:58:25 +0000',
+        date: 'Mon, 28 Oct 2019 21:27:12 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4930,7 +4930,7 @@
                     var test = fn(url);
                     if (!test) {
                         warn('Invalid URL ' + url + ' only https ftp and Path ' +
-                             'that starts with ./ ../ or /');
+                             'are allowed');
                     }
                     return test;
                 };
@@ -5014,7 +5014,7 @@
                     } else {
                         // only http and ftp links (prevent javascript)
                         // unless user force it with anyLinks option
-                        if (valid_href(data)) {
+                        if (!valid_href(data)) {
                             data = '';
                         }
                         result = '<a target="_blank"';

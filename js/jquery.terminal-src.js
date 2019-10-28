@@ -4930,7 +4930,7 @@
                     var test = fn(url);
                     if (!test) {
                         warn('Invalid URL ' + url + ' only https ftp and Path ' +
-                             'that starts with ./ ../ or /');
+                             'are allowed');
                     }
                     return test;
                 };
@@ -5014,7 +5014,7 @@
                     } else {
                         // only http and ftp links (prevent javascript)
                         // unless user force it with anyLinks option
-                        if (valid_href(data)) {
+                        if (!valid_href(data)) {
                             data = '';
                         }
                         result = '<a target="_blank"';
