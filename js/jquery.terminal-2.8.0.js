@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Mon, 28 Oct 2019 20:47:33 +0000
+ * Date: Mon, 28 Oct 2019 20:58:25 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4058,7 +4058,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 28 Oct 2019 20:47:33 +0000',
+        date: 'Mon, 28 Oct 2019 20:58:25 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4922,9 +4922,27 @@
                     !(url.match(/\//) || url.match(/^[^:]+:/));
             }
             // -----------------------------------------------------------------
-            function wrong_url(url) {
-                warn('Invalid URL ' + url + ' only https ftp and Path that starts with ./ ../ or /');
+            function with_url_validation(fn) {
+                return function(url) {
+                    if (settings.anyLinks) {
+                        return true;
+                    }
+                    var test = fn(url);
+                    if (!test) {
+                        warn('Invalid URL ' + url + ' only https ftp and Path ' +
+                             'that starts with ./ ../ or /');
+                    }
+                    return test;
+                };
             }
+            // -----------------------------------------------------------------
+            var valid_href = with_url_validation(function(url) {
+                return url.match(/^((https?|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
+            });
+            // -----------------------------------------------------------------
+            var valid_src = with_url_validation(function(url) {
+                return url.match(/^(https?:|blob:|data:)/) || is_path(url);
+            });
             // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
                 var attrs;
@@ -4996,10 +5014,7 @@
                     } else {
                         // only http and ftp links (prevent javascript)
                         // unless user force it with anyLinks option
-                        if (!settings.anyLinks &&
-                            !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/) &&
-                            !is_path(data)) {
-                            wrong_url(data);
+                        if (valid_href(data)) {
                             data = '';
                         }
                         result = '<a target="_blank"';
@@ -5013,10 +5028,8 @@
                     result += ' tabindex="1000"';
                 } else if (style.indexOf('@') !== -1) {
                     result = '<img';
-                    if (data.match(/^(https?:|blob:|data:)/) || is_path(data)) {
+                    if (valid_src(data)) {
                         result += ' src="' + data + '"';
-                    } else {
-                        wrong_url(data);
                     }
                 } else {
                     result = '<span';

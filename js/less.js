@@ -244,7 +244,6 @@
                         var img = m[1];
                         var cursor = term.find('.cmd-cursor')[0];
                         var rect = cursor.getBoundingClientRect();
-                        console.log(rect);
                         var width = term.width();
                         var opts = {width: width, line_height: rect.height};
                         cache[width] = cache[width] || {};
