@@ -39,7 +39,7 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
- * Date: Sun, 27 Oct 2019 12:24:03 +0000
+ * Date: Mon, 28 Oct 2019 20:47:33 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4058,7 +4058,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 27 Oct 2019 12:24:03 +0000',
+        date: 'Mon, 28 Oct 2019 20:47:33 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4914,6 +4914,18 @@
                 return rel;
             }
             // -----------------------------------------------------------------
+            // test if this is valid Path
+            // -----------------------------------------------------------------
+            function is_path(url) {
+                return url.match(/^\.{1,2}\//) ||
+                    url.match(/^\//) ||
+                    !(url.match(/\//) || url.match(/^[^:]+:/));
+            }
+            // -----------------------------------------------------------------
+            function wrong_url(url) {
+                warn('Invalid URL ' + url + ' only https ftp and Path that starts with ./ ../ or /');
+            }
+            // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
                 var attrs;
                 if (data_text.match(/;/)) {
@@ -4985,7 +4997,9 @@
                         // only http and ftp links (prevent javascript)
                         // unless user force it with anyLinks option
                         if (!settings.anyLinks &&
-                            !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
+                            !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/) &&
+                            !is_path(data)) {
+                            wrong_url(data);
                             data = '';
                         }
                         result = '<a target="_blank"';
@@ -4999,8 +5013,10 @@
                     result += ' tabindex="1000"';
                 } else if (style.indexOf('@') !== -1) {
                     result = '<img';
-                    if (data.match(/^(https?:|blob:|data:)/)) {
+                    if (data.match(/^(https?:|blob:|data:)/) || is_path(data)) {
                         result += ' src="' + data + '"';
+                    } else {
+                        wrong_url(data);
                     }
                 } else {
                     result = '<span';

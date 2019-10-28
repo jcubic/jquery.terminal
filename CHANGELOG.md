@@ -16,6 +16,8 @@
 * don't delay backspace by default on Desktop + fix delay key check [#532](https://github.com/jcubic/jquery.terminal/issues/532)
 * fix pipe when argument is pipe in quote `echo "|"`
 * fix display_position (click on cmd) when using prism + unix formatting [#533](https://github.com/jcubic/jquery.terminal/issues/533)
+* allow path in URL for links and images
+* fix multiple issues with less plugin
 
 ## 2.8.0
 ### Feature

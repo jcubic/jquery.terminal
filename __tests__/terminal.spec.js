@@ -9,6 +9,9 @@
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  * Copyright (c) 2010-2018 Jakub Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
+ *
+ * Image Credit: Author Peter Hamer, source Wikipedia
+ * https://commons.wikimedia.org/wiki/File:Ken_Thompson_(sitting)_and_Dennis_Ritchie_at_PDP-11_(2876612463).jpg
  */
 /* global global, it, expect, describe, require, spyOn, setTimeout, location,
           beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest, setImmediate  */
@@ -1900,6 +1903,7 @@ describe('Terminal utils', function() {
     });
     describe('$.terminal.less', function() {
         var term;
+        var getClientRects;
         var greetings = 'Terminal Less Test';
         var cols = 80, rows = 25;
         var big_text = (function() {
@@ -1926,6 +1930,13 @@ describe('Terminal utils', function() {
         function selected() {
             return term.find('.terminal-output > div div span.terminal-inverted');
         }
+        function first(node) {
+            var $node = term.find('.terminal-output > div > div:eq(0)');
+            if (node) {
+                return $node;
+            }
+            return a0($node.text());
+        }
         function search(text) {
             key('/');
             type(text);
@@ -1933,6 +1944,16 @@ describe('Terminal utils', function() {
         }
         afterEach(function() {
             term.destroy();
+        });
+        // mock cursor size - jest/jsdom don't use css
+        beforeEach(function() {
+            getClientRects = global.window.Element.prototype.getBoundingClientRect;
+            global.window.Element.prototype.getBoundingClientRect = function() {
+                return {width: 7, height: 14};
+            };
+        });
+        afterEach(function() {
+            global.window.Element.prototype.getBoundingClientRect = getClientRects;
         });
         it('should render big text array', function() {
             term.less(big_text);
@@ -1974,6 +1995,85 @@ describe('Terminal utils', function() {
                 expect([i, spans.eq(i).css('color') === 'red']).toEqual([i, check]);
             });
             expect(spans.eq(1).is('.terminal-inverted')).toBeTruthy();
+        });
+        it('should navigate inside search results', function() {
+            term.less(big_text);
+            expect(first()).toEqual('Less 0');
+            search('less 1');
+            expect(first()).toEqual('Less 1');
+            expect(selected().length).toEqual(11); // 1 and 1<num>
+            key('n');
+            expect(selected().length).toEqual(10);
+            for (var i = 0; i < 8; ++i) {
+                key('n');
+            }
+            expect(selected().length).toEqual(2);
+            for (i = 0; i < 5; ++i) {
+                key('n');
+                expect(selected().length).toEqual(1);
+            }
+            key('p');
+            expect(selected().length).toEqual(11);
+            expect(first()).toEqual('Less 0');
+            key('n');
+            expect(first()).toEqual('Less 1');
+            key('n');
+            expect(selected().length).toEqual(10);
+        });
+        it('should scroll by line', function() {
+            term.less(big_text);
+            key('ARROWDOWN');
+            key('ARROWDOWN');
+            expect(first()).toEqual('Less 2');
+            key('ARROWUP');
+            expect(first()).toEqual('Less 1');
+        });
+        it('should exit search', function() {
+            term.less(big_text);
+            key('ARROWDOWN');
+            key('ARROWDOWN');
+            key('/');
+            type('xxx');
+            key(8, 'BACKSPACE');
+            expect(term.get_command()).toEqual('xx');
+            key(8, 'BACKSPACE');
+            expect(term.get_command()).toEqual('x');
+            key('ARROWUP');
+            key('ARROWUP');
+            expect(first()).toEqual('Less 2');
+            key(8, 'BACKSPACE');
+            expect(term.get_command()).toEqual('');
+            expect(term.get_prompt()).toEqual('/');
+            key(8, 'BACKSPACE');
+            expect(term.get_prompt()).toEqual(':');
+            key('ARROWUP');
+            key('ARROWUP');
+            expect(first()).toEqual('Less 0');
+        });
+        /*
+        it('test', async function() {
+            term.less('[[@;;;;Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]');
+            await delay(5000);
+            console.log(term.find('.terminal-output').html());
+        });
+        */
+        it('should scroll by page', function() {
+            term.less(big_text);
+            key('PAGEDOWN');
+            key('PAGEDOWN');
+            expect(first()).toEqual('Less ' + (rows - 1) * 2);
+            key('PAGEUP');
+            expect(first()).toEqual('Less ' + (rows - 1));
+            key('PAGEUP');
+            expect(first()).toEqual('Less 0');
+        });
+        it('should restore the view', function() {
+            term.echo('foo bar');
+            term.echo('lorem ipsum');
+            var output = term.get_output();
+            term.less(big_text);
+            key('q');
+            expect(term.get_output()).toEqual(output);
         });
     });
     describe('$.terminal.pipe', function() {

@@ -156,8 +156,9 @@
             term.pop().import_view(export_data);
             clear_cache();
             $output.css('height', '');
-            if ($.isFunction(options.exit)) {
-                options.exit();
+            var exit = options.exit || options.onExit;
+            if ($.isFunction(exit)) {
+                exit();
             }
         }
         // -------------------------------------------------------------------------------
@@ -222,7 +223,7 @@
         function image_formatter(text) {
             var defer = $.Deferred();
             var parts = text.split(img_split_re).filter(Boolean);
-            if (parts.length === 1) {
+            if (parts.length === 1 && !parts[0].match(img_re)) {
                 defer.resolve(text.split('\n'));
             } else {
                 var result = [];
@@ -243,6 +244,7 @@
                         var img = m[1];
                         var cursor = term.find('.cmd-cursor')[0];
                         var rect = cursor.getBoundingClientRect();
+                        console.log(rect);
                         var width = term.width();
                         var opts = {width: width, line_height: rect.height};
                         cache[width] = cache[width] || {};
@@ -261,18 +263,19 @@
         }
         // -------------------------------------------------------------------------------
         function search(start, reset) {
-            var escape = $.terminal.escape_brackets(search_string),
-                flag = search_string.toLowerCase() === search_string ? 'i' : '',
-                start_re = new RegExp('^(' + escape + ')', flag),
-                index = -1,
-                prev_format = '',
-                formatting = false,
-                in_text = false;
+            var escape = $.terminal.escape_brackets(search_string);
+            var flag = search_string.toLowerCase() === search_string ? 'i' : '';
+            var start_re = new RegExp('^(' + escape + ')', flag);
+            var index = -1;
+            var prev_format = '';
+            var formatting = false;
+            var in_text = false;
+            var count = 0;
             lines = original_lines.slice();
             if (reset) {
                 index = pos = 0;
             }
-            for (var i = 0; i < lines.length; ++i) {
+            for (var i = start; i < lines.length; ++i) {
                 var line = lines[i];
                 for (var j = 0, jlen = line.length; j < jlen; ++j) {
                     if (line[j] === '[' && line[j + 1] === '[') {
@@ -301,6 +304,7 @@
                             if (i >= pos && index === -1) {
                                 index = pos = i;
                             }
+                            count++;
                         }
                     }
                 }
@@ -309,6 +313,9 @@
             print();
             term.set_command('');
             term.set_prompt(prompt);
+            if (count === 1) {
+                return -1;
+            }
             return index;
         }
         // -------------------------------------------------------------------------------
@@ -340,7 +347,10 @@
                                $.inArray(e.which, [78, 80]) !== -1) {
                         if (key === 'N') { // search_string
                             if (last_found !== -1) {
-                                last_found = search(last_found + 1);
+                                var ret = search(last_found + 1);
+                                if (ret !== -1) {
+                                    last_found = ret;
+                                }
                             }
                         } else if (key === 'P') {
                             last_found = search(0, true);
@@ -368,16 +378,16 @@
                                 ++pos;
                                 print();
                             }
-                        } else if (key === 'PAGEUP') {
-                            pos += rows;
+                        } else if (key === 'PAGEDOWN') {
+                            pos += rows - 1;
                             var limit = lines.length - rows + 1;
                             if (pos > limit) {
                                 pos = limit;
                             }
                             print();
-                        } else if (key === 'PAGEDOWN') {
+                        } else if (key === 'PAGEUP') {
                             //Page Down
-                            pos -= rows;
+                            pos -= rows - 1;
                             if (pos < 0) {
                                 pos = 0;
                             }
@@ -399,6 +409,7 @@
                         search_string = command;
                         last_found = search(0);
                     }
+                    // this will disable history
                     return false;
                 }
             },
