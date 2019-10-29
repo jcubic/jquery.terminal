@@ -826,3 +826,9 @@ terminal .terminal-output > div {
     border: 1px solid #ccc;
     border: 1px solid var(--color, #ccc);
 }
+.terminal-output svg.terminal-broken-image {
+    height: calc(var(--size, 1) * 14px);
+}
+.terminal-output svg.terminal-broken-image use {
+    fill: var(--color, #ccc);
+}

@@ -4,6 +4,7 @@
 * call onClear before clear and allow to cancel [#527](https://github.com/jcubic/jquery.terminal/issues/527)
 * new renderHandler option [#526](https://github.com/jcubic/jquery.terminal/issues/526)
 * allow to echo DOM nodes and jQuery objects [#526](https://github.com/jcubic/jquery.terminal/issues/526)
+* handle broken images in terminal and less (svg and error message respectively)
 ### Bugfix
 * fix links from formatters in cmd
 * fix images from formatters in cmd [#519](https://github.com/jcubic/jquery.terminal/issues/519)

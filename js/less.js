@@ -53,8 +53,29 @@
 })(function($) {
     var img_split_re = /(\[\[(?:@|[^;])*;[^;]*;[^\]]*\]\])/;
     var img_re = /\[\[(?:@|[^;])*;[^;]*;[^;]*;[^;]*;([^;]*)\]\]/;
+    // -------------------------------------------------------------------------
+    function find(arr, fn) {
+        for (var i in arr) {
+            if (fn(arr[i])) {
+                return arr[i];
+            }
+        }
+    }
+    // -------------------------------------------------------------------------
+    // $.when is always async we don't want that for normal non images
+    // -------------------------------------------------------------------------
+    function unpromise(args, fn) {
+        var found = find(args, function(arg) {
+            return typeof arg.then === 'function';
+        });
+        if (found) {
+            return $.when.apply($, args).then(fn);
+        } else {
+            return fn.apply(null, args);
+        }
+    }
+    // -------------------------------------------------------------------------
     // slice images into terminal lines - each line is unique blob url
-
     function slice_image(img_data, width, y1, y2) {
         // render slice on canvas and get Blob Data URI
         var canvas = document.createElement('canvas');
@@ -107,6 +128,9 @@
                     defer.resolve(slices);
                 }
             })(0);
+        };
+        img.onerror = function() {
+            defer.reject('Error loading the image: ' + src);
         };
         // images need to have CORS if on different server,
         // without this it will throw error
@@ -184,6 +208,15 @@
             cols = term.cols();
             rows = term.rows();
             fixed_output();
+            function cont(l) {
+                original_lines = l;
+                lines = original_lines.slice();
+                if (in_search) {
+                    search(last_found);
+                } else {
+                    print();
+                }
+            }
             function run(arg) {
                 var text;
                 if (arg instanceof Array) {
@@ -199,18 +232,12 @@
                     if (options.formatters) {
                         text = $.terminal.apply_formatters(text);
                     }
-                    image_formatter(text).then(function(l) {
-                        original_lines = l;
-                        lines = original_lines.slice();
-                        if (in_search) {
-                            search(last_found);
-                        } else {
-                            print();
-                        }
-                    });
+                    unpromise([image_formatter(text)], cont);
                 } else {
-                    lines = original_lines.slice();
-                    print();
+                    unpromise(original_lines.map(image_formatter), function() {
+                        var l = Array.prototype.concat.apply([], arguments);
+                        cont(l);
+                    });
                 }
             }
             if ($.isFunction(text)) {
@@ -220,11 +247,16 @@
             }
         }
         // -------------------------------------------------------------------------------
+        function cursor_size() {
+            var cursor = term.find('.cmd-cursor')[0];
+            return cursor.getBoundingClientRect();
+        }
+        // -------------------------------------------------------------------------------
         function image_formatter(text) {
             var defer = $.Deferred();
             var parts = text.split(img_split_re).filter(Boolean);
             if (parts.length === 1 && !parts[0].match(img_re)) {
-                defer.resolve(text.split('\n'));
+                return text.split('\n');
             } else {
                 var result = [];
                 (function recur() {
@@ -242,15 +274,18 @@
                     var m = part.match(img_re);
                     if (m) {
                         var img = m[1];
-                        var cursor = term.find('.cmd-cursor')[0];
-                        var rect = cursor.getBoundingClientRect();
+                        var rect = cursor_size();
                         var width = term.width();
                         var opts = {width: width, line_height: rect.height};
                         cache[width] = cache[width] || {};
                         if (cache[width][img]) {
                             concat_slices(cache[width][img]);
                         } else {
-                            slice(img, opts).then(concat_slices);
+                            slice(img, opts).then(concat_slices).catch(function() {
+                                var msg = $.terminal.escape_brackets('[BROKEN IMAGE]');
+                                result.push('[[;#c00;]' + msg + ']');
+                                recur();
+                            });
                         }
                     } else {
                         result = result.concat(part.split('\n'));
