@@ -285,7 +285,8 @@
                         } else {
                             slice(img, opts).then(concat_slices).catch(function() {
                                 var msg = $.terminal.escape_brackets('[BROKEN IMAGE]');
-                                result.push('[[;#c00;;terminal-broken-image]' + msg + ']');
+                                var cls = 'terminal-broken-image';
+                                result.push('[[;#c00;;' + cls + ']' + msg + ']');
                                 recur();
                             });
                         }
