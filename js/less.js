@@ -179,6 +179,7 @@
         function quit() {
             term.pop().import_view(export_data);
             clear_cache();
+            term.removeClass('terminal-less');
             $output.css('height', '');
             var exit = options.exit || options.onExit;
             if ($.isFunction(exit)) {
@@ -201,6 +202,7 @@
         function fixed_output() {
             // this will not change on resize, but the font size may change
             var height = cmd.outerHeight(true);
+            term.addClass('terminal-less');
             $output.css('height', 'calc(100% - ' + height + 'px)');
         }
         // -------------------------------------------------------------------------------
@@ -283,7 +285,7 @@
                         } else {
                             slice(img, opts).then(concat_slices).catch(function() {
                                 var msg = $.terminal.escape_brackets('[BROKEN IMAGE]');
-                                result.push('[[;#c00;]' + msg + ']');
+                                result.push('[[;#c00;;terminal-broken-image]' + msg + ']');
                                 recur();
                             });
                         }
