@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 29 Oct 2019 20:39:25 +0000
+ * Date: Tue, 05 Nov 2019 14:14:27 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4062,7 +4062,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 29 Oct 2019 20:39:25 +0000',
+        date: 'Tue, 05 Nov 2019 14:14:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5919,7 +5919,17 @@
                 var settings = $.extend({}, options, {
                     raw: true,
                     finalize: function(div) {
-                        div.find('.terminal-render-item').replaceWith(value);
+                        var node;
+                        if (value instanceof $.fn.init) {
+                            // deep clone with events - we clone because remove
+                            // from DOM will remove events from original object
+                            node = value.clone(true, true);
+                        } else {
+                            // don't clone html nodes because it will not
+                            // work for canvas or video tag
+                            node = value;
+                        }
+                        div.find('.terminal-render-item').replaceWith(node);
                         if (options && is_function(options.finalize)) {
                             options.finalize(div, self);
                         }
