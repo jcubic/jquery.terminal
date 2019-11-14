@@ -469,7 +469,7 @@ type TerminalOption = "prompt" | "name" | "history" | "exit" | "clear" | "enable
     "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
     "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand" | "mobileIngoreAutoSpace" |
     "onBeforeCommand" | "onAfterCommand" | "onBeforeLogout" | "onAfterLogout" | "onBeforeLogin" |
-    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho" | "autocompleteMenu" | "mobileDelete" | "renderHandler";
+    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho" | "autocompleteMenu" | "mobileDelete" | "renderHandler" | "pipe" | "redirets";
 
 type TerminalOptions = {
     prompt?: JQueryTerminal.ExtendedPrompt;
@@ -479,6 +479,8 @@ type TerminalOptions = {
     clear?: boolean;
     enabled?: boolean;
     maskCHar?: string;
+    pipe?: boolean;
+    redirects?: {[key:string]: JQueryTerminal.terminalObjectFunction};
     wrap?: boolean;
     checkArity?: boolean;
     invokeMethods?: boolean;

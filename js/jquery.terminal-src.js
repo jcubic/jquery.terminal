@@ -6115,16 +6115,6 @@
                     return;
                     // throw e; // this will show stack in other try..catch
                 }
-                /*
-                if (login) {
-                    var token = self.token(true);
-                    if (token) {
-                        command.args = [token].concat(command.args);
-                    } else {
-                        terminal.error('&#91;AUTH&#93; ' + strings.noTokenError);
-                        return;
-                    }
-                }*/
                 var val = object[command.name];
                 var type = get_type(val);
                 if (type === 'function') {
@@ -6372,7 +6362,7 @@
                             object,
                             false,
                             login,
-                            fn_interpreter.bind(self)
+                            fn_interpreter && fn_interpreter.bind(self)
                         ),
                         completion: Object.keys(object)
                     });
@@ -7570,7 +7560,7 @@
                         // is resolved
                         var ret = commands(command, silent, true);
                         unpromise(ret, function() {
-                            d.resolve(self);
+                            d.resolve();
                         });
                     }
                 });

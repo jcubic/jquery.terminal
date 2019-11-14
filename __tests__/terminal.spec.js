@@ -2326,9 +2326,6 @@ describe('Terminal utils', function() {
                 });
             });
         });
-        it('should throw', function() {
-            expect(() => $.terminal.pipe($.noop)).toThrow();
-        });
         it('should split command', function() {
             var fn = jest.fn();
             var term = $('<div/>').terminal($.terminal.pipe({

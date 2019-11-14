@@ -1,11 +1,12 @@
 ## 2.9.0
-### features
+### Features
 * allow to return a promise from greetings function [#531](https://github.com/jcubic/jquery.terminal/issues/531)
 * call onClear before clear and allow to cancel [#527](https://github.com/jcubic/jquery.terminal/issues/527)
 * new renderHandler option [#526](https://github.com/jcubic/jquery.terminal/issues/526)
 * allow to echo DOM nodes and jQuery objects [#526](https://github.com/jcubic/jquery.terminal/issues/526)
 * handle broken images in terminal and less (svg and error message respectively)
 * terminal have `terminal-less` class when `less` runs
+* pipe extension monkey patch terminal like echo newline, and it allow to use standard interpreter (old API work the same).
 ### Bugfix
 * fix links from formatters in cmd
 * fix images from formatters in cmd [#519](https://github.com/jcubic/jquery.terminal/issues/519)
@@ -20,6 +21,7 @@
 * fix display_position (click on cmd) when using prism + unix formatting [#533](https://github.com/jcubic/jquery.terminal/issues/533)
 * allow path in URL for links and images
 * fix multiple issues with less plugin
+* few fixes to pipe
 
 ## 2.8.0
 ### Feature

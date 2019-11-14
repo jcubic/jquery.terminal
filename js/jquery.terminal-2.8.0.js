@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 05 Nov 2019 14:14:27 +0000
+ * Date: Thu, 14 Nov 2019 21:15:34 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4062,7 +4062,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 05 Nov 2019 14:14:27 +0000',
+        date: 'Thu, 14 Nov 2019 21:15:34 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6115,16 +6115,6 @@
                     return;
                     // throw e; // this will show stack in other try..catch
                 }
-                /*
-                if (login) {
-                    var token = self.token(true);
-                    if (token) {
-                        command.args = [token].concat(command.args);
-                    } else {
-                        terminal.error('&#91;AUTH&#93; ' + strings.noTokenError);
-                        return;
-                    }
-                }*/
                 var val = object[command.name];
                 var type = get_type(val);
                 if (type === 'function') {
@@ -6372,7 +6362,7 @@
                             object,
                             false,
                             login,
-                            fn_interpreter.bind(self)
+                            fn_interpreter && fn_interpreter.bind(self)
                         ),
                         completion: Object.keys(object)
                     });
@@ -7570,7 +7560,7 @@
                         // is resolved
                         var ret = commands(command, silent, true);
                         unpromise(ret, function() {
-                            d.resolve(self);
+                            d.resolve();
                         });
                     }
                 });
