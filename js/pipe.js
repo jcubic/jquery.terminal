@@ -366,6 +366,7 @@
                         // this branch will be always invoked with new API
                         // using pipe option
                         var str = stringify(cmd);
+                        // this resume is needed for rpc
                         term.resume();
                         ret = term.exec(str, true);
                         return continuation(ret, echo_non_empty);
@@ -406,7 +407,7 @@
             var settings = $.extend({}, {
                 onInit: function() {
                     if (options && options.pipe) {
-                    var fn_interpreter = this.commands();
+                        var fn_interpreter = this.commands();
                         $.terminal.pipe(fn_interpreter, options);
                         this.set_interpreter($.terminal.pipe(fn_interpreter, options));
                     }
