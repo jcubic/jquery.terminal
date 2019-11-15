@@ -366,7 +366,9 @@
                         // this branch will be always invoked with new API
                         // using pipe option
                         var str = stringify(cmd);
-                        // this resume is needed for rpc
+                        // this resume and exec is needed for rpc
+                        // because it use pause/resume and not promises
+                        // TODO: refactor RPC in terminal
                         term.resume();
                         ret = term.exec(str, true);
                         return continuation(ret, echo_non_empty);
