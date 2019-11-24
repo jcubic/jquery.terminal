@@ -6602,6 +6602,7 @@
                     raw: false,
                     finalize: $.noop,
                     invokeMethods: false,
+                    formatters: true,
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string;

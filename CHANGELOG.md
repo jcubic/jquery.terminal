@@ -23,6 +23,7 @@
 * fix multiple issues with less plugin
 * few fixes to pipe
 * fix echo array after refresh [#540](https://github.com/jcubic/jquery.terminal/issues/540)
+* fix apply formatters in update [#543](https://github.com/jcubic/jquery.terminal/issues/543)
 
 ## 2.8.0
 ### Feature

@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 24 Nov 2019 12:32:35 +0000
+ * Date: Sun, 24 Nov 2019 12:39:29 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4062,7 +4062,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 24 Nov 2019 12:32:35 +0000',
+        date: 'Sun, 24 Nov 2019 12:39:29 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6602,6 +6602,7 @@
                     raw: false,
                     finalize: $.noop,
                     invokeMethods: false,
+                    formatters: true,
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string;
