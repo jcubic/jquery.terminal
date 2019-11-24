@@ -13,7 +13,7 @@
  * Image Credit: Author Peter Hamer, source Wikipedia
  * https://commons.wikimedia.org/wiki/File:Ken_Thompson_(sitting)_and_Dennis_Ritchie_at_PDP-11_(2876612463).jpg
  */
-/* global global, it, expect, describe, require, spyOn, setTimeout, location,
+/* global global, it, expect, describe, require, spyOn, setTimeout, location, URL,
           beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest, setImmediate  */
 /* TODO missing tests:
       test caseSensitiveSearch option
@@ -192,6 +192,58 @@ global.location = global.window.location = {hash: ''};
 global.document = window.document;
 global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
+
+// mock Canvas & Image
+var gm = require('gm');
+window.Image = class Image {
+    set onerror(fn) {
+        this._err = fn;
+    }
+    set onload(fn) {
+        this._load = fn;
+    }
+    set src(url) {
+        var img = this;
+        if (url.match(/error.jpg$/)) {
+            if (typeof this._err === 'function') {
+                this._err();
+            }
+        } else if (!url.match(/<BLOB>|(^http)/)) {
+            this._url = url;
+            gm(this._url).size(function(err, size) {
+                if (err) {
+                    throw err;
+                }
+                img.width = size.width;
+                img.height = size.height;
+                if (typeof img._load === 'function') {
+                    img._load();
+                }
+            });
+        }
+    }
+};
+window.HTMLCanvasElement.prototype.getContext = function () {
+    return {
+        putImageData: function(data, x, y) {
+        },
+        getImageData: function(x, y, w, h) {
+            return [1,1,1];
+        },
+        drawImage: function(image, x1, y1, iw, ih, out_x, out_y, out_w, out_h) {
+        }
+    };
+};
+window.HTMLCanvasElement.prototype.toBlob = function(fn) {
+    fn('<BLOB>');
+};
+global.URL = window.URL = {
+    createObjectURL: function(blob) {
+        return 'data:image/jpg;' + blob;
+    },
+    revokeObjectURL: function() {}
+};
+
 
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
@@ -1922,6 +1974,7 @@ describe('Terminal utils', function() {
                 numChars: cols,
                 numRows: rows
             });
+            term.css('width', 800);
             term.focus();
         });
         function key(ord, key) {
@@ -1954,6 +2007,7 @@ describe('Terminal utils', function() {
         });
         afterEach(function() {
             global.window.Element.prototype.getBoundingClientRect = getClientRects;
+            jest.resetAllMocks();
         });
         it('should render big text array', function() {
             term.less(big_text);
@@ -2050,13 +2104,6 @@ describe('Terminal utils', function() {
             key('ARROWUP');
             expect(first()).toEqual('Less 0');
         });
-        /*
-        it('test', async function() {
-            term.less('[[@;;;;Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]');
-            await delay(5000);
-            console.log(term.find('.terminal-output').html());
-        });
-        */
         it('should scroll by page', function() {
             term.less(big_text);
             key('PAGEDOWN');
@@ -2074,6 +2121,28 @@ describe('Terminal utils', function() {
             term.less(big_text);
             key('q');
             expect(term.get_output()).toEqual(output);
+        });
+        it('should split image', async function() {
+            term.settings().numRows = 50;
+            term.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            await delay(1000);
+            expect(term.get_output().match(/@/g).length).toEqual(43);
+        });
+        it('should revoke images', async function() {
+            term.settings().numRows = 50;
+            term.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            await delay(1000);
+            spy(URL, 'revokeObjectURL');
+            key('q');
+            await delay(100);
+            expect(URL.revokeObjectURL).toHaveBeenCalledTimes(43);
+        });
+        it('should render broken image', async function() {
+            term.less('xxx\n[[@;;;;error.jpg]]\nxxx');
+            await delay(100);
+            var err = term.find('.terminal-broken-image');
+            expect(err.length).toEqual(1);
+            expect(err.text()).toEqual(nbsp('[BROKEN IMAGE]'));
         });
     });
     describe('$.terminal.pipe', function() {

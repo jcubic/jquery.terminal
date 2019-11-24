@@ -84,7 +84,7 @@ emoji:
 	./scripts/mkemoji $(VERSION) > css/emoji.css
 
 test:
-	$(JEST) --coverage --testMatch '**/__tests__/*.spec.js'
+	$(JEST) --coverage --detectOpenHandles --testMatch '**/__tests__/*.spec.js'
 
 coveralls:
 	$(CAT) ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
