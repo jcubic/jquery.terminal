@@ -22,6 +22,7 @@
 * allow path in URL for links and images
 * fix multiple issues with less plugin
 * few fixes to pipe
+* fix echo array after refresh [#540](https://github.com/jcubic/jquery.terminal/issues/540)
 
 ## 2.8.0
 ### Feature

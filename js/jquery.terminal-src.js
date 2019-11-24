@@ -5912,9 +5912,9 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: helper function that render DOM nodes and jQuery objects
+        // :: helper function used in render and in update
         // ---------------------------------------------------------------------
-        function render(value, options) {
+        function prepare_render(value, options) {
             if (is_node(value)) {
                 var settings = $.extend({}, options, {
                     raw: true,
@@ -5935,7 +5935,16 @@
                         }
                     }
                 });
-                self.echo('<div class="terminal-render-item"/>', settings);
+                return ['<div class="terminal-render-item"/>', settings];
+            }
+        }
+        // ---------------------------------------------------------------------
+        // :: helper function that renders DOM nodes and jQuery objects
+        // ---------------------------------------------------------------------
+        function render(value, options) {
+            var ret = prepare_render(value, options);
+            if (ret) {
+                self.echo.apply(self, ret);
                 return true;
             }
         }
@@ -5972,7 +5981,9 @@
                 self.echo(object);
             }
         }
-        // Display line code in the file if line numbers are present
+        // ---------------------------------------------------------------------
+        // :: Display line code in the file if line numbers are present
+        // ---------------------------------------------------------------------
         function print_line(url_spec, cols) {
             var re = /(.*):([0-9]+):([0-9]+)$/;
             // google chrome have line and column after filename
@@ -6167,6 +6178,8 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: function create interpreter object based on JSON-RPC meta data
+        // ---------------------------------------------------------------------
         function make_json_rpc_object(url, auth, success) {
             function jrpc_success(json) {
                 if (json.error) {
@@ -6301,6 +6314,9 @@
                 }
             });
         }
+        // ---------------------------------------------------------------------
+        // :: function create interpeter function and call finalize with
+        // :: interpreter and optional completion
         // ---------------------------------------------------------------------
         function make_interpreter(user_intrp, login, finalize) {
             finalize = finalize || $.noop;
@@ -6589,25 +6605,7 @@
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string;
-                var arg = line.string;
-                var is_fn = is_function(arg);
-                if (is_fn) {
-                    arg = arg();
-                }
-                if (get_type(arg) !== 'string') {
-                    if (is_function(settings.parseObject)) {
-                        var ret = settings.parseObject(arg);
-                        if (get_type(ret) === 'string') {
-                            string = ret;
-                        }
-                    } else if (is_array(arg)) {
-                        string = $.terminal.columns(arg, self.cols(), settings.tabs);
-                    } else {
-                        string = String(arg);
-                    }
-                } else {
-                    string = arg;
-                }
+                string = stringify_value(line.value);
                 if (string !== '') {
                     if (!line_settings.raw) {
                         if (line_settings.formatters) {
@@ -6698,16 +6696,10 @@
                     limit = settings.outputLimit;
                 }
                 lines.forEach(function(line, index) {
-                    var string = line[0];
+                    var value = line[0];
                     var options = line[1];
-                    if (get_type(string) === 'function') {
-                        string = string();
-                    }
-                    if (get_type(string) !== 'string') {
-                        string = String(string);
-                    }
                     lines_to_show.push({
-                        string: string,
+                        value: value,
                         index: index,
                         options: options
                     });
@@ -6717,7 +6709,7 @@
             } else {
                 lines_to_show = lines.map(function(line, index) {
                     return {
-                        string: line[0],
+                        value: line[0],
                         index: index,
                         options: line[1]
                     };
@@ -8397,23 +8389,28 @@
             // -------------------------------------------------------------
             // :: Update the output line - line number can be negative
             // -------------------------------------------------------------
-            update: function(line, string, options) {
+            update: function(line, value, options) {
                 when_ready(function ready() {
                     if (line < 0) {
                         line = lines.length + line; // yes +
                     }
                     if (!lines[line]) {
                         self.error('Invalid line number ' + line);
-                    } else if (string === null) {
+                    } else if (value === null) {
                         lines.splice(line, 1);
                         output.find('[data-index=' + line + ']').remove();
                     } else {
-                        lines[line][0] = string;
+                        var ret = prepare_render(value, options);
+                        if (ret) {
+                            value = ret[0];
+                            options = ret[1];
+                        }
+                        lines[line][0] = value;
                         if (options) {
                             lines[line][1] = options;
                         }
                         process_line({
-                            string: string,
+                            value: value,
                             index: line,
                             options: options
                         });
@@ -8519,7 +8516,7 @@
                             return self;
                         }
                         process_line({
-                            string: value,
+                            value: value,
                             options: locals,
                             index: lines.length
                         });
@@ -9192,10 +9189,31 @@
                 self.focus();
             }
         }
+        // -------------------------------------------------------------------------------
         function blur_terminal() {
             old_enabled = enabled;
             self.disable().find('.cmd textarea').trigger('blur', [true]);
         }
+        // -------------------------------------------------------------------------------
+        function stringify_value(value) {
+            if (is_function(value)) {
+                value = value();
+            }
+            if (get_type(value) !== 'string') {
+                if (is_function(settings.parseObject)) {
+                    var ret = settings.parseObject(value);
+                    if (get_type(ret) === 'string') {
+                        value = ret;
+                    }
+                } else if (is_array(value)) {
+                    value = $.terminal.columns(value, self.cols(), settings.tabs);
+                } else {
+                    value = String(value);
+                }
+            }
+            return value;
+        }
+        // -------------------------------------------------------------------------------
         function context_callback_proxy(fn, type) {
             if (fn.proxy) {
                 return fn;
@@ -9211,6 +9229,7 @@
             wrapper.proxy = true;
             return wrapper;
         }
+        // -------------------------------------------------------------------------------
         // paste event is not testable in node
         // istanbul ignore next
         function paste_event(e) {
