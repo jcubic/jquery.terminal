@@ -81,5 +81,6 @@
         }
         return output.join('');
     }
+    $.terminal.xml_formatter = xml_formatter;
     $.terminal.new_formatter(xml_formatter);
 });

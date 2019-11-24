@@ -4,14 +4,14 @@
  __ / / // / // / _  / _/ // / / / _  / _/     / /  \/ / _ \/ /
 /  / / // / // / ___/ // // / / / ___/ // / / / / /\  / // / /__
 \___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/_/_/  \/\__\_\___/
-         \/          /____/                      version 2.8.0
+         \/          /____/                      version DEV
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-2.8.0-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-2.8.0-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&5d3bdc5a704719c1de9a9e812b34e2e5ac72b439)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&eddc6803ea1ab789adf5713093ec64d8)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
+[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&479ad28bbf7f8e43f07dfb2d95ec02c5f746a9e3)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&c70d585dbba6db77c1f789398ddfea22)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -21,11 +21,11 @@ http://terminal.jcubic.pl
 
 jQuery Terminal Emulator is a plugin for creating command line interpreters in
 your applications. It can automatically call JSON-RPC service when a user types
-commands or you can provide you own function in which you can parse user
+commands or you can provide your own function in which you can parse user
 commands. It's ideal if you want to provide additional functionality for power
 users. It can also be used to debug your application.
 
-You can use this JavaScript library to create web based terminal on any website.
+You can use this JavaScript library to create a web based terminal on any website.
 
 ### Features:
 
@@ -52,8 +52,8 @@ You can use this JavaScript library to create web based terminal on any website.
 
 * Includes keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
 
-* Multiply terminals on one page (every terminal can have different
-  command, it's own authentication function and it's own command history).
+* Multiple terminals on one page (every terminal can have different
+  commands, its own authentication function and its own command history).
 
 * It catches all exceptions and displays error messages in the terminal
   (you can see errors in your javascript and php code in terminal if they
@@ -62,11 +62,11 @@ You can use this JavaScript library to create web based terminal on any website.
 * Using extended commands you can change working of the terminal without
   touching the front-end code (using echo method and terminal formatting
   like syntax). Read more in
-  [docs](https::/terminal.jcubic.pl/api_reference.php#extended_commands)
+  [docs](https://terminal.jcubic.pl/api_reference.php#extended_commands)
 
 ### Installation
 
-Include jQuery library, you can use cdn from http://jquery.com/download/
+Include jQuery library, you can use cdn from https://jquery.com/download/
 
 
 ```html
@@ -75,20 +75,20 @@ Include jQuery library, you can use cdn from http://jquery.com/download/
 ```
 
 
-Then include js/jquery.terminal-2.8.0.min.js and css/jquery.terminal-2.8.0.min.css
+Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.min.css
 
 You can grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.8.0/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.8.0/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.8.0/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.8.0/css/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/css/jquery.terminal.min.css">
 ```
 
 If you always want latest version, you can get it from [unpkg](https://unpkg.com/) without specifying version,
@@ -110,17 +110,17 @@ If you want to test bleeding edge, development version of jQuery Terminal. You c
 ```
 
 but the service will be [shutdown in October 2019](https://rawgit.com/), and it don't accept new files. Great things
-about rawgit that (at least when you don't put cdn subdomain) you can get lastest version very fast after the commit
+about rawgit that (at least when you don't put cdn subdomain) you can get latest version very fast after the commit
 is pushed on GitHub (sometimes you need to add no cache query string, anything unique, for faster refresh).
 
-there is also alternative from jsdelivr:
+there is also an alternative from jsdelivr:
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js"></script>
 <link href="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
-but it's not refreshed as fast as rawgit does, because it's CDN and need to be propagated to different servers.
+but it's not refreshed as fast as rawgit, because it's CDN and need to be propagated to different servers.
 
 #### Keyboard key polyfill
 
@@ -210,12 +210,12 @@ $('#term_demo').terminal('service.php', {login: true});
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [Full Documentation](http://terminal.jcubic.pl/api_reference.php) or
-[Getting Started Guide in Wiki](https://github.com/jcubic/jquery.terminal/wiki/Getting-Started).
+[Getting Started Guide on Wiki](https://github.com/jcubic/jquery.terminal/wiki/Getting-Started).
 
 ### Security
 
-Because of security in version 1.20.0 links with protocols different then ftp or http(s) (it was
-possible to enter javascript protocol, that could lead to XSS if author of hte app echo user input
+Because of security in version 1.20.0 links with protocols different than ftp or http(s) (it was
+possible to enter javascript protocol, that could lead to XSS if author of the app echo user input
 and save it in DB) was turn off by default. To enable it, you need to use `anyLinks: true` option.
 
 In version 1.21.0 executing terminal methods using extendend commands `[[ terminal::clear() ]]` was
@@ -238,7 +238,7 @@ from users and execute terminal methods from server (this feature is mostly done
 
 ### Contributors
 
-If you want to contrubite read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here are project contributors:
+If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here are project contributors:
 
 <!-- CONTRIBUTORS-START -->
 | [<img src="https://avatars1.githubusercontent.com/u/280241?v=4" width="100px;"/><br /><sub>Jakub T. Jankiewicz</sub>](https://jcubic.pl/me)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=jcubic) | [<img src="https://avatars1.githubusercontent.com/u/1208327?v=4" width="100px;"/><br /><sub>Zuo Qiyang</sub>](http://zuoqy.com)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=kid1412z) | [<img src="https://avatars1.githubusercontent.com/u/4943440?v=4" width="100px;"/><br /><sub>Marcel Link</sub>](https://github.com/ml1nk)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=ml1nk) | [<img src="https://avatars1.githubusercontent.com/u/6674275?v=4" width="100px;"/><br /><sub>Sébastien Warin</sub>](http://sebastien.warin.fr)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=sebastienwarin) | [<img src="https://avatars2.githubusercontent.com/u/8646106?v=4" width="100px;"/><br /><sub>Christopher John Ryan</sub>](https://github.com/ChrisJohnRyan)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=ChrisJohnRyan) | [<img src="https://avatars3.githubusercontent.com/u/715580?v=4" width="100px;"/><br /><sub>Johan</sub>](https://github.com/johanjordaan)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=johanjordaan) | [<img src="https://avatars0.githubusercontent.com/u/273194?v=4" width="100px;"/><br /><sub>Florian Schäfer</sub>](https://github.com/fschaefer)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=fschaefer) |

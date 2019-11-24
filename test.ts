@@ -16,21 +16,26 @@ $('.term').terminal(function(command) {
 
 });
 $('.term').terminal([function(command, term) {
-
+    return Promise.resolve(document.createElement('div'));
 }]);
 $('.term').terminal("foo.php");
 $('.term').terminal(["foo.php"]);
 var obj_interpreter: JQueryTerminal.ObjectInterpreter = {
     foo: function(...args) {
+        return $('<div/>');
     },
     bar: function(a, b) {
+        // user should typecheck the arguments in JavaScript
+        (<RegExp>a).test('x');
         return Promise.resolve("foo");
     },
     baz: {
         a: function() {
+            return document.createElement('canvas');
         },
         b: {
             c: function() {
+                return "xxx";
             }
         }
     }
@@ -39,6 +44,19 @@ $('.term').terminal([obj_interpreter]);
 $('.term').terminal(["foo.php", obj_interpreter]);
 $('.term').terminal(["foo.php", obj_interpreter, function(command) {
 }]);
+
+class Foo {
+    x: string;
+    constructor(x: string) {
+        this.x = x;
+    }
+}
+// -----------------------------------------------------------------------------
+// :: formatters
+// -----------------------------------------------------------------------------
+$.terminal.nested_formatting.__inherit__ = true;
+$.terminal.nested_formatting.__warn__ = true;
+$.terminal.nested_formatting.__meta__ = true;
 
 // -----------------------------------------------------------------------------
 // :: Options
@@ -110,6 +128,12 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
     $('.term').terminal($.noop, {
         greetings: function(cb) {
             cb("hello");
+        }
+    });
+    $('.term').terminal($.noop, {
+        greetings: function() {
+            console.log(this.get_command());
+            return Promise.resolve("Hello");
         }
     });
     // -------------------------------------------------------------------------
@@ -298,6 +322,27 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
         onEchoCommand: function(div, command) {
             div.css('color', 'red');
             this.echo(command.charCodeAt(0).toString());
+        }
+    });
+    // -------------------------------------------------------------------------
+    // :: renderHandler
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        renderHandler: function(value) {
+            // value here is any you should typecheck the value in JS
+            // and return string, DOM node or jQuery object
+            if (value instanceof Foo) {
+                return $('<span>' + value.x + '</span>');
+            }
+            if (value === true) {
+                this.echo('true value');
+                return false;
+            }
+            if (value === false) {
+                var div = document.createElement('div');
+                div.innerHTML = 'false value';
+                return div;
+            }
         }
     });
 });
@@ -515,7 +560,9 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
     var lines: JQueryTerminal.Lines = term.get_output();
     test_type<number>(lines[0].index);
     var div = $('<div/>');
-    lines[0].options.finalize(div);
+    lines[0].options.finalize.call(term, div);
+    lines[0].options.onClear.call(term, div);
+    lines[0].options.unmount.call(term, div);
     // -------------------------------------------------------------------------
     // :: resize
     // -------------------------------------------------------------------------
@@ -550,10 +597,10 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
     // -------------------------------------------------------------------------
     term.echo("foo");
     term.echo(["foo", "bar"]);
-    term.echo(function() {
+    term.echo(function(): string {
         return "foo";
     });
-    term.echo(function() {
+    term.echo(function(): string[] {
         return ["foo", "bar"];
     });
     term.echo(Promise.resolve("foo"));
@@ -564,6 +611,38 @@ $('.term').terminal(["foo.php", obj_interpreter, function(command) {
     term.echo(Promise.resolve(function(): string[] {
         return ["foo"];
     }));
+    // add in version 2.9.0
+    term.echo(document.createElement('div'));
+    term.echo($('<div/>'));
+    term.echo($(document.createElement('div')));
+    // special case when Foo class is processed by renderHandler
+    // this is wordaround since echo can accept anything
+    term.echo<Foo>(new Foo('hello'));
+    // function options
+    term.echo(document.createElement('canvas'), {
+        onClear: function(div) {
+            div.find('canvas');
+            console.log(this.get_command());
+            (div[0] as any).pause = true;
+        },
+        unmount: function(div) {
+            div.find('canvas');
+            console.log(this.get_command());
+        },
+        finalize: function(div) {
+            div.find('canvas');
+            console.log(this.get_command());
+            var canvas = <HTMLCanvasElement>(div.find('cavas')[0]);
+            canvas.width = canvas.height = 100;
+            var ctx = canvas.getContext("2d");
+            if (ctx === null) {
+                return;
+            }
+            ctx.clearRect(0, 0, 100, 100);
+            ctx.fillStyle = "#00FF00";
+            ctx.fillRect(10, 10, 90, 90);
+        }
+    });
     // -------------------------------------------------------------------------
     // :: error
     // -------------------------------------------------------------------------

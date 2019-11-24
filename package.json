@@ -307,7 +307,7 @@
     }
   },
   "dependencies": {
-    "@types/jquery": "3.3.29",
+    "@types/jquery": "^3.3.29",
     "jquery": "~3",
     "prismjs": "^1.16.0",
     "wcwidth": "^1.0.1"
@@ -317,9 +317,10 @@
     "cssnano": "^4.1.10",
     "emoji-datasource-twitter": "^4.1.0",
     "eslint": "^5.16.0",
+    "gm": "^1.23.1",
     "jest": "^24.8.0",
     "jsonlint": "^1.6.3",
-    "typescript": "~3.1.6",
+    "typescript": "^3.1.6",
     "uglify-js": "^3.5.12"
   }
 }

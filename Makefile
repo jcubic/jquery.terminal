@@ -19,7 +19,7 @@ COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 TOKEN=cat .github.token | tr -d '\n'
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
-UPDATE_CONTRIBUTORS=0
+UPDATE_CONTRIBUTORS=1
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
 
@@ -84,7 +84,7 @@ emoji:
 	./scripts/mkemoji $(VERSION) > css/emoji.css
 
 test:
-	$(JEST) --coverage --testMatch '**/__tests__/*.spec.js'
+	$(JEST) --coverage --detectOpenHandles --testMatch '**/__tests__/*.spec.js'
 
 coveralls:
 	$(CAT) ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js

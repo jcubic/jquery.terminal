@@ -1,3 +1,31 @@
+## 2.9.0
+### Features
+* allow to return a promise from greetings function [#531](https://github.com/jcubic/jquery.terminal/issues/531)
+* call onClear before clear and allow to cancel [#527](https://github.com/jcubic/jquery.terminal/issues/527)
+* new renderHandler option [#526](https://github.com/jcubic/jquery.terminal/issues/526)
+* allow to echo DOM nodes and jQuery objects [#526](https://github.com/jcubic/jquery.terminal/issues/526)
+* handle broken images in terminal and less (svg and error message respectively)
+* terminal have `terminal-less` class when `less` runs
+* pipe extension monkey patch terminal like echo newline, and it allow to use standard interpreter (old API work the same).
+### Bugfix
+* fix links from formatters in cmd
+* fix images from formatters in cmd [#519](https://github.com/jcubic/jquery.terminal/issues/519)
+* fix less [#522](https://github.com/jcubic/jquery.terminal/issues/522)
+* fix recursive error when echo finalize throwed exception [#524](https://github.com/jcubic/jquery.terminal/issues/524)
+* fix prism - xml nested formatting and weird wrapping [#523](https://github.com/jcubic/jquery.terminal/issues/523), [#410](https://github.com/jcubic/jquery.terminal/issues/410)
+* limit number of characters in click on exception line [#525](https://github.com/jcubic/jquery.terminal/issues/525)
+* fix less search clear on resize [#528](https://github.com/jcubic/jquery.terminal/issues/528)
+* fix less search second instance (move one line to bottom)
+* don't delay backspace by default on Desktop + fix delay key check [#532](https://github.com/jcubic/jquery.terminal/issues/532)
+* fix pipe when argument is pipe in quote `echo "|"`
+* fix display_position (click on cmd) when using prism + unix formatting [#533](https://github.com/jcubic/jquery.terminal/issues/533)
+* allow path in URL for links and images
+* fix multiple issues with less plugin
+* few fixes to pipe
+* fix echo array after refresh [#540](https://github.com/jcubic/jquery.terminal/issues/540)
+* fix apply formatters in update [#543](https://github.com/jcubic/jquery.terminal/issues/543)
+* fix pause on login when using callback [#538](https://github.com/jcubic/jquery.terminal/issues/538)
+
 ## 2.8.0
 ### Feature
 * new events `onBeforeLogin`, `onAfterLogin`, `onBeforeEcho` and `onAfterEcho`

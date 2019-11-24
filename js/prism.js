@@ -116,9 +116,17 @@
 
         return env.content.split(/\n/).map(function(content) {
             if (content) {
+                // escape nested non formatting
+                // so you can use like <script>alert("[[;red;]xxxx]");</script>
+                var parts = content.split(format_split_re).filter(Boolean);
+                content = parts.map(function(string) {
+                    if (!string.match(/^\x00/)) {
+                        return $.terminal.escape_brackets(string).replace(/\\/g, '&#92;');
+                    }
+                    return string;
+                }).join('');
                 return '\x00\x00\x00\x00[[b;;;' + env.classes.join(' ') + ']' +
-                    $.terminal.escape_brackets(content).replace(/\\/g, '&#92;')
-                    + '\x00\x00\x00\x00]';
+                    content + '\x00\x00\x00\x00]';
             }
             return '';
         }).join('\n');
@@ -161,22 +169,11 @@
             var grammar = _.languages[language];
             var tokens = _.tokenize(string, grammar);
             string = _.Token.stringify(tokens, language);
-            string = $.terminal.nested_formatting(string);
             string = string.split(format_split_re).filter(Boolean).map(function(string) {
                 if (string.match(/^\x00/)) {
                     return string.replace(/\x00/g, '');
-                } else {
-                    return string.split(/(\\+\])/g).filter(Boolean).map(function(string) {
-                        if (string.match(/^\\+\]$/)) {
-                            if (string.length % 2 === 0) {
-                                string = string.replace(/\\/, '');
-                            }
-                            return string.replace(/\\/g, '&#92;').replace(/\]/, '&#93;');
-                        } else {
-                            return $.terminal.escape_brackets(string);
-                        }
-                    }).join('');
                 }
+                return string;
             }).join('');
         }
         return string;
@@ -188,7 +185,8 @@
         var fn = new Function('$', 'return function syntax_' + language +
                               '(string) { return $.terminal.prism("' + language +
                               '", string); }')($);
+        fn.__no_warn__ = true;
         // disable warning because it may create nested formatting
-        $.terminal.defaults.formatters.push(fn);
+        $.terminal.new_formatter(fn);
     };
 });

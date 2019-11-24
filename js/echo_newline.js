@@ -88,6 +88,9 @@
         return $.extend({}, options || {}, settings);
     }
     function patch_term(term, echo_command) {
+        if (term.__echo) {
+            return term;
+        }
         term.__echo = term.echo;
         term.__exec = term.exec;
         term.exec = function() {

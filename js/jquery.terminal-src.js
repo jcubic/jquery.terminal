@@ -39,11 +39,13 @@
  * emoji regex v7.0.1 by Mathias Bynens
  * MIT license
  *
+ * broken image by Sophia Bai from the Noun Project (CC-BY)
+ *
  * Date: {{DATE}}
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
-          setInterval, clearInterval, clearTimeout, Blob */
+          setInterval, clearInterval, clearTimeout, Blob, Map, Image */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -220,7 +222,8 @@
     /* istanbul ignore next */
     function debug(str) {
         if (false) {
-            $.terminal.active().echo(str);
+            console.log(str);
+            //$.terminal.active().echo(str);
         }
     }
     /* eslint-enable */
@@ -734,7 +737,6 @@
     // -----------------------------------------------------------------------
     /* istanbul ignore next */
     (function(undef) {
-
         // prevent double include
 
         if (!String.prototype.split.toString().match(/\[native/)) {
@@ -986,6 +988,16 @@
         return defer.promise();
     }
     // -----------------------------------------------------------------------
+    function unpromise(value, callback) {
+        if (value) {
+            if (is_function(value.done)) {
+                return value.done(callback);
+            } else if (is_function(value.then)) {
+                return value.then(callback);
+            }
+        }
+    }
+    // -----------------------------------------------------------------------
     // :: based on https://github.com/zeusdeux/isInViewport
     // :: work only vertically and on dom elements
     // -----------------------------------------------------------------------
@@ -1034,7 +1046,7 @@
     var format_parts_re = /\[\[((?:-?[@!gbiuso])*);([^;]*);([^;\]]*);?([^;\]]*);?([^\]]*)\]([^\]\\]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]+)\]?/gi;
     var format_re = /\[\[((?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?/gi;
     var format_exist_re = /\[\[((?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]/gi;
-    var format_full_re = /^\[\[((?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\]([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]$/gi;
+    var format_full_re = /^(\[\[(?:(?:-?[@!gbiuso])*;[^;\]]*;[^;\]]*(?:;|[^\]()]*);?[^\]]*)\])([^\]]*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)(\])$/i;
     var format_begin_re = /(\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\])/i;
     var format_start_re = /^(\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\]?$/i;
@@ -1052,6 +1064,8 @@
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
     var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*')/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
+    var broken_image = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14"><title id="title2">rounded</title><path id="terminal-broken-image" d="m 14,10 h 2 v 1 a 3,3 0 0 1 -3,3 H 3 A 3,3 0 0 1 0,11 H 4.5 A 1.00012,1.00012 0 0 0 5.207,10.707 L 6.5,9.414 7.793,10.707 a 0.99963,0.99963 0 0 0 1.41406,0 l 2.36719,-2.36719 1.80127,1.44092 A 0.99807,0.99807 0 0 0 14,10 Z M 16,3 V 8 H 14.35059 L 12.12451,6.21924 A 0.99846,0.99846 0 0 0 10.793,6.293 L 8.5,8.586 7.207,7.293 a 0.99962,0.99962 0 0 0 -1.41406,0 L 4.08594,9 H 0 V 3 A 3,3 0 0 1 3,0 h 10 a 3,3 0 0 1 3,3 z M 6,4.5 A 1.5,1.5 0 1 0 4.5,6 1.5,1.5 0 0 0 6,4.5 Z" /></svg>';
+    var use_broken_image = '<svg class="terminal-broken-image" role="presentation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#terminal-broken-image"/></svg>';
     /* eslint-enable */
     // -------------------------------------------------------------------------
     // :: features flags
@@ -1272,6 +1286,13 @@
             }
         });
     }
+    /*
+    function time() {
+        // performance.now almost equal Date.now()- performance.timing.navigationStart
+        // the difference check should be almost the same
+        return performance ? performance.now() : Date.now();
+    }
+    */
     // -----------------------------------------------------------------------
     // :: STACK DATA STRUCTURE
     // -----------------------------------------------------------------------
@@ -1308,6 +1329,44 @@
             }
         });
     }
+    // -------------------------------------------------------------------------
+    // :: Class for Worker that do some computation when needed
+    // :: if validation function return false it mean that condition changed
+    // :: and cache need to be cleared. If value was not prcessed it will run
+    // :: the action
+    // -------------------------------------------------------------------------
+    function WorkerCache(options) {
+        var settings = $.extend({
+            validation: $.noop,
+            action: $.noop,
+            onCache: $.noop
+        }, options);
+        this._onCache = settings.onCache;
+        this._action = settings.action;
+        this._validation = settings.validation;
+        this._cache = new Map();
+    }
+    // -------------------------------------------------------------------------
+    WorkerCache.prototype.validate = function() {
+        var valid = this._validation();
+        var test = valid === undefined || valid === true;
+        if (!test) {
+            this._cache.clear();
+        }
+        return test;
+    };
+    // -------------------------------------------------------------------------
+    WorkerCache.prototype.get = function(key) {
+        var value;
+        if (this.validate() && this._cache.has(key)) {
+            value = this._cache.get(key);
+            this._onCache({cahce: value});
+            return value;
+        }
+        value = this._action(key);
+        this._cache.set(key, value);
+        return value;
+    };
     // -------------------------------------------------------------------------
     // :: HISTORY CLASS
     // -------------------------------------------------------------------------
@@ -1433,7 +1492,7 @@
             holdTimeout: 400,
             holdRepeatTimeout: 200,
             mobileIngoreAutoSpace: [],
-            repeatTimeoutKeys: ['HOLD+BACKSPACE'],
+            repeatTimeoutKeys: [],
             tabindex: 1,
             tabs: 4
         }
@@ -1485,6 +1544,41 @@
         var rev_search_str = '';
         var reverse_search_position = null;
         var backup_prompt;
+        // TODO: try to use workerCache with data that don't change like bare_text
+        // or format function.
+        // TODO: remove workerCache for formatters they require dynamic
+        // value of position so data change when you move cursor
+        /*
+        var formatter = new WorkerCache({
+            validation: function() {
+                if (this._formatters instanceof Array) {
+                    var test = this._formatters.every(function(e, i) {
+                        return $.terminal.defaults.formatters[i] === e;
+                    });
+                    if (!test) {
+                        this._formatters = $.terminal.defaults.formatters;
+                    }
+                    return test;
+                }
+                return true;
+            },
+            onCache: function(value) {
+                this._counter = this._counter || 0;
+                this._counter++;
+            },
+            action: function(string) {
+                this._times = this._times || [];
+                var t0 = time();
+                // some optimization - don't change object shape and ref
+                format_options.position = position;
+                string = $.terminal.escape_formatting(string);
+                var value = $.terminal.apply_formatters(string, format_options);
+                var t1 = time();
+                this._times.push(t1 - t0);
+                return value;
+            }
+        });
+        */
         var command = '';
         var last_command;
         // text from selection using CTRL+SHIFT+C (as in Xterm)
@@ -1504,38 +1598,42 @@
         var line_marker_re = /\uFFFF$/;
         function get_char_pos(e) {
             var node = $(e.target);
-            if (node.is('span')) {
+            if (node.is('span,img,a')) {
                 node = node.closest('[data-text]');
                 return node.index() +
                     node.parent('span').prevAll().find('[data-text]').length +
                     node.closest('[role="presentation"]')
                         .prevUntil('.cmd-prompt').find('[data-text]').length;
             } else if (node.is('div[role="presentation"]')) {
-                var last = !node.nextUntil('textarea').length;
-                return node.find('span[data-text]').length +
-                    node.prevUntil('.cmd-prompt').find('span[data-text]').length -
+                var last = !node.next().length;
+                return node.find('[data-text]').length +
+                    node.prevUntil('.cmd-prompt').find('[data-text]').length -
                     (last ? 0 : 1);
             }
         }
         // IE mapping
         var key_mapping = {
             'SPACEBAR': ' ',
-            'UP': 'ARROWUP',
-            'DOWN': 'ARROWDOWN',
-            'LEFT': 'ARROWLEFT',
-            'RIGHT': 'ARROWRIGHT',
-            'DEL': 'DELETE',
+            'UP': 'ArrowUP',
+            'DOWN': 'ArrowDown',
+            'LEFT': 'ArrowLeft',
+            'RIGHT': 'ArrowRight',
+            'DEL': 'Delete',
             'MULTIPLY': '*',
             'DIVIDE': '/',
             'SUBTRACT': '-',
             'ADD': '+'
         };
+        function ie_key_fix(e) {
+            var key = e.key.toUpperCase();
+            if (key_mapping[key]) {
+                return key_mapping[key];
+            }
+            return key;
+        }
         function get_key(e) {
             if (e.key) {
-                var key = e.key.toUpperCase();
-                if (key_mapping[key]) {
-                    key = key_mapping[key];
-                }
+                var key = ie_key_fix(e).toUpperCase();
                 if (key === 'CONTROL') {
                     return 'CTRL';
                 } else {
@@ -1923,8 +2021,8 @@
                             text: value
                         });
                         if (ret !== undefined) {
-                            if (ret && is_function(ret.then)) {
-                                ret.then(insert);
+                            if (ret && is_function(ret.then || ret.done)) {
+                                (ret.then || ret.done).call(ret, insert);
                             } else if (typeof ret === 'string') {
                                 insert(ret);
                             } else if (ret === false) {
@@ -2329,11 +2427,11 @@
             // we don't want to format command when user type formatting in
             try {
                 string = $.terminal.escape_formatting(string);
-                var options = $.extend({}, settings, {
+                var format_options = $.extend({}, settings, {
                     unixFormattingEscapeBrackets: true,
                     position: position
                 });
-                var formatted = $.terminal.apply_formatters(string, options);
+                var formatted = $.terminal.apply_formatters(string, format_options);
                 var output = formatted[0];
                 var max = $.terminal.length(output);
                 if (!skip_formatted_position) {
@@ -2355,6 +2453,7 @@
         // :: format and encode the string
         // ---------------------------------------------------------------------
         function format(string, before) {
+            //string = $.terminal.normalize(string);
             var encoded = $.terminal.encode(wrap(string), {
                 tabs: settings.tabs,
                 before: before
@@ -2400,8 +2499,8 @@
         // ---------------------------------------------------------------------
         // :: shortcut helpers
         // ---------------------------------------------------------------------
-        function length(str) {
-            return $.terminal.length(str);
+        function length(str, raw) {
+            return $.terminal.length(str, raw);
         }
         // ---------------------------------------------------------------------
         function substring(str, start, end) {
@@ -2972,6 +3071,7 @@
                 if (n === undefined) {
                     return formatted_position;
                 } else {
+                    // double escape
                     var string = formatting($.terminal.escape_formatting(command), true);
                     var len = length(string);
                     var command_len = bare_text(command).length;
@@ -2983,7 +3083,7 @@
                     } else {
                         new_formatted_pos = n;
                     }
-                    if (text(string).length === length(command)) {
+                    if (text(string).length === length(command, true)) {
                         formatted_position = new_formatted_pos;
                         return self.position(new_formatted_pos);
                     }
@@ -3099,7 +3199,6 @@
                 }
             }
         });
-        //debug_object(self, 'cmd')('display_position');
         // ---------------------------------------------------------------------
         // :: INIT
         // ---------------------------------------------------------------------
@@ -3145,6 +3244,12 @@
             return e.key && e.key.length === 1 && !e.ctrlKey;
         }
         // ---------------------------------------------------------------------
+        function is_delay_key(key) {
+            var specials = ['HOLD+SHIFT+BACKSPACE', 'HOLD+BACKSPACE'];
+            return specials.indexOf(key) !== -1 && settings.mobileDelete ||
+                settings.repeatTimeoutKeys.indexOf(key) !== -1;
+        }
+        // ---------------------------------------------------------------------
         function clear_reverse_search_key(e) {
             // arrows / Home / End / ENTER
             return e.which === 35 || e.which === 36 ||
@@ -3187,6 +3292,7 @@
             clip.off('input', paste);
             var key = get_key(e);
             if (is_function(settings.keydown)) {
+                e.key = ie_key_fix(e);
                 result = settings.keydown.call(self, e);
                 if (result !== undefined) {
                     //skip_keypress = true;
@@ -3208,8 +3314,7 @@
                     if (hold_pause) {
                         return;
                     }
-                    if (settings.holdRepeatTimeout > 0 &&
-                        key.indexOf(settings.repeatTimeoutKeys) !== -1) {
+                    if (settings.holdRepeatTimeout > 0 && is_delay_key(key)) {
                         hold_pause = true;
                         self.oneTime(settings.holdRepeatTimeout, 'delay', function() {
                             hold_pause = false;
@@ -3521,10 +3626,35 @@
         return entity_re.test(chr) ? 1 : chr.length;
     }
     // -------------------------------------------------------------------------
+    // :: local function used in get_next_character to process single formatting
+    // -------------------------------------------------------------------------
+    /* TODO: remove before release 2.8.1 or 2.9.0
+    function process_single_formatter(string) {
+        return string.replace(format_full_re, function(_, formatting, text, br) {
+            return formatting + get_next_character(text) + br;
+        });
+    }
+    */
+    // -------------------------------------------------------------------------
     // :: function that return character from beginning of the string
     // :: counting emoji, suroggate pairs and combine characters
     // -------------------------------------------------------------------------
     function get_next_character(string) {
+        /*
+        // this is very slow and it's used in iterate formatting when not in formatting
+        if (false && $.terminal.have_formatting(string)) {
+            if ($.terminal.is_formatting(string)) {
+                return process_single_formatter(string);
+            } else {
+                $.terminal.format_split(string).map(function(string) {
+                    if ($.terminal.is_formatting(string)) {
+                        return process_single_formatter(string);
+                    }
+                    return get_next_character(string);
+                }).join('');
+            }
+        }
+        */
         var match_entity = string.match(entity_re);
         if (match_entity) {
             return match_entity[1];
@@ -4019,6 +4149,9 @@
         // :: source https://stackoverflow.com/a/46756077/387194
         // ---------------------------------------------------------------------
         tracking_replace: function tracking_replace(string, rex, replacement, position) {
+            if (!(rex instanceof RegExp)) {
+                throw new Error('tracking_replace: Second argument need to be RegExp');
+            }
             function substring(string, start, end) {
                 return string.slice(start, end);
             }
@@ -4118,6 +4251,15 @@
             function is_text(i) {
                 return not_formatting && (string[i] !== ']' || !have_formatting)
                     && !opening;
+            }
+            function next_char() {
+                var char = get_next_character(substring);
+                if ($.terminal.length(substring) > 1) {
+                    if (char.length > 1) {
+                        return char.length - 1;
+                    }
+                }
+                return 0;
             }
             // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
@@ -4223,9 +4365,8 @@
                     });
                 }
                 // handle emoji, suroggate pairs and combine characters
-                var char = get_next_character(substring);
-                if (char.length > 1) {
-                    i += char.length - 1;
+                if (in_text) {
+                    i += next_char();
                 }
             }
         },
@@ -4777,6 +4918,36 @@
                 return rel;
             }
             // -----------------------------------------------------------------
+            // test if this is valid Path
+            // -----------------------------------------------------------------
+            function is_path(url) {
+                return url.match(/^\.{1,2}\//) ||
+                    url.match(/^\//) ||
+                    !(url.match(/\//) || url.match(/^[^:]+:/));
+            }
+            // -----------------------------------------------------------------
+            function with_url_validation(fn) {
+                return function(url) {
+                    if (settings.anyLinks) {
+                        return true;
+                    }
+                    var test = fn(url);
+                    if (!test) {
+                        warn('Invalid URL ' + url + ' only https ftp and Path ' +
+                             'are allowed');
+                    }
+                    return test;
+                };
+            }
+            // -----------------------------------------------------------------
+            var valid_href = with_url_validation(function(url) {
+                return url.match(/^((https?|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
+            });
+            // -----------------------------------------------------------------
+            var valid_src = with_url_validation(function(url) {
+                return url.match(/^(https?:|blob:|data:)/) || is_path(url);
+            });
+            // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
                 var attrs;
                 if (data_text.match(/;/)) {
@@ -4847,8 +5018,7 @@
                     } else {
                         // only http and ftp links (prevent javascript)
                         // unless user force it with anyLinks option
-                        if (!settings.anyLinks &&
-                            !data.match(/^((https?|ftp):\/\/|\.{0,2}\/)/)) {
+                        if (!valid_href(data)) {
                             data = '';
                         }
                         result = '<a target="_blank"';
@@ -4862,7 +5032,7 @@
                     result += ' tabindex="1000"';
                 } else if (style.indexOf('@') !== -1) {
                     result = '<img';
-                    if (data.match(/^(https?:|blob:|data:)/)) {
+                    if (valid_src(data)) {
                         result += ' src="' + data + '"';
                     }
                 } else {
@@ -4875,10 +5045,12 @@
                 if (_class !== '') {
                     result += ' class="' + _class + '"';
                 }
+                // links and image need data-text attribute cmd click behavior
+                // formatter can return links.
                 if (style.indexOf('!') !== -1) {
-                    result += '>' + text + '</a>';
+                    result += ' data-text>' + text + '</a>';
                 } else if (style.indexOf('@') !== -1) {
-                    result += '/>';
+                    result += ' data-text/>';
                 } else {
                     result += ' data-text="' + data.replace(/"/g, '&quot;') + '">' +
                         text + '</span>';
@@ -4930,8 +5102,8 @@
         // ---------------------------------------------------------------------
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
-        length: function(string) {
-            return $.terminal.split_characters(text(string)).length;
+        length: function(string, raw) {
+            return $.terminal.split_characters(raw ? string : text(string)).length;
         },
         // ---------------------------------------------------------------------
         // :: split characters handling emoji, surogate pairs and combine chars
@@ -5588,7 +5760,7 @@
         clickTimeout: 200,
         holdTimeout: 400,
         holdRepeatTimeout: 200,
-        repeatTimeoutKeys: ['HOLD+BACKSPACE'],
+        repeatTimeoutKeys: [],
         mobileIngoreAutoSpace: [],
         request: $.noop,
         response: $.noop,
@@ -5607,6 +5779,7 @@
         onPop: $.noop,
         keypress: $.noop,
         keydown: $.noop,
+        renderHandler: null,
         onAfterRedraw: $.noop,
         onEchoCommand: $.noop,
         onPaste: $.noop,
@@ -5709,9 +5882,93 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: helper function that use option to render objects
+        // ---------------------------------------------------------------------
+        function preprocess_value(value) {
+            if (is_function(settings.renderHandler)) {
+                var ret = settings.renderHandler.call(self, value, self);
+                if (ret === false) {
+                    return false;
+                }
+                if (typeof ret === 'string' || is_node(ret)) {
+                    return ret;
+                } else {
+                    return value;
+                }
+            }
+            return value;
+        }
+        // ---------------------------------------------------------------------
+        // :: call when line is out of view when outputLimit is used
+        // :: NOTE: it's not called when less plugin is used onClear is called
+        // :: instead because less call term::clear() after export old view
+        // ---------------------------------------------------------------------
+        function unmount(node) {
+            var index = node.data('index');
+            var line = lines[index];
+            var options = line[1];
+            if (is_function(options.unmount)) {
+                options.unmount.call(self, node);
+            }
+        }
+        // ---------------------------------------------------------------------
+        // :: helper function used in render and in update
+        // ---------------------------------------------------------------------
+        function prepare_render(value, options) {
+            if (is_node(value)) {
+                var settings = $.extend({}, options, {
+                    raw: true,
+                    finalize: function(div) {
+                        var node;
+                        if (value instanceof $.fn.init) {
+                            // deep clone with events - we clone because remove
+                            // from DOM will remove events from original object
+                            node = value.clone(true, true);
+                        } else {
+                            // don't clone html nodes because it will not
+                            // work for canvas or video tag
+                            node = value;
+                        }
+                        div.find('.terminal-render-item').replaceWith(node);
+                        if (options && is_function(options.finalize)) {
+                            options.finalize(div, self);
+                        }
+                    }
+                });
+                return ['<div class="terminal-render-item"/>', settings];
+            }
+        }
+        // ---------------------------------------------------------------------
+        // :: helper function that renders DOM nodes and jQuery objects
+        // ---------------------------------------------------------------------
+        function render(value, options) {
+            var ret = prepare_render(value, options);
+            if (ret) {
+                self.echo.apply(self, ret);
+                return true;
+            }
+        }
+        // ---------------------------------------------------------------------
+        function get_node(index) {
+            return output.find('[data-index=' + index + ']');
+        }
+        // ---------------------------------------------------------------------
+        // :: test if object can be rendered
+        // ---------------------------------------------------------------------
+        function is_node(object) {
+            return object instanceof $.fn.init || object instanceof Element;
+        }
+        // ---------------------------------------------------------------------
         // :: Display object on terminal
         // ---------------------------------------------------------------------
         function display_object(object) {
+            object = preprocess_value(object);
+            if (object === false) {
+                return;
+            }
+            if (render(object)) {
+                return;
+            }
             if (typeof object === 'string') {
                 self.echo(object);
             } else if (is_array(object)) {
@@ -5724,8 +5981,10 @@
                 self.echo(object);
             }
         }
-        // Display line code in the file if line numbers are present
-        function print_line(url_spec) {
+        // ---------------------------------------------------------------------
+        // :: Display line code in the file if line numbers are present
+        // ---------------------------------------------------------------------
+        function print_line(url_spec, cols) {
             var re = /(.*):([0-9]+):([0-9]+)$/;
             // google chrome have line and column after filename
             var m = url_spec.match(re);
@@ -5734,16 +5993,25 @@
                 self.pause(settings.softPause);
                 $.get(m[1], function(response) {
                     var file = m[1];
-                    self.echo('[[b;white;]' + file + ']');
                     var code = response.split('\n');
                     var n = +m[2] - 1;
-                    self.echo(code.slice(n - 2, n + 3).map(function(line, i) {
-                        if (i === 2) {
+                    var start = n > 2 ? n - 2 : 0;
+                    var lines = code.slice(start, n + 3).map(function(line, i) {
+                        var prefix = '[' + (n + i - 1) + ']: ';
+                        var limit = cols - prefix.length - 4;
+                        if (line.length > limit) {
+                            line = line.substring(0, limit) + '...';
+                        }
+                        if (n > 2 ? i === 2 : i === n) {
                             line = '[[;#f00;]' +
                                 $.terminal.escape_brackets(line) + ']';
                         }
-                        return '[' + (n + i - 1) + ']: ' + line;
-                    }).join('\n')).resume();
+                        return prefix + line;
+                    }).filter(Boolean).join('\n');
+                    if (lines.length) {
+                        self.echo('[[b;white;]' + file + ']');
+                        self.echo(lines).resume();
+                    }
                 }, 'text');
             }
         }
@@ -5858,16 +6126,6 @@
                     return;
                     // throw e; // this will show stack in other try..catch
                 }
-                /*
-                if (login) {
-                    var token = self.token(true);
-                    if (token) {
-                        command.args = [token].concat(command.args);
-                    } else {
-                        terminal.error('&#91;AUTH&#93; ' + strings.noTokenError);
-                        return;
-                    }
-                }*/
                 var val = object[command.name];
                 var type = get_type(val);
                 if (type === 'function') {
@@ -5919,6 +6177,8 @@
                            $.terminal.escape_brackets(xhr.responseText));
             }
         }
+        // ---------------------------------------------------------------------
+        // :: function create interpreter object based on JSON-RPC meta data
         // ---------------------------------------------------------------------
         function make_json_rpc_object(url, auth, success) {
             function jrpc_success(json) {
@@ -6055,6 +6315,9 @@
             });
         }
         // ---------------------------------------------------------------------
+        // :: function create interpeter function and call finalize with
+        // :: interpreter and optional completion
+        // ---------------------------------------------------------------------
         function make_interpreter(user_intrp, login, finalize) {
             finalize = finalize || $.noop;
             var type = get_type(user_intrp);
@@ -6115,7 +6378,7 @@
                             object,
                             false,
                             login,
-                            fn_interpreter.bind(self)
+                            fn_interpreter && fn_interpreter.bind(self)
                         ),
                         completion: Object.keys(object)
                     });
@@ -6339,28 +6602,11 @@
                     raw: false,
                     finalize: $.noop,
                     invokeMethods: false,
+                    formatters: true,
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string;
-                var arg = line.string;
-                var is_fn = is_function(arg);
-                if (is_fn) {
-                    arg = arg();
-                }
-                if (get_type(arg) !== 'string') {
-                    if (is_function(settings.parseObject)) {
-                        var ret = settings.parseObject(arg);
-                        if (get_type(ret) === 'string') {
-                            string = ret;
-                        }
-                    } else if (is_array(arg)) {
-                        string = $.terminal.columns(arg, self.cols(), settings.tabs);
-                    } else {
-                        string = String(arg);
-                    }
-                } else {
-                    string = arg;
-                }
+                string = stringify_value(line.value);
                 if (string !== '') {
                     if (!line_settings.raw) {
                         if (line_settings.formatters) {
@@ -6451,25 +6697,20 @@
                     limit = settings.outputLimit;
                 }
                 lines.forEach(function(line, index) {
-                    var string = line[0];
+                    var value = line[0];
                     var options = line[1];
-                    if (get_type(string) === 'function') {
-                        string = string();
-                    }
-                    if (get_type(string) !== 'string') {
-                        string = String(string);
-                    }
                     lines_to_show.push({
-                        string: string,
+                        value: value,
                         index: index,
                         options: options
                     });
                 });
-                lines_to_show = lines_to_show.slice(lines_to_show.length - limit - 1);
+                var pivot = lines_to_show.length - limit - 1;
+                lines_to_show = lines_to_show.slice(pivot);
             } else {
                 lines_to_show = lines.map(function(line, index) {
                     return {
-                        string: line[0],
+                        value: line[0],
                         index: index,
                         options: line[1]
                     };
@@ -6515,6 +6756,7 @@
                     parents.each(function() {
                         var $self = $(this);
                         if ($self.is(':empty')) {
+                            unmount($self);
                             // there can be divs inside parent that
                             // was not removed
                             $self.remove();
@@ -6536,7 +6778,8 @@
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     try {
-                        settings.greetings.call(self, self.echo);
+                        var ret = settings.greetings.call(self, self.echo);
+                        unpromise(ret, self.echo);
                     } catch (e) {
                         settings.greetings = null;
                         display_exception(e, 'greetings');
@@ -7201,10 +7444,15 @@
             // :: Clear the output
             // -------------------------------------------------------------
             clear: function() {
-                lines = [];
-                output.html('');
-                fire_event('onClear');
-                self.attr({scrollTop: 0});
+                if (fire_event('onClear') !== false) {
+                    lines.forEach(function(line, i) {
+                        var options = line[1];
+                        options.onClear.call(self, get_node(i));
+                    });
+                    lines = [];
+                    output.html('');
+                    self.attr({scrollTop: 0});
+                }
                 return self;
             },
             // -------------------------------------------------------------
@@ -7304,11 +7552,9 @@
                         // it will resolve exec promise when user promise
                         // is resolved
                         var ret = commands(command, silent, true);
-                        if (ret && (ret.done || ret.then)) {
-                            (ret.done || ret.then).call(ret, function() {
-                                d.resolve(self);
-                            });
-                        }
+                        unpromise(ret, function() {
+                            d.resolve();
+                        });
                     }
                 });
                 // while testing it didn't executed last exec when using this
@@ -7363,6 +7609,9 @@
                 // so we know how many times call pop
                 var level = self.level();
                 function login_callback(user, token, silent) {
+                    if (self.paused()) {
+                        self.resume();
+                    }
                     if (token) {
                         popUserPass();
                         var name = self.prefix_name(true) + '_';
@@ -7410,16 +7659,15 @@
                                 popUserPass();
                                 return;
                             }
+                            self.pause();
                             var ret = auth.call(self, user, pass, function(
                                 token,
                                 silent) {
                                 login_callback(user, token, silent);
                             });
-                            if (ret && is_function(ret.then)) {
-                                self.pause();
-                                ret.then(function(token) {
+                            if (ret && is_function(ret.then || ret.done)) {
+                                (ret.then || ret.done).call(ret, function(token) {
                                     login_callback(user, token);
-                                    self.resume();
                                 });
                             }
                         } catch (e) {
@@ -8093,7 +8341,8 @@
                     var wrapper;
                     // print all lines
                     // var output_buffer = lines.flush();
-                    $.each(output_buffer, function(i, data) {
+                    while (output_buffer.length) {
+                        var data = output_buffer.shift();
                         if (data === NEW_LINE) {
                             wrapper = $('<div></div>');
                         } else if ($.isPlainObject(data) && is_function(data.finalize)) {
@@ -8107,7 +8356,8 @@
                             } else {
                                 wrapper.appendTo(output);
                             }
-                            data.finalize(wrapper.attr('data-index', data.index));
+                            wrapper.attr('data-index', data.index);
+                            data.finalize(wrapper);
                         } else {
                             var line = data.line;
                             var div = $('<div/>').html(line)
@@ -8116,7 +8366,7 @@
                                 div.addClass('cmd-end-line');
                             }
                         }
-                    });
+                    }
                     limit_lines();
                     fire_event('onFlush');
                     //num_rows = get_num_rows(self, char_size);
@@ -8142,23 +8392,28 @@
             // -------------------------------------------------------------
             // :: Update the output line - line number can be negative
             // -------------------------------------------------------------
-            update: function(line, string, options) {
+            update: function(line, value, options) {
                 when_ready(function ready() {
                     if (line < 0) {
                         line = lines.length + line; // yes +
                     }
                     if (!lines[line]) {
                         self.error('Invalid line number ' + line);
-                    } else if (string === null) {
+                    } else if (value === null) {
                         lines.splice(line, 1);
                         output.find('[data-index=' + line + ']').remove();
                     } else {
-                        lines[line][0] = string;
+                        var ret = prepare_render(value, options);
+                        if (ret) {
+                            value = ret[0];
+                            options = ret[1];
+                        }
+                        lines[line][0] = value;
                         if (options) {
                             lines[line][1] = options;
                         }
                         process_line({
-                            string: string,
+                            value: value,
                             index: line,
                             options: options
                         });
@@ -8203,11 +8458,15 @@
                             exec: true,
                             raw: settings.raw,
                             finalize: $.noop,
+                            unmount: $.noop,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
+                            onClear: $.noop,
                             formatters: true,
                             allowedAttributes: settings.allowedAttributes
                         }, options || {});
+                        // finalize function is passed around and invoked
+                        // in terminal::flush after content is added to DOM
                         (function(finalize) {
                             locals.finalize = function(div) {
                                 if (locals.raw) {
@@ -8215,8 +8474,16 @@
                                 }
                                 try {
                                     if (is_function(finalize)) {
-                                        finalize(div);
+                                        finalize.call(self, div);
                                     }
+                                    div.find('img').each(function() {
+                                        var self = $(this);
+                                        var img = new Image();
+                                        img.onerror = function() {
+                                            self.replaceWith(use_broken_image);
+                                        };
+                                        img.src = this.src;
+                                    });
                                 } catch (e) {
                                     display_exception(e, 'USER:echo(finalize)');
                                     finalize = null;
@@ -8242,18 +8509,24 @@
                                 value = '';
                             }
                         } else {
-                            value = arg;
+                            var ret = preprocess_value(arg);
+                            if (ret === false) {
+                                return self;
+                            }
+                            value = ret;
+                        }
+                        if (render(value, locals)) {
+                            return self;
                         }
                         process_line({
-                            string: value,
+                            value: value,
                             options: locals,
                             index: lines.length
                         });
                         // extended commands should be processed only
                         // once in echo and not on redraw
-                        lines.push([value, $.extend(locals, {
-                            exec: false
-                        })]);
+                        locals.exec = false;
+                        lines.push([value, locals]);
                         if (locals.flush) {
                             self.flush();
                             fire_event('onAfterEcho', [arg]);
@@ -8883,6 +9156,7 @@
             requests.push(xhr);
         });
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
+        $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var fill = $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
@@ -8918,27 +9192,47 @@
                 self.focus();
             }
         }
+        // -------------------------------------------------------------------------------
         function blur_terminal() {
             old_enabled = enabled;
             self.disable().find('.cmd textarea').trigger('blur', [true]);
         }
+        // -------------------------------------------------------------------------------
+        function stringify_value(value) {
+            if (is_function(value)) {
+                value = value();
+            }
+            if (get_type(value) !== 'string') {
+                if (is_function(settings.parseObject)) {
+                    var ret = settings.parseObject(value);
+                    if (get_type(ret) === 'string') {
+                        value = ret;
+                    }
+                } else if (is_array(value)) {
+                    value = $.terminal.columns(value, self.cols(), settings.tabs);
+                } else {
+                    value = String(value);
+                }
+            }
+            return value;
+        }
+        // -------------------------------------------------------------------------------
         function context_callback_proxy(fn, type) {
             if (fn.proxy) {
                 return fn;
             }
             var wrapper = function(callback) {
                 var ret = fn.call(self, callback, self);
-                if (ret && is_function(ret.then)) {
-                    ret.then(function(string) {
-                        if (typeof string === type) {
-                            callback(string);
-                        }
-                    });
-                }
+                unpromise(ret, function(string) {
+                    if (typeof string === type) {
+                        callback(string);
+                    }
+                });
             };
             wrapper.proxy = true;
             return wrapper;
         }
+        // -------------------------------------------------------------------------------
         // paste event is not testable in node
         // istanbul ignore next
         function paste_event(e) {
@@ -8968,8 +9262,8 @@
                     }
                     var ret = fire_event('onPaste', [event]);
                     if (ret) {
-                        if (is_function(ret.then)) {
-                            return ret.then(function(ret) {
+                        if (is_function(ret.then || ret.done)) {
+                            return (ret.then || ret.done).call(ret, function(ret) {
                                 echo(ret, true);
                             });
                         } else {
@@ -9243,7 +9537,7 @@
                     var href = $this.attr('href');
                     if (href.match(/:[0-9]+$/)) { // display line if specified
                         e.preventDefault();
-                        print_line(href);
+                        print_line(href, self.cols());
                     }
                 }
                 // refocus because links have tabindex in case where user want

@@ -9,8 +9,11 @@
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  * Copyright (c) 2010-2018 Jakub Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
+ *
+ * Image Credit: Author Peter Hamer, source Wikipedia
+ * https://commons.wikimedia.org/wiki/File:Ken_Thompson_(sitting)_and_Dennis_Ritchie_at_PDP-11_(2876612463).jpg
  */
-/* global global, it, expect, describe, require, spyOn, setTimeout, location,
+/* global global, it, expect, describe, require, spyOn, setTimeout, location, URL,
           beforeEach, afterEach, sprintf, jQuery, $, wcwidth, jest, setImmediate  */
 /* TODO missing tests:
       test caseSensitiveSearch option
@@ -65,70 +68,92 @@ Storage.prototype.clear = function() {
     });
 };
 // https://github.com/tmpvar/jsdom/issues/135
-Object.defineProperties(window.HTMLElement.prototype, {
-    offsetLeft: {
-        get: function() { return parseFloat(window.getComputedStyle(this).marginLeft) || 0; }
-    },
-    offsetTop: {
-        get: function() { return parseFloat(window.getComputedStyle(this).marginTop) || 0; }
-    },
-    offsetHeight: {
-        get: function() { return parseFloat(window.getComputedStyle(this).height) || 0; }
-    },
-    offsetWidth: {
-        get: function() { return parseFloat(window.getComputedStyle(this).width) || 0; }
-    },
-    // this will test if setting 1ch change value to 1ch which don't work in jsdom used by jest
-    style: {
-        get: function() {
-            if (this.__style) {
-                return this.__style;
-            }
-            var self = this;
-            var attr = {};
-            function set_style_attr() {
-                self.setAttribute('style', Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';') + ';');
-            }
-            var mapping = {
-                backgroundClip: 'background-clip',
-                className: 'class'
-            };
-            var reversed_mapping = {};
-            Object.keys(mapping).forEach(key => {
-                reversed_mapping[mapping[key]] = key;
-            });
-            return this.__style = new Proxy({}, {
-                set: function(target, name, value) {
-                    name = mapping[name] || name;
-                    if (!value) {
+
+(function() {
+    var style_descriptor = Object.getOwnPropertyDescriptor(window.HTMLElement.prototype, 'style');
+
+    Object.defineProperties(window.HTMLElement.prototype, {
+        offsetLeft: {
+            get: function() { return parseFloat(window.getComputedStyle(this).marginLeft) || 0; }
+        },
+        offsetTop: {
+            get: function() { return parseFloat(window.getComputedStyle(this).marginTop) || 0; }
+        },
+        offsetHeight: {
+            get: function() { return parseFloat(window.getComputedStyle(this).height) || 0; }
+        },
+        offsetWidth: {
+            get: function() { return parseFloat(window.getComputedStyle(this).width) || 0; }
+        },
+        // this will test if setting 1ch change value to 1ch which don't work in jsdom used by jest
+        style: {
+            get: function getter() {
+                if (this.__style) {
+                    return this.__style;
+                }
+                var self = this;
+                var attr = {};
+                function set_style_attr() {
+                    var str = Object.keys(attr).map((key) => `${key}: ${attr[key]}`).join(';') + ';';
+                    self.setAttribute('style', str);
+                }
+                var mapping = {
+                    backgroundClip: 'background-clip',
+                    className: 'class'
+                };
+                var reversed_mapping = {};
+                Object.keys(mapping).forEach(key => {
+                    reversed_mapping[mapping[key]] = key;
+                });
+                function disable(fn) {
+                    // temporary disable proxy
+                    Object.defineProperty(window.HTMLElement.prototype, "style", style_descriptor);
+                    var ret = fn();
+                    Object.defineProperty(window.HTMLElement.prototype, "style", {
+                        get: getter
+                    });
+                    return ret;
+                }
+                return this.__style = new Proxy({}, {
+                    set: function(target, name, value) {
+                        name = mapping[name] || name;
+                        if (!value) {
+                            delete target[name];
+                            delete attr[name];
+                        } else {
+                            attr[name] = target[name] = value;
+                        }
+                        set_style_attr();
+                        disable(function() {
+                            self.style[name] = name;
+                        });
+                        return true;
+                    },
+                    get: function(target, name) {
+                        if (name === 'setProperty') {
+                            return function(name, value) {
+                                attr[name] = target[name] = value;
+                                set_style_attr();
+                            };
+                        } else if (target[name]) {
+                            return target[name];
+                        } else {
+                            return disable(function() {
+                                return self.style[name];
+                            });
+                        }
+                    },
+                    deleteProperty: function(target, name) {
+                        name = reversed_mapping[name] || name;
                         delete target[name];
                         delete attr[name];
-                    } else {
-                        attr[name] = target[name] = value;
+                        set_style_attr();
                     }
-                    set_style_attr();
-                    return true;
-                },
-                get: function(target, name) {
-                    if (name === 'setProperty') {
-                        return function(name, value) {
-                            attr[name] = target[name] = value;
-                            set_style_attr();
-                        };
-                    } else {
-                        return target[name];
-                    }
-                },
-                deleteProperty: function(target, name) {
-                    name = reversed_mapping[name] || name;
-                    delete target[name];
-                    delete attr[name];
-                    set_style_attr();
-                }
-            });
+                });
+            }
         }
-    }
-});
+    });
+})();
 
 global.window.Element.prototype.getBoundingClientRect = function() {
     var self = $(this);
@@ -168,13 +193,66 @@ global.document = window.document;
 global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
 
+// mock Canvas & Image
+var gm = require('gm');
+window.Image = class Image {
+    set onerror(fn) {
+        this._err = fn;
+    }
+    set onload(fn) {
+        this._load = fn;
+    }
+    set src(url) {
+        var img = this;
+        if (url.match(/error.jpg$/)) {
+            if (typeof this._err === 'function') {
+                this._err();
+            }
+        } else if (!url.match(/<BLOB>|(^http)/)) {
+            this._url = url;
+            gm(this._url).size(function(err, size) {
+                if (err) {
+                    throw err;
+                }
+                img.width = size.width;
+                img.height = size.height;
+                if (typeof img._load === 'function') {
+                    img._load();
+                }
+            });
+        }
+    }
+};
+window.HTMLCanvasElement.prototype.getContext = function () {
+    return {
+        putImageData: function(data, x, y) {
+        },
+        getImageData: function(x, y, w, h) {
+            return [1,1,1];
+        },
+        drawImage: function(image, x1, y1, iw, ih, out_x, out_y, out_w, out_h) {
+        }
+    };
+};
+window.HTMLCanvasElement.prototype.toBlob = function(fn) {
+    fn('<BLOB>');
+};
+global.URL = window.URL = {
+    createObjectURL: function(blob) {
+        return 'data:image/jpg;' + blob;
+    },
+    revokeObjectURL: function() {}
+};
+
+
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
 require('../js/echo_newline')(global.$);
 require('../js/autocomplete_menu')(global.$);
+require('../js/less')(global.$);
 
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 
 function nbsp(string) {
     return string.replace(/ /g, '\xA0');
@@ -262,10 +340,14 @@ function keydown(ctrl, alt, shift, which, key) {
     e.which = e.keyCode = which;
     return e;
 }
-function keypress(key) {
+function keypress(key, code) {
     var e = $.Event("keypress");
     e.key = key;
-    e.which = e.keyCode = 0;
+    if (code === true) {
+        e.which = e.keyCode = key.charCodeAt(0);
+    } else {
+        e.which = e.keyCode = (code || 0);
+    }
     return e;
 }
 function shortcut(ctrl, alt, shift, which, key) {
@@ -284,6 +366,15 @@ function enter_key() {
 function enter(term, text) {
     term.insert(text).focus();
     enter_key();
+}
+function type(text) {
+    var doc = $(document.documentElement || window);
+    text.split('').forEach(function(chr) {
+        var shift = chr.toUpperCase() === chr;
+        doc.trigger(keydown(false, false, shift, chr));
+        doc.trigger(keypress(chr, chr.charCodeAt(0)));
+        doc.trigger($.Event("keyup"));
+    });
 }
 
 function last_div(term) {
@@ -766,14 +857,14 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noopener" tabindex="1000">https://terminal.jcubic.pl<'+
-                        '/a>',
+                        ' rel="noopener" tabindex="1000" data-text>https:'+
+                        '//terminal.jcubic.pl</a>',
                     {}
                 ],
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noreferrer noopener" tabindex="1000">https'+
-                        '://terminal.jcubic.pl</a>',
+                        ' rel="noreferrer noopener" tabindex="1000" data-'+
+                        'text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true
                     }
@@ -794,22 +885,22 @@ describe('Terminal utils', function() {
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000">xss</a>'
+                        ' tabindex="1000" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
                     '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="noopener" tabindex="1000">xss</a>'
+                        ' rel="noopener" tabindex="1000" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000">xss</a>'
+                        ' tabindex="1000" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000">xss</a>'
+                        ' tabindex="1000" data-text>xss</a>'
                 ],
             ];
             tests.forEach(function(spec) {
@@ -822,14 +913,14 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noopener" tabindex="1000">https://terminal.jcubic.pl<'+
-                        '/a>',
+                        ' rel="nofollow noopener" tabindex="1000" data-te'+
+                        'xt>https://terminal.jcubic.pl</a>',
                     {linksNoFollow: true}
                 ],
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noreferrer noopener" tabindex="1000">https'+
-                        '://terminal.jcubic.pl</a>',
+                        ' rel="nofollow noreferrer noopener" tabindex="1000"'+
+                        ' data-text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true,
                         linksNoFollow: true
@@ -847,12 +938,12 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '[[!;;]jcubic@onet.pl]',
-                    '<a href="mailto:jcubic@onet.pl" tabindex="1000">jcubic@onet.pl</a>'
+                    '<a href="mailto:jcubic@onet.pl" tabindex="1000" data-text>jcubic@onet.pl</a>'
                 ],
                 [
                     '[[!;;;;jcubic@onet.pl]j][[!;;;;jcubic@onet.pl]cubic@onet.pl]',
-                    '<a href="mailto:jcubic@onet.pl" tabindex="1000">j</a>' +
-                        '<a href="mailto:jcubic@onet.pl" tabindex="1000">c' +
+                    '<a href="mailto:jcubic@onet.pl" tabindex="1000" data-text>j</a>' +
+                        '<a href="mailto:jcubic@onet.pl" tabindex="1000" data-text>c' +
                         'ubic@onet.pl</a>'
                 ]
             ];
@@ -1862,6 +1953,198 @@ describe('Terminal utils', function() {
             expect(formatters[formatters.length - 1]).toBe(formatter_2);
         });
     });
+    describe('$.terminal.less', function() {
+        var term;
+        var getClientRects;
+        var greetings = 'Terminal Less Test';
+        var cols = 80, rows = 25;
+        var big_text = (function() {
+            var lines = [];
+            for (var i = 0; i < 100; i++) {
+                lines.push('Less ' + i);
+            }
+            return lines;
+        })();
+        function get_lines() {
+            return term.get_output().split('\n');
+        }
+        beforeEach(function() {
+            term = $('<div/>').terminal($.noop, {
+                greetings: greetings,
+                numChars: cols,
+                numRows: rows
+            });
+            term.css('width', 800);
+            term.focus();
+        });
+        function key(ord, key) {
+            shortcut(false, false, false, ord, key);
+        }
+        function selected() {
+            return term.find('.terminal-output > div div span.terminal-inverted');
+        }
+        function first(node) {
+            var $node = term.find('.terminal-output > div > div:eq(0)');
+            if (node) {
+                return $node;
+            }
+            return a0($node.text());
+        }
+        function search(text) {
+            key('/');
+            type(text);
+            enter_key();
+        }
+        afterEach(function() {
+            term.destroy();
+        });
+        // mock cursor size - jest/jsdom don't use css
+        beforeEach(function() {
+            getClientRects = global.window.Element.prototype.getBoundingClientRect;
+            global.window.Element.prototype.getBoundingClientRect = function() {
+                return {width: 7, height: 14};
+            };
+        });
+        afterEach(function() {
+            global.window.Element.prototype.getBoundingClientRect = getClientRects;
+            jest.resetAllMocks();
+        });
+        it('should render big text array', function() {
+            term.less(big_text);
+            expect(get_lines()).toEqual(big_text.slice(0, rows - 1));
+        });
+        it('should render big text string', async function() {
+            term.less(big_text.join('\n'));
+            await delay(10);
+            expect(get_lines()).toEqual(big_text.slice(0, rows - 1));
+        });
+        it('should find 80 line', function() {
+            term.less(big_text);
+            search('Less 80');
+            var sel = selected();
+            expect(sel.length).toEqual(1);
+            expect(sel.closest('[data-index]').data('index')).toEqual(0);
+        });
+        it('should ingore case in search', function() {
+            term.less(big_text);
+            search('less 80');
+            var sel = selected();
+            expect(sel.length).toEqual(1);
+            expect(sel.closest('[data-index]').data('index')).toEqual(0);
+        });
+        it('should find every line', function() {
+            term.less(big_text);
+            search('less');
+            var sel = selected();
+            expect(sel.length).toEqual(rows - 1);
+        });
+        it('should find inside formatting', function() {
+            term.less(big_text.concat(['[[;red;]foo bar baz]']));
+            search('bar');
+            var spans = term.find('[data-index="0"] > div:first-child span');
+            ['foo ', 'bar', ' baz'].forEach(function(string, i) {
+                expect(a0(spans.eq(i).text())).toEqual(string);
+            });
+            [true, false, true].forEach(function(check, i) {
+                expect([i, spans.eq(i).css('color') === 'red']).toEqual([i, check]);
+            });
+            expect(spans.eq(1).is('.terminal-inverted')).toBeTruthy();
+        });
+        it('should navigate inside search results', function() {
+            term.less(big_text);
+            expect(first()).toEqual('Less 0');
+            search('less 1');
+            expect(first()).toEqual('Less 1');
+            expect(selected().length).toEqual(11); // 1 and 1<num>
+            key('n');
+            expect(selected().length).toEqual(10);
+            for (var i = 0; i < 8; ++i) {
+                key('n');
+            }
+            expect(selected().length).toEqual(2);
+            for (i = 0; i < 5; ++i) {
+                key('n');
+                expect(selected().length).toEqual(1);
+            }
+            key('p');
+            expect(selected().length).toEqual(11);
+            expect(first()).toEqual('Less 0');
+            key('n');
+            expect(first()).toEqual('Less 1');
+            key('n');
+            expect(selected().length).toEqual(10);
+        });
+        it('should scroll by line', function() {
+            term.less(big_text);
+            key('ARROWDOWN');
+            key('ARROWDOWN');
+            expect(first()).toEqual('Less 2');
+            key('ARROWUP');
+            expect(first()).toEqual('Less 1');
+        });
+        it('should exit search', function() {
+            term.less(big_text);
+            key('ARROWDOWN');
+            key('ARROWDOWN');
+            key('/');
+            type('xxx');
+            key(8, 'BACKSPACE');
+            expect(term.get_command()).toEqual('xx');
+            key(8, 'BACKSPACE');
+            expect(term.get_command()).toEqual('x');
+            key('ARROWUP');
+            key('ARROWUP');
+            expect(first()).toEqual('Less 2');
+            key(8, 'BACKSPACE');
+            expect(term.get_command()).toEqual('');
+            expect(term.get_prompt()).toEqual('/');
+            key(8, 'BACKSPACE');
+            expect(term.get_prompt()).toEqual(':');
+            key('ARROWUP');
+            key('ARROWUP');
+            expect(first()).toEqual('Less 0');
+        });
+        it('should scroll by page', function() {
+            term.less(big_text);
+            key('PAGEDOWN');
+            key('PAGEDOWN');
+            expect(first()).toEqual('Less ' + (rows - 1) * 2);
+            key('PAGEUP');
+            expect(first()).toEqual('Less ' + (rows - 1));
+            key('PAGEUP');
+            expect(first()).toEqual('Less 0');
+        });
+        it('should restore the view', function() {
+            term.echo('foo bar');
+            term.echo('lorem ipsum');
+            var output = term.get_output();
+            term.less(big_text);
+            key('q');
+            expect(term.get_output()).toEqual(output);
+        });
+        it('should split image', async function() {
+            term.settings().numRows = 50;
+            term.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            await delay(1000);
+            expect(term.get_output().match(/@/g).length).toEqual(43);
+        });
+        it('should revoke images', async function() {
+            term.settings().numRows = 50;
+            term.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            await delay(1000);
+            spy(URL, 'revokeObjectURL');
+            key('q');
+            await delay(100);
+            expect(URL.revokeObjectURL).toHaveBeenCalledTimes(43);
+        });
+        it('should render broken image', async function() {
+            term.less('xxx\n[[@;;;;error.jpg]]\nxxx');
+            await delay(100);
+            var err = term.find('.terminal-broken-image');
+            expect(err.length).toEqual(1);
+            expect(err.text()).toEqual(nbsp('[BROKEN IMAGE]'));
+        });
+    });
     describe('$.terminal.pipe', function() {
         function get_lines(term, fn = last_divs) {
             return fn(term).map(function() {
@@ -1898,6 +2181,21 @@ describe('Terminal utils', function() {
             return term.exec('output | grep /foo/').then(function() {
                 expect(get_lines(term)).toEqual(['foo']);
             });
+        });
+        it('should escape pipe', async function() {
+            var term = $('<div/>').terminal($.terminal.pipe({
+                read: function() {
+                    return this.read('').then((text) => {
+                        this.echo('your text: ' + text);
+                    });
+                },
+                echo: async function(string) {
+                    await delay(10);
+                    return string;
+                }
+            }));
+            await term.exec('echo "|" | read');
+            expect(get_lines(term)).toEqual(['your text: |']);
         });
         it('should filter lines', function() {
             var term = $('<div/>').terminal($.terminal.pipe({
@@ -1986,9 +2284,9 @@ describe('Terminal utils', function() {
                 }
             }));
             term.clear().exec('cat | wc -l');
-            await delay(50);
+            await delay(100);
             await term.exec('foo\nbar');
-            await delay(50);
+            await delay(100);
             expect(term.get_output().split('\n')).toEqual([
                 '> cat | wc -l',
                 'foo',
@@ -2096,9 +2394,6 @@ describe('Terminal utils', function() {
                     });
                 });
             });
-        });
-        it('should throw', function() {
-            expect(() => $.terminal.pipe($.noop)).toThrow();
         });
         it('should split command', function() {
             var fn = jest.fn();
@@ -2283,7 +2578,7 @@ describe('extensions', function() {
         function complete(term, text) {
             term.focus().insert(text);
             shortcut(false, false, false, 9, 'tab');
-            return delay(5);
+            return delay(50);
         }
         it('should display menu from function with Promise', async function() {
             var term = $('<div/>').terminal($.noop, {
@@ -2331,14 +2626,15 @@ describe('extensions', function() {
                 autocompleteMenu: true,
                 completion: ['hello_foo', 'hello_bar']
             });
+            term.focus();
             await complete(term, 'hello');
             enter_text('f');
-            await delay(5);
+            await delay(50);
             menu_visible(term);
             expect(term.get_command()).toEqual('hello_f');
             expect(completion(term)).toEqual(['oo']);
             shortcut(false, false, false, 9, 'tab');
-            await delay(5);
+            await delay(50);
             expect(completion(term)).toEqual([]);
             expect(term.get_command()).toEqual('hello_foo');
             term.destroy();
@@ -3033,14 +3329,18 @@ describe('Terminal plugin', function() {
                 term.insert(input);
                 return new Promise(function(resolve) {
                     setTimeout(function() {
+                        var given = [];
+                        var expected = [];
                         (function loop(i) {
                             var lines = term.find('.cmd [role="presentation"]');
                             if (i === lines.length) {
+                                expect(given).toEqual(expected);
                                 return resolve();
                             }
                             click(lines.eq(i));
                             var count = get_count(i);
-                            expect([i, cmd.display_position()]).toEqual([i, count]);
+                            given.push(cmd.display_position());
+                            expected.push(count);
                             loop(i+1);
                         })(0);
                     }, 100);
@@ -3118,7 +3418,7 @@ describe('Terminal plugin', function() {
                         expect(term.get_command()).toEqual('foo ba');
                         // the code before will trigger dead key - in Android it's always
                         // no keypress or no keydown for all keys
-                        doc.trigger(keypress('a'));
+                        doc.trigger(keypress('a', true));
                         done();
                     }, 200);
                 });
@@ -3132,7 +3432,7 @@ describe('Terminal plugin', function() {
             };
             var term = $('<div/>').appendTo('body').terminal(interpreter);
             it('text should appear and interpreter function should be called', function() {
-                term.focus(true);
+                term.clear().focus(true);
                 spy(interpreter, 'foo');
                 enter_text('foo');
                 expect(term.get_command()).toEqual('foo');

@@ -55,7 +55,9 @@
     // -----------------------------------------------------------------------------------
     function array_split(array, splitter) {
         var test_fn;
-        if (splitter instanceof RegExp) {
+        if (typeof splitter === 'function') {
+            test_fn = splitter;
+        } else if (splitter instanceof RegExp) {
             test_fn = function(item) {
                 if (item instanceof RegExp) {
                     item = item.source;
@@ -77,8 +79,8 @@
         }
         var output = [];
         var sub = [];
-        array.forEach(function(item) {
-            var check = test_fn(item);
+        array.forEach(function(item, i) {
+            var check = test_fn(item, i);
             if (check) {
                 output.push(sub);
                 sub = [];
@@ -100,9 +102,6 @@
     $.terminal.defaults.strings.pipeNestedInterpreterError = 'You can\'t pipe nested ' +
         'interpreter';
     $.terminal.pipe = function pipe(interpreter, options) {
-        if (!$.isPlainObject(interpreter)) {
-            throw new Error('Pipe can be used only with plain objects!');
-        }
         var settings = $.extend({
             processArguments: true,
             overwrite: undefined,
@@ -143,14 +142,25 @@
             return redirects;
         }
         // -------------------------------------------------------------------------------
+        function is_pipe(cmd) {
+            var quotes = [''].concat(cmd.args_quotes);
+            return function(string, i) {
+                return string === '|' && !quotes[i];
+            };
+        }
+        // -------------------------------------------------------------------------------
+        function tokens(cmd) {
+            return [cmd.name].concat(cmd.args);
+        }
+        // -------------------------------------------------------------------------------
         function parse_command(command) {
-            var tokens;
+            var cmd;
             if (term.settings().processArguments) {
-                tokens = $.terminal.parse_arguments(command);
+                cmd = $.terminal.parse_command(command);
             } else {
-                tokens = $.terminal.split_arguments(command);
+                cmd = $.terminal.split_command(command);
             }
-            return array_split(tokens, '|').map(function(args) {
+            return array_split(tokens(cmd), is_pipe(cmd)).map(function(args) {
                 var cmd = {
                     redirects: []
                 };
@@ -287,15 +297,21 @@
             term.echo = echo;
         }
         // -------------------------------------------------------------------------------
+        function stringify(cmd) {
+            return cmd.name + ' ' + cmd.args.join(' ');
+        }
+        // -------------------------------------------------------------------------------
         return function(command, t) {
             command_index = -1;
             term = t; // for echo_non_empty and function that call it
             var term_settings = term.settings();
-            orig = {
-                echo: term.echo,
-                read: term.read,
-                push: term.push
-            };
+            if (!orig) {
+                orig = {
+                    echo: term.echo,
+                    read: term.read,
+                    push: term.push
+                };
+            }
             var tty = make_tty();
             var commands = parse_command(command);
             function loop(callback) {
@@ -326,7 +342,9 @@
             }
             if (single_command(commands)) {
                 var cmd = commands[0];
-                if (is_function(interpreter[cmd.name])) {
+                if (is_function(interpreter)) {
+                    return interpreter.call(term, stringify(cmd), term);
+                } else if (is_function(interpreter[cmd.name])) {
                     return interpreter[cmd.name].apply(term, cmd.args);
                 } else if ($.isPlainObject(interpreter[cmd.name])) {
                     term.push(interpreter[cmd.name], {
@@ -343,22 +361,39 @@
                 $.extend(term, tty);
                 var stop_error = false;
                 var promise = loop(function(cmd) {
-                    var inter = interpreter[cmd.name];
-                    if (is_function(inter)) {
-                        var ret = inter.apply(term, cmd.args);
+                    var ret;
+                    if (is_function(interpreter)) {
+                        // this branch will be always invoked with new API
+                        // using pipe option
+                        var str = stringify(cmd);
+                        // this resume and exec is needed for rpc
+                        // because it use pause/resume and not promises
+                        // TODO: refactor RPC in terminal
+                        term.resume();
+                        ret = term.exec(str, true);
                         return continuation(ret, echo_non_empty);
                     } else {
-                        if ($.isPlainObject(inter)) {
-                            error(strings(term).pipeNestedInterpreterError);
-                        } else if (is_function(term_settings.onCommandNotFound)) {
-                            if (!stop_error) {
-                                term_settings.onCommandNotFound.call(term, command, term);
-                                stop_error = true;
-                            }
+                        var inter = interpreter[cmd.name];
+                        if (is_function(inter)) {
+                            ret = inter.apply(term, cmd.args);
+                            return continuation(ret, echo_non_empty);
                         } else {
-                            error(sprintf(strings(term).commandNotFound, cmd.name));
+                            if ($.isPlainObject(inter)) {
+                                error(strings(term).pipeNestedInterpreterError);
+                            } else if (is_function(term_settings.onCommandNotFound)) {
+                                if (!stop_error) {
+                                    term_settings.onCommandNotFound.call(
+                                        term,
+                                        command,
+                                        term
+                                    );
+                                    stop_error = true;
+                                }
+                            } else {
+                                error(sprintf(strings(term).commandNotFound, cmd.name));
+                            }
+                            return false;
                         }
-                        return false;
                     }
                 });
                 return promise.then(function() {
@@ -366,5 +401,24 @@
                 });
             }
         };
+    };
+    // -------------------------------------------------------------------------
+    var init = $.fn.terminal;
+    $.fn.terminal = function(interpreter, options) {
+        if (options && options.pipe) {
+            var settings = $.extend({}, {
+                onInit: function() {
+                    if (options && options.pipe) {
+                        var fn_interpreter = this.commands();
+                        $.terminal.pipe(fn_interpreter, options);
+                        this.set_interpreter($.terminal.pipe(fn_interpreter, options));
+                    }
+                    if (options && is_function(options.onInit)) {
+                        options.onInit.call(this, this);
+                    }
+                }
+            }, options);
+        }
+        return init.call(this, interpreter, settings || options);
     };
 });
