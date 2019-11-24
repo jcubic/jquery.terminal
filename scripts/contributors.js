@@ -30,7 +30,11 @@ function get(url, query) {
         }
     };
     if (argv.auth) {
-        options.auth = argv.auth;
+        var [user,pass] = argv.auth.split(':');
+        options.auth = {
+            user,
+            pass
+        };
     }
     //return;
     return new Promise(function(resolve, reject) {

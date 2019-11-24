@@ -69,6 +69,10 @@
       "url": "http://ducin.it"
     },
     {
+      "name": "7twin",
+      "url": "https://7twin.com"
+    },
+    {
       "name": "Abdelrahman Omran",
       "url": "https://omranic.com"
     },
@@ -81,8 +85,16 @@
       "url": "https://github.com/finlob"
     },
     {
+      "name": "Hasan",
+      "url": "https://github.com/JuanPotato"
+    },
+    {
       "name": "Hraban Luyat",
       "url": "https://luyat.com"
+    },
+    {
+      "name": "Jarry Shaw",
+      "url": "jarryshaw.me"
     },
     {
       "name": "Jon Steinich",
