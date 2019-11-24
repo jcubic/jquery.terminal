@@ -24,6 +24,7 @@
 * few fixes to pipe
 * fix echo array after refresh [#540](https://github.com/jcubic/jquery.terminal/issues/540)
 * fix apply formatters in update [#543](https://github.com/jcubic/jquery.terminal/issues/543)
+* fix pause on login when using callback [#538](https://github.com/jcubic/jquery.terminal/issues/538)
 
 ## 2.8.0
 ### Feature

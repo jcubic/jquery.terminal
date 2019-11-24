@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 24 Nov 2019 12:39:29 +0000
+ * Date: Sun, 24 Nov 2019 13:02:30 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4062,7 +4062,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 24 Nov 2019 12:39:29 +0000',
+        date: 'Sun, 24 Nov 2019 13:02:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7609,6 +7609,9 @@
                 // so we know how many times call pop
                 var level = self.level();
                 function login_callback(user, token, silent) {
+                    if (self.paused()) {
+                        self.resume();
+                    }
                     if (token) {
                         popUserPass();
                         var name = self.prefix_name(true) + '_';
@@ -7656,16 +7659,15 @@
                                 popUserPass();
                                 return;
                             }
+                            self.pause();
                             var ret = auth.call(self, user, pass, function(
                                 token,
                                 silent) {
                                 login_callback(user, token, silent);
                             });
                             if (ret && is_function(ret.then || ret.done)) {
-                                self.pause();
                                 (ret.then || ret.done).call(ret, function(token) {
                                     login_callback(user, token);
-                                    self.resume();
                                 });
                             }
                         } catch (e) {

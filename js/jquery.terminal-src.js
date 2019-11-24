@@ -7609,6 +7609,9 @@
                 // so we know how many times call pop
                 var level = self.level();
                 function login_callback(user, token, silent) {
+                    if (self.paused()) {
+                        self.resume();
+                    }
                     if (token) {
                         popUserPass();
                         var name = self.prefix_name(true) + '_';
@@ -7656,16 +7659,15 @@
                                 popUserPass();
                                 return;
                             }
+                            self.pause();
                             var ret = auth.call(self, user, pass, function(
                                 token,
                                 silent) {
                                 login_callback(user, token, silent);
                             });
                             if (ret && is_function(ret.then || ret.done)) {
-                                self.pause();
                                 (ret.then || ret.done).call(ret, function(token) {
                                     login_callback(user, token);
-                                    self.resume();
                                 });
                             }
                         } catch (e) {
