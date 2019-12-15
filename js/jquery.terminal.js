@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.9.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 24 Nov 2019 19:15:34 +0000
+ * Date: Sun, 15 Dec 2019 14:43:56 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -988,12 +988,17 @@
         return defer.promise();
     }
     // -----------------------------------------------------------------------
-    function unpromise(value, callback) {
+    function unpromise(value, callback, error) {
         if (value) {
+            if (is_function(value.catch)) {
+                value.catch(error);
+            }
             if (is_function(value.done)) {
                 return value.done(callback);
             } else if (is_function(value.then)) {
                 return value.then(callback);
+            } else {
+                return callback(value);
             }
         }
     }
@@ -2826,9 +2831,16 @@
                         var data = prev_prompt_data = {
                             set: set
                         };
-                        prompt.call(self, function(string) {
+                        var ret = prompt.call(self, function(string) {
                             data.set(string);
                         });
+                        if (ret && ret.then) {
+                            ret.then(data.set).catch(function(e) {
+                                var prompt = $.terminal.escape_brackets('[ERR]> ');
+                                data.set('[[;red;]' + prompt + ']');
+                                alert_exception('Prompt', e);
+                            });
+                        }
                         break;
                 }
             };
@@ -4061,8 +4073,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.9.0',
-        date: 'Sun, 24 Nov 2019 19:15:34 +0000',
+        version: 'DEV',
+        date: 'Sun, 15 Dec 2019 14:43:56 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6779,7 +6791,11 @@
                 } else if (type === 'function') {
                     try {
                         var ret = settings.greetings.call(self, self.echo);
-                        unpromise(ret, self.echo);
+                        var error = make_label_error('Greetings');
+                        unpromise(ret, self.echo, function(e) {
+                            error(e);
+                            settings.greetings = null;
+                        });
                     } catch (e) {
                         settings.greetings = null;
                         display_exception(e, 'greetings');
@@ -6858,6 +6874,12 @@
             }*/
         }
         // ---------------------------------------------------------------------
+        function make_label_error(label) {
+            return function(e) {
+                self.error('[' + label + '] ' + (e.message || e)).resume();
+            };
+        }
+        // ---------------------------------------------------------------------
         // :: Helper function
         // ---------------------------------------------------------------------
         function maybe_update_hash() {
@@ -6909,6 +6931,8 @@
                 self.resume();
             }
             // -----------------------------------------------------------------
+
+            // -----------------------------------------------------------------
             function invoke() {
                 // Call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
@@ -6919,11 +6943,12 @@
                         self.pause(settings.softPause);
                     }
                     force_awake = false;
+                    var error = make_label_error('Command');
                     // when for native Promise object work only in jQuery 3.x
                     if (is_function(result.done || result.then)) {
-                        (result.done || result.then).call(result, show);
+                        return unpromise(result, show, error);
                     } else {
-                        return $.when(result).done(show);
+                        return $.when(result).done(show).catch(error);
                     }
                 } else if (paused) {
                     resume_callbacks.push(function() {
@@ -7053,7 +7078,7 @@
             command_line.name(name + (login ? '_' + login : ''));
             var prompt = interpreter.prompt;
             if (is_function(prompt)) {
-                prompt = context_callback_proxy(prompt, 'string');
+                prompt = context_callback_proxy(prompt);
             }
             if (prompt !== command_line.prompt()) {
                 if (is_function(interpreter.prompt)) {
@@ -7295,13 +7320,7 @@
                                 return false;
                             }
                             var result = completion.call(self, string, resolve);
-                            if (result) {
-                                if (is_function(result.then)) {
-                                    result.then(resolve);
-                                } else if (is_array(result)) {
-                                    resolve(result);
-                                }
-                            }
+                            unpromise(result, resolve, make_label_error('Completion'));
                             break;
                         case 'array':
                             resolve(completion);
@@ -7554,6 +7573,8 @@
                         var ret = commands(command, silent, true);
                         unpromise(ret, function() {
                             d.resolve();
+                        }, function() {
+                            d.reject();
                         });
                     }
                 });
@@ -8542,7 +8563,7 @@
                     }
                 }
                 if (arg !== undefined && is_function(arg.then)) {
-                    $.when(arg).done(echo);
+                    $.when(arg).done(echo).catch(make_label_error('Echo'));
                 } else {
                     echo(arg);
                 }
@@ -8571,7 +8592,7 @@
                 if (message && message.then) {
                     message.then(function(string) {
                         self.echo(format(string));
-                    });
+                    }).catch(make_label_error('Echo Error'));
                     return self;
                 }
                 return self.echo(format(message), options);
@@ -9217,17 +9238,12 @@
             return value;
         }
         // -------------------------------------------------------------------------------
-        function context_callback_proxy(fn, type) {
+        function context_callback_proxy(fn) {
             if (fn.proxy) {
                 return fn;
             }
             var wrapper = function(callback) {
-                var ret = fn.call(self, callback, self);
-                unpromise(ret, function(string) {
-                    if (typeof string === type) {
-                        callback(string);
-                    }
-                });
+                return fn.call(self, callback, self);
             };
             wrapper.proxy = true;
             return wrapper;
@@ -9328,7 +9344,7 @@
             }
             var prompt = settings.prompt;
             if (is_function(prompt)) {
-                prompt = context_callback_proxy(prompt, 'string');
+                prompt = context_callback_proxy(prompt);
             }
             interpreters = new Stack($.extend({}, settings.extra, {
                 name: settings.name,

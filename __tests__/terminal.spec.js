@@ -2161,6 +2161,8 @@ describe('Terminal utils', function() {
             var term = $('<div/>').terminal($.terminal.pipe({
                 output: function() {
                     this.echo('foo');
+                    this.echo('bar');
+                    this.echo('baz');
                 },
                 grep: function(re) {
                     return this.read('').then((str) => {
@@ -2180,7 +2182,7 @@ describe('Terminal utils', function() {
             }));
             return term.exec('output | grep /foo/').then(function() {
                 expect(get_lines(term)).toEqual(['foo']);
-            });
+            }).catch(e => console.log(e));
         });
         it('should escape pipe', async function() {
             var term = $('<div/>').terminal($.terminal.pipe({

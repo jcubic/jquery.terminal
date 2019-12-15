@@ -1,3 +1,8 @@
+## 2.9.1
+### Bugfix
+* fix throw/reject in async function/promise [#546](https://github.com/jcubic/jquery.terminal/issues/546)
+* allow to return string from greetings function
+
 ## 2.9.0
 ### Features
 * allow to return a promise from greetings function [#531](https://github.com/jcubic/jquery.terminal/issues/531)
