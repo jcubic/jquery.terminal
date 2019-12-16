@@ -1,4 +1,7 @@
 ## 2.9.1
+### Feature
+* improve performance by adding function `$.terminal.partition`
+* allow to use force resize `cmd::resize(true)` (to update init command line with emoji)
 ### Bugfix
 * fix throw/reject in async function/promise [#546](https://github.com/jcubic/jquery.terminal/issues/546)
 * allow to return string from greetings function

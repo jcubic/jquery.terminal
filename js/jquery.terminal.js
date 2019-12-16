@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 15 Dec 2019 14:43:56 +0000
+ * Date: Mon, 16 Dec 2019 21:25:52 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -2475,31 +2475,7 @@
         // :: this function is not very usefull so it's not in $.terminal
         // ---------------------------------------------------------------------
         function wrap(string) {
-            function formatting(string) {
-                if ($.terminal.is_formatting(string)) {
-                    if (string.match(/\\]$/)) {
-                        string = string.replace(/\\]/g, '\\\\]');
-                    }
-                } else {
-                    if (string.match(/\\$/)) {
-                        string += '\\';
-                    }
-                    string = '[[;;]' + string + ']';
-                }
-                return string;
-            }
-            var len = length(string);
-            if (len === 1) {
-                return formatting(string);
-            }
-            var result = [];
-            // len - 1 break the command line $.terminal.substring will return
-            // empty string for out of bound indexes
-            for (var i = 0; i < len; ++i) {
-                var text = $.terminal.substring(string, i, i + 1);
-                result.push(formatting(text));
-            }
-            return result.join('');
+            return $.terminal.partition(string).join('');
         }
         // ---------------------------------------------------------------------
         // :: shortcut helpers
@@ -3132,12 +3108,12 @@
             resize: function(num) {
                 char_width = get_char_width();
                 var new_num_chars;
-                if (num) {
+                if (typeof num === 'number') {
                     new_num_chars = num;
                 } else {
                     new_num_chars = get_num_chars(char_width);
                 }
-                if (num_chars !== new_num_chars) {
+                if (num_chars !== new_num_chars || arguments[0] === true) {
                     num_chars = new_num_chars;
                     redraw();
                     draw_prompt();
@@ -4074,7 +4050,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 15 Dec 2019 14:43:56 +0000',
+        date: 'Mon, 16 Dec 2019 21:25:52 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4264,7 +4240,10 @@
                 return not_formatting && (string[i] !== ']' || !have_formatting)
                     && !opening;
             }
-            function next_char() {
+            // ----------------------------------------------------------------
+            // :: function will skip to next character in main loop
+            // ----------------------------------------------------------------
+            function next_iteration() {
                 var char = get_next_character(substring);
                 if ($.terminal.length(substring) > 1) {
                     if (char.length > 1) {
@@ -4337,13 +4316,14 @@
                     if (strlen(string[i]) === 2) {
                         length++;
                     }
+                    var char = get_next_character(substring);
                     var data = {
                         count: count,
                         index: i - offset,
                         formatting: formatting,
                         length: length,
                         text: in_text,
-                        size: offset + 1,
+                        size: char.length,
                         space: space,
                         space_count: space_count
                     };
@@ -4378,9 +4358,60 @@
                 }
                 // handle emoji, suroggate pairs and combine characters
                 if (in_text) {
-                    i += next_char();
+                    i += next_iteration();
                 }
             }
+        },
+        // ---------------------------------------------------------------------
+        // :: function return string splitted into single characters
+        // :: each character is wrapped into formatting from input string
+        // :: or empty formatting so it will create span when using with ::format
+        // ---------------------------------------------------------------------
+        partition: function partition(string) {
+            if (!$.terminal.have_formatting(string)) {
+                var chars = $.terminal.split_characters(string);
+                return chars.map(wrap);
+            }
+            var result = [];
+            function wrap(string) {
+                if (string.match(/\\$/)) {
+                    string += '\\';
+                }
+                return '[[;;]' + string + ']';
+            }
+            function formatting(string) {
+                if ($.terminal.is_formatting(string)) {
+                    if (string.match(/\\]$/)) {
+                        string = string.replace(/\\]/g, '\\\\]');
+                    }
+                } else {
+                    string = wrap(string);
+                }
+                return string;
+            }
+            // TODO: handling html entities should be inside
+            //       iterate_formatting, it's duplicate of
+            //       substring
+            var re = /(&[^;]+);$/;
+            $.terminal.iterate_formatting(string, function(data) {
+                if (data.text) {
+                    var text = [];
+                    if (data.formatting) {
+                        text.push(data.formatting);
+                    }
+                    var start = data.index;
+                    var m = string.slice(0, start + 1).match(re);
+                    if (m) {
+                        start -= m[1].length;
+                    }
+                    text.push(string.substring(start, data.index + data.size));
+                    if (data.formatting) {
+                        text.push(']');
+                    }
+                    result.push(formatting(text.join('')));
+                }
+            });
+            return result;
         },
         // ---------------------------------------------------------------------
         // :: formatting aware substring function

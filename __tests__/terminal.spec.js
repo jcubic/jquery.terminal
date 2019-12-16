@@ -2754,6 +2754,7 @@ describe('sub plugins', function() {
                     cmd.set(spec[0]);
                     var output = spec[1] || spec[0];
                     expect(cmd.find('[data-text]').text()).toEqual(nbsp(output));
+                    cmd.set('');
                 });
             });
         });
