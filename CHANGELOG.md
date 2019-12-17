@@ -1,4 +1,4 @@
-## 2.9.1
+## 2.10.0
 ### Feature
 * improve performance by adding function `$.terminal.partition`
 * allow to use force resize `cmd::resize(true)` (to update init command line with emoji)

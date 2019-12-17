@@ -4252,6 +4252,10 @@
                 }
                 return 0;
             }
+            function is_next_space() {
+                return (is_space(i) && (not_formatting || opening)) &&
+                    (space === -1 && prev_space !== i || space !== -1);
+            }
             // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
             var formatting = '';
@@ -4263,6 +4267,7 @@
             var prev_space;
             var length = 0;
             var offset = 0;
+            var re_ent = /(&[^;]+);$/;
             for (var i = 0; i < string.length; i++) {
                 var substring = string.slice(i);
                 match = substring.match(format_start_re);
@@ -4283,11 +4288,9 @@
                 }
                 var not_formatting = (formatting && in_text) || !formatting;
                 var opening = is_open_formatting(i);
-                if (is_space(i) && (not_formatting || opening)) {
-                    if (space === -1 && prev_space !== i || space !== -1) {
-                        space = i;
-                        space_count = count;
-                    }
+                if (is_next_space()) {
+                    space = i;
+                    space_count = count;
                 }
                 var braket = string[i].match(/[[\]]/);
                 offset = 0;
@@ -4317,13 +4320,25 @@
                         length++;
                     }
                     var char = get_next_character(substring);
+                    var size = char.length;
+                    // begining of enity that we've skipped, we are at the end
+                    if (char === ';') {
+                        match = string.slice(0, i + 1).match(re_ent);
+                        if (match) {
+                            offset = match[1].length;
+                            size = offset + 1;
+                        }
+                    }
+                    // last iteration or one before closing formatting
+                    var last = substring.match(/^.]$/) || i === string.length - 1;
                     var data = {
+                        last: last,
                         count: count,
                         index: i - offset,
                         formatting: formatting,
                         length: length,
                         text: in_text,
-                        size: char.length,
+                        size: size,
                         space: space,
                         space_count: space_count
                     };
@@ -4389,22 +4404,13 @@
                 }
                 return string;
             }
-            // TODO: handling html entities should be inside
-            //       iterate_formatting, it's duplicate of
-            //       substring
-            var re = /(&[^;]+);$/;
             $.terminal.iterate_formatting(string, function(data) {
                 if (data.text) {
                     var text = [];
                     if (data.formatting) {
                         text.push(data.formatting);
                     }
-                    var start = data.index;
-                    var m = string.slice(0, start + 1).match(re);
-                    if (m) {
-                        start -= m[1].length;
-                    }
-                    text.push(string.substring(start, data.index + data.size));
+                    text.push(string.substring(data.index, data.index + data.size));
                     if (data.formatting) {
                         text.push(']');
                     }
@@ -4429,17 +4435,10 @@
             var start_formatting = '';
             var end_formatting = '';
             var prev_index;
-            var re = /(&[^;]+);$/;
             var offset = 1;
             $.terminal.iterate_formatting(string, function(data) {
-                var m;
                 if (start_index && data.count === start_index + 1) {
                     start = data.index;
-                    // correct index for html entity
-                    m = string.slice(0, start + 1).match(re);
-                    if (m) {
-                        start -= m[1].length;
-                    }
                     if (data.formatting) {
                         start_formatting = data.formatting;
                     }
@@ -4451,10 +4450,6 @@
                 }
                 if (data.count === end_index + 1) {
                     end = data.index;
-                    m = string.slice(0, end + 1).match(re);
-                    if (m) {
-                        end -= m[1].length;
-                    }
                     if (data.formatting) {
                         end = prev_index + offset;
                     }
@@ -4527,17 +4522,10 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
-                var chars = $.terminal.split_characters(text(line));
-                var last_char = chars[chars.length - 1];
-                var end_index = line_length - (last_char ? last_char.length : 1);
                 var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);
-                if (last_bracket) {
-                    end_index -= 1;
-                }
                 $.terminal.iterate_formatting(line, function(data) {
-                    var last_iteraction = data.index === end_index;
                     var chr, substring;
-                    if (data.length >= length || last_iteraction ||
+                    if (data.length >= length || data.last ||
                         (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
@@ -4563,7 +4551,7 @@
                             substring = line.slice(data.index);
                             chr = get_next_character(substring);
                             output = line.slice(first_index, data.index) + chr;
-                            if (last_iteraction && last_bracket && chr !== ']') {
+                            if (data.last && last_bracket && chr !== ']') {
                                 output += ']';
                             }
                             new_index = data.index + chr.length - 1;
