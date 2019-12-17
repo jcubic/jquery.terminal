@@ -5,6 +5,7 @@
 ### Bugfix
 * fix throw/reject in async function/promise [#546](https://github.com/jcubic/jquery.terminal/issues/546)
 * allow to return string from greetings function
+* fix low level iterate_formatting function to handle html entities properly
 
 ## 2.9.0
 ### Features
