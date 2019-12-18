@@ -3869,7 +3869,8 @@
     }
     // -----------------------------------------------------------------
     function process_div(element) {
-        return $(element).find('> div')
+        // span is empty line, div is default case with text
+        return $(element).find('> div, > span')
             .map(process_selected_line).get().join('\n').replace(/\n$/, '');
     }
     // -----------------------------------------------------------------
@@ -3882,7 +3883,7 @@
             stdout = $html.find('div[data-index]').map(function() {
                 return process_div(this);
             }).get().join('\n');
-            // match insdie single echo output
+            // match inside single echo output
             if (!stdout && html.match(/style="width: 100%;?"/)) {
                 stdout = process_div($html);
             }

@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 18 Dec 2019 11:56:23 +0000
+ * Date: Wed, 18 Dec 2019 12:22:00 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3869,7 +3869,8 @@
     }
     // -----------------------------------------------------------------
     function process_div(element) {
-        return $(element).find('> div')
+        // span is empty line, div is default case with text
+        return $(element).find('> div, > span')
             .map(process_selected_line).get().join('\n').replace(/\n$/, '');
     }
     // -----------------------------------------------------------------
@@ -3882,7 +3883,7 @@
             stdout = $html.find('div[data-index]').map(function() {
                 return process_div(this);
             }).get().join('\n');
-            // match insdie single echo output
+            // match inside single echo output
             if (!stdout && html.match(/style="width: 100%;?"/)) {
                 stdout = process_div($html);
             }
@@ -4062,7 +4063,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 18 Dec 2019 11:56:23 +0000',
+        date: 'Wed, 18 Dec 2019 12:22:00 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
