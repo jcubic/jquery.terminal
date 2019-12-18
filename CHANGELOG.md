@@ -7,6 +7,8 @@
 * allow to return string from greetings function
 * fix low level iterate_formatting function to handle html entities properly
 * fix spacing of wider characters (Chinese/Japanese) in echo (to match cmd)
+* fix jumping on right click [#545](https://github.com/jcubic/jquery.terminal/issues/545)
+* fix selection on double click on cmd
 
 ## 2.9.0
 ### Features

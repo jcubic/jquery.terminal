@@ -3528,7 +3528,8 @@
             }).on('mouseup.cmd', function(e) {
                 function trigger() {
                     var $target = $(e.target);
-                    if (!$target.is('.cmd-prompt') && down) {
+                    var is_prompt = $target.is('.cmd-prompt');
+                    if (!is_prompt && down && get_selected_html() === '') {
                         if (enabled) {
                             if ($target.is('.cmd')) {
                                 self.position(text(command).length);
@@ -9535,7 +9536,6 @@
                                     self.enable();
                                 }
                                 var offset = command_line.offset();
-                                wrapper.css('overflow', 'hidden');
                                 clip.css({
                                     left: e.pageX - offset.left - 20,
                                     top: e.pageY - offset.top - 20,
@@ -9559,7 +9559,6 @@
                                         props.top = in_line * 14 + 'px';
                                     }
                                     clip.css(props);
-                                    wrapper.css('overflow', '');
                                 });
                                 self.stopTime('selection');
                                 self.everyTime(20, 'selection', function() {

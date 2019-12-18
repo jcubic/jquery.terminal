@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 18 Dec 2019 12:22:00 +0000
+ * Date: Wed, 18 Dec 2019 12:54:49 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3528,7 +3528,8 @@
             }).on('mouseup.cmd', function(e) {
                 function trigger() {
                     var $target = $(e.target);
-                    if (!$target.is('.cmd-prompt') && down) {
+                    var is_prompt = $target.is('.cmd-prompt');
+                    if (!is_prompt && down && get_selected_html() === '') {
                         if (enabled) {
                             if ($target.is('.cmd')) {
                                 self.position(text(command).length);
@@ -4063,7 +4064,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 18 Dec 2019 12:22:00 +0000',
+        date: 'Wed, 18 Dec 2019 12:54:49 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9535,7 +9536,6 @@
                                     self.enable();
                                 }
                                 var offset = command_line.offset();
-                                wrapper.css('overflow', 'hidden');
                                 clip.css({
                                     left: e.pageX - offset.left - 20,
                                     top: e.pageY - offset.top - 20,
@@ -9559,7 +9559,6 @@
                                         props.top = in_line * 14 + 'px';
                                     }
                                     clip.css(props);
-                                    wrapper.css('overflow', '');
                                 });
                                 self.stopTime('selection');
                                 self.everyTime(20, 'selection', function() {
