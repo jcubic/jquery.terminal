@@ -3735,34 +3735,46 @@
                         return arr.concat([{
                             sum: spec.len,
                             len: spec.len,
-                            str: spec.chr
+                            specs: [spec]
                         }]);
                     } else {
                         arr.pop();
                         return arr.concat([{
                             sum: last.sum + spec.len,
                             len: last.len,
-                            str: last.str + spec.chr
+                            specs: last.specs.concat(spec)
                         }]);
                     }
                 }
                 return [{
                     sum: spec.len,
-                    str: spec.chr,
+                    specs: [spec],
                     len: spec.len
                 }];
             }, []);
             return specs.map(function(spec) {
                 if (spec.len === 1) {
-                    return spec.str;
+                    return spec.str.join('');
                 }
                 var style = char_width_prop(spec.sum, options);
                 if (spec.sum === chars.length || !style.length) {
-                    return '<span>' + spec.str + '</span>';
+                    return '<span>' + make_string(spec) + '</span>';
+                } else if (spec.specs.length > 1) {
+                    return wrap(style, spec.specs.map(function(spec) {
+                        return wrap(char_width_prop(spec.len), spec.chr);
+                    }).join(''));
                 } else {
-                    return '<span style="' + style + '">' + spec.str + '</span>';
+                    return wrap(style, make_string(spec));
                 }
             }).join('');
+        }
+        function make_string(spec) {
+            return spec.specs.map(function(spec) {
+                return spec.chr;
+            }).join('');
+        }
+        function wrap(style, str) {
+            return '<span style="' + style + '">' + str + '</span>';
         }
         return text;
     }

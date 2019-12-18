@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Wed, 18 Dec 2019 08:26:09 +0000
+ * Date: Wed, 18 Dec 2019 11:56:24 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -142,6 +142,7 @@ body.full-screen-terminal .terminal {
      * it's hard to overwrite long :not selector (:not(a span) don't work)
      */
     color: #0F60FF !important;
+    --color: var(--link-color, #0F60FF);
     color: var(--link-color, #0F60FF) !important;
     text-decoration: underline;
 }
@@ -607,6 +608,7 @@ terminal .terminal-output > div {
 }
 .terminal .terminal-output > :not(.raw) a[href], .cmd a[href] {
     color: #0F60FF;
+    --color: var(--link-color, #0F60FF);
     color: var(--link-color, #0F60FF);
     cursor: pointer;
 }
@@ -848,4 +850,18 @@ terminal .terminal-output > div {
 }
 .terminal-output svg.terminal-broken-image use {
     fill: var(--color, #ccc);
+}
+.terminal-error {
+    --color: var(--error-color);
+}
+.terminal-glow {
+    --animation: terminal-glow;
+}
+.terminal-glow span[data-text],
+.terminal-glow a[data-text],
+.terminal-glow [data-text] span,
+.terminal-glow .terminal-output > div span,
+.terminal-glow .terminal-output > div a[href] {
+    text-shadow: 1px 1px 5px #ccc;
+    text-shadow: 1px 1px 5px var(--color, #ccc);
 }

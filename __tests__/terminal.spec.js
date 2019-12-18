@@ -847,10 +847,19 @@ describe('Terminal utils', function() {
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
             var string = $.terminal.format(input, {char_width: 7});
+            function wrap(str) {
+                return str.split('').map(char => {
+                    return '<span style="width: 2ch">' + char + '</span>';
+                }).join('');
+            }
+            var chars_a = wrap('ターミナルウィンドウは黒').split('').map(x => {
+                return '<span style="width: 2ch">' + x + '</span>';
+            }).join('');
             expect(string).toEqual('<span style="width: 24ch"><span style="widt'+
-                                   'h: 24ch">ターミナルウィンドウは黒</span></span'+
-                                   '><span style="width: 4ch" data-text="です">'+
-                                   '<span style="width: 4ch">です</span></span>');
+                                   'h: 24ch">' + wrap('ターミナルウィンドウは黒') +
+                                   '</span></span><span style="width: 4ch" data'+
+                                   '-text="です"><span style="width: 4ch">' +
+                                   wrap('です') + '</span></span>');
         });
         it('should handle links', function() {
             var input = '[[!;;]https://terminal.jcubic.pl]';
