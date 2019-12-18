@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.9.0
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 24 Nov 2019 19:15:35 +0000
+ * Date: Wed, 18 Dec 2019 11:56:24 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -134,6 +134,24 @@ body.full-screen-terminal .terminal {
 .terminal .terminal-inverted, .cmd .cmd-inverted {
     background-color: #aaa;
     color: #000;
+}
+.terminal .terminal-output > :not(.raw) a[href] span,
+.cmd a[href] span {
+    /*
+     * shorter and simple solution
+     * it's hard to overwrite long :not selector (:not(a span) don't work)
+     */
+    color: #0F60FF !important;
+    --color: var(--link-color, #0F60FF);
+    color: var(--link-color, #0F60FF) !important;
+    text-decoration: underline;
+}
+.terminal .terminal-output > :not(.raw) a[href]:hover span,
+.cmd a[href]:hover span {
+    background-color: #0F60FF !important;
+    background-color: var(--link-color, #0F60FF) !important;
+    color: var(--background, #000) !important;
+    text-decoration: none;
 }
 .cmd .cmd-cursor {
     display: inline-block;
@@ -590,6 +608,7 @@ terminal .terminal-output > div {
 }
 .terminal .terminal-output > :not(.raw) a[href], .cmd a[href] {
     color: #0F60FF;
+    --color: var(--link-color, #0F60FF);
     color: var(--link-color, #0F60FF);
     cursor: pointer;
 }
@@ -831,4 +850,18 @@ terminal .terminal-output > div {
 }
 .terminal-output svg.terminal-broken-image use {
     fill: var(--color, #ccc);
+}
+.terminal-error {
+    --color: var(--error-color);
+}
+.terminal-glow {
+    --animation: terminal-glow;
+}
+.terminal-glow span[data-text],
+.terminal-glow a[data-text],
+.terminal-glow [data-text] span,
+.terminal-glow .terminal-output > div span,
+.terminal-glow .terminal-output > div a[href] {
+    text-shadow: 1px 1px 5px #ccc;
+    text-shadow: 1px 1px 5px var(--color, #ccc);
 }

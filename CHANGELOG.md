@@ -1,3 +1,20 @@
+## 2.10.0
+### Feature
+* improve performance by adding function `$.terminal.partition`
+* allow to use force resize `cmd::resize(true)` (to update init command line with emoji)
+* add glow style [#549](https://github.com/jcubic/jquery.terminal/issues/549)
+### Bugfix
+* fix throw/reject in async function/promise [#546](https://github.com/jcubic/jquery.terminal/issues/546)
+* allow to return string from greetings function
+* fix low level iterate_formatting function to handle html entities properly
+* fix spacing of wider characters (Chinese/Japanese) in echo (to match cmd)
+* fix jumping on right click [#545](https://github.com/jcubic/jquery.terminal/issues/545)
+* fix selection on double click on cmd
+* fix parse_options [#547](https://github.com/jcubic/jquery.terminal/issues/547)
+* fix style of links with wcwidth [#544](https://github.com/jcubic/jquery.terminal/issues/544)
+* fix copy of empty lines in output [#548](https://github.com/jcubic/jquery.terminal/issues/548)
+
+
 ## 2.9.0
 ### Features
 * allow to return a promise from greetings function [#531](https://github.com/jcubic/jquery.terminal/issues/531)

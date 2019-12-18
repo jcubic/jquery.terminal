@@ -329,7 +329,7 @@
                             command_index++;
                             var ret = callback(cmd);
                             if (ret === false) {
-                                inner();
+                                return inner();
                             } else {
                                 return continuation(ret, inner, 'inner');
                             }
@@ -410,7 +410,6 @@
                 onInit: function() {
                     if (options && options.pipe) {
                         var fn_interpreter = this.commands();
-                        $.terminal.pipe(fn_interpreter, options);
                         this.set_interpreter($.terminal.pipe(fn_interpreter, options));
                     }
                     if (options && is_function(options.onInit)) {

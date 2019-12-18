@@ -847,10 +847,19 @@ describe('Terminal utils', function() {
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
             var string = $.terminal.format(input, {char_width: 7});
+            function wrap(str) {
+                return str.split('').map(char => {
+                    return '<span style="width: 2ch">' + char + '</span>';
+                }).join('');
+            }
+            var chars_a = wrap('ターミナルウィンドウは黒').split('').map(x => {
+                return '<span style="width: 2ch">' + x + '</span>';
+            }).join('');
             expect(string).toEqual('<span style="width: 24ch"><span style="widt'+
-                                   'h: 24ch">ターミナルウィンドウは黒</span></span'+
-                                   '><span style="width: 4ch" data-text="です">'+
-                                   '<span style="width: 4ch">です</span></span>');
+                                   'h: 24ch">' + wrap('ターミナルウィンドウは黒') +
+                                   '</span></span><span style="width: 4ch" data'+
+                                   '-text="です"><span style="width: 4ch">' +
+                                   wrap('です') + '</span></span>');
         });
         it('should handle links', function() {
             var input = '[[!;;]https://terminal.jcubic.pl]';
@@ -2161,6 +2170,8 @@ describe('Terminal utils', function() {
             var term = $('<div/>').terminal($.terminal.pipe({
                 output: function() {
                     this.echo('foo');
+                    this.echo('bar');
+                    this.echo('baz');
                 },
                 grep: function(re) {
                     return this.read('').then((str) => {
@@ -2180,7 +2191,7 @@ describe('Terminal utils', function() {
             }));
             return term.exec('output | grep /foo/').then(function() {
                 expect(get_lines(term)).toEqual(['foo']);
-            });
+            }).catch(e => console.log(e));
         });
         it('should escape pipe', async function() {
             var term = $('<div/>').terminal($.terminal.pipe({
@@ -2752,6 +2763,7 @@ describe('sub plugins', function() {
                     cmd.set(spec[0]);
                     var output = spec[1] || spec[0];
                     expect(cmd.find('[data-text]').text()).toEqual(nbsp(output));
+                    cmd.set('');
                 });
             });
         });
