@@ -135,6 +135,23 @@ body.full-screen-terminal .terminal {
     background-color: #aaa;
     color: #000;
 }
+.terminal .terminal-output > :not(.raw) a[href] span,
+.cmd a[href] span {
+    /*
+     * shorter and simple solution
+     * it's hard to overwrite long :not selector (:not(a span) don't work)
+     */
+    color: #0F60FF !important;
+    color: var(--link-color, #0F60FF) !important;
+    text-decoration: underline;
+}
+.terminal .terminal-output > :not(.raw) a[href]:hover span,
+.cmd a[href]:hover span {
+    background-color: #0F60FF !important;
+    background-color: var(--link-color, #0F60FF) !important;
+    color: var(--background, #000) !important;
+    text-decoration: none;
+}
 .cmd .cmd-cursor {
     display: inline-block;
 }

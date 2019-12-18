@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 15 Dec 2019 14:42:04 +0000
+ * Date: Wed, 18 Dec 2019 08:26:09 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -134,6 +134,23 @@ body.full-screen-terminal .terminal {
 .terminal .terminal-inverted, .cmd .cmd-inverted {
     background-color: #aaa;
     color: #000;
+}
+.terminal .terminal-output > :not(.raw) a[href] span,
+.cmd a[href] span {
+    /*
+     * shorter and simple solution
+     * it's hard to overwrite long :not selector (:not(a span) don't work)
+     */
+    color: #0F60FF !important;
+    color: var(--link-color, #0F60FF) !important;
+    text-decoration: underline;
+}
+.terminal .terminal-output > :not(.raw) a[href]:hover span,
+.cmd a[href]:hover span {
+    background-color: #0F60FF !important;
+    background-color: var(--link-color, #0F60FF) !important;
+    color: var(--background, #000) !important;
+    text-decoration: none;
 }
 .cmd .cmd-cursor {
     display: inline-block;
