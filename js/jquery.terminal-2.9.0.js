@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 18 Dec 2019 12:54:49 +0000
+ * Date: Wed, 18 Dec 2019 13:51:03 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4064,7 +4064,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 18 Dec 2019 12:54:49 +0000',
+        date: 'Wed, 18 Dec 2019 13:51:03 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5318,21 +5318,19 @@
                 this.value = value;
             }
             var rest = arg.reduce(function(acc, arg) {
-                if (typeof arg !== 'string') {
-                    arg = String(arg);
-                }
-                if (arg.match(/^-/) && acc instanceof token) {
+                var str = typeof arg === 'string' ? arg : '';
+                if (str.match(/^-/) && acc instanceof token) {
                     result[acc.value] = true;
                 }
-                if (arg.match(/^--/)) {
-                    var name = arg.replace(/^--/, '');
+                if (str.match(/^--/)) {
+                    var name = str.replace(/^--/, '');
                     if (settings.boolean.indexOf(name) === -1) {
                         return new token(name);
                     } else {
                         result[name] = true;
                     }
-                } else if (arg.match(/^-/)) {
-                    var single = arg.replace(/^-/, '').split('');
+                } else if (str.match(/^-/)) {
+                    var single = str.replace(/^-/, '').split('');
                     if (settings.boolean.indexOf(single.slice(-1)[0]) === -1) {
                         var last = single.pop();
                     }
