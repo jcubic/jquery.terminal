@@ -1,3 +1,7 @@
+## 2.10.1
+### Bugfix
+* fix glow effect of prompt when it don't have formatting
+
 ## 2.10.0
 ### Feature
 * improve performance by adding function `$.terminal.partition`

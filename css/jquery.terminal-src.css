@@ -858,6 +858,7 @@ terminal .terminal-output > div {
     --animation: terminal-glow;
 }
 .terminal-glow span[data-text],
+.terminal-glow .cmd-prompt > span,
 .terminal-glow a[data-text],
 .terminal-glow [data-text] span,
 .terminal-glow .terminal-output > div span,

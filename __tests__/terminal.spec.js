@@ -2762,7 +2762,7 @@ describe('sub plugins', function() {
                 tests.forEach(function(spec) {
                     cmd.set(spec[0]);
                     var output = spec[1] || spec[0];
-                    expect(cmd.find('[data-text]').text()).toEqual(nbsp(output));
+                    expect(cmd.find('.cmd-wrapper div [data-text]').text()).toEqual(nbsp(output));
                     cmd.set('');
                 });
             });
@@ -3090,7 +3090,7 @@ describe('Terminal plugin', function() {
         });
         it('should have default prompt', function() {
             var prompt = term.find('.cmd-prompt');
-            expect(prompt.html()).toEqual("<span>&gt;&nbsp;</span>");
+            expect(prompt.html()).toEqual("<span data-text=\">&nbsp;\">&gt;&nbsp;</span>");
             expect(prompt.text()).toEqual(nbsp('> '));
         });
         it('should destroy terminal', function() {
@@ -3244,7 +3244,7 @@ describe('Terminal plugin', function() {
                 var text = 'foo\nbar\nbaz';
                 term.insert(text).focus();
                 for (var pos = 0; pos < text.length; ++pos) {
-                    var node = cmd.find('span[data-text]').eq(pos);
+                    var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);
                     click(node);
                     expect(term.get_position()).toBe(pos);
                 }
@@ -3253,7 +3253,7 @@ describe('Terminal plugin', function() {
                 var text = '[[;;]hello] [[bui;;]world]';
                 term.insert(text).focus();
                 for (var pos = 0; pos < text.length; ++pos) {
-                    var node = cmd.find('span[data-text]').eq(pos);
+                    var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);
                     click(node);
                     expect(term.get_position()).toBe(pos);
                     expect(term.cmd().display_position()).toBe(pos);
@@ -3263,10 +3263,10 @@ describe('Terminal plugin', function() {
                 var text = '\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3';
                 var chars = $.terminal.split_characters(text);
                 term.insert(text).focus();
-                expect(term.find('.cmd span[data-text]').length).toBe(15);
+                expect(term.find('.cmd .cmd-wrapper div span[data-text]').length).toBe(15);
                 // indexes of emoji
                 [0, 7, 14].forEach(function(pos) {
-                    var node = cmd.find('span[data-text]').eq(pos);
+                    var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);
                     click(node);
                     expect(cmd.display_position()).toBe(pos);
                     var char = chars[pos];
@@ -3280,7 +3280,7 @@ describe('Terminal plugin', function() {
                 var output_str = spec[1];
                 term.set_command(input_str).focus();
                 for (var pos = 0, len = $.terminal.length(input_str); pos < len; ++pos) {
-                    var node = cmd.find('span[data-text]').eq(pos);
+                    var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);
                     click(node);
                     expect(cmd.display_position()).toBe(pos);
                     var output = cmd.find('[role="presentation"]').map(function() {
@@ -3463,18 +3463,20 @@ describe('Terminal plugin', function() {
         });
         it('should return prompt', function() {
             expect(term.get_prompt()).toEqual('>>> ');
-            expect(term.find('.cmd-prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span data-text=">>>&nbsp;">' +
+                                                            '&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should set prompt', function() {
             term.set_prompt('||| ');
             expect(term.get_prompt()).toEqual('||| ');
-            expect(term.find('.cmd-prompt').html()).toEqual('<span>|||&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span data-text=\"|||&nbsp;\">|||&nbsp;</span>');
             function prompt(callback) {
                 callback('>>> ');
             }
             term.set_prompt(prompt);
             expect(term.get_prompt()).toEqual(prompt);
-            expect(term.find('.cmd-prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span data-text=">>>&nbsp;">' +
+                                                            '&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should format prompt', function() {
             var prompt = '<span style="font-weight:bold;text-decoration:underline;color:'+

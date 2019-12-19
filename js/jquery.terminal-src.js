@@ -2767,7 +2767,12 @@
                 prompt = $.terminal.normalize(prompt);
                 prompt = crlf(prompt);
                 last_rendered_prompt = prompt;
-                var lines = $.terminal.split_equal(prompt, num_chars);
+                var lines = $.terminal.split_equal(prompt, num_chars).map(function(line) {
+                    if (!$.terminal.have_formatting(line)) {
+                        return '[[;;]' + line + ']';
+                    }
+                    return line;
+                });
                 var options = {
                     char_width: settings.char_width
                 };
