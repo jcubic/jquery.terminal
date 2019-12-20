@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 20 Dec 2019 17:05:40 +0000
+ * Date: Fri, 20 Dec 2019 17:33:28 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4069,7 +4069,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 20 Dec 2019 17:05:40 +0000',
+        date: 'Fri, 20 Dec 2019 17:33:28 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4277,6 +4277,18 @@
                     (space === -1 && prev_space !== i || space !== -1);
             }
             // ----------------------------------------------------------------
+            // :: last iteration or one before closing formatting
+            // ----------------------------------------------------------------
+            var last = false;
+            function is_last() {
+                if (i === string.length - 1 && !last) {
+                    last = true;
+                } else {
+                    last = !!substring.match(/^.]$/);
+                }
+                return last;
+            }
+            // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
             var formatting = '';
             var in_text = false;
@@ -4349,10 +4361,8 @@
                             size = offset + 1;
                         }
                     }
-                    // last iteration or one before closing formatting
-                    var last = substring.match(/^.]$/) || i === string.length - 1;
                     var data = {
-                        last: last,
+                        last: is_last(),
                         count: count,
                         index: i - offset,
                         formatting: formatting,

@@ -1,7 +1,8 @@
 ## 2.10.1
 ### Bugfix
 * fix glow effect of prompt when it don't have formatting
-* fix exec commands from string
+* fix exec commands from echo
+* fix echo formatting with newline and bracket at the end
 
 ## 2.10.0
 ### Feature

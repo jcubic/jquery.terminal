@@ -4277,6 +4277,18 @@
                     (space === -1 && prev_space !== i || space !== -1);
             }
             // ----------------------------------------------------------------
+            // :: last iteration or one before closing formatting
+            // ----------------------------------------------------------------
+            var last = false;
+            function is_last() {
+                if (i === string.length - 1 && !last) {
+                    last = true;
+                } else {
+                    last = !!substring.match(/^.]$/);
+                }
+                return last;
+            }
+            // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
             var formatting = '';
             var in_text = false;
@@ -4349,10 +4361,8 @@
                             size = offset + 1;
                         }
                     }
-                    // last iteration or one before closing formatting
-                    var last = substring.match(/^.]$/) || i === string.length - 1;
                     var data = {
-                        last: last,
+                        last: is_last(),
                         count: count,
                         index: i - offset,
                         formatting: formatting,

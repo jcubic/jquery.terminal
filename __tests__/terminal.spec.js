@@ -1354,6 +1354,11 @@ describe('Terminal utils', function() {
                 expect(string.length - 1).toBeLessThan(50);
             });
         });
+        it('should split on full formatting with multiple lines', function() {
+            var text = '[[;;]foo\nbar]';
+            var output = $.terminal.split_equal(text, 50);
+            expect(output).toEqual(['[[;;;;foo\\nbar]foo]', '[[;;;;foo\\nbar]bar]']);
+        });
     });
     describe('Cycle', function() {
         describe('create', function() {
