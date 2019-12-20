@@ -5475,6 +5475,7 @@ describe('Terminal plugin', function() {
                     $.terminal.defaults.formatters = [
                         [/\x1bfoo/g, '[[ foo ]]']
                     ];
+                    term.exec('xxxxxxxxxxxxxxxxxxxxxx'); // reset prev exec
                     spy(interpreter, 'foo');
                     term.push(interpreter).clear();
                 });
@@ -5560,6 +5561,32 @@ describe('Terminal plugin', function() {
                     expect(term.clear).not.toHaveBeenCalled();
                     term.echo('[[ terminal::clear() ]]', { invokeMethods: true });
                     expect(term.clear).toHaveBeenCalled();
+                });
+                it('should show error on recursive exec', function() {
+                    var interpreter = {
+                        foo: function() {
+                            this.echo('[[ foo ]]');
+                        }
+                    };
+                    var term = $('<div/>').terminal(interpreter, {
+                        greetings: false
+                    });
+                    spy(interpreter, 'foo');
+                    term.exec('foo');
+                    expect(count(interpreter.foo)).toEqual(1);
+                    expect(term.find('.terminal-error').length).toEqual(1);
+                    expect(a0(term.find('.terminal-error').text()))
+                        .toEqual($.terminal.defaults.strings.recursiveCall);
+                    term.echo('[[ foo ]]');
+                    expect(count(interpreter.foo)).toEqual(2);
+                    expect(term.find('.terminal-error').length).toEqual(2);
+                    var output = term.find('.terminal-error').map(function() {
+                        return a0($(this).text());
+                    }).get();
+                    expect(output).toEqual([
+                        $.terminal.defaults.strings.recursiveCall,
+                        $.terminal.defaults.strings.recursiveCall
+                    ]);
                 });
             });
         });

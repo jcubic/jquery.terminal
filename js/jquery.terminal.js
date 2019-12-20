@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 19 Dec 2019 11:32:44 +0000
+ * Date: Fri, 20 Dec 2019 17:05:40 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4069,7 +4069,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 19 Dec 2019 11:32:44 +0000',
+        date: 'Fri, 20 Dec 2019 17:05:40 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4271,6 +4271,7 @@
                 }
                 return 0;
             }
+            // ----------------------------------------------------------------
             function is_next_space() {
                 return (is_space(i) && (not_formatting || opening)) &&
                     (space === -1 && prev_space !== i || space !== -1);
@@ -6676,13 +6677,12 @@
                                     // and lines variable have all extended commands
                                     string = string.replace(/^\[\[|\]\]$/g, '');
                                     if (line_settings.exec) {
-                                        var prev_cmd;
-                                        if (prev_command) {
-                                            prev_command = prev_command.command.trim();
-                                        }
-                                        if (prev_cmd === string.trim()) {
+                                        var trim = string.trim();
+                                        if (prev_exec_cmd && prev_exec_cmd === trim) {
+                                            prev_exec_cmd = '';
                                             self.error(strings().recursiveCall);
                                         } else {
+                                            prev_exec_cmd = trim;
                                             $.terminal.extended_command(self, string, {
                                                 invokeMethods: line_settings.invokeMethods
                                             });
@@ -7007,7 +7007,9 @@
                 if (fire_event('onBeforeCommand', [command]) === false) {
                     return;
                 }
-                if (!exec) {
+                if (exec) {
+                    prev_exec_cmd = command.trim();
+                } else {
                     prev_command = $.terminal.split_command(command);
                 }
                 if (!ghost()) {
@@ -9156,6 +9158,7 @@
         self.data('terminal', self);
         // var names = []; // stack if interpreter names
         var prev_command; // used for name on the terminal if not defined
+        var prev_exec_cmd;
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
         var terminal_id = terminals.length();

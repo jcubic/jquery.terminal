@@ -1,6 +1,7 @@
 ## 2.10.1
 ### Bugfix
 * fix glow effect of prompt when it don't have formatting
+* fix exec commands from string
 
 ## 2.10.0
 ### Feature
