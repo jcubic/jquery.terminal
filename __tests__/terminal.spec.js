@@ -360,6 +360,13 @@ function shortcut(ctrl, alt, shift, which, key) {
     doc.trigger(keypress(key));
     doc.trigger($.Event("keyup"));
 }
+
+function click(element) {
+    var e = $.Event('mouseup');
+    e.button = 0;
+    e.target = element[0];
+    element.mousedown().trigger(e);
+}
 function enter_key() {
     shortcut(false, false, false, 13, 'enter');
 }
@@ -662,6 +669,19 @@ describe('Terminal utils', function() {
             tests.forEach(function(spec) {
                 expect($.terminal.substring(input, 0, spec[0])).toEqual(spec[1]);
             });
+        });
+        it('should split text into one characters', function() {
+            var string = 'Lorem ipsum dolor sit amet';
+            var input = '[[;;]' + string + ']';
+            var len = $.terminal.length(input);
+            for (var i = 0; i < len; ++i) {
+                var output = $.terminal.substring(input, i, i + 1);
+                expect($.terminal.is_formatting(output)).toBe(true);
+                expect($.terminal.length(output)).toBe(1);
+                expect($.terminal.strip(output)).toEqual(string.substring(i, i + 1));
+            }
+            // case for issue #550
+            expect($.terminal.substring(input, i, i + 1)).toEqual('');
         });
         it('should create formatting for each character', function() {
             var formatting = '[[b;;;token number]10][[b;;;token operator]+][[b;;;token number]10]';
@@ -1353,6 +1373,11 @@ describe('Terminal utils', function() {
             output.forEach(function(string) {
                 expect(string.length - 1).toBeLessThan(50);
             });
+        });
+        it('should split on full formatting with multiple lines', function() {
+            var text = '[[;;]foo\nbar]';
+            var output = $.terminal.split_equal(text, 50);
+            expect(output).toEqual(['[[;;;;foo\\nbar]foo]', '[[;;;;foo\\nbar]bar]']);
         });
     });
     describe('Cycle', function() {
@@ -2762,7 +2787,7 @@ describe('sub plugins', function() {
                 tests.forEach(function(spec) {
                     cmd.set(spec[0]);
                     var output = spec[1] || spec[0];
-                    expect(cmd.find('[data-text]').text()).toEqual(nbsp(output));
+                    expect(cmd.find('.cmd-wrapper div [data-text]').text()).toEqual(nbsp(output));
                     cmd.set('');
                 });
             });
@@ -2779,6 +2804,9 @@ describe('sub plugins', function() {
             beforeEach(function() {
                 $.terminal.defaults.formatters = formatters.slice();
                 $.terminal.defaults.formatters.push([/foo/g, '[[;red;]foo bar]']);
+                if (cmd) {
+                    cmd.destroy();
+                }
                 cmd = $('<div/>').cmd();
             });
             afterEach(function() {
@@ -2807,6 +2835,29 @@ describe('sub plugins', function() {
                 expect(get_pos()).toEqual([5, 5]);
                 cmd.display_position(100);
                 expect(get_pos()).toEqual(pos);
+            });
+            it('should have correct position on text after emoji', async function() {
+                // bug #551
+                $.terminal.defaults.formatters.push([/:emoji:/g, '[[;red;]*]']);
+                cmd.enable();
+                var specs = [
+                    [':emoji:1', ['*1', 7, 1]],
+                    ['aaa:emoji:1', ['aaa*1', 10, 4]],
+                    ['aaa:emoji:1aaaa', ['aaa*1aaaa', 10, 4]],
+                    [':emoji::emoji:1', ['**1', 14, 2]],
+                    ['aaa:emoji:aaa:emoji:1', ['aaa*aaa*1', 20, 8]],
+                    ['aaa:emoji:1aaa:emoji:aaa', ['aaa*1aaa*aaa', 10, 4]]
+                ];
+                for (var i in specs) {
+                    var spec = specs[i];
+                    cmd.set(spec[0]);
+                    var output = cmd.find('.cmd-wrapper div [data-text]').text();
+                    click(cmd.find('[data-text="1"]'));
+                    await delay(300);
+                    var expected = get_pos();
+                    expected.unshift(output);
+                    expect(expected).toEqual(spec[1]);
+                }
             });
         });
     });
@@ -3090,7 +3141,7 @@ describe('Terminal plugin', function() {
         });
         it('should have default prompt', function() {
             var prompt = term.find('.cmd-prompt');
-            expect(prompt.html()).toEqual("<span>&gt;&nbsp;</span>");
+            expect(prompt.html()).toEqual("<span data-text=\">&nbsp;\">&gt;&nbsp;</span>");
             expect(prompt.text()).toEqual(nbsp('> '));
         });
         it('should destroy terminal', function() {
@@ -3234,17 +3285,11 @@ describe('Terminal plugin', function() {
             beforeEach(function() {
                 term.focus().set_command('');
             });
-            function click(element) {
-                var e = $.Event('mouseup');
-                e.button = 0;
-                e.target = element[0];
-                element.mousedown().trigger(e);
-            }
             it('should move cursor to click position', function() {
                 var text = 'foo\nbar\nbaz';
                 term.insert(text).focus();
                 for (var pos = 0; pos < text.length; ++pos) {
-                    var node = cmd.find('span[data-text]').eq(pos);
+                    var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);
                     click(node);
                     expect(term.get_position()).toBe(pos);
                 }
@@ -3253,7 +3298,7 @@ describe('Terminal plugin', function() {
                 var text = '[[;;]hello] [[bui;;]world]';
                 term.insert(text).focus();
                 for (var pos = 0; pos < text.length; ++pos) {
-                    var node = cmd.find('span[data-text]').eq(pos);
+                    var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);
                     click(node);
                     expect(term.get_position()).toBe(pos);
                     expect(term.cmd().display_position()).toBe(pos);
@@ -3263,10 +3308,10 @@ describe('Terminal plugin', function() {
                 var text = '\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3';
                 var chars = $.terminal.split_characters(text);
                 term.insert(text).focus();
-                expect(term.find('.cmd span[data-text]').length).toBe(15);
+                expect(term.find('.cmd .cmd-wrapper div span[data-text]').length).toBe(15);
                 // indexes of emoji
                 [0, 7, 14].forEach(function(pos) {
-                    var node = cmd.find('span[data-text]').eq(pos);
+                    var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);
                     click(node);
                     expect(cmd.display_position()).toBe(pos);
                     var char = chars[pos];
@@ -3280,7 +3325,7 @@ describe('Terminal plugin', function() {
                 var output_str = spec[1];
                 term.set_command(input_str).focus();
                 for (var pos = 0, len = $.terminal.length(input_str); pos < len; ++pos) {
-                    var node = cmd.find('span[data-text]').eq(pos);
+                    var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);
                     click(node);
                     expect(cmd.display_position()).toBe(pos);
                     var output = cmd.find('[role="presentation"]').map(function() {
@@ -3463,18 +3508,20 @@ describe('Terminal plugin', function() {
         });
         it('should return prompt', function() {
             expect(term.get_prompt()).toEqual('>>> ');
-            expect(term.find('.cmd-prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span data-text=">>>&nbsp;">' +
+                                                            '&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should set prompt', function() {
             term.set_prompt('||| ');
             expect(term.get_prompt()).toEqual('||| ');
-            expect(term.find('.cmd-prompt').html()).toEqual('<span>|||&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span data-text=\"|||&nbsp;\">|||&nbsp;</span>');
             function prompt(callback) {
                 callback('>>> ');
             }
             term.set_prompt(prompt);
             expect(term.get_prompt()).toEqual(prompt);
-            expect(term.find('.cmd-prompt').html()).toEqual('<span>&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toEqual('<span data-text=">>>&nbsp;">' +
+                                                            '&gt;&gt;&gt;&nbsp;</span>');
         });
         it('should format prompt', function() {
             var prompt = '<span style="font-weight:bold;text-decoration:underline;color:'+
@@ -5473,6 +5520,7 @@ describe('Terminal plugin', function() {
                     $.terminal.defaults.formatters = [
                         [/\x1bfoo/g, '[[ foo ]]']
                     ];
+                    term.exec('xxxxxxxxxxxxxxxxxxxxxx'); // reset prev exec
                     spy(interpreter, 'foo');
                     term.push(interpreter).clear();
                 });
@@ -5558,6 +5606,32 @@ describe('Terminal plugin', function() {
                     expect(term.clear).not.toHaveBeenCalled();
                     term.echo('[[ terminal::clear() ]]', { invokeMethods: true });
                     expect(term.clear).toHaveBeenCalled();
+                });
+                it('should show error on recursive exec', function() {
+                    var interpreter = {
+                        foo: function() {
+                            this.echo('[[ foo ]]');
+                        }
+                    };
+                    var term = $('<div/>').terminal(interpreter, {
+                        greetings: false
+                    });
+                    spy(interpreter, 'foo');
+                    term.exec('foo');
+                    expect(count(interpreter.foo)).toEqual(1);
+                    expect(term.find('.terminal-error').length).toEqual(1);
+                    expect(a0(term.find('.terminal-error').text()))
+                        .toEqual($.terminal.defaults.strings.recursiveCall);
+                    term.echo('[[ foo ]]');
+                    expect(count(interpreter.foo)).toEqual(2);
+                    expect(term.find('.terminal-error').length).toEqual(2);
+                    var output = term.find('.terminal-error').map(function() {
+                        return a0($(this).text());
+                    }).get();
+                    expect(output).toEqual([
+                        $.terminal.defaults.strings.recursiveCall,
+                        $.terminal.defaults.strings.recursiveCall
+                    ]);
                 });
             });
         });

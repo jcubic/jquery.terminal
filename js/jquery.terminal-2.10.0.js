@@ -4,11 +4,11 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.10.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2019 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2019 Jakub T. Jankiewicz <https://jcubic.pl/m>e
  * Released under the MIT license
  *
  * Contains:
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 18 Dec 2019 14:05:42 +0000
+ * Date: Sun, 22 Dec 2019 17:01:22 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -2437,7 +2437,7 @@
                     position: position
                 });
                 var formatted = $.terminal.apply_formatters(string, format_options);
-                var output = formatted[0];
+                var output = $.terminal.normalize(formatted[0]);
                 var max = $.terminal.length(output);
                 if (!skip_formatted_position) {
                     formatted_position = formatted[1];
@@ -2464,7 +2464,8 @@
                 before: before
             });
             string = $.terminal.format(encoded, {
-                char_width: settings.char_width
+                char_width: settings.char_width,
+                allowedAttributes: settings.allowedAttributes || []
             });
             var re = /(<span[^>]+data-text[^>]+>)(.*?)(<\/span>)/g;
             return string.replace(re, '$1<span>$2</span>$3');
@@ -2723,14 +2724,20 @@
         // :: change length by formatters
         // ---------------------------------------------------------------------
         var find_position = (function() {
-            function cmp(search_pos, pos) {
+            function make_guess(string, position) {
                 var opts = $.extend({}, settings, {
-                    position: pos
+                    position: position
                 });
-                var string = $.terminal.escape_brackets(command);
-                var guess = $.terminal.apply_formatters(string, opts)[1];
+                return $.terminal.apply_formatters(string, opts)[1];
+            }
+            function cmp(search_pos, pos, string) {
+                var guess = make_guess(string, pos);
                 if (guess === search_pos) {
-                    return 0;
+                    var next_guess = make_guess(string, pos + 1);
+                    if (next_guess > search_pos) {
+                        return 0;
+                    }
+                    return 1;
                 } else if (guess < search_pos) {
                     return 1;
                 } else {
@@ -2743,7 +2750,8 @@
                 }
                 string = bare_text(string);
                 var codepoint_len = string.length;
-                var pos = binary_search(0, codepoint_len, formatted_position, cmp);
+                var str = $.terminal.escape_brackets(command);
+                var pos = binary_search(0, codepoint_len, formatted_position, cmp, [str]);
                 var chars = $.terminal.split_characters(string);
                 if (codepoint_len > chars.length) {
                     var len = 0;
@@ -2767,7 +2775,12 @@
                 prompt = $.terminal.normalize(prompt);
                 prompt = crlf(prompt);
                 last_rendered_prompt = prompt;
-                var lines = $.terminal.split_equal(prompt, num_chars);
+                var lines = $.terminal.split_equal(prompt, num_chars).map(function(line) {
+                    if (!$.terminal.have_formatting(line)) {
+                        return '[[;;]' + line + ']';
+                    }
+                    return line;
+                });
                 var options = {
                     char_width: settings.char_width
                 };
@@ -3588,6 +3601,22 @@
         }
     })();
     // -------------------------------------------------------------------------
+    function count_selfclosing_formatting(string) {
+        var count = 0;
+        if ($.terminal.have_formatting(string)) {
+            var re = new RegExp(format_parts_re, 'i');
+            $.terminal.format_split(string).forEach(function(str) {
+                if ($.terminal.is_formatting(str)) {
+                    var m = str.match(re);
+                    if (m && m[1].match(/@/) && m[6] === '') {
+                        count++;
+                    }
+                }
+            });
+        }
+        return count;
+    }
+    // -------------------------------------------------------------------------
     function bare_text(string) {
         if (!string.match(/&/)) {
             return string;
@@ -3755,7 +3784,7 @@
             }, []);
             return specs.map(function(spec) {
                 if (spec.len === 1) {
-                    return spec.str.join('');
+                    return spec.chr;
                 }
                 var style = char_width_prop(spec.sum, options);
                 if (spec.sum === chars.length || !style.length) {
@@ -3782,10 +3811,11 @@
     // ---------------------------------------------------------------------
     // :: Binary search utility
     // ---------------------------------------------------------------------
-    function binary_search(start, end, search_pos, compare_fn) {
+    function binary_search(start, end, search_pos, compare_fn, more_args) {
         var len = end - start;
         var mid = start + Math.floor(len / 2);
-        var cmp = compare_fn(search_pos, mid);
+        var args = [search_pos, mid].concat(more_args);
+        var cmp = compare_fn.apply(null, args);
         if (cmp === 0) {
             return mid;
         } else if (cmp > 0 && len > 1) {
@@ -3793,14 +3823,16 @@
                 mid,
                 end,
                 search_pos,
-                compare_fn
+                compare_fn,
+                more_args
             );
         } else if (cmp < 0 && len > 1) {
             return binary_search(
                 start,
                 mid,
                 search_pos,
-                compare_fn
+                compare_fn,
+                more_args
             );
         } else {
             return -1;
@@ -4063,8 +4095,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.10.0',
-        date: 'Wed, 18 Dec 2019 14:05:42 +0000',
+        version: 'DEV',
+        date: 'Sun, 22 Dec 2019 17:01:22 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4198,17 +4230,19 @@
                 // If the position is affected...
                 if (start < position) {
                     // ... update it:
+                    var rep_len = length(rep_string);
+                    rep_len += count_selfclosing_formatting(rep_string);
                     if (last_index < position) {
                         // It's after the replacement, move it
                         new_position = Math.max(
                             0,
                             new_position +
-                            length(rep_string) -
+                            rep_len -
                             length(match[0])
                         );
                     } else {
                         // It's *in* the replacement, put it just after
-                        new_position += length(rep_string) - (position - start);
+                        new_position += rep_len - (position - start);
                     }
                 }
                 // If the regular expression doesn't have the g flag, break here so
@@ -4266,9 +4300,22 @@
                 }
                 return 0;
             }
+            // ----------------------------------------------------------------
             function is_next_space() {
                 return (is_space(i) && (not_formatting || opening)) &&
                     (space === -1 && prev_space !== i || space !== -1);
+            }
+            // ----------------------------------------------------------------
+            // :: last iteration or one before closing formatting
+            // ----------------------------------------------------------------
+            var last = false;
+            function is_last() {
+                if (i === string.length - 1 && !last) {
+                    last = true;
+                } else {
+                    last = !!substring.match(/^.]$/);
+                }
+                return last;
             }
             // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
@@ -4343,10 +4390,8 @@
                             size = offset + 1;
                         }
                     }
-                    // last iteration or one before closing formatting
-                    var last = substring.match(/^.]$/) || i === string.length - 1;
                     var data = {
-                        last: last,
+                        last: is_last(),
                         count: count,
                         index: i - offset,
                         formatting: formatting,
@@ -4375,7 +4420,10 @@
                             continue;
                         }
                     }
-                } else if (i === string.length - 1) {
+                } else if (i === string.length - 1 && !last) {
+                    // last iteration, if formatting have last bracket,
+                    // from formatting, then last iteration
+                    // was already called (in if) #550
                     callback({
                         count: count + 1,
                         index: i,
@@ -4515,7 +4563,8 @@
                 // closing braket will break formatting so we need to escape
                 // those using html entity equvalent
                 // space is hack for images that break iterate_formatting
-                return '[[' + format + semicolons + safe(text) + ']' + text + ']';
+                format += semicolons + safe(text);
+                return '[[' + format + ']' + text + ']';
             });
             return $.terminal.amp(string);
         },
@@ -4862,6 +4911,7 @@
                         }
                         // to make sure that output position is not outside the string
                         var max = text(string).length;
+                        max += count_selfclosing_formatting(string);
                         if (position > max) {
                             position = max;
                         }
@@ -4998,7 +5048,10 @@
                 if (data_text.match(/;/)) {
                     try {
                         var splitted = data_text.split(';');
-                        var str = splitted.slice(1).join(';');
+                        var str = splitted.slice(1).join(';')
+                            .replace(/&nbsp;/g, ' ')
+                            .replace(/&lt;/g, '<')
+                            .replace(/&gt;/g, '>');
                         if (str.match(/^\s*\{[^}]*\}\s*$/)) {
                             attrs = JSON.parse(str);
                             data_text = splitted[0];
@@ -6671,13 +6724,12 @@
                                     // and lines variable have all extended commands
                                     string = string.replace(/^\[\[|\]\]$/g, '');
                                     if (line_settings.exec) {
-                                        var prev_cmd;
-                                        if (prev_command) {
-                                            prev_command = prev_command.command.trim();
-                                        }
-                                        if (prev_cmd === string.trim()) {
+                                        var trim = string.trim();
+                                        if (prev_exec_cmd && prev_exec_cmd === trim) {
+                                            prev_exec_cmd = '';
                                             self.error(strings().recursiveCall);
                                         } else {
+                                            prev_exec_cmd = trim;
                                             $.terminal.extended_command(self, string, {
                                                 invokeMethods: line_settings.invokeMethods
                                             });
@@ -7002,7 +7054,9 @@
                 if (fire_event('onBeforeCommand', [command]) === false) {
                     return;
                 }
-                if (!exec) {
+                if (exec) {
+                    prev_exec_cmd = command.trim();
+                } else {
                     prev_command = $.terminal.split_command(command);
                 }
                 if (!ghost()) {
@@ -8203,10 +8257,10 @@
             signature: function() {
                 var cols = self.cols();
                 for (var i = signatures.length; i--;) {
-                    var lenghts = signatures[i].map(function(line) {
+                    var lengths = signatures[i].map(function(line) {
                         return line.length;
                     });
-                    if (Math.max.apply(null, lenghts) <= cols) {
+                    if (Math.max.apply(null, lengths) <= cols) {
                         return signatures[i].join('\n') + '\n';
                     }
                 }
@@ -9151,6 +9205,7 @@
         self.data('terminal', self);
         // var names = []; // stack if interpreter names
         var prev_command; // used for name on the terminal if not defined
+        var prev_exec_cmd;
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
         var terminal_id = terminals.length();
@@ -9408,6 +9463,7 @@
                 holdTimeout: settings.holdTimeout,
                 holdRepeatTimeout: settings.holdRepeatTimeout,
                 repeatTimeoutKeys: settings.repeatTimeoutKeys,
+                allowedAttributes: settings.allowedAttributes,
                 keypress: key_press,
                 tabs: settings.tabs,
                 onPositionChange: function() {
