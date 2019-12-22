@@ -3,6 +3,8 @@
 * fix glow effect of prompt when it don't have formatting
 * fix exec commands from echo
 * fix echo formatting with newline and bracket at the end
+* fix single wide character exception
+* fix substring after string when string have bracket at the end [#550](https://github.com/jcubic/jquery.terminal/issues/550)
 
 ## 2.10.0
 ### Feature

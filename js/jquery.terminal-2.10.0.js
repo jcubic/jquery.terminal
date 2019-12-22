@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2019 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2019 Jakub T. Jankiewicz <https://jcubic.pl/m>e
  * Released under the MIT license
  *
  * Contains:
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 20 Dec 2019 17:33:28 +0000
+ * Date: Sun, 22 Dec 2019 11:07:37 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3760,7 +3760,7 @@
             }, []);
             return specs.map(function(spec) {
                 if (spec.len === 1) {
-                    return spec.str.join('');
+                    return spec.chr;
                 }
                 var style = char_width_prop(spec.sum, options);
                 if (spec.sum === chars.length || !style.length) {
@@ -4069,7 +4069,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 20 Dec 2019 17:33:28 +0000',
+        date: 'Sun, 22 Dec 2019 11:07:37 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4391,7 +4391,10 @@
                             continue;
                         }
                     }
-                } else if (i === string.length - 1) {
+                } else if (i === string.length - 1 && !last) {
+                    // last iteration, if formatting have last bracket,
+                    // from formatting, then last iteration
+                    // was already called (in if) #550
                     callback({
                         count: count + 1,
                         index: i,

@@ -663,6 +663,19 @@ describe('Terminal utils', function() {
                 expect($.terminal.substring(input, 0, spec[0])).toEqual(spec[1]);
             });
         });
+        it('should split text into one characters', function() {
+            var string = 'Lorem ipsum dolor sit amet';
+            var input = '[[;;]' + string + ']';
+            var len = $.terminal.length(input);
+            for (var i = 0; i < len; ++i) {
+                var output = $.terminal.substring(input, i, i + 1);
+                expect($.terminal.is_formatting(output)).toBe(true);
+                expect($.terminal.length(output)).toBe(1);
+                expect($.terminal.strip(output)).toEqual(string.substring(i, i + 1));
+            }
+            // case for issue #550
+            expect($.terminal.substring(input, i, i + 1)).toEqual('');
+        });
         it('should create formatting for each character', function() {
             var formatting = '[[b;;;token number]10][[b;;;token operator]+][[b;;;token number]10]';
 
