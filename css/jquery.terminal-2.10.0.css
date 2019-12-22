@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 22 Dec 2019 10:48:45 +0000
+ * Date: Sun, 22 Dec 2019 15:36:58 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -155,9 +155,15 @@ body.full-screen-terminal .terminal {
 }
 .cmd .cmd-cursor {
     display: inline-block;
+    vertical-align: top;
 }
-.cmd .cmd-cursor-line > span {
+.cmd .cmd-cursor-line > span,
+.cmd .cmd-cursor-line img {
     display: inline-block;
+}
+.cmd-wrapper div [data-text] {
+    /* fix for images */
+    vertical-align: top;
 }
 .cmd .cmd-cursor.cmd-blink span:not(.emoji) span {
     -webkit-animation: terminal-blink 1s infinite linear;
@@ -841,9 +847,14 @@ terminal .terminal-output > div {
 .terminal-output img {
     display: block;
 }
+.cmd img {
+    height: 14px;
+    height: calc(var(--size, 1) * 14px);
+    border: 1px solid transparent;
+}
 .cmd-cursor img {
-    border: 1px solid #ccc;
-    border: 1px solid var(--color, #ccc);
+    border-color: #ccc;
+    border-color: var(--color, #ccc);
 }
 .terminal-output svg.terminal-broken-image {
     height: calc(var(--size, 1) * 14px);

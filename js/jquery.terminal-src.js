@@ -2437,7 +2437,7 @@
                     position: position
                 });
                 var formatted = $.terminal.apply_formatters(string, format_options);
-                var output = formatted[0];
+                var output = $.terminal.normalize(formatted[0]);
                 var max = $.terminal.length(output);
                 if (!skip_formatted_position) {
                     formatted_position = formatted[1];
@@ -3600,6 +3600,22 @@
         }
     })();
     // -------------------------------------------------------------------------
+    function count_selfclosing_formatting(string) {
+        var count = 0;
+        if ($.terminal.have_formatting(string)) {
+            var re = new RegExp(format_parts_re, 'i');
+            $.terminal.format_split(string).forEach(function(str) {
+                if ($.terminal.is_formatting(str)) {
+                    var m = str.match(re);
+                    if (m && m[1].match(/@/) && m[6] === '') {
+                        count++;
+                    }
+                }
+            });
+        }
+        return count;
+    }
+    // -------------------------------------------------------------------------
     function bare_text(string) {
         if (!string.match(/&/)) {
             return string;
@@ -4213,17 +4229,19 @@
                 // If the position is affected...
                 if (start < position) {
                     // ... update it:
+                    var rep_len = length(rep_string);
+                    rep_len += count_selfclosing_formatting(rep_string);
                     if (last_index < position) {
                         // It's after the replacement, move it
                         new_position = Math.max(
                             0,
                             new_position +
-                            length(rep_string) -
+                            rep_len -
                             length(match[0])
                         );
                     } else {
                         // It's *in* the replacement, put it just after
-                        new_position += length(rep_string) - (position - start);
+                        new_position += rep_len - (position - start);
                     }
                 }
                 // If the regular expression doesn't have the g flag, break here so
@@ -4544,7 +4562,8 @@
                 // closing braket will break formatting so we need to escape
                 // those using html entity equvalent
                 // space is hack for images that break iterate_formatting
-                return '[[' + format + semicolons + safe(text) + ']' + text + ']';
+                format += semicolons + safe(text);
+                return '[[' + format + ']' + text + ']';
             });
             return $.terminal.amp(string);
         },
@@ -4891,6 +4910,7 @@
                         }
                         // to make sure that output position is not outside the string
                         var max = text(string).length;
+                        max += count_selfclosing_formatting(string);
                         if (position > max) {
                             position = max;
                         }
@@ -8233,10 +8253,10 @@
             signature: function() {
                 var cols = self.cols();
                 for (var i = signatures.length; i--;) {
-                    var lenghts = signatures[i].map(function(line) {
+                    var lengths = signatures[i].map(function(line) {
                         return line.length;
                     });
-                    if (Math.max.apply(null, lenghts) <= cols) {
+                    if (Math.max.apply(null, lengths) <= cols) {
                         return signatures[i].join('\n') + '\n';
                     }
                 }
