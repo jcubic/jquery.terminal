@@ -2464,7 +2464,8 @@
                 before: before
             });
             string = $.terminal.format(encoded, {
-                char_width: settings.char_width
+                char_width: settings.char_width,
+                allowedAttributes: settings.allowedAttributes || []
             });
             var re = /(<span[^>]+data-text[^>]+>)(.*?)(<\/span>)/g;
             return string.replace(re, '$1<span>$2</span>$3');
@@ -5047,7 +5048,10 @@
                 if (data_text.match(/;/)) {
                     try {
                         var splitted = data_text.split(';');
-                        var str = splitted.slice(1).join(';');
+                        var str = splitted.slice(1).join(';')
+                            .replace(/&nbsp;/g, ' ')
+                            .replace(/&lt;/g, '<')
+                            .replace(/&gt;/g, '>');
                         if (str.match(/^\s*\{[^}]*\}\s*$/)) {
                             attrs = JSON.parse(str);
                             data_text = splitted[0];
@@ -9459,6 +9463,7 @@
                 holdTimeout: settings.holdTimeout,
                 holdRepeatTimeout: settings.holdRepeatTimeout,
                 repeatTimeoutKeys: settings.repeatTimeoutKeys,
+                allowedAttributes: settings.allowedAttributes,
                 keypress: key_press,
                 tabs: settings.tabs,
                 onPositionChange: function() {

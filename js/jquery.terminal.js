@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 22 Dec 2019 16:41:37 +0000
+ * Date: Sun, 22 Dec 2019 17:01:22 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -2464,7 +2464,8 @@
                 before: before
             });
             string = $.terminal.format(encoded, {
-                char_width: settings.char_width
+                char_width: settings.char_width,
+                allowedAttributes: settings.allowedAttributes || []
             });
             var re = /(<span[^>]+data-text[^>]+>)(.*?)(<\/span>)/g;
             return string.replace(re, '$1<span>$2</span>$3');
@@ -4095,7 +4096,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 22 Dec 2019 16:41:37 +0000',
+        date: 'Sun, 22 Dec 2019 17:01:22 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5047,7 +5048,10 @@
                 if (data_text.match(/;/)) {
                     try {
                         var splitted = data_text.split(';');
-                        var str = splitted.slice(1).join(';');
+                        var str = splitted.slice(1).join(';')
+                            .replace(/&nbsp;/g, ' ')
+                            .replace(/&lt;/g, '<')
+                            .replace(/&gt;/g, '>');
                         if (str.match(/^\s*\{[^}]*\}\s*$/)) {
                             attrs = JSON.parse(str);
                             data_text = splitted[0];
@@ -9459,6 +9463,7 @@
                 holdTimeout: settings.holdTimeout,
                 holdRepeatTimeout: settings.holdRepeatTimeout,
                 repeatTimeoutKeys: settings.repeatTimeoutKeys,
+                allowedAttributes: settings.allowedAttributes,
                 keypress: key_press,
                 tabs: settings.tabs,
                 onPositionChange: function() {
