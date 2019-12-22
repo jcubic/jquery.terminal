@@ -360,6 +360,13 @@ function shortcut(ctrl, alt, shift, which, key) {
     doc.trigger(keypress(key));
     doc.trigger($.Event("keyup"));
 }
+
+function click(element) {
+    var e = $.Event('mouseup');
+    e.button = 0;
+    e.target = element[0];
+    element.mousedown().trigger(e);
+}
 function enter_key() {
     shortcut(false, false, false, 13, 'enter');
 }
@@ -2797,6 +2804,9 @@ describe('sub plugins', function() {
             beforeEach(function() {
                 $.terminal.defaults.formatters = formatters.slice();
                 $.terminal.defaults.formatters.push([/foo/g, '[[;red;]foo bar]']);
+                if (cmd) {
+                    cmd.destroy();
+                }
                 cmd = $('<div/>').cmd();
             });
             afterEach(function() {
@@ -2825,6 +2835,29 @@ describe('sub plugins', function() {
                 expect(get_pos()).toEqual([5, 5]);
                 cmd.display_position(100);
                 expect(get_pos()).toEqual(pos);
+            });
+            it('should have correct position on text after emoji', async function() {
+                // bug #551
+                $.terminal.defaults.formatters.push([/:emoji:/g, '[[;red;]*]']);
+                cmd.enable();
+                var specs = [
+                    [':emoji:1', ['*1', 7, 1]],
+                    ['aaa:emoji:1', ['aaa*1', 10, 4]],
+                    ['aaa:emoji:1aaaa', ['aaa*1aaaa', 10, 4]],
+                    [':emoji::emoji:1', ['**1', 14, 2]],
+                    ['aaa:emoji:aaa:emoji:1', ['aaa*aaa*1', 20, 8]],
+                    ['aaa:emoji:1aaa:emoji:aaa', ['aaa*1aaa*aaa', 10, 4]]
+                ];
+                for (var i in specs) {
+                    var spec = specs[i];
+                    cmd.set(spec[0]);
+                    var output = cmd.find('.cmd-wrapper div [data-text]').text();
+                    click(cmd.find('[data-text="1"]'));
+                    await delay(300);
+                    var expected = get_pos();
+                    expected.unshift(output);
+                    expect(expected).toEqual(spec[1]);
+                }
             });
         });
     });
@@ -3252,12 +3285,6 @@ describe('Terminal plugin', function() {
             beforeEach(function() {
                 term.focus().set_command('');
             });
-            function click(element) {
-                var e = $.Event('mouseup');
-                e.button = 0;
-                e.target = element[0];
-                element.mousedown().trigger(e);
-            }
             it('should move cursor to click position', function() {
                 var text = 'foo\nbar\nbaz';
                 term.insert(text).focus();

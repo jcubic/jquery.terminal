@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 22 Dec 2019 11:07:37 +0000
+ * Date: Sun, 22 Dec 2019 13:58:28 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -2723,14 +2723,20 @@
         // :: change length by formatters
         // ---------------------------------------------------------------------
         var find_position = (function() {
-            function cmp(search_pos, pos) {
+            function make_guess(string, position) {
                 var opts = $.extend({}, settings, {
-                    position: pos
+                    position: position
                 });
-                var string = $.terminal.escape_brackets(command);
-                var guess = $.terminal.apply_formatters(string, opts)[1];
+                return $.terminal.apply_formatters(string, opts)[1];
+            }
+            function cmp(search_pos, pos, string) {
+                var guess = make_guess(string, pos);
                 if (guess === search_pos) {
-                    return 0;
+                    var next_guess = make_guess(string, pos + 1);
+                    if (next_guess > search_pos) {
+                        return 0;
+                    }
+                    return 1;
                 } else if (guess < search_pos) {
                     return 1;
                 } else {
@@ -2743,7 +2749,8 @@
                 }
                 string = bare_text(string);
                 var codepoint_len = string.length;
-                var pos = binary_search(0, codepoint_len, formatted_position, cmp);
+                var str = $.terminal.escape_brackets(command);
+                var pos = binary_search(0, codepoint_len, formatted_position, cmp, [str]);
                 var chars = $.terminal.split_characters(string);
                 if (codepoint_len > chars.length) {
                     var len = 0;
@@ -3787,10 +3794,11 @@
     // ---------------------------------------------------------------------
     // :: Binary search utility
     // ---------------------------------------------------------------------
-    function binary_search(start, end, search_pos, compare_fn) {
+    function binary_search(start, end, search_pos, compare_fn, more_args) {
         var len = end - start;
         var mid = start + Math.floor(len / 2);
-        var cmp = compare_fn(search_pos, mid);
+        var args = [search_pos, mid].concat(more_args);
+        var cmp = compare_fn.apply(null, args);
         if (cmp === 0) {
             return mid;
         } else if (cmp > 0 && len > 1) {
@@ -3798,14 +3806,16 @@
                 mid,
                 end,
                 search_pos,
-                compare_fn
+                compare_fn,
+                more_args
             );
         } else if (cmp < 0 && len > 1) {
             return binary_search(
                 start,
                 mid,
                 search_pos,
-                compare_fn
+                compare_fn,
+                more_args
             );
         } else {
             return -1;
@@ -4069,7 +4079,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 22 Dec 2019 11:07:37 +0000',
+        date: 'Sun, 22 Dec 2019 13:58:28 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
