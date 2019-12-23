@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 23 Dec 2019 21:54:52 +0000
+ * Date: Mon, 23 Dec 2019 23:07:29 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -3653,22 +3653,21 @@
         if (match_entity) {
             return match_entity[1];
         }
-        if (string.charCodeAt(0) < 255) {
-            return string[0];
+        var match_combo = string.match(combine_chr_re);
+        if (match_combo) {
+            return match_combo[1];
         }
         var match_emoji = string.match(emoji_re);
         if (match_emoji) {
             return match_emoji[1];
+        } else if (string.charCodeAt(0) < 255) {
+            return string[0];
         } else if (string.match(astral_symbols_begin_re)) {
             if (string.slice(1).match(combine_chr_re)) {
                 return string.slice(0, 3);
             }
             return string.slice(0, 2);
         } else {
-            var match_combo = string.match(combine_chr_re);
-            if (match_combo) {
-                return match_combo[1];
-            }
             return string[0];
         }
     }
@@ -4075,7 +4074,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 23 Dec 2019 21:54:52 +0000',
+        date: 'Mon, 23 Dec 2019 23:07:29 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4269,6 +4268,8 @@
             }
             // ----------------------------------------------------------------
             // :: function will skip to next character in main loop
+            // :: TODO: improve performance of emoji regex and check whole
+            // :: string it's complex string if not use simple function
             // ----------------------------------------------------------------
             function next_iteration() {
                 var char = get_next_character(substring);
@@ -4582,9 +4583,13 @@
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
+                        var after_index = data.index + data.size;
+                        if (last_bracket) {
+                            after_index += 1;
+                        }
                         var new_index;
                         if (keep_words && data.space !== -1 &&
-                            data.index !== line_length - 1 && can_break) {
+                            after_index !== line_length && can_break) {
                             output = line.slice(first_index, data.space);
                             new_index = data.space - 1;
                         } else {

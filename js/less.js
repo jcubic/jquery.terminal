@@ -257,7 +257,7 @@
         function image_formatter(text) {
             var defer = $.Deferred();
             if (!text.match(img_re)) {
-                return [text];
+                return text.split('\n');
             }
             var parts = text.split(img_split_re).filter(Boolean);
             var result = [];

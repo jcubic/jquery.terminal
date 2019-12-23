@@ -1379,6 +1379,11 @@ describe('Terminal utils', function() {
             var output = $.terminal.split_equal(text, 50);
             expect(output).toEqual(['[[;;;;foo\\nbar]foo]', '[[;;;;foo\\nbar]bar]']);
         });
+        it('should not split on words of full formatting when text have less length', function() {
+            var text = '[[;red;]xxx xx xx]';
+            var output = $.terminal.split_equal(text, 100, true);
+            expect(output).toEqual([$.terminal.normalize(text)]);
+        });
     });
     describe('Cycle', function() {
         describe('create', function() {

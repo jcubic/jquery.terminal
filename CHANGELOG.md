@@ -3,6 +3,7 @@
 * improve performance
 ### Bugfix
 * fix empty lines in less
+* fix split_equal with keep works and formatting at the end.
 
 ## 2.10.1
 ### Bugfix
