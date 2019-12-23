@@ -256,46 +256,45 @@
         // -------------------------------------------------------------------------------
         function image_formatter(text) {
             var defer = $.Deferred();
-            var parts = text.split(img_split_re).filter(Boolean);
-            if (parts.length === 1 && !parts[0].match(img_re)) {
-                return text.split('\n');
-            } else {
-                var result = [];
-                (function recur() {
-                    function concat_slices(slices) {
-                        cache[width][img] = slices;
-                        result = result.concat(slices.map(function(uri) {
-                            return '[[@;;;;' + uri + ']]';
-                        }));
-                        recur();
-                    }
-                    if (!parts.length) {
-                        return defer.resolve(result);
-                    }
-                    var part = parts.shift();
-                    var m = part.match(img_re);
-                    if (m) {
-                        var img = m[1];
-                        var rect = cursor_size();
-                        var width = term.width();
-                        var opts = {width: width, line_height: rect.height};
-                        cache[width] = cache[width] || {};
-                        if (cache[width][img]) {
-                            concat_slices(cache[width][img]);
-                        } else {
-                            slice(img, opts).then(concat_slices).catch(function() {
-                                var msg = $.terminal.escape_brackets('[BROKEN IMAGE]');
-                                var cls = 'terminal-broken-image';
-                                result.push('[[;#c00;;' + cls + ']' + msg + ']');
-                                recur();
-                            });
-                        }
-                    } else {
-                        result = result.concat(part.split('\n'));
-                        recur();
-                    }
-                })();
+            if (!text.match(img_re)) {
+                return [text];
             }
+            var parts = text.split(img_split_re).filter(Boolean);
+            var result = [];
+            (function recur() {
+                function concat_slices(slices) {
+                    cache[width][img] = slices;
+                    result = result.concat(slices.map(function(uri) {
+                        return '[[@;;;;' + uri + ']]';
+                    }));
+                    recur();
+                }
+                if (!parts.length) {
+                    return defer.resolve(result);
+                }
+                var part = parts.shift();
+                var m = part.match(img_re);
+                if (m) {
+                    var img = m[1];
+                    var rect = cursor_size();
+                    var width = term.width();
+                    var opts = {width: width, line_height: rect.height};
+                    cache[width] = cache[width] || {};
+                    if (cache[width][img]) {
+                        concat_slices(cache[width][img]);
+                    } else {
+                        slice(img, opts).then(concat_slices).catch(function() {
+                            var msg = $.terminal.escape_brackets('[BROKEN IMAGE]');
+                            var cls = 'terminal-broken-image';
+                            result.push('[[;#c00;;' + cls + ']' + msg + ']');
+                            recur();
+                        });
+                    }
+                } else {
+                    result = result.concat(part.split('\n'));
+                    recur();
+                }
+            })();
             return defer.promise();
         }
         // -------------------------------------------------------------------------------
