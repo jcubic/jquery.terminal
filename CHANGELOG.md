@@ -1,3 +1,9 @@
+## 2.11.0
+### Features
+* improve performance
+### Bugfix
+* fix empty lines in less
+
 ## 2.10.1
 ### Bugfix
 * fix glow effect of prompt when it don't have formatting

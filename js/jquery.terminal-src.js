@@ -3653,6 +3653,9 @@
         if (match_entity) {
             return match_entity[1];
         }
+        if (string.charCodeAt(0) < 255) {
+            return string[0];
+        }
         var match_emoji = string.match(emoji_re);
         if (match_emoji) {
             return match_emoji[1];
@@ -4269,10 +4272,8 @@
             // ----------------------------------------------------------------
             function next_iteration() {
                 var char = get_next_character(substring);
-                if ($.terminal.length(substring) > 1) {
-                    if (char.length > 1) {
-                        return char.length - 1;
-                    }
+                if (char.length > 1 && $.terminal.length(substring) > 1) {
+                    return char.length - 1;
                 }
                 return 0;
             }
@@ -8434,6 +8435,7 @@
                 }, options || {});
                 try {
                     var bottom = self.is_bottom();
+                    output.css('visibilty', 'hidden');
                     var wrapper;
                     // print all lines
                     // var output_buffer = lines.flush();
@@ -8464,6 +8466,7 @@
                         }
                     }
                     limit_lines();
+                    output.css('visibilty', '');
                     fire_event('onFlush');
                     //num_rows = get_num_rows(self, char_size);
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
