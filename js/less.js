@@ -330,7 +330,6 @@
                         if (line.substring(j).match(start_re)) {
                             var rep;
                             if (formatting && in_text) {
-                                var f_re = /\[\[([^;]+)/;
                                 var style = prev_format.match(/\[\[([^;]+)/);
                                 var new_format = ';;;terminal-inverted';
                                 style = style ? style[1] : '';
@@ -338,7 +337,6 @@
                                     new_format = style + new_format + ';';
                                     new_format += prev_format.replace(/]$/, '')
                                         .split(';').slice(4).join(';');
-                                    console.log(new_format);
                                 }
                                 rep = '][[' + new_format + ']$1]' + prev_format;
                             } else {

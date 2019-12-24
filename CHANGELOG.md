@@ -4,8 +4,9 @@
 ### Bugfix
 * fix empty lines in less
 * fix split_equal with keep works and formatting at the end.
+* fix searching inside links in less
 
-## 2.10.1
+## 2.10.1CHANGELOG.md
 ### Bugfix
 * fix glow effect of prompt when it don't have formatting
 * fix exec commands from echo
