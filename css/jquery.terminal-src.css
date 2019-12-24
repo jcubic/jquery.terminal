@@ -614,9 +614,15 @@ terminal .terminal-output > div {
 }
 .terminal .terminal-output > :not(.raw) a[href], .cmd a[href] {
     color: #0F60FF;
-    --color: var(--link-color, #0F60FF);
     color: var(--link-color, #0F60FF);
     cursor: pointer;
+}
+.cmd a[href]:not(.terminal-inverted),
+.terminal .terminal-output > :not(.raw) a[href]:not(.terminal-inverted) {
+    --color: var(--link-color, #0F60FF);
+}
+.terminal .terminal-output > :not(.raw) a[href].terminal-inverted {
+    background: var(--color, #ccc);
 }
 .terminal .terminal-output > :not(.raw) a[href]:hover, .cmd a[href]:hover {
     background-color: #0F60FF;
