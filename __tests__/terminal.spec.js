@@ -2050,12 +2050,12 @@ describe('Terminal utils', function() {
         });
         it('should render big text array', function() {
             term.less(big_text);
-            expect(get_lines()).toEqual(big_text.slice(0, rows - 1));
+            expect(get_lines()).toEqual(big_text.slice(0, rows));
         });
         it('should render big text string', async function() {
             term.less(big_text.join('\n'));
             await delay(10);
-            expect(get_lines()).toEqual(big_text.slice(0, rows - 1));
+            expect(get_lines()).toEqual(big_text.slice(0, rows));
         });
         it('should find 80 line', function() {
             term.less(big_text);
@@ -2075,7 +2075,7 @@ describe('Terminal utils', function() {
             term.less(big_text);
             search('less');
             var sel = selected();
-            expect(sel.length).toEqual(rows - 1);
+            expect(sel.length).toEqual(rows);
         });
         it('should find inside formatting', function() {
             term.less(big_text.concat(['[[;red;]foo bar baz]']));

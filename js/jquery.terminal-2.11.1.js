@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 24 Dec 2019 10:30:16 +0000
+ * Date: Wed, 25 Dec 2019 14:02:51 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -187,7 +187,10 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
-        define(['jquery', 'wcwidth'], factory);
+        define(['jquery', 'wcwidth'], function(jquery, wcwidth) {
+            factory(jquery, wcwidth, root);
+            return jquery;
+        });
     } else if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
         module.exports = function(root, jQuery, wcwidth) {
@@ -205,15 +208,15 @@
             if (wcwidth === undefined) {
                 wcwidth = require('wcwidth');
             }
-            factory(jQuery, wcwidth);
+            factory(jQuery, wcwidth, root);
             return jQuery;
         };
     } else {
         // Browser
         // istanbul ignore next
-        factory(root.jQuery, root.wcwidth);
+        factory(root.jQuery, root.wcwidth, root);
     }
-})(function($, wcwidth, undefined) {
+})(function($, wcwidth, root, undefined) {
     'use strict';
     // -----------------------------------------------------------------------
     // :: debug functions
@@ -3019,16 +3022,19 @@
                 } else if (user_prompt === undefined) {
                     return prompt;
                 } else {
+                    var should_redraw = user_prompt !== prompt;
                     if (typeof user_prompt === 'string' ||
                         typeof user_prompt === 'function') {
                         prompt = user_prompt;
                     } else {
                         throw new Error('prompt must be a function or string');
                     }
-                    draw_prompt();
-                    // we could check if command is longer then numchars-new
-                    // prompt
-                    redraw();
+                    if (should_redraw) {
+                        draw_prompt();
+                        // we could check if command is longer then numchars-new
+                        // prompt
+                        redraw();
+                    }
                     return self;
                 }
             },
@@ -4132,7 +4138,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 24 Dec 2019 10:30:16 +0000',
+        date: 'Wed, 25 Dec 2019 14:02:51 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6637,9 +6643,13 @@
         // ---------------------------------------------------------------------
         var output_buffer = [];
         var NEW_LINE = 1;
+        var format_cache;
+        if ('Map' in root) {
+            format_cache = new Map();
+        }
         function buffer_line(arg, index, options) {
             // urls should always have formatting to keep url if split
-            var i, len, data;
+            var i, len;
             output_buffer.push(NEW_LINE);
             var format_options = {
                 linksNoReferrer: settings.linksNoReferrer,
@@ -6649,31 +6659,36 @@
                 escape: false,
                 allowedAttributes: options.allowedAttributes || []
             };
+            var use_cache = settings.useCache && format_cache;
+            function format_buff(arg, newline) {
+                var args = JSON.stringify([arg, format_options]);
+                if (use_cache) {
+                    if (format_cache.has(args)) {
+                        return format_cache.get(args);
+                    }
+                }
+                var data = {
+                    line: $.terminal.format(
+                        arg,
+                        format_options
+                    ),
+                    newline: newline
+                };
+                if (use_cache) {
+                    format_cache.set(args, data);
+                }
+                return data;
+            }
             if (arg instanceof Array) {
                 for (i = 0, len = arg.length; i < len; ++i) {
                     if (arg[i] === '' || arg[i] === '\r') {
                         output_buffer.push({line: '<span></span>'});
                     } else {
-                        data = {
-                            line: $.terminal.format(
-                                arg[i],
-                                format_options
-                            )
-                        };
-                        if (i === len - 1) {
-                            data.newline = true;
-                        }
-                        output_buffer.push(data);
+                        output_buffer.push(format_buff(arg[i], i === len - 1));
                     }
                 }
             } else if (!options.raw) {
-                data = {
-                    line: $.terminal.format(
-                        arg,
-                        format_options
-                    )
-                };
-                output_buffer.push(data);
+                output_buffer.push(format_buff(arg));
             } else {
                 output_buffer.push({line: arg});
             }
@@ -6734,6 +6749,10 @@
                  options.wrap === true);
         }
         // ---------------------------------------------------------------------
+        var string_cache;
+        if ('Map' in root) {
+            string_cache = new Map();
+        }
         function process_line(line) {
             // prevent exception in display exception
             try {
@@ -6757,6 +6776,14 @@
                                 );
                             } catch (e) {
                                 display_exception(e, 'FORMATTING');
+                            }
+                        }
+                        if (settings.useCache) {
+                            var key = string;
+                            if (string_cache && string_cache.has(key)) {
+                                string = string_cache.get(key);
+                                buffer_line(string, line.index, line_settings);
+                                return;
                             }
                         }
                         if (line_settings.exec) {
@@ -6801,16 +6828,16 @@
                         if (should_wrap(string, line_settings)) {
                             var words = line_settings.keepWords;
                             array = $.terminal.split_equal(string, cols, words);
-                            buffer_line(array, line.index, line_settings);
                         } else if (string.match(/\n/)) {
                             array = string.split(/\n/);
-                            buffer_line(array, line.index, line_settings);
                         }
                     }
                 }
-                if (!array) {
-                    buffer_line(string, line.index, line_settings);
+                var arg = array || string;
+                if (string_cache && key) {
+                    string_cache.set(key, arg);
                 }
+                buffer_line(arg, line.index, line_settings);
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
@@ -6979,11 +7006,6 @@
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
-            if (self.is('body')) {
-                // source: https://stackoverflow.com/a/6639405/387194
-                // from comment by Šime Vidas
-                return window.innerWidth - document.documentElement.clientWidth > 0;
-            }
             return fill.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
@@ -7608,11 +7630,13 @@
                 if (fire_event('onClear') !== false) {
                     lines.forEach(function(line, i) {
                         var options = line[1];
-                        options.onClear.call(self, get_node(i));
+                        if (is_function(options.onClear)) {
+                            options.onClear.call(self, get_node(i));
+                        }
                     });
                     lines = [];
-                    output.html('');
-                    self.attr({scrollTop: 0});
+                    output[0].innerHTML = '';
+                    self.prop({scrollTop: 0});
                 }
                 return self;
             },
@@ -8287,6 +8311,17 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: function clear formatting cache if you don't longer need it
+            // :: cache is used if option useCache is set to true
+            // -------------------------------------------------------------
+            clear_cache: 'Map' in root ? function() {
+                format_cache.clear();
+                string_cache.clear();
+                return self;
+            } : function() {
+                return self;
+            },
+            // -------------------------------------------------------------
             // :: Disable the terminal
             // -------------------------------------------------------------
             disable: function(silent) {
@@ -8508,7 +8543,7 @@
                     while (output_buffer.length) {
                         var data = output_buffer.shift();
                         if (data === NEW_LINE) {
-                            wrapper = $('<div></div>');
+                            wrapper = $(document.createElement('div'));
                         } else if ($.isPlainObject(data) && is_function(data.finalize)) {
                             // this is finalize function from echo
                             if (options.update) {
@@ -8524,17 +8559,19 @@
                             data.finalize(wrapper);
                         } else {
                             var line = data.line;
-                            var div = $('<div/>').html(line)
-                                .appendTo(wrapper).width('100%');
+                            var div = document.createElement('div');
+                            div.style.width = '100%';
+                            div.innerHTML = line;
                             if (data.newline) {
-                                div.addClass('cmd-end-line');
+                                div.className = 'cmd-end-line';
                             }
+                            wrapper[0].appendChild(div);
                         }
                     }
                     limit_lines();
                     output.css('visibilty', '');
                     fire_event('onFlush');
-                    //num_rows = get_num_rows(self, char_size);
+
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
                     }
@@ -8626,7 +8663,7 @@
                             unmount: $.noop,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
-                            onClear: $.noop,
+                            onClear: null,
                             formatters: true,
                             allowedAttributes: settings.allowedAttributes
                         }, options || {});
@@ -8801,10 +8838,10 @@
                     pos = self.prop('scrollTop');
                     self.scrollTop(pos + amount);
                 } else {
-                    if (amount > self.attr('scrollTop') && amount > 0) {
-                        self.attr('scrollTop', 0);
+                    if (amount > self.prop('scrollTop') && amount > 0) {
+                        self.prop('scrollTop', 0);
                     }
-                    pos = self.attr('scrollTop');
+                    pos = self.prop('scrollTop');
                     self.scrollTop(pos + amount);
                 }
                 return self;
@@ -9227,8 +9264,8 @@
                 } else {
                     var scroll_height, scroll_top, height;
                     scroll_height = self[0].scrollHeight;
-                    scroll_top = self.scrollTop();
-                    height = self.outerHeight();
+                    scroll_top = self[0].scrollTop;
+                    height = self[0].offsetHeight;
                     var limit = scroll_height - settings.scrollBottomOffset;
                     return scroll_top + height > limit;
                 }

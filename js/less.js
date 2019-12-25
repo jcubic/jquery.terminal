@@ -148,12 +148,18 @@
         var prompt = '';
         var left = 0;
         var $output = term.find('.terminal-output');
+        var had_cache = term.option('useCache');
+        if (!had_cache) {
+            term.option('useCache', true);
+        }
         var cmd = term.cmd();
         var scroll_by = 3;
         //term.on('mousewheel', wheel);
         var in_search = false, last_found, search_string;
         // -------------------------------------------------------------------------------
         function print() {
+            // performance optimization
+            term.find('.terminal-output').css('visibilty', 'hidden');
             term.clear();
             if (lines.length - pos > rows - 1) {
                 prompt = ':';
@@ -161,9 +167,10 @@
                 prompt = '[[;;;cmd-inverted](END)]';
             }
             term.set_prompt(prompt);
-            var to_print = lines.slice(pos, pos + rows - 1);
+            var to_print = lines.slice(pos, pos + rows);
             to_print = to_print.map(function(line) {
-                if ($.terminal.length(line) > cols) {
+                var len = $.terminal.length(line);
+                if (len > cols) {
                     return $.terminal.substring(line, left, left + cols - 1);
                 }
                 return line;
@@ -189,6 +196,9 @@
         // -------------------------------------------------------------------------------
         var cache = {};
         function clear_cache() {
+            if (!had_cache) {
+                term.option('useCache', false).clear_cache();
+            }
             Object.keys(cache).forEach(function(width) {
                 Object.keys(cache[width]).forEach(function(img) {
                     cache[width][img].forEach(function(uri) {
