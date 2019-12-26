@@ -9223,6 +9223,11 @@
                             clearInterval(visibility_observer);
                         }
                     }
+                    var scroll_marker = self.find('.terminal-scroll-marker');
+                    if (is_bottom_observer) {
+                        visibility_observer.unobserve(scroll_marker[0]);
+                    }
+                    scroll_marker.remove();
                     if (mutation_observer) {
                         mutation_observer.disconnect();
                     }
@@ -9261,6 +9266,8 @@
             is_bottom: function() {
                 if (settings.scrollBottomOffset === -1) {
                     return false;
+                } else if (typeof is_bottom_detected === 'boolean') {
+                    return is_bottom_detected;
                 } else {
                     var scroll_height, scroll_top, height;
                     scroll_height = self[0].scrollHeight;
@@ -9292,7 +9299,7 @@
             };
         }));
         // -----------------------------------------------------------------
-        // INIT CODE
+        // :: INIT CODE
         // -----------------------------------------------------------------
         if (self.length === 0) {
             var msg = sprintf(strings().invalidSelector);
@@ -9314,6 +9321,8 @@
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
+        var is_bottom_detected;
+        var is_bottom_observer;
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;// used to indicate that user call pause onInit
@@ -9773,6 +9782,27 @@
                     self.resize();
                 }, options);
             }
+            function bottom_detect(intersections) {
+                is_bottom_detected = intersections[0].intersectionRatio === 1;
+            }
+            function create_bottom_detect() {
+                if (window.IntersectionObserver) {
+                    var top = $('<div class="terminal-scroll-marker"/>').appendTo(self);
+                    var marker = top;
+                    if (settings.scrollBottomOffset !== -1) {
+                        marker = $('<div/>').css({
+                            height: settings.scrollBottomOffset
+                        }).appendTo(top);
+                    }
+                    is_bottom_observer = new IntersectionObserver(bottom_detect, {
+                        root: self[0]
+                    });
+                    is_bottom_observer.observe(marker[0]);
+                }
+            }
+            // this observer can be added imedietely even if terminal is not in the DOM
+            // because both of the elements (root and target) are in same fragment
+            create_bottom_detect();
             if (self.is(':visible')) {
                 create_resizers();
             }
@@ -9828,9 +9858,8 @@
                     if (self.closest('body').length) {
                         if (!in_dom) {
                             self.scroll_to_bottom();
-                            if (window.IntersectionObserver) {
-                                observe_visibility();
-                            }
+                            // this observer need to be added when terminal is in the DOM
+                            observe_visibility();
                             resize();
                         }
                         in_dom = true;

@@ -2,7 +2,7 @@
 ### Features
 * improve performance
 * add cache for formatting and processing lines
-* big improvements to less plugin re-rendering (e.g. when scrolling text with keys)
+* big improvements to less plugin re-rendering (e.g. when scrolling text with keyboard)
 ### Bugfix
 * fix empty lines in less
 * fix split_equal with keep works and formatting at the end.

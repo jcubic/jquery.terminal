@@ -2050,12 +2050,12 @@ describe('Terminal utils', function() {
         });
         it('should render big text array', function() {
             term.less(big_text);
-            expect(get_lines()).toEqual(big_text.slice(0, rows));
+            expect(get_lines()).toEqual(big_text.slice(0, rows - 1));
         });
         it('should render big text string', async function() {
             term.less(big_text.join('\n'));
             await delay(10);
-            expect(get_lines()).toEqual(big_text.slice(0, rows));
+            expect(get_lines()).toEqual(big_text.slice(0, rows - 1));
         });
         it('should find 80 line', function() {
             term.less(big_text);
@@ -2075,7 +2075,7 @@ describe('Terminal utils', function() {
             term.less(big_text);
             search('less');
             var sel = selected();
-            expect(sel.length).toEqual(rows);
+            expect(sel.length).toEqual(rows - 1);
         });
         it('should find inside formatting', function() {
             term.less(big_text.concat(['[[;red;]foo bar baz]']));
@@ -3196,7 +3196,7 @@ describe('Terminal plugin', function() {
         });
     });
     describe('observers', function() {
-        var i_callback, m_callback, test, term;
+        var i_callback, m_callback, test, term, s_callback;
         function init() {
             beforeEach(function() {
                 test = {
@@ -3204,10 +3204,15 @@ describe('Terminal plugin', function() {
                 };
                 spy(test, 'fn');
                 i_callback = [];
-                window.IntersectionObserver = function(callback) {
-                    i_callback.push(callback);
+                s_callback = [];
+                window.IntersectionObserver = function(callback, options) {
                     return {
-                        observe: function() {
+                        observe: function(node) {
+                            if (options.root === null) {
+                                i_callback.push(callback);
+                            } else {
+                                s_callback.push(callback);
+                            }
                         },
                         unobserve: function() {
                             for (var i = i_callback.length; --i;) {

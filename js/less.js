@@ -167,7 +167,7 @@
                 prompt = '[[;;;cmd-inverted](END)]';
             }
             term.set_prompt(prompt);
-            var to_print = lines.slice(pos, pos + rows);
+            var to_print = lines.slice(pos, pos + rows - 1);
             to_print = to_print.map(function(line) {
                 var len = $.terminal.length(line);
                 if (len > cols) {
