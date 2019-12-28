@@ -252,6 +252,10 @@ require('../js/echo_newline')(global.$);
 require('../js/autocomplete_menu')(global.$);
 require('../js/less')(global.$);
 
+var fs = require('fs');
+var util = require('util');
+fs.readFileAsync = util.promisify(fs.readFile);
+
 jest.setTimeout(20000);
 
 function nbsp(string) {
@@ -543,6 +547,16 @@ describe('Terminal utils', function() {
                 unixFormattingEscapeBrackets: true
             });
             expect(output).toEqual('foo &#91; bar &#93;');
+        });
+        it('should format plots with moving cursors', function() {
+            return Promise.all([
+                fs.readFileAsync('__tests__/ervy-plot-01'),
+                fs.readFileAsync('__tests__/ervy-plot-02')
+            ]).then(function(plots) {
+                plots.forEach(function(plot) {
+                    expect($.terminal.from_ansi(plot.toString())).toMatchSnapshot();
+                });
+            });
         });
     });
     describe('$.terminal.overtyping', function() {

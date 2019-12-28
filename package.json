@@ -320,6 +320,7 @@
   },
   "dependencies": {
     "@types/jquery": "^3.3.29",
+    "ervy": "^1.0.5",
     "jquery": "~3",
     "prismjs": "^1.16.0",
     "wcwidth": "^1.0.1"

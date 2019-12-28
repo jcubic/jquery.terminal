@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Terminal utils $.terminal.from_ansi should format plots with moving cursors 1`] = `
+"  Y Axis                  Foo: [[;#A00;]#]
+   A
+ 10|                              
+   |                              
+  8|                              
+   |                              
+  6|         [[;#A00;]#] [[;#A00;]#]                  
+   |                              
+  4|                              
+   |                              
+  2|   [[;#A00;]#] [[;#A00;]#] [[;#A00;]#]                      
+   | [[;#A00;]#]                            
+   +---+---+---+---+---+----+----+----+-> X Axis
+   0   2   4   6   8   10   12   14   "
+`;
+
+exports[`Terminal utils $.terminal.from_ansi should format plots with moving cursors 2`] = `
+"  Y Axis                  A: [[;#A00;]*] | B: [[;#00A;]# ] | C: [[;;#0AA]  ]
+   A
+ 10|                              
+   |           [[;;#0AA]  ]                 
+  8|                              
+   |   [[;#00A;]# ][[;#00A;]# ]    [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*]                                   [[;#A00;]*]
+  6|   [[;#00A;]# ][[;#00A;]# ]  [[;#A00;]*]                    
+   |       [[;#A00;]*]                      
+  4|     [[;#A00;]*]                        
+   |   [[;#A00;]*]                          
+  2| [[;#A00;]*]                            
+   |                              
+   +---+---+---+---+---+----+----+----+-> X Axis                               
+   0   2   4   6   8   10   12   14   "
+`;

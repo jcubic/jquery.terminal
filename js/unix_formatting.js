@@ -12,6 +12,8 @@
  * Copyright (c) 2014-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
+ * Last Update in jQuery Terminal 2.11.0
+ *
  */
 /* global define, global, require, module */
 (function(factory) {
@@ -50,6 +52,14 @@
         factory(root.jQuery);
     }
 })(function($) {
+    /* eslint-disable */
+    function warn(str) {
+        if ('warn' in console) {
+            console.warn(str);
+        }
+    }
+    /* eslint-enable */
+    // ---------------------------------------------------------------------
     $.terminal.defaults.unixFormattingEscapeBrackets = false;
     // we match characters and html entities because command line escape brackets
     // echo don't, when writing formatter always process html entitites so it work
@@ -498,19 +508,14 @@
             var ret = [styles.join(''), color, background];
             return ret;
         }
-        return function from_ansi(input, options) {
-            options = options || {};
-            input = $.terminal.unescape_brackets(input);
-            var settings = $.extend({
-                unixFormattingEscapeBrackets: false,
-                position: 0
-            }, options);
-            var state = {}; // used to inherit vales from previous formatting
-            var new_position = settings.position;
-            var position = new_position;
+        // -------------------------------------------------------------------------------
+        var ansi_re = /(\x1B\[[0-9;]*[A-Za-z])/g;
+        var cursor_re = /(.*)\r?\n\x1b\[1A\x1b\[([0-9]+)C/;
+        var move_cursor_split = /(\x1b\[[0-9]+[A-G])/g;
+        var move_cursor_match = /^\x1b\[([0-9]+)([A-G])/;
+        // -------------------------------------------------------------------------------
+        function parse_ansi_cursor(input) {
             var result;
-            var ansi_re = /(\x1B\[[0-9;]*[A-Za-z])/g;
-            var cursor_re = /(.*)\r?\n\x1b\[1A\x1b\[([0-9]+)C/g;
             // move up and right we need to delete what's after in previous line
             input = input.replace(cursor_re, function(_, line, n) {
                 n = parseInt(n, 10);
@@ -532,11 +537,182 @@
                 }
                 return result.join('');
             });
-            // move right is just repate space
+            function length(text) {
+                return text.replace(ansi_re, '').length;
+            }
+            function get_index(text, x) {
+                var splitted = text.split(ansi_re);
+                var format = 0;
+                var count = 0;
+                var prev_count = 0;
+                for (var i = 0; i < splitted.length; i++) {
+                    var string = splitted[i];
+                    if (string) {
+                        if (string.match(ansi_re)) {
+                            format += string.length;
+                        } else {
+                            count += string.length;
+                            if (count >= x) {
+                                var rest = x - prev_count;
+                                return format + rest;
+                            }
+                            prev_count = count;
+                        }
+                    }
+                }
+                return i;
+            }
+            function insert(text) {
+                if (!text) {
+                    return;
+                }
+                if (!result[cursor.y]) {
+                    result[cursor.y] = [];
+                }
+                var index = 0;
+                var sum = 0;
+                var len, after;
+                function inject() {
+                    index++;
+                    if (result[cursor.y][index]) {
+                        result[cursor.y].splice(index, 0, null);
+                    }
+                }
+                if (cursor.x === 0 && result[cursor.y][index]) {
+                    source = result[cursor.y][0];
+                    len = length(text);
+                    var i = get_index(source, len);
+                    if (length(source) < len) {
+                        after = result[cursor.y][index + 1];
+                        if (after) {
+                            i = get_index(after, len - length(source));
+                            after = after.substring(i);
+                            result[cursor.y].splice(index, 2, null, after);
+                        } else {
+                            result[cursor.y].splice(index, 1, null);
+                        }
+                    } else {
+                        after = source.substring(i);
+                        result[cursor.y].splice(index, 1, null, after);
+                        result[cursor.y].splice(index, 1, null);
+                    }
+                } else {
+                    var limit = 100000; // infite loop guard
+                    while (index < cursor.x) {
+                        if (!limit--) {
+                            warn('[WARN] To many loops');
+                            break;
+                        }
+                        var source = result[cursor.y][index];
+                        if (!source) {
+                            result[cursor.y].push(new Array(cursor.x + 1).join(' '));
+                            index++;
+                            break;
+                        }
+                        if (sum === cursor.x) {
+                            inject();
+                            break;
+                        }
+                        len = length(source);
+                        var prev_sum = sum;
+                        sum += len;
+                        if (sum === cursor.x) {
+                            inject();
+                            break;
+                        }
+                        if (sum > cursor.x) {
+                            var pivot = get_index(source, cursor.x - prev_sum);
+                            var before = source.substring(0, pivot);
+                            var end = get_index(source, length(text));
+                            after = source.substring(pivot + end);
+                            if (!after.length) {
+                                result[cursor.y].splice(index, 1, before, text);
+                            } else {
+                                result[cursor.y].splice(index, 1, before, null, after);
+                            }
+                            index++;
+                            break;
+                        } else {
+                            index++;
+                        }
+                    }
+                }
+                cursor.x += length(text);
+                result[cursor.y][index] = text;
+            }
+            if (input.match(move_cursor_split)) {
+                var lines = input.split('\n').filter(Boolean);
+                var cursor = {x: 0, y: -1};
+                result = [];
+                for (var i = 0; i < lines.length; ++i) {
+                    var string = lines[i];
+                    cursor.x = 0;
+                    cursor.y++;
+                    var splitted = string.split(move_cursor_split).filter(Boolean);
+                    for (var j = 0; j < splitted.length; ++j) {
+                        var part = splitted[j];
+                        var match = part.match(move_cursor_match);
+                        if (match) {
+                            var ansi_code = match[2];
+                            var value = +match[1];
+                            if (value === 0) {
+                                continue;
+                            }
+                            switch (ansi_code) {
+                                case 'A': // UP
+                                    cursor.y -= value + 1;
+                                    break;
+                                case 'B': // Down
+                                    cursor.y += value;
+                                    break;
+                                case 'C': // forward
+                                    cursor.x += value + 1;
+                                    break;
+                                case 'D': // Back
+                                    cursor.x -= value;
+                                    break;
+                                case 'E': // Cursor Next Line
+                                    cursor.x = 0;
+                                    cursor.y += value;
+                                    break;
+                                case 'F': // Cursor Previous Line
+                                    cursor.x = 0;
+                                    cursor.y -= value;
+                                    break;
+                            }
+                        } else {
+                            insert(part);
+                        }
+                    }
+                }
+                return result.map(function(line) {
+                    return line.join('');
+                }).join('\n');
+            }
+            return input;
+        }
+        // -------------------------------------------------------------------------------
+        return function from_ansi(input, options) {
+            options = options || {};
+            input = $.terminal.unescape_brackets(input);
+            var settings = $.extend({
+                unixFormattingEscapeBrackets: false,
+                position: 0
+            }, options);
+            var state = {}; // used to inherit vales from previous formatting
+            var new_position = settings.position;
+            var position = new_position;
+            var result;
+            var splitted;
+            // parse_ansi_cursor function don't work for some ANSI art
+            // this is working for all cases
             input = input.replace(/\x1b\[([0-9]+)C/g, function(_, num) {
                 return new Array(+num + 1).join(' ');
             });
-            var splitted = input.split(ansi_re);
+            if (input.match(ansi_re)) {
+                input = parse_ansi_cursor(input);
+            }
+            splitted = input.split(ansi_re);
             if (splitted.length === 1) {
                 if (settings.unixFormattingEscapeBrackets) {
                     result = $.terminal.escape_formatting(input);
