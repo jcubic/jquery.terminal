@@ -1,4 +1,4 @@
-## 2.11.0
+## 2.12.0
 ### Features
 * improve performance
 * add cache for formatting and processing lines
@@ -9,7 +9,7 @@
 * fix split_equal with keep works and formatting at the end.
 * fix searching inside links in less
 
-## 2.10.1
+## 2.10.1 (released on npm as 2.11.1)
 ### Bugfix
 * fix glow effect of prompt when it don't have formatting
 * fix exec commands from echo
