@@ -55,6 +55,7 @@
     }
 })(function($) {
     /* eslint-disable */
+    /* istanbul ignore next */
     function warn(str) {
         if ('warn' in console) {
             console.warn(str);
@@ -63,6 +64,7 @@
     // node-ansiparser
     // The MIT License (MIT)
     // Copyright (c) 2014 Joerg Breitbart
+    /* istanbul ignore next */
     var AnsiParser = (function () {
         'use strict';
 
