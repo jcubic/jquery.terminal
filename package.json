@@ -330,6 +330,7 @@
     "emoji-datasource-twitter": "^4.1.0",
     "eslint": "^5.16.0",
     "gm": "^1.23.1",
+    "iconv-lite": "^0.5.0",
     "jest": "^24.8.0",
     "jsonlint": "^1.6.3",
     "typescript": "^3.1.6",
