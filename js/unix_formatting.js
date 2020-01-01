@@ -986,14 +986,21 @@
                     }
                     cursor.x += s_len;
                 };
+                var use_CR = !!input.match(/\x0D/);
                 var events = {
                     inst_p: print,
-                    inst_x: function(flag) {
+                    inst_x: use_CR ? function(flag) {
                         var code = flag.charCodeAt(0);
                         if (code === 13) {
                             cursor.x = 0;
                         }
                         if (code === 10) {
+                            cursor.y++;
+                        }
+                    } : function(flag) {
+                        var code = flag.charCodeAt(0);
+                        if (code === 10) {
+                            cursor.x = 0;
                             cursor.y++;
                         }
                     },
