@@ -148,12 +148,18 @@
         var prompt = '';
         var left = 0;
         var $output = term.find('.terminal-output');
+        var had_cache = term.option('useCache');
+        if (!had_cache) {
+            term.option('useCache', true);
+        }
         var cmd = term.cmd();
         var scroll_by = 3;
         //term.on('mousewheel', wheel);
         var in_search = false, last_found, search_string;
         // -------------------------------------------------------------------------------
         function print() {
+            // performance optimization
+            term.find('.terminal-output').css('visibilty', 'hidden');
             term.clear();
             if (lines.length - pos > rows - 1) {
                 prompt = ':';
@@ -163,7 +169,8 @@
             term.set_prompt(prompt);
             var to_print = lines.slice(pos, pos + rows - 1);
             to_print = to_print.map(function(line) {
-                if ($.terminal.length(line) > cols) {
+                var len = $.terminal.length(line);
+                if (len > cols) {
                     return $.terminal.substring(line, left, left + cols - 1);
                 }
                 return line;
@@ -189,6 +196,9 @@
         // -------------------------------------------------------------------------------
         var cache = {};
         function clear_cache() {
+            if (!had_cache) {
+                term.option('useCache', false).clear_cache();
+            }
             Object.keys(cache).forEach(function(width) {
                 Object.keys(cache[width]).forEach(function(img) {
                     cache[width][img].forEach(function(uri) {
@@ -256,46 +266,45 @@
         // -------------------------------------------------------------------------------
         function image_formatter(text) {
             var defer = $.Deferred();
-            var parts = text.split(img_split_re).filter(Boolean);
-            if (parts.length === 1 && !parts[0].match(img_re)) {
+            if (!text.match(img_re)) {
                 return text.split('\n');
-            } else {
-                var result = [];
-                (function recur() {
-                    function concat_slices(slices) {
-                        cache[width][img] = slices;
-                        result = result.concat(slices.map(function(uri) {
-                            return '[[@;;;;' + uri + ']]';
-                        }));
-                        recur();
-                    }
-                    if (!parts.length) {
-                        return defer.resolve(result);
-                    }
-                    var part = parts.shift();
-                    var m = part.match(img_re);
-                    if (m) {
-                        var img = m[1];
-                        var rect = cursor_size();
-                        var width = term.width();
-                        var opts = {width: width, line_height: rect.height};
-                        cache[width] = cache[width] || {};
-                        if (cache[width][img]) {
-                            concat_slices(cache[width][img]);
-                        } else {
-                            slice(img, opts).then(concat_slices).catch(function() {
-                                var msg = $.terminal.escape_brackets('[BROKEN IMAGE]');
-                                var cls = 'terminal-broken-image';
-                                result.push('[[;#c00;;' + cls + ']' + msg + ']');
-                                recur();
-                            });
-                        }
-                    } else {
-                        result = result.concat(part.split('\n'));
-                        recur();
-                    }
-                })();
             }
+            var parts = text.split(img_split_re).filter(Boolean);
+            var result = [];
+            (function recur() {
+                function concat_slices(slices) {
+                    cache[width][img] = slices;
+                    result = result.concat(slices.map(function(uri) {
+                        return '[[@;;;;' + uri + ']]';
+                    }));
+                    recur();
+                }
+                if (!parts.length) {
+                    return defer.resolve(result);
+                }
+                var part = parts.shift();
+                var m = part.match(img_re);
+                if (m) {
+                    var img = m[1];
+                    var rect = cursor_size();
+                    var width = term.width();
+                    var opts = {width: width, line_height: rect.height};
+                    cache[width] = cache[width] || {};
+                    if (cache[width][img]) {
+                        concat_slices(cache[width][img]);
+                    } else {
+                        slice(img, opts).then(concat_slices).catch(function() {
+                            var msg = $.terminal.escape_brackets('[BROKEN IMAGE]');
+                            var cls = 'terminal-broken-image';
+                            result.push('[[;#c00;;' + cls + ']' + msg + ']');
+                            recur();
+                        });
+                    }
+                } else {
+                    result = result.concat(part.split('\n'));
+                    recur();
+                }
+            })();
             return defer.promise();
         }
         // -------------------------------------------------------------------------------
@@ -331,7 +340,15 @@
                         if (line.substring(j).match(start_re)) {
                             var rep;
                             if (formatting && in_text) {
-                                rep = '][[;;;terminal-inverted]$1]' + prev_format;
+                                var style = prev_format.match(/\[\[([^;]+)/);
+                                var new_format = ';;;terminal-inverted';
+                                style = style ? style[1] : '';
+                                if (style.match(/!/)) {
+                                    new_format = style + new_format + ';';
+                                    new_format += prev_format.replace(/]$/, '')
+                                        .split(';').slice(4).join(';');
+                                }
+                                rep = '][[' + new_format + ']$1]' + prev_format;
                             } else {
                                 rep = '[[;;;terminal-inverted]$1]';
                             }

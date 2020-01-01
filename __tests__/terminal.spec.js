@@ -192,7 +192,7 @@ global.location = global.window.location = {hash: ''};
 global.document = window.document;
 global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
-
+var iconv = require('iconv-lite');
 // mock Canvas & Image
 var gm = require('gm');
 window.Image = class Image {
@@ -251,6 +251,10 @@ require('../js/pipe')(global.$);
 require('../js/echo_newline')(global.$);
 require('../js/autocomplete_menu')(global.$);
 require('../js/less')(global.$);
+
+var fs = require('fs');
+var util = require('util');
+fs.readFileAsync = util.promisify(fs.readFile);
 
 jest.setTimeout(20000);
 
@@ -537,12 +541,27 @@ describe('Terminal utils', function() {
             var output = $.terminal.from_ansi(input);
             expect(output).toEqual(input);
         });
-        it('should escape brakets', function() {
-            var input = 'foo [ bar ]';
-            var output = $.terminal.from_ansi(input, {
-                unixFormattingEscapeBrackets: true
+        it('should format plots with moving cursors', function() {
+            return Promise.all([
+                fs.readFileAsync('__tests__/ervy-plot-01'),
+                fs.readFileAsync('__tests__/ervy-plot-02')
+            ]).then(function(plots) {
+                plots.forEach(function(plot) {
+                    expect($.terminal.from_ansi(plot.toString())).toMatchSnapshot();
+                });
             });
-            expect(output).toEqual('foo &#91; bar &#93;');
+        });
+        it('should render ANSI art', function() {
+            return Promise.all(['nf-marble.ans', 'bs-pacis.ans'].map(fname => {
+                return fs.readFileAsync(`__tests__/${fname}`).then(data => {
+                    var str = iconv.decode(data, 'CP437');
+                    return $.terminal.from_ansi(str);
+                });
+            })).then(data => {
+                data.forEach(ansi => {
+                    expect(ansi).toMatchSnapshot();
+                });
+            });
         });
     });
     describe('$.terminal.overtyping', function() {
@@ -1378,6 +1397,11 @@ describe('Terminal utils', function() {
             var text = '[[;;]foo\nbar]';
             var output = $.terminal.split_equal(text, 50);
             expect(output).toEqual(['[[;;;;foo\\nbar]foo]', '[[;;;;foo\\nbar]bar]']);
+        });
+        it('should not split on words of full formatting when text have less length', function() {
+            var text = '[[;red;]xxx xx xx]';
+            var output = $.terminal.split_equal(text, 100, true);
+            expect(output).toEqual([$.terminal.normalize(text)]);
         });
     });
     describe('Cycle', function() {
@@ -3191,7 +3215,7 @@ describe('Terminal plugin', function() {
         });
     });
     describe('observers', function() {
-        var i_callback, m_callback, test, term;
+        var i_callback, m_callback, test, term, s_callback;
         function init() {
             beforeEach(function() {
                 test = {
@@ -3199,10 +3223,15 @@ describe('Terminal plugin', function() {
                 };
                 spy(test, 'fn');
                 i_callback = [];
-                window.IntersectionObserver = function(callback) {
-                    i_callback.push(callback);
+                s_callback = [];
+                window.IntersectionObserver = function(callback, options) {
                     return {
-                        observe: function() {
+                        observe: function(node) {
+                            if (options.root === null) {
+                                i_callback.push(callback);
+                            } else {
+                                s_callback.push(callback);
+                            }
                         },
                         unobserve: function() {
                             for (var i = i_callback.length; --i;) {

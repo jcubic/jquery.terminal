@@ -1,4 +1,15 @@
-## 2.10.1
+## 2.12.0
+### Features
+* improve performance
+* add cache for formatting and processing lines
+* big improvements to less plugin re-rendering (e.g. when scrolling text with keyboard)
+* cursor movement in unix formatting (virtual cursor not supported in cmd, because it make no sense)
+### Bugfix
+* fix empty lines in less
+* fix split_equal with keep works and formatting at the end.
+* fix searching inside links in less
+
+## 2.10.1 (released on npm as 2.11.1)
 ### Bugfix
 * fix glow effect of prompt when it don't have formatting
 * fix exec commands from echo

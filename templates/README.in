@@ -257,6 +257,17 @@ If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 <!-- CONTRIBUTORS-WWW-END -->
 
 
+### Credits
+
+Project used:
+
+* [Storage plugin](https://sites.google.com/site/daveschindler/jquery-html5-storage-plugin) by Dave Schindler (MIT)
+* [jQuery Timers](http://jquery.offput.ca/every/) (WTFPL)
+* [Cross-Browser Split](http://blog.stevenlevithan.com/archives/cross-browser-split) by [Steven Levithan](http://stevenlevithan.com/) (MIT)
+* [jQuery Caret](https://github.com/accursoft/caret) by Gideon Sireling (3-BSD)
+* [sprintf.js](https://github.com/alexei/sprintf.js) by [Alexandru Mărășteanu](http://alexei.ro/) (3-BSD)
+* [node-ansiparser](https://github.com/netzkolchose/node-ansiparser) by Joerg Breitbart (MIT)
+
 ### License
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license

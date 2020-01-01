@@ -187,7 +187,10 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
-        define(['jquery', 'wcwidth'], factory);
+        define(['jquery', 'wcwidth'], function(jquery, wcwidth) {
+            factory(jquery, wcwidth, root);
+            return jquery;
+        });
     } else if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
         module.exports = function(root, jQuery, wcwidth) {
@@ -205,15 +208,15 @@
             if (wcwidth === undefined) {
                 wcwidth = require('wcwidth');
             }
-            factory(jQuery, wcwidth);
+            factory(jQuery, wcwidth, root);
             return jQuery;
         };
     } else {
         // Browser
         // istanbul ignore next
-        factory(root.jQuery, root.wcwidth);
+        factory(root.jQuery, root.wcwidth, root);
     }
-})(function($, wcwidth, undefined) {
+})(function($, wcwidth, root, undefined) {
     'use strict';
     // -----------------------------------------------------------------------
     // :: debug functions
@@ -1036,14 +1039,14 @@
     })();
     // -------------------------------------------------------------------------
     /* eslint-disable */
+    var entity_re = /(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
     // regex that match single character at begining and folowing combine character
     // https://en.wikipedia.org/wiki/Combining_character
-    var combine_chr_re = /^(.(?:[\u0300-\u036F]|[\u1AB0-\u1abE]|[\u1DC0-\u1DF9]|[\u1DFB-\u1DFF]|[\u20D0-\u20F0]|[\uFE20-\uFE2F])+)/;
+    var combine_chr_re = /(.(?:[\u0300-\u036F]|[\u1AB0-\u1abE]|[\u1DC0-\u1DF9]|[\u1DFB-\u1DFF]|[\u20D0-\u20F0]|[\uFE20-\uFE2F])+)/;
     // source: https://mathiasbynens.be/notes/javascript-unicode
-    var astral_symbols_re = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+    var astral_symbols_re = /([\uD800-\uDBFF][\uDC00-\uDFFF])/;
     // source: https://github.com/mathiasbynens/emoji-regex
-    var emoji_re = /^(\uD83C\uDFF4(?:\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74)\uDB40\uDC7F|\u200D\u2620\uFE0F)|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3]))|\uD83D\uDC69\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\uD83D\uDC68(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83D\uDC69\u200D[\u2695\u2696\u2708])\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC68(?:\u200D(?:(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D[\uDC66\uDC67])|\uD83C[\uDFFB-\uDFFF])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83C\uDDF6\uD83C\uDDE6|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])\uFE0F|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDD1-\uDDDD]))/;
-    var entity_re = /^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
+    var emoji_re = /(\uD83C\uDFF4(?:\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74)\uDB40\uDC7F|\u200D\u2620\uFE0F)|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3]))|\uD83D\uDC69\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\uD83D\uDC68(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83D\uDC69\u200D[\u2695\u2696\u2708])\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC68(?:\u200D(?:(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D[\uDC66\uDC67])|\uD83C[\uDFFB-\uDFFF])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83C\uDDF6\uD83C\uDDE6|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])\uFE0F|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDD1-\uDDDD]))/;
     // https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
     var mobile_re = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i;
     var tablet_re = /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i;
@@ -3019,16 +3022,19 @@
                 } else if (user_prompt === undefined) {
                     return prompt;
                 } else {
+                    var should_redraw = user_prompt !== prompt;
                     if (typeof user_prompt === 'string' ||
                         typeof user_prompt === 'function') {
                         prompt = user_prompt;
                     } else {
                         throw new Error('prompt must be a function or string');
                     }
-                    draw_prompt();
-                    // we could check if command is longer then numchars-new
-                    // prompt
-                    redraw();
+                    if (should_redraw) {
+                        draw_prompt();
+                        // we could check if command is longer then numchars-new
+                        // prompt
+                        redraw();
+                    }
                     return self;
                 }
             },
@@ -3488,6 +3494,7 @@
                 } else {
                     var str = val.slice(position);
                     if (str.length === 1 || backspace) {
+                        // original not optimized function called once
                         var chr = get_next_character(str);
                         if (mobile_ignore_key(chr)) {
                             skip_input = true;
@@ -3644,53 +3651,88 @@
         return entity_re.test(chr) ? 1 : chr.length;
     }
     // -------------------------------------------------------------------------
-    // :: local function used in get_next_character to process single formatting
-    // -------------------------------------------------------------------------
-    /* TODO: remove before release 2.8.1 or 2.9.0
-    function process_single_formatter(string) {
-        return string.replace(format_full_re, function(_, formatting, text, br) {
-            return formatting + get_next_character(text) + br;
-        });
+    function make_re_fn(re) {
+        return function(string) {
+            var m = string.match(re);
+            if (starts_with(m)) {
+                return m[1];
+            }
+        };
     }
-    */
+    // -------------------------------------------------------------------------
+    function starts_with(match) {
+        return match && match.index === 0;
+    }
+    // -------------------------------------------------------------------------
+    // :: optimized higher order function that it check complex regexes
+    // :: only when bigger string match those regexes, function is always
+    // :: used in loop when you process whole string, it's used to create local
+    // :: get_next_character function only cmd in input use original
+    // :: not optimized function
+    // -------------------------------------------------------------------------
+    function make_next_char_fun(string) {
+        var tests = [];
+        [
+            entity_re,
+            emoji_re,
+            combine_chr_re
+        ].forEach(function(re) {
+            if (string.match(re)) {
+                tests.push(make_re_fn(re));
+            }
+        });
+        if (string.match(astral_symbols_re)) {
+            tests.push(function(string) {
+                var m1 = string.match(astral_symbols_re);
+                if (starts_with(m1)) {
+                    var m2 = string.match(combine_chr_re);
+                    if (m2 && m2.index === 1) {
+                        return string.slice(0, 3);
+                    }
+                    return m1[1];
+                }
+            });
+        }
+        return function(string) {
+            for (var i = 0; i < tests.length; ++i) {
+                var test = tests[i];
+                var ret = test(string);
+                if (ret) {
+                    return ret;
+                }
+            }
+            return string[0];
+        };
+    }
     // -------------------------------------------------------------------------
     // :: function that return character from beginning of the string
     // :: counting emoji, suroggate pairs and combine characters
     // -------------------------------------------------------------------------
     function get_next_character(string) {
-        /*
-        // this is very slow and it's used in iterate formatting when not in formatting
-        if (false && $.terminal.have_formatting(string)) {
-            if ($.terminal.is_formatting(string)) {
-                return process_single_formatter(string);
-            } else {
-                $.terminal.format_split(string).map(function(string) {
-                    if ($.terminal.is_formatting(string)) {
-                        return process_single_formatter(string);
-                    }
-                    return get_next_character(string);
-                }).join('');
-            }
-        }
-        */
         var match_entity = string.match(entity_re);
-        if (match_entity) {
+        if (starts_with(match_entity)) {
             return match_entity[1];
         }
+        var match_combo = string.match(combine_chr_re);
+        if (starts_with(match_combo)) {
+            return match_combo[1];
+        }
         var match_emoji = string.match(emoji_re);
-        if (match_emoji) {
+        if (starts_with(match_emoji)) {
             return match_emoji[1];
-        } else if (string.slice(0, 2).replace(astral_symbols_re, '_') === 1) {
-            if (string.slice(1).match(combine_chr_re)) {
-                return string.slice(0, 3);
-            }
-            return string.slice(0, 2);
-        } else {
-            var match_combo = string.match(combine_chr_re);
-            if (match_combo) {
-                return match_combo[1];
-            }
+        } else if (string.charCodeAt(0) < 255) {
             return string[0];
+        } else {
+            var astral_match = string.match(astral_symbols_re);
+            if (starts_with(astral_match)) {
+                match_combo = string.match(combine_chr_re);
+                if (match_combo && match_combo.index === 1) {
+                    return string.slice(0, 3);
+                }
+                return string.slice(0, 2);
+            } else {
+                return string[0];
+            }
         }
     }
     // -------------------------------------------------------------------------
@@ -4290,13 +4332,14 @@
             }
             // ----------------------------------------------------------------
             // :: function will skip to next character in main loop
+            // :: TODO: improve performance of emoji regex and check whole
+            // :: string it's complex string if not use simple function
             // ----------------------------------------------------------------
+            var get_next_character = make_next_char_fun(string);
             function next_iteration() {
                 var char = get_next_character(substring);
-                if ($.terminal.length(substring) > 1) {
-                    if (char.length > 1) {
-                        return char.length - 1;
-                    }
+                if (char.length > 1 && $.terminal.length(substring) > 1) {
+                    return char.length - 1;
                 }
                 return 0;
             }
@@ -4582,6 +4625,7 @@
                     continue;
                 }
                 var line = array[i];
+                var get_next_character = make_next_char_fun(line);
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
@@ -4605,9 +4649,13 @@
                         }
                         // if words is true we split at last space and make next loop
                         // continue where the space where located
+                        var after_index = data.index + data.size;
+                        if (last_bracket) {
+                            after_index += 1;
+                        }
                         var new_index;
                         if (keep_words && data.space !== -1 &&
-                            data.index !== line_length - 1 && can_break) {
+                            after_index !== line_length && can_break) {
                             output = line.slice(first_index, data.space);
                             new_index = data.space - 1;
                         } else {
@@ -4784,7 +4832,7 @@
         // ---------------------------------------------------------------------
         apply_formatters: function apply_formatters(string, settings) {
             if (string === "") {
-                if (typeof settings.position === 'number') {
+                if (settings && typeof settings.position === 'number') {
                     return ["", settings.position];
                 } else {
                     return "";
@@ -5104,9 +5152,9 @@
                     style_str += 'background-color:' + background + ';';
                 }
                 var data = clean_data(data_text, text);
-                var extra = extra_css(text, options);
+                var extra = extra_css(text, settings);
                 if (extra) {
-                    text = wide_characters(text, options);
+                    text = wide_characters(text, settings);
                     style_str += extra;
                 }
                 var result;
@@ -5171,9 +5219,9 @@
                     } else {
                         text = safe(text);
                         text = text.replace(/\\\]/, '&#93;');
-                        var extra = extra_css(text, options);
+                        var extra = extra_css(text, settings);
                         if (extra.length) {
-                            text = wide_characters(text, options);
+                            text = wide_characters(text, settings);
                             return '<span style="' + extra + '">' + text + '</span>';
                         } else {
                             return '<span>' + text + '</span>';
@@ -5208,6 +5256,7 @@
         // ---------------------------------------------------------------------
         split_characters: function split_characters(string) {
             var result = [];
+            var get_next_character = make_next_char_fun(string);
             while (string.length) {
                 var chr = get_next_character(string);
                 string = string.slice(chr.length);
@@ -6592,55 +6641,56 @@
         // :: NOTE: it formats and appends lines to output_buffer. The actual
         // :: append to terminal output happens in the flush function
         // ---------------------------------------------------------------------
-        function push_line(string) {
-            output_buffer.push({line: string});
-        }
-        // ---------------------------------------------------------------------
         var output_buffer = [];
         var NEW_LINE = 1;
-        function buffer_line(string, index, options) {
+        var format_cache;
+        if ('Map' in root) {
+            format_cache = new Map();
+        }
+        function buffer_line(arg, index, options) {
             // urls should always have formatting to keep url if split
             var i, len;
             output_buffer.push(NEW_LINE);
-            if (!options.raw) {
-                var format_options = {
-                    linksNoReferrer: settings.linksNoReferrer,
-                    linksNoFollow: settings.linksNoFollow,
-                    anyLinks: settings.anyLinks,
-                    char_width: char_size.width,
-                    escape: false,
-                    allowedAttributes: options.allowedAttributes || []
-                };
-                //string = $.terminal.normalize(string);
-                var cols = self.cols();
-                if ((strlen(text(string)) > cols ||
-                     string.match(/\n/)) &&
-                    ((settings.wrap === true && options.wrap === undefined) ||
-                     settings.wrap === false && options.wrap === true)) {
-                    var words = options.keepWords;
-                    var array = $.terminal.split_equal(string, cols, words);
-                    for (i = 0, len = array.length; i < len; ++i) {
-                        if (array[i] === '' || array[i] === '\r') {
-                            output_buffer.push({line: '<span></span>'});
-                        } else {
-                            var data = {
-                                line: $.terminal.format(
-                                    array[i],
-                                    format_options
-                                )
-                            };
-                            if (i === len - 1) {
-                                data.newline = true;
-                            }
-                            output_buffer.push(data);
-                        }
+            var format_options = {
+                linksNoReferrer: settings.linksNoReferrer,
+                linksNoFollow: settings.linksNoFollow,
+                anyLinks: settings.anyLinks,
+                char_width: char_size.width,
+                escape: false,
+                allowedAttributes: options.allowedAttributes || []
+            };
+            var use_cache = settings.useCache && format_cache;
+            function format_buff(arg, newline) {
+                var args = JSON.stringify([arg, format_options]);
+                if (use_cache) {
+                    if (format_cache.has(args)) {
+                        return format_cache.get(args);
                     }
-                } else {
-                    string = $.terminal.format(string, format_options);
-                    string.split(/\n/).forEach(push_line);
                 }
+                var data = {
+                    line: $.terminal.format(
+                        arg,
+                        format_options
+                    ),
+                    newline: newline
+                };
+                if (use_cache) {
+                    format_cache.set(args, data);
+                }
+                return data;
+            }
+            if (arg instanceof Array) {
+                for (i = 0, len = arg.length; i < len; ++i) {
+                    if (arg[i] === '' || arg[i] === '\r') {
+                        output_buffer.push({line: '<span></span>'});
+                    } else {
+                        output_buffer.push(format_buff(arg[i], i === len - 1));
+                    }
+                }
+            } else if (!options.raw) {
+                output_buffer.push(format_buff(arg));
             } else {
-                push_line(string);
+                output_buffer.push({line: arg});
             }
             output_buffer.push({
                 finalize: options.finalize,
@@ -6690,6 +6740,19 @@
             }).join('');
         }
         // ---------------------------------------------------------------------
+        function should_wrap(string, options) {
+            return (strlen(text(string)) > options.cols ||
+                    string.match(/\n/)) &&
+                ((settings.wrap === true &&
+                  options.wrap === undefined) ||
+                 settings.wrap === false &&
+                 options.wrap === true);
+        }
+        // ---------------------------------------------------------------------
+        var string_cache;
+        if ('Map' in root) {
+            string_cache = new Map();
+        }
         function process_line(line) {
             // prevent exception in display exception
             try {
@@ -6713,6 +6776,14 @@
                                 );
                             } catch (e) {
                                 display_exception(e, 'FORMATTING');
+                            }
+                        }
+                        if (settings.useCache) {
+                            var key = string;
+                            if (string_cache && string_cache.has(key)) {
+                                string = string_cache.get(key);
+                                buffer_line(string, line.index, line_settings);
+                                return;
                             }
                         }
                         if (line_settings.exec) {
@@ -6751,9 +6822,22 @@
                         string = $.terminal.encode(string, {
                             tabs: settings.tabs
                         });
+                        //string = $.terminal.normalize(string);
+                        var array;
+                        var cols = line_settings.cols = self.cols();
+                        if (should_wrap(string, line_settings)) {
+                            var words = line_settings.keepWords;
+                            array = $.terminal.split_equal(string, cols, words);
+                        } else if (string.match(/\n/)) {
+                            array = string.split(/\n/);
+                        }
                     }
                 }
-                buffer_line(string, line.index, line_settings);
+                var arg = array || string;
+                if (string_cache && key) {
+                    string_cache.set(key, arg);
+                }
+                buffer_line(arg, line.index, line_settings);
             } catch (e) {
                 output_buffer = [];
                 // don't display exception if exception throw in terminal
@@ -6922,11 +7006,6 @@
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
-            if (self.is('body')) {
-                // source: https://stackoverflow.com/a/6639405/387194
-                // from comment by Šime Vidas
-                return window.innerWidth - document.documentElement.clientWidth > 0;
-            }
             return fill.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
@@ -7551,11 +7630,13 @@
                 if (fire_event('onClear') !== false) {
                     lines.forEach(function(line, i) {
                         var options = line[1];
-                        options.onClear.call(self, get_node(i));
+                        if (is_function(options.onClear)) {
+                            options.onClear.call(self, get_node(i));
+                        }
                     });
                     lines = [];
-                    output.html('');
-                    self.attr({scrollTop: 0});
+                    output[0].innerHTML = '';
+                    self.prop({scrollTop: 0});
                 }
                 return self;
             },
@@ -8230,6 +8311,17 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: function clear formatting cache if you don't longer need it
+            // :: cache is used if option useCache is set to true
+            // -------------------------------------------------------------
+            clear_cache: 'Map' in root ? function() {
+                format_cache.clear();
+                string_cache.clear();
+                return self;
+            } : function() {
+                return self;
+            },
+            // -------------------------------------------------------------
             // :: Disable the terminal
             // -------------------------------------------------------------
             disable: function(silent) {
@@ -8444,13 +8536,14 @@
                 }, options || {});
                 try {
                     var bottom = self.is_bottom();
+                    output.css('visibilty', 'hidden');
                     var wrapper;
                     // print all lines
                     // var output_buffer = lines.flush();
                     while (output_buffer.length) {
                         var data = output_buffer.shift();
                         if (data === NEW_LINE) {
-                            wrapper = $('<div></div>');
+                            wrapper = $(document.createElement('div'));
                         } else if ($.isPlainObject(data) && is_function(data.finalize)) {
                             // this is finalize function from echo
                             if (options.update) {
@@ -8466,16 +8559,19 @@
                             data.finalize(wrapper);
                         } else {
                             var line = data.line;
-                            var div = $('<div/>').html(line)
-                                .appendTo(wrapper).width('100%');
+                            var div = document.createElement('div');
+                            div.style.width = '100%';
+                            div.innerHTML = line;
                             if (data.newline) {
-                                div.addClass('cmd-end-line');
+                                div.className = 'cmd-end-line';
                             }
+                            wrapper[0].appendChild(div);
                         }
                     }
                     limit_lines();
+                    output.css('visibilty', '');
                     fire_event('onFlush');
-                    //num_rows = get_num_rows(self, char_size);
+
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
                     }
@@ -8567,7 +8663,7 @@
                             unmount: $.noop,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
-                            onClear: $.noop,
+                            onClear: null,
                             formatters: true,
                             allowedAttributes: settings.allowedAttributes
                         }, options || {});
@@ -8742,10 +8838,10 @@
                     pos = self.prop('scrollTop');
                     self.scrollTop(pos + amount);
                 } else {
-                    if (amount > self.attr('scrollTop') && amount > 0) {
-                        self.attr('scrollTop', 0);
+                    if (amount > self.prop('scrollTop') && amount > 0) {
+                        self.prop('scrollTop', 0);
                     }
-                    pos = self.attr('scrollTop');
+                    pos = self.prop('scrollTop');
                     self.scrollTop(pos + amount);
                 }
                 return self;
@@ -9127,6 +9223,11 @@
                             clearInterval(visibility_observer);
                         }
                     }
+                    var scroll_marker = self.find('.terminal-scroll-marker');
+                    if (is_bottom_observer) {
+                        visibility_observer.unobserve(scroll_marker[0]);
+                    }
+                    scroll_marker.remove();
                     if (mutation_observer) {
                         mutation_observer.disconnect();
                     }
@@ -9165,11 +9266,13 @@
             is_bottom: function() {
                 if (settings.scrollBottomOffset === -1) {
                     return false;
+                } else if (typeof is_bottom_detected === 'boolean') {
+                    return is_bottom_detected;
                 } else {
                     var scroll_height, scroll_top, height;
                     scroll_height = self[0].scrollHeight;
-                    scroll_top = self.scrollTop();
-                    height = self.outerHeight();
+                    scroll_top = self[0].scrollTop;
+                    height = self[0].offsetHeight;
                     var limit = scroll_height - settings.scrollBottomOffset;
                     return scroll_top + height > limit;
                 }
@@ -9196,7 +9299,7 @@
             };
         }));
         // -----------------------------------------------------------------
-        // INIT CODE
+        // :: INIT CODE
         // -----------------------------------------------------------------
         if (self.length === 0) {
             var msg = sprintf(strings().invalidSelector);
@@ -9218,6 +9321,8 @@
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
+        var is_bottom_detected;
+        var is_bottom_observer;
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;// used to indicate that user call pause onInit
@@ -9677,6 +9782,27 @@
                     self.resize();
                 }, options);
             }
+            function bottom_detect(intersections) {
+                is_bottom_detected = intersections[0].intersectionRatio === 1;
+            }
+            function create_bottom_detect() {
+                if (window.IntersectionObserver) {
+                    var top = $('<div class="terminal-scroll-marker"/>').appendTo(self);
+                    var marker = top;
+                    if (settings.scrollBottomOffset !== -1) {
+                        marker = $('<div/>').css({
+                            height: settings.scrollBottomOffset
+                        }).appendTo(top);
+                    }
+                    is_bottom_observer = new IntersectionObserver(bottom_detect, {
+                        root: self[0]
+                    });
+                    is_bottom_observer.observe(marker[0]);
+                }
+            }
+            // this observer can be added imedietely even if terminal is not in the DOM
+            // because both of the elements (root and target) are in same fragment
+            create_bottom_detect();
             if (self.is(':visible')) {
                 create_resizers();
             }
@@ -9732,9 +9858,8 @@
                     if (self.closest('body').length) {
                         if (!in_dom) {
                             self.scroll_to_bottom();
-                            if (window.IntersectionObserver) {
-                                observe_visibility();
-                            }
+                            // this observer need to be added when terminal is in the DOM
+                            observe_visibility();
                             resize();
                         }
                         in_dom = true;
