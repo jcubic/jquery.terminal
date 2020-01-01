@@ -1011,7 +1011,7 @@
                                 cursor.y -= value;
                                 break;
                             case 'B': // Down
-                                cursor.y = value;
+                                cursor.y += value;
                                 break;
                             case 'C': // forward
                                 cursor.x += value;
@@ -1047,6 +1047,9 @@
                         }
                         if (cursor.x < 0) {
                             cursor.x = 0;
+                        }
+                        if (cursor.y < 0) {
+                            cursor.y = 0;
                         }
                     }
                     /*
