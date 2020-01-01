@@ -1,5 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Terminal utils $.terminal.from_ansi should format plots with moving cursors 1`] = `
+"  Y Axis                  Foo: [[;#A00;]#]
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+   A                               
+ 10|                               
+   |                               
+  8|         [[;#A00;]#]                     
+   | [[;#A00;]#] [[;#A00;]#]       [[;#A00;]#]
+  6|     [[;#A00;]#]
+   |       [[;#A00;]#]
+  4|
+   |
+  2|
+   |
+   +---+---+---+---+---+----+----+----+-> X Axis
+   0   2   4   6   8   10   12   14   "
+`;
+
+exports[`Terminal utils $.terminal.from_ansi should format plots with moving cursors 2`] = `
+"  Y Axis                  A: [[;#A00;]*] | B: [[;#00A;]# ] | C: [[;;#0AA]  ]
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+     [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*] [[;#A00;]*]                   
+                 [[;#A00;]*]
+                   [[;#A00;]*]
+                     [[;#A00;]*]
+                       [[;#A00;]*]
+                         [[;#A00;]*]
+                           [[;#A00;]*]
+                             [[;#A00;]*]
+                               [[;#A00;]*]
+   A                             [[;#A00;]*]
+ 10|           [[;;#0AA]  ]                  [[;#A00;]*]
+   |   [[;#00A;]# ][[;#00A;]# ]
+  8|   [[;#00A;]# ][[;#00A;]# ]
+   |
+  6|
+   |
+  4|
+   |
+  2|
+   |
+   +---+---+---+---+---+----+----+----+-> X Axis
+   0   2   4   6   8   10   12   14   "
+`;
+
 exports[`Terminal utils $.terminal.from_ansi should render ANSI art 1`] = `
 "
 

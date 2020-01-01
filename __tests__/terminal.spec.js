@@ -541,8 +541,6 @@ describe('Terminal utils', function() {
             var output = $.terminal.from_ansi(input);
             expect(output).toEqual(input);
         });
-        // TODO: add tests when ervy fix https://github.com/chunqiuyiyu/ervy/issues/14
-        /*
         it('should format plots with moving cursors', function() {
             return Promise.all([
                 fs.readFileAsync('__tests__/ervy-plot-01'),
@@ -553,7 +551,6 @@ describe('Terminal utils', function() {
                 });
             });
         });
-        */
         it('should render ANSI art', function() {
             return Promise.all(['nf-marble.ans', 'bs-pacis.ans'].map(fname => {
                 return fs.readFileAsync(`__tests__/${fname}`).then(data => {
