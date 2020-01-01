@@ -10,8 +10,8 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&1090b06b354f633244d57b66a5c26d027a8c4bd9)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&ea922dfe0d9b9476db2ce2ee4d7401c5)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&dcce5bf58daf7a4a8ed1c5397a02ae4963e79485)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&b7ada3884d47f626d4bc4928150422dc)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -256,6 +256,17 @@ If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 | :---: | :---: | :---: | :---:  |
 <!-- CONTRIBUTORS-WWW-END -->
 
+
+### Credits
+
+Project used:
+
+* [Storage plugin](https://sites.google.com/site/daveschindler/jquery-html5-storage-plugin) by Dave Schindler (MIT)
+* [jQuery Timers](http://jquery.offput.ca/every/) (WTFPL)
+* [Cross-Browser Split](http://blog.stevenlevithan.com/archives/cross-browser-split) by [Steven Levithan](http://stevenlevithan.com/) (MIT)
+* [jQuery Caret](https://github.com/accursoft/caret) by Gideon Sireling (3-BSD)
+* [sprintf.js](https://github.com/alexei/sprintf.js) by [Alexandru Mărășteanu](http://alexei.ro/) (3-BSD)
+* [node-ansiparser](https://github.com/netzkolchose/node-ansiparser) by Joerg Breitbart (MIT)
 
 ### License
 
