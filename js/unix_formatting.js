@@ -1013,10 +1013,10 @@
                             case 'B': // Down
                                 cursor.y += value;
                                 break;
-                            case 'C': // forward
+                            case 'C': // Forward
                                 cursor.x += value;
                                 break;
-                            case 'D': // Back
+                            case 'D': // Backward
                                 cursor.x -= value;
                                 break;
                             case 'E': // Cursor Next Line
