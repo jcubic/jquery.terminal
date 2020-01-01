@@ -192,7 +192,7 @@ global.location = global.window.location = {hash: ''};
 global.document = window.document;
 global.jQuery = global.$ = require("jquery");
 global.wcwidth = require('wcwidth');
-
+var iconv = require('iconv-lite');
 // mock Canvas & Image
 var gm = require('gm');
 window.Image = class Image {
@@ -541,13 +541,8 @@ describe('Terminal utils', function() {
             var output = $.terminal.from_ansi(input);
             expect(output).toEqual(input);
         });
-        it('should escape brakets', function() {
-            var input = 'foo [ bar ]';
-            var output = $.terminal.from_ansi(input, {
-                unixFormattingEscapeBrackets: true
-            });
-            expect(output).toEqual('foo &#91; bar &#93;');
-        });
+        // TODO: add tests when ervy fix https://github.com/chunqiuyiyu/ervy/issues/14
+        /*
         it('should format plots with moving cursors', function() {
             return Promise.all([
                 fs.readFileAsync('__tests__/ervy-plot-01'),
@@ -555,6 +550,19 @@ describe('Terminal utils', function() {
             ]).then(function(plots) {
                 plots.forEach(function(plot) {
                     expect($.terminal.from_ansi(plot.toString())).toMatchSnapshot();
+                });
+            });
+        });
+        */
+        it('should render ANSI art', function() {
+            return Promise.all(['nf-marble.ans', 'bs-pacis.ans'].map(fname => {
+                return fs.readFileAsync(`__tests__/${fname}`).then(data => {
+                    var str = iconv.decode(data, 'CP437');
+                    return $.terminal.from_ansi(str);
+                });
+            })).then(data => {
+                data.forEach(ansi => {
+                    expect(ansi).toMatchSnapshot();
                 });
             });
         });

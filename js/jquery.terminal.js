@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 26 Dec 2019 19:14:37 +0000
+ * Date: Wed, 01 Jan 2020 13:17:25 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4138,7 +4138,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 26 Dec 2019 19:14:37 +0000',
+        date: 'Wed, 01 Jan 2020 13:17:25 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4832,7 +4832,7 @@
         // ---------------------------------------------------------------------
         apply_formatters: function apply_formatters(string, settings) {
             if (string === "") {
-                if (typeof settings.position === 'number') {
+                if (settings && typeof settings.position === 'number') {
                     return ["", settings.position];
                 } else {
                     return "";
@@ -5152,9 +5152,9 @@
                     style_str += 'background-color:' + background + ';';
                 }
                 var data = clean_data(data_text, text);
-                var extra = extra_css(text, options);
+                var extra = extra_css(text, settings);
                 if (extra) {
-                    text = wide_characters(text, options);
+                    text = wide_characters(text, settings);
                     style_str += extra;
                 }
                 var result;
@@ -5219,9 +5219,9 @@
                     } else {
                         text = safe(text);
                         text = text.replace(/\\\]/, '&#93;');
-                        var extra = extra_css(text, options);
+                        var extra = extra_css(text, settings);
                         if (extra.length) {
-                            text = wide_characters(text, options);
+                            text = wide_characters(text, settings);
                             return '<span style="' + extra + '">' + text + '</span>';
                         } else {
                             return '<span>' + text + '</span>';

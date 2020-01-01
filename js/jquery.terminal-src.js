@@ -4832,7 +4832,7 @@
         // ---------------------------------------------------------------------
         apply_formatters: function apply_formatters(string, settings) {
             if (string === "") {
-                if (typeof settings.position === 'number') {
+                if (settings && typeof settings.position === 'number') {
                     return ["", settings.position];
                 } else {
                     return "";
@@ -5152,9 +5152,9 @@
                     style_str += 'background-color:' + background + ';';
                 }
                 var data = clean_data(data_text, text);
-                var extra = extra_css(text, options);
+                var extra = extra_css(text, settings);
                 if (extra) {
-                    text = wide_characters(text, options);
+                    text = wide_characters(text, settings);
                     style_str += extra;
                 }
                 var result;
@@ -5219,9 +5219,9 @@
                     } else {
                         text = safe(text);
                         text = text.replace(/\\\]/, '&#93;');
-                        var extra = extra_css(text, options);
+                        var extra = extra_css(text, settings);
                         if (extra.length) {
-                            text = wide_characters(text, options);
+                            text = wide_characters(text, settings);
                             return '<span style="' + extra + '">' + text + '</span>';
                         } else {
                             return '<span>' + text + '</span>';
