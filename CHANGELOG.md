@@ -1,3 +1,7 @@
+## 2.12.1
+### Bugfix
+* fix selecting textarea content when selecting cmd
+
 ## 2.12.0
 ### Features
 * improve performance

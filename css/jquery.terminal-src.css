@@ -64,6 +64,7 @@
 .cmd span.cmd-end-line span,
 .cmd div.cmd-end-line span[data-text]:last-child,
 .cmd div.cmd-end-line span[data-text]:last-child span,
+.cmd textarea,
 .cmd .cursor + span:empty {
     -webkit-touch-callout: none; /* iOS Safari */
       -webkit-user-select: none; /* Safari */
@@ -586,6 +587,14 @@ terminal .terminal-output > div {
      */
     background-color: rgba(170, 170, 170, 0.99);
     color: #000;
+}
+.cmd textarea::-moz-selection {
+    background-color: transparent;
+    color: transparent;
+}
+.cmd textarea::selection {
+    background-color: transparent;
+    color: transparent;
 }
 
 .terminal .terminal-output > :not(.raw) .terminal-error,
