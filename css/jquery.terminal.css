@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Thu, 02 Jan 2020 09:26:54 +0000
+ * Date: Fri, 03 Jan 2020 16:14:44 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -187,8 +187,8 @@ body.full-screen-terminal .terminal {
     height: auto;
 }
 .terminal .terminal-output > div > div, .cmd div {
-    min-height: 14px;
-    min-height: calc(var(--size, 1) * 14px);
+    min-height: 12px;
+    min-height: calc(var(--size, 1) * 12px);
 }
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;

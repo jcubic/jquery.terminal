@@ -187,8 +187,8 @@ body.full-screen-terminal .terminal {
     height: auto;
 }
 .terminal .terminal-output > div > div, .cmd div {
-    min-height: 14px;
-    min-height: calc(var(--size, 1) * 14px);
+    min-height: 12px;
+    min-height: calc(var(--size, 1) * 12px);
 }
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
