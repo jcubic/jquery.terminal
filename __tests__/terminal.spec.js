@@ -5650,7 +5650,7 @@ describe('Terminal plugin', function() {
                     expect(count(interpreter.foo)).toEqual(1);
                     expect(term.find('.terminal-error').length).toEqual(1);
                     expect(a0(term.find('.terminal-error').text()))
-                        .toEqual($.terminal.defaults.strings.recursiveCall);
+                        .toEqual($.terminal.defaults.strings.recursiveLoop);
                     term.echo('[[ foo ]]');
                     expect(count(interpreter.foo)).toEqual(2);
                     expect(term.find('.terminal-error').length).toEqual(2);
@@ -5658,8 +5658,8 @@ describe('Terminal plugin', function() {
                         return a0($(this).text());
                     }).get();
                     expect(output).toEqual([
-                        $.terminal.defaults.strings.recursiveCall,
-                        $.terminal.defaults.strings.recursiveCall
+                        $.terminal.defaults.strings.recursiveLoop,
+                        $.terminal.defaults.strings.recursiveLoop
                     ]);
                 });
             });

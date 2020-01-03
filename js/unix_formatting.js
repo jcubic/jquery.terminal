@@ -492,6 +492,8 @@
     })();
     /* eslint-enable */
     // ---------------------------------------------------------------------
+    $.terminal.AnsiParser = AnsiParser;
+    // ---------------------------------------------------------------------
     $.terminal.defaults.unixFormattingEscapeBrackets = false;
     // we match characters and html entities because command line escape brackets
     // echo don't, when writing formatter always process html entitites so it work
@@ -941,130 +943,139 @@
             return ret;
         }
         // -------------------------------------------------------------------------------
-        var ansi_re = /(\x1B\[[0-9;]*[A-Za-z])/g;
-        // -------------------------------------------------------------------------------
         return function from_ansi(input, options) {
             options = options || {};
             var settings = $.extend({
                 unixFormattingEscapeBrackets: false,
-                position: 0
+                position: 0,
+                ansiParser: {}
             }, options);
-            if (input.match(ansi_re)) {
-                input = $.terminal.unescape_brackets(input);
-                var state = {};
-                var code, inside, format;
-                var cursor = {x: 0, y: 0};
-                var result = [];
-                var print = function print(s) {
-                    var s_len = s.length;
-                    if (settings.unixFormattingEscapeBrackets) {
-                        s = $.terminal.escape_formatting(s);
-                    }
-                    if (format) {
-                        s = format + s + ']';
-                    }
-                    var line = result[cursor.y];
-                    var len;
-                    if (!line) {
-                        if (cursor.x > 0) {
-                            result[cursor.y] = new Array(cursor.x + 1).join(' ') + s;
-                        } else {
-                            result[cursor.y] = s;
-                        }
+            input = $.terminal.unescape_brackets(input);
+            var code, inside, format;
+            var print = function print(s) {
+                var s_len = s.length;
+                if (settings.unixFormattingEscapeBrackets) {
+                    s = $.terminal.escape_formatting(s);
+                }
+                if (format) {
+                    s = format + s + ']';
+                }
+                var line = this.result[this.cursor.y];
+                var len, after, before, line_len;
+                if (!line) {
+                    if (this.cursor.x > 0) {
+                        var space = new Array(this.cursor.x + 1).join(' ');
+                        this.result[this.cursor.y] = space + s;
                     } else {
-                        var line_len = $.terminal.length(line);
-                        if (cursor.x === 0) {
-                            result[cursor.y] = s + $.terminal.substring(line, s_len);
-                        } else if (line_len < cursor.x) {
-                            len = cursor.x - (line_len - 1);
-                            result[cursor.y] += new Array(len).join(' ') + s;
-                        } else if (line_len === cursor.x) {
-                            result[cursor.y] += s;
-                        } else {
-                            var before = $.terminal.substring(line, 0, cursor.x);
-                            var after = $.terminal.substring(line, cursor.x + s_len);
-                            result[cursor.y] = before + s + after;
-                        }
+                        this.result[this.cursor.y] = s;
                     }
-                    cursor.x += s_len;
-                };
-                var use_CR = !!input.match(/\x0D/);
-                var events = {
-                    inst_p: print,
-                    inst_x: use_CR ? function(flag) {
-                        var code = flag.charCodeAt(0);
-                        if (code === 13) {
-                            cursor.x = 0;
+                } else {
+                    line_len = $.terminal.strip(line).length;
+                    if (this.cursor.x === 0) {
+                        after = $.terminal.substring(line, s_len);
+                        this.result[this.cursor.y] = s + after;
+                    } else if (line_len < this.cursor.x) {
+                        len = this.cursor.x - (line_len - 1);
+                        this.result[this.cursor.y] += new Array(len).join(' ') + s;
+                    } else if (line_len === this.cursor.x) {
+                        this.result[this.cursor.y] += s;
+                    } else {
+                        before = $.terminal.substring(line, 0, this.cursor.x);
+                        after = $.terminal.substring(line, this.cursor.x + s_len);
+                        this.result[this.cursor.y] = before + s + after;
+                    }
+                }
+                this.cursor.x += s_len;
+            };
+            var use_CR = !!input.match(/\x0D/);
+            var parser_events = {
+                cursor: {x: 0, y: 0},
+                result: [],
+                state: {},
+                inst_p: print,
+                inst_x: function(flag) {
+                    var code = flag.charCodeAt(0);
+                    if (code === 13) {
+                        this.cursor.x = 0;
+                    } else if (code === 10) {
+                        this.cursor.y++;
+                        if (!use_CR) {
+                            this.cursor.x = 0;
                         }
-                        if (code === 10) {
-                            cursor.y++;
-                        }
-                    } : function(flag) {
-                        var code = flag.charCodeAt(0);
-                        if (code === 10) {
-                            cursor.x = 0;
-                            cursor.y++;
-                        }
-                    },
-                    inst_c: function(collected, params, flag) {
-                        var value = params[0] === 0 ? 1 : params[0];
-                        switch (flag) {
-                            case 'A': // UP
-                                cursor.y -= value;
-                                break;
-                            case 'B': // Down
-                                cursor.y += value;
-                                break;
-                            case 'C': // Forward
-                                cursor.x += value;
-                                break;
-                            case 'D': // Backward
-                                cursor.x -= value;
-                                break;
-                            case 'E': // Cursor Next Line
-                                cursor.x = 0;
-                                cursor.y += value;
-                                break;
-                            case 'F': // Cursor Previous Line
-                                cursor.x = 0;
-                                cursor.y -= value;
-                                break;
-                            case 'm':
-                                code = format_ansi(params, state);
-                                var empty = params.length === 1 && params[0] === 0;
-                                if (inside) {
-                                    if (empty) {
-                                        inside = false;
-                                        format = null;
-                                    } else {
-                                        format = '[[' + code.join(';') + ']';
-                                    }
-                                } else if (empty) {
+                    } else if (code === 9) {
+                        print.call(this, '\t');
+                    }
+                    if (!this.result[this.cursor.y]) {
+                        this.result[this.cursor.y] = '';
+                    }
+                },
+                inst_c: function(collected, params, flag) {
+                    var value = params[0] === 0 ? 1 : params[0];
+                    switch (flag) {
+                        case 'A': // UP
+                            this.cursor.y -= value;
+                            break;
+                        case 'B': // Down
+                            this.cursor.y += value;
+                            break;
+                        case 'C': // Forward
+                            this.cursor.x += value;
+                            break;
+                        case 'D': // Backward
+                            this.cursor.x -= value;
+                            break;
+                        case 'E': // Cursor Next Line
+                            this.cursor.x = 0;
+                            this.cursor.y += value;
+                            break;
+                        case 'F': // Cursor Previous Line
+                            this.cursor.x = 0;
+                            this.cursor.y -= value;
+                            break;
+                        case 'm':
+                            code = format_ansi(params, this.state);
+                            var empty = params.length === 1 && params[0] === 0;
+                            if (inside) {
+                                if (empty) {
+                                    inside = false;
                                     format = null;
                                 } else {
                                     format = '[[' + code.join(';') + ']';
-                                    inside = true;
                                 }
-                                break;
-                        }
-                        if (cursor.x < 0) {
-                            cursor.x = 0;
-                        }
-                        if (cursor.y < 0) {
-                            cursor.y = 0;
-                        }
+                            } else if (empty) {
+                                format = null;
+                            } else {
+                                format = '[[' + code.join(';') + ']';
+                                inside = true;
+                            }
+                            break;
                     }
-                    /*
-                    inst_o: function(s) {console.log('osc', s);},
-                    inst_e: function(collected, flag) {},
-                    inst_H: function(collected, params, flag) {},
-                    inst_P: function(dcs) {},
-                    inst_U: function() {}
-                    */
+                    if (this.cursor.x < 0) {
+                        this.cursor.x = 0;
+                    }
+                    if (this.cursor.y < 0) {
+                        this.cursor.y = 0;
+                    }
+                }
+            };
+            // extra parser options not used by unix_formatting
+            Object.keys(settings.ansiParser).forEach(function(name) {
+                var original = parser_events[name];
+                var fn = settings.ansiParser[name];
+                parser_events[name] = original ? function() {
+                    if (fn.apply(parser_events, arguments) !== false) {
+                        return original.apply(parser_events, arguments);
+                    }
+                } : function() {
+                    return fn.apply(parser_events, arguments);
                 };
-                var parser = new AnsiParser(events);
-                parser.parse(input);
-                return result.join('\n');
+                settings.ansiParser[name] = parser_events[name];
+            });
+            var parser = new AnsiParser(parser_events);
+            parser.parse(input);
+            var output = parser_events.result.join('\n');
+            if (input !== output) {
+                return output;
             }
             if (typeof options !== 'undefined' && typeof options.position === 'number') {
                 return [input, options.position];

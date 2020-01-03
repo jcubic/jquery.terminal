@@ -1,6 +1,10 @@
 ## 2.12.1
+### Features
+* allow to return promise from renderHandler
+* allow to extend the ansiParser in unix_formatting
 ### Bugfix
 * fix selecting textarea content when selecting cmd
+* fix possible loops in renderHandler
 
 ## 2.12.0
 ### Features

@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 02 Jan 2020 09:26:53 +0000
+ * Date: Fri, 03 Jan 2020 14:21:41 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -992,7 +992,7 @@
     }
     // -----------------------------------------------------------------------
     function unpromise(value, callback, error) {
-        if (value) {
+        if (value !== undefined) {
             if (is_function(value.catch)) {
                 value.catch(error);
             }
@@ -4138,7 +4138,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 02 Jan 2020 09:26:53 +0000',
+        date: 'Fri, 03 Jan 2020 14:21:41 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5798,6 +5798,10 @@
         return get_type(object) === 'function';
     }
     // -----------------------------------------------------------------------
+    function is_promise(object) {
+        return is_function(object && (object.then || object.done));
+    }
+    // -----------------------------------------------------------------------
     function is_array(object) {
         return get_type(object) === 'array';
     }
@@ -5913,6 +5917,7 @@
         onRPCError: null,
         doubleTab: null,
         doubleTabEchoCommand: false,
+        ansiParser: {},
         completion: false,
         onInit: $.noop,
         onClear: $.noop,
@@ -5964,7 +5969,7 @@
             invalidTerminalId: 'Invalid Terminal ID',
             login: 'login',
             password: 'password',
-            recursiveCall: 'Recursive call detected, skip',
+            recursiveLoop: 'Recursive loop in echo detected, skip',
             notAString: '%s function: argument is not a string',
             redrawError: 'Internal error, wrong position in cmd redraw',
             invalidStrings: 'Command %s have unclosed strings',
@@ -6035,7 +6040,7 @@
                 if (ret === false) {
                     return false;
                 }
-                if (typeof ret === 'string' || is_node(ret)) {
+                if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
                     return ret;
                 } else {
                     return value;
@@ -6798,7 +6803,7 @@
                                         var trim = string.trim();
                                         if (prev_exec_cmd && prev_exec_cmd === trim) {
                                             prev_exec_cmd = '';
-                                            self.error(strings().recursiveCall);
+                                            self.error(strings().recursiveLoop);
                                         } else {
                                             prev_exec_cmd = trim;
                                             $.terminal.extended_command(self, string, {
@@ -8717,22 +8722,24 @@
                             }
                             value = ret;
                         }
-                        if (render(value, locals)) {
-                            return self;
-                        }
-                        process_line({
-                            value: value,
-                            options: locals,
-                            index: lines.length
+                        unpromise(value, function(value) {
+                            if (render(value, locals)) {
+                                return self;
+                            }
+                            process_line({
+                                value: value,
+                                options: locals,
+                                index: lines.length
+                            });
+                            // extended commands should be processed only
+                            // once in echo and not on redraw
+                            locals.exec = false;
+                            lines.push([value, locals]);
+                            if (locals.flush) {
+                                self.flush();
+                                fire_event('onAfterEcho', [arg]);
+                            }
                         });
-                        // extended commands should be processed only
-                        // once in echo and not on redraw
-                        locals.exec = false;
-                        lines.push([value, locals]);
-                        if (locals.flush) {
-                            self.flush();
-                            fire_event('onAfterEcho', [arg]);
-                        }
                     } catch (e) {
                         // if echo throw exception we can't use error to
                         // display that exception
