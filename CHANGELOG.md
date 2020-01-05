@@ -5,6 +5,7 @@
 ### Bugfix
 * fix selecting textarea content when selecting cmd
 * fix possible loops in renderHandler
+* fix parsing image REGEXes in less
 
 ## 2.12.0
 ### Features
