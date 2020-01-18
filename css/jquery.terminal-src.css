@@ -124,6 +124,7 @@ body.full-screen-terminal .terminal {
     padding: 0;
     position: relative;
     width: 100%;
+    z-index: 300;
 }
 .terminal a[tabindex="1000"],
 .terminal a[tabindex="1000"]:active,

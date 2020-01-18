@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 03 Jan 2020 16:14:44 +0000
+ * Date: Sat, 18 Jan 2020 12:22:20 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -124,6 +124,7 @@ body.full-screen-terminal .terminal {
     padding: 0;
     position: relative;
     width: 100%;
+    z-index: 300;
 }
 .terminal a[tabindex="1000"],
 .terminal a[tabindex="1000"]:active,
