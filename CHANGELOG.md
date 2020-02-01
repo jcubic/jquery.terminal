@@ -3,6 +3,7 @@
 * allow to return promise from renderHandler
 * allow to extend the ansiParser in unix_formatting
 * improve performance of cmd render when moving cursor
+* implement H cursor movement and a way to handle Sixel terminal image format
 ### Bugfix
 * fix selecting textarea content when selecting cmd
 * fix possible loops in renderHandler

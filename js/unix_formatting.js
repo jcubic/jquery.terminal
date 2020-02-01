@@ -988,6 +988,8 @@
                 this.cursor.x += s_len;
             };
             var use_CR = !!input.match(/\x0D/);
+            var ROWS = $.terminal.active().rows();
+            var COLS = $.terminal.active().cols();
             var parser_events = {
                 cursor: {x: 0, y: 0},
                 result: [],
@@ -1031,6 +1033,11 @@
                         case 'F': // Cursor Previous Line
                             this.cursor.x = 0;
                             this.cursor.y -= value;
+                            break;
+                        case 'H':
+                            // -1 since CUP is 1-based
+                            this.cursor.y = Math.min(params[0] || 1, ROWS) - 1;
+                            this.cursor.x = Math.min(params[1] || 1, COLS) - 1;
                             break;
                         case 'm':
                             code = format_ansi(params, this.state);
