@@ -307,8 +307,17 @@
     var clone = function(object) {
         return Clone.clone_object(object);
     };
-
+    // -----------------------------------------------------------------------
+    // IE11 polyfill
+    // -----------------------------------------------------------------------
     /* eslint-disable */
+    if (!('clear' in Map.prototype)) {
+        Map.prototype.clear = function() {
+            this.forEach(function(value, key, map) {
+                map.delete(key);
+            });
+        };
+    }
     // -----------------------------------------------------------------------
     // :: Storage plugin
     // -----------------------------------------------------------------------
@@ -1349,14 +1358,14 @@
             action: $.noop,
             onCache: $.noop
         }, options);
-        this._onCache = settings.onCache;
-        this._action = settings.action;
-        this._validation = settings.validation;
+        this._onCache = settings.onCache.bind(this);
+        this._action = settings.action.bind(this);
+        this._validation = settings.validation.bind(this);
         this._cache = new Map();
     }
     // -------------------------------------------------------------------------
-    WorkerCache.prototype.validate = function() {
-        var valid = this._validation();
+    WorkerCache.prototype.validate = function(key) {
+        var valid = this._validation(key);
         var test = valid === undefined || valid === true;
         if (!test) {
             this._cache.clear();
@@ -1366,9 +1375,9 @@
     // -------------------------------------------------------------------------
     WorkerCache.prototype.get = function(key) {
         var value;
-        if (this.validate() && this._cache.has(key)) {
+        if (this.validate(key) && this._cache.has(key)) {
             value = this._cache.get(key);
-            this._onCache({cahce: value});
+            this._onCache({cache: value});
             return value;
         }
         value = this._action(key);
@@ -2372,7 +2381,7 @@
         // :: Split String that fit into command line where first line need to
         // :: fit next to prompt (need to have less characters)
         // ---------------------------------------------------------------------
-        function get_splitted_command_line(string) {
+        function process_cmd_line(string) {
             function split(string) {
                 return $.terminal.split_equal(string, num_chars);
             }
@@ -2427,6 +2436,24 @@
                 array.push('');
             }
             return array;
+        }
+        // ---------------------------------------------------------------------
+        var cmd_line_worker = new WorkerCache({
+            validation: function(key) {
+                var result = false;
+                if ((!this._previous_value || this._previous_value === key) &&
+                    (!this._cols || this._cols === num_chars)) {
+                    result = true;
+                }
+                this._previous_value = key;
+                this._cols = num_chars;
+                return result;
+            },
+            action: process_cmd_line
+        });
+        // ---------------------------------------------------------------------
+        function get_splitted_command_line(string) {
+            return cmd_line_worker.get(string);
         }
         // ---------------------------------------------------------------------
         // :: use custom formatting
@@ -2607,7 +2634,9 @@
                     pos = formatted_position;
                 }
                 var i;
-                wrapper.css('visibility', 'hidden');
+                wrapper.css({
+                    display: 'none'
+                });
                 wrapper.find('div:not(.cmd-cursor-line)').remove();
                 before.html('');
                 // long line
@@ -2719,7 +2748,9 @@
                 } else {
                     clip.css('top', in_line * 14 + 'px');
                 }
-                wrapper.css('visibility', '');
+                wrapper.css({
+                    display: ''
+                });
             };
         })();
         // ---------------------------------------------------------------------

@@ -2,6 +2,7 @@
 ### Features
 * allow to return promise from renderHandler
 * allow to extend the ansiParser in unix_formatting
+* improve performance of cmd render when moving cursor
 ### Bugfix
 * fix selecting textarea content when selecting cmd
 * fix possible loops in renderHandler
