@@ -2073,6 +2073,16 @@
             return string.match(/\n/);
         }
         // -------------------------------------------------------------------------------
+        function have_wrapping(string) {
+            var lengths = string.split('\n').map(function(line) {
+                return $.terminal.length(line);
+            });
+            var wrap = lengths.filter(function(len) {
+                return len > num_chars;
+            });
+            return !!wrap.length;
+        }
+        // -------------------------------------------------------------------------------
         function match_column(re, string, col) {
             var match = string.match(re);
             if (have_newlines(string)) {
@@ -2086,7 +2096,7 @@
             var before = command.substring(0, position);
             var re = /\n?([^\n]+)$/;
             var col = self.column();
-            if (have_newlines(before)) {
+            if (have_newlines(before) || have_wrapping(before)) {
                 for (var i = before.length - col - 1; i--;) {
                     if (before[i] === '\n') {
                         break;
@@ -2106,15 +2116,29 @@
         function down_arrow() {
             var after = command.substring(position);
             var col = self.column();
-            if (have_newlines(after)) {
-                var before = command.substring(0, position);
-                var match = after.match(/^[^\n]*\n/);
+            if (have_newlines(after) || have_wrapping(after)) {
+                var match = after.match(/^([^\n]*)(\n?)([^\n]*)/);
                 if (match) {
-                    var new_pos = col + match[0].length;
-                    if (!have_newlines(before)) {
-                        new_pos += prompt_len;
+                    var before = command.substring(0, position);
+                    var before_newline = match[1].length;
+                    var include_prompt = !have_newlines(before) || have_wrapping(before);
+                    var pos;
+                    if (include_prompt) {
+                        before_newline += prompt_len;
                     }
-                    self.position(new_pos, true);
+                    if (before_newline > num_chars) {
+                        // full length of terminal will position into same place below
+                        pos = num_chars;
+                    } else if (!match[2]) {
+                        return next_history();
+                    } else {
+                        pos = before_newline + col - 1;
+                        if (include_prompt) {
+                            pos += prompt_len;
+                        }
+                    }
+                    // relative position
+                    self.position(pos, true);
                 }
                 return false;
             } else {
@@ -3041,8 +3065,8 @@
                 }
                 var re = /\n?([^\n]*)$/;
                 var match = before.match(re);
-                var col = match[1].length;
-                if (!have_newlines(before) && include_prompt) {
+                var col = match[1].length % num_chars;
+                if (!have_newlines(before) && (include_prompt || have_wrapping(before))) {
                     col += prompt_len;
                 }
                 return col;
