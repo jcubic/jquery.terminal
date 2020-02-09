@@ -2086,9 +2086,9 @@
         function match_column(re, string, col) {
             var match = string.match(re);
             if (have_newlines(string)) {
-                return match && match[1].length <= col;
+                return match && (match[1].length % num_chars) <= col;
             } else {
-                return match && match[1].length <= col - prompt_len;
+                return match && (match[1].length % num_chars) <= col - prompt_len;
             }
         }
         // -------------------------------------------------------------------------------
@@ -2121,18 +2121,15 @@
                 if (match) {
                     var before = command.substring(0, position);
                     var before_newline = match[1].length;
-                    var include_prompt = !have_newlines(before) || have_wrapping(before);
+                    var include_prompt = !have_newlines(before) && !have_wrapping(before);
                     var pos;
-                    if (include_prompt) {
-                        before_newline += prompt_len;
-                    }
                     if (before_newline > num_chars) {
                         // full length of terminal will position into same place below
                         pos = num_chars;
                     } else if (!match[2]) {
                         return next_history();
                     } else {
-                        pos = before_newline + col - 1;
+                        pos = before_newline + col + 1; // count newline
                         if (include_prompt) {
                             pos += prompt_len;
                         }

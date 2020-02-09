@@ -3566,17 +3566,24 @@ describe('Terminal plugin', function() {
         });
     });
     describe('cmd plugin', function() {
-        var term = $('<div/>').appendTo('body').css('overflow-y', 'scroll').terminal($.noop, {
-            name: 'cmd',
-            numChars: 150,
-            numRows: 20
-        });
         var string = '';
-        for (var i=term.cols(); i--;) {
-            term.insert('M');
-        }
-        var cmd = term.cmd();
-        var line = cmd.find('.cmd-prompt').next();
+        var term, cmd, line, history;
+        beforeEach(function() {
+            term = $('<div/>').appendTo('body').css('overflow-y', 'scroll').terminal($.noop, {
+                name: 'cmd',
+                numChars: 150,
+                numRows: 20
+            });
+            for (var i=term.cols(); i--;) {
+                term.insert('M');
+            }
+            cmd = term.cmd();
+            history = cmd.history();
+            line = cmd.find('.cmd-prompt').next();
+        });
+        afterEach(function() {
+            term.destroy().remove();
+        });
         it('text should have 2 lines', function() {
             expect(line.is('div')).toBe(true);
             expect(line.text().length).toBe(term.cols()-2);
@@ -3594,6 +3601,7 @@ describe('Terminal plugin', function() {
             expect(cursor.text()).toBe('M');
         });
         it('should remove characters', function() {
+            cmd.position(-8, true);
             cmd['delete'](-10);
             var cursor = cmd.find('.cmd-cursor');
             var before = cursor.prev();
@@ -3603,7 +3611,6 @@ describe('Terminal plugin', function() {
             expect(cursor.text()).toEqual('\xA0');
             expect(after.text().length).toEqual(0);
         });
-        var history = cmd.history();
         it('should have one entry in history', function() {
             cmd.purge();
             term.set_command('something').focus(true);
@@ -3611,12 +3618,16 @@ describe('Terminal plugin', function() {
             expect(history.data()).toEqual(['something']);
         });
         it('should not add item to history if history is disabled', function() {
+            term.set_command('something').focus(true);
+            enter_key();
             history.disable();
             term.set_command('something else');
             enter_key();
             expect(history.data()).toEqual(['something']);
         });
         it('should remove commands from history', function() {
+            term.set_command('something').focus(true);
+            enter_key();
             spy(history, 'purge');
             cmd.purge();
             expect(history.purge).toHaveBeenCalled();
@@ -3642,6 +3653,8 @@ describe('Terminal plugin', function() {
             expect(cmd.position()).toEqual(0);
         });
         it('should set and remove mask', function() {
+            cmd.set('foobar').position(0);
+            term.focus();
             cmd.mask('•');
             cmd.position(6);
             var before = cmd.find('.cmd-cursor').prev();
@@ -3651,6 +3664,8 @@ describe('Terminal plugin', function() {
             expect(before.text()).toEqual('foobar');
         });
         it('should execute functions on shortcuts', function() {
+            cmd.set('foobar').position(0);
+            term.focus();
             spy(cmd, 'position');
             shortcut(true, false, false, 65, 'a'); // CTRL+A
             expect(cmd.position).toHaveBeenCalled();
@@ -3770,8 +3785,32 @@ describe('Terminal plugin', function() {
             expect(cmd.position()).toEqual(with_newlines(1) + 4 + cmd.prompt().length);
             up();
             expect(cmd.position()).toEqual(4);
-            cmd.purge();
-            term.destroy().remove();
+            lines = [
+                'First Line of Text is little bit longer',
+                'Second Line of Text',
+                'Thrid Line of Text'
+            ];
+            term.option('numChars', 30);
+            cmd.resize(30);
+            command = lines.join('\n');
+            cmd.set(command);
+            cmd.position(0);
+            right();
+            right();
+            right();
+            expect(cmd.position()).toEqual(3);
+            down();
+            expect(cmd.position()).toEqual(33); // 30 numChars + 3 x right
+            down();
+            expect(cmd.position()).toEqual(with_newlines(1) + 3 + cmd.prompt().length);
+            down();
+            expect(cmd.position()).toEqual(with_newlines(2) + 3 + cmd.prompt().length);
+            up();
+            expect(cmd.position()).toEqual(with_newlines(1) + 3 + cmd.prompt().length);
+            up();
+            expect(cmd.position()).toEqual(33);
+            up();
+            expect(cmd.position()).toEqual(3);
         });
     });
     function AJAXMock(url, response, options) {
