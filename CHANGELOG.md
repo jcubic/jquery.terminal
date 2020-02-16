@@ -15,6 +15,7 @@
 * fix issue with prism (html language) and less
 * fix left/right pagination in less, when not all lines are longer then cols
 * fix CTRL+ARROWRIGHT [#560](https://github.com/jcubic/jquery.terminal/issues/560)
+* fix urls inside formatting
 
 ## 2.12.0
 ### Features

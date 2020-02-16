@@ -1070,7 +1070,7 @@
     var self_closing_re = /^(?:\[\[)?[^;]*@[^;]*;/;
     var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
-    var url_nf_re = /\b(?![^\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
+    var url_nf_re = /\b(?![^"\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)$/gi;
     var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
@@ -6763,15 +6763,16 @@
                         color,
                         background,
                         _class,
-                        data || text
+                        text || data
                     ].join(';') + ']';
                 }
                 function escaped(_) {
                     return ']' + formatting('!', _) + _ + ']' + formatting();
                 }
                 if (!style.match(/!/)) {
-                    if (text.match(email_full_re) || text.match(url_full_re)) {
-                        return formatting('!', text) + text + ']';
+                    var m = text.match(email_full_re) || text.match(url_full_re);
+                    if (m) {
+                        return formatting('!', m[1]) + text + ']';
                     } else if (text.match(email_re) || text.match(url_nf_re)) {
                         var output = text.replace(email_re, escaped)
                             .replace(url_nf_re, escaped);
@@ -6779,9 +6780,6 @@
                     }
                 }
                 return _;
-            }
-            if (!(string.match(email_re) || string.match(url_nf_re))) {
-                return string;
             }
             if (!$.terminal.have_formatting(string)) {
                 return string.replace(email_re, '[[!;;]$1]').
