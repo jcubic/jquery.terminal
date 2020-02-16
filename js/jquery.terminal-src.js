@@ -1888,7 +1888,7 @@
                 var re = /\S[\n\s]{2,}|[\n\s]+\S?/;
                 var match = command.slice(position).match(re);
                 if (!match || match[0].match(/^\s+$/)) {
-                    self.position(text(command).length);
+                    self.position(bare_text(command).length);
                 } else if (match[0][0] !== ' ') {
                     position += match.index + 1;
                 } else {

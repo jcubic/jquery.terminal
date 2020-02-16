@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 09 Feb 2020 10:33:10 +0000
+ * Date: Sun, 16 Feb 2020 10:57:37 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1888,7 +1888,7 @@
                 var re = /\S[\n\s]{2,}|[\n\s]+\S?/;
                 var match = command.slice(position).match(re);
                 if (!match || match[0].match(/^\s+$/)) {
-                    self.position(text(command).length);
+                    self.position(bare_text(command).length);
                 } else if (match[0][0] !== ' ') {
                     position += match.index + 1;
                 } else {
@@ -4190,7 +4190,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 09 Feb 2020 10:33:10 +0000',
+        date: 'Sun, 16 Feb 2020 10:57:37 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

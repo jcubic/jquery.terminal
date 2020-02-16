@@ -14,6 +14,7 @@
 * fix cmd cursor up/down with wrapping [#557](https://github.com/jcubic/jquery.terminal/issues/557)
 * fix issue with prism (html language) and less
 * fix left/right pagination in less, when not all lines are longer then cols
+* fix CTRL+ARROWRIGHT [#560](https://github.com/jcubic/jquery.terminal/issues/560)
 
 ## 2.12.0
 ### Features
