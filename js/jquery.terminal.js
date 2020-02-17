@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.12.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 01 Jan 2020 17:03:16 +0000
+ * Date: Sun, 16 Feb 2020 20:59:06 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -307,8 +307,17 @@
     var clone = function(object) {
         return Clone.clone_object(object);
     };
-
+    // -----------------------------------------------------------------------
+    // IE11 polyfill
+    // -----------------------------------------------------------------------
     /* eslint-disable */
+    if (!('clear' in Map.prototype)) {
+        Map.prototype.clear = function() {
+            this.forEach(function(value, key, map) {
+                map.delete(key);
+            });
+        };
+    }
     // -----------------------------------------------------------------------
     // :: Storage plugin
     // -----------------------------------------------------------------------
@@ -992,7 +1001,7 @@
     }
     // -----------------------------------------------------------------------
     function unpromise(value, callback, error) {
-        if (value) {
+        if (value !== undefined) {
             if (is_function(value.catch)) {
                 value.catch(error);
             }
@@ -1061,7 +1070,7 @@
     var self_closing_re = /^(?:\[\[)?[^;]*@[^;]*;/;
     var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
-    var url_nf_re = /\b(?![^\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
+    var url_nf_re = /\b(?![^"\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)$/gi;
     var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
@@ -1349,14 +1358,14 @@
             action: $.noop,
             onCache: $.noop
         }, options);
-        this._onCache = settings.onCache;
-        this._action = settings.action;
-        this._validation = settings.validation;
+        this._onCache = settings.onCache.bind(this);
+        this._action = settings.action.bind(this);
+        this._validation = settings.validation.bind(this);
         this._cache = new Map();
     }
     // -------------------------------------------------------------------------
-    WorkerCache.prototype.validate = function() {
-        var valid = this._validation();
+    WorkerCache.prototype.validate = function(key) {
+        var valid = this._validation(key);
         var test = valid === undefined || valid === true;
         if (!test) {
             this._cache.clear();
@@ -1366,9 +1375,9 @@
     // -------------------------------------------------------------------------
     WorkerCache.prototype.get = function(key) {
         var value;
-        if (this.validate() && this._cache.has(key)) {
+        if (this.validate(key) && this._cache.has(key)) {
             value = this._cache.get(key);
-            this._onCache({cahce: value});
+            this._onCache({cache: value});
             return value;
         }
         value = this._action(key);
@@ -1879,7 +1888,7 @@
                 var re = /\S[\n\s]{2,}|[\n\s]+\S?/;
                 var match = command.slice(position).match(re);
                 if (!match || match[0].match(/^\s+$/)) {
-                    self.position(text(command).length);
+                    self.position(bare_text(command).length);
                 } else if (match[0][0] !== ' ') {
                     position += match.index + 1;
                 } else {
@@ -2064,12 +2073,22 @@
             return string.match(/\n/);
         }
         // -------------------------------------------------------------------------------
+        function have_wrapping(string) {
+            var lengths = string.split('\n').map(function(line) {
+                return $.terminal.length(line);
+            });
+            var wrap = lengths.filter(function(len) {
+                return len > num_chars;
+            });
+            return !!wrap.length;
+        }
+        // -------------------------------------------------------------------------------
         function match_column(re, string, col) {
             var match = string.match(re);
             if (have_newlines(string)) {
-                return match && match[1].length <= col;
+                return match && (match[1].length % num_chars) <= col;
             } else {
-                return match && match[1].length <= col - prompt_len;
+                return match && (match[1].length % num_chars) <= col - prompt_len;
             }
         }
         // -------------------------------------------------------------------------------
@@ -2077,7 +2096,7 @@
             var before = command.substring(0, position);
             var re = /\n?([^\n]+)$/;
             var col = self.column();
-            if (have_newlines(before)) {
+            if (have_newlines(before) || have_wrapping(before)) {
                 for (var i = before.length - col - 1; i--;) {
                     if (before[i] === '\n') {
                         break;
@@ -2097,15 +2116,26 @@
         function down_arrow() {
             var after = command.substring(position);
             var col = self.column();
-            if (have_newlines(after)) {
-                var before = command.substring(0, position);
-                var match = after.match(/^[^\n]*\n/);
+            if (have_newlines(after) || have_wrapping(after)) {
+                var match = after.match(/^([^\n]*)(\n?)([^\n]*)/);
                 if (match) {
-                    var new_pos = col + match[0].length;
-                    if (!have_newlines(before)) {
-                        new_pos += prompt_len;
+                    var before = command.substring(0, position);
+                    var before_newline = match[1].length;
+                    var include_prompt = !have_newlines(before) && !have_wrapping(before);
+                    var pos;
+                    if (before_newline > num_chars) {
+                        // full length of terminal will position into same place below
+                        pos = num_chars;
+                    } else if (!match[2]) {
+                        return next_history();
+                    } else {
+                        pos = before_newline + col + 1; // count newline
+                        if (include_prompt) {
+                            pos += prompt_len;
+                        }
                     }
-                    self.position(new_pos, true);
+                    // relative position
+                    self.position(pos, true);
                 }
                 return false;
             } else {
@@ -2372,7 +2402,7 @@
         // :: Split String that fit into command line where first line need to
         // :: fit next to prompt (need to have less characters)
         // ---------------------------------------------------------------------
-        function get_splitted_command_line(string) {
+        function process_cmd_line(string) {
             function split(string) {
                 return $.terminal.split_equal(string, num_chars);
             }
@@ -2427,6 +2457,24 @@
                 array.push('');
             }
             return array;
+        }
+        // ---------------------------------------------------------------------
+        var cmd_line_worker = new WorkerCache({
+            validation: function(key) {
+                var result = false;
+                if ((!this._previous_value || this._previous_value === key) &&
+                    (!this._cols || this._cols === num_chars)) {
+                    result = true;
+                }
+                this._previous_value = key;
+                this._cols = num_chars;
+                return result;
+            },
+            action: process_cmd_line
+        });
+        // ---------------------------------------------------------------------
+        function get_splitted_command_line(string) {
+            return cmd_line_worker.get(string);
         }
         // ---------------------------------------------------------------------
         // :: use custom formatting
@@ -2607,7 +2655,9 @@
                     pos = formatted_position;
                 }
                 var i;
-                wrapper.css('visibility', 'hidden');
+                wrapper.css({
+                    display: 'none'
+                });
                 wrapper.find('div:not(.cmd-cursor-line)').remove();
                 before.html('');
                 // long line
@@ -2719,7 +2769,9 @@
                 } else {
                     clip.css('top', in_line * 14 + 'px');
                 }
-                wrapper.css('visibility', '');
+                wrapper.css({
+                    display: ''
+                });
             };
         })();
         // ---------------------------------------------------------------------
@@ -3010,8 +3062,8 @@
                 }
                 var re = /\n?([^\n]*)$/;
                 var match = before.match(re);
-                var col = match[1].length;
-                if (!have_newlines(before) && include_prompt) {
+                var col = match[1].length % num_chars;
+                if (!have_newlines(before) && (include_prompt || have_wrapping(before))) {
                     col += prompt_len;
                 }
                 return col;
@@ -4137,8 +4189,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.12.0',
-        date: 'Wed, 01 Jan 2020 17:03:16 +0000',
+        version: 'DEV',
+        date: 'Sun, 16 Feb 2020 20:59:06 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5798,6 +5850,10 @@
         return get_type(object) === 'function';
     }
     // -----------------------------------------------------------------------
+    function is_promise(object) {
+        return is_function(object && (object.then || object.done));
+    }
+    // -----------------------------------------------------------------------
     function is_array(object) {
         return get_type(object) === 'array';
     }
@@ -5913,6 +5969,7 @@
         onRPCError: null,
         doubleTab: null,
         doubleTabEchoCommand: false,
+        ansiParser: {},
         completion: false,
         onInit: $.noop,
         onClear: $.noop,
@@ -5964,7 +6021,7 @@
             invalidTerminalId: 'Invalid Terminal ID',
             login: 'login',
             password: 'password',
-            recursiveCall: 'Recursive call detected, skip',
+            recursiveLoop: 'Recursive loop in echo detected, skip',
             notAString: '%s function: argument is not a string',
             redrawError: 'Internal error, wrong position in cmd redraw',
             invalidStrings: 'Command %s have unclosed strings',
@@ -6035,7 +6092,7 @@
                 if (ret === false) {
                     return false;
                 }
-                if (typeof ret === 'string' || is_node(ret)) {
+                if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
                     return ret;
                 } else {
                     return value;
@@ -6706,15 +6763,16 @@
                         color,
                         background,
                         _class,
-                        data || text
+                        text || data
                     ].join(';') + ']';
                 }
                 function escaped(_) {
                     return ']' + formatting('!', _) + _ + ']' + formatting();
                 }
                 if (!style.match(/!/)) {
-                    if (text.match(email_full_re) || text.match(url_full_re)) {
-                        return formatting('!', text) + text + ']';
+                    var m = text.match(email_full_re) || text.match(url_full_re);
+                    if (m) {
+                        return formatting('!', m[1]) + text + ']';
                     } else if (text.match(email_re) || text.match(url_nf_re)) {
                         var output = text.replace(email_re, escaped)
                             .replace(url_nf_re, escaped);
@@ -6722,9 +6780,6 @@
                     }
                 }
                 return _;
-            }
-            if (!(string.match(email_re) || string.match(url_nf_re))) {
-                return string;
             }
             if (!$.terminal.have_formatting(string)) {
                 return string.replace(email_re, '[[!;;]$1]').
@@ -6798,7 +6853,7 @@
                                         var trim = string.trim();
                                         if (prev_exec_cmd && prev_exec_cmd === trim) {
                                             prev_exec_cmd = '';
-                                            self.error(strings().recursiveCall);
+                                            self.error(strings().recursiveLoop);
                                         } else {
                                             prev_exec_cmd = trim;
                                             $.terminal.extended_command(self, string, {
@@ -8717,22 +8772,24 @@
                             }
                             value = ret;
                         }
-                        if (render(value, locals)) {
-                            return self;
-                        }
-                        process_line({
-                            value: value,
-                            options: locals,
-                            index: lines.length
+                        unpromise(value, function(value) {
+                            if (render(value, locals)) {
+                                return self;
+                            }
+                            process_line({
+                                value: value,
+                                options: locals,
+                                index: lines.length
+                            });
+                            // extended commands should be processed only
+                            // once in echo and not on redraw
+                            locals.exec = false;
+                            lines.push([value, locals]);
+                            if (locals.flush) {
+                                self.flush();
+                                fire_event('onAfterEcho', [arg]);
+                            }
                         });
-                        // extended commands should be processed only
-                        // once in echo and not on redraw
-                        locals.exec = false;
-                        lines.push([value, locals]);
-                        if (locals.flush) {
-                            self.flush();
-                            fire_event('onAfterEcho', [arg]);
-                        }
                     } catch (e) {
                         // if echo throw exception we can't use error to
                         // display that exception

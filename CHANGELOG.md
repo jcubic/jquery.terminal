@@ -1,9 +1,28 @@
+## 2.14.0
+### Features
+* allow to return promise from renderHandler
+* allow to extend the ansiParser in unix_formatting
+* add a way to to handle Sixel terminal image format [#553](https://github.com/jcubic/jquery.terminal/issues/553)
+* improve performance of cmd render when moving cursor
+* implement H cursor movement [#553](https://github.com/jcubic/jquery.terminal/issues/553)
+* unix formatting ANSI character replacements modes
+### Bugfix
+* fix click on last line in multiline cmd [#554](https://github.com/jcubic/jquery.terminal/issues/554)
+* fix selecting textarea content when selecting cmd
+* fix possible loops in renderHandler
+* fix parsing image REGEXes in less
+* fix cmd cursor up/down with wrapping [#557](https://github.com/jcubic/jquery.terminal/issues/557)
+* fix issue with prism (html language) and less
+* fix left/right pagination in less, when not all lines are longer then cols
+* fix CTRL+ARROWRIGHT [#560](https://github.com/jcubic/jquery.terminal/issues/560)
+* fix urls inside formatting
+
 ## 2.12.0
 ### Features
 * improve performance
 * add cache for formatting and processing lines
 * big improvements to less plugin re-rendering (e.g. when scrolling text with keyboard)
-* cursor movement in unix formatting (virtual cursor not supported in cmd, because it make no sense)
+* cursor movement in unix formatting (virtual cursor not supported in cmd, because it make no sense) [#553](https://github.com/jcubic/jquery.terminal/issues/553)
 ### Bugfix
 * fix empty lines in less
 * fix split_equal with keep works and formatting at the end.

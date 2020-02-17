@@ -51,8 +51,8 @@
         factory(root.jQuery);
     }
 })(function($) {
-    var img_split_re = /(\[\[(?:@|[^;])*;[^;]*;[^\]]*\]\])/;
-    var img_re = /\[\[(?:@|[^;])*;[^;]*;[^;]*;[^;]*;([^;]*)\]\]/;
+    var img_split_re = /(\[\[(?:[^;]*@[^;]*);[^;]*;[^\]]*\]\])/;
+    var img_re = /\[\[(?:[^;]*@[^;]*);[^;]*;[^;]*;[^;]*;([^;]*)\] ?\]/;
     // -------------------------------------------------------------------------
     function find(arr, fn) {
         for (var i in arr) {
@@ -168,13 +168,15 @@
             }
             term.set_prompt(prompt);
             var to_print = lines.slice(pos, pos + rows - 1);
-            to_print = to_print.map(function(line) {
+            var should_substring = to_print.filter(function(line) {
                 var len = $.terminal.length(line);
-                if (len > cols) {
+                return len > cols;
+            }).length;
+            if (should_substring) {
+                to_print = to_print.map(function(line) {
                     return $.terminal.substring(line, left, left + cols - 1);
-                }
-                return line;
-            });
+                });
+            }
             if (to_print.length < rows - 1) {
                 while (rows - 1 > to_print.length) {
                     to_print.push('~');
@@ -243,6 +245,11 @@
                 if (text) {
                     if (options.formatters) {
                         text = $.terminal.apply_formatters(text);
+                    } else {
+                        // prism text will be boken when there are nestings (xml)
+                        // and empty formattings
+                        text = $.terminal.nested_formatting(text);
+                        text = $.terminal.normalize(text);
                     }
                     unpromise([image_formatter(text)], cont);
                 } else {
