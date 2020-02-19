@@ -1,3 +1,7 @@
+## 2.14.1
+### Bugfix
+* fix number of rows (count & empty rows size)
+
 ## 2.14.0
 ### Features
 * allow to return promise from renderHandler

@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.14.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 17 Feb 2020 18:32:22 +0000
+ * Date: Wed, 19 Feb 2020 13:19:11 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4189,8 +4189,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.14.0',
-        date: 'Mon, 17 Feb 2020 18:32:22 +0000',
+        version: 'DEV',
+        date: 'Wed, 19 Feb 2020 13:19:11 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5820,7 +5820,8 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        return Math.floor(terminal.find('.terminal-fill').height() / char_size.height);
+        var height = terminal.find('.terminal-fill').outerHeight();
+        return Math.floor(height / char_size.height);
     }
     // -----------------------------------------------------------------------
     function all(array, fn) {
