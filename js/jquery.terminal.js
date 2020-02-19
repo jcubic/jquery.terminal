@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 19 Feb 2020 13:19:11 +0000
+ * Date: Wed, 19 Feb 2020 15:26:00 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4190,7 +4190,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 19 Feb 2020 13:19:11 +0000',
+        date: 'Wed, 19 Feb 2020 15:26:00 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5820,7 +5820,7 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var height = terminal.find('.terminal-fill').outerHeight();
+        var height = terminal.find('.terminal-fill').height();
         return Math.floor(height / char_size.height);
     }
     // -----------------------------------------------------------------------

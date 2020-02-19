@@ -5820,7 +5820,7 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var height = terminal.find('.terminal-fill').outerHeight();
+        var height = terminal.find('.terminal-fill').height();
         return Math.floor(height / char_size.height);
     }
     // -----------------------------------------------------------------------
