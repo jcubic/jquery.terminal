@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.14.0
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Mon, 17 Feb 2020 18:32:23 +0000
+ * Date: Wed, 19 Feb 2020 13:19:12 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -188,8 +188,8 @@ body.full-screen-terminal .terminal {
     height: auto;
 }
 .terminal .terminal-output > div > div, .cmd div {
-    min-height: 12px;
-    min-height: calc(var(--size, 1) * 12px);
+    min-height: 14px;
+    min-height: calc(var(--size, 1) * 14px);
 }
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;

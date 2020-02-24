@@ -114,12 +114,10 @@ jsonlint: package.json bower.json
 	$(JSONLINT) -cq package.json
 	$(JSONLINT) -cq bower.json
 
-npm:
+publish:
 	test -e npm && ( $(CD) npm && $(GIT) pull ) || true
 	test -e npm || $(GIT) clone $(URL) --depth 1 npm
-
-publish: npm
-	$(CD) npm && $(NPM) publish
+	$(CD) npm && $(NPM) publish && $(CD) .. && $(RM) -rf npm
 
 publish-guthub: .github.token
 	$(SED) "s/{{TOKEN}}/`$(TOKEN)`/" templates/npmrc.tmpl > .npmrc
