@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 24 Feb 2020 20:44:47 +0000
+ * Date: Mon, 24 Feb 2020 22:51:11 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -909,150 +909,145 @@
     };
     /* eslint-enable */
     // -----------------------------------------------------------------------
-    // :: Cross-browser resize element plugin using sentinel iframe or
-    // :: resizeObserver
+    // :: callback based event handler plugin generator
     // -----------------------------------------------------------------------
-    $.fn.resizer = function(callback, options) {
-        var settings = $.extend({}, {
-            prefix: ''
-        }, options, {
-            name: 'resize',
-            init: function(handler) {
-                var $this = $(this);
-                var resizer;
-                var first = true;
-                if (window.ResizeObserver) {
-                    resizer = new ResizeObserver(function() {
-                        if (!first) {
-                            handler();
-                        }
-                        first = false;
-                    });
-                    resizer.observe(this);
-                    $this.data('observer', resizer);
-                } else if ($this.is('body')) {
-                    $(window).on('resize.resizer', handler);
-                } else {
-                    var iframe = $('<iframe/>').addClass(settings.prefix + 'resizer')
-                        .appendTo(this)[0];
-
-                    $(iframe.contentWindow).on('resize', handler);
-                }
-            },
-            destroy: function() {
-                var $this = $(this);
-                if (window.ResizeObserver) {
-                    var observer = $this.data('observer');
-                    if (observer) {
-                        observer.unobserve(this);
-                        $this.removeData('observer');
-                    }
-                } else {
-                    var iframe = $this.find('> iframe');
-                    if (iframe.length) {
-                        // just in case of memory leaks in IE
-                        $(iframe[0].contentWindow).off('resize').remove();
-                        iframe.remove();
-                    } else if ($this.is('body')) {
-                        $(window).off('resize.resizer');
-                    }
-                }
-            }
-        });
-        return this.callback_event(callback, settings);
-    };
-    // -----------------------------------------------------------------------
-    // :: abstraction that run init once then use callbacks to add more events
-    // :: if there are no events on unbind it remove the handler
-    // -----------------------------------------------------------------------
-    $.fn.callback_event = function(callback, options) {
-        var settings = $.extend({
+    function make_callback_plugin(options) {
+        var factory_settings = $.extend({
             init: $.noop,
             destroy: $.noop,
             name: 'event'
         }, options);
-        var trigger = arguments.length === 0;
-        var unbind = arguments[0] === "unbind";
-        if (!trigger && !unbind && !is_function(callback)) {
-            throw new Error('Invalid argument, it need to a function or string ' +
-                            '"unbind" or no arguments.');
-        }
-        if (unbind) {
-            callback = is_function(arguments[1]) ? arguments[1] : null;
-        }
-        var data_name = 'callbacks_' + settings.name;
-        return this.each(function() {
-            var $this = $(this);
-            var callbacks;
-            function handler(arg) {
-                callbacks.fireWith($this, [arg]);
+        return function(callback, options) {
+            var trigger = arguments.length === 0;
+            var unbind = arguments[0] === "unbind";
+            if (!trigger && !unbind && !is_function(callback)) {
+                throw new Error('Invalid argument, it need to a function or string ' +
+                                '"unbind" or no arguments.');
             }
-            if (trigger || unbind) {
-                callbacks = $this.data(data_name);
-                if (trigger) {
-                    callbacks && callbacks.fire();
-                } else {
-                    if (callback && callbacks) {
-                        callbacks.remove(callback);
-                        if (!callbacks.has()) {
+            if (unbind) {
+                callback = is_function(arguments[1]) ? arguments[1] : null;
+            }
+            var data_name = 'callbacks_' + factory_settings.name;
+            return this.each(function() {
+                var $this = $(this);
+                var callbacks;
+                function handler(arg) {
+                    callbacks.fireWith($this, [arg]);
+                }
+                if (trigger || unbind) {
+                    callbacks = $this.data(data_name);
+                    if (trigger) {
+                        callbacks && callbacks.fire();
+                    } else {
+                        if (callback && callbacks) {
+                            callbacks.remove(callback);
+                            if (!callbacks.has()) {
+                                callbacks = null;
+                            }
+                        } else {
                             callbacks = null;
                         }
-                    } else {
-                        callbacks = null;
+                        if (!callbacks) {
+                            $this.removeData(data_name);
+                            factory_settings.destroy.call(this, handler, options);
+                        }
                     }
-                    if (!callbacks) {
-                        $this.removeData(data_name);
-                        settings.destroy.call(this, handler);
-                    }
+                } else if ($this.data(data_name)) {
+                    $(this).data(data_name).add(callback);
+                } else {
+                    callbacks = $.Callbacks();
+                    callbacks.add(callback);
+                    $this.data(data_name, callbacks);
+                    factory_settings.init.call(this, handler, options);
                 }
-            } else if ($this.data('callbacks')) {
-                $(this).data(data_name).add(callback);
+            });
+        };
+    }
+    // -----------------------------------------------------------------------
+    // :: Cross-browser resize element plugin using sentinel iframe or
+    // :: resizeObserver
+    // -----------------------------------------------------------------------
+    $.fn.resizer = make_callback_plugin({
+        name: 'resize',
+        init: function(handler, options) {
+            var settings = $.extend({
+                prefix: ''
+            }, options);
+            var $this = $(this);
+            var resizer;
+            var first = true;
+            if ($this.is('body')) {
+                $(window).on('resize.resizer', handler);
+            } else if (window.ResizeObserver) {
+                resizer = new ResizeObserver(function() {
+                    if (!first) {
+                        handler();
+                    }
+                    first = false;
+                });
+                resizer.observe(this);
+                $this.data('observer', resizer);
             } else {
-                callbacks = $.Callbacks();
-                callbacks.add(callback);
-                $this.data(data_name, callbacks);
-                settings.init.call(this, handler);
+                var iframe = $('<iframe/>').addClass(settings.prefix + 'resizer')
+                    .appendTo(this)[0];
+                $(iframe.contentWindow).on('resize', handler);
             }
-        });
-    };
+        },
+        destroy: function() {
+            var $this = $(this);
+            if (window.ResizeObserver) {
+                var observer = $this.data('observer');
+                if (observer) {
+                    observer.unobserve(this);
+                    $this.removeData('observer');
+                }
+            } else {
+                var iframe = $this.find('> iframe[class$="resizer"]');
+                if (iframe.length) {
+                    // just in case of memory leaks in IE
+                    $(iframe[0].contentWindow).off('resize').remove();
+                    iframe.remove();
+                } else if ($this.is('body')) {
+                    $(window).off('resize.resizer');
+                }
+            }
+        }
+    });
     // -----------------------------------------------------------------------
     // :: mobile friendly scroll that work without scrollbar (for less)
     // -----------------------------------------------------------------------
-    $.fn.touch_scroll = function(callback) {
-        var settings = {
-            name: 'touch',
-            init: function(handler) {
-                var origin;
-                var previous;
-                $(this).on('touchstart.scroll', function(e) {
-                    e = e.originalEvent;
-                    if (e.touches.length === 1) {
-                        previous = origin = e.touches[0];
-                        e.preventDefault();
-                    }
-                }).on('touchmove.scroll', function(e) {
-                    e = e.originalEvent;
-                    if (origin && e.touches.length === 1) {
-                        var current = e.touches[0];
-                        handler({
-                            origin: origin,
-                            previous: previous,
-                            current: current
-                        });
-                        previous = current;
-                    }
-                }).on('touchend.scroll', function() {
-                    if (origin || previous) {
-                        origin = previous = null;
-                    }
-                });
-            },
-            destroy: function() {
-                $(this).off('touchstart.scroll touchmove.scroll touchend.scroll');
-            }
-        };
-        return this.callback_event(callback, settings);
-    };
+    $.fn.touch_scroll = make_callback_plugin({
+        name: 'touch',
+        init: function(handler) {
+            var origin;
+            var previous;
+            $(this).on('touchstart.scroll', function(e) {
+                e = e.originalEvent;
+                if (e.touches.length === 1) {
+                    previous = origin = e.touches[0];
+                    e.preventDefault();
+                }
+            }).on('touchmove.scroll', function(e) {
+                e = e.originalEvent;
+                if (origin && e.touches.length === 1) {
+                    var current = e.touches[0];
+                    handler({
+                        origin: origin,
+                        previous: previous,
+                        current: current
+                    });
+                    previous = current;
+                }
+            }).on('touchend.scroll', function() {
+                if (origin || previous) {
+                    origin = previous = null;
+                }
+            });
+        },
+        destroy: function() {
+            $(this).off('touchstart.scroll touchmove.scroll touchend.scroll');
+        }
+    });
     // -----------------------------------------------------------------------
     function jquery_resolve(value) {
         var defer = jQuery.Deferred();
@@ -4250,7 +4245,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 24 Feb 2020 20:44:47 +0000',
+        date: 'Mon, 24 Feb 2020 22:51:11 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
