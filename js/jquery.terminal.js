@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.14.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 24 Feb 2020 12:40:29 +0000
+ * Date: Mon, 24 Feb 2020 20:44:47 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -915,6 +915,61 @@
     $.fn.resizer = function(callback, options) {
         var settings = $.extend({}, {
             prefix: ''
+        }, options, {
+            name: 'resize',
+            init: function(handler) {
+                var $this = $(this);
+                var resizer;
+                var first = true;
+                if (window.ResizeObserver) {
+                    resizer = new ResizeObserver(function() {
+                        if (!first) {
+                            handler();
+                        }
+                        first = false;
+                    });
+                    resizer.observe(this);
+                    $this.data('observer', resizer);
+                } else if ($this.is('body')) {
+                    $(window).on('resize.resizer', handler);
+                } else {
+                    var iframe = $('<iframe/>').addClass(settings.prefix + 'resizer')
+                        .appendTo(this)[0];
+
+                    $(iframe.contentWindow).on('resize', handler);
+                }
+            },
+            destroy: function() {
+                var $this = $(this);
+                if (window.ResizeObserver) {
+                    var observer = $this.data('observer');
+                    if (observer) {
+                        observer.unobserve(this);
+                        $this.removeData('observer');
+                    }
+                } else {
+                    var iframe = $this.find('> iframe');
+                    if (iframe.length) {
+                        // just in case of memory leaks in IE
+                        $(iframe[0].contentWindow).off('resize').remove();
+                        iframe.remove();
+                    } else if ($this.is('body')) {
+                        $(window).off('resize.resizer');
+                    }
+                }
+            }
+        });
+        return this.callback_event(callback, settings);
+    };
+    // -----------------------------------------------------------------------
+    // :: abstraction that run init once then use callbacks to add more events
+    // :: if there are no events on unbind it remove the handler
+    // -----------------------------------------------------------------------
+    $.fn.callback_event = function(callback, options) {
+        var settings = $.extend({
+            init: $.noop,
+            destroy: $.noop,
+            name: 'event'
         }, options);
         var trigger = arguments.length === 0;
         var unbind = arguments[0] === "unbind";
@@ -925,15 +980,15 @@
         if (unbind) {
             callback = is_function(arguments[1]) ? arguments[1] : null;
         }
+        var data_name = 'callbacks_' + settings.name;
         return this.each(function() {
             var $this = $(this);
-            var iframe;
             var callbacks;
-            function resize_handler() {
-                callbacks.fire();
+            function handler(arg) {
+                callbacks.fireWith($this, [arg]);
             }
             if (trigger || unbind) {
-                callbacks = $this.data('callbacks');
+                callbacks = $this.data(data_name);
                 if (trigger) {
                     callbacks && callbacks.fire();
                 } else {
@@ -946,52 +1001,57 @@
                         callbacks = null;
                     }
                     if (!callbacks) {
-                        $this.removeData('callbacks');
-                        if (window.ResizeObserver) {
-                            var observer = $this.data('observer');
-                            if (observer) {
-                                observer.unobserve(this);
-                                $this.removeData('observer');
-                            }
-                        } else {
-                            iframe = $this.find('> iframe');
-                            if (iframe.length) {
-                                // just in case of memory leaks in IE
-                                $(iframe[0].contentWindow).off('resize').remove();
-                                iframe.remove();
-                            } else if ($this.is('body')) {
-                                $(window).off('resize.resizer');
-                            }
-                        }
+                        $this.removeData(data_name);
+                        settings.destroy.call(this, handler);
                     }
                 }
             } else if ($this.data('callbacks')) {
-                $(this).data('callbacks').add(callback);
+                $(this).data(data_name).add(callback);
             } else {
                 callbacks = $.Callbacks();
                 callbacks.add(callback);
-                $this.data('callbacks', callbacks);
-                var resizer;
-                var first = true;
-                if (window.ResizeObserver) {
-                    resizer = new ResizeObserver(function() {
-                        if (!first) {
-                            resize_handler();
-                        }
-                        first = false;
-                    });
-                    resizer.observe(this);
-                    $this.data('observer', resizer);
-                } else if ($this.is('body')) {
-                    $(window).on('resize.resizer', resize_handler);
-                } else {
-                    iframe = $('<iframe/>').addClass(settings.prefix + 'resizer')
-                        .appendTo(this)[0];
-
-                    $(iframe.contentWindow).on('resize', resize_handler);
-                }
+                $this.data(data_name, callbacks);
+                settings.init.call(this, handler);
             }
         });
+    };
+    // -----------------------------------------------------------------------
+    // :: mobile friendly scroll that work without scrollbar (for less)
+    // -----------------------------------------------------------------------
+    $.fn.touch_scroll = function(callback) {
+        var settings = {
+            name: 'touch',
+            init: function(handler) {
+                var origin;
+                var previous;
+                $(this).on('touchstart.scroll', function(e) {
+                    e = e.originalEvent;
+                    if (e.touches.length === 1) {
+                        previous = origin = e.touches[0];
+                        e.preventDefault();
+                    }
+                }).on('touchmove.scroll', function(e) {
+                    e = e.originalEvent;
+                    if (origin && e.touches.length === 1) {
+                        var current = e.touches[0];
+                        handler({
+                            origin: origin,
+                            previous: previous,
+                            current: current
+                        });
+                        previous = current;
+                    }
+                }).on('touchend.scroll', function() {
+                    if (origin || previous) {
+                        origin = previous = null;
+                    }
+                });
+            },
+            destroy: function() {
+                $(this).off('touchstart.scroll touchmove.scroll touchend.scroll');
+            }
+        };
+        return this.callback_event(callback, settings);
     };
     // -----------------------------------------------------------------------
     function jquery_resolve(value) {
@@ -4189,8 +4249,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.14.1',
-        date: 'Mon, 24 Feb 2020 12:40:29 +0000',
+        version: 'DEV',
+        date: 'Mon, 24 Feb 2020 20:44:47 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5929,6 +5989,8 @@
         exceptionHandler: null,
         pauseEvents: true,
         softPause: false,
+        mousewheel: null,
+        touchScroll: null,
         memory: false,
         cancelableAjax: true,
         processArguments: true,
@@ -10071,6 +10133,18 @@
                         mousewheel(e, -delta);
                     });
                 }
+                self.touch_scroll(function(event) {
+                    var delta = event.current.clientY - event.previous.clientY;
+                    var ret;
+                    if (is_function(interpreter.touchScroll)) {
+                        ret = interpreter.touchScroll(event, delta, self);
+                    } else if (is_function(settings.touchScroll)) {
+                        ret = settings.touchScroll(event, delta, self);
+                    }
+                    if (ret === true) {
+                        return;
+                    }
+                });
             })();
         }); // make_interpreter
         return self;
