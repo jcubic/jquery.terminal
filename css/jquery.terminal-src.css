@@ -217,6 +217,9 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
 }
+.cmd span.cmd-prompt, .cmd .cmd-prompt span {
+    background-color: transparent !important;
+}
 .terminal-output > :not(.raw) .emoji, .cmd .emoji {
     height: 14px;
     background-size: contain;

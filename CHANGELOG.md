@@ -1,3 +1,7 @@
+## 2.14.2
+### Bugfix
+* fix vertical bar cursor animation on empty command line
+
 ## 2.14.1
 ### Bugfix
 * fix empty rows size
