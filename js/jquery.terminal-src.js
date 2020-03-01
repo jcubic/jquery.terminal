@@ -2508,8 +2508,11 @@
                 array[0] = array[0].replace(re, '');
             }
             // fix issue with cursor that was cut off #379
-            if (array.length > 1 && array[array.length - 1].length === num_chars) {
-                array.push('');
+            if (array.length > 1) {
+                var len = $.terminal.length(array[array.length - 1]);
+                if (len === num_chars) {
+                    array.push('');
+                }
             }
             return array;
         }

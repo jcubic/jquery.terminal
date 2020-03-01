@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 25 Feb 2020 10:43:44 +0000
+ * Date: Sun, 01 Mar 2020 09:27:10 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -2508,8 +2508,11 @@
                 array[0] = array[0].replace(re, '');
             }
             // fix issue with cursor that was cut off #379
-            if (array.length > 1 && array[array.length - 1].length === num_chars) {
-                array.push('');
+            if (array.length > 1) {
+                var len = $.terminal.length(array[array.length - 1]);
+                if (len === num_chars) {
+                    array.push('');
+                }
             }
             return array;
         }
@@ -4245,7 +4248,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 25 Feb 2020 10:43:44 +0000',
+        date: 'Sun, 01 Mar 2020 09:27:10 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

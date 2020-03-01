@@ -1,6 +1,7 @@
 ## 2.14.2
 ### Bugfix
 * fix vertical bar cursor animation on empty command line
+* fix edge case while splitting the command line with formatting
 
 ## 2.14.1
 ### Bugfix
