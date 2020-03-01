@@ -1,7 +1,7 @@
 ## 2.14.2
 ### Bugfix
 * fix vertical bar cursor animation on empty command line
-* fix edge case while splitting the command line with formatting
+* fix edge case while splitting the command line with formatting (better fix for [#379](https://github.com/jcubic/jquery.terminal/379))
 
 ## 2.14.1
 ### Bugfix
