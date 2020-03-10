@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 01 Mar 2020 09:27:11 +0000
+ * Date: Tue, 10 Mar 2020 10:02:44 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -908,4 +908,15 @@ terminal .terminal-output > div {
     left: 0;
     right: 0;
     z-index: 200;
+}
+.terminal-less {
+    touch-action: none;
+    overscroll-behavior-y: contain;
+}
+/*
+ * mobile scroll fix, with help from StackOverflow
+ * https://stackoverflow.com/a/60535925/387194
+ */
+.terminal-mobile .terminal-wrapper {
+    pointer-events: none;
 }

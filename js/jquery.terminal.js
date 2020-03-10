@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 01 Mar 2020 09:27:10 +0000
+ * Date: Tue, 10 Mar 2020 10:02:43 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -1025,17 +1025,19 @@
                 e = e.originalEvent;
                 if (e.touches.length === 1) {
                     previous = origin = e.touches[0];
-                    e.preventDefault();
                 }
             }).on('touchmove.scroll', function(e) {
                 e = e.originalEvent;
                 if (origin && e.touches.length === 1) {
                     var current = e.touches[0];
-                    handler({
+                    var ret = handler({
                         origin: origin,
                         previous: previous,
                         current: current
                     });
+                    if (ret === false) {
+                        e.preventDefault();
+                    }
                     previous = current;
                 }
             }).on('touchend.scroll', function() {
@@ -2344,7 +2346,7 @@
         // terminal animation don't work on android because they animate
         // 2 properties
         // -------------------------------------------------------------------------------
-        if (animation_supported && !is_android) {
+        if (animation_supported) { // && !is_android) {
             animation = function(toggle) {
                 if (toggle) {
                     cursor.addClass('cmd-blink');
@@ -4248,7 +4250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 01 Mar 2020 09:27:10 +0000',
+        date: 'Tue, 10 Mar 2020 10:02:43 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5988,7 +5990,7 @@
         pauseEvents: true,
         softPause: false,
         mousewheel: null,
-        touchScroll: null,
+        touchscroll: null,
         memory: false,
         cancelableAjax: true,
         processArguments: true,
@@ -9731,7 +9733,7 @@
             });
             // istanbul ignore next
             if (is_mobile) {
-                self.click(function() {
+                self.addClass('terminal-mobile').click(function() {
                     if (!frozen) {
                         if (!self.enabled()) {
                             self.focus();
@@ -10134,14 +10136,16 @@
                 self.touch_scroll(function(event) {
                     var delta = event.current.clientY - event.previous.clientY;
                     var ret;
-                    if (is_function(interpreter.touchScroll)) {
-                        ret = interpreter.touchScroll(event, delta, self);
-                    } else if (is_function(settings.touchScroll)) {
-                        ret = settings.touchScroll(event, delta, self);
+                    var interpreter = interpreters.top();
+                    if (is_function(interpreter.touchscroll)) {
+                        ret = interpreter.touchscroll(event, delta, self);
+                    } else if (is_function(settings.touchscroll)) {
+                        ret = settings.touchscroll(event, delta, self);
                     }
                     if (ret === true) {
                         return;
                     }
+                    return false;
                 });
             })();
         }); // make_interpreter

@@ -909,3 +909,14 @@ terminal .terminal-output > div {
     right: 0;
     z-index: 200;
 }
+.terminal-less {
+    touch-action: none;
+    overscroll-behavior-y: contain;
+}
+/*
+ * mobile scroll fix, with help from StackOverflow
+ * https://stackoverflow.com/a/60535925/387194
+ */
+.terminal-mobile .terminal-wrapper {
+    pointer-events: none;
+}
