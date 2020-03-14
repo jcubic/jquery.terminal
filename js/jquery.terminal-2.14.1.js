@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 14 Mar 2020 14:07:27 +0000
+ * Date: Sat, 14 Mar 2020 14:23:02 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4280,7 +4280,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 14 Mar 2020 14:07:27 +0000',
+        date: 'Sat, 14 Mar 2020 14:23:02 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9791,14 +9791,14 @@
                 (function() {
                     self.addClass('terminal-mobile');
                     var timer;
-                    self.on('touchstart.terminal', function() {
+                    self.add(command_line.clip()).on('touchstart.terminal', function() {
                         if (!frozen) {
                             if (!self.enabled()) {
                                 command_line.clip().css('top', 0);
                                 self.focus();
                             } else {
                                 self.disable();
-                                command_line.clip().blur();
+                                command_line.clip().css('top', '100%').blur();
                                 // just in case of Webkit bug
                                 window.getSelection().removeAllRanges();
                             }

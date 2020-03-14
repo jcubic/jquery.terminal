@@ -9791,14 +9791,14 @@
                 (function() {
                     self.addClass('terminal-mobile');
                     var timer;
-                    self.on('touchstart.terminal', function() {
+                    self.add(command_line.clip()).on('touchstart.terminal', function() {
                         if (!frozen) {
                             if (!self.enabled()) {
                                 command_line.clip().css('top', 0);
                                 self.focus();
                             } else {
                                 self.disable();
-                                command_line.clip().blur();
+                                command_line.clip().css('top', '100%').blur();
                                 // just in case of Webkit bug
                                 window.getSelection().removeAllRanges();
                             }
