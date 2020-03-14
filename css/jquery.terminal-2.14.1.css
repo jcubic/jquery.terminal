@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 14 Mar 2020 14:09:25 +0000
+ * Date: Sat, 14 Mar 2020 23:34:33 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -824,6 +824,12 @@ terminal .terminal-output > div {
 .cmd .style .token.string,
 .cmd .token.token {
     background-color: inherit;
+}
+/* for wide characters that have span inside .token */
+.terminal span.token.string span,
+.cmd span.token.string span {
+    color: inherit !important;
+    background: inherit !important;
 }
 /* FireFox hack
 @supports (-moz-animation: foo) {

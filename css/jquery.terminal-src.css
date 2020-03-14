@@ -825,6 +825,12 @@ terminal .terminal-output > div {
 .cmd .token.token {
     background-color: inherit;
 }
+/* for wide characters that have span inside .token */
+.terminal span.token.string span,
+.cmd span.token.string span {
+    color: inherit !important;
+    background: inherit !important;
+}
 /* FireFox hack
 @supports (-moz-animation: foo) {
     .terminal,

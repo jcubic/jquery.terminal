@@ -3967,6 +3967,9 @@
                 }];
             }, []);
             return specs.map(function(spec) {
+                if (spec.len === 1) {
+                    return make_string(spec);
+                }
                 var style = char_width_prop(spec.sum, options);
                 if (spec.sum === chars.length || !style.length) {
                     return '<span>' + make_string(spec) + '</span>';
@@ -5440,10 +5443,18 @@
         // :: Remove formatting from text
         // ---------------------------------------------------------------------
         strip: function strip(str) {
-            str = str.replace(format_parts_re, '$6');
-            return str.replace(/\\([[\]])/g, function(whole, bracket) {
-                return bracket;
-            });
+            if (!$.terminal.have_formatting(str)) {
+                return str;
+            }
+            return $.terminal.format_split(str).map(function(str) {
+                if ($.terminal.is_formatting(str)) {
+                    str = str.replace(format_parts_re, '$6');
+                    return str.replace(/\\([[\]])/g, function(whole, bracket) {
+                        return bracket;
+                    });
+                }
+                return str;
+            }).join('');
         },
         // ---------------------------------------------------------------------
         // :: Return active terminal

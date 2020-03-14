@@ -6,7 +6,8 @@
 * fix vertical bar cursor animation on empty command line
 * fix edge case while splitting the command line with formatting (better fix for [#379](https://github.com/jcubic/jquery.terminal/379))
 * fix option parser when using minus or double minus as argument
-* fix major issue when wcwidth is added and there are no wide characters
+* fix issue when wcwidth is added and there are no wide characters
+* prism + wide characters (e.g. Chinese and Japanese inside strings)
 
 ## 2.14.1
 ### Bugfix

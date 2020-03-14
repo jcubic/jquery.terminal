@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 14 Mar 2020 16:37:49 +0000
+ * Date: Sat, 14 Mar 2020 23:34:32 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3967,6 +3967,9 @@
                 }];
             }, []);
             return specs.map(function(spec) {
+                if (spec.len === 1) {
+                    return make_string(spec);
+                }
                 var style = char_width_prop(spec.sum, options);
                 if (spec.sum === chars.length || !style.length) {
                     return '<span>' + make_string(spec) + '</span>';
@@ -4277,7 +4280,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 14 Mar 2020 16:37:49 +0000',
+        date: 'Sat, 14 Mar 2020 23:34:32 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5440,10 +5443,18 @@
         // :: Remove formatting from text
         // ---------------------------------------------------------------------
         strip: function strip(str) {
-            str = str.replace(format_parts_re, '$6');
-            return str.replace(/\\([[\]])/g, function(whole, bracket) {
-                return bracket;
-            });
+            if (!$.terminal.have_formatting(str)) {
+                return str;
+            }
+            return $.terminal.format_split(str).map(function(str) {
+                if ($.terminal.is_formatting(str)) {
+                    str = str.replace(format_parts_re, '$6');
+                    return str.replace(/\\([[\]])/g, function(whole, bracket) {
+                        return bracket;
+                    });
+                }
+                return str;
+            }).join('');
         },
         // ---------------------------------------------------------------------
         // :: Return active terminal
