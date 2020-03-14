@@ -10,7 +10,7 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&f705142eaafd733d63afa35392c01fe5a91b90f5)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&4735dc075466b92d40f39547b5128f0ec1ed419a)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&456666fbade1b3a17080d5477566c268)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
@@ -190,7 +190,7 @@ jQuery(function($, undefined) {
 });
 ```
 
-command `add 2 2` will not display `22` but `4`.
+command `add 2 2` will display `4` (not `22`).
 
 Command `foo` will execute json-rpc from foo.php file.
 
@@ -198,6 +198,22 @@ command `bar` will change the prompt to `bar> ` and if you type `sub 10 2` it wi
 To exit from bar nested command you can type `exit` or press CTRL+D.
 
 command `re /^foo/ foo-bar` will echo: "foo-bar match" where "match" will be green.
+
+By default arguments are required but you can disable the check like this:
+
+```javascript
+jQuery(function($, undefined) {
+    $('#term_demo').terminal({
+        add: function(...args) {
+            this.echo(args.reduce((a,b) => a + b));
+        }
+    }, {
+       checkArity: false
+    });
+});
+```
+
+And add command will accept any number of argments and it will sum them up (if they are numbers).
 
 You can create JSON-RPC interpreter with authentication in just one line:
 
@@ -259,7 +275,7 @@ If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 
 ### Credits
 
-Project used:
+Projects used:
 
 * [Storage plugin](https://sites.google.com/site/daveschindler/jquery-html5-storage-plugin) by Dave Schindler (MIT)
 * [jQuery Timers](http://jquery.offput.ca/every/) (WTFPL)

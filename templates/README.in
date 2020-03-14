@@ -190,7 +190,7 @@ jQuery(function($, undefined) {
 });
 ```
 
-command `add 2 2` will not display `22` but `4`.
+command `add 2 2` will display `4` (not `22`).
 
 Command `foo` will execute json-rpc from foo.php file.
 
@@ -198,6 +198,22 @@ command `bar` will change the prompt to `bar> ` and if you type `sub 10 2` it wi
 To exit from bar nested command you can type `exit` or press CTRL+D.
 
 command `re /^foo/ foo-bar` will echo: "foo-bar match" where "match" will be green.
+
+By default arguments are required but you can disable the check like this:
+
+```javascript
+jQuery(function($, undefined) {
+    $('#term_demo').terminal({
+        add: function(...args) {
+            this.echo(args.reduce((a,b) => a + b));
+        }
+    }, {
+       checkArity: false
+    });
+});
+```
+
+And add command will accept any number of argments and it will sum them up (if they are numbers).
 
 You can create JSON-RPC interpreter with authentication in just one line:
 
@@ -259,7 +275,7 @@ If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 
 ### Credits
 
-Project used:
+Projects used:
 
 * [Storage plugin](https://sites.google.com/site/daveschindler/jquery-html5-storage-plugin) by Dave Schindler (MIT)
 * [jQuery Timers](http://jquery.offput.ca/every/) (WTFPL)
