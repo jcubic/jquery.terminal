@@ -10,7 +10,7 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&4735dc075466b92d40f39547b5128f0ec1ed419a)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&f6b33c5253c52e7cfe091ffcd05de2788a574a8a)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&456666fbade1b3a17080d5477566c268)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
@@ -192,7 +192,8 @@ jQuery(function($, undefined) {
 
 command `add 2 2` will display `4` (not `22`).
 
-Command `foo` will execute json-rpc from foo.php file.
+Command `foo` will change prompt to `foo>` and each new command will execute
+json-rpc method from foo.php script.
 
 command `bar` will change the prompt to `bar> ` and if you type `sub 10 2` it will display 8.
 To exit from bar nested command you can type `exit` or press CTRL+D.
@@ -221,8 +222,27 @@ You can create JSON-RPC interpreter with authentication in just one line:
 $('#term_demo').terminal('service.php', {login: true});
 ```
 
-The reset of the code can be on the server, so you can write fully working application,
+The rest of the code can be on the server, so you can write fully working application,
 without any front-end, that can be tested in browser.
+
+First argument to terminal can also be array with objects strings and functions, with
+one requirement, that only one function can be used as last fallback for commands that was
+not found in RPC or in objects.
+
+```javascript
+jQuery(function($, undefined) {
+    $('#term_demo').terminal([{
+        add: function(...args) {
+            this.echo(args.reduce((a,b) => a + b));
+        }
+    } 'foo.php', function(command) {
+       this.echo("You've typed " + command, {formatters: false, exec: false});
+    }], {
+       checkArity: false
+    });
+});
+```
+
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [Full Documentation](http://terminal.jcubic.pl/api_reference.php) or

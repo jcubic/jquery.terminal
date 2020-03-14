@@ -192,7 +192,8 @@ jQuery(function($, undefined) {
 
 command `add 2 2` will display `4` (not `22`).
 
-Command `foo` will execute json-rpc from foo.php file.
+Command `foo` will change prompt to `foo>` and each new command will execute
+json-rpc method from foo.php script.
 
 command `bar` will change the prompt to `bar> ` and if you type `sub 10 2` it will display 8.
 To exit from bar nested command you can type `exit` or press CTRL+D.
@@ -221,8 +222,27 @@ You can create JSON-RPC interpreter with authentication in just one line:
 $('#term_demo').terminal('service.php', {login: true});
 ```
 
-The reset of the code can be on the server, so you can write fully working application,
+The rest of the code can be on the server, so you can write fully working application,
 without any front-end, that can be tested in browser.
+
+First argument to terminal can also be array with objects strings and functions, with
+one requirement, that only one function can be used as last fallback for commands that was
+not found in RPC or in objects.
+
+```javascript
+jQuery(function($, undefined) {
+    $('#term_demo').terminal([{
+        add: function(...args) {
+            this.echo(args.reduce((a,b) => a + b));
+        }
+    } 'foo.php', function(command) {
+       this.echo("You've typed " + command, {formatters: false, exec: false});
+    }], {
+       checkArity: false
+    });
+});
+```
+
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [Full Documentation](http://terminal.jcubic.pl/api_reference.php) or
