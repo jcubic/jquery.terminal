@@ -5563,17 +5563,17 @@
             }
             var rest = arg.reduce(function(acc, arg) {
                 var str = typeof arg === 'string' ? arg : '';
-                if (str.match(/^-/) && acc instanceof token) {
+                if (str.match(/^--?[^-]/) && acc instanceof token) {
                     result[acc.value] = true;
                 }
-                if (str.match(/^--/)) {
+                if (str.match(/^--[^-]/)) {
                     var name = str.replace(/^--/, '');
                     if (settings.boolean.indexOf(name) === -1) {
                         return new token(name);
                     } else {
                         result[name] = true;
                     }
-                } else if (str.match(/^-/)) {
+                } else if (str.match(/^-[^-]/)) {
                     var single = str.replace(/^-/, '').split('');
                     if (settings.boolean.indexOf(single.slice(-1)[0]) === -1) {
                         var last = single.pop();

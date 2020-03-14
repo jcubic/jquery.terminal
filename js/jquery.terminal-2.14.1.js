@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 14 Mar 2020 14:23:02 +0000
+ * Date: Sat, 14 Mar 2020 15:55:16 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4280,7 +4280,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 14 Mar 2020 14:23:02 +0000',
+        date: 'Sat, 14 Mar 2020 15:55:16 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5563,17 +5563,17 @@
             }
             var rest = arg.reduce(function(acc, arg) {
                 var str = typeof arg === 'string' ? arg : '';
-                if (str.match(/^-/) && acc instanceof token) {
+                if (str.match(/^--?[^-]/) && acc instanceof token) {
                     result[acc.value] = true;
                 }
-                if (str.match(/^--/)) {
+                if (str.match(/^--[^-]/)) {
                     var name = str.replace(/^--/, '');
                     if (settings.boolean.indexOf(name) === -1) {
                         return new token(name);
                     } else {
                         result[name] = true;
                     }
-                } else if (str.match(/^-/)) {
+                } else if (str.match(/^-[^-]/)) {
                     var single = str.replace(/^-/, '').split('');
                     if (settings.boolean.indexOf(single.slice(-1)[0]) === -1) {
                         var last = single.pop();

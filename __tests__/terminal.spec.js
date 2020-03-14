@@ -1829,6 +1829,15 @@ describe('Terminal utils', function() {
                 f: 'foo'
             }]);
         });
+        it('should parse minus and double minus', function() {
+            test([['--foo', '-', '-aif', '--', '-', '--'], {
+                _: ['-', '--'],
+                foo: '-',
+                a: true,
+                i: true,
+                f: '--'
+            }]);
+        });
         it('should create boolean option for double dash if arg is missing', function() {
             [
                 [
@@ -2675,7 +2684,7 @@ describe('extensions', function() {
                 }
             });
             complete(term, 'hello');
-            await delay(100);
+            await delay(200);
             menu_visible(term);
             expect(term.get_command()).toEqual('hello_');
             expect(completion(term)).toEqual(['foo', 'bar']);
@@ -3506,7 +3515,7 @@ describe('Terminal plugin', function() {
                         // no keypress or no keydown for all keys
                         doc.trigger(keypress('a', true));
                         done();
-                    }, 200);
+                    }, 300);
                 });
                 doc.trigger('input');
             });
