@@ -7717,10 +7717,6 @@
         }
         // ---------------------------------------------------------------------
         var self = this;
-        if (self.is('body,html')) {
-            self = $('<div/>').appendTo('body');
-            $('body').addClass('full-screen-terminal');
-        }
         if (this.length > 1) {
             return this.each(function() {
                 $.fn.terminal.call(
@@ -7730,8 +7726,20 @@
                 );
             });
         }
-        // terminal already exists
-        if (self.data('terminal')) {
+        var body_terminal;
+        if (self.is('body,html')) {
+            // terminal already exists on body
+            if (self.hasClass('full-screen-terminal')) {
+                var data = self.find('> .terminal').data('terminal');
+                if (data) {
+                    return data;
+                }
+            }
+            body_terminal = self;
+            self = $('<div/>').appendTo('body');
+            $('body').addClass('full-screen-terminal');
+        } else if (self.data('terminal')) {
+            // terminal already exists
             return self.data('terminal');
         }
         // -----------------------------------------------------------------
@@ -9356,6 +9364,15 @@
                     }
                     output.remove();
                     wrapper.remove();
+                    if (body_terminal) {
+                        var $body = $(body_terminal);
+                        if ($body.attr('class') === 'full-screen-terminal') {
+                            $body.removeAttr('class');
+                        } else {
+                            $body.removeClass('full-screen-terminal');
+                        }
+                        self.remove();
+                    }
                     defunct = true;
                 });
                 return self;

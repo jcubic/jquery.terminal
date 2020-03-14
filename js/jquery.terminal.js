@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 10 Mar 2020 10:02:43 +0000
+ * Date: Sat, 14 Mar 2020 10:51:59 +0000
  */
 /* global location, setTimeout, window, global, sprintf, setImmediate,
           IntersectionObserver,  ResizeObserver, module, require, define,
@@ -4250,7 +4250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 10 Mar 2020 10:02:43 +0000',
+        date: 'Sat, 14 Mar 2020 10:51:59 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7717,10 +7717,6 @@
         }
         // ---------------------------------------------------------------------
         var self = this;
-        if (self.is('body,html')) {
-            self = $('<div/>').appendTo('body');
-            $('body').addClass('full-screen-terminal');
-        }
         if (this.length > 1) {
             return this.each(function() {
                 $.fn.terminal.call(
@@ -7730,8 +7726,20 @@
                 );
             });
         }
-        // terminal already exists
-        if (self.data('terminal')) {
+        var body_terminal;
+        if (self.is('body,html')) {
+            // terminal already exists on body
+            if (self.hasClass('full-screen-terminal')) {
+                var data = self.find('> .terminal').data('terminal');
+                if (data) {
+                    return data;
+                }
+            }
+            body_terminal = self;
+            self = $('<div/>').appendTo('body');
+            $('body').addClass('full-screen-terminal');
+        } else if (self.data('terminal')) {
+            // terminal already exists
             return self.data('terminal');
         }
         // -----------------------------------------------------------------
@@ -9356,6 +9364,15 @@
                     }
                     output.remove();
                     wrapper.remove();
+                    if (body_terminal) {
+                        var $body = $(body_terminal);
+                        if ($body.attr('class') === 'full-screen-terminal') {
+                            $body.removeAttr('class');
+                        } else {
+                            $body.removeClass('full-screen-terminal');
+                        }
+                        self.remove();
+                    }
                     defunct = true;
                 });
                 return self;
