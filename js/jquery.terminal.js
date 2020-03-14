@@ -41,11 +41,9 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 24 Feb 2020 12:40:29 +0000
+ * Date: Sat, 14 Mar 2020 12:07:43 +0000
  */
-/* global location, setTimeout, window, global, sprintf, setImmediate,
-          IntersectionObserver,  ResizeObserver, module, require, define,
-          setInterval, clearInterval, clearTimeout, Blob, Map, Image */
+/* global define, Map */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -4190,7 +4188,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.14.1',
-        date: 'Mon, 24 Feb 2020 12:40:29 +0000',
+        date: 'Sat, 14 Mar 2020 12:07:43 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

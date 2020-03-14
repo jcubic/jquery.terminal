@@ -17,7 +17,7 @@
  * Last Update in jQuery Terminal 2.11.0
  *
  */
-/* global define, global, require, module */
+/* global define */
 (function(factory) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {

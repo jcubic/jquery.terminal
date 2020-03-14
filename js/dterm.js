@@ -10,7 +10,7 @@
  * Released under the MIT license
  *
  */
-/* global setTimeout, IntersectionObserver, define, global, require, module */
+/* global define */
 (function(factory, undefined) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {

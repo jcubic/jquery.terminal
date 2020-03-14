@@ -660,6 +660,7 @@ terminal .terminal-output > div {
 }
 .terminal .cmd {
     margin-bottom: 10px;
+    position: relative;
 }
 @supports (--css: variables) {
     .terminal,
