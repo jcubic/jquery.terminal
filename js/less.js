@@ -14,7 +14,7 @@
  * Released under the MIT license
  *
  */
-/* global define, global, require, module, Image, URL */
+/* global define */
 (function(factory, undefined) {
     var root = typeof window !== 'undefined' ? window : global;
     if (typeof define === 'function' && define.amd) {

@@ -43,9 +43,7 @@
  *
  * Date: {{DATE}}
  */
-/* global location, setTimeout, window, global, sprintf, setImmediate,
-          IntersectionObserver,  ResizeObserver, module, require, define,
-          setInterval, clearInterval, clearTimeout, Blob, Map, Image */
+/* global define, Map */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
