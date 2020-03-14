@@ -3967,9 +3967,6 @@
                 }];
             }, []);
             return specs.map(function(spec) {
-                if (spec.len === 1) {
-                    return spec.chr;
-                }
                 var style = char_width_prop(spec.sum, options);
                 if (spec.sum === chars.length || !style.length) {
                     return '<span>' + make_string(spec) + '</span>';
