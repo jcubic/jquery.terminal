@@ -8,17 +8,10 @@
 ```
 http://terminal.jcubic.pl
 
-<<<<<<< HEAD
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&843ab7e423154a87a45844b685b5bf9793502f4b)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&d9f1c3bc9581b774f5523a97f75faaeb)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
-=======
-[![npm](https://img.shields.io/badge/npm-2.14.1-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-2.14.1-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&9e9229ce5e0dc3a33b10bbcdad4477176d3c7259)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&d9f1c3bc9581b774f5523a97f75faaeb)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
->>>>>>> master
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&999baf839c79adfe5a44734b06e12fe4b4e31706)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&320bf02181bfc7733cd40198efdf24c0)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
