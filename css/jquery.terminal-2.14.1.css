@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Tue, 10 Mar 2020 10:02:44 +0000
+ * Date: Sat, 14 Mar 2020 14:09:25 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -663,6 +663,7 @@ terminal .terminal-output > div {
 }
 .terminal .cmd {
     margin-bottom: 10px;
+    position: relative;
 }
 @supports (--css: variables) {
     .terminal,
@@ -919,4 +920,13 @@ terminal .terminal-output > div {
  */
 .terminal-mobile .terminal-wrapper {
     pointer-events: none;
+}
+.cmd-editable {
+    position: absolute;
+    top: calc(var(--cmd-y, 0) * 1px);
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    opacity: 0.01;
 }

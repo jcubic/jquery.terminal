@@ -921,3 +921,12 @@ terminal .terminal-output > div {
 .terminal-mobile .terminal-wrapper {
     pointer-events: none;
 }
+.cmd-editable {
+    position: absolute;
+    top: calc(var(--cmd-y, 0) * 1px);
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    opacity: 0.01;
+}

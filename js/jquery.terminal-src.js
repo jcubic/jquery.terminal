@@ -1215,6 +1215,21 @@
         space.remove();
     });
     // -----------------------------------------------------------------------
+    // :: css helper that work with css variables
+    // :: jQuery css method from 3.4 support them by default
+    // -----------------------------------------------------------------------
+    function css(node, obj, value) {
+        if ($.isPlainObject(obj)) {
+            Object.keys(obj).forEach(function(key) {
+                node.style.setProperty(key, obj[key]);
+            });
+        } else if (typeof value === 'undefined') {
+            return node.style.getPropertyValue(obj);
+        } else {
+            node.style.setProperty(obj, value);
+        }
+    }
+    // -----------------------------------------------------------------------
     // :: hide elements from screen readers
     // -----------------------------------------------------------------------
     function a11y_hide(element) {
@@ -1595,12 +1610,26 @@
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
-        var clip = $('<textarea>').attr({
-            autocapitalize: 'off',
-            spellcheck: 'false',
-            tabindex: settings.tabindex
-        }).addClass('cmd-clipboard').appendTo(self);
-        if (!is_mobile) {
+        var clip;
+        if (is_mobile) {
+            clip = $('<div class="cmd-editable" contenteditable/>').appendTo('body');
+            clip.val = function(value) {
+                if (value) {
+                    clip.html(value);
+                } else {
+                    return clip.text();
+                }
+            };
+            clip.on('focus', function() {
+                self.enable();
+            });
+            self.addClass('cmd-mobile');
+        } else {
+            clip = $('<textarea>').attr({
+                autocapitalize: 'off',
+                spellcheck: 'false',
+                tabindex: settings.tabindex
+            }).addClass('cmd-clipboard').appendTo(self);
             clip.val(' ');
         }
         if (settings.width) {
@@ -2281,7 +2310,7 @@
                         clip.trigger('focus', [true]);
                     }
                 });
-            } else if (focus && (is_mobile || !enabled)) {
+            } else if (focus && !enabled) {
                 clip.trigger('blur', [true]);
             }
         }
@@ -2344,7 +2373,7 @@
         // terminal animation don't work on android because they animate
         // 2 properties
         // -------------------------------------------------------------------------------
-        if (animation_supported) { // && !is_android) {
+        if (animation_supported && !is_android) {
             animation = function(toggle) {
                 if (toggle) {
                     cursor.addClass('cmd-blink');
@@ -3109,7 +3138,7 @@
                 doc.unbind('input.cmd', input_event);
                 self.stopTime('blink', blink);
                 self.find('.cmd-wrapper').remove();
-                self.find('.cmd-prompt, .cmd-clipboard').remove();
+                self.find('.cmd-prompt, .cmd-clipboard, .cmd-editable').remove();
                 self.removeClass('cmd').removeData('cmd').off('.cmd');
                 return self;
             },
@@ -3271,6 +3300,9 @@
                 e.which = e.keyCode = 0;
                 doc.trigger(e);
                 return self;
+            },
+            clip: function() {
+                return clip;
             },
             enable: function(silent) {
                 if (!enabled) {
@@ -8695,6 +8727,11 @@
                     limit_lines();
                     output.css('visibilty', '');
                     fire_event('onFlush');
+                    var position = self.find('.cmd').position();
+                    css(document.body, {
+                        '--cmd-x': position.left,
+                        '--cmd-y': position.top
+                    });
 
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
@@ -9724,6 +9761,9 @@
                 commands: commands
             });
             function disable(e) {
+                if (is_mobile) {
+                    return;
+                }
                 e = e.originalEvent;
                 if (e) {
                     // e.terget is body when click outside of context menu to close it
@@ -9748,16 +9788,28 @@
             });
             // istanbul ignore next
             if (is_mobile) {
-                self.addClass('terminal-mobile').click(function() {
-                    if (!frozen) {
-                        if (!self.enabled()) {
-                            self.focus();
-                            command_line.enable();
-                        } else {
-                            self.disable();
+                (function() {
+                    self.addClass('terminal-mobile');
+                    var timer;
+                    self.on('touchstart.terminal', function() {
+                        if (!frozen) {
+                            if (!self.enabled()) {
+                                command_line.clip().css('top', 0);
+                                self.focus();
+                            } else {
+                                self.disable();
+                                command_line.clip().blur();
+                                // just in case of Webkit bug
+                                window.getSelection().removeAllRanges();
+                            }
                         }
-                    }
-                });
+                    }).on('touchend.terminal', function() {
+                        clearTimeout(timer);
+                        timer = setTimeout(function() {
+                            command_line.clip().css('top', '');
+                        }, 100);
+                    });
+                })();
             } else {
                 // work weird on mobile
                 $win.on('focus.terminal_' + self.id(), focus_terminal).
