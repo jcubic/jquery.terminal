@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 15 Mar 2020 13:12:44 +0000
+ * Date: Sun, 15 Mar 2020 18:52:35 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -845,7 +845,9 @@
             if (window.getSelection) {
                 //contenteditable
                 if (isContentEditable) {
-                    target.focus();
+                    if (!this.is(':focus')) {
+                        target.focus();
+                    }
                     var range1 = window.getSelection().getRangeAt(0),
                     range2 = range1.cloneRange();
                     range2.selectNodeContents(target);
@@ -885,8 +887,11 @@
         if (window.getSelection) {
             //contenteditable
             if (isContentEditable) {
-                target.focus();
-                window.getSelection().collapse(target.firstChild, pos);
+                if (!this.is(':focus')) {
+                    target.focus();
+                }
+                var selection = window.getSelection();
+                selection.collapse(selection.focusNode, pos);
             }
             //textarea
             else
@@ -1021,7 +1026,7 @@
             var previous;
             $(this).on('touchstart.scroll', function(e) {
                 e = e.originalEvent;
-                if (e.touches.length === 1) {
+                if (e.target.tagName.toLowerCase() !== 'a' && e.touches.length === 1) {
                     previous = origin = e.touches[0];
                 }
             }).on('touchmove.scroll', function(e) {
@@ -1624,10 +1629,10 @@
                 var clip = {
                     $node: $node,
                     val: function(value) {
-                        if (value) {
-                            $node.html(value);
-                        } else {
+                        if (typeof value === 'undefined') {
                             return $node.text();
+                        } else {
+                            $node.html(value);
                         }
                     },
                     reset: function() {
@@ -2131,7 +2136,7 @@
         function paste_event() {
             clip.val('');
             paste_count = 0;
-            if (self.isenabled() && !clip.is(':focus')) {
+            if (self.isenabled() && !clip.$node.is(':focus')) {
                 clip.$node.trigger('focus', [true]);
             }
             clip.$node.one('input', paste);
@@ -2400,7 +2405,7 @@
                     self.oneTime(10, function() {
                         try {
                             // we check first to improve performance
-                            if (!is_mobile && clip.$node.caret() !== position + 1) {
+                            if (clip.$node.caret() !== position + 1) {
                                 clip.$node.caret(position + 1);
                             }
                         } catch (e) {
@@ -4332,7 +4337,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.15.0',
-        date: 'Sun, 15 Mar 2020 13:12:44 +0000',
+        date: 'Sun, 15 Mar 2020 18:52:35 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9423,6 +9428,7 @@
                 when_ready(function ready() {
                     command_line.destroy().remove();
                     self.resizer('unbind');
+                    self.touch_scroll('unbind');
                     font_resizer.resizer('unbind').remove();
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
@@ -9457,6 +9463,13 @@
                     }
                     if (!terminals.length()) {
                         $(window).off('hashchange');
+                    }
+                    if (is_mobile) {
+                        self.off([
+                            'touchstart.terminal',
+                            'touchmove.terminal',
+                            'touchend.terminal'
+                        ].join(' '));
                     }
                     output.remove();
                     wrapper.remove();
@@ -9851,16 +9864,54 @@
             if (is_mobile) {
                 (function() {
                     self.addClass('terminal-mobile');
-                    self.on('touchstart.terminal', function() {
-                        if (!frozen) {
-                            if (!self.enabled()) {
-                                command_line.clip().focus();
-                                self.focus();
-                            } else {
-                                command_line.clip().blur();
-                                self.disable();
+                    var start;
+                    var move;
+                    var enabled;
+                    var SENSITIVITY = 3;
+                    var clip = command_line.clip();
+                    var HOLD_TIME = 200;
+                    var timer;
+                    clip.$node.off('touchstart.cmd');
+                    self.on('touchstart.terminal', function(e) {
+                        window.touch_event = e;
+                        if (e.target.tagName.toLowerCase() === 'a') {
+                            return;
+                        }
+                        if (!frozen && e.touches.length === 1) {
+                            enabled = self.enabled();
+                            var point = e.touches[0];
+                            start = {
+                                x: point.clientX,
+                                y: point.clientY
+                            };
+                            timer = setTimeout(function() {
+                                start = null;
+                            }, HOLD_TIME);
+                        }
+                    }).on('touchmove.terminal', function(e) {
+                        if (e.touches.length === 1 && start) {
+                            var point = e.touches[0];
+                            var diff_x = Math.abs(point.clientX - start.x);
+                            var diff_y = Math.abs(point.clientY - start.y);
+                            if (diff_x > SENSITIVITY || diff_y > SENSITIVITY) {
+                                move = true;
                             }
                         }
+                    }).on('touchend.terminal', function() {
+                        if (start) {
+                            clearTimeout(timer);
+                            if (!move) {
+                                if (!enabled) {
+                                    clip.focus();
+                                    self.focus();
+                                } else {
+                                    clip.blur();
+                                    self.disable();
+                                }
+                            }
+                        }
+                        move = false;
+                        start = null;
                     });
                 })();
             } else {
