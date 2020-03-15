@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 14 Mar 2020 23:34:32 +0000
+ * Date: Sun, 15 Mar 2020 11:22:04 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1612,24 +1612,64 @@
         //self.append('<span class="mask"></mask>');
         var clip;
         if (is_mobile) {
-            clip = $('<div class="cmd-editable" contenteditable/>').appendTo('body');
-            clip.val = function(value) {
-                if (value) {
-                    clip.html(value);
-                } else {
-                    return clip.text();
-                }
-            };
-            clip.on('focus', function() {
-                self.enable();
-            });
+            clip = (function() {
+                var $node = $('<div class="cmd-editable" contenteditable/>')
+                    .appendTo('body');
+                $node.on('focus', function() {
+                    self.enable();
+                }).on('blur', function() {
+                    self.disable();
+                });
+                var timer;
+                var clip = {
+                    $node: $node,
+                    val: function(value) {
+                        if (value) {
+                            $node.html(value);
+                        } else {
+                            return $node.text();
+                        }
+                    },
+                    reset: function() {
+                        clearTimeout(timer);
+                        timer = setTimeout(function() {
+                            $node.css('top', '');
+                        }, 400);
+                    },
+                    focus: function() {
+                        $node.css('top', 0);
+                        clip.reset();
+                    },
+                    blur: function() {
+                        $node.css('top', '100%').blur();
+                        // just in case of Webkit bug
+                        window.getSelection().removeAllRanges();
+                        clip.reset();
+                    }
+                };
+                return clip;
+            })();
             self.addClass('cmd-mobile');
         } else {
-            clip = $('<textarea>').attr({
-                autocapitalize: 'off',
-                spellcheck: 'false',
-                tabindex: settings.tabindex
-            }).addClass('cmd-clipboard').appendTo(self);
+            clip = (function() {
+                var $node = $('<textarea>').attr({
+                    autocapitalize: 'off',
+                    spellcheck: 'false',
+                    tabindex: settings.tabindex
+                }).addClass('cmd-clipboard').appendTo(self);
+                return {
+                    $node: $node,
+                    val: function(value) {
+                        // even if value is undeifned
+                        // when calling val(value) it return jQuery object
+                        if (typeof value === 'undefined') {
+                            return $node.val();
+                        } else {
+                            return $node.val(value);
+                        }
+                    }
+                };
+            })();
             clip.val(' ');
         }
         if (settings.width) {
@@ -2092,9 +2132,9 @@
             clip.val('');
             paste_count = 0;
             if (self.isenabled() && !clip.is(':focus')) {
-                clip.trigger('focus', [true]);
+                clip.$node.trigger('focus', [true]);
             }
-            clip.one('input', paste);
+            clip.$node.one('input', paste);
             return true;
         }
         // ---------------------------------------------------------------------
@@ -2300,18 +2340,19 @@
         // -------------------------------------------------------------------------------
         function mobile_focus() {
             //if (is_touch) {
-            var focus = clip.is(':focus');
+            var $clip = clip.$node;
+            var focus = $clip.is(':focus');
             if (enabled) {
                 if (!focus) {
                     //clip.trigger('focus', [true]);
                 }
                 self.oneTime(10, function() {
-                    if (!clip.is(':focus') && enabled) {
-                        clip.trigger('focus', [true]);
+                    if (!$clip.is(':focus') && enabled) {
+                        $clip.trigger('focus', [true]);
                     }
                 });
             } else if (focus && !enabled) {
-                clip.trigger('blur', [true]);
+                $clip.trigger('blur', [true]);
             }
         }
         // -------------------------------------------------------------------------------
@@ -2359,8 +2400,8 @@
                     self.oneTime(10, function() {
                         try {
                             // we check first to improve performance
-                            if (!is_mobile && clip.caret() !== position + 1) {
-                                clip.caret(position + 1);
+                            if (!is_mobile && clip.$node.caret() !== position + 1) {
+                                clip.$node.caret(position + 1);
                             }
                         } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
@@ -2854,7 +2895,7 @@
                 if (is_css_variables_supported) {
                     self[0].style.setProperty('--cursor-line', in_line);
                 } else {
-                    clip.css('top', in_line * 14 + 'px');
+                    clip.$node.css('top', in_line * 14 + 'px');
                 }
                 wrapper.css({
                     display: ''
@@ -3309,10 +3350,10 @@
                     enabled = true;
                     self.addClass('enabled');
                     try {
-                        if (clip.is(':not(:focus)')) {
-                            clip.focus();
+                        if (clip.$node.is(':not(:focus)')) {
+                            clip.$node.focus();
                         }
-                        clip.caret(position);
+                        clip.$node.caret(position);
                     } catch (e) {
                         // firefox throw NS_ERROR_FAILURE - ignore
                     }
@@ -3438,7 +3479,7 @@
             no_keypress = true;
             // Meta+V did bind input but it didin't happen because terminal paste
             // prevent native insert action
-            clip.off('input', paste);
+            clip.$node.off('input', paste);
             var key = get_key(e);
             if (is_function(settings.keydown)) {
                 e.key = ie_key_fix(e);
@@ -3683,6 +3724,17 @@
         doc.bind('keyup.cmd', clear_hold);
         doc.bind('input.cmd', input_event);
         (function() {
+            if (is_mobile) {
+                $(self[0]).add(clip.$node).on('touchstart.cmd', function() {
+                    if (!self.isenabled()) {
+                        clip.focus();
+                    } else {
+                        clip.blur();
+                    }
+                });
+                self.disable();
+                return;
+            }
             var was_down = false;
             var count = 0;
             self.on('mousedown.cmd', function() {
@@ -4280,7 +4332,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 14 Mar 2020 23:34:32 +0000',
+        date: 'Sun, 15 Mar 2020 11:22:04 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9798,24 +9850,16 @@
             if (is_mobile) {
                 (function() {
                     self.addClass('terminal-mobile');
-                    var timer;
-                    self.add(command_line.clip()).on('touchstart.terminal', function() {
+                    self.on('touchstart.terminal', function() {
                         if (!frozen) {
                             if (!self.enabled()) {
-                                command_line.clip().css('top', 0);
+                                command_line.clip().focus();
                                 self.focus();
                             } else {
+                                command_line.clip().blur();
                                 self.disable();
-                                command_line.clip().css('top', '100%').blur();
-                                // just in case of Webkit bug
-                                window.getSelection().removeAllRanges();
                             }
                         }
-                    }).on('touchend.terminal', function() {
-                        clearTimeout(timer);
-                        timer = setTimeout(function() {
-                            command_line.clip().css('top', '');
-                        }, 100);
                     });
                 })();
             } else {
@@ -9878,7 +9922,7 @@
                     });
                 })();
                 (function() {
-                    var clip = self.find('.cmd textarea');
+                    var $clip = command_line.clip().$node;
                     function is_context_event(e) {
                         return e.type === 'mousedown' && e.buttons === 2 ||
                             e.type === 'contextmenu';
@@ -9890,14 +9934,14 @@
                                     self.enable();
                                 }
                                 var offset = command_line.offset();
-                                clip.css({
+                                $clip.css({
                                     left: e.pageX - offset.left - 20,
                                     top: e.pageY - offset.top - 20,
                                     width: '5em',
                                     height: '4em'
                                 });
-                                if (!clip.is(':focus')) {
-                                    clip.focus();
+                                if (!$clip.is(':focus')) {
+                                    $clip.focus();
                                 }
                                 self.stopTime('textarea');
                                 self.oneTime(100, 'textarea', function() {
@@ -9912,13 +9956,13 @@
                                             .prevUntil('.cmd-prompt').length;
                                         props.top = in_line * 14 + 'px';
                                     }
-                                    clip.css(props);
+                                    $clip.css(props);
                                 });
                                 self.stopTime('selection');
                                 self.everyTime(20, 'selection', function() {
-                                    if (clip[0].selection !== clip[0].value) {
-                                        if (get_textarea_selection(clip[0])) {
-                                            clear_textarea_selection(clip[0]);
+                                    if ($clip[0].selection !== $clip[0].value) {
+                                        if (get_textarea_selection($clip[0])) {
+                                            clear_textarea_selection($clip[0]);
                                             select(
                                                 self.find('.terminal-output')[0],
                                                 self.find('.cmd div:last-of-type')[0]
