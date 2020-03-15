@@ -286,9 +286,9 @@ terminal .terminal-output > div {
 .terminal td {
     border: 1px solid #aaa;
 }
-.cmd.cmd span[data-text]:not(.emoji) span {
-    background-color: inherit;
-    color: inherit;
+.cmd span[data-text]:not(.emoji) span {
+    background-color: inherit !important;
+    color: inherit !important;
 }
 /* fix for underline on middle line */
 .cmd [role="presentation"].cmd-cursor-line {

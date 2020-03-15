@@ -6120,6 +6120,7 @@
         response: $.noop,
         describe: 'procs',
         onRPCError: null,
+        keymap: null,
         doubleTab: null,
         doubleTabEchoCommand: false,
         ansiParser: {},
