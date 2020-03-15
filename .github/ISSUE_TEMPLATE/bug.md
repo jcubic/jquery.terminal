@@ -2,6 +2,7 @@
 name: Bug Report
 about: Found bug in the library
 ---
+### Issue summary
 
 ### Expected behavior
 
