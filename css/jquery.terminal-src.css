@@ -932,7 +932,8 @@ terminal .terminal-output > div {
 }
 .cmd-editable {
     position: absolute;
-    top: calc(var(--cmd-y, 0) * 1px);
+    top: 0;
+    top: calc(var(--terminal-y, var(--cmd-y, 0)) * 1px);
     right: 0;
     left: 0;
     bottom: 0;

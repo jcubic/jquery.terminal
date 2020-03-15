@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 15 Mar 2020 18:52:35 +0000
+ * Date: Sun, 15 Mar 2020 20:24:24 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4337,7 +4337,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.15.0',
-        date: 'Sun, 15 Mar 2020 18:52:35 +0000',
+        date: 'Sun, 15 Mar 2020 20:24:24 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8795,8 +8795,8 @@
                     fire_event('onFlush');
                     var position = self.find('.cmd').position();
                     css(document.body, {
-                        '--cmd-x': position.left,
-                        '--cmd-y': position.top
+                        '--terminal-x': position.left,
+                        '--terminal-y': position.top
                     });
 
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {

@@ -8795,8 +8795,8 @@
                     fire_event('onFlush');
                     var position = self.find('.cmd').position();
                     css(document.body, {
-                        '--cmd-x': position.left,
-                        '--cmd-y': position.top
+                        '--terminal-x': position.left,
+                        '--terminal-y': position.top
                     });
 
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {

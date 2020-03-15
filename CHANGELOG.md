@@ -1,3 +1,7 @@
+## 2.15.1
+### Bugfix
+* fix combination of mobile: focus, selection and touchscroll
+
 ## 2.15.0
 ### Features
 * add new API event touchscroll for mobile (use it in less) [#556](https://github.com/jcubic/jquery.terminal/issues/556)
