@@ -6,7 +6,7 @@
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
  *           \/              /____/
  * Example plugin using JQuery Terminal Emulator
- * Copyright (c) 2014-2019 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */

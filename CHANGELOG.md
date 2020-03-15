@@ -1,3 +1,15 @@
+## 2.15.0
+### Features
+* add new API event touchscroll for mobile (use it in less) [#556](https://github.com/jcubic/jquery.terminal/issues/556)
+* mobile paste [#458](https://github.com/jcubic/jquery.terminal/issues/458)
+* cmd::clip API method used internally, most for mobile
+### Bugfix
+* fix vertical bar cursor animation on empty command line
+* fix edge case while splitting the command line with formatting (better fix for [#379](https://github.com/jcubic/jquery.terminal/379))
+* fix option parser when using minus or double minus as argument
+* fix issue when wcwidth is added and there are no wide characters
+* prism + wide characters (e.g. Chinese and Japanese inside strings)
+
 ## 2.14.1
 ### Bugfix
 * fix empty rows size

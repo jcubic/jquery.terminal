@@ -10,8 +10,8 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-2.14.1-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.14.1-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&9e9229ce5e0dc3a33b10bbcdad4477176d3c7259)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&d9f1c3bc9581b774f5523a97f75faaeb)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&38ceb7376c1fd855b0057c6ee678ce6aaf16c262)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&456666fbade1b3a17080d5477566c268)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -64,6 +64,8 @@ You can use this JavaScript library to create a web based terminal on any websit
   like syntax). Read more in
   [docs](https://terminal.jcubic.pl/api_reference.php#extended_commands)
 
+* Full mobile support
+
 ### Installation
 
 Include jQuery library, you can use cdn from https://jquery.com/download/
@@ -105,32 +107,15 @@ it will redirect to the latest ones:
 If you want to test bleeding edge, development version of jQuery Terminal. You can use those files:
 
 ```html
-<script src="https://cdn.rawgit.com/jcubic/jquery.terminal/devel/js/jquery.terminal.min.js"></script>
-<link href="https://cdn.rawgit.com/jcubic/jquery.terminal/devel/css/jquery.terminal.min.css" rel="stylesheet"/>
-```
-
-but the service will be [shutdown in October 2019](https://rawgit.com/), and it don't accept new files. Great things
-about rawgit that (at least when you don't put cdn subdomain) you can get latest version very fast after the commit
-is pushed on GitHub (sometimes you need to add no cache query string, anything unique, for faster refresh).
-
-there is also an alternative from jsdelivr:
-
-```html
 <script src="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js"></script>
 <link href="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
-but it's not refreshed as fast as rawgit, because it's CDN and need to be propagated to different servers.
+but it's not refreshed as fast as rawgit was, because it's CDN and need to be propagated to different servers.
 
 #### Keyboard key polyfill
 
 **NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key) (as you can see in chart it's required by Android so it's good to add).
-
-```html
-<script src="https://cdn.rawgit.com/inexorabletash/polyfill/master/keyboard.js"></script>
-```
-
-or
 
 ```html
 <script src="https://unpkg.com/js-polyfills@0.x.x/keyboard.js"></script>
@@ -186,6 +171,11 @@ jQuery(function($, undefined) {
         add: function(a, b) {
             this.echo(a + b);
         },
+        re: function(re, str) {
+           if (re instanceof RegExp && re.test(str)) {
+              this.echo(str + ' [[;green;]match]');
+           }
+        },
         foo: 'foo.php',
         bar: {
             sub: function(a, b) {
@@ -200,13 +190,59 @@ jQuery(function($, undefined) {
 });
 ```
 
-Command foo will execute json-rpc from foo.php file.
+command `add 2 2` will display `4` (not `22`).
+
+Command `foo` will change prompt to `foo>` and each new command will execute
+json-rpc method from foo.php script.
+
+command `bar` will change the prompt to `bar> ` and if you type `sub 10 2` it will display 8.
+To exit from bar nested command you can type `exit` or press CTRL+D.
+
+command `re /^foo/ foo-bar` will echo: "foo-bar match" where "match" will be green.
+
+By default arguments are required but you can disable the check like this:
+
+```javascript
+jQuery(function($, undefined) {
+    $('#term_demo').terminal({
+        add: function(...args) {
+            this.echo(args.reduce((a,b) => a + b));
+        }
+    }, {
+       checkArity: false
+    });
+});
+```
+
+And add command will accept any number of argments and it will sum them up (if they are numbers).
 
 You can create JSON-RPC interpreter with authentication in just one line:
 
 ```javascript
 $('#term_demo').terminal('service.php', {login: true});
 ```
+
+The rest of the code can be on the server, so you can write fully working application,
+without any front-end, that can be tested in browser.
+
+First argument to terminal can also be array with objects strings and functions, with
+one requirement, that only one function can be used as last fallback for commands that was
+not found in RPC or in objects.
+
+```javascript
+jQuery(function($, undefined) {
+    $('#term_demo').terminal([{
+        add: function(...args) {
+            this.echo(args.reduce((a,b) => a + b));
+        }
+    } 'foo.php', function(command) {
+       this.echo("You've typed " + command, {formatters: false, exec: false});
+    }], {
+       checkArity: false
+    });
+});
+```
+
 
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [Full Documentation](http://terminal.jcubic.pl/api_reference.php) or
@@ -259,7 +295,7 @@ If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 
 ### Credits
 
-Project used:
+Projects used:
 
 * [Storage plugin](https://sites.google.com/site/daveschindler/jquery-html5-storage-plugin) by Dave Schindler (MIT)
 * [jQuery Timers](http://jquery.offput.ca/every/) (WTFPL)
@@ -272,4 +308,4 @@ Project used:
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
-Copyright (c) 2011-2019 [Jakub Jankiewicz](https://jcubic.pl/jakub-jankiewicz)
+Copyright (c) 2011-2020 [Jakub Jankiewicz](https://jcubic.pl/jakub-jankiewicz)

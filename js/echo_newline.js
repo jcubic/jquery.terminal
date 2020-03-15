@@ -9,7 +9,7 @@
  *
  * Monkey patch to add newlinew option for echo method inside jQuery Terminal
  *
- * Copyright (c) 2014-2019 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */

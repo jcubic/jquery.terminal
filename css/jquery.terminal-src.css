@@ -9,7 +9,7 @@
  *
  * This file is part of jQuery Terminal.
  *
- * Copyright (c) 2011-2019 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Date: {{DATE}}
@@ -217,6 +217,9 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
 }
+.cmd span.cmd-prompt, .cmd .cmd-prompt span {
+    background-color: transparent !important;
+}
 .terminal-output > :not(.raw) .emoji, .cmd .emoji {
     height: 14px;
     background-size: contain;
@@ -283,9 +286,9 @@ terminal .terminal-output > div {
 .terminal td {
     border: 1px solid #aaa;
 }
-.cmd.cmd span[data-text]:not(.emoji) span {
-    background-color: inherit;
-    color: inherit;
+.cmd span[data-text]:not(.emoji) span {
+    background-color: inherit !important;
+    color: inherit !important;
 }
 /* fix for underline on middle line */
 .cmd [role="presentation"].cmd-cursor-line {
@@ -822,6 +825,12 @@ terminal .terminal-output > div {
 .cmd .token.token {
     background-color: inherit;
 }
+/* for wide characters that have span inside .token */
+.terminal span.token.string span,
+.cmd span.token.string span {
+    color: inherit !important;
+    background: inherit !important;
+}
 /* FireFox hack
 @supports (-moz-animation: foo) {
     .terminal,
@@ -906,4 +915,24 @@ terminal .terminal-output > div {
     left: 0;
     right: 0;
     z-index: 200;
+}
+.terminal-less {
+    touch-action: none;
+    overscroll-behavior-y: contain;
+}
+/*
+ * mobile scroll fix, with help from StackOverflow
+ * https://stackoverflow.com/a/60535925/387194
+ */
+.terminal-mobile .terminal-wrapper {
+    pointer-events: none;
+}
+.cmd-editable {
+    position: absolute;
+    top: calc(var(--cmd-y, 0) * 1px);
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    opacity: 0.01;
 }

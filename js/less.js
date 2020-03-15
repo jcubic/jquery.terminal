@@ -10,7 +10,7 @@
  * This is example of how to create less like command for jQuery Terminal
  * the code is based on the one from leash shell and written as jQuery plugin
  *
- * Copyright (c) 2018-2019 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2018-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
@@ -380,22 +380,30 @@
             return index;
         }
         // -------------------------------------------------------------------------------
+        function scroll(delta, scroll_by) {
+            if (delta > 0) {
+                pos -= scroll_by;
+                if (pos < 0) {
+                    pos = 0;
+                }
+            } else {
+                pos += scroll_by;
+                if (pos - 1 > lines.length - rows) {
+                    pos = lines.length - rows + 1;
+                }
+            }
+            print();
+            return true;
+        }
         term.push($.noop, {
             onResize: refresh_view,
+            touchscroll: function(event, delta) {
+                var offset = Math.abs(delta);
+                scroll(delta, Math.round(offset / 14));
+                return false;
+            },
             mousewheel: function(event, delta) {
-                if (delta > 0) {
-                    pos -= scroll_by;
-                    if (pos < 0) {
-                        pos = 0;
-                    }
-                } else {
-                    pos += scroll_by;
-                    if (pos - 1 > lines.length - rows) {
-                        pos = lines.length - rows + 1;
-                    }
-                }
-                print();
-                return true;
+                return scroll(delta, scroll_by);
             },
             name: 'less',
             keydown: function(e) {
