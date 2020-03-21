@@ -1618,8 +1618,12 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var $node = $('<div class="cmd-editable" contenteditable/>')
-                    .appendTo('body');
+                var $node = $('<div class="cmd-editable" contenteditable/>').attr({
+                    autocapitalize: 'off',
+                    autocorrect: 'off',
+                    spellcheck: 'false',
+                    tabindex: settings.tabindex
+                }).insertAfter(self);
                 $node.on('focus', function() {
                     self.enable();
                 }).on('blur', function() {
@@ -2047,7 +2051,9 @@
                 return false;
             },
             'CTRL+X': return_true,
-            'CTRL+C': return_true,
+            'CTRL+C': function() {
+                return get_selected_html() === '';
+            },
             'CTRL+T': return_true,
             'CTRL+Y': function() {
                 if (kill_text !== '') {
@@ -2060,14 +2066,14 @@
                 var len = text(command).length;
                 if (len > position) {
                     kill_text = self['delete'](len - position);
-                    text_to_clipboard(clip, kill_text);
+                    text_to_clipboard(clip.$node, kill_text);
                 }
                 return false;
             },
             'CTRL+U': function() {
                 if (command !== '' && position !== 0) {
                     kill_text = self['delete'](-position);
-                    text_to_clipboard(clip, kill_text);
+                    text_to_clipboard(clip.$node, kill_text);
                 }
                 return false;
             },
@@ -3355,7 +3361,7 @@
                     enabled = true;
                     self.addClass('enabled');
                     try {
-                        if (clip.$node.is(':not(:focus)')) {
+                        if (!clip.$node.is(':focus')) {
                             clip.$node.focus();
                         }
                         clip.$node.caret(position);
@@ -4189,12 +4195,25 @@
             var val = $textarea.val();
             var had_focus = $textarea.is(':focus');
             var pos = $textarea.caret();
-            $textarea.val(text).focus();
-            $textarea[0].select();
-            document.execCommand('copy');
-            $textarea.val(val);
-            if (had_focus) {
+            if (window.navigator && window.navigator.clipboard) {
+                navigator.clipboard.writeText(text);
+            } else if (had_focus) {
+                $textarea.val(text).focus();
+                $textarea[0].select();
+                document.execCommand('copy');
+                $textarea.val(val);
                 $textarea.caret(pos);
+            } else {
+                var $text = $('<textarea/>').css({
+                    position: 'fixed',
+                    top: 0,
+                    left: 0
+                }).appendTo('body');
+                $text.val(text).focus();
+                $text[0].select();
+                document.execCommand('copy');
+                $text.blur();
+                $text.remove();
             }
             return true;
         };
@@ -8793,10 +8812,11 @@
                     limit_lines();
                     output.css('visibilty', '');
                     fire_event('onFlush');
-                    var position = self.find('.cmd').position();
-                    css(document.body, {
-                        '--terminal-x': position.left,
-                        '--terminal-y': position.top
+                    var offset = self.find('.cmd').offset();
+                    var self_offset = self.offset();
+                    css(self[0], {
+                        '--terminal-x': offset.left - self_offset.left,
+                        '--terminal-y': offset.top - self_offset.top
                     });
 
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
@@ -9873,6 +9893,7 @@
                     var timer;
                     clip.$node.off('touchstart.cmd');
                     self.on('touchstart.terminal', function(e) {
+                        e = e.originalEvent;
                         window.touch_event = e;
                         if (e.target.tagName.toLowerCase() === 'a') {
                             return;
@@ -9933,7 +9954,19 @@
                             self.set_position(0);
                         }
                         if (!textarea.is(':focus')) {
-                            textarea.focus();
+                            var offset = command_line.offset();
+                            var self_offset = self.offset();
+                            textarea.css({
+                                left: self_offset.left - offset.left,
+                                top: self_offset.top - offset.top
+                            }).focus();
+                            self.stopTime('focus');
+                            self.oneTime(10, 'focus', function() {
+                                textarea.css({
+                                    left: '',
+                                    top: ''
+                                });
+                            });
                         }
                         reset();
                     }

@@ -1,3 +1,9 @@
+## 2.15.2
+### Bugfix
+* fix toggle keyboard on multiple terminals on same page
+* fix jumping to prompt on press CTRL+C when terminal scrolled to top
+* don't scroll to bottom when click on terminal that already in focus
+
 ## 2.15.1
 ### Bugfix
 * fix combination of mobile: focus, selection and touchscroll

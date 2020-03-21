@@ -927,7 +927,7 @@ terminal .terminal-output > div {
 .terminal-mobile.terminal-less .terminal-wrapper {
     pointer-events: none;
 }
-.terminal-mobile.terminal-less .terminal-output a {
+.terminal-mobile.terminal-less .terminal-output a, .cmd-editable {
     pointer-events: visible;
 }
 .cmd-editable {
@@ -937,6 +937,7 @@ terminal .terminal-output > div {
     right: 0;
     left: 0;
     bottom: 0;
-    z-index: 100;
+    z-index: 500;
+    color: transparent;
     opacity: 0.01;
 }
