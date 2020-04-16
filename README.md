@@ -14,6 +14,7 @@ http://terminal.jcubic.pl
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&456666fbade1b3a17080d5477566c268)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjcubic%2Fjquery.terminal.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjcubic%2Fjquery.terminal?ref=badge_shield)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
 
@@ -309,3 +310,6 @@ Projects used:
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
 Copyright (c) 2011-2020 [Jakub Jankiewicz](https://jcubic.pl/jakub-jankiewicz)
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjcubic%2Fjquery.terminal.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjcubic%2Fjquery.terminal?ref=badge_large)
