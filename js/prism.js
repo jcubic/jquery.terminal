@@ -173,7 +173,7 @@
                 if (string.match(/^\x00/)) {
                     return string.replace(/\x00/g, '');
                 }
-                return string;
+                return $.terminal.escape_brackets(string);
             }).join('');
         }
         return string;
