@@ -1,3 +1,7 @@
+## 2.15.3
+### Bugfix
+* fix broken formatting in prism.js when processing brackets
+
 ## 2.15.2
 ### Bugfix
 * fix toggle keyboard on multiple terminals on same page

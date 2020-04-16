@@ -4,13 +4,13 @@
  __ / / // / // / _  / _/ // / / / _  / _/     / /  \/ / _ \/ /
 /  / / // / // / ___/ // // / / / ___/ // / / / / /\  / // / /__
 \___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/_/_/  \/\__\_\___/
-         \/          /____/                      version 2.15.2
+         \/          /____/                      version 2.15.3
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-2.15.2-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-2.15.2-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&035ef05529c5bc2dd8b0d1fc92f9b07bf0885948)](https://travis-ci.org/jcubic/jquery.terminal)
+[![npm](https://img.shields.io/badge/npm-2.15.3-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-2.15.3-yellow.svg)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&e311e55460c5e3dd5f5b3243386c4da1b2f76873)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&456666fbade1b3a17080d5477566c268)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
@@ -77,20 +77,20 @@ Include jQuery library, you can use cdn from https://jquery.com/download/
 ```
 
 
-Then include js/jquery.terminal-2.15.2.min.js and css/jquery.terminal-2.15.2.min.css
+Then include js/jquery.terminal-2.15.3.min.js and css/jquery.terminal-2.15.3.min.css
 
 You can grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.15.2/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.15.2/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.15.3/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.15.3/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.15.2/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.15.2/css/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.15.3/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.15.3/css/jquery.terminal.min.css">
 ```
 
 If you always want latest version, you can get it from [unpkg](https://unpkg.com/) without specifying version,
