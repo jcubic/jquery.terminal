@@ -9958,7 +9958,7 @@
                             var self_offset = self.offset();
                             textarea.css({
                                 left: self_offset.left - offset.left,
-                                top: self_offset.top - offset.top
+                                top: Math.max(self_offset.top - offset.top, 0)
                             }).focus();
                             self.stopTime('focus');
                             self.oneTime(10, 'focus', function() {

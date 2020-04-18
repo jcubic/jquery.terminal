@@ -1,3 +1,7 @@
+## 2.15.4
+### Bugfix
+* fix jumping when you scrolled down the div terminal [#565](https://github.com/jcubic/jquery.terminal/issues/565)
+
 ## 2.15.3
 ### Bugfix
 * fix broken formatting in prism.js when processing brackets

@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 16 Apr 2020 19:57:39 +0000
+ * Date: Sat, 18 Apr 2020 05:50:04 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4356,7 +4356,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.15.3',
-        date: 'Thu, 16 Apr 2020 19:57:39 +0000',
+        date: 'Sat, 18 Apr 2020 05:50:04 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9958,7 +9958,7 @@
                             var self_offset = self.offset();
                             textarea.css({
                                 left: self_offset.left - offset.left,
-                                top: self_offset.top - offset.top
+                                top: Math.max(self_offset.top - offset.top, 0)
                             }).focus();
                             self.stopTime('focus');
                             self.oneTime(10, 'focus', function() {
