@@ -1,3 +1,7 @@
+## 2.16.0
+### Features
+* style of scrollbars in WebKit
+
 ## 2.15.4
 ### Bugfix
 * fix jumping when you scrolled down the div terminal [#565](https://github.com/jcubic/jquery.terminal/issues/565)

@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.15.4
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 18 Apr 2020 05:52:00 +0000
+ * Date: Sun, 19 Apr 2020 06:43:29 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -940,4 +940,17 @@ terminal .terminal-output > div {
     z-index: 500;
     color: transparent;
     opacity: 0.01;
+}
+.terminal::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    width: calc(var(--size) * 10px);
+    height: calc(var(--size) * 10px);
+    background: #212020;
+}
+.terminal::-webkit-scrollbar-thumb {
+    background: #888;
+}
+.terminal::-webkit-scrollbar-thumb:hover {
+    background: #dcdcdc
 }
