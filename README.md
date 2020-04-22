@@ -10,7 +10,7 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&19fb6bc99c021f09b74d83b82e2aea823c94ad8b)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&74e14bd34b082a3c14ae800554070b64c73497c6)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&456666fbade1b3a17080d5477566c268)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
@@ -288,8 +288,8 @@ If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 [jQuery Terminal Website](https://github.com/jcubic/jquery.terminal-www) contributors:
 
 <!-- CONTRIBUTORS-WWW-START -->
-| [<img src="https://avatars1.githubusercontent.com/u/280241?v=4" width="100px;"/><br /><sub>Jakub T. Jankiewicz</sub>](https://jcubic.pl/me)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=jcubic) | [<img src="https://avatars0.githubusercontent.com/u/31372?v=4" width="100px;"/><br /><sub>Rich Morin</sub>](http://www.cfcl.com/rdm)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=RichMorin) | [<img src="https://avatars0.githubusercontent.com/u/26324569?v=4" width="100px;"/><br /><sub>DInesh51297</sub>](https://github.com/DInesh51297)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=DInesh51297) | [<img src="https://avatars1.githubusercontent.com/u/512317?v=4" width="100px;"/><br /><sub>Logan Rosen</sub>](https://www.loganrosen.com/)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=loganrosen) |
-| :---: | :---: | :---: | :---:  |
+| [<img src="https://avatars1.githubusercontent.com/u/280241?v=4" width="100px;"/><br /><sub>Jakub T. Jankiewicz</sub>](https://jcubic.pl/me)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=jcubic) | [<img src="https://avatars1.githubusercontent.com/u/1004261?v=4" width="100px;"/><br /><sub>Marc Laporte</sub>](https://wikisuite.org)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=marclaporte) | [<img src="https://avatars0.githubusercontent.com/u/31372?v=4" width="100px;"/><br /><sub>Rich Morin</sub>](http://www.cfcl.com/rdm)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=RichMorin) | [<img src="https://avatars0.githubusercontent.com/u/26324569?v=4" width="100px;"/><br /><sub>DInesh51297</sub>](https://github.com/DInesh51297)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=DInesh51297) | [<img src="https://avatars1.githubusercontent.com/u/512317?v=4" width="100px;"/><br /><sub>Logan Rosen</sub>](https://www.loganrosen.com/)<br>[commits](https://github.com/jcubic/jquery.terminal/commits?author=loganrosen) |
+| :---: | :---: | :---: | :---: | :---:  |
 <!-- CONTRIBUTORS-WWW-END -->
 
 
