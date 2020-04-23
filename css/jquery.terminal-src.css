@@ -201,12 +201,8 @@ body.full-screen-terminal .terminal {
     display: inline-block;
 }
 .terminal,
-.terminal-output > :not(.raw) span,
-.terminal-output > :not(.raw) a,
-.terminal-output > :not(.raw) div,
-.cmd,
-.cmd span,
-.cmd div {
+.terminal-output > :not(.raw),
+.cmd {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     font-size: 12px;

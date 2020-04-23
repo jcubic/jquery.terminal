@@ -1,6 +1,8 @@
 ## 2.16.0
 ### Features
 * style of scrollbars in WebKit
+### Bugfix
+* fix for fontawesome icons added using formatting
 
 ## 2.15.4
 ### Bugfix
