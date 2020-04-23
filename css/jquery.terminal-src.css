@@ -166,13 +166,16 @@ body.full-screen-terminal .terminal {
     /* fix for images */
     vertical-align: top;
 }
-.cmd .cmd-cursor.cmd-blink span:not(.emoji) span {
+.cmd .cmd-cursor.cmd-blink span:not(.emoji):not(.fa):not(.far):not(.fas) span {
     -webkit-animation: terminal-blink 1s infinite linear;
        -moz-animation: terminal-blink 1s infinite linear;
         -ms-animation: terminal-blink 1s infinite linear;
             animation: terminal-blink 1s infinite linear;
 }
-.cmd .cmd-cursor .emoji {
+.cmd .cmd-cursor .emoji,
+.cmd .cmd-cursor .fa,
+.cmd .cmd-cursor .fas,
+.cmd .cmd-cursor .far {
         -webkit-animation: terminal-blink 1s infinite linear;
            -moz-animation: terminal-blink 1s infinite linear;
             -ms-animation: terminal-blink 1s infinite linear;
@@ -208,8 +211,8 @@ body.full-screen-terminal .terminal {
     font-size: 12px;
     line-height: 15px;
 }
-.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
-.cmd span:not(.cmd-inverted):not(.token):not(.emoji) {
+.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji):not(.fa):not(.fas):not(.far),
+.cmd span:not(.cmd-inverted):not(.token):not(.emoji):not(.fa):not(.far):not(.fas) {
     color: #aaa;
     background-color: #000;
 }
@@ -223,7 +226,16 @@ body.full-screen-terminal .terminal {
     color: transparent;
     position: relative;
 }
-.terminal-output > :not(.raw) .emoji, .terminal-output > :not(.raw) .emoji span,
+.cmd .fa span,
+.cmd .fas span,
+.cmd .far span {
+    background: transparent;
+    color: transparent;
+    clip: rect(1px,1px,1px,1px);
+    position: absolute;
+}
+.terminal-output > :not(.raw) .emoji,
+.terminal-output > :not(.raw) .emoji span,
 .cmd .emoji, .cmd .emoji span {
     display: inline-block;
     width: 2ch;
@@ -282,7 +294,7 @@ terminal .terminal-output > div {
 .terminal td {
     border: 1px solid #aaa;
 }
-.cmd span[data-text]:not(.emoji) span {
+.cmd span[data-text]:not(.emoji):not(.fa):not(.fas):not(.far) span {
     background-color: inherit !important;
     color: inherit !important;
 }
@@ -667,7 +679,7 @@ terminal .terminal-output > div {
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
-    .cmd span:not(.cmd-inverted):not(.token):not(.emoji),
+    .cmd span:not(.cmd-inverted):not(.token):not(.emoji):not(.fa):not(.fas):not(.far),
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
@@ -710,14 +722,17 @@ terminal .terminal-output > div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
-    .cmd .cmd-cursor.cmd-blink span:not(.emoji) span,
+    .cmd .cmd-cursor.cmd-blink span:not(.emoji):not(.fa):not(.far):not(.fas) span,
     .cmd .cmd-cursor.cmd-blink a {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
             -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
                 animation: var(--animation, terminal-blink) 1s infinite linear;
     }
-    .cmd .cmd-cursor.cmd-blink .emoji {
+    .cmd .cmd-cursor.cmd-blink .emoji,
+    .cmd .cmd-cursor.cmd-blink .fa,
+    .cmd .cmd-cursor.cmd-blink .far,
+    .cmd .cmd-cursor.cmd-blink .fas {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
             -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
