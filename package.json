@@ -333,6 +333,7 @@
     "iconv-lite": "^0.5.1",
     "jest": "^24.8.0",
     "jsonlint": "^1.6.3",
+    "optimist": "^0.6.1",
     "typescript": "^3.1.6",
     "uglify-js": "^3.8.0"
   }
