@@ -2,6 +2,8 @@
 ### Features
 * style of scrollbars in WebKit
 * integration with fontawesome icons added using formatting
+### Bugfix
+* fix version of widget.js
 
 ## 2.15.4
 ### Bugfix

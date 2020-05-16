@@ -1,5 +1,17 @@
+/**@license
+ *       __ _____                     ________                              __
+ *      / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___  / /
+ *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
+ * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
+ * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
+ *           \/              /____/                              version 2.15.4
+ *
+ * This file is part of jQuery Terminal. https://terminal.jcubic.pl
+ *
+ * Copyright (c) 2010-2020 Jakub T. Jankiewicz <https://jcubic.pl/m>e
+ * Released under the MIT license
+ */
 /* global jQuery */
-
 (function() {
     function get(url) {
         var element;
@@ -25,10 +37,10 @@
     }
     var terminals = window.terminals || [];
     if (typeof jQuery === 'undefined') {
-        get('http://code.jquery.com/jquery-3.2.1.min.js').then(function() {
+        get('http://code.jquery.com/jquery-3.5.0.min.js').then(function() {
             jQuery.noConflict();
-            get('https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.7.2/css/jquery.terminal.min.css');
-            return get('https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.7.2/js/jquery.terminal.min.js');
+            get('https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.15.4/css/jquery.terminal.min.css');
+            return get('https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.15.4/js/jquery.terminal.min.js');
         }).then(function() {
             terminals.forEach(function(spec) {
                 jQuery.fn.terminal.apply(jQuery(spec[0]), spec.slice(1));
