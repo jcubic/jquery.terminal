@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 22 May 2020 15:38:17 +0000
+ * Date: Fri, 22 May 2020 18:38:39 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2218,30 +2218,44 @@
             return !!wrap.length;
         }
         // -------------------------------------------------------------------------------
-        function match_column(re, string, col) {
-            var match = string.match(re);
-            if (have_newlines(string)) {
-                return match && (match[1].length % num_chars) <= col;
-            } else {
-                return match && (match[1].length % num_chars) <= col - prompt_len;
-            }
+        function simple_split_command_line(formatted) {
+            var prompt = last_rendered_prompt;
+            var lines = $.terminal.split_equal(prompt + formatted, num_chars);
+            var re = new RegExp('^' + $.terminal.escape_regex(prompt));
+            lines[0] = lines[0].replace(re, '');
+            return lines;
         }
         // -------------------------------------------------------------------------------
         function up_arrow() {
-            var before = command.substring(0, position);
-            var re = /\n?([^\n]+)$/;
+            var formatted = formatting(command);
+            formatted = $.terminal.strip(formatted);
+            var before = formatted.substring(0, position);
             var col = self.column();
             if (have_newlines(before) || have_wrapping(before)) {
-                for (var i = before.length - col - 1; i--;) {
-                    if (before[i] === '\n') {
-                        break;
-                    }
-                    var str = before.substring(0, i);
-                    if (match_column(re, str, col)) {
-                        break;
-                    }
+                var cursor_line = self.find('.cmd-cursor-line');
+                var line = cursor_line.prevUntil('span').length;
+                if (line === 0) {
+                    return prev_history();
                 }
-                self.position(i);
+                var ending = cursor_line.prev().find('[data-text]:last').text();
+                var lines = simple_split_command_line(formatted);
+                var prev = lines[line - 1];
+                var left_over = lines[line].substring(col).length;
+                var diff;
+                if (left_over > 0) {
+                    diff = col;
+                    if (line - 1 === 0) {
+                        diff -= prompt_len;
+                    }
+                    diff = col + 1 + prev.substring(diff).length;
+                    if (ending !== '\xA0') {
+                        // correction for splitted line that don't have extra space
+                        diff -= 1;
+                    }
+                } else {
+                    diff = col + 1;
+                }
+                self.position(-diff, true);
                 return false;
             } else {
                 return prev_history();
@@ -2249,29 +2263,36 @@
         }
         // -------------------------------------------------------------------------------
         function down_arrow() {
-            var after = command.substring(position);
-            var col = self.column();
+            // use format and strip so we get visual strings (formatting can change text)
+            var formatted = formatting(command);
+            formatted = $.terminal.strip(formatted);
+            var after = formatted.substring(position);
             if (have_newlines(after) || have_wrapping(after)) {
-                var match = after.match(/^([^\n]*)(\n?)([^\n]*)/);
-                if (match) {
-                    var before = command.substring(0, position);
-                    var before_newline = match[1].length;
-                    var include_prompt = !have_newlines(before) && !have_wrapping(before);
-                    var pos;
-                    if (before_newline > num_chars) {
-                        // full length of terminal will position into same place below
-                        pos = num_chars;
-                    } else if (!match[2]) {
-                        return next_history();
-                    } else {
-                        pos = before_newline + col + 1; // count newline
-                        if (include_prompt) {
-                            pos += prompt_len;
-                        }
-                    }
-                    // relative position
-                    self.position(pos, true);
+                var lines = simple_split_command_line(formatted);
+                var col = self.column();
+                var cursor_line = self.find('.cmd-cursor-line');
+                var line = cursor_line.prevUntil('span').length;
+                var ending = cursor_line.find('[data-text]:last').text();
+                var next = lines[line + 1];
+                if (!next) {
+                    return next_history();
                 }
+                var left_over = lines[line].substring(col).length;
+                var diff;
+                // move to next line if at the end move to end of next line
+                if (left_over === 0) {
+                    diff = next.length + 1;
+                } else {
+                    diff = Math.min(col, next.length) + left_over + 1;
+                    if (line === 0) {
+                        diff += prompt_len;
+                    }
+                    if (ending !== '\xA0') {
+                        // correction for splitted line that don't have extra space
+                        diff -= 1;
+                    }
+                }
+                self.position(diff, true);
                 return false;
             } else {
                 return next_history();
@@ -2612,7 +2633,7 @@
             action: process_cmd_line
         });
         // ---------------------------------------------------------------------
-        function get_splitted_command_line(string) {
+        function split_command_line(string) {
             return cmd_line_worker.get(string);
         }
         // ---------------------------------------------------------------------
@@ -2673,6 +2694,11 @@
         // ---------------------------------------------------------------------
         function length(str, raw) {
             return $.terminal.length(str, raw);
+        }
+        // ---------------------------------------------------------------------
+        function is_multiline(str) {
+            return strlen(text(str)) > num_chars - prompt_len - 1 ||
+                str.match(/\n/);
         }
         // ---------------------------------------------------------------------
         function substring(str, start, end) {
@@ -2799,16 +2825,14 @@
                 });
                 wrapper.find('div:not(.cmd-cursor-line)').remove();
                 before.html('');
-                // long line
-                if (strlen(text(formatted)) > num_chars - prompt_len - 1 ||
-                    formatted.match(/\n/)) {
+                if (is_multiline(formatted)) {
                     var tabs = formatted.match(/\t/g);
                     var original_string = formatted;
                     //quick tabulation hack
                     if (tabs) {
                         formatted = formatted.replace(/\t/g, '\x00\x00\x00\x00');
                     }
-                    var array = get_splitted_command_line(formatted);
+                    var array = split_command_line(formatted);
                     if (tabs) {
                         array = $.map(array, function(line) {
                             return line.replace(/\x00\x00\x00\x00/g, '\t');
@@ -3202,6 +3226,13 @@
                     col += prompt_len;
                 }
                 return col;
+            },
+            line: function() {
+                var before = command.substring(0, position);
+                if (position === 0 || !command.length) {
+                    return 0;
+                }
+                return before.split(/\n/).length - 1;
             },
             prompt: function(user_prompt) {
                 if (user_prompt === true) {
@@ -4352,7 +4383,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 22 May 2020 15:38:17 +0000',
+        date: 'Fri, 22 May 2020 18:38:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6488,7 +6519,6 @@
                 if (user_command === '') {
                     return;
                 }
-                // command = split_command_line(command);
                 var command;
                 try {
                     command = get_processed_command(user_command);
