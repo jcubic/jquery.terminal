@@ -3035,10 +3035,6 @@
             }
         }
         // ---------------------------------------------------------------------
-        function clean(string) {
-            return string.replace(/((?!\\).)\\(?:&#93;|])/g, '$1&#93;');
-        }
-        // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
         $.extend(self, {
@@ -3100,7 +3096,7 @@
                     }
                 }
                 if (removed) {
-                    command = clean(string);
+                    command = string;
                 }
                 redraw();
                 fix_textarea();
@@ -3109,7 +3105,7 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
-                    command = clean(string);
+                    command = string;
                     if (!stay) {
                         self.position(bare_text(command).length);
                     }
@@ -3164,7 +3160,7 @@
                     string = bare_command.slice(0, position) +
                         string + bare_command.slice(position);
                 }
-                command = clean(string);
+                command = string;
                 if (!stay) {
                     self.position(len, true, true);
                 }

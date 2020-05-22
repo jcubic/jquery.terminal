@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.16.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 16 May 2020 07:45:32 +0000
+ * Date: Fri, 22 May 2020 15:38:17 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3035,10 +3035,6 @@
             }
         }
         // ---------------------------------------------------------------------
-        function clean(string) {
-            return string.replace(/((?!\\).)\\(?:&#93;|])/g, '$1&#93;');
-        }
-        // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
         $.extend(self, {
@@ -3100,7 +3096,7 @@
                     }
                 }
                 if (removed) {
-                    command = clean(string);
+                    command = string;
                 }
                 redraw();
                 fix_textarea();
@@ -3109,7 +3105,7 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
-                    command = clean(string);
+                    command = string;
                     if (!stay) {
                         self.position(bare_text(command).length);
                     }
@@ -3164,7 +3160,7 @@
                     string = bare_command.slice(0, position) +
                         string + bare_command.slice(position);
                 }
-                command = clean(string);
+                command = string;
                 if (!stay) {
                     self.position(len, true, true);
                 }
@@ -4355,8 +4351,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.16.0',
-        date: 'Sat, 16 May 2020 07:45:32 +0000',
+        version: 'DEV',
+        date: 'Fri, 22 May 2020 15:38:17 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
