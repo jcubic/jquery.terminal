@@ -2809,12 +2809,12 @@ describe('sub plugins', function() {
                     ['foo\\nbar'],
                     [
                         'foo\\]bar',
-                        'foo]bar'
+                        'foo\\]bar'
                     ],
                     ['1111foo\\nbar1111'],
                     [
                         '1111foo111foo\\nbarr111baz\\]quux111',
-                        '1111foo111foo\\nbarr111baz]quux111'
+                        '1111foo111foo\\nbarr111baz\\]quux111'
                     ]
                 ];
                 tests.forEach(function(spec) {
