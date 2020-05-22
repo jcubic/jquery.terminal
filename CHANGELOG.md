@@ -1,3 +1,9 @@
+## 2.16.1
+### Bugfix
+* fix disappearing cursor when use up down arrow in multi line CMD [#576](https://github.com/jcubic/jquery.terminal/issues/576)
+* fix broken color CSS variables [#575](https://github.com/jcubic/jquery.terminal/issues/575)
+* fix swallowed escape bracket as input in CMD [#574](https://github.com/jcubic/jquery.terminal/issues/574)
+
 ## 2.16.0
 ### Features
 * style of scrollbars in WebKit
