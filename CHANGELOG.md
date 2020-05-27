@@ -1,3 +1,9 @@
+## 2.16.2
+### Bugfix
+* fix ch unit bug for Firefox and IE [#579](https://github.com/jcubic/jquery.terminal/issues/579)
+* fix broken emoji [#578](https://github.com/jcubic/jquery.terminal/issues/578)
+* fix broken cursor navigation in Firefox [#577](https://github.com/jcubic/jquery.terminal/issues/577)
+
 ## 2.16.1
 ### Bugfix
 * fix disappearing cursor when use up down arrow in multi line CMD [#576](https://github.com/jcubic/jquery.terminal/issues/576)

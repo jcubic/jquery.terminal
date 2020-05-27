@@ -4,14 +4,14 @@
  __ / / // / // / _  / _/ // / / / _  / _/     / /  \/ / _ \/ /
 /  / / // / // / ___/ // // / / / ___/ // / / / / /\  / // / /__
 \___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/_/_/  \/\__\_\___/
-         \/          /____/                      version 2.16.1
+         \/          /____/                      version DEV
 ```
 http://terminal.jcubic.pl
 
-[![npm](https://img.shields.io/badge/npm-2.16.1-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-2.16.1-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&6df4a5b1330500f2092c0d53560df609ffbe26fa)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&80dfe77cfbd9ad1fe1173527ac83a164)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
+[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&2eb087d4c69c7573945735da49d369ddad073175)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&80dfe77cfbd9ad1fe1173527ac83a164)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -77,20 +77,20 @@ Include jQuery library, you can use cdn from https://jquery.com/download/
 ```
 
 
-Then include js/jquery.terminal-2.16.1.min.js and css/jquery.terminal-2.16.1.min.css
+Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.min.css
 
 You can grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.16.1/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.16.1/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.16.1/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.16.1/css/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/css/jquery.terminal.min.css">
 ```
 
 If you always want latest version, you can get it from [unpkg](https://unpkg.com/) without specifying version,

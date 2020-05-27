@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.16.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 22 May 2020 18:46:15 +0000
+ * Date: Wed, 27 May 2020 21:15:29 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1215,7 +1215,8 @@
         var base = '<span style="font-family: monospace;visibility:hidden;';
         var ch = $(base + 'width:1ch;overflow: hidden">&nbsp;</span>').appendTo('body');
         var space = $(base + '">&nbsp;</span>').appendTo('body');
-        ch_unit_bug = width(ch) !== width(space);
+        // in FireFox the size of space is fraction larger #579
+        ch_unit_bug = Math.abs(width(ch) - width(space)) > 0.0001;
         ch.remove();
         space.remove();
     });
@@ -2705,6 +2706,15 @@
             return $.terminal.substring(str, start, end);
         }
         // ---------------------------------------------------------------------
+        // :: helper function that check if string is valid emoji formatting
+        // ---------------------------------------------------------------------
+        function is_emoji_formatting(str) {
+            if ($.terminal.is_formatting(str)) {
+                return str.replace(format_parts_re, '$4').match(/^emoji /);
+            }
+            return false;
+        }
+        // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
         // :: place cursor in the right place
         // ---------------------------------------------------------------------
@@ -2728,13 +2738,11 @@
                 var position = settings.position;
                 var len = length(string);
                 var prompt = settings.prompt;
-                if (ch_unit_bug) {
-                    cursor.width(char_width);
-                }
                 var c;
                 if (position === len) {
                     before.html(format(string));
-                    cursor.html('<span><span>&nbsp;</span></span>');
+                    c = '&nbsp;';
+                    cursor.html('<span><span>' + c + '</span></span>');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
@@ -2757,6 +2765,19 @@
                             c_before += c;
                         }
                         after.html(format(substring(string, position + 1), c_before));
+                    }
+                }
+                if (ch_unit_bug) {
+                    if (typeof wcwidth !== 'undefined') {
+                        // handle emoji and wide characters in IE or
+                        // other possible browsers that don't have valid ch unit
+                        var size = strlen(text(c));
+                        if (size === 1 && is_emoji_formatting(c)) {
+                            size = 2;
+                        }
+                        cursor.width(char_width * size);
+                    } else {
+                        cursor.width(char_width);
                     }
                 }
                 cursor.toggleClass('cmd-end-line', cursor_end_line);
@@ -4382,8 +4403,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.16.1',
-        date: 'Fri, 22 May 2020 18:46:15 +0000',
+        version: 'DEV',
+        date: 'Wed, 27 May 2020 21:15:29 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
