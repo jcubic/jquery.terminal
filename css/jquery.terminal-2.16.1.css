@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 22 May 2020 18:46:16 +0000
+ * Date: Wed, 27 May 2020 20:12:28 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -212,7 +212,7 @@ body.full-screen-terminal .terminal {
     line-height: 15px;
 }
 .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji):not(.fa):not(.fas):not(.far),
-.cmd span:not(.cmd-inverted):not(.token):not(.emoji):not(.fa):not(.far):not(.fas) {
+.cmd > span:not(.cmd-inverted):not(.token):not(.emoji):not(.fa):not(.far):not(.fas) {
     color: #aaa;
     background-color: #000;
 }
@@ -295,8 +295,8 @@ terminal .terminal-output > div {
     border: 1px solid #aaa;
 }
 .cmd span[data-text]:not(.emoji):not(.fa):not(.fas):not(.far) span {
-    background-color: inherit !important;
-    color: inherit !important;
+    background-color: inherit;
+    color: inherit;
 }
 /* fix for underline on middle line */
 .cmd [role="presentation"].cmd-cursor-line {
@@ -676,11 +676,10 @@ terminal .terminal-output > div {
 @supports (--css: variables) {
     .terminal,
     .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji):not(.fa):not(.fas):not(.far),
-    .cmd span:not(.cmd-inverted):not(.token):not(.emoji):not(.fa):not(.far):not(.fas),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
-    .cmd span:not(.cmd-inverted):not(.token):not(.emoji):not(.fa):not(.far):not(.fas),
+    .cmd > span:not(.cmd-inverted):not(.token):not(.emoji):not(.fa):not(.far):not(.fas),
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
