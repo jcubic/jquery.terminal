@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 27 May 2020 21:15:29 +0000
+ * Date: Fri, 29 May 2020 09:20:21 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2667,6 +2667,11 @@
             }
         }
         // ---------------------------------------------------------------------
+        function wrap_formatted(string) {
+            var re = /(<span[^>]+data-text[^>]+>)([^>]*)(<\/span>)/g;
+            return string.replace(re, '$1<span>$2</span>$3');
+        }
+        // ---------------------------------------------------------------------
         // :: format and encode the string
         // ---------------------------------------------------------------------
         function format(string, before) {
@@ -2679,8 +2684,7 @@
                 char_width: settings.char_width,
                 allowedAttributes: settings.allowedAttributes || []
             });
-            var re = /(<span[^>]+data-text[^>]+>)(.*?)(<\/span>)/g;
-            return string.replace(re, '$1<span>$2</span>$3');
+            return wrap_formatted(string);
         }
         // ---------------------------------------------------------------------
         // :: function create new string with all characters in it's own
@@ -2742,7 +2746,8 @@
                 if (position === len) {
                     before.html(format(string));
                     c = '&nbsp;';
-                    cursor.html('<span><span>' + c + '</span></span>');
+                    cursor.html('<span><span data-text="' + c + '">' +
+                                c + '</span></span>');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
@@ -2939,7 +2944,7 @@
                         .append('<span></span>');
                 } else if (formatted === '') {
                     before.html('');
-                    cursor.html('<span><span>&nbsp;</span></span>');
+                    cursor.html('<span><span data-text=" ">&nbsp;</span></span>');
                     after.html('');
                 } else {
                     draw_cursor_line(formatted, {
@@ -3018,7 +3023,12 @@
                     if (!$.terminal.have_formatting(line)) {
                         return '[[;;]' + line + ']';
                     }
-                    return line;
+                    return $.terminal.format_split(line).map(function(str) {
+                        if ($.terminal.is_formatting(str)) {
+                            return str;
+                        }
+                        return '[[;;]' + str + ']';
+                    }).join('');
                 });
                 var options = {
                     char_width: settings.char_width
@@ -3036,6 +3046,7 @@
                         $.terminal.format(line, options) +
                         '</span>';
                 }).concat([last_line]).join('\n');
+                formatted = wrap_formatted(formatted);
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
@@ -4404,7 +4415,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 27 May 2020 21:15:29 +0000',
+        date: 'Fri, 29 May 2020 09:20:21 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5405,8 +5416,11 @@
                     style_str += 'font-style:italic;';
                 }
                 if ($.terminal.valid_color(color)) {
-                    style_str += 'color:' + color + ';' +
-                        '--color:' + color + ';';
+                    style_str += [
+                        'color:' + color,
+                        '--color:' + color,
+                        '--original-color:' + color
+                    ].join(';') + ';';
                     if (style.indexOf('!') !== -1) {
                         style_str += '--link-color:' + color + ';';
                     }

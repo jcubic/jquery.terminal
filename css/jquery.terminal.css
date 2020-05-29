@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Wed, 27 May 2020 21:15:31 +0000
+ * Date: Fri, 29 May 2020 09:20:22 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -166,16 +166,13 @@ body.full-screen-terminal .terminal {
     /* fix for images */
     vertical-align: top;
 }
-.cmd .cmd-cursor.cmd-blink span:not(.emoji):not(.fa):not(.far):not(.fas) span {
+.cmd .cmd-cursor.cmd-blink span:not(.emoji) span {
     -webkit-animation: terminal-blink 1s infinite linear;
        -moz-animation: terminal-blink 1s infinite linear;
         -ms-animation: terminal-blink 1s infinite linear;
             animation: terminal-blink 1s infinite linear;
 }
-.cmd .cmd-cursor .emoji,
-.cmd .cmd-cursor .fa,
-.cmd .cmd-cursor .fas,
-.cmd .cmd-cursor .far {
+.cmd .cmd-cursor .emoji {
         -webkit-animation: terminal-blink 1s infinite linear;
            -moz-animation: terminal-blink 1s infinite linear;
             -ms-animation: terminal-blink 1s infinite linear;
@@ -212,7 +209,7 @@ body.full-screen-terminal .terminal {
     line-height: 15px;
 }
 .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji):not(.fa):not(.fas):not(.far),
-.cmd > span:not(.cmd-inverted):not(.token):not(.emoji):not(.fa):not(.far):not(.fas) {
+.cmd > span:not(.cmd-inverted):not(.token):not(.emoji) {
     color: #aaa;
     background-color: #000;
 }
@@ -229,8 +226,8 @@ body.full-screen-terminal .terminal {
 .cmd .fa span,
 .cmd .fas span,
 .cmd .far span {
-    background: transparent;
-    color: transparent;
+    background: transparent !important;
+    color: transparent !important;
     clip: rect(1px,1px,1px,1px);
     position: absolute;
 }
@@ -324,14 +321,16 @@ terminal .terminal-output > div {
 /* DEFAULT ANIMATION */
 @-webkit-keyframes terminal-blink {
     0%, 50% {
-        background-color: #bbb;
-        background-color: var(--original-color, #bbb);
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
     }
     50.1%, 100% {
         background-color: inherit;
+        /* original background is set in emoji that need different style */
         color: inherit;
+        color: var(--original-background, var(--original-color, #aaa));
     }
 }
 @-moz-keyframes terminal-blink {
@@ -344,6 +343,7 @@ terminal .terminal-output > div {
     50.1%, 100% {
         background-color: inherit;
         color: inherit;
+        color: var(--original-background, var(--original-color, #aaa));
     }
 }
 @keyframes terminal-blink {
@@ -356,6 +356,7 @@ terminal .terminal-output > div {
     50.1%, 100% {
         background-color: inherit;
         color: inherit;
+        color: var(--original-background, var(--original-color, #aaa));
     }
 }
 /* GLOW ANIMATION */
@@ -557,12 +558,7 @@ terminal .terminal-output > div {
 .terminal .terminal-output div span::-moz-selection,
 .terminal .terminal-output div div a::-moz-selection,
 .terminal .terminal-output .raw div::-moz-selection,
-.cmd div::-moz-selection,
-.cmd > span::-moz-selection,
-.cmd > span span::-moz-selection,
-.cmd > div::-moz-selection,
-.cmd > div span::-moz-selection,
-.cmd .prompt span::-moz-selection {
+.cmd span[data-text]::-moz-selection {
     background-color: #aaa;
     color: #000;
 }
@@ -587,12 +583,8 @@ terminal .terminal-output > div {
 .terminal .terminal-output div div a::selection,
 .terminal .terminal-output div span::selection,
 .terminal .terminal-output .raw div::selection,
-.cmd div::selection,
-.cmd > span::selection,
-.cmd > span span::selection,
-.cmd > div::selection,
-.cmd > div span::selection,
-.cmd .prompt span::selection {
+.cmd span[data-text]::selection,
+.cmd span[data-text] span::selection {
     /*
      * use rgba to fix transparent selection in chrome
      * http://stackoverflow.com/questions/7224445/css3-selection-behaves-differently-in-ff-chrome
@@ -675,11 +667,11 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji):not(.fa):not(.fas):not(.far),
+    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
-    .cmd > span:not(.cmd-inverted):not(.token):not(.emoji):not(.fa):not(.far):not(.fas),
+    .cmd > span:not(.cmd-inverted):not(.token):not(.emoji),
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
@@ -722,21 +714,19 @@ terminal .terminal-output > div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
-    .cmd .cmd-cursor.cmd-blink span:not(.emoji):not(.fa):not(.far):not(.fas) span,
+    .cmd .cmd-cursor.cmd-blink > span:not(.emoji),
     .cmd .cmd-cursor.cmd-blink a {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
             -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
                 animation: var(--animation, terminal-blink) 1s infinite linear;
     }
-    .cmd .cmd-cursor.cmd-blink .emoji,
-    .cmd .cmd-cursor.cmd-blink .fa,
-    .cmd .cmd-cursor.cmd-blink .far,
-    .cmd .cmd-cursor.cmd-blink .fas {
+    .cmd .cmd-cursor.cmd-blink .emoji {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
             -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
                 animation: var(--animation, terminal-blink) 1s infinite linear;
+        --original-background: inherit;
     }
     .cmd .cmd-cursor.cmd-blink .emoji span {
         color: transparent;
@@ -751,12 +741,7 @@ terminal .terminal-output > div {
     .terminal td::-moz-selection,
     .terminal .terminal-output div div::-moz-selection,
     .terminal .terminal-output div span::-moz-selection,
-    .cmd div::-moz-selection,
-    .cmd > span::-moz-selection,
-    .cmd > span span::-moz-selection,
-    .cmd > div::-moz-selection,
-    .cmd > div span::-moz-selection,
-    .cmd .cmd-prompt span::-moz-selection {
+    .cmd span[data-text]::-moz-selection {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
     }
@@ -777,12 +762,9 @@ terminal .terminal-output > div {
     .terminal td::selection,
     .terminal .terminal-output div div::selection,
     .terminal .terminal-output div span::selection,
-    .cmd div::selection,
-    .cmd > span::selection,
-    .cmd > span span::selection,
-    .cmd > div::selection,
-    .cmd > div span::selection,
-    .cmd .cmd-prompt span::selection {
+    .terminal .terminal-output div span::before::selection,
+    .cmd span[data-text]::selection,
+    .cmd span[data-text] span::selection {
         background-color: var(--color, rgba(170, 170, 170, 0.99)) !important;
         color: var(--background, #000) !important;
     }
@@ -809,12 +791,7 @@ terminal .terminal-output > div {
     .terminal .terminal-output div div::selection,
     .terminal .terminal-output div div a::selection,
     .terminal .terminal-output div span::selection,
-    .cmd div::selection,
-    .cmd > span::selection,
-    .cmd > span span::selection,
-    .cmd > div::selection,
-    .cmd > div span::selection,
-    .cmd .prompt span::selection {
+    .cmd span[data-text]::selection {
         background-color: rgba(170, 170, 170, 0.99);
         color: #000;
     }
@@ -964,4 +941,8 @@ terminal .terminal-output > div {
 }
 .terminal::-webkit-scrollbar-thumb:hover {
     background: #dcdcdc
+}
+
+.cmd .token {
+    --original-color: var(--color);
 }

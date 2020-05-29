@@ -3,6 +3,8 @@
 * fix ch unit bug for Firefox and IE [#579](https://github.com/jcubic/jquery.terminal/issues/579)
 * fix broken emoji [#578](https://github.com/jcubic/jquery.terminal/issues/578)
 * fix broken cursor navigation in Firefox [#577](https://github.com/jcubic/jquery.terminal/issues/577)
+* fix default cursor color animation on color cmd from formatting (e.g. prism)
+* fix font-awesome selection (partial - works only in Firefox)
 
 ## 2.16.1
 ### Bugfix
