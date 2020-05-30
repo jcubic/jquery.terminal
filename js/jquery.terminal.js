@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 30 May 2020 07:31:52 +0000
+ * Date: Sat, 30 May 2020 11:54:07 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4002,7 +4002,7 @@
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
-            if (len !== $.terminal.length(bare)) {
+            if (len > 1 && len !== $.terminal.length(bare)) {
                 return char_width_prop(len, options);
             }
         }
@@ -4372,7 +4372,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 30 May 2020 07:31:52 +0000',
+        date: 'Sat, 30 May 2020 11:54:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4702,6 +4702,7 @@
                     // from formatting, then last iteration
                     // was already called (in if) #550
                     callback({
+                        last: true,
                         count: count + 1,
                         index: i,
                         formatting: formatting,

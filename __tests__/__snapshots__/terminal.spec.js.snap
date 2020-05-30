@@ -312,3 +312,12 @@ exports[`Terminal utils $.terminal.from_ansi should render ANSI art 2`] = `
                                                                     [[;#000;]░░▒▓]
 [[;#000;]SAUCE00Regina Pacis                       burps               fuel                20180923fX][[;#000;]P][[;#000;]ç][[;#000;]IBM VGA]"
 `;
+
+exports[`Terminal utils $.terminal.split_equal split emoji encoded from apply_formatters 1`] = `
+Array [
+  "ZZZZZZz",
+  "[[;;;emoji relaxed;☺️]☺️]oo&nbsp;bar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[;;;emoji relaxed;☺️]☺️]a[[;;;emoji eight;8️⃣]8️⃣]",
+  "foo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;baz",
+  "foobar&nbsp;&nbsp;ba&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;br",
+]
+`;

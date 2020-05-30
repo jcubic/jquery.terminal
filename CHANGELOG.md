@@ -5,6 +5,9 @@
 * fix broken cursor navigation in Firefox [#577](https://github.com/jcubic/jquery.terminal/issues/577)
 * fix default cursor color animation on color cmd from formatting (e.g. prism)
 * fix font-awesome selection (partial - works only in Firefox)
+* fix consistency of data-text attribute and span
+* fix issue with split_equal when it swallow the line if the line had bracket at the end
+* allow to use .emoji CSS in .raw output
 
 ## 2.16.1
 ### Bugfix

@@ -1159,6 +1159,17 @@ describe('Terminal utils', function() {
                 expect(line).toEqual(array[i]);
             });
         });
+        it('split emoji encoded from apply_formatters', function() {
+            var str = 'ZZZZZZz\n\u263a\ufe0foo\tbar\t\t\u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr';
+            var formatters = $.terminal.defaults.formatters.slice();
+            $.terminal.defaults.formatters.push([/☺️/gu, '[[;;;emoji relaxed;☺️]☺️]']);
+            $.terminal.defaults.formatters.push([/8️⃣/gu, '[[;;;emoji eight;8️⃣]8️⃣]']);
+            str = $.terminal.apply_formatters(str);
+            str = $.terminal.encode(str);
+            var lines = $.terminal.split_equal(str, 1000);
+            expect(lines).toMatchSnapshot();
+            $.terminal.defaults.formatters = formatters;
+        });
         it("should keep formatting if span across line with newline characters", function() {
             var text = ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
                         'scing elit. Nulla sed dolor nisl, in suscipit justo. Donec a enim',

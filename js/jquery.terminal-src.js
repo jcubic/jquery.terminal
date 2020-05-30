@@ -4002,7 +4002,7 @@
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
-            if (len !== $.terminal.length(bare)) {
+            if (len > 1 && len !== $.terminal.length(bare)) {
                 return char_width_prop(len, options);
             }
         }
@@ -4702,6 +4702,7 @@
                     // from formatting, then last iteration
                     // was already called (in if) #550
                     callback({
+                        last: true,
                         count: count + 1,
                         index: i,
                         formatting: formatting,
