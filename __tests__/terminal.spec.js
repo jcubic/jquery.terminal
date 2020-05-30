@@ -3749,6 +3749,7 @@ describe('Terminal plugin', function() {
                 'Thrid Line of Text'
             ];
             var command = lines.join('\n');
+            var positions = [];
             term.focus();
             cmd.set(command);
             cmd.position(0);
@@ -3757,42 +3758,45 @@ describe('Terminal plugin', function() {
             right();
             right();
             right();
-            expect(cmd.position()).toEqual(5);
+            positions.push(cmd.position());
             down();
-            expect(cmd.position()).toEqual(with_newlines(1) + 5 + cmd.prompt().length);
+            positions.push(cmd.position());
             down();
-            expect(cmd.position()).toEqual(with_newlines(2) + 5 + cmd.prompt().length);
+            positions.push(cmd.position());
             left();
             up();
-            expect(cmd.position()).toEqual(with_newlines(1) + 4 + cmd.prompt().length);
+            positions.push(cmd.position());
             up();
-            expect(cmd.position()).toEqual(4);
+            positions.push(cmd.position());
+            expect(positions).toMatchSnapshot();
             lines = [
-                'First Line of Text is little bit longer',
-                'Second Line of Text',
-                'Thrid Line of Text'
+                '<<< First Line [[[[ of Text ><><> is little ]]] bit longer',
+                '<<<<>>>> Second ]]]] Line of Text ',
+                '<<<< Thrid Line of Text'
             ];
             term.option('numChars', 30);
             cmd.resize(30);
             command = lines.join('\n');
             cmd.set(command);
             cmd.position(0);
+            positions = [];
             right();
             right();
             right();
-            expect(cmd.position()).toEqual(3);
+            positions.push(cmd.position());
             down();
-            expect(cmd.position()).toEqual(33); // 30 numChars + 3 x right
+            positions.push(cmd.position());
             down();
-            expect(cmd.position()).toEqual(with_newlines(1) + 3 + cmd.prompt().length);
+            positions.push(cmd.position());
             down();
-            expect(cmd.position()).toEqual(with_newlines(2) + 3 + cmd.prompt().length);
+            positions.push(cmd.position());
             up();
-            expect(cmd.position()).toEqual(with_newlines(1) + 3 + cmd.prompt().length);
+            positions.push(cmd.position());
             up();
-            expect(cmd.position()).toEqual(33);
+            positions.push(cmd.position());
             up();
-            expect(cmd.position()).toEqual(3);
+            positions.push(cmd.position());
+            expect(positions).toMatchSnapshot();
         });
     });
     function AJAXMock(url, response, options) {

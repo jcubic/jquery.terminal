@@ -1611,8 +1611,9 @@
                        '<span>&nbsp;</span></span></span>' +
                        '<span></span>' +
                        '</div>');
+        var cursor_line = wrapper.find('.cmd-cursor-line');
         // a11y: don't read command it's in textarea that's in focus
-        a11y_hide(wrapper.find('.cmd-cursor-line'));
+        a11y_hide(cursor_line);
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
@@ -1712,6 +1713,7 @@
         // so we can hide it by css when using text selection
         var line_marker = '\uFFFF';
         var line_marker_re = /\uFFFF$/;
+        var empty_marker_re = /^\uFFFF$/;
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span,img,a')) {
@@ -1926,10 +1928,12 @@
             },
             'HOLD+ARROWUP': up_arrow,
             'ARROWUP': up_arrow,
+            'CTRL+ARROWUP': prev_history,
             'CTRL+P': prev_history,
             'ARROWDOWN': down_arrow,
             'HOLD+ARROWDOWN': down_arrow,
             'CTRL+N': next_history,
+            'CTRL+ARROWDOWN': next_history,
             'ARROWLEFT': left,
             'HOLD+ARROWLEFT': debounce(left, 10),
             'CTRL+B': left,
@@ -2174,12 +2178,15 @@
             return string.match(/\n/);
         }
         // -------------------------------------------------------------------------------
-        function have_wrapping(string) {
+        function have_wrapping(string, prompt_len) {
             var lengths = string.split('\n').map(function(line) {
                 return $.terminal.length(line);
             });
+            if (prompt_len) {
+                lengths[0] += prompt_len;
+            }
             var wrap = lengths.filter(function(len) {
-                return len > num_chars;
+                return len >= num_chars;
             });
             return !!wrap.length;
         }
@@ -2188,24 +2195,31 @@
             var prompt = last_rendered_prompt;
             var lines = $.terminal.split_equal(prompt + formatted, num_chars);
             var re = new RegExp('^' + $.terminal.escape_regex(prompt));
+            lines = lines.map($.terminal.unescape_brackets);
             lines[0] = lines[0].replace(re, '');
             return lines;
         }
         // -------------------------------------------------------------------------------
         function up_arrow() {
             var formatted = formatting(command);
-            formatted = $.terminal.unescape_brackets($.terminal.strip(formatted));
-            var before = formatted.substring(0, position);
+            formatted = $.terminal.strip(formatted);
+            var before = $.terminal.substring(formatted, 0, position);
             var col = self.column();
-            if (have_newlines(before) || have_wrapping(before)) {
-                var cursor_line = self.find('.cmd-cursor-line');
-                var line = cursor_line.prevUntil('span').length;
+            var cursor_line = self.find('.cmd-cursor-line');
+            var line = cursor_line.prevUntil('span').length;
+            // case when line is wrapped and we are below prompt
+            if (line === 1 && col <= prompt_len) {
+                self.position(0);
+                return false;
+            }
+            if (have_newlines(before) || have_wrapping(before, prompt_len)) {
                 if (line === 0) {
                     return prev_history();
                 }
-                var ending = cursor_line.prev().find('[data-text]:last').text();
+                var prev = cursor_line.prev();
+                var splitted = prev.is('.cmd-end-line');
                 var lines = simple_split_command_line(formatted);
-                var prev = lines[line - 1];
+                prev = lines[line - 1];
                 var left_over = lines[line].substring(col).length;
                 var diff;
                 if (left_over > 0) {
@@ -2213,15 +2227,14 @@
                     if (line - 1 === 0) {
                         diff -= prompt_len;
                     }
-                    diff = col + 1 + prev.substring(diff).length;
-                    if (ending !== '\xA0') {
-                        // correction for splitted line that don't have extra space
-                        diff -= 1;
+                    diff = col + prev.substring(diff).length;
+                    if (splitted) {
+                        ++diff;
                     }
                 } else {
                     diff = col + 1;
                 }
-                self.display_position(-diff, true);
+                self.position(-diff, true);
                 return false;
             } else {
                 return prev_history();
@@ -2231,14 +2244,15 @@
         function down_arrow() {
             // use format and strip so we get visual strings (formatting can change text)
             var formatted = formatting(command);
-            formatted = $.terminal.unescape_brackets($.terminal.strip(formatted));
-            var after = formatted.substring(position);
+            formatted = $.terminal.strip(formatted);
+            var after = $.terminal.substring(formatted, position);
             if (have_newlines(after) || have_wrapping(after)) {
                 var lines = simple_split_command_line(formatted);
                 var col = self.column();
                 var cursor_line = self.find('.cmd-cursor-line');
-                var line = cursor_line.prevUntil('span').length;
-                var ending = cursor_line.find('[data-text]:last').text();
+                var $line = cursor_line.prevUntil('span');
+                var line = $line.length;
+                var ending = cursor_line.is('.cmd-end-line');
                 var next = lines[line + 1];
                 if (!next) {
                     return next_history();
@@ -2249,16 +2263,16 @@
                 if (left_over === 0) {
                     diff = next.length + 1;
                 } else {
-                    diff = Math.min(col, next.length) + left_over + 1;
+                    diff = Math.min(col, next.length) + left_over;
                     if (line === 0) {
                         diff += prompt_len;
                     }
-                    if (ending !== '\xA0') {
+                    if (ending) {
                         // correction for splitted line that don't have extra space
-                        diff -= 1;
+                        diff += 1;
                     }
                 }
-                self.display_position(diff, true);
+                self.position(diff, true);
                 return false;
             } else {
                 return next_history();
@@ -2529,12 +2543,27 @@
             function split(string) {
                 return $.terminal.split_equal(string, num_chars);
             }
+            // -----------------------------------------------------------------
             function skip_empty(array) {
                 // we remove lines that are leftovers after adding space at the end
-                return array.filter(function(line) {
-                    return !$.terminal.strip(line).match(/^ $/);
+                var result = [];
+                array.forEach(function(line, i) {
+                    if ($.terminal.strip(line).match(empty_marker_re)) {
+                        result[i] = false;
+                        // lines that will get removed need line ending on previos
+                        // line so code that check that marker works correctly
+                        if (i > 0) {
+                            result[i - 1] += line_marker;
+                        }
+                    } else {
+                        result[i] = array[i];
+                    }
+                });
+                return result.filter(function(line) {
+                    return line !== false;
                 });
             }
+            // -----------------------------------------------------------------
             var line = prompt_node.find('.cmd-line');
             var prompt;
             if (line.length) {
@@ -2693,6 +2722,7 @@
                 if (end_line) {
                     string = string.replace(line_marker_re, ' ');
                 }
+                cursor_line.toggleClass('cmd-end-line', !!end_line);
                 var cursor_end_line = false;
                 var settings = $.extend({
                     prompt: '',
@@ -3210,10 +3240,12 @@
                 }
                 var re = /\n?([^\n]*)$/;
                 var match = before.match(re);
-                var col = match[1].length % num_chars;
-                if (!have_newlines(before) && (include_prompt || have_wrapping(before))) {
+                var col = match[1].length;
+                if (!have_newlines(before) &&
+                    (include_prompt || have_wrapping(before, prompt_len))) {
                     col += prompt_len;
                 }
+                col %= num_chars;
                 return col;
             },
             line: function() {

@@ -1,5 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Terminal plugin cmd plugin should move cursor 1`] = `
+Array [
+  5,
+  26,
+  46,
+  25,
+  4,
+]
+`;
+
+exports[`Terminal plugin cmd plugin should move cursor 2`] = `
+Array [
+  3,
+  33,
+  64,
+  93,
+  88,
+  57,
+  27,
+]
+`;
+
 exports[`Terminal plugin events enter text text should appear and interpreter function should be called 1`] = `"<span data-text=\\">&nbsp;foo\\">&gt;&nbsp;foo</span>"`;
 
 exports[`Terminal plugin jQuery Terminal methods generic import/export view should import view 1`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span data-text=\\"Hello&nbsp;World!\\">Hello&nbsp;World!</span></div></div><div data-index=\\"1\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;foo\\">&gt;&nbsp;foo</span></div></div><div data-index=\\"2\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;bar\\">&gt;&nbsp;bar</span></div></div>"`;

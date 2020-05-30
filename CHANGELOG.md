@@ -1,4 +1,6 @@
-## 2.16.2
+## 2.17.0
+### Features
+* new CTRL+Arrow down/up shortcuts and ignore the multi line commands (change history)
 ### Bugfix
 * fix ch unit bug for Firefox and IE [#579](https://github.com/jcubic/jquery.terminal/issues/579)
 * fix broken emoji [#578](https://github.com/jcubic/jquery.terminal/issues/578)
@@ -8,7 +10,8 @@
 * fix consistency of data-text attribute and span
 * fix issue with split_equal when it swallow the line if the line had bracket at the end
 * allow to use .emoji CSS in .raw output
-* fix up/down on multi line command navigation when command have brackets
+* fix up/down on multi line command navigation when command have brackets and/or wrappings
+* fix empty lines after wrapping in CMD when splitted line length == cols
 
 ## 2.16.1
 ### Bugfix
