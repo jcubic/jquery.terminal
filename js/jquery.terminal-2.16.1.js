@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 29 May 2020 09:20:21 +0000
+ * Date: Sat, 30 May 2020 07:31:52 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1695,41 +1695,6 @@
         var rev_search_str = '';
         var reverse_search_position = null;
         var backup_prompt;
-        // TODO: try to use workerCache with data that don't change like bare_text
-        // or format function.
-        // TODO: remove workerCache for formatters they require dynamic
-        // value of position so data change when you move cursor
-        /*
-        var formatter = new WorkerCache({
-            validation: function() {
-                if (this._formatters instanceof Array) {
-                    var test = this._formatters.every(function(e, i) {
-                        return $.terminal.defaults.formatters[i] === e;
-                    });
-                    if (!test) {
-                        this._formatters = $.terminal.defaults.formatters;
-                    }
-                    return test;
-                }
-                return true;
-            },
-            onCache: function(value) {
-                this._counter = this._counter || 0;
-                this._counter++;
-            },
-            action: function(string) {
-                this._times = this._times || [];
-                var t0 = time();
-                // some optimization - don't change object shape and ref
-                format_options.position = position;
-                string = $.terminal.escape_formatting(string);
-                var value = $.terminal.apply_formatters(string, format_options);
-                var t1 = time();
-                this._times.push(t1 - t0);
-                return value;
-            }
-        });
-        */
         var command = '';
         var last_command;
         // text from selection using CTRL+SHIFT+C (as in Xterm)
@@ -2667,11 +2632,6 @@
             }
         }
         // ---------------------------------------------------------------------
-        function wrap_formatted(string) {
-            var re = /(<span[^>]+data-text[^>]+>)([^>]*)(<\/span>)/g;
-            return string.replace(re, '$1<span>$2</span>$3');
-        }
-        // ---------------------------------------------------------------------
         // :: format and encode the string
         // ---------------------------------------------------------------------
         function format(string, before) {
@@ -2680,11 +2640,10 @@
                 tabs: settings.tabs,
                 before: before
             });
-            string = $.terminal.format(encoded, {
+            return $.terminal.format(encoded, {
                 char_width: settings.char_width,
                 allowedAttributes: settings.allowedAttributes || []
             });
-            return wrap_formatted(string);
         }
         // ---------------------------------------------------------------------
         // :: function create new string with all characters in it's own
@@ -2746,8 +2705,7 @@
                 if (position === len) {
                     before.html(format(string));
                     c = '&nbsp;';
-                    cursor.html('<span><span data-text="' + c + '">' +
-                                c + '</span></span>');
+                    cursor.html('<span>' + c + '</span>');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
@@ -3046,7 +3004,6 @@
                         $.terminal.format(line, options) +
                         '</span>';
                 }).concat([last_line]).join('\n');
-                formatted = wrap_formatted(formatted);
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
@@ -4415,7 +4372,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 29 May 2020 09:20:21 +0000',
+        date: 'Sat, 30 May 2020 07:31:52 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5353,7 +5310,7 @@
                     }
                     var test = fn(url);
                     if (!test) {
-                        warn('Invalid URL ' + url + ' only https ftp and Path ' +
+                        warn('Invalid URL ' + url + ' only http(s) ftp and Path ' +
                              'are allowed');
                     }
                     return test;
@@ -5479,7 +5436,7 @@
                     result += ' data-text/>';
                 } else {
                     result += ' data-text="' + data.replace(/"/g, '&quot;') + '">' +
-                        text + '</span>';
+                        '<span>' + text + '</span></span>';
                 }
                 return result;
             }
@@ -5500,12 +5457,14 @@
                         text = safe(text);
                         text = text.replace(/\\\]/, '&#93;');
                         var extra = extra_css(text, settings);
+                        var prefix;
                         if (extra.length) {
                             text = wide_characters(text, settings);
-                            return '<span style="' + extra + '">' + text + '</span>';
+                            prefix = '<span style="' + extra + '"';
                         } else {
-                            return '<span>' + text + '</span>';
+                            prefix = '<span';
                         }
+                        return prefix + ' data-text="' + text + '">' + text + '</span>';
                     }
                 }).join('');
                 return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');
@@ -5981,19 +5940,6 @@
         });
         return deferred.promise();
     };
-
-    // -----------------------------------------------------------------------
-    /*
-    function is_scrolled_into_view(elem) {
-        var docViewTop = $(window).scrollTop();
-        var docViewBottom = docViewTop + $(window).height();
-
-        var elemTop = $(elem).offset().top;
-        var elemBottom = elemTop + $(elem).height();
-
-        return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
-    }
-    */
     // -----------------------------------------------------------------------
     function terminal_ready(term) {
         return !!(term.closest('body').length &&

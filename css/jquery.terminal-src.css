@@ -208,8 +208,8 @@ body.full-screen-terminal .terminal {
     font-size: 12px;
     line-height: 15px;
 }
-.terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji):not(.fa):not(.fas):not(.far),
-.cmd > span:not(.cmd-inverted):not(.token):not(.emoji) {
+.terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji):not(.fa):not(.fas):not(.far),
+.cmd span[data-text]:not(.cmd-inverted):not(.token):not(.emoji) {
     color: #aaa;
     background-color: #000;
 }
@@ -223,6 +223,9 @@ body.full-screen-terminal .terminal {
     color: transparent;
     position: relative;
 }
+.terminal .terminal-output .fa span,
+.terminal .terminal-output .fas span,
+.terminal .terminal-output .far span,
 .cmd .fa span,
 .cmd .fas span,
 .cmd .far span {
@@ -554,11 +557,15 @@ terminal .terminal-output > div {
 .terminal h6::-moz-selection,
 .terminal pre::-moz-selection,
 .terminal td::-moz-selection,
+.terminal .terminal-output::-moz-selection,
 .terminal .terminal-output div div::-moz-selection,
-.terminal .terminal-output div span::-moz-selection,
 .terminal .terminal-output div div a::-moz-selection,
+.terminal .terminal-output span[data-text]::-moz-selection,
+.terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection,
+.terminal .terminal-output div span::-moz-selection,
 .terminal .terminal-output .raw div::-moz-selection,
-.cmd span[data-text]::-moz-selection {
+.cmd span[data-text]::-moz-selection,
+.cmd span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection {
     background-color: #aaa;
     color: #000;
 }
@@ -581,10 +588,12 @@ terminal .terminal-output > div {
 .terminal .terminal-output::selection,
 .terminal .terminal-output div div::selection,
 .terminal .terminal-output div div a::selection,
+.terminal .terminal-output span[data-text]::selection,
+.terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::selection,
 .terminal .terminal-output div span::selection,
 .terminal .terminal-output .raw div::selection,
 .cmd span[data-text]::selection,
-.cmd span[data-text] span::selection {
+.cmd span[data-text]:not(.far):not(.fa):not(.fas) span::selection {
     /*
      * use rgba to fix transparent selection in chrome
      * http://stackoverflow.com/questions/7224445/css3-selection-behaves-differently-in-ff-chrome
@@ -667,11 +676,11 @@ terminal .terminal-output > div {
 }
 @supports (--css: variables) {
     .terminal,
-    .terminal-output > :not(.raw) span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
+    .terminal-output > :not(.raw) span[data-text]:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
     .terminal-output > :not(.raw) a,
     .terminal-output > :not(.raw) div,
     .cmd,
-    .cmd > span:not(.cmd-inverted):not(.token):not(.emoji),
+    .cmd span[data-text]:not(.cmd-inverted):not(.token):not(.emoji),
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
@@ -739,9 +748,15 @@ terminal .terminal-output > div {
     .terminal h6::-moz-selection,
     .terminal pre::-moz-selection,
     .terminal td::-moz-selection,
+    .terminal .terminal-output::-moz-selection,
     .terminal .terminal-output div div::-moz-selection,
+    .terminal .terminal-output div div a::-moz-selection,
+    .terminal .terminal-output span[data-text]::-moz-selection,
+    .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection,
     .terminal .terminal-output div span::-moz-selection,
-    .cmd span[data-text]::-moz-selection {
+    .terminal .terminal-output .raw div::-moz-selection,
+    .cmd span[data-text]::-moz-selection,
+    .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
     }
@@ -760,11 +775,15 @@ terminal .terminal-output > div {
     .terminal h6::selection,
     .terminal pre::selection,
     .terminal td::selection,
+    .terminal .terminal-output::selection,
     .terminal .terminal-output div div::selection,
+    .terminal .terminal-output div div a::selection,
+    .terminal .terminal-output span[data-text]::selection,
+    .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::selection,
     .terminal .terminal-output div span::selection,
-    .terminal .terminal-output div span::before::selection,
+    .terminal .terminal-output .raw div::selection,
     .cmd span[data-text]::selection,
-    .cmd span[data-text] span::selection {
+    .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::selection {
         background-color: var(--color, rgba(170, 170, 170, 0.99)) !important;
         color: var(--background, #000) !important;
     }

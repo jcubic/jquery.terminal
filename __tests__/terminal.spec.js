@@ -857,15 +857,7 @@ describe('Terminal utils', function() {
         var format = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz]';
         it('should create html span tags with style and classes', function() {
             var string = $.terminal.format(format);
-            expect(string).toEqual('<span style="font-weight:bold;text-decorat'+
-                                   'ion:underline line-through;font-style:ital'+
-                                   'ic;color:#fff;--color:#fff;text-shadow:0 0'+
-                                   ' 5px #fff;background-color:#000;" data-tex'+
-                                   't="Foo">Foo</span><span style="font-style:'+
-                                   'italic;" class="foo" data-text="Bar">Bar</'+
-                                   'span><span style="text-decoration:underlin'+
-                                   'e line-through overline;" data-text="Baz">'+
-                                   'Baz</span>');
+            expect(string).toMatchSnapshot();
         });
         it('should escape brackets', function() {
             var specs = [
@@ -886,19 +878,7 @@ describe('Terminal utils', function() {
         it('should handle wider characters without formatting', function() {
             var input = 'ターミナルウィンドウは黒[[;;]です]';
             var string = $.terminal.format(input, {char_width: 7});
-            function wrap(str) {
-                return str.split('').map(char => {
-                    return '<span style="width: 2ch">' + char + '</span>';
-                }).join('');
-            }
-            var chars_a = wrap('ターミナルウィンドウは黒').split('').map(x => {
-                return '<span style="width: 2ch">' + x + '</span>';
-            }).join('');
-            expect(string).toEqual('<span style="width: 24ch"><span style="widt'+
-                                   'h: 24ch">' + wrap('ターミナルウィンドウは黒') +
-                                   '</span></span><span style="width: 4ch" data'+
-                                   '-text="です"><span style="width: 4ch">' +
-                                   wrap('です') + '</span></span>');
+            expect(string).toMatchSnapshot();
         });
         it('should handle links', function() {
             var input = '[[!;;]https://terminal.jcubic.pl]';
@@ -984,69 +964,56 @@ describe('Terminal utils', function() {
         });
         it('should handle emails', function() {
             var tests = [
-                [
-                    '[[!;;]jcubic@onet.pl]',
-                    '<a href="mailto:jcubic@onet.pl" tabindex="1000" data-text>jcubic@onet.pl</a>'
-                ],
-                [
-                    '[[!;;;;jcubic@onet.pl]j][[!;;;;jcubic@onet.pl]cubic@onet.pl]',
-                    '<a href="mailto:jcubic@onet.pl" tabindex="1000" data-text>j</a>' +
-                        '<a href="mailto:jcubic@onet.pl" tabindex="1000" data-text>c' +
-                        'ubic@onet.pl</a>'
-                ]
+                '[[!;;]jcubic@onet.pl]',
+                '[[!;;;;jcubic@onet.pl]j][[!;;;;jcubic@onet.pl]cubic@onet.pl]'
             ];
-            tests.forEach(function([input, expected]) {
-                expect($.terminal.format(input)).toEqual(expected);
+            tests.forEach(function(input) {
+                expect($.terminal.format(input)).toMatchSnapshot();
             });
         });
         it('should skip empty parts', function() {
             var input = '[[;;]]x[[b;;]y][[b;;]z]';
             var output = $.terminal.format(input);
-            expect(output).toEqual('<span>x</span><span style="font-weight:' +
-                                   'bold;" data-text="y">y</span><span styl' +
-                                   'e="font-weight:bold;" data-text="z">z</span>');
+            expect(output).toMatchSnapshot();
         });
         it('should handle JSON', function() {
             var input = '[[;;;;;{"title": "foo", "data-foo": "bar"}]foo]';
             var output = $.terminal.format(input, {
                 allowedAttributes: [/^data-/, 'title']
             });
-            expect(output).toEqual('<span title="foo" data-foo="bar" data-text=' +
-                                   '"foo">foo</span>');
+            expect(output).toMatchSnapshot();
         });
         it('should not allow attributes', function() {
             var input = '[[;;;;;{"title": "foo", "data-foo": "bar"}]foo]';
             var output = $.terminal.format(input, {
                 allowedAttributes: []
             });
-            expect(output).toEqual('<span data-text="foo">foo</span>');
+            expect(output).toMatchSnapshot();
         });
         it('should filter out attribute in JSON', function() {
             var input = '[[;;;;;{"title": "foo", "data-foo": "bar"}]foo]';
             var output = $.terminal.format(input, {
                 allowedAttributes: ['title']
             });
-            expect(output).toEqual('<span title="foo" data-text=' +
-                                   '"foo">foo</span>');
+            expect(output).toMatchSnapshot();
         });
         it('should parse JSON if semicolon in value', function() {
             var input = '[[;;;;;{"title": "foo ; bar"}]foo]';
             var output = $.terminal.format(input, {
                 allowedAttributes: ['title']
             });
-            expect(output).toEqual('<span title="foo ; bar" data-text=' +
-                                   '"foo">foo</span>');
+            expect(output).toMatchSnapshot();
         });
         it("should not duplicate and don't overwrite data-text", function() {
             var input = '[[;;;;;{"data-text": "bar"}]foo]';
             var output = $.terminal.format(input, {
                 allowedAttributes: []
             });
-            expect(output).toEqual('<span data-text="foo">foo</span>');
+            expect(output).toMatchSnapshot();
             output = $.terminal.format(input, {
                 allowedAttributes: ['data-text']
             });
-            expect(output).toEqual('<span data-text="foo">foo</span>');
+            expect(output).toMatchSnapshot();
         });
     });
     describe('$.terminal.strip', function() {
@@ -2108,7 +2075,7 @@ describe('Terminal utils', function() {
         it('should find inside formatting', function() {
             term.less(big_text.concat(['[[;red;]foo bar baz]']));
             search('bar');
-            var spans = term.find('[data-index="0"] > div:first-child span');
+            var spans = term.find('[data-index="0"] > div:first-child span[data-text]');
             ['foo ', 'bar', ' baz'].forEach(function(string, i) {
                 expect(a0(spans.eq(i).text())).toEqual(string);
             });
@@ -3036,7 +3003,7 @@ describe('Terminal plugin', function() {
                 var line = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ultrices rhoncus hendrerit. Nunc ligula eros, tincidunt posuere tristique quis, iaculis non elit.';
                 term.echo(line);
                 var output = last_div(term);
-                expect(output.find('span').length).toEqual(1);
+                expect(output.find('span[data-text]').length).toEqual(1);
                 expect(output.find('div').length).toEqual(1);
             });
             it('should not wrap formatting', function() {
@@ -3048,7 +3015,7 @@ describe('Terminal plugin', function() {
                 var line = '[[;#fff;]Lorem ipsum dolor sit amet], consectetur adipiscing elit. [[;#fee;]Cras ultrices rhoncus hendrerit.] Nunc ligula eros, tincidunt posuere tristique quis, [[;#fff;]iaculis non elit.]';
                 term.echo(line);
                 var output = last_div(term);
-                expect(output.find('span').length).toEqual(5); // 3 formattings and 2 between
+                expect(output.find('span[data-text]').length).toEqual(5); // 3 formattings and 2 between
                 expect(output.find('div').length).toEqual(1);
             });
         });
@@ -3174,7 +3141,7 @@ describe('Terminal plugin', function() {
         });
         it('should have default prompt', function() {
             var prompt = term.find('.cmd-prompt');
-            expect(prompt.html()).toEqual("<span data-text=\">&nbsp;\">&gt;&nbsp;</span>");
+            expect(prompt.html()).toMatchSnapshot();
             expect(prompt.text()).toEqual(nbsp('> '));
         });
         it('should destroy terminal', function() {
@@ -3346,7 +3313,7 @@ describe('Terminal plugin', function() {
                 var text = '\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3';
                 var chars = $.terminal.split_characters(text);
                 term.insert(text).focus();
-                expect(term.find('.cmd .cmd-wrapper div span[data-text]').length).toBe(15);
+                expect(term.find('.cmd .cmd-wrapper div span[data-text]').length).toBe(chars.length);
                 // indexes of emoji
                 [0, 7, 14].forEach(function(pos) {
                     var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);
@@ -3535,7 +3502,7 @@ describe('Terminal plugin', function() {
                 expect(interpreter.foo).toHaveBeenCalled();
                 var last_div = term.find('.terminal-output > div:last-child');
                 expect(last_div.hasClass('terminal-command')).toBe(true);
-                expect(last_div.children().html()).toEqual('<span>&gt;&nbsp;foo</span>');
+                expect(last_div.children().html()).toMatchSnapshot();
                 term.destroy().remove();
             });
         });
@@ -3546,31 +3513,26 @@ describe('Terminal plugin', function() {
         });
         it('should return prompt', function() {
             expect(term.get_prompt()).toEqual('>>> ');
-            expect(term.find('.cmd-prompt').html()).toEqual('<span data-text=">>>&nbsp;">' +
-                                                            '&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toMatchSnapshot();
         });
         it('should set prompt', function() {
             term.set_prompt('||| ');
             expect(term.get_prompt()).toEqual('||| ');
-            expect(term.find('.cmd-prompt').html()).toEqual('<span data-text=\"|||&nbsp;\">|||&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toMatchSnapshot();
             function prompt(callback) {
                 callback('>>> ');
             }
             term.set_prompt(prompt);
             expect(term.get_prompt()).toEqual(prompt);
-            expect(term.find('.cmd-prompt').html()).toEqual('<span data-text=">>>&nbsp;">' +
-                                                            '&gt;&gt;&gt;&nbsp;</span>');
+            expect(term.find('.cmd-prompt').html()).toMatchSnapshot();
         });
         it('should format prompt', function() {
-            var prompt = '<span style="font-weight:bold;text-decoration:underline;color:'+
-                    '#fff;--color:#fff;" data-text=">>>">&gt;&gt;&gt;</span><span>&nbsp;'+
-                    '</span>';
             term.set_prompt('[[ub;#fff;]>>>] ');
-            expect(term.find('.cmd-prompt').html()).toEqual(prompt);
+            expect(term.find('.cmd-prompt').html()).toMatchSnapshot();
             term.set_prompt(function(callback) {
                 callback('[[ub;#fff;]>>>] ');
             });
-            expect(term.find('.cmd-prompt').html()).toEqual(prompt);
+            expect(term.find('.cmd-prompt').html()).toMatchSnapshot();
             term.destroy().remove();
         });
     });
@@ -4606,14 +4568,7 @@ describe('Terminal plugin', function() {
                     expect(term.get_command()).toEqual(command);
                     expect(term.get_prompt()).toEqual(prompt);
                     expect(cmd.position()).toEqual(position);
-                    var html = '<div data-index="0"><div style="width: 100%;"><span>' +
-                        'Hello&nbsp;World!</span></div></div><div data-index="1" cla' +
-                        'ss="terminal-command" role="presentation" aria-hidden="true' +
-                        '"><div style="width: 100%;"><span>&gt;&nbsp;foo</span></div' +
-                        '></div><div data-index="2" class="terminal-command" role="p' +
-                        'resentation" aria-hidden="true"><div style="width: 100%;"><' +
-                        'span>&gt;&nbsp;bar</span></div></div>';
-                    expect(term.find('.terminal-output').html()).toEqual(html);
+                    expect(term.find('.terminal-output').html()).toMatchSnapshot();
                 });
             });
         });
@@ -5731,7 +5686,7 @@ describe('Terminal plugin', function() {
                 term.clear().error('[[ Message ]]');
                 expect(term.echo).toHaveBeenCalledWith('[[;;;terminal-error]&#91;&#91; Message &#93;&#93;]',
                                                        defaults);
-                var span = term.find('.terminal-output span');
+                var span = term.find('.terminal-output span[data-text]');
                 expect(span.length).toEqual(1);
                 expect(span.hasClass('terminal-error')).toBeTruthy();
             });
