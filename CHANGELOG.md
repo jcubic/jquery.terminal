@@ -8,6 +8,7 @@
 * fix consistency of data-text attribute and span
 * fix issue with split_equal when it swallow the line if the line had bracket at the end
 * allow to use .emoji CSS in .raw output
+* fix up/down on multi line command navigation when command have brackets
 
 ## 2.16.1
 ### Bugfix

@@ -2194,7 +2194,7 @@
         // -------------------------------------------------------------------------------
         function up_arrow() {
             var formatted = formatting(command);
-            formatted = $.terminal.strip(formatted);
+            formatted = $.terminal.unescape_brackets($.terminal.strip(formatted));
             var before = formatted.substring(0, position);
             var col = self.column();
             if (have_newlines(before) || have_wrapping(before)) {
@@ -2221,7 +2221,7 @@
                 } else {
                     diff = col + 1;
                 }
-                self.position(-diff, true);
+                self.display_position(-diff, true);
                 return false;
             } else {
                 return prev_history();
@@ -2231,7 +2231,7 @@
         function down_arrow() {
             // use format and strip so we get visual strings (formatting can change text)
             var formatted = formatting(command);
-            formatted = $.terminal.strip(formatted);
+            formatted = $.terminal.unescape_brackets($.terminal.strip(formatted));
             var after = formatted.substring(position);
             if (have_newlines(after) || have_wrapping(after)) {
                 var lines = simple_split_command_line(formatted);
@@ -2258,7 +2258,7 @@
                         diff -= 1;
                     }
                 }
-                self.position(diff, true);
+                self.display_position(diff, true);
                 return false;
             } else {
                 return next_history();
