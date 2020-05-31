@@ -208,7 +208,7 @@ body.full-screen-terminal .terminal {
     font-size: 12px;
     line-height: 15px;
 }
-.terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji):not(.fa):not(.fas):not(.far),
+.terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
 .cmd span[data-text]:not(.cmd-inverted):not(.token):not(.emoji) {
     color: #aaa;
     background-color: #000;
