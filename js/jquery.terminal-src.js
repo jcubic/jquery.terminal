@@ -2735,7 +2735,7 @@
                 if (position === len) {
                     before.html(format(string));
                     c = '&nbsp;';
-                    cursor.html('<span>' + c + '</span>');
+                    empty_cursor();
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
@@ -2786,6 +2786,7 @@
                 // looks nicer until she disable that inner animation)
                 restart_animation();
             }
+            // -----------------------------------------------------------------
             function div(string, before) {
                 var end_line = string.match(line_marker_re);
                 var result = '<div role="presentation" aria-hidden="true"';
@@ -2795,6 +2796,11 @@
                 }
                 result += '>' + format(string, before || '') + '</div>';
                 return result;
+            }
+            // -----------------------------------------------------------------
+            function empty_cursor() {
+                // data-text is for consistency in CSS and end class is for unit tests
+                cursor.html('<span data-text class="end"><span>&nbsp;<span></span>');
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -2932,7 +2938,7 @@
                         .append('<span></span>');
                 } else if (formatted === '') {
                     before.html('');
-                    cursor.html('<span><span data-text=" ">&nbsp;</span></span>');
+                    empty_cursor();
                     after.html('');
                 } else {
                     draw_cursor_line(formatted, {
@@ -3037,6 +3043,18 @@
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
+                    // fix for Chrome bug width selection
+                    // https://bugs.chromium.org/p/chromium/issues/detail?id=1087787
+                    var spans = prompt_node.find('> span span');
+                    if (is_ch_unit_supported) {
+                        prompt_node.hide();
+                        spans.each(function() {
+                            var self = $(this);
+                            var len = strlen(self.text());
+                            self.css('width', len + 'ch');
+                        });
+                        prompt_node.show();
+                    }
                     prompt_len = strlen(text(encoded_last_line));
                 }
             }

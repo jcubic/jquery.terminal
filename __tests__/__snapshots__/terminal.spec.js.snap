@@ -26,17 +26,17 @@ exports[`Terminal plugin events enter text text should appear and interpreter fu
 
 exports[`Terminal plugin jQuery Terminal methods generic import/export view should import view 1`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span data-text=\\"Hello&nbsp;World!\\">Hello&nbsp;World!</span></div></div><div data-index=\\"1\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;foo\\">&gt;&nbsp;foo</span></div></div><div data-index=\\"2\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;bar\\">&gt;&nbsp;bar</span></div></div>"`;
 
-exports[`Terminal plugin prompt should format prompt 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff;\\" data-text=\\">>>\\"><span>&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span>&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should format prompt 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff;\\" data-text=\\">>>\\"><span style=\\"width: 3ch;\\">&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span style=\\"width: 1ch;\\">&nbsp;</span></span>"`;
 
-exports[`Terminal plugin prompt should format prompt 2`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff;\\" data-text=\\">>>\\"><span>&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span>&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should format prompt 2`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff;\\" data-text=\\">>>\\"><span style=\\"width: 3ch;\\">&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span style=\\"width: 1ch;\\">&nbsp;</span></span>"`;
 
-exports[`Terminal plugin prompt should return prompt 1`] = `"<span data-text=\\">>>&nbsp;\\"><span>&gt;&gt;&gt;&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should return prompt 1`] = `"<span data-text=\\">>>&nbsp;\\"><span style=\\"width: 4ch;\\">&gt;&gt;&gt;&nbsp;</span></span>"`;
 
-exports[`Terminal plugin prompt should set prompt 1`] = `"<span data-text=\\"|||&nbsp;\\"><span>|||&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should set prompt 1`] = `"<span data-text=\\"|||&nbsp;\\"><span style=\\"width: 4ch;\\">|||&nbsp;</span></span>"`;
 
-exports[`Terminal plugin prompt should set prompt 2`] = `"<span data-text=\\">>>&nbsp;\\"><span>&gt;&gt;&gt;&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should set prompt 2`] = `"<span data-text=\\">>>&nbsp;\\"><span style=\\"width: 4ch;\\">&gt;&gt;&gt;&nbsp;</span></span>"`;
 
-exports[`Terminal plugin terminal create / terminal destroy should have default prompt 1`] = `"<span data-text=\\">&nbsp;\\"><span>&gt;&nbsp;</span></span>"`;
+exports[`Terminal plugin terminal create / terminal destroy should have default prompt 1`] = `"<span data-text=\\">&nbsp;\\"><span style=\\"width: 2ch;\\">&gt;&nbsp;</span></span>"`;
 
 exports[`Terminal utils $.terminal.format should create html span tags with style and classes 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;--color:#fff;--original-color:#fff;text-shadow:0 0 5px #fff;background-color:#000;\\" data-text=\\"Foo\\"><span>Foo</span></span><span style=\\"font-style:italic;\\" class=\\"foo\\" data-text=\\"Bar\\"><span>Bar</span></span><span style=\\"text-decoration:underline line-through overline;\\" data-text=\\"Baz\\"><span>Baz</span></span>"`;
 

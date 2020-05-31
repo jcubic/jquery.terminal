@@ -166,12 +166,16 @@ body.full-screen-terminal .terminal {
     /* fix for images */
     vertical-align: top;
 }
-.cmd .cmd-cursor.cmd-blink span:not(.emoji) span {
+.cmd .cmd-cursor.cmd-blink span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span {
     -webkit-animation: terminal-blink 1s infinite linear;
        -moz-animation: terminal-blink 1s infinite linear;
         -ms-animation: terminal-blink 1s infinite linear;
             animation: terminal-blink 1s infinite linear;
 }
+
+.cmd .cmd-cursor.cmd-blink .fa,
+.cmd .cmd-cursor.cmd-blink .far,
+.cmd .cmd-cursor.cmd-blink .fas,
 .cmd .cmd-cursor .emoji {
         -webkit-animation: terminal-blink 1s infinite linear;
            -moz-animation: terminal-blink 1s infinite linear;
@@ -208,7 +212,7 @@ body.full-screen-terminal .terminal {
     font-size: 12px;
     line-height: 15px;
 }
-.terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji):not(.fa):not(.fas):not(.far),
+.terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
 .cmd span[data-text]:not(.cmd-inverted):not(.token):not(.emoji) {
     color: #aaa;
     background-color: #000;
@@ -468,7 +472,7 @@ terminal .terminal-output > div {
       box-shadow: none;
   }
 }
-.underline-animation .cmd-cursor.cmd-blink span span,
+.underline-animation .cmd-cursor.cmd-blink span[date-text] span,
 .underline-animation .cmd-cursor.cmd-blink a {
     -webkit-animation-name: terminal-underline;
        -moz-animation-name: terminal-underline;
@@ -562,7 +566,6 @@ terminal .terminal-output > div {
 .terminal .terminal-output div div a::-moz-selection,
 .terminal .terminal-output span[data-text]::-moz-selection,
 .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection,
-.terminal .terminal-output div span::-moz-selection,
 .terminal .terminal-output .raw div::-moz-selection,
 .cmd span[data-text]::-moz-selection,
 .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection {
@@ -590,9 +593,7 @@ terminal .terminal-output > div {
 .terminal .terminal-output div div a::selection,
 .terminal .terminal-output span[data-text]::selection,
 .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::selection,
-.terminal .terminal-output div span::selection,
 .terminal .terminal-output .raw div::selection,
-.cmd span[data-text]::selection,
 .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::selection {
     /*
      * use rgba to fix transparent selection in chrome
@@ -601,13 +602,21 @@ terminal .terminal-output > div {
     background-color: rgba(170, 170, 170, 0.99);
     color: #000;
 }
+.terminal-output .emoji::-moz-selection,
+.terminal-output .emoji span::-moz-selection,
+.cmd .emoji::-moz-selection,
+.cmd .emoji span::-moz-selection,
 .cmd textarea::-moz-selection {
-    background-color: transparent;
-    color: transparent;
+    background-color: transparent !important;
+    color: transparent !important;
 }
+.terminal-output .emoji::selection,
+.terminal-output .emoji span::selection,
+.cmd .emoji span::selection,
+.cmd .emoji::selection,
 .cmd textarea::selection {
-    background-color: transparent;
-    color: transparent;
+    background-color: transparent !important;
+    color: transparent !important;
 }
 
 .terminal .terminal-output > :not(.raw) .terminal-error,
@@ -723,13 +732,16 @@ terminal .terminal-output > div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
-    .cmd .cmd-cursor.cmd-blink > span:not(.emoji),
+    .cmd .cmd-cursor.cmd-blink > span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span,
     .cmd .cmd-cursor.cmd-blink a {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
             -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
                 animation: var(--animation, terminal-blink) 1s infinite linear;
     }
+    .cmd .cmd-cursor.cmd-blink .fa,
+    .cmd .cmd-cursor.cmd-blink .far,
+    .cmd .cmd-cursor.cmd-blink .fas,
     .cmd .cmd-cursor.cmd-blink .emoji {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
@@ -739,6 +751,7 @@ terminal .terminal-output > div {
     }
     .cmd .cmd-cursor.cmd-blink .emoji span {
         color: transparent;
+        background: transparent;
     }
     .terminal h1::-moz-selection,
     .terminal h2::-moz-selection,
@@ -752,11 +765,13 @@ terminal .terminal-output > div {
     .terminal .terminal-output div div::-moz-selection,
     .terminal .terminal-output div div a::-moz-selection,
     .terminal .terminal-output span[data-text]::-moz-selection,
-    .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection,
-    .terminal .terminal-output div span::-moz-selection,
+    /*
+     * font icons (fontawesome) don't render selection we make emoji the same becuase,
+     * selection on emoji looks weird
+     */
+    .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas):not(.emoji) span::-moz-selection,
     .terminal .terminal-output .raw div::-moz-selection,
-    .cmd span[data-text]::-moz-selection,
-    .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection {
+    .cmd span[data-text]:not(.far):not(.fa):not(.fas):not(.emoji) span::-moz-selection {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
     }
@@ -778,12 +793,10 @@ terminal .terminal-output > div {
     .terminal .terminal-output::selection,
     .terminal .terminal-output div div::selection,
     .terminal .terminal-output div div a::selection,
-    .terminal .terminal-output span[data-text]::selection,
-    .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::selection,
-    .terminal .terminal-output div span::selection,
+    .terminal .terminal-output span[data-text]:not(.emoji)::selection,
+    .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas):not(.emoji) span::selection,
     .terminal .terminal-output .raw div::selection,
-    .cmd span[data-text]::selection,
-    .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::selection {
+    .cmd span[data-text]:not(.far):not(.fa):not(.fas):not(.emoji) span::selection {
         background-color: var(--color, rgba(170, 170, 170, 0.99)) !important;
         color: var(--background, #000) !important;
     }
@@ -809,7 +822,6 @@ terminal .terminal-output > div {
     .terminal td::selection,
     .terminal .terminal-output div div::selection,
     .terminal .terminal-output div div a::selection,
-    .terminal .terminal-output div span::selection,
     .cmd span[data-text]::selection {
         background-color: rgba(170, 170, 170, 0.99);
         color: #000;

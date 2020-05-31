@@ -2798,7 +2798,7 @@ describe('sub plugins', function() {
                 tests.forEach(function(spec) {
                     cmd.set(spec[0]);
                     var output = spec[1] || spec[0];
-                    expect(cmd.find('.cmd-wrapper div [data-text]').text()).toEqual(nbsp(output));
+                    expect(cmd.find('.cmd-wrapper div [data-text]:not(.end)').text()).toEqual(nbsp(output));
                     cmd.set('');
                 });
             });
@@ -2862,7 +2862,7 @@ describe('sub plugins', function() {
                 for (var i in specs) {
                     var spec = specs[i];
                     cmd.set(spec[0]);
-                    var output = cmd.find('.cmd-wrapper div [data-text]').text();
+                    var output = cmd.find('.cmd-wrapper div [data-text]:not(.end)').text();
                     click(cmd.find('[data-text="1"]'));
                     await delay(300);
                     var expected = get_pos();
@@ -2990,7 +2990,7 @@ describe('Terminal plugin', function() {
         describe('maskChar', function() {
             function text(term) {
                 // without [data-text] is select before cursor span and spans inside
-                return term.find('.cmd .cmd-cursor-line span[data-text]:not(.cmd-cursor)').text();
+                return term.find('.cmd .cmd-cursor-line span[data-text]:not(.cmd-cursor):not(.end)').text();
             }
             it('should use specified character for mask', function() {
                 var mask = '-';
@@ -3324,7 +3324,7 @@ describe('Terminal plugin', function() {
                 var text = '\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3';
                 var chars = $.terminal.split_characters(text);
                 term.insert(text).focus();
-                expect(term.find('.cmd .cmd-wrapper div span[data-text]').length).toBe(chars.length);
+                expect(term.find('.cmd .cmd-wrapper div span[data-text]:not(.end)').length).toBe(chars.length);
                 // indexes of emoji
                 [0, 7, 14].forEach(function(pos) {
                     var node = cmd.find('.cmd-wrapper div span[data-text]').eq(pos);

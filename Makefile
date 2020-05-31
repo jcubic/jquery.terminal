@@ -86,6 +86,9 @@ emoji:
 test:
 	$(JEST) --coverage --testMatch '**/__tests__/*.spec.js'
 
+test-accept-snapshots:
+	$(JEST) --coverage --updateSnapshot --testMatch '**/__tests__/*.spec.js'
+
 coveralls:
 	$(CAT) ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 

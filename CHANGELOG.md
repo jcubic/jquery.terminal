@@ -1,3 +1,8 @@
+## 2.17.1
+### Bugfix
+* fix regressions in text selection, cursor and CSS variables [#584](https://github.com/jcubic/jquery.terminal/issues/584)
+* unify selection on font icons (fontawesome) and emoji
+
 ## 2.17.0
 ### Features
 * new CTRL+ARROW DOWN/UP shortcuts and ignore the multi line commands (change history)
