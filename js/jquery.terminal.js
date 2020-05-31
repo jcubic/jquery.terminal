@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 30 May 2020 16:13:11 +0000
+ * Date: Sun, 31 May 2020 10:59:30 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4404,7 +4404,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 30 May 2020 16:13:11 +0000',
+        date: 'Sun, 31 May 2020 10:59:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5156,19 +5156,25 @@
                             var position;
                             var this_len = text(string).length;
                             // first position that match is used for this partial
-                            if (input[1] <= length + this_len && !found_position) {
+                            if (input[1] < length + this_len && !found_position) {
                                 position = input[1] - length;
                                 found_position = true;
-                            } else {
+                            } else if (found_position) {
                                 // -1 indicate that we will not track position because it
                                 // was in one of the previous parial strings
                                 position = -1;
+                            } else {
+                                // initial position for replacers
+                                position = input[1];
                             }
                             // length is used to correct position after replace
                             var length_before = length;
                             var result;
                             length += this_len;
                             if ($.terminal.is_formatting(string)) {
+                                if (found_position) {
+                                    return [string, position];
+                                }
                                 return [string, -1];
                             } else {
                                 if (is_array(formatter)) {
@@ -5207,6 +5213,9 @@
                                     if (result[1] !== -1) {
                                         result[1] += length_before;
                                     }
+                                    var after_len = text(result[0]).length;
+                                    if (after_len !== this_len) {
+                                    }
                                     return result;
                                 }
                                 return [string, -1];
@@ -5232,6 +5241,11 @@
                         }
                         if (string === input[0]) {
                             return input;
+                        }
+                        var before = $.terminal.strip(input[0]);
+                        var after = $.terminal.strip(string);
+                        if (before === after) {
+                            return [string, input[1]];
                         }
                         return [string, position];
                     }
