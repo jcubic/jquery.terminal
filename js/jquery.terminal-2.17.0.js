@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 31 May 2020 13:36:59 +0000
+ * Date: Sun, 31 May 2020 14:21:09 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2735,7 +2735,7 @@
                 if (position === len) {
                     before.html(format(string));
                     c = '&nbsp;';
-                    cursor.html('<span>' + c + '</span>');
+                    cursor.html('<span data-text><span>' + c + '</span></span>');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
@@ -3037,6 +3037,18 @@
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
+                    // fix for Chrome bug width selection
+                    // https://bugs.chromium.org/p/chromium/issues/detail?id=1087787
+                    var spans = prompt_node.find('> span span');
+                    if (is_ch_unit_supported) {
+                        prompt_node.hide();
+                        spans.each(function() {
+                            var self = $(this);
+                            var len = strlen(self.text());
+                            self.css('width', len + 'ch');
+                        });
+                        prompt_node.show();
+                    }
                     prompt_len = strlen(text(encoded_last_line));
                 }
             }
@@ -4404,7 +4416,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 31 May 2020 13:36:59 +0000',
+        date: 'Sun, 31 May 2020 14:21:09 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 31 May 2020 13:37:00 +0000
+ * Date: Sun, 31 May 2020 14:21:10 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -166,7 +166,7 @@ body.full-screen-terminal .terminal {
     /* fix for images */
     vertical-align: top;
 }
-.cmd .cmd-cursor.cmd-blink span:not(.emoji) span {
+.cmd .cmd-cursor.cmd-blink span[data-text]:not(.emoji) span {
     -webkit-animation: terminal-blink 1s infinite linear;
        -moz-animation: terminal-blink 1s infinite linear;
         -ms-animation: terminal-blink 1s infinite linear;
@@ -468,7 +468,7 @@ terminal .terminal-output > div {
       box-shadow: none;
   }
 }
-.underline-animation .cmd-cursor.cmd-blink span span,
+.underline-animation .cmd-cursor.cmd-blink span[date-text] span,
 .underline-animation .cmd-cursor.cmd-blink a {
     -webkit-animation-name: terminal-underline;
        -moz-animation-name: terminal-underline;
@@ -592,7 +592,6 @@ terminal .terminal-output > div {
 .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::selection,
 .terminal .terminal-output div span::selection,
 .terminal .terminal-output .raw div::selection,
-.cmd span[data-text]::selection,
 .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::selection {
     /*
      * use rgba to fix transparent selection in chrome
@@ -723,7 +722,7 @@ terminal .terminal-output > div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
-    .cmd .cmd-cursor.cmd-blink > span:not(.emoji),
+    .cmd .cmd-cursor.cmd-blink > span[data-text]:not(.emoji) span,
     .cmd .cmd-cursor.cmd-blink a {
         -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
            -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
@@ -755,7 +754,6 @@ terminal .terminal-output > div {
     .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection,
     .terminal .terminal-output div span::-moz-selection,
     .terminal .terminal-output .raw div::-moz-selection,
-    .cmd span[data-text]::-moz-selection,
     .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::-moz-selection {
         background-color: var(--color, #aaa);
         color: var(--background, #000);
@@ -782,7 +780,6 @@ terminal .terminal-output > div {
     .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::selection,
     .terminal .terminal-output div span::selection,
     .terminal .terminal-output .raw div::selection,
-    .cmd span[data-text]::selection,
     .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::selection {
         background-color: var(--color, rgba(170, 170, 170, 0.99)) !important;
         color: var(--background, #000) !important;
