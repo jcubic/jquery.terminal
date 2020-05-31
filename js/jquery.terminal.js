@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 31 May 2020 14:35:07 +0000
+ * Date: Sun, 31 May 2020 15:35:20 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2735,7 +2735,7 @@
                 if (position === len) {
                     before.html(format(string));
                     c = '&nbsp;';
-                    cursor.html('<span data-text class="end"><span>' + c + '<span></span>');
+                    empty_cursor();
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
@@ -2786,6 +2786,7 @@
                 // looks nicer until she disable that inner animation)
                 restart_animation();
             }
+            // -----------------------------------------------------------------
             function div(string, before) {
                 var end_line = string.match(line_marker_re);
                 var result = '<div role="presentation" aria-hidden="true"';
@@ -2795,6 +2796,11 @@
                 }
                 result += '>' + format(string, before || '') + '</div>';
                 return result;
+            }
+            // -----------------------------------------------------------------
+            function empty_cursor() {
+                // data-text is for consistency in CSS and end class is for unit tests
+                cursor.html('<span data-text class="end"><span>&nbsp;<span></span>');
             }
             // -----------------------------------------------------------------
             // :: Display lines after the cursor
@@ -2932,7 +2938,7 @@
                         .append('<span></span>');
                 } else if (formatted === '') {
                     before.html('');
-                    cursor.html('<span><span data-text=" ">&nbsp;</span></span>');
+                    empty_cursor();
                     after.html('');
                 } else {
                     draw_cursor_line(formatted, {
@@ -4416,7 +4422,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 31 May 2020 14:35:07 +0000',
+        date: 'Sun, 31 May 2020 15:35:20 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
