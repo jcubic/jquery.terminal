@@ -2735,7 +2735,7 @@
                 if (position === len) {
                     before.html(format(string));
                     c = '&nbsp;';
-                    cursor.html('<span data-text><span>' + c + '</span></span>');
+                    cursor.html('<span data-text class="end"><span>' + c + '<span></span>');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');

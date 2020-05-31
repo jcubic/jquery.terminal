@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 31 May 2020 14:21:09 +0000
+ * Date: Sun, 31 May 2020 14:35:07 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2735,7 +2735,7 @@
                 if (position === len) {
                     before.html(format(string));
                     c = '&nbsp;';
-                    cursor.html('<span data-text><span>' + c + '</span></span>');
+                    cursor.html('<span data-text class="end"><span>' + c + '<span></span>');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
@@ -4416,7 +4416,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 31 May 2020 14:21:09 +0000',
+        date: 'Sun, 31 May 2020 14:35:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
