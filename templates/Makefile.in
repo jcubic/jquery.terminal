@@ -72,7 +72,7 @@ import.html: templates/import.in
 	$(SED) -e "s/{{BRANCH}}/$(BRANCH)/g" templates/import.in > import.html
 
 js/terminal.widget.js: js/terminal.widget.in .$(VERSION)
-	$(GIT) branch | grep '* devel' > /dev/null || $(SED) -e "s/{{VER}}/$(VERSION)/g" js/terminal.widget.in > js/terminal.widget.js
+	$(SED) -e "s/{{VER}}/$(VERSION)/g" js/terminal.widget.in > js/terminal.widget.js
 
 terminal.jquery.json: manifest .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" manifest > terminal.jquery.json

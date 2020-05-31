@@ -1,3 +1,19 @@
+## 2.17.0
+### Features
+* new CTRL+ARROW DOWN/UP shortcuts and ignore the multi line commands (change history)
+### Bugfix
+* fix ch unit bug for Firefox and IE [#579](https://github.com/jcubic/jquery.terminal/issues/579)
+* fix broken emoji [#578](https://github.com/jcubic/jquery.terminal/issues/578)
+* fix broken cursor navigation in Firefox [#577](https://github.com/jcubic/jquery.terminal/issues/577)
+* fix default cursor color animation on color cmd from formatting (e.g. prism)
+* fix font-awesome selection (partial - works only in Firefox)
+* fix consistency of data-text attribute and span
+* fix issue with split_equal when it swallow the line if the line had bracket at the end
+* allow to use .emoji CSS in .raw output
+* fix up/down on multi line command navigation when command have brackets and/or wrappings
+* fix empty lines after wrapping in CMD when splitted line length == cols
+* fix navigating of formatting when stacked formatters are used and one change length [#580](https://github.com/jcubic/jquery.terminal/issues/580)
+
 ## 2.16.1
 ### Bugfix
 * fix disappearing cursor when use up down arrow in multi line CMD [#576](https://github.com/jcubic/jquery.terminal/issues/576)

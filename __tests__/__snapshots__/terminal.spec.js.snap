@@ -1,5 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Terminal plugin cmd plugin should move cursor 1`] = `
+Array [
+  5,
+  26,
+  46,
+  25,
+  4,
+]
+`;
+
+exports[`Terminal plugin cmd plugin should move cursor 2`] = `
+Array [
+  3,
+  33,
+  64,
+  93,
+  88,
+  57,
+  27,
+]
+`;
+
+exports[`Terminal plugin events enter text text should appear and interpreter function should be called 1`] = `"<span data-text=\\">&nbsp;foo\\">&gt;&nbsp;foo</span>"`;
+
+exports[`Terminal plugin jQuery Terminal methods generic import/export view should import view 1`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span data-text=\\"Hello&nbsp;World!\\">Hello&nbsp;World!</span></div></div><div data-index=\\"1\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;foo\\">&gt;&nbsp;foo</span></div></div><div data-index=\\"2\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;bar\\">&gt;&nbsp;bar</span></div></div>"`;
+
+exports[`Terminal plugin prompt should format prompt 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff;\\" data-text=\\">>>\\"><span>&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span>&nbsp;</span></span>"`;
+
+exports[`Terminal plugin prompt should format prompt 2`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff;\\" data-text=\\">>>\\"><span>&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span>&nbsp;</span></span>"`;
+
+exports[`Terminal plugin prompt should return prompt 1`] = `"<span data-text=\\">>>&nbsp;\\"><span>&gt;&gt;&gt;&nbsp;</span></span>"`;
+
+exports[`Terminal plugin prompt should set prompt 1`] = `"<span data-text=\\"|||&nbsp;\\"><span>|||&nbsp;</span></span>"`;
+
+exports[`Terminal plugin prompt should set prompt 2`] = `"<span data-text=\\">>>&nbsp;\\"><span>&gt;&gt;&gt;&nbsp;</span></span>"`;
+
+exports[`Terminal plugin terminal create / terminal destroy should have default prompt 1`] = `"<span data-text=\\">&nbsp;\\"><span>&gt;&nbsp;</span></span>"`;
+
+exports[`Terminal utils $.terminal.format should create html span tags with style and classes 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;--color:#fff;--original-color:#fff;text-shadow:0 0 5px #fff;background-color:#000;\\" data-text=\\"Foo\\"><span>Foo</span></span><span style=\\"font-style:italic;\\" class=\\"foo\\" data-text=\\"Bar\\"><span>Bar</span></span><span style=\\"text-decoration:underline line-through overline;\\" data-text=\\"Baz\\"><span>Baz</span></span>"`;
+
+exports[`Terminal utils $.terminal.format should filter out attribute in JSON 1`] = `"<span title=\\"foo\\" data-text=\\"foo\\"><span>foo</span></span>"`;
+
+exports[`Terminal utils $.terminal.format should handle JSON 1`] = `"<span title=\\"foo\\" data-foo=\\"bar\\" data-text=\\"foo\\"><span>foo</span></span>"`;
+
+exports[`Terminal utils $.terminal.format should handle emails 1`] = `"<a href=\\"mailto:jcubic@onet.pl\\" tabindex=\\"1000\\" data-text>jcubic@onet.pl</a>"`;
+
+exports[`Terminal utils $.terminal.format should handle emails 2`] = `"<a href=\\"mailto:jcubic@onet.pl\\" tabindex=\\"1000\\" data-text>j</a><a href=\\"mailto:jcubic@onet.pl\\" tabindex=\\"1000\\" data-text>cubic@onet.pl</a>"`;
+
+exports[`Terminal utils $.terminal.format should handle wider characters without formatting 1`] = `"<span style=\\"width: 24ch\\" data-text=\\"<span style=\\"width: 24ch\\"><span style=\\"width: 2ch\\">タ</span><span style=\\"width: 2ch\\">ー</span><span style=\\"width: 2ch\\">ミ</span><span style=\\"width: 2ch\\">ナ</span><span style=\\"width: 2ch\\">ル</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">ィ</span><span style=\\"width: 2ch\\">ン</span><span style=\\"width: 2ch\\">ド</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">は</span><span style=\\"width: 2ch\\">黒</span></span>\\"><span style=\\"width: 24ch\\"><span style=\\"width: 2ch\\">タ</span><span style=\\"width: 2ch\\">ー</span><span style=\\"width: 2ch\\">ミ</span><span style=\\"width: 2ch\\">ナ</span><span style=\\"width: 2ch\\">ル</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">ィ</span><span style=\\"width: 2ch\\">ン</span><span style=\\"width: 2ch\\">ド</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">は</span><span style=\\"width: 2ch\\">黒</span></span></span><span style=\\"width: 4ch\\" data-text=\\"です\\"><span><span style=\\"width: 4ch\\"><span style=\\"width: 2ch\\">で</span><span style=\\"width: 2ch\\">す</span></span></span></span>"`;
+
+exports[`Terminal utils $.terminal.format should not allow attributes 1`] = `"<span data-text=\\"foo\\"><span>foo</span></span>"`;
+
+exports[`Terminal utils $.terminal.format should not duplicate and don't overwrite data-text 1`] = `"<span data-text=\\"foo\\"><span>foo</span></span>"`;
+
+exports[`Terminal utils $.terminal.format should not duplicate and don't overwrite data-text 2`] = `"<span data-text=\\"foo\\"><span>foo</span></span>"`;
+
+exports[`Terminal utils $.terminal.format should parse JSON if semicolon in value 1`] = `"<span title=\\"foo ; bar\\" data-text=\\"foo\\"><span>foo</span></span>"`;
+
+exports[`Terminal utils $.terminal.format should skip empty parts 1`] = `"<span data-text=\\"x\\">x</span><span style=\\"font-weight:bold;\\" data-text=\\"y\\"><span>y</span></span><span style=\\"font-weight:bold;\\" data-text=\\"z\\"><span>z</span></span>"`;
+
 exports[`Terminal utils $.terminal.from_ansi should format plots with moving cursors 1`] = `
 "  Y Axis                  Foo: [[;#A00;]#]
                                    
@@ -273,4 +333,13 @@ exports[`Terminal utils $.terminal.from_ansi should render ANSI art 2`] = `
                                                     [[;#A50;#000]▀ ▀ ▀  ▀]     [[;#A50;#000]▄▀ ][[b;#444;#000]bs]
                                                                     [[;#000;]░░▒▓]
 [[;#000;]SAUCE00Regina Pacis                       burps               fuel                20180923fX][[;#000;]P][[;#000;]ç][[;#000;]IBM VGA]"
+`;
+
+exports[`Terminal utils $.terminal.split_equal split emoji encoded from apply_formatters 1`] = `
+Array [
+  "ZZZZZZz",
+  "[[;;;emoji relaxed;☺️]☺️]oo&nbsp;bar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[;;;emoji relaxed;☺️]☺️]a[[;;;emoji eight;8️⃣]8️⃣]",
+  "foo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;baz",
+  "foobar&nbsp;&nbsp;ba&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;br",
+]
 `;

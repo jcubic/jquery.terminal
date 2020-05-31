@@ -20,7 +20,7 @@ if (process.argv.length === 3) {
         var class_name = emoji.short_name.replace(/\+/g, '\\+')
             .replace(/^(\d)/i, '\\3$1 ');
         var selector = [
-            '.terminal-output>:not(.raw) .emoji.' + class_name,
+            '.terminal-output .emoji.' + class_name,
             '.cmd .emoji.' + class_name].join(',');
         console.log(`${selector}{background-image:url(${url});}`);
     });

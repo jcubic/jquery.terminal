@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.16.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 22 May 2020 18:46:15 +0000
+ * Date: Sun, 31 May 2020 10:59:30 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1215,7 +1215,8 @@
         var base = '<span style="font-family: monospace;visibility:hidden;';
         var ch = $(base + 'width:1ch;overflow: hidden">&nbsp;</span>').appendTo('body');
         var space = $(base + '">&nbsp;</span>').appendTo('body');
-        ch_unit_bug = width(ch) !== width(space);
+        // in FireFox the size of space is fraction larger #579
+        ch_unit_bug = Math.abs(width(ch) - width(space)) > 0.0001;
         ch.remove();
         space.remove();
     });
@@ -1610,8 +1611,9 @@
                        '<span>&nbsp;</span></span></span>' +
                        '<span></span>' +
                        '</div>');
+        var cursor_line = wrapper.find('.cmd-cursor-line');
         // a11y: don't read command it's in textarea that's in focus
-        a11y_hide(wrapper.find('.cmd-cursor-line'));
+        a11y_hide(cursor_line);
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
@@ -1694,41 +1696,6 @@
         var rev_search_str = '';
         var reverse_search_position = null;
         var backup_prompt;
-        // TODO: try to use workerCache with data that don't change like bare_text
-        // or format function.
-        // TODO: remove workerCache for formatters they require dynamic
-        // value of position so data change when you move cursor
-        /*
-        var formatter = new WorkerCache({
-            validation: function() {
-                if (this._formatters instanceof Array) {
-                    var test = this._formatters.every(function(e, i) {
-                        return $.terminal.defaults.formatters[i] === e;
-                    });
-                    if (!test) {
-                        this._formatters = $.terminal.defaults.formatters;
-                    }
-                    return test;
-                }
-                return true;
-            },
-            onCache: function(value) {
-                this._counter = this._counter || 0;
-                this._counter++;
-            },
-            action: function(string) {
-                this._times = this._times || [];
-                var t0 = time();
-                // some optimization - don't change object shape and ref
-                format_options.position = position;
-                string = $.terminal.escape_formatting(string);
-                var value = $.terminal.apply_formatters(string, format_options);
-                var t1 = time();
-                this._times.push(t1 - t0);
-                return value;
-            }
-        });
-        */
         var command = '';
         var last_command;
         // text from selection using CTRL+SHIFT+C (as in Xterm)
@@ -1746,6 +1713,7 @@
         // so we can hide it by css when using text selection
         var line_marker = '\uFFFF';
         var line_marker_re = /\uFFFF$/;
+        var empty_marker_re = /^\uFFFF$/;
         function get_char_pos(e) {
             var node = $(e.target);
             if (node.is('span,img,a')) {
@@ -1960,10 +1928,12 @@
             },
             'HOLD+ARROWUP': up_arrow,
             'ARROWUP': up_arrow,
+            'CTRL+ARROWUP': prev_history,
             'CTRL+P': prev_history,
             'ARROWDOWN': down_arrow,
             'HOLD+ARROWDOWN': down_arrow,
             'CTRL+N': next_history,
+            'CTRL+ARROWDOWN': next_history,
             'ARROWLEFT': left,
             'HOLD+ARROWLEFT': debounce(left, 10),
             'CTRL+B': left,
@@ -2208,12 +2178,15 @@
             return string.match(/\n/);
         }
         // -------------------------------------------------------------------------------
-        function have_wrapping(string) {
+        function have_wrapping(string, prompt_len) {
             var lengths = string.split('\n').map(function(line) {
                 return $.terminal.length(line);
             });
+            if (prompt_len) {
+                lengths[0] += prompt_len;
+            }
             var wrap = lengths.filter(function(len) {
-                return len > num_chars;
+                return len >= num_chars;
             });
             return !!wrap.length;
         }
@@ -2222,6 +2195,7 @@
             var prompt = last_rendered_prompt;
             var lines = $.terminal.split_equal(prompt + formatted, num_chars);
             var re = new RegExp('^' + $.terminal.escape_regex(prompt));
+            lines = lines.map($.terminal.unescape_brackets);
             lines[0] = lines[0].replace(re, '');
             return lines;
         }
@@ -2229,17 +2203,23 @@
         function up_arrow() {
             var formatted = formatting(command);
             formatted = $.terminal.strip(formatted);
-            var before = formatted.substring(0, position);
+            var before = $.terminal.substring(formatted, 0, position);
             var col = self.column();
-            if (have_newlines(before) || have_wrapping(before)) {
-                var cursor_line = self.find('.cmd-cursor-line');
-                var line = cursor_line.prevUntil('span').length;
+            var cursor_line = self.find('.cmd-cursor-line');
+            var line = cursor_line.prevUntil('span').length;
+            // case when line is wrapped and we are below prompt
+            if (line === 1 && col <= prompt_len) {
+                self.position(0);
+                return false;
+            }
+            if (have_newlines(before) || have_wrapping(before, prompt_len)) {
                 if (line === 0) {
                     return prev_history();
                 }
-                var ending = cursor_line.prev().find('[data-text]:last').text();
+                var prev = cursor_line.prev();
+                var splitted = prev.is('.cmd-end-line');
                 var lines = simple_split_command_line(formatted);
-                var prev = lines[line - 1];
+                prev = lines[line - 1];
                 var left_over = lines[line].substring(col).length;
                 var diff;
                 if (left_over > 0) {
@@ -2247,10 +2227,9 @@
                     if (line - 1 === 0) {
                         diff -= prompt_len;
                     }
-                    diff = col + 1 + prev.substring(diff).length;
-                    if (ending !== '\xA0') {
-                        // correction for splitted line that don't have extra space
-                        diff -= 1;
+                    diff = col + prev.substring(diff).length;
+                    if (splitted) {
+                        ++diff;
                     }
                 } else {
                     diff = col + 1;
@@ -2266,13 +2245,14 @@
             // use format and strip so we get visual strings (formatting can change text)
             var formatted = formatting(command);
             formatted = $.terminal.strip(formatted);
-            var after = formatted.substring(position);
+            var after = $.terminal.substring(formatted, position);
             if (have_newlines(after) || have_wrapping(after)) {
                 var lines = simple_split_command_line(formatted);
                 var col = self.column();
                 var cursor_line = self.find('.cmd-cursor-line');
-                var line = cursor_line.prevUntil('span').length;
-                var ending = cursor_line.find('[data-text]:last').text();
+                var $line = cursor_line.prevUntil('span');
+                var line = $line.length;
+                var ending = cursor_line.is('.cmd-end-line');
                 var next = lines[line + 1];
                 if (!next) {
                     return next_history();
@@ -2283,13 +2263,13 @@
                 if (left_over === 0) {
                     diff = next.length + 1;
                 } else {
-                    diff = Math.min(col, next.length) + left_over + 1;
+                    diff = Math.min(col, next.length) + left_over;
                     if (line === 0) {
                         diff += prompt_len;
                     }
-                    if (ending !== '\xA0') {
+                    if (ending) {
                         // correction for splitted line that don't have extra space
-                        diff -= 1;
+                        diff += 1;
                     }
                 }
                 self.position(diff, true);
@@ -2563,12 +2543,27 @@
             function split(string) {
                 return $.terminal.split_equal(string, num_chars);
             }
+            // -----------------------------------------------------------------
             function skip_empty(array) {
                 // we remove lines that are leftovers after adding space at the end
-                return array.filter(function(line) {
-                    return !$.terminal.strip(line).match(/^ $/);
+                var result = [];
+                array.forEach(function(line, i) {
+                    if ($.terminal.strip(line).match(empty_marker_re)) {
+                        result[i] = false;
+                        // lines that will get removed need line ending on previos
+                        // line so code that check that marker works correctly
+                        if (i > 0) {
+                            result[i - 1] += line_marker;
+                        }
+                    } else {
+                        result[i] = array[i];
+                    }
+                });
+                return result.filter(function(line) {
+                    return line !== false;
                 });
             }
+            // -----------------------------------------------------------------
             var line = prompt_node.find('.cmd-line');
             var prompt;
             if (line.length) {
@@ -2674,12 +2669,10 @@
                 tabs: settings.tabs,
                 before: before
             });
-            string = $.terminal.format(encoded, {
+            return $.terminal.format(encoded, {
                 char_width: settings.char_width,
                 allowedAttributes: settings.allowedAttributes || []
             });
-            var re = /(<span[^>]+data-text[^>]+>)(.*?)(<\/span>)/g;
-            return string.replace(re, '$1<span>$2</span>$3');
         }
         // ---------------------------------------------------------------------
         // :: function create new string with all characters in it's own
@@ -2705,6 +2698,15 @@
             return $.terminal.substring(str, start, end);
         }
         // ---------------------------------------------------------------------
+        // :: helper function that check if string is valid emoji formatting
+        // ---------------------------------------------------------------------
+        function is_emoji_formatting(str) {
+            if ($.terminal.is_formatting(str)) {
+                return str.replace(format_parts_re, '$4').match(/^emoji /);
+            }
+            return false;
+        }
+        // ---------------------------------------------------------------------
         // :: Function that displays the command line. Split long lines and
         // :: place cursor in the right place
         // ---------------------------------------------------------------------
@@ -2720,6 +2722,7 @@
                 if (end_line) {
                     string = string.replace(line_marker_re, ' ');
                 }
+                cursor_line.toggleClass('cmd-end-line', !!end_line);
                 var cursor_end_line = false;
                 var settings = $.extend({
                     prompt: '',
@@ -2728,13 +2731,11 @@
                 var position = settings.position;
                 var len = length(string);
                 var prompt = settings.prompt;
-                if (ch_unit_bug) {
-                    cursor.width(char_width);
-                }
                 var c;
                 if (position === len) {
                     before.html(format(string));
-                    cursor.html('<span><span>&nbsp;</span></span>');
+                    c = '&nbsp;';
+                    cursor.html('<span>' + c + '</span>');
                     after.html('');
                 } else if (position === 0) {
                     before.html('');
@@ -2757,6 +2758,19 @@
                             c_before += c;
                         }
                         after.html(format(substring(string, position + 1), c_before));
+                    }
+                }
+                if (ch_unit_bug) {
+                    if (typeof wcwidth !== 'undefined') {
+                        // handle emoji and wide characters in IE or
+                        // other possible browsers that don't have valid ch unit
+                        var size = strlen(text(c));
+                        if (size === 1 && is_emoji_formatting(c)) {
+                            size = 2;
+                        }
+                        cursor.width(char_width * size);
+                    } else {
+                        cursor.width(char_width);
                     }
                 }
                 cursor.toggleClass('cmd-end-line', cursor_end_line);
@@ -2918,7 +2932,7 @@
                         .append('<span></span>');
                 } else if (formatted === '') {
                     before.html('');
-                    cursor.html('<span><span>&nbsp;</span></span>');
+                    cursor.html('<span><span data-text=" ">&nbsp;</span></span>');
                     after.html('');
                 } else {
                     draw_cursor_line(formatted, {
@@ -2997,7 +3011,12 @@
                     if (!$.terminal.have_formatting(line)) {
                         return '[[;;]' + line + ']';
                     }
-                    return line;
+                    return $.terminal.format_split(line).map(function(str) {
+                        if ($.terminal.is_formatting(str)) {
+                            return str;
+                        }
+                        return '[[;;]' + str + ']';
+                    }).join('');
                 });
                 var options = {
                     char_width: settings.char_width
@@ -3221,10 +3240,12 @@
                 }
                 var re = /\n?([^\n]*)$/;
                 var match = before.match(re);
-                var col = match[1].length % num_chars;
-                if (!have_newlines(before) && (include_prompt || have_wrapping(before))) {
+                var col = match[1].length;
+                if (!have_newlines(before) &&
+                    (include_prompt || have_wrapping(before, prompt_len))) {
                     col += prompt_len;
                 }
+                col %= num_chars;
                 return col;
             },
             line: function() {
@@ -4013,7 +4034,7 @@
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
-            if (len !== $.terminal.length(bare)) {
+            if (len > 1 && len !== $.terminal.length(bare)) {
                 return char_width_prop(len, options);
             }
         }
@@ -4382,8 +4403,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.16.1',
-        date: 'Fri, 22 May 2020 18:46:15 +0000',
+        version: 'DEV',
+        date: 'Sun, 31 May 2020 10:59:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4713,6 +4734,7 @@
                     // from formatting, then last iteration
                     // was already called (in if) #550
                     callback({
+                        last: true,
                         count: count + 1,
                         index: i,
                         formatting: formatting,
@@ -5134,19 +5156,25 @@
                             var position;
                             var this_len = text(string).length;
                             // first position that match is used for this partial
-                            if (input[1] <= length + this_len && !found_position) {
+                            if (input[1] < length + this_len && !found_position) {
                                 position = input[1] - length;
                                 found_position = true;
-                            } else {
+                            } else if (found_position) {
                                 // -1 indicate that we will not track position because it
                                 // was in one of the previous parial strings
                                 position = -1;
+                            } else {
+                                // initial position for replacers
+                                position = input[1];
                             }
                             // length is used to correct position after replace
                             var length_before = length;
                             var result;
                             length += this_len;
                             if ($.terminal.is_formatting(string)) {
+                                if (found_position) {
+                                    return [string, position];
+                                }
                                 return [string, -1];
                             } else {
                                 if (is_array(formatter)) {
@@ -5185,6 +5213,9 @@
                                     if (result[1] !== -1) {
                                         result[1] += length_before;
                                     }
+                                    var after_len = text(result[0]).length;
+                                    if (after_len !== this_len) {
+                                    }
                                     return result;
                                 }
                                 return [string, -1];
@@ -5210,6 +5241,11 @@
                         }
                         if (string === input[0]) {
                             return input;
+                        }
+                        var before = $.terminal.strip(input[0]);
+                        var after = $.terminal.strip(string);
+                        if (before === after) {
+                            return [string, input[1]];
                         }
                         return [string, position];
                     }
@@ -5321,7 +5357,7 @@
                     }
                     var test = fn(url);
                     if (!test) {
-                        warn('Invalid URL ' + url + ' only https ftp and Path ' +
+                        warn('Invalid URL ' + url + ' only http(s) ftp and Path ' +
                              'are allowed');
                     }
                     return test;
@@ -5384,8 +5420,11 @@
                     style_str += 'font-style:italic;';
                 }
                 if ($.terminal.valid_color(color)) {
-                    style_str += 'color:' + color + ';' +
-                        '--color:' + color + ';';
+                    style_str += [
+                        'color:' + color,
+                        '--color:' + color,
+                        '--original-color:' + color
+                    ].join(';') + ';';
                     if (style.indexOf('!') !== -1) {
                         style_str += '--link-color:' + color + ';';
                     }
@@ -5444,7 +5483,7 @@
                     result += ' data-text/>';
                 } else {
                     result += ' data-text="' + data.replace(/"/g, '&quot;') + '">' +
-                        text + '</span>';
+                        '<span>' + text + '</span></span>';
                 }
                 return result;
             }
@@ -5465,12 +5504,14 @@
                         text = safe(text);
                         text = text.replace(/\\\]/, '&#93;');
                         var extra = extra_css(text, settings);
+                        var prefix;
                         if (extra.length) {
                             text = wide_characters(text, settings);
-                            return '<span style="' + extra + '">' + text + '</span>';
+                            prefix = '<span style="' + extra + '"';
                         } else {
-                            return '<span>' + text + '</span>';
+                            prefix = '<span';
                         }
+                        return prefix + ' data-text="' + text + '">' + text + '</span>';
                     }
                 }).join('');
                 return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');
@@ -5946,19 +5987,6 @@
         });
         return deferred.promise();
     };
-
-    // -----------------------------------------------------------------------
-    /*
-    function is_scrolled_into_view(elem) {
-        var docViewTop = $(window).scrollTop();
-        var docViewBottom = docViewTop + $(window).height();
-
-        var elemTop = $(elem).offset().top;
-        var elemBottom = elemTop + $(elem).height();
-
-        return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
-    }
-    */
     // -----------------------------------------------------------------------
     function terminal_ready(term) {
         return !!(term.closest('body').length &&
