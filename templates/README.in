@@ -15,7 +15,8 @@ http://terminal.jcubic.pl
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![package quality](http://npm.packagequality.com/shield/jquery.terminal.svg)](http://packagequality.com/#?package=jquery.terminal)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
-[![](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
+[![LICENSE MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
+[![Paid Support](https://github.com/xscode-resources/promotion-materials/blob/master/assets/xscode-banner-s.svg?raw=true)](https://xscode.com/jcubic/jquery.terminal)
 
 ### Summary
 
@@ -303,6 +304,10 @@ Projects used:
 * [jQuery Caret](https://github.com/accursoft/caret) by Gideon Sireling (3-BSD)
 * [sprintf.js](https://github.com/alexei/sprintf.js) by [Alexandru Mărășteanu](http://alexei.ro/) (3-BSD)
 * [node-ansiparser](https://github.com/netzkolchose/node-ansiparser) by Joerg Breitbart (MIT)
+
+### Support
+
+You have some non-trivial request or need help, you can get paid support at [xs:code](https://xscode.com/jcubic/jquery.terminal).
 
 ### License
 
