@@ -1,3 +1,7 @@
+## 2.17.2
+### Bugfix
+* fix cursor on strings in prism
+
 ## 2.17.1
 ### Bugfix
 * fix regressions in text selection, cursor and CSS variables [#584](https://github.com/jcubic/jquery.terminal/issues/584)

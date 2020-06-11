@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.17.1
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 31 May 2020 16:15:44 +0000
+ * Date: Thu, 11 Jun 2020 19:18:33 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -843,12 +843,6 @@ terminal .terminal-output > div {
 .cmd .style .token.string,
 .cmd .token.token {
     background-color: inherit;
-}
-/* for wide characters that have span inside .token */
-.terminal span.token.string span,
-.cmd span.token.string span {
-    color: inherit !important;
-    background: inherit !important;
 }
 /* FireFox hack
 @supports (-moz-animation: foo) {
