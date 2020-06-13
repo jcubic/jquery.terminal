@@ -206,7 +206,10 @@ body.full-screen-terminal .terminal {
 }
 .terminal,
 .terminal-output > :not(.raw),
-.cmd {
+.terminal-output > :not(.raw) span,
+.terminal-output > :not(.raw) a,
+.cmd,
+.cmd span {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     font-size: 12px;

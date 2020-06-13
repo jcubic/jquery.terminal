@@ -1,3 +1,7 @@
+## 2.17.3
+### Bugfix
+* fix for font-family wildcard css rule
+
 ## 2.17.2
 ### Bugfix
 * fix cursor on strings in prism
