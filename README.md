@@ -10,12 +10,13 @@ http://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-2.17.2-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.17.2-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&a17d57c623123a5184fe54368ab3fc718f599567)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&a88d91e8ee9cfb8bed60ce5b2a4523803371a6b9)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&51b32c0d59f6eeb46d4c65662e06e08d)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![LICENSE MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
-[![Paid Support](https://github.com/xscode-resources/promotion-materials/blob/master/assets/xscode-banner-s.svg?raw=true)](https://xscode.com/jcubic/jquery.terminal)
+
+[![Paid Support](https://github.com/jcubic/jquery.terminal/blob/master/.github/support.svg?raw=true)](https://xscode.com/jcubic/jquery.terminal)
 
 ### Summary
 
