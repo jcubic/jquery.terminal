@@ -5,7 +5,7 @@
     <meta name="robots" content="noindex"/>
     <meta name="googlebot" content="noindex"/>
     <link rel="shortcut icon" href="favicon.ico"/>
-    <meta name = "viewport" content="user-scalable=no, width=device-width">
+    <meta name="viewport" content="user-scalable=no, width=device-width">
     <link rel="stylesheet" href="https://rawgit.com/jcubic/jquery.terminal/master/css/jquery.terminal.css"/>
     <link rel="stylesheet" href="https://unpkg.com/prismjs@1.14.0/themes/prism.css"/>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -30,10 +30,37 @@
          }
          return result;
      }
-     var file = query().file || 'browser_test_files/base.js';
+     $.getStyle = function(url, callback) {
+         var link = $('<link href="' + url + '" rel="stylesheet"/>');
+         if (callback) {
+             link.on('load', callback);
+         }
+         var head = $('head');
+         if (head.length) {
+             link.appendTo(head);
+         }
+     };
+     var args = query();
+     var file = args.file || 'browser_test_files/base.js';
+     var base = 'https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@';
+     var ver = args.ver || 'devel';
+     var files = [
+         base + ver + '/js/jquery.terminal.js',
+         base + ver + '/css/jquery.terminal.css'
+     ];
      if (file.match(/^browser_test_files/)) {
-         $.getScript(file);
+         files.push(file);
      }
+     (function loop() {
+         var url = files.shift();
+         if (url) {
+             if (url.match(/\.js$/)) {
+                 $.getScript(url, loop);
+             } else {
+                 $.getStyle(url, loop);
+             }
+         }
+     })();
     </script>
     <style>
      html, body {
