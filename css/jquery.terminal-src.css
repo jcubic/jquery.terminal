@@ -250,7 +250,6 @@ body.full-screen-terminal .terminal {
 
 .terminal, .cmd {
     box-sizing: border-box;
-    cursor: text;
 }
 .cmd .cmd-cursor span:not(.token):not(.inverted) {
     color: inherit;

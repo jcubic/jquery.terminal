@@ -5521,6 +5521,7 @@
                     } else {
                         text = safe(text);
                         text = text.replace(/\\\]/, '&#93;');
+                        var data = text;
                         var extra = extra_css(text, settings);
                         var prefix;
                         if (extra.length) {
@@ -5529,7 +5530,7 @@
                         } else {
                             prefix = '<span';
                         }
-                        return prefix + ' data-text="' + text + '">' + text + '</span>';
+                        return prefix + ' data-text="' + data + '">' + text + '</span>';
                     }
                 }).join('');
                 return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');

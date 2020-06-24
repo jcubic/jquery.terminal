@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.17.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 11 Jun 2020 19:20:14 +0000
+ * Date: Wed, 24 Jun 2020 20:41:08 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4421,8 +4421,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.17.2',
-        date: 'Thu, 11 Jun 2020 19:20:14 +0000',
+        version: 'DEV',
+        date: 'Wed, 24 Jun 2020 20:41:08 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5521,6 +5521,7 @@
                     } else {
                         text = safe(text);
                         text = text.replace(/\\\]/, '&#93;');
+                        var data = text;
                         var extra = extra_css(text, settings);
                         var prefix;
                         if (extra.length) {
@@ -5529,7 +5530,7 @@
                         } else {
                             prefix = '<span';
                         }
-                        return prefix + ' data-text="' + text + '">' + text + '</span>';
+                        return prefix + ' data-text="' + data + '">' + text + '</span>';
                     }
                 }).join('');
                 return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');

@@ -1,6 +1,8 @@
 ## 2.17.3
 ### Bugfix
 * fix for font-family wildcard css rule
+* fix cursor on scrollbar
+* fix broken html with wide characters without formatting
 
 ## 2.17.2
 ### Bugfix
