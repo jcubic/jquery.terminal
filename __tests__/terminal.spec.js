@@ -5626,8 +5626,12 @@ describe('Terminal plugin', function() {
                 });
                 it('should not execute methods', function() {
                     spy(term, 'clear');
+                    var warn = console.warn;
+                    console.warn = jest.fn();
                     term.echo('bar');
                     term.echo('[[ terminal::clear() ]]', { invokeMethods: false });
+                    expect(count(console.warn)).toEqual(1);
+                    console.warn = warn;
                     term.echo('[[ foo ]]', { invokeMethods: false });
                     expect(interpreter.foo).toHaveBeenCalled();
                     expect(a0(term.find('.terminal-output').text())).toEqual('bar');

@@ -5,6 +5,7 @@
 * fix broken html with wide characters without formatting
 * fix jumping to address bar on CTRL+L [#587](https://github.com/jcubic/jquery.terminal/issues/587)
 * fix issue in less when only one image get rendered [#583](https://github.com/jcubic/jquery.terminal/issues/583)
+* fix jumping on focus on mobile when terminal content scrolled down [#572](https://github.com/jcubic/jquery.terminal/issues/572)
 
 ## 2.17.2
 ### Bugfix

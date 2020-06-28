@@ -1644,15 +1644,23 @@
                     reset: function() {
                         clearTimeout(timer);
                         timer = setTimeout(function() {
-                            $node.css('top', '');
+                            $node.css({
+                                top: '',
+                                bottom: ''
+                            });
                         }, 400);
                     },
                     focus: function() {
-                        $node.css('top', 0);
+                        css($node[0], {
+                            top: 'calc(var(--terminal-scroll, 0) * 1px)'
+                        });
                         clip.reset();
                     },
                     blur: function() {
-                        $node.css('top', '100%').blur();
+                        $node.css({
+                            top: '100%',
+                            bottom: 0
+                        }).blur();
                         // just in case of Webkit bug
                         window.getSelection().removeAllRanges();
                         clip.reset();
@@ -3046,6 +3054,7 @@
                     // fix for Chrome bug width selection
                     // https://bugs.chromium.org/p/chromium/issues/detail?id=1087787
                     var spans = prompt_node.find('> span span');
+                    clip.$node.attr('data-cmd-prompt', prompt_node.text());
                     if (is_ch_unit_supported) {
                         prompt_node.hide();
                         spans.each(function() {
@@ -8888,11 +8897,14 @@
                     fire_event('onFlush');
                     var offset = self.find('.cmd').offset();
                     var self_offset = self.offset();
-                    css(self[0], {
-                        '--terminal-x': offset.left - self_offset.left,
-                        '--terminal-y': offset.top - self_offset.top
-                    });
-
+                    setTimeout(function() {
+                        css(self[0], {
+                            '--terminal-height': self.height(),
+                            '--terminal-x': offset.left - self_offset.left,
+                            '--terminal-y': offset.top - self_offset.top,
+                            '--terminal-scroll': self.prop('scrollTop')
+                        });
+                    }, 0);
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
                     }
@@ -10420,6 +10432,9 @@
                     } else if (is_function(settings.touchscroll)) {
                         ret = settings.touchscroll(event, delta, self);
                     }
+                    css(self[0], {
+                        '--terminal-scroll': self.prop('scrollTop')
+                    });
                     if (ret === true) {
                         return;
                     }
