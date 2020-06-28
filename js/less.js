@@ -51,7 +51,7 @@
         factory(root.jQuery);
     }
 })(function($) {
-    var img_split_re = /(\[\[(?:[^;]*@[^;]*);[^;]*;[^\]]*\]\])/;
+    var img_split_re = /(\[\[(?:[^;]*@[^;]*);[^;]*;[^\]]*\]\s*\])/;
     var img_re = /\[\[(?:[^;]*@[^;]*);[^;]*;[^;]*;[^;]*;([^;]*)\] ?\]/;
     // -------------------------------------------------------------------------
     function find(arr, fn) {
@@ -308,7 +308,9 @@
                         });
                     }
                 } else {
-                    result = result.concat(part.split('\n'));
+                    if (part !== '\n') {
+                        result = result.concat(part.split('\n'));
+                    }
                     recur();
                 }
             })();

@@ -3,7 +3,8 @@
 * fix for font-family wildcard css rule
 * fix cursor on scrollbar
 * fix broken html with wide characters without formatting
-* fix jumping to address bar on CTRL+L
+* fix jumping to address bar on CTRL+L [#587](https://github.com/jcubic/jquery.terminal/issues/587)
+* fix issue in less when only one image get rendered [#583](https://github.com/jcubic/jquery.terminal/issues/583)
 
 ## 2.17.2
 ### Bugfix
