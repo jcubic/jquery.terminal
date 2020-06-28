@@ -7738,6 +7738,7 @@
             },
             'CTRL+L': function() {
                 self.clear();
+                return false;
             },
             'TAB': function(e, orignal) {
                 // TODO: move this to cmd plugin

@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 24 Jun 2020 20:41:08 +0000
+ * Date: Sun, 28 Jun 2020 12:29:49 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4422,7 +4422,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 24 Jun 2020 20:41:08 +0000',
+        date: 'Sun, 28 Jun 2020 12:29:49 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7738,6 +7738,7 @@
             },
             'CTRL+L': function() {
                 self.clear();
+                return false;
             },
             'TAB': function(e, orignal) {
                 // TODO: move this to cmd plugin
