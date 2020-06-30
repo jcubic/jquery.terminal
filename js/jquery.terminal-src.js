@@ -1201,6 +1201,11 @@
         if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
             check = true;
         }
+        // detect iPad 13
+        // ref: https://stackoverflow.com/a/57924983/387194s
+        if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+            return true;
+        }
         return check;
     })(navigator.userAgent || navigator.vendor || window.opera);
 

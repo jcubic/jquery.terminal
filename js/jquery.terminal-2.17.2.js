@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 28 Jun 2020 15:36:53 +0000
+ * Date: Tue, 30 Jun 2020 09:04:45 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1200,6 +1200,11 @@
         var check = false;
         if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
             check = true;
+        }
+        // detect iPad 13
+        // ref: https://stackoverflow.com/a/57924983/387194s
+        if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+            return true;
         }
         return check;
     })(navigator.userAgent || navigator.vendor || window.opera);
@@ -4431,7 +4436,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 28 Jun 2020 15:36:53 +0000',
+        date: 'Tue, 30 Jun 2020 09:04:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
