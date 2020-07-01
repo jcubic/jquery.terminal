@@ -2,6 +2,7 @@
 ### Bugfix
 * fix jumping on right click near bottom and/or right edge when terminal is not full screen
 * fix double event fire on right mouse click
+* fix scrollbar size in Chrome
 
 ## 2.17.3
 ### Bugfix

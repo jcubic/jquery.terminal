@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Wed, 01 Jul 2020 10:42:26 +0000
+ * Date: Wed, 01 Jul 2020 11:43:45 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -968,8 +968,8 @@ terminal .terminal-output > div {
 .terminal::-webkit-scrollbar {
     width: 10px;
     height: 10px;
-    width: calc(var(--size) * 10px);
-    height: calc(var(--size) * 10px);
+    width: calc(var(--size, 1) * 10px);
+    height: calc(var(--size, 1) * 10px);
     background: #212020;
 }
 .terminal::-webkit-scrollbar-thumb {

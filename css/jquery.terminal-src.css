@@ -968,8 +968,8 @@ terminal .terminal-output > div {
 .terminal::-webkit-scrollbar {
     width: 10px;
     height: 10px;
-    width: calc(var(--size) * 10px);
-    height: calc(var(--size) * 10px);
+    width: calc(var(--size, 1) * 10px);
+    height: calc(var(--size, 1) * 10px);
     background: #212020;
 }
 .terminal::-webkit-scrollbar-thumb {
