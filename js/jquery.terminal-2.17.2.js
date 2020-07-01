@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 01 Jul 2020 06:29:14 +0000
+ * Date: Wed, 01 Jul 2020 07:19:55 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4436,7 +4436,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 01 Jul 2020 06:29:14 +0000',
+        date: 'Wed, 01 Jul 2020 07:19:55 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10105,49 +10105,68 @@
                     }
                     self.on('contextmenu.terminal mousedown.terminal', function(e) {
                         if (get_selected_html() === '' && is_context_event(e)) {
-                            if (!$(e.target).is('img,value,audio,object,canvas,a')) {
-                                if (!self.enabled()) {
-                                    self.enable();
-                                }
-                                var offset = command_line.offset();
-                                $clip.css({
-                                    left: e.pageX - offset.left - 20,
-                                    top: e.pageY - offset.top - 20,
-                                    width: '5em',
-                                    height: '4em'
-                                });
-                                if (!$clip.is(':focus')) {
-                                    $clip.focus();
-                                }
-                                self.stopTime('textarea');
-                                self.oneTime(100, 'textarea', function() {
-                                    var props = {
-                                        left: '',
-                                        top: '',
-                                        width: '',
-                                        height: ''
-                                    };
-                                    if (!is_css_variables_supported) {
-                                        var in_line = self.find('.cmd .cmd-cursor-line')
-                                            .prevUntil('.cmd-prompt').length;
-                                        props.top = in_line * 14 + 'px';
-                                    }
-                                    $clip.css(props);
-                                });
-                                self.stopTime('selection');
-                                self.everyTime(20, 'selection', function() {
-                                    if ($clip[0].selection !== $clip[0].value) {
-                                        if (get_textarea_selection($clip[0])) {
-                                            clear_textarea_selection($clip[0]);
-                                            select(
-                                                self.find('.terminal-output')[0],
-                                                self.find('.cmd div:last-of-type')[0]
-                                            );
-                                            self.stopTime('selection');
-                                        }
-                                    }
-                                });
+                            var $target = $(e.target);
+                            // click on terminal directly (on padding) will allow
+                            // to pick viewSource that is not available on textarea
+                            if ($target.is('img,value,audio,object,canvas,a') ||
+                                $target.is(self)) {
+                                return;
                             }
+                            if (!self.enabled()) {
+                                self.enable();
+                            }
+                            var cmd_rect = command_line[0].getBoundingClientRect();
+                            var top = e.pageY - cmd_rect.top - 20;
+                            var left = e.pageX - cmd_rect.left - 20;
+                            var height = 4 * 14;
+                            var width = 5 * 14;
+                            var rect = self[0].getBoundingClientRect();
+                            // fix jumping when click near bottom or left edge #592
+                            var diff_h = (top + cmd_rect.top + height) - rect.height;
+                            var diff_w = (left + cmd_rect.left + width) - rect.width;
+                            if (diff_h > 0) {
+                                height -= diff_h;
+                            }
+                            if (diff_w > 0) {
+                                width -= diff_w;
+                            }
+                            $clip.css({
+                                left: left,
+                                top: top,
+                                width: width,
+                                height: height
+                            });
+                            if (!$clip.is(':focus')) {
+                                $clip.focus();
+                            }
+                            self.stopTime('textarea');
+                            self.oneTime(100, 'textarea', function() {
+                                var props = {
+                                    left: '',
+                                    top: '',
+                                    width: '',
+                                    height: ''
+                                };
+                                if (!is_css_variables_supported) {
+                                    var in_line = self.find('.cmd .cmd-cursor-line')
+                                        .prevUntil('.cmd-prompt').length;
+                                    props.top = in_line * 14 + 'px';
+                                }
+                                $clip.css(props);
+                            });
+                            self.stopTime('selection');
+                            self.everyTime(20, 'selection', function() {
+                                if ($clip[0].selection !== $clip[0].value) {
+                                    if (get_textarea_selection($clip[0])) {
+                                        clear_textarea_selection($clip[0]);
+                                        select(
+                                            self.find('.terminal-output')[0],
+                                            self.find('.cmd div:last-of-type')[0]
+                                        );
+                                        self.stopTime('selection');
+                                    }
+                                }
+                            });
                         }
                     });
                 })();
