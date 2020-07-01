@@ -1,3 +1,8 @@
+## 2.17.4
+### Bugfix
+* fix jumping on right click near bottom or left edge when terminal is not full screen
+* fix double event fire on right mouse click
+
 ## 2.17.3
 ### Bugfix
 * fix for font-family wildcard css rule
