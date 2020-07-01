@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 01 Jul 2020 10:34:53 +0000
+ * Date: Wed, 01 Jul 2020 10:42:24 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4436,7 +4436,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.17.4',
-        date: 'Wed, 01 Jul 2020 10:34:53 +0000',
+        date: 'Wed, 01 Jul 2020 10:42:24 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10125,13 +10125,15 @@
                             var height = 4 * 14;
                             var width = 5 * 14;
                             var rect = self[0].getBoundingClientRect();
+                            // we need width without scrollbar
+                            var content_width = fill.outerWidth();
                             // fix jumping when click near bottom or left edge #592
                             var diff_h = (top + cmd_rect.top + height);
                             diff_h = diff_h - rect.height - rect.top;
                             var diff_w = (left + cmd_rect.left + width);
                             // in Chrome scrollbar is added even when width
                             // of textarea is smaller, adding 1px solved the issue
-                            diff_w = 1 + diff_w - rect.width - rect.left;
+                            diff_w = diff_w - content_width - rect.left;
                             if (diff_h > 0) {
                                 height -= Math.ceil(diff_h);
                             }

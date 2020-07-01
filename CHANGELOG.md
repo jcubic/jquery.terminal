@@ -1,6 +1,6 @@
 ## 2.17.4
 ### Bugfix
-* fix jumping on right click near bottom or left edge when terminal is not full screen
+* fix jumping on right click near bottom and/or right edge when terminal is not full screen
 * fix double event fire on right mouse click
 
 ## 2.17.3
@@ -14,7 +14,7 @@
 * fix detecting iPad iOS 13as mobile [#589](https://github.com/jcubic/jquery.terminal/issues/589)
 * fix return false from onPaste to disable insert from clipboard
 * fix paste in command mode of less plugin [#581](https://github.com/jcubic/jquery.terminal/issues/581)
-* fix jumping when click near bottom or left edge [#592](https://github.com/jcubic/jquery.terminal/issues/592)
+* fix jumping when click near bottom and/or right edge [#592](https://github.com/jcubic/jquery.terminal/issues/592)
 
 ## 2.17.2
 ### Bugfix
