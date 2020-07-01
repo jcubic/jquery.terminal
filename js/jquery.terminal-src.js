@@ -9815,7 +9815,7 @@
                 return URL.createObjectURL(blob);
             }
             function echo(object, ignoreEvents) {
-                if (!ignoreEvents && is_function(settings.onPaste)) {
+                if (!ignoreEvents) {
                     var event = {
                         target: self
                     };
@@ -9833,7 +9833,7 @@
                         } else {
                             echo(ret, true);
                         }
-                    } else {
+                    } else if (ret !== false) {
                         echo(event.image || event.text, true);
                     }
                 } else if (object instanceof Blob) {

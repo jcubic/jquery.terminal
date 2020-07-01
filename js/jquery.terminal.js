@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 30 Jun 2020 09:04:45 +0000
+ * Date: Wed, 01 Jul 2020 06:29:14 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4436,7 +4436,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 30 Jun 2020 09:04:45 +0000',
+        date: 'Wed, 01 Jul 2020 06:29:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9815,7 +9815,7 @@
                 return URL.createObjectURL(blob);
             }
             function echo(object, ignoreEvents) {
-                if (!ignoreEvents && is_function(settings.onPaste)) {
+                if (!ignoreEvents) {
                     var event = {
                         target: self
                     };
@@ -9833,7 +9833,7 @@
                         } else {
                             echo(ret, true);
                         }
-                    } else {
+                    } else if (ret !== false) {
                         echo(event.image || event.text, true);
                     }
                 } else if (object instanceof Blob) {

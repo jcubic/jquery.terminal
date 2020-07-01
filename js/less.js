@@ -404,6 +404,11 @@
                 scroll(delta, Math.round(offset / 14));
                 return false;
             },
+            onPaste: function() {
+                if (term.get_prompt() !== '/') {
+                    return false;
+                }
+            },
             mousewheel: function(event, delta) {
                 return scroll(delta, scroll_by);
             },
