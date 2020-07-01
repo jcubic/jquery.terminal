@@ -909,6 +909,8 @@ describe('Terminal utils', function() {
             var js = "javascript".split('').map(function(chr) {
                 return '&#' + chr.charCodeAt(0) + ';';
             }).join('');
+            var warn = console.warn;
+            console.warn = jest.fn();
             var tests = [
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
@@ -935,6 +937,8 @@ describe('Terminal utils', function() {
                 var output = $.terminal.format(spec[0], spec[1]);
                 expect(output).toEqual(spec[2]);
             });
+            expect(count(console.warn)).toEqual(3);
+            console.warn = warn;
         });
         it('should add nofollow', function() {
             var input = '[[!;;]https://terminal.jcubic.pl]';
@@ -2184,7 +2188,7 @@ describe('Terminal utils', function() {
         });
         it('should render broken image', async function() {
             term.less('xxx\n[[@;;;;error.jpg]]\nxxx');
-            await delay(100);
+            await delay(300);
             var err = term.find('.terminal-broken-image');
             expect(err.length).toEqual(1);
             expect(err.text()).toEqual(nbsp('[BROKEN IMAGE]'));
@@ -5622,8 +5626,12 @@ describe('Terminal plugin', function() {
                 });
                 it('should not execute methods', function() {
                     spy(term, 'clear');
+                    var warn = console.warn;
+                    console.warn = jest.fn();
                     term.echo('bar');
                     term.echo('[[ terminal::clear() ]]', { invokeMethods: false });
+                    expect(count(console.warn)).toEqual(1);
+                    console.warn = warn;
                     term.echo('[[ foo ]]', { invokeMethods: false });
                     expect(interpreter.foo).toHaveBeenCalled();
                     expect(a0(term.find('.terminal-output').text())).toEqual('bar');

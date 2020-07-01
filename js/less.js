@@ -51,7 +51,7 @@
         factory(root.jQuery);
     }
 })(function($) {
-    var img_split_re = /(\[\[(?:[^;]*@[^;]*);[^;]*;[^\]]*\]\])/;
+    var img_split_re = /(\[\[(?:[^;]*@[^;]*);[^;]*;[^\]]*\]\s*\])/;
     var img_re = /\[\[(?:[^;]*@[^;]*);[^;]*;[^;]*;[^;]*;([^;]*)\] ?\]/;
     // -------------------------------------------------------------------------
     function find(arr, fn) {
@@ -308,7 +308,9 @@
                         });
                     }
                 } else {
-                    result = result.concat(part.split('\n'));
+                    if (part !== '\n') {
+                        result = result.concat(part.split('\n'));
+                    }
                     recur();
                 }
             })();
@@ -401,6 +403,11 @@
                 var offset = Math.abs(delta);
                 scroll(delta, Math.round(offset / 14));
                 return false;
+            },
+            onPaste: function() {
+                if (term.get_prompt() !== '/') {
+                    return false;
+                }
             },
             mousewheel: function(event, delta) {
                 return scroll(delta, scroll_by);

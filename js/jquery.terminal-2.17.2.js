@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.17.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 11 Jun 2020 19:20:14 +0000
+ * Date: Wed, 01 Jul 2020 07:19:55 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1201,6 +1201,11 @@
         if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
             check = true;
         }
+        // detect iPad 13
+        // ref: https://stackoverflow.com/a/57924983/387194s
+        if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+            return true;
+        }
         return check;
     })(navigator.userAgent || navigator.vendor || window.opera);
 
@@ -1644,15 +1649,23 @@
                     reset: function() {
                         clearTimeout(timer);
                         timer = setTimeout(function() {
-                            $node.css('top', '');
+                            $node.css({
+                                top: '',
+                                bottom: ''
+                            });
                         }, 400);
                     },
                     focus: function() {
-                        $node.css('top', 0);
+                        css($node[0], {
+                            top: 'calc(var(--terminal-scroll, 0) * 1px)'
+                        });
                         clip.reset();
                     },
                     blur: function() {
-                        $node.css('top', '100%').blur();
+                        $node.css({
+                            top: '100%',
+                            bottom: 0
+                        }).blur();
                         // just in case of Webkit bug
                         window.getSelection().removeAllRanges();
                         clip.reset();
@@ -3046,6 +3059,7 @@
                     // fix for Chrome bug width selection
                     // https://bugs.chromium.org/p/chromium/issues/detail?id=1087787
                     var spans = prompt_node.find('> span span');
+                    clip.$node.attr('data-cmd-prompt', prompt_node.text());
                     if (is_ch_unit_supported) {
                         prompt_node.hide();
                         spans.each(function() {
@@ -4421,8 +4435,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.17.2',
-        date: 'Thu, 11 Jun 2020 19:20:14 +0000',
+        version: 'DEV',
+        date: 'Wed, 01 Jul 2020 07:19:55 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5521,6 +5535,7 @@
                     } else {
                         text = safe(text);
                         text = text.replace(/\\\]/, '&#93;');
+                        var data = text;
                         var extra = extra_css(text, settings);
                         var prefix;
                         if (extra.length) {
@@ -5529,7 +5544,7 @@
                         } else {
                             prefix = '<span';
                         }
-                        return prefix + ' data-text="' + text + '">' + text + '</span>';
+                        return prefix + ' data-text="' + data + '">' + text + '</span>';
                     }
                 }).join('');
                 return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');
@@ -7737,6 +7752,7 @@
             },
             'CTRL+L': function() {
                 self.clear();
+                return false;
             },
             'TAB': function(e, orignal) {
                 // TODO: move this to cmd plugin
@@ -8886,11 +8902,14 @@
                     fire_event('onFlush');
                     var offset = self.find('.cmd').offset();
                     var self_offset = self.offset();
-                    css(self[0], {
-                        '--terminal-x': offset.left - self_offset.left,
-                        '--terminal-y': offset.top - self_offset.top
-                    });
-
+                    setTimeout(function() {
+                        css(self[0], {
+                            '--terminal-height': self.height(),
+                            '--terminal-x': offset.left - self_offset.left,
+                            '--terminal-y': offset.top - self_offset.top,
+                            '--terminal-scroll': self.prop('scrollTop')
+                        });
+                    }, 0);
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
                     }
@@ -9796,7 +9815,7 @@
                 return URL.createObjectURL(blob);
             }
             function echo(object, ignoreEvents) {
-                if (!ignoreEvents && is_function(settings.onPaste)) {
+                if (!ignoreEvents) {
                     var event = {
                         target: self
                     };
@@ -9814,7 +9833,7 @@
                         } else {
                             echo(ret, true);
                         }
-                    } else {
+                    } else if (ret !== false) {
                         echo(event.image || event.text, true);
                     }
                 } else if (object instanceof Blob) {
@@ -10086,49 +10105,68 @@
                     }
                     self.on('contextmenu.terminal mousedown.terminal', function(e) {
                         if (get_selected_html() === '' && is_context_event(e)) {
-                            if (!$(e.target).is('img,value,audio,object,canvas,a')) {
-                                if (!self.enabled()) {
-                                    self.enable();
-                                }
-                                var offset = command_line.offset();
-                                $clip.css({
-                                    left: e.pageX - offset.left - 20,
-                                    top: e.pageY - offset.top - 20,
-                                    width: '5em',
-                                    height: '4em'
-                                });
-                                if (!$clip.is(':focus')) {
-                                    $clip.focus();
-                                }
-                                self.stopTime('textarea');
-                                self.oneTime(100, 'textarea', function() {
-                                    var props = {
-                                        left: '',
-                                        top: '',
-                                        width: '',
-                                        height: ''
-                                    };
-                                    if (!is_css_variables_supported) {
-                                        var in_line = self.find('.cmd .cmd-cursor-line')
-                                            .prevUntil('.cmd-prompt').length;
-                                        props.top = in_line * 14 + 'px';
-                                    }
-                                    $clip.css(props);
-                                });
-                                self.stopTime('selection');
-                                self.everyTime(20, 'selection', function() {
-                                    if ($clip[0].selection !== $clip[0].value) {
-                                        if (get_textarea_selection($clip[0])) {
-                                            clear_textarea_selection($clip[0]);
-                                            select(
-                                                self.find('.terminal-output')[0],
-                                                self.find('.cmd div:last-of-type')[0]
-                                            );
-                                            self.stopTime('selection');
-                                        }
-                                    }
-                                });
+                            var $target = $(e.target);
+                            // click on terminal directly (on padding) will allow
+                            // to pick viewSource that is not available on textarea
+                            if ($target.is('img,value,audio,object,canvas,a') ||
+                                $target.is(self)) {
+                                return;
                             }
+                            if (!self.enabled()) {
+                                self.enable();
+                            }
+                            var cmd_rect = command_line[0].getBoundingClientRect();
+                            var top = e.pageY - cmd_rect.top - 20;
+                            var left = e.pageX - cmd_rect.left - 20;
+                            var height = 4 * 14;
+                            var width = 5 * 14;
+                            var rect = self[0].getBoundingClientRect();
+                            // fix jumping when click near bottom or left edge #592
+                            var diff_h = (top + cmd_rect.top + height) - rect.height;
+                            var diff_w = (left + cmd_rect.left + width) - rect.width;
+                            if (diff_h > 0) {
+                                height -= diff_h;
+                            }
+                            if (diff_w > 0) {
+                                width -= diff_w;
+                            }
+                            $clip.css({
+                                left: left,
+                                top: top,
+                                width: width,
+                                height: height
+                            });
+                            if (!$clip.is(':focus')) {
+                                $clip.focus();
+                            }
+                            self.stopTime('textarea');
+                            self.oneTime(100, 'textarea', function() {
+                                var props = {
+                                    left: '',
+                                    top: '',
+                                    width: '',
+                                    height: ''
+                                };
+                                if (!is_css_variables_supported) {
+                                    var in_line = self.find('.cmd .cmd-cursor-line')
+                                        .prevUntil('.cmd-prompt').length;
+                                    props.top = in_line * 14 + 'px';
+                                }
+                                $clip.css(props);
+                            });
+                            self.stopTime('selection');
+                            self.everyTime(20, 'selection', function() {
+                                if ($clip[0].selection !== $clip[0].value) {
+                                    if (get_textarea_selection($clip[0])) {
+                                        clear_textarea_selection($clip[0]);
+                                        select(
+                                            self.find('.terminal-output')[0],
+                                            self.find('.cmd div:last-of-type')[0]
+                                        );
+                                        self.stopTime('selection');
+                                    }
+                                }
+                            });
                         }
                     });
                 })();
@@ -10418,6 +10456,9 @@
                     } else if (is_function(settings.touchscroll)) {
                         ret = settings.touchscroll(event, delta, self);
                     }
+                    css(self[0], {
+                        '--terminal-scroll': self.prop('scrollTop')
+                    });
                     if (ret === true) {
                         return;
                     }

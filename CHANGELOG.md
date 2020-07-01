@@ -1,3 +1,16 @@
+## 2.17.3
+### Bugfix
+* fix for font-family wildcard css rule
+* fix cursor on scrollbar
+* fix broken html with wide characters without formatting
+* fix jumping to address bar on CTRL+L [#587](https://github.com/jcubic/jquery.terminal/issues/587)
+* fix issue in less when only one image get rendered [#583](https://github.com/jcubic/jquery.terminal/issues/583)
+* fix jumping on focus on mobile when terminal content scrolled down [#572](https://github.com/jcubic/jquery.terminal/issues/572)
+* fix detecting iPad iOS 13as mobile [#589](https://github.com/jcubic/jquery.terminal/issues/589)
+* fix return false from onPaste to disable insert from clipboard
+* fix paste in command mode of less plugin [#581](https://github.com/jcubic/jquery.terminal/issues/581)
+* fix jumping when click near bottom or left edge [#592](https://github.com/jcubic/jquery.terminal/issues/592)
+
 ## 2.17.2
 ### Bugfix
 * fix cursor on strings in prism
