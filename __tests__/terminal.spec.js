@@ -1163,6 +1163,10 @@ describe('Terminal utils', function() {
                 expect(line).toEqual(array[i]);
             });
         });
+        it('should keep last bracket #597', function() {
+            var str = 'foo bar]';
+            expect($.terminal.split_equal(str, 1000)).toEqual([str]);
+        });
         it('split emoji encoded from apply_formatters', function() {
             var str = 'ZZZZZZz\n\u263a\ufe0foo\tbar\t\t\u263a\ufe0fa\u0038\ufe0f\u20e3\nfoo\t\tb\t\tbaz\nfoobar\tba\t\tbr';
             var formatters = $.terminal.defaults.formatters.slice();

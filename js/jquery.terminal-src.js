@@ -4654,7 +4654,7 @@
                 if (i === string.length - 1 && !last) {
                     last = true;
                 } else {
-                    last = !!substring.match(/^.]$/);
+                    last = formatting && !!substring.match(/^.]$/);
                 }
                 return last;
             }
