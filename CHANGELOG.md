@@ -1,3 +1,8 @@
+## 2.17.5
+### Bugfix
+* fix eating last bracket from split_equal [#597](https://github.com/jcubic/jquery.terminal/issues/597)
+* fix false positive recursive echo error [#593](https://github.com/jcubic/jquery.terminal/issues/593)
+
 ## 2.17.4
 ### Bugfix
 * fix jumping on right click near bottom and/or right edge when terminal is not full screen
