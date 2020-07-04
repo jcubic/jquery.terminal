@@ -1,3 +1,7 @@
+## 2.17.6
+### Bugfix
+* fix adding duplicated prism formatters [#573](https://github.com/jcubic/jquery.terminal/issues/573)
+
 ## 2.17.5
 ### Bugfix
 * fix eating last bracket from split_equal [#597](https://github.com/jcubic/jquery.terminal/issues/597)

@@ -182,10 +182,18 @@
         // we create function with name so we will see it in developer tools
         // we bind jQuery as argument so it will work when jQuery with noConflict
         // is added after this script
-        var fn = new Function('$', 'return function syntax_' + language +
+        var name = 'syntax_' + language;
+        var fn = new Function('$', 'return function ' + name +
                               '(string) { return $.terminal.prism("' + language +
                               '", string); }')($);
         fn.__no_warn__ = true;
+        var formatters = $.terminal.defaults.formatters;
+        $.terminal.defaults.formatters = formatters.filter(function(formatter) {
+            if (typeof formatter !== 'function') {
+                return true;
+            }
+            return formatter.name !== name;
+        });
         // disable warning because it may create nested formatting
         $.terminal.new_formatter(fn);
     };
