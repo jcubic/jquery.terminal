@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 04 Jul 2020 11:21:16 +0000
+ * Date: Sat, 04 Jul 2020 13:18:22 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4436,7 +4436,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 04 Jul 2020 11:21:16 +0000',
+        date: 'Sat, 04 Jul 2020 13:18:22 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5788,6 +5788,7 @@
             var settings = $.extend({
                 invokeMethods: false
             }, options);
+            var deferred = new $.Deferred();
             try {
                 change_hash = false;
                 var m = string.match(extended_command_re);
@@ -5795,30 +5796,38 @@
                     if (!settings.invokeMethods) {
                         warn('To invoke terminal or cmd methods you need to enable ' +
                              'invokeMethods option');
-                        return;
-                    }
-                    string = m[1];
-                    var obj = m[2] === 'terminal' ? term : term.cmd();
-                    var fn = m[3];
-                    try {
-                        var args = eval('[' + m[4] + ']');
-                        if (!obj[fn]) {
-                            term.error('Unknow function ' + fn);
-                        } else {
-                            obj[fn].apply(term, args);
+                        deferred.reject();
+                    } else {
+                        string = m[1];
+                        var obj = m[2] === 'terminal' ? term : term.cmd();
+                        var fn = m[3];
+                        try {
+                            var args = eval('[' + m[4] + ']');
+                            if (!obj[fn]) {
+                                term.error('Unknow function ' + fn);
+                            } else {
+                                var ret = obj[fn].apply(term, args);
+                                if (ret && ret.then) {
+                                    return ret;
+                                }
+                            }
+                            deferred.resolve();
+                        } catch (e) {
+                            term.error('Invalid invocation in ' +
+                                       $.terminal.escape_brackets(string));
+                            deferred.reject();
                         }
-                    } catch (e) {
-                        term.error('Invalid invocation in ' +
-                                   $.terminal.escape_brackets(string));
                     }
                 } else {
-                    term.exec(string, true).done(function() {
+                    return term.exec(string, true).done(function() {
                         change_hash = true;
                     });
                 }
             } catch (e) {
                 // error is process in exec
+                deferred.reject();
             }
+            return deferred.promise();
         },
         // ---------------------------------------------------------------------
         // :: ES6 iterator for a given string that handle emoji and formatting
@@ -7123,6 +7132,8 @@
                                             prev_exec_cmd = trim;
                                             $.terminal.extended_command(self, string, {
                                                 invokeMethods: line_settings.invokeMethods
+                                            }).then(function() {
+                                                prev_exec_cmd = '';
                                             });
                                         }
                                     }

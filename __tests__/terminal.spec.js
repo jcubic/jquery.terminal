@@ -5619,7 +5619,7 @@ describe('Terminal plugin', function() {
                     expect(term.cmd().prompt()).toEqual('>>>');
                 });
                 it('should not execute command by typing', function() {
-                    term.exec('[[ foo ]]');
+                    enter(term, '[[ foo ]]');
                     expect(interpreter.foo).not.toHaveBeenCalled();
                     expect(a0(term.find('.terminal-command').text())).toEqual('> [[ foo ]]');
                 });
@@ -5675,14 +5675,15 @@ describe('Terminal plugin', function() {
                     var term = $('<div/>').terminal(interpreter, {
                         greetings: false
                     });
+                    // recursive call guard execute two times before showing error
                     spy(interpreter, 'foo');
-                    term.exec('foo');
-                    expect(count(interpreter.foo)).toEqual(1);
+                    enter(term, 'foo');
+                    expect(count(interpreter.foo)).toEqual(2);
                     expect(term.find('.terminal-error').length).toEqual(1);
                     expect(a0(term.find('.terminal-error').text()))
                         .toEqual($.terminal.defaults.strings.recursiveLoop);
                     term.echo('[[ foo ]]');
-                    expect(count(interpreter.foo)).toEqual(2);
+                    expect(count(interpreter.foo)).toEqual(3);
                     expect(term.find('.terminal-error').length).toEqual(2);
                     var output = term.find('.terminal-error').map(function() {
                         return a0($(this).text());
@@ -5691,6 +5692,40 @@ describe('Terminal plugin', function() {
                         $.terminal.defaults.strings.recursiveLoop,
                         $.terminal.defaults.strings.recursiveLoop
                     ]);
+                });
+                it('should not show recursvie error on two exec calls', async function() {
+                    // bug #593
+                    var interpreter = {
+                        foo: function() {
+                            this.echo('[[ bar ]]');
+                        },
+                        bar: function() {
+                            this.echo('hello');
+                        },
+                        exec: async function() {
+                            return '[[ terminal::clear() ]]';
+                        }
+                    };
+                    var term = $('<div/>').terminal(interpreter, {
+                        greetings: false,
+                        invokeMethods: true
+                    });
+                    spy(interpreter, 'bar');
+                    enter(term, 'foo');
+                    // even if command is sync the extended command reset is async
+                    // but it should not matter if user type the command
+                    await delay(50);
+                    enter(term, 'foo');
+                    await delay(50);
+                    expect(count(interpreter.bar)).toEqual(2);
+                    expect(term.find('.terminal-error').length).toEqual(0);
+                    spy(term, 'clear');
+                    enter(term, 'exec');
+                    await delay(50);
+                    enter(term, 'exec');
+                    await delay(50);
+                    expect(count(term.clear)).toEqual(2);
+                    expect(term.find('.terminal-error').length).toEqual(0);
                 });
             });
         });

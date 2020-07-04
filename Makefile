@@ -84,7 +84,7 @@ emoji:
 	./scripts/mkemoji $(VERSION) > css/emoji.css
 
 test:
-	$(JEST) --coverage --testMatch '**/__tests__/*.spec.js'
+	$(JEST) --coverage --no-cache --testMatch '**/__tests__/*.spec.js'
 
 test-accept-snapshots:
 	$(JEST) --coverage --updateSnapshot --testMatch '**/__tests__/*.spec.js'
