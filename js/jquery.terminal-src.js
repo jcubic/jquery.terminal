@@ -1230,7 +1230,11 @@
     // :: jQuery css method from 3.4 support them by default
     // -----------------------------------------------------------------------
     function css(node, obj, value) {
-        if ($.isPlainObject(obj)) {
+        if (node instanceof $.fn.init) {
+            node.each(function() {
+                css(this, obj, value);
+            });
+        } else if ($.isPlainObject(obj)) {
             Object.keys(obj).forEach(function(key) {
                 node.style.setProperty(key, obj[key]);
             });
@@ -9772,6 +9776,7 @@
         function focus_terminal() {
             if (old_enabled) {
                 self.focus();
+                self.scroll_to_bottom();
             }
         }
         // -------------------------------------------------------------------------------
@@ -10058,19 +10063,7 @@
                             self.set_position(0);
                         }
                         if (!textarea.is(':focus')) {
-                            var offset = command_line.offset();
-                            var self_offset = self.offset();
-                            textarea.css({
-                                left: self_offset.left - offset.left,
-                                top: Math.max(self_offset.top - offset.top, 0)
-                            }).focus();
-                            self.stopTime('focus');
-                            self.oneTime(10, 'focus', function() {
-                                textarea.css({
-                                    left: '',
-                                    top: ''
-                                });
-                            });
+                            textarea.focus();
                         }
                         reset();
                     }
@@ -10094,6 +10087,7 @@
                                 if (!frozen) {
                                     if (!enabled) {
                                         self.focus();
+                                        self.scroll_to_bottom();
                                     } else {
                                         var timeout = settings.clickTimeout;
                                         self.oneTime(timeout, name, click);
@@ -10193,6 +10187,20 @@
                         }
                     });
                 })();
+                self.on('scroll', function() {
+                    var $textarea = self.find('textarea');
+                    var rect = self[0].getBoundingClientRect();
+                    var height = self[0].scrollHeight;
+                    var scrollTop = self.scrollTop();
+                    var diff = height - (scrollTop + rect.height);
+                    // if scrolled to bottom top need to be aligned with cursor line
+                    // done by CSS file using css variables
+                    if (diff === 0) {
+                        $textarea.css('top', '');
+                    } else {
+                        $textarea.css('top', -diff);
+                    }
+                });
             }
             self.on('click', 'a', function(e) {
                 var $this = $(this);

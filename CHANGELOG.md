@@ -2,6 +2,8 @@
 ### Bugfix
 * fix adding duplicated prism formatters [#573](https://github.com/jcubic/jquery.terminal/issues/573)
 * fix inserting emoji using Windows 10 emoji picker
+* fix position of textarea in multi line command (probably will affect IME or Emoji picker)
+* make jump to bottom on click only when terminal is not enabled [#596](https://github.com/jcubic/jquery.terminal/issues/596)
 
 ## 2.17.5
 ### Bugfix
