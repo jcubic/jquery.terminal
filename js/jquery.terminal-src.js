@@ -1616,8 +1616,9 @@
         wrapper.append('<span class="cmd-prompt"></span>');
         wrapper.append('<div class="cmd-cursor-line">' +
                        '<span></span>' +
-                       '<span class="cmd-cursor"><span>' +
-                       '<span>&nbsp;</span></span></span>' +
+                       '<span class="cmd-cursor">' +
+                       '<span data-text class="end"><span>&nbsp;</span></span>' +
+                       '</span>' +
                        '<span></span>' +
                        '</div>');
         var cursor_line = wrapper.find('.cmd-cursor-line');

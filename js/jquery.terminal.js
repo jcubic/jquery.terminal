@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 06 Jul 2020 21:05:26 +0000
+ * Date: Mon, 06 Jul 2020 23:27:42 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1616,8 +1616,9 @@
         wrapper.append('<span class="cmd-prompt"></span>');
         wrapper.append('<div class="cmd-cursor-line">' +
                        '<span></span>' +
-                       '<span class="cmd-cursor"><span>' +
-                       '<span>&nbsp;</span></span></span>' +
+                       '<span class="cmd-cursor">' +
+                       '<span data-text class="end"><span>&nbsp;<span></span>' +
+                       '</span>' +
                        '<span></span>' +
                        '</div>');
         var cursor_line = wrapper.find('.cmd-cursor-line');
@@ -4442,7 +4443,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 06 Jul 2020 21:05:26 +0000',
+        date: 'Mon, 06 Jul 2020 23:27:42 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
