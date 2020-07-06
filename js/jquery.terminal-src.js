@@ -3564,8 +3564,9 @@
                 // event in input with e.fake == true
                 return;
             }
-            // Meta is special keydown triggered by Emoji picker on Windows 10
-            if (!e.fake && e.key.toLowerCase() !== 'meta') {
+            // meta and os are special keydown triggered by Emoji picker on Windows 10
+            // meta is in Google Chrome is is in Firefox
+            if (!e.fake && ['meta', 'os'].indexOf(e.key.toLowerCase()) === -1) {
                 no_keydown = false;
             }
             no_keypress = true;

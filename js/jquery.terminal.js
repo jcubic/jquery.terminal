@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 06 Jul 2020 13:08:04 +0000
+ * Date: Mon, 06 Jul 2020 13:30:44 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3564,8 +3564,9 @@
                 // event in input with e.fake == true
                 return;
             }
-            // Meta is special keydown triggered by Emoji picker on Windows 10
-            if (!e.fake && e.key.toLowerCase() !== 'meta') {
+            // meta and os are special keydown triggered by Emoji picker on Windows 10
+            // meta is in Google Chrome is is in Firefox
+            if (!e.fake && ['meta', 'os'].indexOf(e.key.toLowerCase()) === -1) {
                 no_keydown = false;
             }
             no_keypress = true;
@@ -4437,7 +4438,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 06 Jul 2020 13:08:04 +0000',
+        date: 'Mon, 06 Jul 2020 13:30:44 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
