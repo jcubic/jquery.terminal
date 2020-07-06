@@ -1,6 +1,7 @@
 ## 2.17.6
 ### Bugfix
 * fix adding duplicated prism formatters [#573](https://github.com/jcubic/jquery.terminal/issues/573)
+* fix inserting emoji using Windows 10 emoji picker
 
 ## 2.17.5
 ### Bugfix

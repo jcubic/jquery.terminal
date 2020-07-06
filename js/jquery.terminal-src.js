@@ -3564,7 +3564,8 @@
                 // event in input with e.fake == true
                 return;
             }
-            if (!e.fake) {
+            // Meta is special keydown triggered by Emoji picker on Windows 10
+            if (!e.fake && e.key.toLowerCase() !== 'meta') {
                 no_keydown = false;
             }
             no_keypress = true;
