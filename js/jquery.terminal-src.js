@@ -3366,7 +3366,7 @@
                     } else {
                         new_formatted_pos = n;
                     }
-                    if (text(string).length === length(command, true)) {
+                    if (len === command_len) {
                         formatted_position = new_formatted_pos;
                         return self.position(new_formatted_pos);
                     }
