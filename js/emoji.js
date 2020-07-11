@@ -49,7 +49,7 @@
         // istanbul ignore next
         factory(root.jQuery, root.Prism);
     }
-})(function($) {
+})(function($, undefined) {
     // https://2ality.com/2013/09/javascript-unicode.html
     function toUTF16(codePoint) {
         var TEN_BITS = parseInt('1111111111', 2);
@@ -69,6 +69,40 @@
         var tailSurrogate = 0xDC00 + (codePoint & TEN_BITS);
 
         return u(leadSurrogate) + u(tailSurrogate);
+    }
+    // compare two arrays of numbers
+    function compare_nums(a, b) {
+        for (var i = 0; i < a.length; ++i) {
+            if (a[1] === undefined) {
+                return 1;
+            }
+            if (b[i] === undefined) {
+                return -1;
+            }
+            if (a[i] > b[i]) {
+                return -1;
+            } else if (a[i] < b[i]) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    function make_formatter(unified, short_name) {
+        var unicode = unified.split('-').map(function(u) {
+            var x = parseInt(u, 16);
+            if (x > 0xFFFF) {
+                return toUTF16(x);
+            }
+            return '\\u' + u;
+        }).join('');
+        var re = new RegExp('(' + unicode + ')', 'g');
+        return [re, '[[;;;emoji ' + short_name + ']⻇]'];
+    }
+    // create array of numbers out of unified field
+    function parse_unified(str) {
+        return str.split('-').map(function(num) {
+            return parseInt(num, 16);
+        });
     }
     // emoji_data param need to be JavaScript object from
     // https://unpkg.com/emoji-datasource-twitter/emoji.json
@@ -99,30 +133,30 @@
                 '[[;;;emoji ' + text[name] + ']⻇]'
             ]);
         });
+        for (var i = 0; i < emoji_data.length; ++i) {
+            var emoji = emoji_data[i];
+            emoji.sort = parse_unified(emoji.unified);
+        }
+        emoji_data = emoji_data.sort(function(a, b) {
+            return compare_nums(a.sort, b.sort);
+        });
+        var formatters = [];
+        emoji_data.forEach(function(emoji) {
+            formatters.push(make_formatter(emoji.unified, emoji.short_name));
+            if (emoji.skin_variations) {
+                var variations = Object.keys(emoji.skin_variations).map(function(key, i) {
+                    var unified = emoji.skin_variations[key].unified;
+                    var short_name = emoji.short_name + '-var-' + i;
+                    return make_formatter(unified, short_name);
+                });
+                formatters = formatters.concat(variations);
+            }
+        });
         // this is unicode emoji handling
         $.terminal.defaults.formatters.push(function(string, options) {
-            var result = [string, options.position];
-            emoji_data.forEach(function(emoji) {
-                if (emoji.unified) {
-                    var unicode = emoji.unified.split('-').map(function(u) {
-                        var x = parseInt(u, 16);
-                        if (x > 0xFFFF) {
-                            return toUTF16(x);
-                        }
-                        return '\\u' + u;
-                    }).join('');
-                    var re = new RegExp('(' + unicode + ')', 'g');
-                    if (re.test(result[0])) {
-                        result = $.terminal.tracking_replace(
-                            result[0],
-                            re,
-                            '[[;;;emoji ' + emoji.short_name + ']$1]',
-                            result[1]
-                        );
-                    }
-                }
-            });
-            return result;
+            return $.terminal.apply_formatters(string, $.extend(options, {
+                formatters: formatters
+            }));
         });
     };
 });

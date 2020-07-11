@@ -12,16 +12,26 @@ if (process.argv.length === 3) {
         ' * ship with version: ' + process.argv[2],
         ' * build: ' + new Date().toUTCString(),
         ' */'].join('\n'));
+    function make_emoji(class_name, url) {
+        var selector = [
+            '.terminal-output .emoji.' + class_name,
+            '.cmd .emoji.' + class_name].join(',');
+        return `${selector}{background-image:url(${url});}`;
+    }
+    var base = 'https://unpkg.com/emoji-datasource-twitter/img/twitter/64/';
     emoji.map(function(emoji) {
-        var url = 'https://unpkg.com/emoji-datasource-twitter/img/' +
-            'twitter/64/' + emoji.image;
+        var url = base + emoji.image;
         // escape special characters in class name
         // https://mathiasbynens.be/notes/css-escapes
         var class_name = emoji.short_name.replace(/\+/g, '\\+')
             .replace(/^(\d)/i, '\\3$1 ');
-        var selector = [
-            '.terminal-output .emoji.' + class_name,
-            '.cmd .emoji.' + class_name].join(',');
-        console.log(`${selector}{background-image:url(${url});}`);
+        console.log(make_emoji(class_name, url));
+        if (emoji.skin_variations) {
+            Object.values(emoji.skin_variations).forEach((emoji, i) => {
+                var url = base + emoji.image;
+                var var_class_name = `${class_name}-var-${i}`;
+                console.log(make_emoji(var_class_name, url));
+            });
+        }
     });
 }

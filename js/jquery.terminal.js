@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 06 Jul 2020 23:27:42 +0000
+ * Date: Sat, 11 Jul 2020 10:07:44 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1617,7 +1617,7 @@
         wrapper.append('<div class="cmd-cursor-line">' +
                        '<span></span>' +
                        '<span class="cmd-cursor">' +
-                       '<span data-text class="end"><span>&nbsp;<span></span>' +
+                       '<span data-text class="end"><span>&nbsp;</span></span>' +
                        '</span>' +
                        '<span></span>' +
                        '</div>');
@@ -4443,7 +4443,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 06 Jul 2020 23:27:42 +0000',
+        date: 'Sat, 11 Jul 2020 10:07:44 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5152,8 +5152,8 @@
                          ' that return [replacement, position] instead');
                 }
             }
-            var formatters = $.terminal.defaults.formatters;
             settings = settings || {};
+            var formatters = settings.formatters || $.terminal.defaults.formatters;
             var i = 0;
             function apply_function_formatter(formatter, input) {
                 var options = $.extend({}, settings, {

@@ -5152,8 +5152,8 @@
                          ' that return [replacement, position] instead');
                 }
             }
-            var formatters = $.terminal.defaults.formatters;
             settings = settings || {};
+            var formatters = settings.formatters || $.terminal.defaults.formatters;
             var i = 0;
             function apply_function_formatter(formatter, input) {
                 var options = $.extend({}, settings, {

@@ -6,6 +6,7 @@
 * make jump to bottom on click only when terminal is not enabled [#596](https://github.com/jcubic/jquery.terminal/issues/596)
 * fix init cmd plugin without terminal
 * fix underscore cut off in Firefox (visible in signature)
+* fix combined emoji characters and skin tone variations [#598](https://github.com/jcubic/jquery.terminal/issues/598)
 
 ## 2.17.5
 ### Bugfix
