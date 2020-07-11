@@ -10128,7 +10128,9 @@
                             }
                             var cmd_offset = command_line.offset();
                             var cmd_rect = command_line[0].getBoundingClientRect();
-                            var top = e.pageY - cmd_offset.top - 20;
+                            var self_offset = self.offset();
+                            var top_limit = self_offset.top - cmd_offset.top;
+                            var top = Math.max(e.pageY - cmd_offset.top - 20, top_limit);
                             var left = e.pageX - cmd_offset.left - 20;
                             var height = 4 * 14;
                             var width = 5 * 14;

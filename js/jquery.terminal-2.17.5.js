@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 11 Jul 2020 15:27:08 +0000
+ * Date: Sat, 11 Jul 2020 15:48:24 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4443,7 +4443,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 11 Jul 2020 15:27:08 +0000',
+        date: 'Sat, 11 Jul 2020 15:48:24 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10128,7 +10128,9 @@
                             }
                             var cmd_offset = command_line.offset();
                             var cmd_rect = command_line[0].getBoundingClientRect();
-                            var top = e.pageY - cmd_offset.top - 20;
+                            var self_offset = self.offset();
+                            var top_limit = self_offset.top - cmd_offset.top;
+                            var top = Math.max(e.pageY - cmd_offset.top - 20, top_limit);
                             var left = e.pageX - cmd_offset.left - 20;
                             var height = 4 * 14;
                             var width = 5 * 14;
