@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.17.5
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 04 Jul 2020 13:40:56 +0000
+ * Date: Tue, 14 Jul 2020 07:51:40 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1230,7 +1230,11 @@
     // :: jQuery css method from 3.4 support them by default
     // -----------------------------------------------------------------------
     function css(node, obj, value) {
-        if ($.isPlainObject(obj)) {
+        if (node instanceof $.fn.init) {
+            node.each(function() {
+                css(this, obj, value);
+            });
+        } else if ($.isPlainObject(obj)) {
             Object.keys(obj).forEach(function(key) {
                 node.style.setProperty(key, obj[key]);
             });
@@ -1612,8 +1616,9 @@
         wrapper.append('<span class="cmd-prompt"></span>');
         wrapper.append('<div class="cmd-cursor-line">' +
                        '<span></span>' +
-                       '<span class="cmd-cursor"><span>' +
-                       '<span>&nbsp;</span></span></span>' +
+                       '<span class="cmd-cursor">' +
+                       '<span data-text class="end"><span>&nbsp;</span></span>' +
+                       '</span>' +
                        '<span></span>' +
                        '</div>');
         var cursor_line = wrapper.find('.cmd-cursor-line');
@@ -2266,6 +2271,7 @@
                 var $line = cursor_line.prevUntil('span');
                 var line = $line.length;
                 var ending = cursor_line.is('.cmd-end-line');
+                var next_broken = cursor_line.next().is('.cmd-end-line');
                 var next = lines[line + 1];
                 if (!next) {
                     return next_history();
@@ -2274,7 +2280,10 @@
                 var diff;
                 // move to next line if at the end move to end of next line
                 if (left_over === 0) {
-                    diff = next.length + 1;
+                    diff = next.length;
+                    if (next_broken) {
+                        diff++;
+                    }
                 } else {
                     diff = Math.min(col, next.length) + left_over;
                     if (line === 0) {
@@ -3277,7 +3286,13 @@
                     (include_prompt || have_wrapping(before, prompt_len))) {
                     col += prompt_len;
                 }
+                if (col === 0) {
+                    return col;
+                }
                 col %= num_chars;
+                if (col === 0) {
+                    return num_chars;
+                }
                 return col;
             },
             line: function() {
@@ -3361,7 +3376,7 @@
                     } else {
                         new_formatted_pos = n;
                     }
-                    if (text(string).length === length(command, true)) {
+                    if (len === command_len) {
                         formatted_position = new_formatted_pos;
                         return self.position(new_formatted_pos);
                     }
@@ -3564,7 +3579,9 @@
                 // event in input with e.fake == true
                 return;
             }
-            if (!e.fake) {
+            // meta and os are special keydown triggered by Emoji picker on Windows 10
+            // meta is in Google Chrome is is in Firefox
+            if (!e.fake && ['meta', 'os'].indexOf(e.key.toLowerCase()) === -1) {
                 no_keydown = false;
             }
             no_keypress = true;
@@ -4435,8 +4452,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.17.5',
-        date: 'Sat, 04 Jul 2020 13:40:56 +0000',
+        version: 'DEV',
+        date: 'Tue, 14 Jul 2020 07:51:40 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5145,8 +5162,8 @@
                          ' that return [replacement, position] instead');
                 }
             }
-            var formatters = $.terminal.defaults.formatters;
             settings = settings || {};
+            var formatters = settings.formatters || $.terminal.defaults.formatters;
             var i = 0;
             function apply_function_formatter(formatter, input) {
                 var options = $.extend({}, settings, {
@@ -9770,6 +9787,7 @@
         function focus_terminal() {
             if (old_enabled) {
                 self.focus();
+                self.scroll_to_bottom();
             }
         }
         // -------------------------------------------------------------------------------
@@ -10056,19 +10074,7 @@
                             self.set_position(0);
                         }
                         if (!textarea.is(':focus')) {
-                            var offset = command_line.offset();
-                            var self_offset = self.offset();
-                            textarea.css({
-                                left: self_offset.left - offset.left,
-                                top: Math.max(self_offset.top - offset.top, 0)
-                            }).focus();
-                            self.stopTime('focus');
-                            self.oneTime(10, 'focus', function() {
-                                textarea.css({
-                                    left: '',
-                                    top: ''
-                                });
-                            });
+                            textarea.focus();
                         }
                         reset();
                     }
@@ -10092,6 +10098,7 @@
                                 if (!frozen) {
                                     if (!enabled) {
                                         self.focus();
+                                        self.scroll_to_bottom();
                                     } else {
                                         var timeout = settings.clickTimeout;
                                         self.oneTime(timeout, name, click);
@@ -10131,7 +10138,9 @@
                             }
                             var cmd_offset = command_line.offset();
                             var cmd_rect = command_line[0].getBoundingClientRect();
-                            var top = e.pageY - cmd_offset.top - 20;
+                            var self_offset = self.offset();
+                            var top_limit = self_offset.top - cmd_offset.top;
+                            var top = Math.max(e.pageY - cmd_offset.top - 20, top_limit);
                             var left = e.pageX - cmd_offset.left - 20;
                             var height = 4 * 14;
                             var width = 5 * 14;
@@ -10191,6 +10200,20 @@
                         }
                     });
                 })();
+                self.on('scroll', function() {
+                    var $textarea = self.find('textarea');
+                    var rect = self[0].getBoundingClientRect();
+                    var height = self[0].scrollHeight;
+                    var scrollTop = self.scrollTop();
+                    var diff = height - (scrollTop + rect.height);
+                    // if scrolled to bottom top need to be aligned with cursor line
+                    // done by CSS file using css variables
+                    if (diff === 0) {
+                        $textarea.css('top', '');
+                    } else {
+                        $textarea.css('top', -diff);
+                    }
+                });
             }
             self.on('click', 'a', function(e) {
                 var $this = $(this);

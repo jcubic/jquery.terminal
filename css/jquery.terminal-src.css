@@ -57,7 +57,7 @@
     overflow: hidden;
     white-space: pre;
     text-indent: -9999em; /* better cursor hiding for Safari and IE */
-    top: calc(var(--cursor-line, 0) * 1em);
+    top: calc(var(--cursor-line, 0) * var(--size, 1) * 14px);
 }
 
 .cmd span.cmd-end-line,
@@ -186,9 +186,8 @@ body.full-screen-terminal .terminal {
     box-shadow: -2px 0 0 -1px #aaa;
     box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
 }
-.terminal .terminal .terminal-output > div > div, .cmd .cmd-prompt {
+.terminal, .terminal .terminal-output > div > div, .cmd .cmd-prompt {
     display: block;
-    /*line-height: 15px;*/
     height: auto;
 }
 .terminal .terminal-output > div > div, .cmd div {
@@ -213,7 +212,7 @@ body.full-screen-terminal .terminal {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     font-size: 12px;
-    line-height: 15px;
+    line-height: 1;
 }
 .terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
 .cmd span[data-text]:not(.cmd-inverted):not(.token):not(.emoji) {
@@ -715,10 +714,6 @@ terminal .terminal-output > div {
     .cmd span,
     .cmd div {
         font-size: calc(var(--size, 1) * 12px);
-        /* TODO: investigate + 1px below that create space in selection it suppose to fix
-         *       cutting off underlines
-         */
-        line-height: calc(var(--size, 1) * 14px);
     }
     .terminal-output .emoji, .cmd .emoji {
         height: calc(var(--size, 1) * 14px);

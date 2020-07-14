@@ -1,3 +1,14 @@
+## 2.17.6
+### Bugfix
+* fix adding duplicated prism formatters [#573](https://github.com/jcubic/jquery.terminal/issues/573)
+* fix inserting emoji using Windows 10 emoji picker
+* fix position of textarea in multi line command (probably will affect IME or Emoji picker)
+* make jump to bottom on click only when terminal is not enabled [#596](https://github.com/jcubic/jquery.terminal/issues/596)
+* fix init cmd plugin without terminal
+* fix underscore cut off in Firefox (visible in signature)
+* fix combined emoji characters and skin tone variations [#598](https://github.com/jcubic/jquery.terminal/issues/598)
+* fix down arrow at when cursor at the end of broken line [#601](https://github.com/jcubic/jquery.terminal/issues/601)
+
 ## 2.17.5
 ### Bugfix
 * fix eating last bracket from split_equal [#597](https://github.com/jcubic/jquery.terminal/issues/597)
