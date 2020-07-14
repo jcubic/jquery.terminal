@@ -2271,6 +2271,7 @@
                 var $line = cursor_line.prevUntil('span');
                 var line = $line.length;
                 var ending = cursor_line.is('.cmd-end-line');
+                var next_broken = cursor_line.next().is('.cmd-end-line');
                 var next = lines[line + 1];
                 if (!next) {
                     return next_history();
@@ -2279,7 +2280,10 @@
                 var diff;
                 // move to next line if at the end move to end of next line
                 if (left_over === 0) {
-                    diff = next.length + 1;
+                    diff = next.length;
+                    if (next_broken) {
+                        diff++;
+                    }
                 } else {
                     diff = Math.min(col, next.length) + left_over;
                     if (line === 0) {
@@ -3282,7 +3286,13 @@
                     (include_prompt || have_wrapping(before, prompt_len))) {
                     col += prompt_len;
                 }
+                if (col === 0) {
+                    return col;
+                }
                 col %= num_chars;
+                if (col === 0) {
+                    return num_chars;
+                }
                 return col;
             },
             line: function() {
