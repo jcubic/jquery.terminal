@@ -9729,6 +9729,9 @@
             self.height(settings.height);
         }
         var char_size = get_char_size(self);
+        // this is needed when terminal have selector with --size that is not
+        // bare .terminal so fake terminal will not get the proper size #602
+        var need_char_size_recalculate = !terminal_ready(self);
         // so it's the same as in TypeScript definition for options
         delete settings.formatters;
         // used to throw error when calling methods on destroyed terminal
@@ -10242,6 +10245,10 @@
                 if (self.is(':visible')) {
                     var width = fill.width();
                     var height = fill.height();
+                    if (need_char_size_recalculate) {
+                        need_char_size_recalculate = !terminal_ready(self);
+                        calculate_char_size();
+                    }
                     // prevent too many calculations in IE
                     if (old_height !== height || old_width !== width) {
                         self.resize();
