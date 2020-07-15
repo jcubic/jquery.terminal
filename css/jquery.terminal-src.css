@@ -963,17 +963,22 @@ terminal .terminal-output > div {
 .terminal::-webkit-scrollbar {
     width: 10px;
     height: 10px;
-    width: calc(var(--size, 1) * 10px);
-    height: calc(var(--size, 1) * 10px);
-    background: #212020;
+    width: calc(var(--size, 1) * 8px);
+    height: calc(var(--size, 1) * 8px);
+    background: var(--background, #000);
+    border-left: 1px solid var(--color, #aaa);
 }
 .terminal::-webkit-scrollbar-thumb {
-    background: #888;
+    background: var(--color, #aaa);
 }
 .terminal::-webkit-scrollbar-thumb:hover {
-    background: #dcdcdc
+    background: var(--color, #aaa);
 }
-
+.terminal {
+    scrollbar-color: #aaa #000;
+    scrollbar-color: var(--color, #aaa) var(--background, #000);
+    scrollbar-width: thin;
+}
 .cmd .token {
     --original-color: var(--color);
 }

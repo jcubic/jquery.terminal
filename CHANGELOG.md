@@ -1,3 +1,9 @@
+## 2.17.7
+### Bugfix
+* fix same cases of wrong calculated size of the character when --size is used [#602](https://github.com/jcubic/jquery.terminal/issues/602)
+* add custom scrollbar on Firefox
+* fix colors of Webkit scrollbar
+
 ## 2.17.6
 ### Bugfix
 * fix adding duplicated prism formatters [#573](https://github.com/jcubic/jquery.terminal/issues/573)

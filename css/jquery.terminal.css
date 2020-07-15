@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.17.6
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Tue, 14 Jul 2020 07:54:56 +0000
+ * Date: Wed, 15 Jul 2020 08:27:34 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -963,17 +963,22 @@ terminal .terminal-output > div {
 .terminal::-webkit-scrollbar {
     width: 10px;
     height: 10px;
-    width: calc(var(--size, 1) * 10px);
-    height: calc(var(--size, 1) * 10px);
-    background: #212020;
+    width: calc(var(--size, 1) * 8px);
+    height: calc(var(--size, 1) * 8px);
+    background: var(--background, #000);
+    border-left: 1px solid var(--color, #aaa);
 }
 .terminal::-webkit-scrollbar-thumb {
-    background: #888;
+    background: var(--color, #aaa);
 }
 .terminal::-webkit-scrollbar-thumb:hover {
-    background: #dcdcdc
+    background: var(--color, #aaa);
 }
-
+.terminal {
+    scrollbar-color: #aaa #000;
+    scrollbar-color: var(--color, #aaa) var(--background, #000);
+    scrollbar-width: thin;
+}
 .cmd .token {
     --original-color: var(--color);
 }
