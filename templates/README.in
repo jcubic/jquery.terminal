@@ -116,7 +116,7 @@ but it's not refreshed as fast as rawgit was, because it's CDN and need to be pr
 
 #### Keyboard key polyfill
 
-**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key) (as you can see in chart it's required by Android so it's good to add).
+**NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key).
 
 ```html
 <script src="https://unpkg.com/js-polyfills@0.x.x/keyboard.js"></script>
