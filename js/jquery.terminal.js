@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 15 Jul 2020 07:24:17 +0000
+ * Date: Wed, 22 Jul 2020 09:13:43 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4453,7 +4453,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 15 Jul 2020 07:24:17 +0000',
+        date: 'Wed, 22 Jul 2020 09:13:43 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6378,9 +6378,9 @@
         // ---------------------------------------------------------------------
         // :: helper function that use option to render objects
         // ---------------------------------------------------------------------
-        function preprocess_value(value) {
+        function preprocess_value(value, options) {
             if (is_function(settings.renderHandler)) {
-                var ret = settings.renderHandler.call(self, value, self);
+                var ret = settings.renderHandler.call(self, value, options, self);
                 if (ret === false) {
                     return false;
                 }
@@ -8971,23 +8971,33 @@
                         lines.splice(line, 1);
                         output.find('[data-index=' + line + ']').remove();
                     } else {
-                        var ret = prepare_render(value, options);
-                        if (ret) {
-                            value = ret[0];
-                            options = ret[1];
-                        }
-                        lines[line][0] = value;
-                        if (options) {
-                            lines[line][1] = options;
-                        }
-                        process_line({
-                            value: value,
-                            index: line,
-                            options: options
+                        value = preprocess_value(value, {
+                            update: true,
+                            line: line
                         });
-                        self.flush({
-                            scroll: false,
-                            update: true
+                        if (value === false) {
+                            return self;
+                        }
+                        unpromise(value, function(value) {
+                            var ret = prepare_render(value, options);
+                            if (ret) {
+                                value = ret[0];
+                                options = ret[1];
+                            }
+                            lines[line][0] = value;
+                            if (options) {
+                                options = $.extend(lines[line][1], options);
+                                lines[line][1] = options;
+                            }
+                            process_line({
+                                value: value,
+                                index: line,
+                                options: options
+                            });
+                            self.flush({
+                                scroll: false,
+                                update: true
+                            });
                         });
                     }
                 });
@@ -9077,7 +9087,7 @@
                                 value = '';
                             }
                         } else {
-                            var ret = preprocess_value(arg);
+                            var ret = preprocess_value(arg, {});
                             if (ret === false) {
                                 return self;
                             }

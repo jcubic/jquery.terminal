@@ -5395,22 +5395,6 @@ describe('Terminal plugin', function() {
                 expect(term.find('.terminal-output').text()).toEqual('foobarbaz');
             });
         });
-        describe('update', function() {
-            var term = $('<div/>').terminal($.noop, {greetings: false});
-            it('should update terminal output', function() {
-                term.echo('Hello');
-                term.update(0, 'Hello, World!');
-                expect(term.find('.terminal-output').text()).toEqual(nbsp('Hello, World!'));
-                term.clear();
-                term.echo('Foo');
-                term.echo('Bar');
-                term.update(-1, 'Baz');
-                expect(term.find('.terminal-output').text()).toEqual('FooBaz');
-                term.update(-2, 'Lorem');
-                term.update(1, 'Ipsum');
-                expect(term.find('.terminal-output').text()).toEqual('LoremIpsum');
-            });
-        });
         describe('last_index', function() {
             var term = $('<div/>').terminal($.noop, {greetings: false});
             it('should return proper index', function() {
@@ -6571,18 +6555,46 @@ describe('Terminal plugin', function() {
             });
         });
         describe('update', function() {
-            var term = $('<div/>').terminal();
+            var term = $('<div/>').terminal($.noop, {greetings: false});
             function last_line() {
                 return last_div().find('div');
             }
             function last_div() {
                 return term.find('.terminal-output > div:last-child');
             }
+            beforeEach(function() {
+                term.clear();
+            });
+            it('should update terminal output', function() {
+                term.echo('Hello');
+                term.update(0, 'Hello, World!');
+                expect(term.find('.terminal-output').text()).toEqual(nbsp('Hello, World!'));
+                term.clear();
+                term.echo('Foo');
+                term.echo('Bar');
+                term.update(-1, 'Baz');
+                expect(term.find('.terminal-output').text()).toEqual('FooBaz');
+                term.update(-2, 'Lorem');
+                term.update(1, 'Ipsum');
+                expect(term.find('.terminal-output').text()).toEqual('LoremIpsum');
+            });
             it('should update last line', function() {
                 term.echo('foo');
                 expect(last_line().text()).toEqual('foo');
                 term.update(-1, 'bar');
                 expect(last_line().text()).toEqual('bar');
+            });
+            it('should allow attributes in formatting from echo', function() {
+                var f = $.terminal.defaults.formatters.slice();
+                $.terminal.defaults.formatters.push([
+                    /foo/g, '[[;;;;;{"style": "color:#fff"}]foo]'
+                ]);
+                $.terminal.defaults.allowedAttributes.push('style');
+                term.echo('hello');
+                term.update(-1, 'foo', {});
+                expect(last_line().find('[style*="color"]').length).toEqual(1);
+                $.terminal.defaults.formatters = f;
+                $.terminal.defaults.allowedAttributes.pop();
             });
             it('should remove last line', function() {
                 var index = term.last_index();
@@ -6595,6 +6607,7 @@ describe('Terminal plugin', function() {
                 var options = {
                     finalize: function() {}
                 };
+                term.echo('hello');
                 spy(options, 'finalize');
                 term.update(-1, 'baz', options);
                 expect(options.finalize).toHaveBeenCalled();

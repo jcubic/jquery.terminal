@@ -3,6 +3,8 @@
 * fix same cases of wrong calculated size of the character when --size is used [#602](https://github.com/jcubic/jquery.terminal/issues/602)
 * add custom scrollbar on Firefox
 * fix colors of Webkit scrollbar
+* fix renderHandler in update
+* fix formatting in update - reusing options from echo
 
 ## 2.17.6
 ### Bugfix
