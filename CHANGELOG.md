@@ -1,4 +1,6 @@
-## 2.17.7
+## 2.18.0
+### Features
+* new API to use renderHandler with update
 ### Bugfix
 * fix same cases of wrong calculated size of the character when --size is used [#602](https://github.com/jcubic/jquery.terminal/issues/602)
 * add custom scrollbar on Firefox
