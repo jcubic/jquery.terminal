@@ -3101,6 +3101,9 @@
                         var ret = prompt.call(self, function(string) {
                             data.set(string);
                         });
+                        if (typeof ret === 'string') {
+                            data.set(ret);
+                        }
                         if (ret && ret.then) {
                             ret.then(data.set).catch(function(e) {
                                 var prompt = $.terminal.escape_brackets('[ERR]> ');
