@@ -58,6 +58,20 @@ $.terminal.nested_formatting.__inherit__ = true;
 $.terminal.nested_formatting.__warn__ = true;
 $.terminal.nested_formatting.__meta__ = true;
 
+$.terminal.defaults.formatters.push([/foo/g, 'bar']);
+$.terminal.defaults.formatters.push([/foo/g, 'bar', {echo: true, command: true}]);
+$.terminal.defaults.formatters.push(function(str: string) {
+    return str.replace(/foo/g, 'bar');
+});
+
+function red(str: string) {
+    return '[[;red;]' + str + ']';
+}
+red.__inerit__ = true;
+$.terminal.defaults.formatters.push(red);
+
+
+
 // -----------------------------------------------------------------------------
 // :: Options
 // -----------------------------------------------------------------------------

@@ -8,6 +8,11 @@ type JSONObject = {
     [key: string]: TypeOrArray<StringOrNumber | boolean | JSONObject>
 }
 
+type renderHandlerOptions = {
+    update?: boolean;
+    line?: number;
+}
+
 type mapFunction = (key: string, value: anyFunction) => any;
 type voidFunction = () => void;
 
@@ -91,11 +96,11 @@ declare namespace JQueryTerminal {
     type FormatterRegExpFunction = (...args: string[]) => string;
     type FormaterRegExpReplacement = string | FormatterRegExpFunction;
     type FormatterFunctionPropsInterface = {
-        __inherit__: boolean;
-        __warn__: boolean;
-        __meta__: boolean;
+        __inherit__?: boolean;
+        __warn__?: boolean;
+        __meta__?: boolean;
     };
-    type FormatterFunction = ((str: string, options: JSONObject) => (string | [string, number])) & FormatterFunctionPropsInterface;
+    type FormatterFunction = ((str: string, options?: JSONObject) => (string | [string, number])) & FormatterFunctionPropsInterface;
     type FormatterArrayOptions = {
         loop?: boolean;
         echo?: boolean;
@@ -304,7 +309,7 @@ interface JQueryTerminalStatic {
     data: string;
     color_names: string[];
     defaults: {
-        formatters: TypeOrArray<JQueryTerminal.Formatter>;
+        formatters: JQueryTerminal.Formatter[],
         strings: JQueryTerminal.strings;
         [key: string]: any;
     };
@@ -543,7 +548,7 @@ type TerminalOptions = {
     completion?: JQueryTerminal.Completion;
     keypress?: JQueryTerminal.KeyEventHandler;
     keydown?: JQueryTerminal.KeyEventHandler;
-    renderHandler?: (this: JQueryTerminal, obj: any, term: JQueryTerminal) => (void | string | Element | JQuery<Element> | false);
+    renderHandler?: (this: JQueryTerminal, obj: any, opts: renderHandlerOptions, term: JQueryTerminal) => (void | string | Element | JQuery<Element> | false);
     onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status: string, error: string) => void;
     onFocus?: JQueryTerminal.EventCallback;
     onInit?: JQueryTerminal.EventCallback;
