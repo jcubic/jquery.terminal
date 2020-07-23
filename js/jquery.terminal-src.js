@@ -5167,6 +5167,19 @@
                          ' that return [replacement, position] instead');
                 }
             }
+            function should_format(options) {
+                if (!settings || !options) {
+                    return true;
+                }
+                var props = ['echo', 'command', 'prompt'];
+                for (var i = props.length; i--;) {
+                    var prop = props[i];
+                    if (options[prop] === true && settings[prop] === true) {
+                        return true;
+                    }
+                }
+                return false;
+            }
             settings = settings || {};
             var formatters = settings.formatters || $.terminal.defaults.formatters;
             var i = 0;
@@ -5234,7 +5247,8 @@
                                 if (is_array(formatter)) {
                                     var options = formatter[2] || {};
                                     result = [string, position < 0 ? 0 : position];
-                                    if (result[0].match(formatter[0])) {
+                                    if (result[0].match(formatter[0]) &&
+                                        should_format(formatter[2])) {
                                         if (options.loop) {
                                             while (result[0].match(formatter[0])) {
                                                 result = $.terminal.tracking_replace(
