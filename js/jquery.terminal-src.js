@@ -5172,6 +5172,12 @@
                     return true;
                 }
                 var props = ['echo', 'command', 'prompt'];
+                var have_any = props.some(function(name) {
+                    return options[name] === true;
+                });
+                if (!have_any) {
+                    return true;
+                }
                 for (var i = props.length; i--;) {
                     var prop = props[i];
                     if (options[prop] === true && settings[prop] === true) {

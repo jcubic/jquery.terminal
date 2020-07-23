@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 23 Jul 2020 07:30:44 +0000
+ * Date: Thu, 23 Jul 2020 08:18:14 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4458,7 +4458,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 23 Jul 2020 07:30:44 +0000',
+        date: 'Thu, 23 Jul 2020 08:18:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5172,6 +5172,12 @@
                     return true;
                 }
                 var props = ['echo', 'command', 'prompt'];
+                var have_any = props.some(function(name) {
+                    return options[name] === true;
+                });
+                if (!have_any) {
+                    return true;
+                }
                 for (var i = props.length; i--;) {
                     var prop = props[i];
                     if (options[prop] === true && settings[prop] === true) {
