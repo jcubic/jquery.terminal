@@ -2662,7 +2662,8 @@
                 string = $.terminal.escape_formatting(string);
                 var format_options = $.extend({}, settings, {
                     unixFormattingEscapeBrackets: true,
-                    position: position
+                    position: position,
+                    command: true
                 });
                 var formatted = $.terminal.apply_formatters(string, format_options);
                 var output = $.terminal.normalize(formatted[0]);
@@ -2986,7 +2987,8 @@
         var find_position = (function() {
             function make_guess(string, position) {
                 var opts = $.extend({}, settings, {
-                    position: position
+                    position: position,
+                    command: true
                 });
                 return $.terminal.apply_formatters(string, opts)[1];
             }
@@ -3031,7 +3033,7 @@
         var prev_prompt_data;
         var draw_prompt = (function() {
             function set(prompt) {
-                prompt = $.terminal.apply_formatters(prompt, {});
+                prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                 prompt = $.terminal.normalize(prompt);
                 prompt = crlf(prompt);
                 last_rendered_prompt = prompt;
@@ -7121,7 +7123,7 @@
                             try {
                                 string = $.terminal.apply_formatters(
                                     string,
-                                    settings
+                                    $.extend(settings, {echo: true})
                                 );
                             } catch (e) {
                                 display_exception(e, 'FORMATTING');
@@ -7348,11 +7350,13 @@
             var options = {
                 convertLinks: false,
                 exec: false,
+                formatters: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
+            command = $.terminal.apply_formatters(command, {command: true});
             self.echo(prompt + command, options);
         }
         // ---------------------------------------------------------------------

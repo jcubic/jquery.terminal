@@ -96,8 +96,14 @@ declare namespace JQueryTerminal {
         __meta__: boolean;
     };
     type FormatterFunction = ((str: string, options: JSONObject) => (string | [string, number])) & FormatterFunctionPropsInterface;
+    type FormatterArrayOptions = {
+        loop?: boolean;
+        echo?: boolean;
+        command?: boolean;
+        prompt?: boolean;
+    };
 
-    type Formatter = [RegExp, FormaterRegExpReplacement] | [RegExp, FormaterRegExpReplacement, { loop: boolean }] | FormatterFunction;
+    type Formatter = [RegExp, FormaterRegExpReplacement] | [RegExp, FormaterRegExpReplacement, FormatterArrayOptions] | FormatterFunction;
     type keymapFunctionOptionalArg = (event: JQueryKeyEventObject, original?: keymapFunction) => any;
 
     type keymapFunction<T = JQueryTerminal> = (this: T, event: JQueryKeyEventObject, original: keymapFunctionOptionalArg) => any;
@@ -348,6 +354,11 @@ interface JQueryTerminalStatic {
      * plugins
      */
     prism(lang: string, text: string): string;
+    prism_formatters: {
+        command: boolean,
+        echo: boolean,
+        prompt: boolean
+    },
     syntax(lang: string): void;
     pipe(obj: JQueryTerminal.ObjectInterpreter): JQueryTerminal.interpreterFunction;
     // formatters

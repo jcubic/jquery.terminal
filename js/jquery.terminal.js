@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 22 Jul 2020 09:13:43 +0000
+ * Date: Thu, 23 Jul 2020 07:12:21 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2662,7 +2662,8 @@
                 string = $.terminal.escape_formatting(string);
                 var format_options = $.extend({}, settings, {
                     unixFormattingEscapeBrackets: true,
-                    position: position
+                    position: position,
+                    command: true
                 });
                 var formatted = $.terminal.apply_formatters(string, format_options);
                 var output = $.terminal.normalize(formatted[0]);
@@ -2986,7 +2987,8 @@
         var find_position = (function() {
             function make_guess(string, position) {
                 var opts = $.extend({}, settings, {
-                    position: position
+                    position: position,
+                    command: true
                 });
                 return $.terminal.apply_formatters(string, opts)[1];
             }
@@ -3031,7 +3033,7 @@
         var prev_prompt_data;
         var draw_prompt = (function() {
             function set(prompt) {
-                prompt = $.terminal.apply_formatters(prompt, {});
+                prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                 prompt = $.terminal.normalize(prompt);
                 prompt = crlf(prompt);
                 last_rendered_prompt = prompt;
@@ -3101,6 +3103,9 @@
                         var ret = prompt.call(self, function(string) {
                             data.set(string);
                         });
+                        if (typeof ret === 'string') {
+                            data.set(ret);
+                        }
                         if (ret && ret.then) {
                             ret.then(data.set).catch(function(e) {
                                 var prompt = $.terminal.escape_brackets('[ERR]> ');
@@ -4453,7 +4458,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 22 Jul 2020 09:13:43 +0000',
+        date: 'Thu, 23 Jul 2020 07:12:21 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7118,7 +7123,7 @@
                             try {
                                 string = $.terminal.apply_formatters(
                                     string,
-                                    settings
+                                    $.extend(settings, {echo: true})
                                 );
                             } catch (e) {
                                 display_exception(e, 'FORMATTING');
@@ -7345,11 +7350,13 @@
             var options = {
                 convertLinks: false,
                 exec: false,
+                formatters: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
+            command = $.terminal.apply_formatters(command, {command: true});
             self.echo(prompt + command, options);
         }
         // ---------------------------------------------------------------------

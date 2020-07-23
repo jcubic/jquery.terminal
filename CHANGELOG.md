@@ -1,12 +1,15 @@
 ## 2.18.0
 ### Features
-* new API to use renderHandler with update
+* new API to use `renderHandler` with update
+* new API (`apply_formatters` function option) to pick where processing of formatting should work [#588](https://github.com/jcubic/jquery.terminal/issues/588)
+* disable prompt from prism formatters (can be trun on)
 ### Bugfix
 * fix same cases of wrong calculated size of the character when --size is used [#602](https://github.com/jcubic/jquery.terminal/issues/602)
 * add custom scrollbar on Firefox
 * fix colors of Webkit scrollbar
-* fix renderHandler in update
+* fix `renderHandler` in update
 * fix formatting in update - reusing options from echo
+* fix normal return string from prompt
 
 ## 2.17.6
 ### Bugfix

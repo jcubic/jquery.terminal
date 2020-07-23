@@ -143,7 +143,20 @@
     /* eslint-disable */
     var format_split_re = /(\x00\x00\x00\x00(?:\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]\\]*(\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?|\]))/i;
     /* eslint-enable */
-    $.terminal.prism = function prism(language, string) {
+    function should_render(options) {
+        var props = Object.keys($.terminal.prism_formatters);
+        for (var i = props.length; i--;) {
+            var prop = props[i];
+            if (options[prop] === true && $.terminal.prism_formatters[prop] === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+    $.terminal.prism = function prism(language, string, options) {
+        if (!should_render(options)) {
+            return string;
+        }
         if (language === 'website') {
             var re = /(<\/?\s*(?:script|style)[^>]*>)/g;
             var style;
@@ -178,14 +191,18 @@
         }
         return string;
     };
+    $.terminal.prism_formatters = {
+        echo: true,
+        command: true
+    };
     $.terminal.syntax = function syntax(language) {
         // we create function with name so we will see it in developer tools
         // we bind jQuery as argument so it will work when jQuery with noConflict
         // is added after this script
         var name = 'syntax_' + language;
         var fn = new Function('$', 'return function ' + name +
-                              '(string) { return $.terminal.prism("' + language +
-                              '", string); }')($);
+                              '(string, options) { return $.terminal.prism("' + language +
+                              '", string, options); }')($);
         fn.__no_warn__ = true;
         var formatters = $.terminal.defaults.formatters;
         $.terminal.defaults.formatters = formatters.filter(function(formatter) {
