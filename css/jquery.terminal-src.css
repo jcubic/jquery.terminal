@@ -190,10 +190,6 @@ body.full-screen-terminal .terminal {
     display: block;
     height: auto;
 }
-.cmd div {
-    min-height: 14px;
-    min-height: calc(var(--size, 1) * 14px);
-}
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
 }
@@ -963,12 +959,9 @@ terminal .terminal-output > div {
     opacity: 0.01;
 }
 .terminal::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-    width: calc(var(--size, 1) * 8px);
-    height: calc(var(--size, 1) * 8px);
+    width: 6px;
+    height: 6px;
     background: var(--background, #000);
-    border-left: 1px solid var(--color, #aaa);
 }
 .terminal::-webkit-scrollbar-thumb {
     background: var(--color, #aaa);

@@ -5,6 +5,7 @@
 * allow to toggle formatters in prism (enabled by default only for echo and command)
 * escape slash in `escape_formatting`/`escape_brackets` [#605](https://github.com/jcubic/jquery.terminal/issues/605)
 * add support for rgb(a) and hsl(a) colors [#590](https://github.com/jcubic/jquery.terminal/issues/590)
+* unify Firefox and Webkit (chrome) custom scrollbars [#607](https://github.com/jcubic/jquery.terminal/issues/607)
 ### Bugfix
 * fix same cases of wrong calculated size of the character when --size is used [#602](https://github.com/jcubic/jquery.terminal/issues/602)
 * add custom scrollbar on Firefox
