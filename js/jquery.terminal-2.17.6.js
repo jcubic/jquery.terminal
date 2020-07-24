@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 24 Jul 2020 07:38:33 +0000
+ * Date: Fri, 24 Jul 2020 21:28:27 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1128,7 +1128,7 @@
     var format_start_re = /^(\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\]?$/i;
     var self_closing_re = /^(?:\[\[)?[^;]*@[^;]*;/;
-    var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+    var color_re = /(?:^rgba?\([^)]+\)$|^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$|^hsla?\([^)]+\)$)/i;
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var url_nf_re = /\b(?![^"\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
@@ -4458,7 +4458,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 24 Jul 2020 07:38:33 +0000',
+        date: 'Fri, 24 Jul 2020 21:28:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4502,7 +4502,7 @@
         // :: Validate html color (it can be name or hex)
         // ---------------------------------------------------------------------
         valid_color: function valid_color(color) {
-            if (color.match(color_hex_re)) {
+            if (color.match(color_re)) {
                 return true;
             } else {
                 return $.inArray(color.toLowerCase(), $.terminal.color_names) !== -1;

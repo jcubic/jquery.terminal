@@ -175,7 +175,7 @@
                     var split_args = array_split(args, re);
                     if (split_args.length > 1) {
                         args = split_args[0];
-                        cmd.redirects = parse_redirect(split_args.slice(1), re);
+                        result.redirects = parse_redirect(split_args.slice(1), re);
                     }
                 }
                 result.args_quotes = args.map(function(_, i) {
