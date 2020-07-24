@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 24 Jul 2020 11:17:27 +0000
+ * Date: Fri, 24 Jul 2020 20:44:24 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -190,7 +190,7 @@ body.full-screen-terminal .terminal {
     display: block;
     height: auto;
 }
-.terminal .terminal-output > div > div, .cmd div {
+.cmd div {
     min-height: 14px;
     min-height: calc(var(--size, 1) * 14px);
 }
@@ -212,7 +212,12 @@ body.full-screen-terminal .terminal {
     font-family: monospace;
     /*font-family: FreeMono, monospace; this don't work on Android */
     font-size: 12px;
-    line-height: 1;
+}
+.terminal-output div div::before {
+    content: '\0200B';
+    width: 0;
+    float: left;
+    display: block;
 }
 .terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
 .cmd span[data-text]:not(.cmd-inverted):not(.token):not(.emoji) {
@@ -266,9 +271,6 @@ body.full-screen-terminal .terminal {
 }
 .cmd .cmd-prompt + div {
     clear: right;
-}
-.terminal-output > div > div, .cmd div {
-    min-height: 15px;
 }
 terminal .terminal-output > div {
     margin-top: -1px;
@@ -724,9 +726,6 @@ terminal .terminal-output > div {
     .terminal .inverted, .cmd.cmd.cmd .inverted, .cmd.cmd.cmd .cmd-inverted {
         background-color: var(--color, #aaa) !important;
         color: var(--background, #000) !important;
-    }
-    .cmd div {
-        min-height: calc(var(--size, 1) * 14px);
     }
     .cmd .cmd-cursor.cmd-blink {
         color: var(--color, #aaa);

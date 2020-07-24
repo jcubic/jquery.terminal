@@ -12,6 +12,7 @@
 * fix formatting in update - reusing options from echo
 * fix normal return string from prompt
 * fix pipe symbol inside strings [#606](https://github.com/jcubic/jquery.terminal/issues/606)
+* fix spaces in images in less & text selection
 
 ## 2.17.6
 ### Bugfix
