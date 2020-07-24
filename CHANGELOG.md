@@ -14,6 +14,7 @@
 * fix normal return string from prompt
 * fix pipe symbol inside strings [#606](https://github.com/jcubic/jquery.terminal/issues/606)
 * fix spaces in images in less & text selection
+* fix regresion in fontawesome icons
 
 ## 2.17.6
 ### Bugfix

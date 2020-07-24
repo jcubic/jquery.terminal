@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 24 Jul 2020 20:44:24 +0000
+ * Date: Fri, 24 Jul 2020 22:42:38 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -205,12 +205,15 @@ body.full-screen-terminal .terminal {
 }
 .terminal,
 .terminal-output > :not(.raw),
-.terminal-output > :not(.raw) span,
+.terminal-output > :not(.raw) span:not(.fas):not(.far):not(.fa),
 .terminal-output > :not(.raw) a,
 .cmd,
-.cmd span {
-    font-family: monospace;
+.cmd span:not(.fas):not(.far):not(.fa) {
     /*font-family: FreeMono, monospace; this don't work on Android */
+    font-family: monospace;
+}
+.terminal,
+.cmd {
     font-size: 12px;
 }
 .terminal-output div div::before {
