@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 23 Jul 2020 08:18:14 +0000
+ * Date: Fri, 24 Jul 2020 07:38:33 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4458,7 +4458,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 23 Jul 2020 08:18:14 +0000',
+        date: 'Fri, 24 Jul 2020 07:38:33 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5598,13 +5598,17 @@
         // :: Replace brackets with html entities
         // ---------------------------------------------------------------------
         escape_brackets: function escape_brackets(string) {
-            return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
+            return string.replace(/\[/g, '&#91;')
+                .replace(/\]/g, '&#93;')
+                .replace(/\\/g, '&#92;');
         },
         // ---------------------------------------------------------------------
         // :: complmentary function
         // ---------------------------------------------------------------------
         unescape_brackets: function unescape_brackets(string) {
-            return string.replace(/&#91;/g, '[').replace(/&#93;/g, ']');
+            return string.replace(/&#91;/g, '[')
+                .replace(/&#93;/g, ']')
+                .replace(/&#92;/g, '\\');
         },
         // ---------------------------------------------------------------------
         // :: return number of characters without formatting

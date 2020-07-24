@@ -5598,13 +5598,17 @@
         // :: Replace brackets with html entities
         // ---------------------------------------------------------------------
         escape_brackets: function escape_brackets(string) {
-            return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
+            return string.replace(/\[/g, '&#91;')
+                .replace(/\]/g, '&#93;')
+                .replace(/\\/g, '&#92;');
         },
         // ---------------------------------------------------------------------
         // :: complmentary function
         // ---------------------------------------------------------------------
         unescape_brackets: function unescape_brackets(string) {
-            return string.replace(/&#91;/g, '[').replace(/&#93;/g, ']');
+            return string.replace(/&#91;/g, '[')
+                .replace(/&#93;/g, ']')
+                .replace(/&#92;/g, '\\');
         },
         // ---------------------------------------------------------------------
         // :: return number of characters without formatting

@@ -2,7 +2,8 @@
 ### Features
 * new API to use `renderHandler` with update
 * new API (`apply_formatters` function option) to pick where processing of formatting should work [#588](https://github.com/jcubic/jquery.terminal/issues/588)
-* disable prompt from prism formatters (can be trun on)
+* allow to toggle formatters in prism (enabled by default only for echo and command)
+* escape slash in `escape_formatting`/`escape_brackets` [#605](https://github.com/jcubic/jquery.terminal/issues/605)
 ### Bugfix
 * fix same cases of wrong calculated size of the character when --size is used [#602](https://github.com/jcubic/jquery.terminal/issues/602)
 * add custom scrollbar on Firefox
