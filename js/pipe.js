@@ -101,6 +101,7 @@
     // -----------------------------------------------------------------------------------
     $.terminal.defaults.strings.pipeNestedInterpreterError = 'You can\'t pipe nested ' +
         'interpreter';
+    // -----------------------------------------------------------------------------------
     $.terminal.pipe = function pipe(interpreter, options) {
         var settings = $.extend({
             processArguments: true,
@@ -160,10 +161,12 @@
             } else {
                 cmd = $.terminal.split_command(command);
             }
+            var index = 0;
             return array_split(tokens(cmd), is_pipe(cmd)).map(function(args) {
-                var cmd = {
+                var result = {
                     redirects: []
                 };
+                var len = args.length;
                 if (settings.redirects.length) {
                     var redirect_names = settings.redirects.map(function(redirect) {
                         return $.terminal.escape_regex(redirect.name);
@@ -175,9 +178,13 @@
                         cmd.redirects = parse_redirect(split_args.slice(1), re);
                     }
                 }
-                cmd.name = args[0];
-                cmd.args = args.slice(1);
-                return cmd;
+                result.args_quotes = args.map(function(_, i) {
+                    return cmd.args_quotes[i + index];
+                });
+                index += len;
+                result.name = args[0];
+                result.args = args.slice(1);
+                return result;
             });
         }
         // -------------------------------------------------------------------------------
@@ -297,8 +304,22 @@
             term.echo = echo;
         }
         // -------------------------------------------------------------------------------
+        function unparse(string) {
+            if (term.settings().processArguments) {
+                return string.replace(/(['"()])/g, '\\$1');
+            } else {
+                return string.replace(/ /g, '\\ ');
+            }
+        }
+        // -------------------------------------------------------------------------------
         function stringify(cmd) {
-            return cmd.name + ' ' + cmd.args.join(' ');
+            return cmd.name + ' ' + cmd.args.map(function(arg, i) {
+                if (cmd.args_quotes[i]) {
+                    var quote = cmd.args_quotes[i];
+                    return quote + unparse(arg) + quote;
+                }
+                return arg.replace(/ /g, '\\ ');
+            }).join(' ');
         }
         // -------------------------------------------------------------------------------
         return function(command, t) {

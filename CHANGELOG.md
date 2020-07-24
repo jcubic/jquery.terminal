@@ -11,6 +11,7 @@
 * fix `renderHandler` in update
 * fix formatting in update - reusing options from echo
 * fix normal return string from prompt
+* fix pipe symbol inside strings [#606](https://github.com/jcubic/jquery.terminal/issues/606)
 
 ## 2.17.6
 ### Bugfix
