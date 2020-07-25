@@ -16,6 +16,7 @@
 * fix pipe symbol inside strings [#606](https://github.com/jcubic/jquery.terminal/issues/606)
 * fix spaces in images in less & text selection
 * fix regresion in fontawesome icons
+* fix inconsistency with emoji and wide characters in terminal and cmd
 
 ## 2.17.6
 ### Bugfix

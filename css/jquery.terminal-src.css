@@ -156,15 +156,10 @@ body.full-screen-terminal .terminal {
 }
 .cmd .cmd-cursor {
     display: inline-block;
-    vertical-align: top;
 }
 .cmd .cmd-cursor-line > span,
 .cmd .cmd-cursor-line img {
     display: inline-block;
-}
-.cmd-wrapper div [data-text] {
-    /* fix for images */
-    vertical-align: top;
 }
 .cmd .cmd-cursor.cmd-blink span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span {
     -webkit-animation: terminal-blink 1s infinite linear;
@@ -196,8 +191,17 @@ body.full-screen-terminal .terminal {
 .cmd .cmd-prompt > span {
     float: left;
 }
-.cmd span[style*="width"], .terminal span[style*="width"] {
+.cmd .cmd-prompt ~ div span[style*="width"],
+.terminal-output span[style*="width"] {
     display: inline-block;
+    line-height: 1;
+}
+.terminal-ouput span[style*="width"] {
+    min-height: 14px;
+    min-height: calc(var(--size, 1) * 14px);
+}
+.cmd .cmd-prompt span[style*="width"] {
+    margin-top: 2px;
 }
 .terminal,
 .terminal-output > :not(.raw),
@@ -227,7 +231,7 @@ body.full-screen-terminal .terminal {
     background-color: transparent !important;
 }
 .terminal-output .emoji, .cmd .emoji {
-    height: 14px;
+    height: 12px;
     background-size: contain;
     background-repeat: no-repeat;
     color: transparent;
@@ -717,7 +721,7 @@ terminal .terminal-output > div {
         font-size: calc(var(--size, 1) * 12px);
     }
     .terminal-output .emoji, .cmd .emoji {
-        height: calc(var(--size, 1) * 14px);
+        height: calc(var(--size, 1) * 12px);
     }
     .cmd .clipboard {
         top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
