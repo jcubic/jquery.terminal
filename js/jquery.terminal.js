@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 24 Jul 2020 21:31:20 +0000
+ * Date: Fri, 31 Jul 2020 16:30:05 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4458,7 +4458,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 24 Jul 2020 21:31:20 +0000',
+        date: 'Fri, 31 Jul 2020 16:30:05 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9017,13 +9017,12 @@
                             }
                             lines[line][0] = value;
                             if (options) {
-                                options = $.extend(lines[line][1], options);
-                                lines[line][1] = options;
+                                lines[line][1] = $.extend(lines[line][1], options);
                             }
                             process_line({
                                 value: value,
                                 index: line,
-                                options: options
+                                options: lines[line][1]
                             });
                             self.flush({
                                 scroll: false,

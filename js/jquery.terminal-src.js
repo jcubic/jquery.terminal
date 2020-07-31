@@ -9017,13 +9017,12 @@
                             }
                             lines[line][0] = value;
                             if (options) {
-                                options = $.extend(lines[line][1], options);
-                                lines[line][1] = options;
+                                lines[line][1] = $.extend(lines[line][1], options);
                             }
                             process_line({
                                 value: value,
                                 index: line,
-                                options: options
+                                options: lines[line][1]
                             });
                             self.flush({
                                 scroll: false,
