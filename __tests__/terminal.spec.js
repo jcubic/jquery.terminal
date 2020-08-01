@@ -2251,6 +2251,23 @@ describe('Terminal utils', function() {
             }));
             await term.exec('echo "|" | read');
             expect(get_lines(term)).toEqual(['your text: |']);
+            term.destroy();
+            // new API with option that use monkey patch
+            term = $('<div/>').terminal({
+                read: function() {
+                    return this.read('').then((text) => {
+                        this.echo('your text: ' + text);
+                    });
+                },
+                echo: async function(string) {
+                    await delay(10);
+                    return string;
+                }
+            }, {
+                pipe: true
+            });
+            await term.exec('echo "|" | read');
+            expect(get_lines(term)).toEqual(['your text: |']);
         });
         it('should filter lines', function() {
             var term = $('<div/>').terminal($.terminal.pipe({
