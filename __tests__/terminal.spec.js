@@ -847,9 +847,19 @@ describe('Terminal utils', function() {
     });
     describe('$.terminal.valid_color', function() {
         it('should mark hex color as valid', function() {
-            var valid_colors = ['#fff', '#fab', '#ffaacc', 'red', 'blue'];
+            var valid_colors = [
+                '#fff', '#fab', '#ffaacc', 'red', 'blue',
+                'rgba(100,100,100,1)', 'rgb(100, 200, 300)',
+                'hsl(100, 20, 20)', 'hsla(100,10,20, 1)'
+            ];
             valid_colors.forEach(function(color) {
                 expect($.terminal.valid_color(color)).toBe(true);
+            });
+        });
+        it('should mark hex color as invalid', function() {
+            var valid_colors = ['foo', '#faro', '#fifa', 'fuck'];
+            valid_colors.forEach(function(color) {
+                expect($.terminal.valid_color(color)).toBe(false);
             });
         });
     });
@@ -4944,7 +4954,7 @@ describe('Terminal plugin', function() {
                 spy(options, 'login');
                 var term = $('<div/>').terminal({
                     echo: function(arg) {
-                        test.empty(arg);
+                        test.test(arg);
                     }
                 }, options);
                 if (term.token()) {
