@@ -4762,8 +4762,50 @@ describe('Terminal plugin', function() {
                 expect(term.keymap()['CTRL+S']).toBeTruthy();
                 expect(Object.keys(term.keymap())).toEqual(keys.concat(['CTRL+S']));
             });
+            it('should clear keymap in pop', function() {
+                term.push($.noop, {
+                    keymap: {
+                        'ENTER': test.empty
+                    }
+                });
+                enter_key();
+                expect(test.empty).toHaveBeenCalled();
+                term.pop();
+                enter_key();
+                expect(count(test.empty)).toEqual(1);
+            });
+            it('should use keymap not overwritten in push', function() {
+                term.push($.noop, {
+                    keymap: {
+                        'ENTER': test.empty
+                    }
+                });
+                shortcut(true, false, false, 'c');
+                expect(test.original).toHaveBeenCalled();
+                term.push($.noop, {
+                    keymap: {
+                        'CTRL+C': test.empty
+                    }
+                });
+                shortcut(true, false, false, 'c');
+                expect(count(test.original)).toEqual(1);
+                expect(test.empty).toHaveBeenCalled();
+                term.push($.noop, {
+                    keymap: {
+                        'ENTER': test.empty
+                    }
+                });
+                shortcut(true, false, false, 'c');
+                expect(count(test.original)).toEqual(2);
+            });
+            it('should reset keymap', function() {
+                // state of keymap is in cmd plugin
+                expect(term.keymap('HOLD+CTRL+I')).toBeTruthy();
+                term.cmd().keymap(null);
+                expect(term.keymap('HOLD+CTRL+I')).toBeFalsy();
+            });
         });
-        
+
         describe('exec', function() {
             var counter = 0;
             var interpreter;
@@ -4885,7 +4927,7 @@ describe('Terminal plugin', function() {
                 spy(options, 'login');
                 var term = $('<div/>').terminal({
                     echo: function(arg) {
-                        test.test(arg);
+                        test.empty(arg);
                     }
                 }, options);
                 if (term.token()) {
