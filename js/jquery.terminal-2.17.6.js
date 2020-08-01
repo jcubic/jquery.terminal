@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 01 Aug 2020 07:37:25 +0000
+ * Date: Sat, 01 Aug 2020 07:49:43 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4456,7 +4456,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.17.6',
-        date: 'Sat, 01 Aug 2020 07:37:25 +0000',
+        date: 'Sat, 01 Aug 2020 07:49:43 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9508,7 +9508,7 @@
                                     return fn.bind(self);
                                 }
                                 return function(e, original) {
-                                    // new keymap function will get default as 2nd argument
+                                    // new keymap function will get default as 2nd arg
                                     return fn.call(self, e, function() {
                                         return terminal_init_keymap[key](e, original);
                                     });

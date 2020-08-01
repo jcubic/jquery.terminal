@@ -9508,7 +9508,7 @@
                                     return fn.bind(self);
                                 }
                                 return function(e, original) {
-                                    // new keymap function will get default as 2nd argument
+                                    // new keymap function will get default as 2nd arg
                                     return fn.call(self, e, function() {
                                         return terminal_init_keymap[key](e, original);
                                     });
