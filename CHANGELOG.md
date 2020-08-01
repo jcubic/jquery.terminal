@@ -8,6 +8,7 @@
 * fix underscore cut off in Firefox (visible in signature)
 * fix combined emoji characters and skin tone variations [#598](https://github.com/jcubic/jquery.terminal/issues/598)
 * fix down arrow at when cursor at the end of broken line [#601](https://github.com/jcubic/jquery.terminal/issues/601)
+* fix broken keymap inheritance in nested interpreters [#615](https://github.com/jcubic/jquery.terminal/issues/615)
 
 ## 2.17.5
 ### Bugfix

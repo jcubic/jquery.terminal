@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 14 Jul 2020 07:54:55 +0000
+ * Date: Sat, 01 Aug 2020 07:37:25 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3212,7 +3212,10 @@
                         return fn.call(self, e, original);
                     };
                 }
-                if (typeof new_keymap === 'undefined') {
+                if (new_keymap === null) {
+                    keymap = default_keymap;
+                    return self;
+                } else if (typeof new_keymap === 'undefined') {
                     return keymap;
                 } else if (typeof new_keymap === 'string') {
                     if (typeof value === 'undefined') {
@@ -4453,7 +4456,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.17.6',
-        date: 'Tue, 14 Jul 2020 07:54:55 +0000',
+        date: 'Sat, 01 Aug 2020 07:37:25 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7603,16 +7606,20 @@
                 self.history().toggle(interpreter.history);
             }
             if ($.isPlainObject(interpreter.keymap)) {
-                command_line.keymap($.omap(interpreter.keymap, function(name, fun) {
-                    return function() {
-                        var args = [].slice.call(arguments);
-                        try {
-                            return fun.apply(self, args);
-                        } catch (e) {
-                            display_exception(e, 'USER KEYMAP');
-                        }
-                    };
-                }));
+                command_line.keymap(null).keymap($.extend(
+                    {},
+                    terminal_init_keymap,
+                    $.omap(interpreter.keymap, function(name, fun) {
+                        return function() {
+                            var args = [].slice.call(arguments);
+                            try {
+                                return fun.apply(self, args);
+                            } catch (e) {
+                                display_exception(e, 'USER KEYMAP');
+                            }
+                        };
+                    })
+                ));
             }
             command_line.set('');
             init_queue.resolve();
@@ -9493,27 +9500,31 @@
                         return command_line.keymap(keymap);
                     } else if ($.isPlainObject(keymap)) {
                         // argument is an object
-                        keymap = $.omap(keymap || {}, function(key, fn) {
-                            if (!new_keymap[key]) {
-                                return fn.bind(self);
-                            }
-                            return function(e, original) {
-                                // new keymap function will get default as 2nd argument
-                                return fn.call(self, e, function() {
-                                    return new_keymap[key](e, original);
-                                });
-                            };
-                        });
-                        command_line.keymap(keymap);
+                        keymap = $.extend(
+                            {},
+                            terminal_init_keymap,
+                            $.omap(keymap || {}, function(key, fn) {
+                                if (!terminal_init_keymap[key]) {
+                                    return fn.bind(self);
+                                }
+                                return function(e, original) {
+                                    // new keymap function will get default as 2nd argument
+                                    return fn.call(self, e, function() {
+                                        return terminal_init_keymap[key](e, original);
+                                    });
+                                };
+                            })
+                        );
+                        command_line.keymap(null).keymap(keymap);
                     }
                 } else if (typeof fn === 'function') {
                     var key = keymap;
-                    if (!new_keymap[key]) {
+                    if (!terminal_init_keymap[key]) {
                         command_line.keymap(key, fn.bind(self));
                     } else {
                         command_line.keymap(key, function(e, original) {
                             return fn.call(self, e, function() {
-                                return new_keymap[key](e, original);
+                                return terminal_init_keymap[key](e, original);
                             });
                         });
                     }
@@ -9896,7 +9907,7 @@
             }
         }
         $(document).on('paste.terminal_' + self.id(), paste_event);
-        var new_keymap = $.extend(
+        var terminal_init_keymap = $.extend(
             {},
             keymap,
             $.omap(settings.keymap || {}, function(key, fn) {
@@ -9932,7 +9943,7 @@
                 greetings: settings.greetings,
                 mousewheel: settings.mousewheel,
                 history: settings.history,
-                keymap: new_keymap
+                keymap: terminal_init_keymap
             }, interpreter));
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
@@ -9949,7 +9960,7 @@
                 enabled: false,
                 char_width: char_size.width,
                 keydown: key_down,
-                keymap: new_keymap,
+                keymap: terminal_init_keymap,
                 clickTimeout: settings.clickTimeout,
                 holdTimeout: settings.holdTimeout,
                 holdRepeatTimeout: settings.holdRepeatTimeout,
