@@ -1097,6 +1097,62 @@ describe('Terminal utils', function() {
             var output = $.terminal.apply_formatters(input);
             expect(output).toEqual(input.replace(/0/g, 'x'));
         });
+        describe('terminal', function() {
+            var term, formatters;
+            beforeEach(function() {
+                term = $('<div/>').terminal();
+                formatters = $.terminal.defaults.formatters.slice();
+                $.terminal.defaults.formatters = [
+                    [/foo/g, 'bar'],
+                    [/prompt/g, 'p__', {prompt: true}],
+                    [/cmd/g, 'c__', {command: true}],
+                    [/echo/g, 'e__', {echo: true}]
+                ];
+            });
+            afterEach(function() {
+                term.destroy();
+                $.terminal.defaults.formatters = formatters;
+            });
+            function test(spec) {
+                var prompt = spec.prompt;
+                var echo = spec.echo;
+                var command = spec.command;
+                term.set_prompt(prompt[0]);
+                expect(term.find('.cmd-prompt').text()).toEqual(prompt[1]);
+                term.clear().echo(echo[0]);
+                expect(term.find('.terminal-output').text()).toEqual(echo[1]);
+                term.set_command(command[0]);
+                expect(term.find('.cmd-prompt').nextAll().text().trim()).toEqual(command[1]);
+            }
+            it('should always formatters', function() {
+                test({
+                    prompt: ['foo>', 'bar>'],
+                    command: ['foo', 'bar'],
+                    echo: ['foo', 'bar']
+                });
+            });
+            it('should apply formatter only in prompt', function() {
+                test({
+                    prompt: ['prompt>', 'p__>'],
+                    command: ['prompt', 'prompt'],
+                    echo: ['prompt', 'prompt']
+                });
+            });
+            it('should apply formatter only to echo', function() {
+                test({
+                    prompt: ['echo>', 'echo>'],
+                    command: ['echo', 'echo'],
+                    echo: ['echo', 'e__']
+                });
+            });
+            it('should apply formatter only to command', function() {
+                test({
+                    prompt: ['cmd>', 'cmd>'],
+                    command: ['cmd', 'c__'],
+                    echo: ['cmd', 'cmd']
+                });
+            });
+        });
     });
     describe('$.terminal.split_equal', function() {
         var text = ['[[bui;#fff;]Lorem ipsum dolor sit amet, consectetur adipi',
