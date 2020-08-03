@@ -10,8 +10,8 @@ https://terminal.jcubic.pl
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&c980206064d976f84e727878a099752223385d2b)](https://travis-ci.org/jcubic/jquery.terminal)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&7223661bc5986a69bae11d4b39fa63c0)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&3ad462d2d00b00903ca69863e2853ff3c5662b27)](https://travis-ci.org/jcubic/jquery.terminal)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&482a03c79e1911dde973d38d8cd42a4d)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![LICENSE MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
@@ -19,8 +19,6 @@ https://terminal.jcubic.pl
 [![Paid Support](https://github.com/jcubic/jquery.terminal/blob/master/.github/support.svg?raw=true)](https://xscode.com/jcubic/jquery.terminal)
 
 “jQuery Terminal is being sponsored by the following tool; please help to support us by taking a look and signing up to a free trial”
-
-[![GitAds](https://images.gitads.io/jquery.terminal)](https://tracking.gitads.io/?repo=jquery.terminal)
 
 ### Summary
 
