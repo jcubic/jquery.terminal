@@ -17,6 +17,7 @@
 * fix spaces in images in less & text selection
 * fix regresion in fontawesome icons
 * fix inconsistency with emoji and wide characters in terminal and cmd
+* fix rounding issue that cause exception in less when rendering images
 
 ## 2.17.6
 ### Bugfix
