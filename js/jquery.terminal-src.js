@@ -5545,6 +5545,11 @@
                 } else {
                     result = '<span';
                 }
+                if (attrs && attrs.style) {
+                    // merge style attr and colors #617
+                    attrs.style = style_str + attrs.style;
+                    style_str = '';
+                }
                 result += add_attrs(attrs);
                 if (style_str !== '') {
                     result += ' style="' + style_str + '"';

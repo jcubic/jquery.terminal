@@ -1029,6 +1029,13 @@ describe('Terminal utils', function() {
             });
             expect(output).toMatchSnapshot();
         });
+        it('should merge color style with style attr', function() {
+            var input = '[[;green;;;;{"style": "--size: 2"}]Foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: ['style']
+            });
+            expect(output).toMatchSnapshot();
+        });
     });
     describe('$.terminal.strip', function() {
         it('should remove formatting', function() {
