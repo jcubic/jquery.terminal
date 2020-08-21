@@ -4927,7 +4927,7 @@ describe('Terminal plugin', function() {
                 spy(options, 'login');
                 var term = $('<div/>').terminal({
                     echo: function(arg) {
-                        test.empty(arg);
+                        test.test(arg);
                     }
                 }, options);
                 if (term.token()) {
