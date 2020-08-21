@@ -2177,7 +2177,7 @@
         }
         // -------------------------------------------------------------------------------
         function prev_history() {
-            if (first_up_history && !command) {
+            if (first_up_history) {
                 last_command = command;
                 self.set(history.current());
             } else {
