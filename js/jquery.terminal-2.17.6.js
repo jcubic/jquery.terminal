@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 05 Aug 2020 09:38:35 +0000
+ * Date: Fri, 21 Aug 2020 13:09:13 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2177,7 +2177,7 @@
         }
         // -------------------------------------------------------------------------------
         function prev_history() {
-            if (first_up_history) {
+            if (first_up_history && !command) {
                 last_command = command;
                 self.set(history.current());
             } else {
@@ -2230,10 +2230,10 @@
                 self.position(0);
                 return false;
             }
+            if (line === 0) {
+                return prev_history();
+            }
             if (have_newlines(before) || have_wrapping(before, prompt_len)) {
-                if (line === 0) {
-                    return prev_history();
-                }
                 var prev = cursor_line.prev();
                 var splitted = prev.is('.cmd-end-line');
                 var lines = simple_split_command_line(formatted);
@@ -4461,7 +4461,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 05 Aug 2020 09:38:35 +0000',
+        date: 'Fri, 21 Aug 2020 13:09:13 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

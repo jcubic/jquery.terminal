@@ -2177,7 +2177,7 @@
         }
         // -------------------------------------------------------------------------------
         function prev_history() {
-            if (first_up_history) {
+            if (first_up_history && !command) {
                 last_command = command;
                 self.set(history.current());
             } else {
@@ -2230,10 +2230,10 @@
                 self.position(0);
                 return false;
             }
+            if (line === 0) {
+                return prev_history();
+            }
             if (have_newlines(before) || have_wrapping(before, prompt_len)) {
-                if (line === 0) {
-                    return prev_history();
-                }
                 var prev = cursor_line.prev();
                 var splitted = prev.is('.cmd-end-line');
                 var lines = simple_split_command_line(formatted);
