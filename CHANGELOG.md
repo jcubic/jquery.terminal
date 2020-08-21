@@ -1,3 +1,24 @@
+## 2.18.0
+### Features
+* new API to use `renderHandler` with update
+* new API (`apply_formatters` function option) to pick where processing of formatting should work [#588](https://github.com/jcubic/jquery.terminal/issues/588)
+* allow to toggle formatters in prism (enabled by default only for echo and command)
+* escape slash in `escape_formatting`/`escape_brackets` [#605](https://github.com/jcubic/jquery.terminal/issues/605)
+* add support for rgb(a) and hsl(a) colors [#590](https://github.com/jcubic/jquery.terminal/issues/590)
+* unify Firefox and Webkit (chrome) custom scrollbars [#607](https://github.com/jcubic/jquery.terminal/issues/607)
+### Bugfix
+* fix same cases of wrong calculated size of the character when --size is used [#602](https://github.com/jcubic/jquery.terminal/issues/602)
+* add custom scrollbar on Firefox
+* fix colors of Webkit scrollbar
+* fix `renderHandler` in update
+* fix formatting in update - reusing options from echo
+* fix normal return string from prompt
+* fix pipe symbol inside strings [#606](https://github.com/jcubic/jquery.terminal/issues/606)
+* fix spaces in images in less & text selection
+* fix regresion in fontawesome icons
+* fix inconsistency with emoji and wide characters in terminal and cmd
+* fix rounding issue that cause exception in less when rendering images
+
 ## 2.17.6
 ### Bugfix
 * fix adding duplicated prism formatters [#573](https://github.com/jcubic/jquery.terminal/issues/573)

@@ -847,9 +847,19 @@ describe('Terminal utils', function() {
     });
     describe('$.terminal.valid_color', function() {
         it('should mark hex color as valid', function() {
-            var valid_colors = ['#fff', '#fab', '#ffaacc', 'red', 'blue'];
+            var valid_colors = [
+                '#fff', '#fab', '#ffaacc', 'red', 'blue',
+                'rgba(100,100,100,1)', 'rgb(100, 200, 300)',
+                'hsl(100, 20, 20)', 'hsla(100,10,20, 1)'
+            ];
             valid_colors.forEach(function(color) {
                 expect($.terminal.valid_color(color)).toBe(true);
+            });
+        });
+        it('should mark hex color as invalid', function() {
+            var valid_colors = ['foo', '#faro', '#fifa', 'fuck'];
+            valid_colors.forEach(function(color) {
+                expect($.terminal.valid_color(color)).toBe(false);
             });
         });
     });
@@ -1019,6 +1029,13 @@ describe('Terminal utils', function() {
             });
             expect(output).toMatchSnapshot();
         });
+        it('should merge color style with style attr', function() {
+            var input = '[[;green;;;;{"style": "--size: 2"}]Foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: ['style']
+            });
+            expect(output).toMatchSnapshot();
+        });
     });
     describe('$.terminal.strip', function() {
         it('should remove formatting', function() {
@@ -1086,6 +1103,62 @@ describe('Terminal utils', function() {
             var input = '00000000000000000000000000';
             var output = $.terminal.apply_formatters(input);
             expect(output).toEqual(input.replace(/0/g, 'x'));
+        });
+        describe('terminal', function() {
+            var term, formatters;
+            beforeEach(function() {
+                term = $('<div/>').terminal();
+                formatters = $.terminal.defaults.formatters.slice();
+                $.terminal.defaults.formatters = [
+                    [/foo/g, 'bar'],
+                    [/prompt/g, 'p__', {prompt: true}],
+                    [/cmd/g, 'c__', {command: true}],
+                    [/echo/g, 'e__', {echo: true}]
+                ];
+            });
+            afterEach(function() {
+                term.destroy();
+                $.terminal.defaults.formatters = formatters;
+            });
+            function test(spec) {
+                var prompt = spec.prompt;
+                var echo = spec.echo;
+                var command = spec.command;
+                term.set_prompt(prompt[0]);
+                expect(term.find('.cmd-prompt').text()).toEqual(prompt[1]);
+                term.clear().echo(echo[0]);
+                expect(term.find('.terminal-output').text()).toEqual(echo[1]);
+                term.set_command(command[0]);
+                expect(term.find('.cmd-prompt').nextAll().text().trim()).toEqual(command[1]);
+            }
+            it('should always formatters', function() {
+                test({
+                    prompt: ['foo>', 'bar>'],
+                    command: ['foo', 'bar'],
+                    echo: ['foo', 'bar']
+                });
+            });
+            it('should apply formatter only in prompt', function() {
+                test({
+                    prompt: ['prompt>', 'p__>'],
+                    command: ['prompt', 'prompt'],
+                    echo: ['prompt', 'prompt']
+                });
+            });
+            it('should apply formatter only to echo', function() {
+                test({
+                    prompt: ['echo>', 'echo>'],
+                    command: ['echo', 'echo'],
+                    echo: ['echo', 'e__']
+                });
+            });
+            it('should apply formatter only to command', function() {
+                test({
+                    prompt: ['cmd>', 'cmd>'],
+                    command: ['cmd', 'c__'],
+                    echo: ['cmd', 'cmd']
+                });
+            });
         });
     });
     describe('$.terminal.split_equal', function() {
@@ -2249,6 +2322,23 @@ describe('Terminal utils', function() {
                     return string;
                 }
             }));
+            await term.exec('echo "|" | read');
+            expect(get_lines(term)).toEqual(['your text: |']);
+            term.destroy();
+            // new API with option that use monkey patch
+            term = $('<div/>').terminal({
+                read: function() {
+                    return this.read('').then((text) => {
+                        this.echo('your text: ' + text);
+                    });
+                },
+                echo: async function(string) {
+                    await delay(10);
+                    return string;
+                }
+            }, {
+                pipe: true
+            });
             await term.exec('echo "|" | read');
             expect(get_lines(term)).toEqual(['your text: |']);
         });
@@ -5437,22 +5527,6 @@ describe('Terminal plugin', function() {
                 expect(term.find('.terminal-output').text()).toEqual('foobarbaz');
             });
         });
-        describe('update', function() {
-            var term = $('<div/>').terminal($.noop, {greetings: false});
-            it('should update terminal output', function() {
-                term.echo('Hello');
-                term.update(0, 'Hello, World!');
-                expect(term.find('.terminal-output').text()).toEqual(nbsp('Hello, World!'));
-                term.clear();
-                term.echo('Foo');
-                term.echo('Bar');
-                term.update(-1, 'Baz');
-                expect(term.find('.terminal-output').text()).toEqual('FooBaz');
-                term.update(-2, 'Lorem');
-                term.update(1, 'Ipsum');
-                expect(term.find('.terminal-output').text()).toEqual('LoremIpsum');
-            });
-        });
         describe('last_index', function() {
             var term = $('<div/>').terminal($.noop, {greetings: false});
             it('should return proper index', function() {
@@ -6613,18 +6687,46 @@ describe('Terminal plugin', function() {
             });
         });
         describe('update', function() {
-            var term = $('<div/>').terminal();
+            var term = $('<div/>').terminal($.noop, {greetings: false});
             function last_line() {
                 return last_div().find('div');
             }
             function last_div() {
                 return term.find('.terminal-output > div:last-child');
             }
+            beforeEach(function() {
+                term.clear();
+            });
+            it('should update terminal output', function() {
+                term.echo('Hello');
+                term.update(0, 'Hello, World!');
+                expect(term.find('.terminal-output').text()).toEqual(nbsp('Hello, World!'));
+                term.clear();
+                term.echo('Foo');
+                term.echo('Bar');
+                term.update(-1, 'Baz');
+                expect(term.find('.terminal-output').text()).toEqual('FooBaz');
+                term.update(-2, 'Lorem');
+                term.update(1, 'Ipsum');
+                expect(term.find('.terminal-output').text()).toEqual('LoremIpsum');
+            });
             it('should update last line', function() {
                 term.echo('foo');
                 expect(last_line().text()).toEqual('foo');
                 term.update(-1, 'bar');
                 expect(last_line().text()).toEqual('bar');
+            });
+            it('should allow attributes in formatting from echo', function() {
+                var f = $.terminal.defaults.formatters.slice();
+                $.terminal.defaults.formatters.push([
+                    /foo/g, '[[;;;;;{"style": "color:#fff"}]foo]'
+                ]);
+                $.terminal.defaults.allowedAttributes.push('style');
+                term.echo('hello');
+                term.update(-1, 'foo', {});
+                expect(last_line().find('[style*="color"]').length).toEqual(1);
+                $.terminal.defaults.formatters = f;
+                $.terminal.defaults.allowedAttributes.pop();
             });
             it('should remove last line', function() {
                 var index = term.last_index();
@@ -6637,6 +6739,7 @@ describe('Terminal plugin', function() {
                 var options = {
                     finalize: function() {}
                 };
+                term.echo('hello');
                 spy(options, 'finalize');
                 term.update(-1, 'baz', options);
                 expect(options.finalize).toHaveBeenCalled();

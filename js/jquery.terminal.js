@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.17.6
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 01 Aug 2020 07:49:43 +0000
+ * Date: Fri, 21 Aug 2020 13:09:13 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1128,7 +1128,7 @@
     var format_start_re = /^(\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\])/i;
     var format_end_re = /\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\]?$/i;
     var self_closing_re = /^(?:\[\[)?[^;]*@[^;]*;/;
-    var color_hex_re = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+    var color_re = /^(?:#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([^)]+\)|hsla?\([^)]+\))$/i;
     var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var url_nf_re = /\b(?![^"\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
@@ -2177,7 +2177,7 @@
         }
         // -------------------------------------------------------------------------------
         function prev_history() {
-            if (first_up_history) {
+            if (first_up_history && !command) {
                 last_command = command;
                 self.set(history.current());
             } else {
@@ -2230,10 +2230,10 @@
                 self.position(0);
                 return false;
             }
+            if (line === 0) {
+                return prev_history();
+            }
             if (have_newlines(before) || have_wrapping(before, prompt_len)) {
-                if (line === 0) {
-                    return prev_history();
-                }
                 var prev = cursor_line.prev();
                 var splitted = prev.is('.cmd-end-line');
                 var lines = simple_split_command_line(formatted);
@@ -2662,7 +2662,8 @@
                 string = $.terminal.escape_formatting(string);
                 var format_options = $.extend({}, settings, {
                     unixFormattingEscapeBrackets: true,
-                    position: position
+                    position: position,
+                    command: true
                 });
                 var formatted = $.terminal.apply_formatters(string, format_options);
                 var output = $.terminal.normalize(formatted[0]);
@@ -2986,7 +2987,8 @@
         var find_position = (function() {
             function make_guess(string, position) {
                 var opts = $.extend({}, settings, {
-                    position: position
+                    position: position,
+                    command: true
                 });
                 return $.terminal.apply_formatters(string, opts)[1];
             }
@@ -3031,7 +3033,7 @@
         var prev_prompt_data;
         var draw_prompt = (function() {
             function set(prompt) {
-                prompt = $.terminal.apply_formatters(prompt, {});
+                prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                 prompt = $.terminal.normalize(prompt);
                 prompt = crlf(prompt);
                 last_rendered_prompt = prompt;
@@ -3101,6 +3103,9 @@
                         var ret = prompt.call(self, function(string) {
                             data.set(string);
                         });
+                        if (typeof ret === 'string') {
+                            data.set(ret);
+                        }
                         if (ret && ret.then) {
                             ret.then(data.set).catch(function(e) {
                                 var prompt = $.terminal.escape_brackets('[ERR]> ');
@@ -4455,8 +4460,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.17.6',
-        date: 'Sat, 01 Aug 2020 07:49:43 +0000',
+        version: 'DEV',
+        date: 'Fri, 21 Aug 2020 13:09:13 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -4500,7 +4505,7 @@
         // :: Validate html color (it can be name or hex)
         // ---------------------------------------------------------------------
         valid_color: function valid_color(color) {
-            if (color.match(color_hex_re)) {
+            if (color.match(color_re)) {
                 return true;
             } else {
                 return $.inArray(color.toLowerCase(), $.terminal.color_names) !== -1;
@@ -5165,6 +5170,25 @@
                          ' that return [replacement, position] instead');
                 }
             }
+            function should_format(options) {
+                if (!settings || !options) {
+                    return true;
+                }
+                var props = ['echo', 'command', 'prompt'];
+                var have_any = props.some(function(name) {
+                    return options[name] === true;
+                });
+                if (!have_any) {
+                    return true;
+                }
+                for (var i = props.length; i--;) {
+                    var prop = props[i];
+                    if (options[prop] === true && settings[prop] === true) {
+                        return true;
+                    }
+                }
+                return false;
+            }
             settings = settings || {};
             var formatters = settings.formatters || $.terminal.defaults.formatters;
             var i = 0;
@@ -5232,7 +5256,8 @@
                                 if (is_array(formatter)) {
                                     var options = formatter[2] || {};
                                     result = [string, position < 0 ? 0 : position];
-                                    if (result[0].match(formatter[0])) {
+                                    if (result[0].match(formatter[0]) &&
+                                        should_format(formatter[2])) {
                                         if (options.loop) {
                                             while (result[0].match(formatter[0])) {
                                                 result = $.terminal.tracking_replace(
@@ -5520,6 +5545,11 @@
                 } else {
                     result = '<span';
                 }
+                if (attrs && attrs.style) {
+                    // merge style attr and colors #617
+                    attrs.style = style_str + attrs.style;
+                    style_str = '';
+                }
                 result += add_attrs(attrs);
                 if (style_str !== '') {
                     result += ' style="' + style_str + '"';
@@ -5576,13 +5606,17 @@
         // :: Replace brackets with html entities
         // ---------------------------------------------------------------------
         escape_brackets: function escape_brackets(string) {
-            return string.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;');
+            return string.replace(/\[/g, '&#91;')
+                .replace(/\]/g, '&#93;')
+                .replace(/\\/g, '&#92;');
         },
         // ---------------------------------------------------------------------
         // :: complmentary function
         // ---------------------------------------------------------------------
         unescape_brackets: function unescape_brackets(string) {
-            return string.replace(/&#91;/g, '[').replace(/&#93;/g, ']');
+            return string.replace(/&#91;/g, '[')
+                .replace(/&#93;/g, ']')
+                .replace(/&#92;/g, '\\');
         },
         // ---------------------------------------------------------------------
         // :: return number of characters without formatting
@@ -6381,9 +6415,9 @@
         // ---------------------------------------------------------------------
         // :: helper function that use option to render objects
         // ---------------------------------------------------------------------
-        function preprocess_value(value) {
+        function preprocess_value(value, options) {
             if (is_function(settings.renderHandler)) {
-                var ret = settings.renderHandler.call(self, value, self);
+                var ret = settings.renderHandler.call(self, value, options, self);
                 if (ret === false) {
                     return false;
                 }
@@ -7121,7 +7155,7 @@
                             try {
                                 string = $.terminal.apply_formatters(
                                     string,
-                                    settings
+                                    $.extend(settings, {echo: true})
                                 );
                             } catch (e) {
                                 display_exception(e, 'FORMATTING');
@@ -7348,11 +7382,13 @@
             var options = {
                 convertLinks: false,
                 exec: false,
+                formatters: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
+            command = $.terminal.apply_formatters(command, {command: true});
             self.echo(prompt + command, options);
         }
         // ---------------------------------------------------------------------
@@ -8978,23 +9014,32 @@
                         lines.splice(line, 1);
                         output.find('[data-index=' + line + ']').remove();
                     } else {
-                        var ret = prepare_render(value, options);
-                        if (ret) {
-                            value = ret[0];
-                            options = ret[1];
-                        }
-                        lines[line][0] = value;
-                        if (options) {
-                            lines[line][1] = options;
-                        }
-                        process_line({
-                            value: value,
-                            index: line,
-                            options: options
+                        value = preprocess_value(value, {
+                            update: true,
+                            line: line
                         });
-                        self.flush({
-                            scroll: false,
-                            update: true
+                        if (value === false) {
+                            return self;
+                        }
+                        unpromise(value, function(value) {
+                            var ret = prepare_render(value, options);
+                            if (ret) {
+                                value = ret[0];
+                                options = ret[1];
+                            }
+                            lines[line][0] = value;
+                            if (options) {
+                                lines[line][1] = $.extend(lines[line][1], options);
+                            }
+                            process_line({
+                                value: value,
+                                index: line,
+                                options: lines[line][1]
+                            });
+                            self.flush({
+                                scroll: false,
+                                update: true
+                            });
                         });
                     }
                 });
@@ -9084,7 +9129,7 @@
                                 value = '';
                             }
                         } else {
-                            var ret = preprocess_value(arg);
+                            var ret = preprocess_value(arg, {});
                             if (ret === false) {
                                 return self;
                             }
@@ -9740,6 +9785,9 @@
             self.height(settings.height);
         }
         var char_size = get_char_size(self);
+        // this is needed when terminal have selector with --size that is not
+        // bare .terminal so fake terminal will not get the proper size #602
+        var need_char_size_recalculate = !terminal_ready(self);
         // so it's the same as in TypeScript definition for options
         delete settings.formatters;
         // used to throw error when calling methods on destroyed terminal
@@ -10253,6 +10301,10 @@
                 if (self.is(':visible')) {
                     var width = fill.width();
                     var height = fill.height();
+                    if (need_char_size_recalculate) {
+                        need_char_size_recalculate = !terminal_ready(self);
+                        calculate_char_size();
+                    }
                     // prevent too many calculations in IE
                     if (old_height !== height || old_width !== width) {
                         self.resize();

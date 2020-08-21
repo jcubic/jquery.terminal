@@ -50,6 +50,8 @@ exports[`Terminal utils $.terminal.format should handle emails 2`] = `"<a href=\
 
 exports[`Terminal utils $.terminal.format should handle wider characters without formatting 1`] = `"<span style=\\"width: 24ch\\" data-text=\\"ターミナルウィンドウは黒\\"><span style=\\"width: 24ch\\"><span style=\\"width: 2ch\\">タ</span><span style=\\"width: 2ch\\">ー</span><span style=\\"width: 2ch\\">ミ</span><span style=\\"width: 2ch\\">ナ</span><span style=\\"width: 2ch\\">ル</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">ィ</span><span style=\\"width: 2ch\\">ン</span><span style=\\"width: 2ch\\">ド</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">は</span><span style=\\"width: 2ch\\">黒</span></span></span><span style=\\"width: 4ch\\" data-text=\\"です\\"><span><span style=\\"width: 4ch\\"><span style=\\"width: 2ch\\">で</span><span style=\\"width: 2ch\\">す</span></span></span></span>"`;
 
+exports[`Terminal utils $.terminal.format should merge color style with style attr 1`] = `"<span style=\\"color:green;--color:green;--original-color:green;--size: 2\\" data-text=\\"Foo\\"><span>Foo</span></span>"`;
+
 exports[`Terminal utils $.terminal.format should not allow attributes 1`] = `"<span data-text=\\"foo\\"><span>foo</span></span>"`;
 
 exports[`Terminal utils $.terminal.format should not duplicate and don't overwrite data-text 1`] = `"<span data-text=\\"foo\\"><span>foo</span></span>"`;

@@ -85,7 +85,11 @@
         ctx.putImageData(img_data, 0, 0);
         var defer = $.Deferred();
         canvas.toBlob(function(blob) {
-            defer.resolve(URL.createObjectURL(blob));
+            if (blob === null) {
+                defer.resolve(null);
+            } else {
+                defer.resolve(URL.createObjectURL(blob));
+            }
         });
         return defer.promise();
     }
@@ -295,7 +299,10 @@
                     var img = m[1];
                     var rect = cursor_size();
                     var width = term.width();
-                    var opts = {width: width, line_height: rect.height};
+                    var opts = {
+                        width: width,
+                        line_height: Math.floor(rect.height)
+                    };
                     cache[width] = cache[width] || {};
                     if (cache[width][img]) {
                         concat_slices(cache[width][img]);
