@@ -78,9 +78,8 @@
 }
 .terminal {
     position: relative;
-    /*overflow: hidden;*/
+    line-height: 1em;
     overflow-y: auto;
-    /* overflow-x: hidden; */
 }
 terminal.terminal-temp {
     visibility: hidden;

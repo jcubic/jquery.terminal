@@ -1,6 +1,7 @@
 ## 2.18.1
 ### Bugfix
 * fix glitches in history navigation (visible when using multiline commands in history)
+* fix using line-height from body
 
 ## 2.18.0
 ### Features
