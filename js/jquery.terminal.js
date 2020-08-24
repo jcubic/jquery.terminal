@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version DEV
+ *           \/              /____/                              version 2.18.1
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 24 Aug 2020 11:34:51 +0000
+ * Date: Mon, 24 Aug 2020 13:42:27 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3657,7 +3657,7 @@
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 // only enter will reset history (and down arrow on last command)
-                if (key.toLowerCase() == 'enter') {
+                if (key.toLowerCase() === 'enter') {
                     first_up_history = true;
                 }
                 if (reverse_search && clear_reverse_search_key(e)) {
@@ -4466,8 +4466,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: 'DEV',
-        date: 'Mon, 24 Aug 2020 11:34:51 +0000',
+        version: '2.18.1',
+        date: 'Mon, 24 Aug 2020 13:42:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
