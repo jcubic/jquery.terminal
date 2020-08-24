@@ -3657,7 +3657,7 @@
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
                 // only enter will reset history (and down arrow on last command)
-                if (key.toLowerCase() == 'enter') {
+                if (key.toLowerCase() === 'enter') {
                     first_up_history = true;
                 }
                 if (reverse_search && clear_reverse_search_key(e)) {
