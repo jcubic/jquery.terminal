@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.18.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 21 Aug 2020 18:11:46 +0000
+ * Date: Mon, 24 Aug 2020 11:34:51 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2188,7 +2188,12 @@
         }
         // -------------------------------------------------------------------------------
         function next_history() {
-            self.set(history.end() ? last_command : history.next());
+            if (history.end()) {
+                first_up_history = true;
+                self.set(last_command);
+            } else {
+                self.set(history.next());
+            }
             return false;
         }
         // -------------------------------------------------------------------------------
@@ -3651,7 +3656,8 @@
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
                 skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
-                if (e.which !== 38 && !(e.which === 80 && e.ctrlKey)) {
+                // only enter will reset history (and down arrow on last command)
+                if (key.toLowerCase() == 'enter') {
                     first_up_history = true;
                 }
                 if (reverse_search && clear_reverse_search_key(e)) {
@@ -4460,8 +4466,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.18.0',
-        date: 'Fri, 21 Aug 2020 18:11:46 +0000',
+        version: 'DEV',
+        date: 'Mon, 24 Aug 2020 11:34:51 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
