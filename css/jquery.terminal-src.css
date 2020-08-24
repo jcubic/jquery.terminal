@@ -78,7 +78,7 @@
 }
 .terminal {
     position: relative;
-    line-height: 1em;
+    line-height: initial;
     overflow-y: auto;
 }
 terminal.terminal-temp {
