@@ -1,3 +1,7 @@
+## 2.18.3
+### Bugfix
+* fix jumping to cursor position on mobile (with code)
+
 ## 2.18.2
 ### Bugfix
 * fix when page use line-height on body

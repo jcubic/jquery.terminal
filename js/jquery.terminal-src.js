@@ -2438,9 +2438,10 @@
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
+                            var pos = !is_mobile ? position + 1 : position;
                             // we check first to improve performance
-                            if (clip.$node.caret() !== position + 1) {
-                                clip.$node.caret(position + 1);
+                            if (clip.$node.caret() !== pos) {
+                                clip.$node.caret(pos);
                             }
                         } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
@@ -3353,9 +3354,9 @@
                     } else {
                         position = n;
                     }
-                    if (pos !== position && !silent) {
+                    if (pos !== position) {
                         redraw();
-                        if (is_function(settings.onPositionChange)) {
+                        if (!silent && is_function(settings.onPositionChange)) {
                             settings.onPositionChange(position, formatted_position);
                         }
                         fix_textarea(true);

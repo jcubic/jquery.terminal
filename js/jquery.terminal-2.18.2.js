@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 24 Aug 2020 17:56:04 +0000
+ * Date: Mon, 31 Aug 2020 10:34:45 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2438,9 +2438,10 @@
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
+                            var pos = !is_mobile ? position + 1 : position;
                             // we check first to improve performance
-                            if (clip.$node.caret() !== position + 1) {
-                                clip.$node.caret(position + 1);
+                            if (clip.$node.caret() !== pos) {
+                                clip.$node.caret(pos);
                             }
                         } catch (e) {
                             // firefox throw NS_ERROR_FAILURE ignore
@@ -3353,9 +3354,9 @@
                     } else {
                         position = n;
                     }
-                    if (pos !== position && !silent) {
+                    if (pos !== position) {
                         redraw();
-                        if (is_function(settings.onPositionChange)) {
+                        if (!silent && is_function(settings.onPositionChange)) {
                             settings.onPositionChange(position, formatted_position);
                         }
                         fix_textarea(true);
@@ -4467,7 +4468,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.18.2',
-        date: 'Mon, 24 Aug 2020 17:56:04 +0000',
+        date: 'Mon, 31 Aug 2020 10:34:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
