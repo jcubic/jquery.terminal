@@ -845,6 +845,10 @@ terminal .terminal-output > div {
 .cmd .token.token {
     background-color: inherit;
 }
+.cmd .token, .terminal .token {
+    color: inherit;
+    background-color: inherit;
+}
 /* FireFox hack
 @supports (-moz-animation: foo) {
     .terminal,

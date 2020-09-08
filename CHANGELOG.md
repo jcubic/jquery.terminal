@@ -1,3 +1,7 @@
+## 2.18.4
+### Bugfix
+* fix prism when page have color set on span
+
 ## 2.18.3
 ### Bugfix
 * fix jumping to cursor position on mobile (with code)
