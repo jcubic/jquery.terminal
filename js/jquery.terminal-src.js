@@ -2088,7 +2088,7 @@
                 if (m) {
                     kill_text = m[0];
                     if (options.clipboard) {
-                        text_to_clipboard(clip, kill_text);
+                        text_to_clipboard(clip.$node, kill_text);
                     }
                 }
                 self.set(
@@ -2115,7 +2115,7 @@
                     if (m[0].length) {
                         kill_text = self['delete'](-m[0].length);
                         if (options.clipboard) {
-                            text_to_clipboard(clip, kill_text);
+                            text_to_clipboard(clip.$node, kill_text);
                         }
                     }
                 }
