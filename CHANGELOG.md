@@ -1,6 +1,7 @@
 ## 2.18.4
 ### Bugfix
 * fix prism when page have color set on span
+* fix visible textarea when global css set background image
 
 ## 2.18.3
 ### Bugfix
