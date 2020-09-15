@@ -1906,6 +1906,8 @@
                     history.append(command);
                 }
                 var tmp = command;
+                // fix scroll the page where there is no scrollbar
+                clip.$node.blur();
                 history.reset();
 
                 // for next input event on firefox/android with google keyboard
@@ -1925,6 +1927,7 @@
                     }
                 }
                 clip.val('');
+                clip.$node.focus();
                 return false;
             },
             'SHIFT+ENTER': function() {

@@ -3,6 +3,7 @@
 * fix prism when page have color set on span
 * fix visible textarea when global css set background image
 * fix exception `delete_word_forward` (ALT+D) `delete_word_backward` (CTRL+W)
+* fix page scrolling on enter when terminal don't have scrollbar
 
 ## 2.18.3
 ### Bugfix

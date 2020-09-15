@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 09 Sep 2020 12:07:59 +0000
+ * Date: Tue, 15 Sep 2020 07:45:32 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1906,6 +1906,8 @@
                     history.append(command);
                 }
                 var tmp = command;
+                // fix scroll the page where there is no scrollbar
+                clip.$node.blur();
                 history.reset();
 
                 // for next input event on firefox/android with google keyboard
@@ -1925,6 +1927,7 @@
                     }
                 }
                 clip.val('');
+                clip.$node.focus();
                 return false;
             },
             'SHIFT+ENTER': function() {
@@ -4468,7 +4471,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 09 Sep 2020 12:07:59 +0000',
+        date: 'Tue, 15 Sep 2020 07:45:32 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
