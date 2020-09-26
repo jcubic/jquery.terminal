@@ -7807,7 +7807,6 @@
                             self.pop('');
                         } else {
                             self.resume();
-                            self.echo('');
                         }
                     } else {
                         original();

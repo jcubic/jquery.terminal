@@ -5,6 +5,7 @@
 * fix exception `delete_word_forward` (ALT+D) `delete_word_backward` (CTRL+W)
 * fix page scrolling on enter when terminal don't have scrollbar
 * fix ANSI Art [#622](https://github.com/jcubic/jquery.terminal/issues/622) (unix formatting)
+* fix empty echo in CTRL+D [#626](https://github.com/jcubic/jquery.terminal/issues/626)
 
 ## 2.18.3
 ### Bugfix
