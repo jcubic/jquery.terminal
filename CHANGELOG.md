@@ -4,6 +4,7 @@
 * fix visible textarea when global css set background image
 * fix exception `delete_word_forward` (ALT+D) `delete_word_backward` (CTRL+W)
 * fix page scrolling on enter when terminal don't have scrollbar
+* fix ANSI Art [#622](https://github.com/jcubic/jquery.terminal/issues/622) (unix formatting)
 
 ## 2.18.3
 ### Bugfix
