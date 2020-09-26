@@ -195,7 +195,7 @@ exports[`Terminal utils $.terminal.from_ansi should render ANSI art 1`] = `
                                 [[b;#444;] ]▐[[b;#444;#AAA]▓][[;#444;#000]░ ][[;#444;#AAA]▐][[;#444;#000]▌  ][[;#444;#AAA]░▀]▄[[b;#444;#AAA]▄][[;#444;#000]▀]░[[b;#444;#AAA]░][[;#FFF;#AAA]░]▄[[b;#444;]▄ ▀][[;#444;#AAA]░][[;#444;#000]▌ ▄░]▀
                                 [[;#AAA;] ][[b;#444;#AAA]░][[;#444;#000]▌]▄[[b;#444;#AAA]▄][[;#444;#000]▀    ]▀[[b;#444;]▀    ▀▀    ]▀[[b;#444;]▀]
                                 [[b;#444;]  ]▀[[b;#444;]▀]
-[[b;#444;]SAUCE00marble                             Necrofiliac         fuel                20180923;+][[b;#444;]P][[b;#444;]H][[b;#444;]IBM VGA]"
+"
 `;
 
 exports[`Terminal utils $.terminal.from_ansi should render ANSI art 2`] = `
@@ -334,7 +334,7 @@ exports[`Terminal utils $.terminal.from_ansi should render ANSI art 2`] = `
                                       [[;#A50;#000]▀▀▀]          [[;#A50;#000]▐▌▐▌▐▌▀▓▒▄▀ ░ ▄▓]
                                                     [[;#A50;#000]▀ ▀ ▀  ▀]     [[;#A50;#000]▄▀ ][[b;#444;#000]bs]
                                                                     [[;#000;]░░▒▓]
-[[;#000;]SAUCE00Regina Pacis                       burps               fuel                20180923fX][[;#000;]P][[;#000;]ç][[;#000;]IBM VGA]"
+"
 `;
 
 exports[`Terminal utils $.terminal.split_equal split emoji encoded from apply_formatters 1`] = `

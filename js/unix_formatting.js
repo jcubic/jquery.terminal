@@ -1178,6 +1178,8 @@
                 position: 0,
                 ansiParser: {}
             }, options);
+            input = input.replace(/\x1A.*/, '');
+            input = input.replace(/\r?\n?\x1b\[A\x1b\[[0-9]+C/g, '');
             input = $.terminal.unescape_brackets(input);
             var code, inside, format, charset;
             var print = function print(s) {
@@ -1191,6 +1193,12 @@
                     }).join('');
                 }
                 if (format) {
+                    // this will always need to be escaped
+                    if (s.match(/\\$|[[\]]/) &&
+                        !settings.unixFormattingEscapeBrackets &&
+                        !$.terminal.have_formatting(s)) {
+                        s = $.terminal.escape_formatting(s);
+                    }
                     s = format + s + ']';
                 }
                 var line = this.result[this.cursor.y];
@@ -1223,6 +1231,13 @@
             var use_CR = !!input.match(/\x0D/);
             var ROWS = $.terminal.active().rows();
             var COLS = $.terminal.active().cols();
+            // correction to CP 437
+            // ref: https://unix.stackexchange.com/a/611513/1806
+            //      https://unix.stackexchange.com/a/611344/1806
+            var cp_437_control = {
+                0x00: ' ',
+                0x0F: '*'
+            };
             var parser_events = {
                 cursor: {x: 0, y: 0},
                 result: [],
@@ -1239,6 +1254,8 @@
                         }
                     } else if (code === 9) {
                         print.call(this, '\t');
+                    } else if (code in cp_437_control) {
+                        print.call(this, cp_437_control[code]);
                     }
                     if (!this.result[this.cursor.y]) {
                         this.result[this.cursor.y] = '';
