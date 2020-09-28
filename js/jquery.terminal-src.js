@@ -5520,7 +5520,10 @@
                     }
                 }
                 if ($.terminal.valid_color(background)) {
-                    style_str += 'background-color:' + background + ';';
+                    style_str += [
+                        'background-color:' + background,
+                        '--background:' + background
+                    ].join(';') + ';';
                 }
                 var data = clean_data(data_text, text);
                 var extra = extra_css(text, settings);

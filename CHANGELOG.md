@@ -1,4 +1,6 @@
-## 2.18.4
+## 2.19.0
+### Features
+* add support blinking blink ANSI escape (unix_formatting)
 ### Bugfix
 * fix prism when page have color set on span
 * fix visible textarea when global css set background image

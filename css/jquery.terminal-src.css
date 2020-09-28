@@ -984,3 +984,17 @@ terminal .terminal-output > div {
 .cmd .token {
     --original-color: var(--color);
 }
+.terminal .terminal-blink, .cmd .terminal-blink {
+    animation: terminal-ansi-blink 1s steps(2, start) infinite;
+    -webkit-animation: terminal-ansi-blink 1s steps(2, start) infinite;
+}
+@keyframes terminal-ansi-blink {
+    to {
+        color: var(--background);
+    }
+}
+@-webkit-keyframes terminal-ansi-blink {
+    to {
+        color: var(--background);
+     }
+}

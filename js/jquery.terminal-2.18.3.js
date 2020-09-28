@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 26 Sep 2020 15:51:24 +0000
+ * Date: Mon, 28 Sep 2020 17:55:30 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4471,7 +4471,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 26 Sep 2020 15:51:24 +0000',
+        date: 'Mon, 28 Sep 2020 17:55:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5520,7 +5520,10 @@
                     }
                 }
                 if ($.terminal.valid_color(background)) {
-                    style_str += 'background-color:' + background + ';';
+                    style_str += [
+                        'background-color:' + background,
+                        '--background:' + background
+                    ].join(';') + ';';
                 }
                 var data = clean_data(data_text, text);
                 var extra = extra_css(text, settings);

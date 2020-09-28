@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Wed, 09 Sep 2020 08:40:30 +0000
+ * Date: Mon, 28 Sep 2020 17:55:31 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -983,4 +983,18 @@ terminal .terminal-output > div {
 }
 .cmd .token {
     --original-color: var(--color);
+}
+.terminal .terminal-blink, .cmd .terminal-blink {
+    animation: terminal-ansi-blink 1s steps(2, start) infinite;
+    -webkit-animation: terminal-ansi-blink 1s steps(2, start) infinite;
+}
+@keyframes terminal-ansi-blink {
+    to {
+        color: var(--background);
+    }
+}
+@-webkit-keyframes terminal-ansi-blink {
+    to {
+        color: var(--background);
+     }
 }
