@@ -1211,7 +1211,8 @@
                         this.result[this.cursor.y] = s;
                     }
                 } else {
-                    line_len = $.terminal.unescape_brackets($.terminal.strip(line)).length;
+                    var stripped = $.terminal.strip(line);
+                    line_len = $.terminal.unescape_brackets(stripped).length;
                     if (this.cursor.x === 0) {
                         after = $.terminal.substring(line, s_len);
                         this.result[this.cursor.y] = s + after;
