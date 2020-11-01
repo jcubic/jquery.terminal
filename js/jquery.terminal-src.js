@@ -6293,6 +6293,11 @@
         login: null,
         outputLimit: -1,
         formatters: [$.terminal.nested_formatting],
+        unixFormatting: {
+            escapeBrackets: false,
+            ansiParser: {},
+            ansiArt: false
+        },
         onAjaxError: null,
         pasteImage: true,
         scrollBottomOffset: 20,
@@ -6311,7 +6316,6 @@
         keymap: null,
         doubleTab: null,
         doubleTabEchoCommand: false,
-        ansiParser: {},
         completion: false,
         onInit: $.noop,
         onClear: $.noop,

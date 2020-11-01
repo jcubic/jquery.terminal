@@ -1,6 +1,7 @@
 ## 2.19.0
 ### Features
-* add support blinking blink ANSI escape (unix_formatting)
+* add support blink ANSI escape (unix_formatting)
+* new unix formatting API options, `ansiArt` option change behavior of blinking
 ### Bugfix
 * fix prism when page have color set on span
 * fix visible textarea when global css set background image

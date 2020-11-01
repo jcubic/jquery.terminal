@@ -495,7 +495,6 @@
     // ---------------------------------------------------------------------
     $.terminal.AnsiParser = AnsiParser;
     // ---------------------------------------------------------------------
-    $.terminal.defaults.unixFormattingEscapeBrackets = false;
     // we match characters and html entities because command line escape brackets
     // echo don't, when writing formatter always process html entitites so it work
     // for cmd plugin as well for echo
@@ -510,14 +509,42 @@
         return $.terminal.length(string);
     }
     // ---------------------------------------------------------------------
+    function get_settings(options) {
+        var unixFormatting = {
+            escapeBrackets: false,
+            ansiParser: {},
+            position: 0,
+            ansiArt: false
+        };
+        if (options) {
+            if (options.unixFormatting) {
+                unixFormatting = $.extend({
+                    escapeBrackets: false,
+                    ansiParser: {},
+                    ansiArt: false
+                }, unixFormatting, options.unixFormatting);
+            }
+            if ('position' in options) {
+                unixFormatting.position = options.position;
+            }
+            if ('unixFormattingEscapeBrackets' in options) {
+                unixFormatting.escapeBrackets = options.unixFormattingEscapeBrackets;
+            }
+            if ('ansiParser' in options) {
+                unixFormatting.ansiParser = $.extend(
+                    unixFormatting.ansiParser,
+                    options.ansiParser
+                );
+            }
+        }
+        return unixFormatting;
+    }
+    // ---------------------------------------------------------------------
     // :: Replace overtyping (from man) formatting with terminal formatting
     // ---------------------------------------------------------------------
     $.terminal.overtyping = function overtyping(string, options) {
         string = $.terminal.unescape_brackets(string);
-        var settings = $.extend({
-            unixFormattingEscapeBrackets: false,
-            position: 0
-        }, options);
+        var settings = get_settings(options);
         var removed_chars = [];
         var new_position;
         var char_count = 0;
@@ -667,7 +694,7 @@
         // replace special characters with terminal formatting
         string = format(string, '\uFFF1', 'b;#fff;');
         string = format(string, '\uFFF2', 'u;;');
-        if (settings.unixFormattingEscapeBrackets) {
+        if (settings.escapeBrackets) {
             string = $.terminal.escape_brackets(string);
         }
         if (options && typeof options.position === 'number') {
@@ -1179,13 +1206,8 @@
         // -------------------------------------------------------------------------------
         return function from_ansi(input, options) {
             options = options || {};
-            var settings = $.extend({
-                unixFormattingEscapeBrackets: false,
-                position: 0,
-                unixFormattingAnsiArt: false,
-                ansiParser: {}
-            }, options);
-            var ansi_art = settings.unixFormattingAnsiArt;
+            var settings = get_settings(options);
+            var ansi_art = settings.ansiArt;
             // if there are SAUCE record if something after end of file
             input = input.replace(/\x1A.*/, '');
             input = input.replace(/\r?\n?\x1b\[A\x1b\[[0-9]+C/g, '');
@@ -1193,7 +1215,7 @@
             var code, inside, format, charset;
             var print = function print(s) {
                 var s_len = s.length;
-                if (settings.unixFormattingEscapeBrackets) {
+                if (settings.escapeBrackets) {
                     s = $.terminal.escape_formatting(s);
                 }
                 if (charset) {
@@ -1204,7 +1226,7 @@
                 if (format) {
                     // this will always need to be escaped
                     if (s.match(/\\$|[[\]]/) &&
-                        !settings.unixFormattingEscapeBrackets &&
+                        !settings.escapeBrackets &&
                         !$.terminal.have_formatting(s)) {
                         s = $.terminal.escape_formatting(s);
                     }
