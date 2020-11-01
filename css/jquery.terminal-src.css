@@ -47,7 +47,7 @@
     opacity: 0.01;
     filter: alpha(opacity = 0.01);
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);*/
-    background-color: transparent;
+    background: transparent;
     border: none;
     color: transparent;
     outline: none;
@@ -845,6 +845,10 @@ terminal .terminal-output > div {
 .cmd .token.token {
     background-color: inherit;
 }
+.cmd .token, .terminal .token {
+    color: inherit;
+    background-color: inherit;
+}
 /* FireFox hack
 @supports (-moz-animation: foo) {
     .terminal,
@@ -979,4 +983,18 @@ terminal .terminal-output > div {
 }
 .cmd .token {
     --original-color: var(--color);
+}
+.terminal .terminal-blink, .cmd .terminal-blink {
+    animation: terminal-ansi-blink 1s steps(2, start) infinite;
+    -webkit-animation: terminal-ansi-blink 1s steps(2, start) infinite;
+}
+@keyframes terminal-ansi-blink {
+    to {
+        color: var(--background);
+    }
+}
+@-webkit-keyframes terminal-ansi-blink {
+    to {
+        color: var(--background);
+     }
 }

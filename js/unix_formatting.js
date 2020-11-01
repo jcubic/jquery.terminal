@@ -54,6 +54,7 @@
         factory(root.jQuery);
     }
 })(function($) {
+    var DEBUG = false;
     /* eslint-disable */
     /* istanbul ignore next */
     function warn(str) {
@@ -494,7 +495,6 @@
     // ---------------------------------------------------------------------
     $.terminal.AnsiParser = AnsiParser;
     // ---------------------------------------------------------------------
-    $.terminal.defaults.unixFormattingEscapeBrackets = false;
     // we match characters and html entities because command line escape brackets
     // echo don't, when writing formatter always process html entitites so it work
     // for cmd plugin as well for echo
@@ -509,14 +509,42 @@
         return $.terminal.length(string);
     }
     // ---------------------------------------------------------------------
+    function get_settings(options) {
+        var unixFormatting = {
+            escapeBrackets: false,
+            ansiParser: {},
+            position: 0,
+            ansiArt: false
+        };
+        if (options) {
+            if (options.unixFormatting) {
+                unixFormatting = $.extend({
+                    escapeBrackets: false,
+                    ansiParser: {},
+                    ansiArt: false
+                }, unixFormatting, options.unixFormatting);
+            }
+            if ('position' in options) {
+                unixFormatting.position = options.position;
+            }
+            if ('unixFormattingEscapeBrackets' in options) {
+                unixFormatting.escapeBrackets = options.unixFormattingEscapeBrackets;
+            }
+            if ('ansiParser' in options) {
+                unixFormatting.ansiParser = $.extend(
+                    unixFormatting.ansiParser,
+                    options.ansiParser
+                );
+            }
+        }
+        return unixFormatting;
+    }
+    // ---------------------------------------------------------------------
     // :: Replace overtyping (from man) formatting with terminal formatting
     // ---------------------------------------------------------------------
     $.terminal.overtyping = function overtyping(string, options) {
         string = $.terminal.unescape_brackets(string);
-        var settings = $.extend({
-            unixFormattingEscapeBrackets: false,
-            position: 0
-        }, options);
+        var settings = get_settings(options);
         var removed_chars = [];
         var new_position;
         var char_count = 0;
@@ -666,7 +694,7 @@
         // replace special characters with terminal formatting
         string = format(string, '\uFFF1', 'b;#fff;');
         string = format(string, '\uFFF2', 'u;;');
-        if (settings.unixFormattingEscapeBrackets) {
+        if (settings.escapeBrackets) {
             string = $.terminal.escape_brackets(string);
         }
         if (options && typeof options.position === 'number') {
@@ -699,7 +727,7 @@
             white: '#818181'
         },
         bold: {
-            black: '#444',
+            black: '#000',
             red: '#F55',
             green: '#44D544',
             yellow: '#FF5',
@@ -1011,8 +1039,7 @@
 
             49: 'transparent' // default background
         };
-        function format_ansi(controls/*code*/, state) {
-            //var controls = code.split(';');
+        function format_ansi(controls, state, ansi_art) {
             var num;
             var styles = [];
             var output_color = '';
@@ -1045,6 +1072,11 @@
                     case 5:
                         if (_ex_color || _ex_background) {
                             _process_8bit = true;
+                        } else if (ansi_art) {
+                            state.bold = true;
+                            styles.push('b');
+                        } else {
+                            state.blink = true;
                         }
                         break;
                     case 38:
@@ -1065,13 +1097,11 @@
                         state.reverse = true;
                         break;
                     default:
-                        if (controls[1] !== '5') {
-                            if (color_list[num]) {
-                                output_color = color_list[num];
-                            }
-                            if (background_list[num]) {
-                                output_background = background_list[num];
-                            }
+                        if (color_list[num]) {
+                            output_color = color_list[num];
+                        }
+                        if (background_list[num]) {
+                            output_background = background_list[num];
                         }
                 }
             }
@@ -1164,25 +1194,28 @@
                 } else if (output_background === 'transparent') {
                     background = output_background;
                 } else {
-                    background = $.terminal.ansi_colors.normal[output_background];
+                    background = colors[output_background];
                 }
             }
             var ret = [styles.join(''), color, background];
+            if (state.blink) {
+                ret.push('terminal-blink');
+            }
             return ret;
         }
         // -------------------------------------------------------------------------------
         return function from_ansi(input, options) {
             options = options || {};
-            var settings = $.extend({
-                unixFormattingEscapeBrackets: false,
-                position: 0,
-                ansiParser: {}
-            }, options);
+            var settings = get_settings(options);
+            var ansi_art = settings.ansiArt;
+            // if there are SAUCE record if something after end of file
+            input = input.replace(/\x1A.*/, '');
+            input = input.replace(/\r?\n?\x1b\[A\x1b\[[0-9]+C/g, '');
             input = $.terminal.unescape_brackets(input);
             var code, inside, format, charset;
             var print = function print(s) {
                 var s_len = s.length;
-                if (settings.unixFormattingEscapeBrackets) {
+                if (settings.escapeBrackets) {
                     s = $.terminal.escape_formatting(s);
                 }
                 if (charset) {
@@ -1191,6 +1224,12 @@
                     }).join('');
                 }
                 if (format) {
+                    // this will always need to be escaped
+                    if (s.match(/\\$|[[\]]/) &&
+                        !settings.escapeBrackets &&
+                        !$.terminal.have_formatting(s)) {
+                        s = $.terminal.escape_formatting(s);
+                    }
                     s = format + s + ']';
                 }
                 var line = this.result[this.cursor.y];
@@ -1203,7 +1242,8 @@
                         this.result[this.cursor.y] = s;
                     }
                 } else {
-                    line_len = $.terminal.strip(line).length;
+                    var stripped = $.terminal.strip(line);
+                    line_len = $.terminal.unescape_brackets(stripped).length;
                     if (this.cursor.x === 0) {
                         after = $.terminal.substring(line, s_len);
                         this.result[this.cursor.y] = s + after;
@@ -1223,6 +1263,19 @@
             var use_CR = !!input.match(/\x0D/);
             var ROWS = $.terminal.active().rows();
             var COLS = $.terminal.active().cols();
+            // correction to CP 437
+            // ref: https://unix.stackexchange.com/a/611513/1806
+            //      https://unix.stackexchange.com/a/611344/1806
+            var cp_437_control = {
+                0x00: ' ',
+                0x0F: '*',
+                0x12: '↕',
+                0x18: '↑',
+                0x19: '↓',
+                0x11: '◄',
+                0x10: '█'
+            };
+            var characters = 'qwertyuiopasdfghjklzxcvbnm';
             var parser_events = {
                 cursor: {x: 0, y: 0},
                 result: [],
@@ -1239,6 +1292,12 @@
                         }
                     } else if (code === 9) {
                         print.call(this, '\t');
+                    } else if (ansi_art && code in cp_437_control) {
+                        print.call(this, cp_437_control[code]);
+                    } else if (DEBUG) {
+                        var mod = code % characters.length;
+                        var char = characters[mod];
+                        print.call(this, char);
                     }
                     if (!this.result[this.cursor.y]) {
                         this.result[this.cursor.y] = '';
@@ -1280,7 +1339,7 @@
                             this.cursor.x = Math.min(params[1] || 1, COLS) - 1;
                             break;
                         case 'm':
-                            code = format_ansi(params, this.state);
+                            code = format_ansi(params, this.state, ansi_art);
                             var empty = params.length === 1 && params[0] === 0;
                             if (inside) {
                                 if (empty) {
