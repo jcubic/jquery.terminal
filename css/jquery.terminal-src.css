@@ -828,27 +828,6 @@ terminal .terminal-output > div {
         color: #000;
     }
 }
-/* PrismJS style overwrites */
-.terminal .token.operator,
-.terminal .token.entity,
-.terminal .token.variable,
-.terminal .token.url,
-.terminal .token.string,
-.terminal .style .token.string,
-.terminal .token.token,
-.cmd .token.operator,
-.cmd .token.entity,
-.cmd .token.variable,
-.cmd .token.url,
-.cmd .token.string,
-.cmd .style .token.string,
-.cmd .token.token {
-    background-color: inherit;
-}
-.cmd .token, .terminal .token {
-    color: inherit;
-    background-color: inherit;
-}
 /* FireFox hack
 @supports (-moz-animation: foo) {
     .terminal,
