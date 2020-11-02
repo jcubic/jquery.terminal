@@ -1,3 +1,7 @@
+## 2.19.1
+### Bugfix
+* fix prism highlighting
+
 ## 2.19.0
 ### Features
 * add support blink ANSI escape (unix_formatting)
