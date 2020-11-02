@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.19.0
+ *           \/              /____/                              version 2.19.1
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 01 Nov 2020 14:15:42 +0000
+ * Date: Mon, 02 Nov 2020 09:40:58 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -827,27 +827,6 @@ terminal .terminal-output > div {
         background-color: rgba(170, 170, 170, 0.99);
         color: #000;
     }
-}
-/* PrismJS style overwrites */
-.terminal .token.operator,
-.terminal .token.entity,
-.terminal .token.variable,
-.terminal .token.url,
-.terminal .token.string,
-.terminal .style .token.string,
-.terminal .token.token,
-.cmd .token.operator,
-.cmd .token.entity,
-.cmd .token.variable,
-.cmd .token.url,
-.cmd .token.string,
-.cmd .style .token.string,
-.cmd .token.token {
-    background-color: inherit;
-}
-.cmd .token, .terminal .token {
-    color: inherit;
-    background-color: inherit;
 }
 /* FireFox hack
 @supports (-moz-animation: foo) {
