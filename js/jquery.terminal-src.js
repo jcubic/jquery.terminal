@@ -10450,12 +10450,12 @@
             function exec_spec(spec) {
                 var terminal = terminals.get()[spec[0]];
                 // execute if belong to this terminal
+                var defer = $.Deferred();
                 if (terminal && terminal_id === terminal.id()) {
                     if (!spec[2]) {
                         defer.resolve();
                         return defer.promise();
                     } else if (paused) {
-                        var defer = $.Deferred();
                         resume_callbacks.push(function() {
                             return terminal.exec(spec[2]).done(function() {
                                 terminal.save_state(spec[2], true, spec[1]);

@@ -1,3 +1,7 @@
+## 2.19.3
+### Bugfix
+* fix silent error when executing empty command from hash
+
 ## 2.19.1/2.19.2
 ### Bugfix
 * fix prism highlighting

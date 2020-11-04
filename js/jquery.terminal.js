@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.19.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 02 Nov 2020 10:13:25 +0000
+ * Date: Wed, 04 Nov 2020 11:54:46 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4470,8 +4470,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.19.2',
-        date: 'Mon, 02 Nov 2020 10:13:25 +0000',
+        version: 'DEV',
+        date: 'Wed, 04 Nov 2020 11:54:46 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10450,12 +10450,12 @@
             function exec_spec(spec) {
                 var terminal = terminals.get()[spec[0]];
                 // execute if belong to this terminal
+                var defer = $.Deferred();
                 if (terminal && terminal_id === terminal.id()) {
                     if (!spec[2]) {
                         defer.resolve();
                         return defer.promise();
                     } else if (paused) {
-                        var defer = $.Deferred();
                         resume_callbacks.push(function() {
                             return terminal.exec(spec[2]).done(function() {
                                 terminal.save_state(spec[2], true, spec[1]);
