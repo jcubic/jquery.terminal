@@ -1,6 +1,7 @@
 ## 2.19.3
 ### Bugfix
 * fix silent error when executing empty command from hash
+* with issues with browser that don't support css variables [#630](https://github.com/jcubic/jquery.terminal/issues/630)
 
 ## 2.19.1/2.19.2
 ### Bugfix
