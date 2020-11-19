@@ -2,7 +2,7 @@
 ### Bugfix
 * fix silent error when executing empty command from hash
 * with issues with browser that don't support css variables [#630](https://github.com/jcubic/jquery.terminal/issues/630)
-
+* fix exception in IE from formatters [#631](https://github.com/jcubic/jquery.terminal/issues/631)
 ## 2.19.1/2.19.2
 ### Bugfix
 * fix prism highlighting

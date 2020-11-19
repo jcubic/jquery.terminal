@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 04 Nov 2020 11:54:46 +0000
+ * Date: Thu, 19 Nov 2020 20:49:35 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3931,7 +3931,7 @@
     function count_selfclosing_formatting(string) {
         var count = 0;
         if ($.terminal.have_formatting(string)) {
-            var re = new RegExp(format_parts_re, 'i');
+            var re = new RegExp(format_parts_re.source, 'i'); // without g flag
             $.terminal.format_split(string).forEach(function(str) {
                 if ($.terminal.is_formatting(str)) {
                     var m = str.match(re);
@@ -4471,7 +4471,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 04 Nov 2020 11:54:46 +0000',
+        date: 'Thu, 19 Nov 2020 20:49:35 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

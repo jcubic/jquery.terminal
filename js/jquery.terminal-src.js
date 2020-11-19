@@ -3931,7 +3931,7 @@
     function count_selfclosing_formatting(string) {
         var count = 0;
         if ($.terminal.have_formatting(string)) {
-            var re = new RegExp(format_parts_re, 'i');
+            var re = new RegExp(format_parts_re.source, 'i'); // without g flag
             $.terminal.format_split(string).forEach(function(str) {
                 if ($.terminal.is_formatting(str)) {
                     var m = str.match(re);
