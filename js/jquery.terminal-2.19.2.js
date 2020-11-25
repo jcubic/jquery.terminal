@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 19 Nov 2020 20:49:35 +0000
+ * Date: Wed, 25 Nov 2020 10:58:56 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1069,9 +1069,19 @@
                 return value.done(callback);
             } else if (is_function(value.then)) {
                 return value.then(callback);
-            } else {
-                return callback(value);
+            } else if (value instanceof Array) {
+                var promises = value.filter(function(value) {
+                    return value && (is_function(value.done) || is_function(value.then));
+                });
+                if (promises.length) {
+                    var result = $.when.apply($, value).then(callback);
+                    if (is_function(value.catch)) {
+                        result.catch(error);
+                    }
+                    return result;
+                }
             }
+            return callback(value);
         }
     }
     // -----------------------------------------------------------------------
@@ -4471,7 +4481,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 19 Nov 2020 20:49:35 +0000',
+        date: 'Wed, 25 Nov 2020 10:58:56 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7164,8 +7174,15 @@
                     formatters: true,
                     convertLinks: settings.convertLinks
                 }, line.options || {});
-                var string;
-                string = stringify_value(line.value);
+                var string = stringify_value(line.value);
+                if (string && is_function(string.then)) {
+                    // handle function that return a promise #629
+                    return string.then(function(string) {
+                        process_line($.extend(line, {
+                            value: string
+                        }));
+                    });
+                }
                 if (string !== '') {
                     if (!line_settings.raw) {
                         if (line_settings.formatters) {
@@ -7249,6 +7266,8 @@
                     alert_exception('[Internal Exception(process_line)]', e);
                 }
             }
+            // is it work with unpromise that ignore undefined
+            return true;
         }
         // ---------------------------------------------------------------------
         // :: Update terminal lines
@@ -7299,14 +7318,15 @@
             }
             try {
                 output_buffer = [];
-                $.each(lines_to_show, function(i, line) {
-                    process_line(line);
+                unpromise(lines_to_show.map(function(line) {
+                    return process_line(line);
+                }), function() {
+                    if (!options.update) {
+                        command_line.before(detached_output); // reinsert output
+                    }
+                    self.flush(options);
+                    fire_event('onAfterRedraw');
                 });
-                if (!options.update) {
-                    command_line.before(detached_output); // reinsert output
-                }
-                self.flush(options);
-                fire_event('onAfterRedraw');
             } catch (e) {
                 if (is_function(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL (redraw)');
@@ -9047,14 +9067,19 @@
                             if (options) {
                                 lines[line][1] = $.extend(lines[line][1], options);
                             }
-                            process_line({
+                            var next = process_line({
                                 value: value,
                                 index: line,
                                 options: lines[line][1]
                             });
-                            self.flush({
-                                scroll: false,
-                                update: true
+                            // process_line can return a promise
+                            // value is function that resolve to promise
+                            unpromise(next, function() {
+                                // trigger flush even if next is undefined
+                                self.flush({
+                                    scroll: false,
+                                    update: true
+                                });
                             });
                         });
                     }
@@ -9155,19 +9180,21 @@
                             if (render(value, locals)) {
                                 return self;
                             }
-                            process_line({
+                            var next = process_line({
                                 value: value,
                                 options: locals,
                                 index: lines.length
                             });
-                            // extended commands should be processed only
-                            // once in echo and not on redraw
-                            locals.exec = false;
-                            lines.push([value, locals]);
-                            if (locals.flush) {
-                                self.flush();
-                                fire_event('onAfterEcho', [arg]);
-                            }
+                            unpromise(next, function() {
+                                // extended commands should be processed only
+                                // once in echo and not on redraw
+                                locals.exec = false;
+                                lines.push([value, locals]);
+                                if (locals.flush) {
+                                    self.flush();
+                                    fire_event('onAfterEcho', [arg]);
+                                }
+                            });
                         });
                     } catch (e) {
                         // if echo throw exception we can't use error to
@@ -9874,6 +9901,9 @@
         function stringify_value(value) {
             if (is_function(value)) {
                 value = value();
+            }
+            if (value && is_function(value.then)) {
+                return value.then(stringify_value);
             }
             if (get_type(value) !== 'string') {
                 if (is_function(settings.parseObject)) {
