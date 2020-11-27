@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 25 Nov 2020 10:58:56 +0000
+ * Date: Fri, 27 Nov 2020 08:07:12 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4481,7 +4481,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 25 Nov 2020 10:58:56 +0000',
+        date: 'Fri, 27 Nov 2020 08:07:12 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8500,6 +8500,7 @@
             // :: Low Level method that overwrites interpreter
             // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
+                var defer = $.Deferred();
                 function overwrite_interpreter() {
                     self.pause(settings.softPause);
                     make_interpreter(user_intrp, login, function(result) {
@@ -8507,6 +8508,7 @@
                         var top = interpreters.top();
                         $.extend(top, result);
                         prepare_top_interpreter(true);
+                        defer.resolve();
                     });
                 }
                 if (is_function(login)) {
@@ -8520,7 +8522,7 @@
                 } else {
                     overwrite_interpreter();
                 }
-                return self;
+                return defer.promise();
             },
             // -------------------------------------------------------------
             // :: Show user greetings or terminal signature

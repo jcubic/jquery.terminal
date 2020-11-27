@@ -1,6 +1,9 @@
 ## 2.20.0
+### Breaking
+* `set_interpreter` return a promise instead of terminal instance
 ### Features
 * add support for echo async functions [#629](https://github.com/jcubic/jquery.terminal/issues/629)
+* allow to run exec using onInit that will use pipe [#603](https://github.com/jcubic/jquery.terminal/issues/603)
 ### Bugfix
 * fix silent error when executing empty command from hash
 * with issues with browser that don't support css variables [#630](https://github.com/jcubic/jquery.terminal/issues/630)

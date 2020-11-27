@@ -8500,6 +8500,7 @@
             // :: Low Level method that overwrites interpreter
             // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
+                var defer = $.Deferred();
                 function overwrite_interpreter() {
                     self.pause(settings.softPause);
                     make_interpreter(user_intrp, login, function(result) {
@@ -8507,6 +8508,7 @@
                         var top = interpreters.top();
                         $.extend(top, result);
                         prepare_top_interpreter(true);
+                        defer.resolve();
                     });
                 }
                 if (is_function(login)) {
@@ -8520,7 +8522,7 @@
                 } else {
                     overwrite_interpreter();
                 }
-                return self;
+                return defer.promise();
             },
             // -------------------------------------------------------------
             // :: Show user greetings or terminal signature

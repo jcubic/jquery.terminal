@@ -5272,7 +5272,8 @@ describe('Terminal plugin', function() {
                 spy(object, 'echo');
                 spy(object, 'login');
                 term.set_prompt('$ ');
-                term.set_interpreter('/async', true).focus();
+                term.set_interpreter('/async', true);
+                term.focus();
                 // there seems to be bug in setTimeout in Node or in Terminal code
                 // that sometimes don't invoke code when using setTimeout
                 return delay(500, () => {
