@@ -5272,7 +5272,8 @@ describe('Terminal plugin', function() {
                 spy(object, 'echo');
                 spy(object, 'login');
                 term.set_prompt('$ ');
-                term.set_interpreter('/async', true).focus();
+                term.set_interpreter('/async', true);
+                term.focus();
                 // there seems to be bug in setTimeout in Node or in Terminal code
                 // that sometimes don't invoke code when using setTimeout
                 return delay(500, () => {
@@ -5550,8 +5551,9 @@ describe('Terminal plugin', function() {
                 numChars: numChars,
                 numRows: numRows
             });
-            function output(selector = '.terminal-output > div div span') {
-                return term.find(selector).map(function() {
+            function output(selector = '.terminal-output > div div span', t) {
+                t = t || term;
+                return t.find(selector).map(function() {
                     return $(this).text().replace(/\xA0/g, ' ');
                 }).get();
             }
@@ -5635,6 +5637,29 @@ describe('Terminal plugin', function() {
             it('should print undefined', function() {
                 term.clear().echo(undefined);
                 expect(output().join('\n')).toEqual('undefined');
+            });
+            it('should print value from function that return promise', function(done) {
+                var term = $('<div/>').terminal();
+                var message = "hello timer";
+                function get_message() {
+                    return output('.terminal-output > div div span', term)[0];
+                }
+                term.clear().echo(function() {
+                    return new Promise(function(resolve) {
+                        setTimeout(function() {
+                            resolve(message);
+                        }, 10);
+                    });
+                });
+                setTimeout(function() {
+                    expect(get_message()).toEqual('hello timer');
+                    message = 'hello 2nd timer';
+                    term.refresh();
+                    setTimeout(function() {
+                        expect(get_message()).toEqual('hello 2nd timer');
+                        done();
+                    }, 100);
+                }, 100);
             });
             it('should print empty line', function() {
                 function test() {

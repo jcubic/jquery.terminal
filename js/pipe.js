@@ -427,17 +427,23 @@
     var init = $.fn.terminal;
     $.fn.terminal = function(interpreter, options) {
         if (options && options.pipe) {
-            var settings = $.extend({}, {
+            var settings = $.extend({}, options, {
                 onInit: function() {
+                    var defer = $.Deferred();
                     if (options && options.pipe) {
-                        var fn_interpreter = this.commands();
-                        this.set_interpreter($.terminal.pipe(fn_interpreter, options));
+                        var interpreter = $.terminal.pipe(this.commands(), options);
+                        this.set_interpreter(interpreter).then(defer.resolve);
+                    } else {
+                        defer.resolve();
                     }
                     if (options && is_function(options.onInit)) {
-                        options.onInit.call(this, this);
+                        var self = this;
+                        defer.then(function() {
+                            options.onInit.call(self, self);
+                        });
                     }
                 }
-            }, options);
+            });
         }
         return init.call(this, interpreter, settings || options);
     };

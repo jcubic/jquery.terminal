@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.19.2
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,8 +12,9 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Mon, 02 Nov 2020 10:13:26 +0000
+ * Date: Thu, 19 Nov 2020 20:27:22 +0000
  */
+
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
     display: inline-block;
@@ -21,32 +22,12 @@
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6, .terminal pre, .cmd {
     margin: 0;
 }
-/*
-.terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
-    line-height: 1.2em;
-}
-/*
-.cmd .mask {
-    width: 10px;
-    height: 11px;
-    background: black;
-    z-index: 100;
-}
-*/
 .cmd .cmd-clipboard {
     position: absolute;
     left: -16px;
     top: 0;
     width: 16px;
     height: 16px;
-    /* this seems to work after all on Android */
-    /*left: -99999px;
-    clip: rect(1px,1px,1px,1px);
-    /* on desktop textarea appear when paste */
-    /* opacity is needed for Edge and IE
-    opacity: 0.01;
-    filter: alpha(opacity = 0.01);
-    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);*/
     background: transparent;
     border: none;
     color: transparent;
@@ -150,6 +131,7 @@ body.full-screen-terminal .terminal {
 .cmd a[href]:hover span {
     background-color: #0F60FF !important;
     background-color: var(--link-color, #0F60FF) !important;
+    color: #000 !important;
     color: var(--background, #000) !important;
     text-decoration: none;
 }
@@ -160,13 +142,8 @@ body.full-screen-terminal .terminal {
 .cmd .cmd-cursor-line img {
     display: inline-block;
 }
-.cmd .cmd-cursor.cmd-blink span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span {
-    -webkit-animation: terminal-blink 1s infinite linear;
-       -moz-animation: terminal-blink 1s infinite linear;
-        -ms-animation: terminal-blink 1s infinite linear;
-            animation: terminal-blink 1s infinite linear;
-}
-
+.cmd .cmd-cursor.cmd-blink > span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span,
+.cmd .cmd-cursor.cmd-blink a,
 .cmd .cmd-cursor.cmd-blink .fa,
 .cmd .cmd-cursor.cmd-blink .far,
 .cmd .cmd-cursor.cmd-blink .fas,
@@ -221,7 +198,7 @@ body.full-screen-terminal .terminal {
     float: left;
     display: block;
 }
-.terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
+.terminal, terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
 .cmd span[data-text]:not(.cmd-inverted):not(.token):not(.emoji) {
     color: #aaa;
     background-color: #000;
@@ -477,22 +454,34 @@ terminal .terminal-output > div {
       box-shadow: none;
   }
 }
-.underline-animation .cmd-cursor.cmd-blink span[date-text] span,
-.underline-animation .cmd-cursor.cmd-blink a {
+.underline-animation .cmd .cmd-cursor.cmd-blink > span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span,
+.underline-animation .cmd .cmd-cursor.cmd-blink a,
+.underline-animation .cmd .cmd-cursor.cmd-blink .fa,
+.underline-animation .cmd .cmd-cursor.cmd-blink .far,
+.underline-animation .cmd .cmd-cursor.cmd-blink .fas,
+.underline-animation .cmd .cmd-cursor .emoji {
     -webkit-animation-name: terminal-underline;
        -moz-animation-name: terminal-underline;
         -ms-animation-name: terminal-underline;
             animation-name: terminal-underline;
 }
-.glow-animation .cmd-cursor.cmd-blink span span,
-.glow-animation .cmd-cursor.cmd-blink a {
+.glow-animation .cmd .cmd-cursor.cmd-blink > span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span,
+.glow-animation .cmd .cmd-cursor.cmd-blink a,
+.glow-animation .cmd .cmd-cursor.cmd-blink .fa,
+.glow-animation .cmd .cmd-cursor.cmd-blink .far,
+.glow-animation .cmd .cmd-cursor.cmd-blink .fas,
+.glow-animation .cmd .cmd-cursor .emoji {
     -webkit-animation-name: terminal-glow;
        -moz-animation-name: terminal-glow;
         -ms-animation-name: terminal-glow;
             animation-name: terminal-glow;
 }
-.bar-animation .cmd-cursor.cmd-blink span span,
-.bar-animation .cmd-cursor.cmd-blink a {
+.bar-animation .cmd .cmd-cursor.cmd-blink > span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span,
+.bar-animation .cmd .cmd-cursor.cmd-blink a,
+.bar-animation .cmd .cmd-cursor.cmd-blink .fa,
+.bar-animation .cmd .cmd-cursor.cmd-blink .far,
+.bar-animation .cmd .cmd-cursor.cmd-blink .fas,
+.bar-animation .cmd .cmd-cursor .emoji {
     -webkit-animation-name: terminal-bar;
        -moz-animation-name: terminal-bar;
         -ms-animation-name: terminal-bar;
@@ -662,6 +651,7 @@ terminal .terminal-output > div {
 .terminal .terminal-output > :not(.raw) a[href]:hover, .cmd a[href]:hover {
     background-color: #0F60FF;
     background-color: var(--link-color, #0F60FF);
+    color: #000;
     color: var(--background, #000) !important;
     text-decoration: none;
 }
@@ -734,12 +724,7 @@ terminal .terminal-output > div {
         background-color: var(--background, #000);
     }
     .cmd .cmd-cursor.cmd-blink > span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span,
-    .cmd .cmd-cursor.cmd-blink a {
-        -webkit-animation: var(--animation, terminal-blink) 1s infinite linear;
-           -moz-animation: var(--animation, terminal-blink) 1s infinite linear;
-            -ms-animation: var(--animation, terminal-blink) 1s infinite linear;
-                animation: var(--animation, terminal-blink) 1s infinite linear;
-    }
+    .cmd .cmd-cursor.cmd-blink a,
     .cmd .cmd-cursor.cmd-blink .fa,
     .cmd .cmd-cursor.cmd-blink .far,
     .cmd .cmd-cursor.cmd-blink .fas,
