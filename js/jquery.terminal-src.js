@@ -4473,7 +4473,7 @@
                 command: string,
                 name: '',
                 args: [],
-                args_quotes: quotes,
+                args_quotes: [],
                 rest: ''
             };
         }
@@ -9187,14 +9187,22 @@
                                 options: locals,
                                 index: lines.length
                             });
+                            // queue async functions in echo
+                            if (next && next.then) {
+                                var defer = new DelayQueue();
+                                echo_ready = ready(defer);
+                            }
+                            lines.push([value, $.extend({exec: false}, locals)]);
                             unpromise(next, function() {
                                 // extended commands should be processed only
                                 // once in echo and not on redraw
-                                locals.exec = false;
-                                lines.push([value, locals]);
                                 if (locals.flush) {
                                     self.flush();
                                     fire_event('onAfterEcho', [arg]);
+                                }
+                                if (defer) {
+                                    defer.resolve();
+                                    echo_ready = null;
                                 }
                             });
                         });
@@ -9210,6 +9218,10 @@
                 }
                 if (arg !== undefined && is_function(arg.then)) {
                     $.when(arg).done(echo).catch(make_label_error('Echo'));
+                } else if (echo_ready) {
+                    echo_ready(function() {
+                        echo(arg);
+                    });
                 } else {
                     echo(arg);
                 }
@@ -9695,7 +9707,7 @@
                     }
                     var scroll_marker = self.find('.terminal-scroll-marker');
                     if (is_bottom_observer) {
-                        visibility_observer.unobserve(scroll_marker[0]);
+                        is_bottom_observer.unobserve(scroll_marker[0]);
                     }
                     scroll_marker.remove();
                     if (mutation_observer) {
@@ -9792,6 +9804,9 @@
             throw new $.terminal.Exception(msg);
         }
         self.data('terminal', self);
+        // synchronize the echo calls (used for async functions) that need
+        // to be called in order
+        var echo_ready;
         // var names = []; // stack if interpreter names
         var prev_command; // used for name on the terminal if not defined
         var prev_exec_cmd;

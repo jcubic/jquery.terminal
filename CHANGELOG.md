@@ -1,3 +1,10 @@
+## 2.20.1
+### Bugfix
+* fix async synchronization of async functions and normal echo
+* fix exception when executing empty command with pipe
+* fix serialization of commands when using pipe operator and function interpreter
+* fix exception in `terminal::destroy`
+
 ## 2.20.0
 ### Breaking
 * `set_interpreter` return a promise instead of terminal instance
