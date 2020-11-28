@@ -161,8 +161,8 @@
             } else {
                 cmd = $.terminal.split_command(command);
             }
-            var index = 0;
-            return array_split(tokens(cmd), is_pipe(cmd)).map(function(args) {
+            var index = 1;
+            return array_split(tokens(cmd), is_pipe(cmd)).map(function(args, i) {
                 var result = {
                     redirects: []
                 };
@@ -178,9 +178,15 @@
                         result.redirects = parse_redirect(split_args.slice(1), re);
                     }
                 }
-                result.args_quotes = args.map(function(_, i) {
-                    return cmd.args_quotes[i + index];
-                });
+                if (i === 0) {
+                    result.args_quotes = args.map(function(_, i) {
+                        return cmd.args_quotes[i];
+                    });
+                } else {
+                    result.args_quotes = args.map(function(_, i) {
+                        return cmd.args_quotes[i + index];
+                    }).slice(1);
+                }
                 index += len;
                 result.name = args[0];
                 result.args = args.slice(1);
