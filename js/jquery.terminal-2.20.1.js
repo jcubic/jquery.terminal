@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 10 Dec 2020 15:17:41 +0000
+ * Date: Sun, 20 Dec 2020 15:32:14 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -309,7 +309,7 @@
     // IE11 polyfill
     // -----------------------------------------------------------------------
     /* eslint-disable */
-    if (!('clear' in Map.prototype)) {
+    if ('Map' in root && !('clear' in Map.prototype)) {
         Map.prototype.clear = function() {
             this.forEach(function(value, key, map) {
                 map.delete(key);
@@ -1456,7 +1456,9 @@
         this._onCache = settings.onCache.bind(this);
         this._action = settings.action.bind(this);
         this._validation = settings.validation.bind(this);
-        this._cache = new Map();
+        if ('Map' in root) {
+            this._cache = new Map();
+        }
     }
     // -------------------------------------------------------------------------
     WorkerCache.prototype.validate = function(key) {
@@ -1469,6 +1471,9 @@
     };
     // -------------------------------------------------------------------------
     WorkerCache.prototype.get = function(key) {
+        if (!this._cache) {
+            return this._action(key);
+        }
         var value;
         if (this.validate(key) && this._cache.has(key)) {
             value = this._cache.get(key);
@@ -4481,7 +4486,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 10 Dec 2020 15:17:41 +0000',
+        date: 'Sun, 20 Dec 2020 15:32:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
