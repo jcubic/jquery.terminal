@@ -1,3 +1,7 @@
+## 2.20.2
+### Bugfix
+* fix bold colors for background in unix formatting (another ANSI artwork bug)
+
 ## 2.20.1
 ### Bugfix
 * fix async synchronization of async functions and normal echo
