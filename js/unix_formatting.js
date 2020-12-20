@@ -1187,6 +1187,8 @@
                 } else {
                     color = colors[output_color];
                 }
+            } else {
+                color = colors['white'];
             }
             if (typeof output_background !== 'undefined') {
                 if (output_background.match(/^#/)) { // already 8bit color #460
@@ -1197,6 +1199,8 @@
                     // background is not changed by bold flag
                     background = $.terminal.ansi_colors.normal[output_background];
                 }
+            } else {
+                background = $.terminal.ansi_colors.normal['black'];
             }
             var ret = [styles.join(''), color, background];
             if (state.blink) {
