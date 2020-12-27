@@ -115,6 +115,7 @@
         var PRINTABLES = r(0x20, 0x7f);
         var EXECUTABLES = r(0x00, 0x18);
         EXECUTABLES.push(0x19);
+        EXECUTABLES.push(0x1E);
         EXECUTABLES.concat(r(0x1c, 0x20));
 
         /* meaning of state and action indices
@@ -1278,6 +1279,7 @@
                 0x18: '↑',
                 0x19: '↓',
                 0x11: '◄',
+                0x1E: '▲',
                 0x10: '█'
             };
             var characters = 'qwertyuiopasdfghjklzxcvbnm';

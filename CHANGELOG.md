@@ -1,6 +1,7 @@
 ## 2.20.2
 ### Bugfix
 * fix bold background and default color in Unix formatting (another ANSI artwork issue)
+* fix rendering 0x1E in ANSI art
 * fix when browser don't have ES6 Map object [#630](https://github.com/jcubic/jquery.terminal/issues/630)
 
 ## 2.20.1
