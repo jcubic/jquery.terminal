@@ -258,9 +258,10 @@ function handle_json_rpc($object) {
             } else {
                 $method_object = new ReflectionMethod($class, $method);
                 $num_got = count($params);
-                $num_expect = $method_object->getNumberOfRequiredParameters();
-                if ($num_got != $num_expect) {
-                    $msg = "Wrong number of parameters. Got $num_got expect $num_expect";
+                $num_min = $method_object->getNumberOfRequiredParameters();
+                $num_max = $method_object->getNumberOfParameters();
+                if ($num_got < $num_min  || $num_got > $num_max) {
+                    $msg = "Wrong number of parameters. Got $num_got expected between $num_min and $num_max";
                     throw new JsonRpcExeption(105, $msg);
                 } else {
                     //throw new Exception('x -> ' . json_encode($params));
