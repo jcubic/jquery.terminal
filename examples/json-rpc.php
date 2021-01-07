@@ -258,7 +258,7 @@ function handle_json_rpc($object) {
             } else {
                 $method_object = new ReflectionMethod($class, $method);
                 $num_got = count($params);
-                $num_expect = $method_object->getNumberOfParameters();
+                $num_expect = $method_object->getNumberOfRequiredParameters();
                 if ($num_got != $num_expect) {
                     $msg = "Wrong number of parameters. Got $num_got expect $num_expect";
                     throw new JsonRpcExeption(105, $msg);
