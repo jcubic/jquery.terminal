@@ -1043,8 +1043,8 @@
         function format_ansi(controls, state, ansi_art) {
             var num;
             var styles = [];
-            var output_color = '';
-            var output_background = '';
+            var output_color;
+            var output_background;
             var _process_true_color = -1;
             var _ex_color = false;
             var _ex_background = false;
@@ -1056,6 +1056,7 @@
                         Object.keys(state).forEach(function(key) {
                             delete state[key];
                         });
+                        state.blink = false;
                         state.bold = false;
                         state.faited = false;
                         break;
@@ -1073,9 +1074,6 @@
                     case 5:
                         if (_ex_color || _ex_background) {
                             _process_8bit = true;
-                        } else if (ansi_art) {
-                            state.bold = true;
-                            styles.push('b');
                         } else {
                             state.blink = true;
                         }
@@ -1159,6 +1157,7 @@
                 }
             }
             if (state.reverse) {
+                console.log('revese');
                 if (output_color || output_background) {
                     var tmp = output_background;
                     output_background = output_color;
@@ -1170,8 +1169,6 @@
             }
             output_color = output_color || state.color;
             output_background = output_background || state.background;
-            state.background = output_background;
-            state.color = output_color;
             var colors, color, background;
             if (state.bold) {
                 colors = $.terminal.ansi_colors.bold;
@@ -1188,6 +1185,7 @@
                 } else {
                     color = colors[output_color];
                 }
+                state.color = output_color;
             } else {
                 color = colors['white'];
             }
@@ -1197,14 +1195,19 @@
                 } else if (output_background === 'transparent') {
                     background = output_background;
                 } else {
-                    // background is not changed by bold flag
-                    background = $.terminal.ansi_colors.normal[output_background];
+                    if (state.blink && ansi_art) {
+                        background = $.terminal.ansi_colors.bold[output_background];
+                    } else {
+                        // background is not changed by bold flag
+                        background = $.terminal.ansi_colors.normal[output_background];
+                    }
                 }
-            } else {
-                background = $.terminal.ansi_colors.normal['black'];
+                state.background = output_background;
+            } else if (state.blink && ansi_art) {
+                background = $.terminal.ansi_colors.bold['black'];
             }
             var ret = [styles.join(''), color, background];
-            if (state.blink) {
+            if (state.blink && !ansi_art) {
                 ret.push('terminal-blink');
             }
             return ret;
@@ -1316,6 +1319,9 @@
                             charset = CHARSETS[flag];
                         }
                     }
+                },
+                inst_E: function(data) {
+                    console.log(data);
                 },
                 inst_c: function(collected, params, flag) {
                     var value = params[0] === 0 ? 1 : params[0];

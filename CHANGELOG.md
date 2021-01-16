@@ -4,6 +4,7 @@
 * fix rendering 0x1E in ANSI art
 * fix when browser don't have ES6 Map object [#630](https://github.com/jcubic/jquery.terminal/issues/630)
 * fix echo_newline extension
+* fix handling of blink in ANSI Art
 
 ## 2.20.1
 ### Bugfix
