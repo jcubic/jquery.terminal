@@ -6,6 +6,7 @@
 * fix echo_newline extension
 * fix handling of blink in ANSI Art
 * fix error in prism when calling without options and render flags (e.g.: echo or prompt)
+* fix background color for links that have set background using formatting
 
 ## 2.20.1
 ### Bugfix

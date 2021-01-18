@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2020 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Thu, 10 Dec 2020 15:17:42 +0000
+ * Date: Mon, 18 Jan 2021 20:29:51 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -116,6 +116,25 @@ body.full-screen-terminal .terminal {
     background-color: #aaa !important;
     color: #000 !important;
 }
+.terminal .terminal-output > :not(.raw) a[href], .cmd a[href] {
+    color: #0F60FF;
+    color: var(--link-color, #0F60FF);
+    cursor: pointer;
+}
+.cmd a[href]:not(.terminal-inverted),
+.terminal .terminal-output > :not(.raw) a[href]:not(.terminal-inverted) {
+    --color: var(--link-color, #0F60FF);
+}
+.terminal .terminal-output > :not(.raw) a[href].terminal-inverted {
+    background: var(--color, #ccc);
+}
+.terminal .terminal-output > :not(.raw) a[href]:hover, .cmd a[href]:hover {
+    background-color: #0F60FF;
+    background-color: var(--link-color, #0F60FF) !important;
+    color: #000;
+    color: var(--background, #000) !important;
+    text-decoration: none;
+}
 .terminal .terminal-output > :not(.raw) a[href] span,
 .cmd a[href] span {
     /*
@@ -127,6 +146,7 @@ body.full-screen-terminal .terminal {
     color: var(--link-color, #0F60FF) !important;
     text-decoration: underline;
 }
+
 .terminal .terminal-output > :not(.raw) a[href]:hover span,
 .cmd a[href]:hover span {
     background-color: #0F60FF !important;
@@ -635,25 +655,6 @@ terminal .terminal-output > div {
 }
 .clear {
     clear: both;
-}
-.terminal .terminal-output > :not(.raw) a[href], .cmd a[href] {
-    color: #0F60FF;
-    color: var(--link-color, #0F60FF);
-    cursor: pointer;
-}
-.cmd a[href]:not(.terminal-inverted),
-.terminal .terminal-output > :not(.raw) a[href]:not(.terminal-inverted) {
-    --color: var(--link-color, #0F60FF);
-}
-.terminal .terminal-output > :not(.raw) a[href].terminal-inverted {
-    background: var(--color, #ccc);
-}
-.terminal .terminal-output > :not(.raw) a[href]:hover, .cmd a[href]:hover {
-    background-color: #0F60FF;
-    background-color: var(--link-color, #0F60FF);
-    color: #000;
-    color: var(--background, #000) !important;
-    text-decoration: none;
 }
 .terminal .terminal-fill {
     position: absolute;
