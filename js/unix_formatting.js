@@ -1193,13 +1193,11 @@
                     background = output_background;
                 } else if (output_background === 'transparent') {
                     background = output_background;
+                } else if (state.blink && ansi_art) {
+                    background = $.terminal.ansi_colors.bold[output_background];
                 } else {
-                    if (state.blink && ansi_art) {
-                        background = $.terminal.ansi_colors.bold[output_background];
-                    } else {
-                        // background is not changed by bold flag
-                        background = $.terminal.ansi_colors.normal[output_background];
-                    }
+                    // background is not changed by bold flag
+                    background = $.terminal.ansi_colors.normal[output_background];
                 }
                 state.background = output_background;
             } else if (state.blink && ansi_art) {
@@ -1320,7 +1318,9 @@
                     }
                 },
                 inst_E: function(data) {
+                    /* eslint-disable no-console */
                     console.log(data);
+                    /* eslint-enable no-console */
                 },
                 inst_c: function(collected, params, flag) {
                     var value = params[0] === 0 ? 1 : params[0];
