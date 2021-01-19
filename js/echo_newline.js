@@ -56,8 +56,8 @@
             patch_term($(this).data('terminal'), should_echo_command(options));
         });
     };
-    var last;
-    var prompt;
+    var last = null;
+    var prompt = null;
     function should_echo_command(options) {
         return options && options.echoCommand !== false || !options;
     }
@@ -65,14 +65,14 @@
         var keymap = {
             'ENTER': function(e, original) {
                 var term = this;
-                if (!last) {
+                if (last === null) {
                     if (should_echo_command(options)) {
                         term.echo_command();
                     }
                 } else {
                     this.__echo(last + prompt + this.get_command());
                     this.set_prompt(prompt);
-                    last = '';
+                    last = null;
                 }
                 if (options && options.keymap && options.keymap.ENTER) {
                     options.keymap.ENTER.call(this, e, original);
@@ -93,8 +93,9 @@
         }
         term.__echo = term.echo;
         term.__exec = term.exec;
+        term.__set_prompt = term.set_prompt;
         term.exec = function() {
-            last = '';
+            last = null;
             if (echo_command) {
                 this.settings().echoCommand = true;
             }
@@ -109,22 +110,15 @@
                 newline: true
             }, options);
             function process(prompt) {
-                // this probably can be simplify because terminal handle
-                // newlines in prompt
-                var last_line;
-                last += arg;
-                arg = last + prompt;
-                var arr = arg.split('\n');
-                if (arr.length === 1) {
-                    last_line = arg;
+                if (last === null) {
+                    last = arg;
                 } else {
-                    term.__echo(arr.slice(0, -1).join('\n'), options);
-                    last_line = arr[arr.length - 1];
+                    last += arg;
                 }
-                term.set_prompt(last_line);
+                term.__set_prompt(last + prompt);
             }
             if (settings.newline === false) {
-                if (!prompt) {
+                if (prompt === null) {
                     prompt = term.get_prompt();
                 }
                 if (typeof prompt === 'string') {
@@ -133,10 +127,10 @@
                     prompt(process);
                 }
             } else {
-                if (prompt) {
-                    term.set_prompt(prompt);
+                if (prompt !== null) {
+                    term.__set_prompt(prompt);
                 }
-                if (last) {
+                if (last !== null) {
                     term.__echo(last + arg, options);
                 } else if (!arguments.length) {
                     // original echo check length to test if someone call echo
@@ -145,8 +139,8 @@
                 } else {
                     term.__echo(arg, options);
                 }
-                last = '';
-                prompt = '';
+                prompt = null;
+                last = null;
             }
             return term;
         };

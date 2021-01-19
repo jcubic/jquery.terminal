@@ -309,7 +309,7 @@
     // IE11 polyfill
     // -----------------------------------------------------------------------
     /* eslint-disable */
-    if (!('clear' in Map.prototype)) {
+    if ('Map' in root && !('clear' in Map.prototype)) {
         Map.prototype.clear = function() {
             this.forEach(function(value, key, map) {
                 map.delete(key);
@@ -1456,7 +1456,9 @@
         this._onCache = settings.onCache.bind(this);
         this._action = settings.action.bind(this);
         this._validation = settings.validation.bind(this);
-        this._cache = new Map();
+        if ('Map' in root) {
+            this._cache = new Map();
+        }
     }
     // -------------------------------------------------------------------------
     WorkerCache.prototype.validate = function(key) {
@@ -1469,6 +1471,9 @@
     };
     // -------------------------------------------------------------------------
     WorkerCache.prototype.get = function(key) {
+        if (!this._cache) {
+            return this._action(key);
+        }
         var value;
         if (this.validate(key) && this._cache.has(key)) {
             value = this._cache.get(key);
@@ -2167,7 +2172,7 @@
             if (self.isenabled()) {
                 //wait until Browser insert text to textarea
                 self.oneTime(100, function() {
-                    var value = clip.val();
+                    var value = clip.val().replace(/\r/g, '');
                     if (is_function(settings.onPaste)) {
                         var ret = settings.onPaste.call(self, {
                             target: self,
@@ -9971,9 +9976,9 @@
                         target: self
                     };
                     if (typeof object === 'string') {
-                        event['text'] = object;
+                        event.text = object;
                     } else if (object instanceof Blob) {
-                        event['image'] = data_uri(object);
+                        event.image = data_uri(object);
                     }
                     var ret = fire_event('onPaste', [event]);
                     if (ret) {
@@ -10006,12 +10011,14 @@
                                 var blob = items[i].getAsFile();
                                 echo(blob);
                             } else if (is_type(items[i], 'text/plain')) {
-                                items[i].getAsString(echo);
+                                items[i].getAsString(function(text) {
+                                    echo(text.replace(/\r/g, ''));
+                                });
                             }
                         }
                     } else if (e.clipboardData.getData) {
                         var text = e.clipboardData.getData('text/plain');
-                        echo(text);
+                        echo(text.replace(/\r/g, ''));
                     }
                     return false;
                 }

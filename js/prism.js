@@ -144,6 +144,9 @@
     var format_split_re = /(\x00\x00\x00\x00(?:\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]\\]*(\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?|\]))/i;
     /* eslint-enable */
     function should_render(options) {
+        if (!options || !Object.keys(options).length) {
+            return true;
+        }
         var props = Object.keys($.terminal.prism_formatters);
         for (var i = props.length; i--;) {
             var prop = props[i];
