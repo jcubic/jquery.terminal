@@ -110,27 +110,12 @@
                 newline: true
             }, options);
             function process(prompt) {
-                // this probably can be simplify because terminal handle
-                // newlines in prompt
-                var last_line;
                 if (last === null) {
                     last = arg;
                 } else {
                     last += arg;
                 }
-                arg = last + prompt;
-                var arr = arg.split('\n');
-                if (arr.length === 1) {
-                    last_line = arg;
-                } else {
-                    var prev = arr.slice(0, -1).join('\n');
-                    if (prev) {
-                        term.__echo(prev, options);
-                    }
-                    last_line = arr[arr.length - 1];
-                }
-                last = last_line;
-                term.__set_prompt(last_line);
+                term.__set_prompt(last + prompt);
             }
             if (settings.newline === false) {
                 if (prompt === null) {

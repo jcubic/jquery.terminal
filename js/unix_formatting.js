@@ -1157,7 +1157,6 @@
                 }
             }
             if (state.reverse) {
-                console.log('revese');
                 if (output_color || output_background) {
                     var tmp = output_background;
                     output_background = output_color;
