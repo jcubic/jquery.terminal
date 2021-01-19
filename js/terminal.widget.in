@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2020 Jakub T. Jankiewicz <https://jcubic.pl/m>e
+ * Copyright (c) 2010-2021 Jakub T. Jankiewicz <https://jcubic.pl/m>e
  * Released under the MIT license
  */
 /* global jQuery */
