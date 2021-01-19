@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 21 Dec 2020 19:19:10 +0000
+ * Date: Tue, 19 Jan 2021 15:22:12 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2172,7 +2172,7 @@
             if (self.isenabled()) {
                 //wait until Browser insert text to textarea
                 self.oneTime(100, function() {
-                    var value = clip.val();
+                    var value = clip.val().replace(/\r/g, '');
                     if (is_function(settings.onPaste)) {
                         var ret = settings.onPaste.call(self, {
                             target: self,
@@ -4486,7 +4486,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 21 Dec 2020 19:19:10 +0000',
+        date: 'Tue, 19 Jan 2021 15:22:12 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9976,9 +9976,9 @@
                         target: self
                     };
                     if (typeof object === 'string') {
-                        event['text'] = object;
+                        event.text = object;
                     } else if (object instanceof Blob) {
-                        event['image'] = data_uri(object);
+                        event.image = data_uri(object);
                     }
                     var ret = fire_event('onPaste', [event]);
                     if (ret) {
@@ -10011,12 +10011,14 @@
                                 var blob = items[i].getAsFile();
                                 echo(blob);
                             } else if (is_type(items[i], 'text/plain')) {
-                                items[i].getAsString(echo);
+                                items[i].getAsString(function(text) {
+                                    echo(text.replace(/\r/g, ''));
+                                });
                             }
                         }
                     } else if (e.clipboardData.getData) {
                         var text = e.clipboardData.getData('text/plain');
-                        echo(text);
+                        echo(text.replace(/\r/g, ''));
                     }
                     return false;
                 }
