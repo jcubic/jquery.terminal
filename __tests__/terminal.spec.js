@@ -2250,7 +2250,7 @@ describe('Terminal utils', function() {
             term.settings().numRows = 50;
             term.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
             await delay(1000);
-            expect(term.get_output().match(/@/g).length).toEqual(43);
+            expect(term.get_output()).toMatchSnapshot();
         });
         it('should revoke images', async function() {
             term.settings().numRows = 50;
