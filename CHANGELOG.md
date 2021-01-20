@@ -1,3 +1,7 @@
+## 2.21.0
+### Features
+* add wrap and keepWords option to less [#641](https://github.com/jcubic/jquery.terminal/issues/641)
+
 ## 2.20.2
 ### Bugfix
 * fix bold background and default color in Unix formatting (another ANSI artwork issue)

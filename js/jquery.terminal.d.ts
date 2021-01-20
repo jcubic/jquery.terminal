@@ -295,7 +295,11 @@ interface JQuery<TElement = HTMLElement> {
     visible(): JQuery;
     hidden(): JQuery;
     // plugins
-    less(text: JQueryTerminal.LessArgument, options?: {formatters?: boolean}): JQueryTerminal;
+    less(text: JQueryTerminal.LessArgument, options?: {
+        formatters?: boolean,
+        wrap?: boolean,
+        keepWords?: boolean
+    }): JQueryTerminal;
 }
 
 interface JQueryStatic {
