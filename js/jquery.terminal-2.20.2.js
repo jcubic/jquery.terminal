@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.20.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 19 Jan 2021 16:45:47 +0000
+ * Date: Wed, 03 Feb 2021 15:11:46 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4485,8 +4485,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.20.2',
-        date: 'Tue, 19 Jan 2021 16:45:47 +0000',
+        version: 'DEV',
+        date: 'Wed, 03 Feb 2021 15:11:46 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5747,8 +5747,11 @@
                             return '';
                         }
                         var quote = string[0];
-                        var re = new RegExp("(^|(?:\\\\(?:\\\\)*)?)" + quote, "g");
-                        string = string.replace(re, "$1");
+                        var re = new RegExp("(^|(?:\\\\\\\\(?:\\\\\\\\)*))" + quote, "g");
+                        string = string.replace(re, '$1').replace(new RegExp(quote + '$'), '');
+                        if (quote === "'") {
+                            string = string.replace(/"/g, '\\"');
+                        }
                     }
                     string = '"' + string + '"';
                     // use build in function to parse rest of escaped characters

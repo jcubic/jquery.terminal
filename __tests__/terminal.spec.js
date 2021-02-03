@@ -440,85 +440,37 @@ describe('Terminal utils', function() {
     var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" \'foo\'';
     describe('$.terminal.split_arguments', function() {
         it('should create array of arguments', function() {
-            expect($.terminal.split_arguments(args)).toEqual([
-                'foo bar',
-                'baz',
-                '/^asd [x]/',
-                'str str',
-                '10',
-                '1e10',
-                '',
-                'foo"bar"',
-                "foo"
-            ]);
+            expect($.terminal.split_arguments(args)).toMatchSnapshot();
         });
     });
     describe('$.terminal.parse_arguments', function() {
         it('should create array of arguments and convert types', function() {
-            expect($.terminal.parse_arguments(args)).toEqual([
-                'foo bar',
-                'baz',
-                    /^asd [x]/,
-                'str str',
-                10,
-                1e10,
-                '',
-                'foobar',
-                'foo'
-            ]);
+            expect($.terminal.parse_arguments(args)).toMatchSnapshot();
         });
     });
     describe('$.terminal.split_command', function() {
         it('Should split command', function() {
             var cmd = jQuery.terminal.split_command(command);
-            expect(cmd).toEqual({
-                command: command,
-                name: 'test',
-                args: [
-                    'foo bar',
-                    'baz',
-                    '/^asd [x]/',
-                    'str str',
-                    '10',
-                    '1e10',
-                    '',
-                    'foo"bar"',
-                    'foo'
-                ],
-                args_quotes: ['"', '', '', '', '', '', '"', '', "'"],
-                rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" \'foo\''
-            });
+            expect(cmd).toMatchSnapshot();
         });
     });
     describe('$.terminal.parse_command', function() {
         it('should split and parse command', function() {
             var cmd = jQuery.terminal.parse_command(command);
-            expect(cmd).toEqual({
-                command: command,
-                name: 'test',
-                args: [
-                    'foo bar',
-                    'baz',
-                        /^asd [x]/,
-                    'str str',
-                    10,
-                    1e10,
-                    '',
-                    'foobar',
-                    'foo'
-                ],
-                args_quotes: ['"', '', '', '', '', '', '"', '', "'"],
-                rest: '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" \'foo\''
-            });
+            expect(cmd).toMatchSnapshot();
         });
         it('should handle JSON string', function() {
             var cmd = jQuery.terminal.parse_command('{"demo": ["error"]}');
-            expect(cmd).toEqual({
-                command: '{"demo": ["error"]}',
-                name: '{"demo":',
-                args: ['[error]}'],
-                args_quotes: [""],
-                rest: '["error"]}'
+            expect(cmd).toMatchSnapshot();
+        });
+        it('should handle JSON inside string', function() {
+            [
+                `test "{\\"wrap\\": true}"`,
+                `test '{"wrap": true}'`,
+                `test "xxx\\"xxx\\"xxx" y`
+            ].forEach(function(input) {
+                var cmd = jQuery.terminal.parse_command(input);
+                expect(cmd).toMatchSnapshot();
             });
         });
     });
@@ -2247,14 +2199,16 @@ describe('Terminal utils', function() {
             expect(term.get_output()).toEqual(output);
         });
         it('should split image', async function() {
-            term.settings().numRows = 50;
-            term.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            var t = term;
+            t.settings().numRows = 50;
+            t.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
             await delay(1000);
-            expect(term.get_output()).toMatchSnapshot();
+            expect(t.get_output()).toMatchSnapshot();
         });
         it('should revoke images', async function() {
-            term.settings().numRows = 50;
-            term.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            var t = term;
+            t.settings().numRows = 50;
+            t.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
             await delay(1000);
             spy(URL, 'revokeObjectURL');
             key('q');

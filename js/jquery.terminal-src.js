@@ -5747,8 +5747,11 @@
                             return '';
                         }
                         var quote = string[0];
-                        var re = new RegExp("(^|(?:\\\\(?:\\\\)*)?)" + quote, "g");
-                        string = string.replace(re, "$1");
+                        var re = new RegExp("(^|(?:\\\\\\\\(?:\\\\\\\\)*))" + quote, "g");
+                        string = string.replace(re, '$1').replace(new RegExp(quote + '$'), '');
+                        if (quote === "'") {
+                            string = string.replace(/"/g, '\\"');
+                        }
                     }
                     string = '"' + string + '"';
                     // use build in function to parse rest of escaped characters
