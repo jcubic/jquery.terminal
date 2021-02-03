@@ -75,6 +75,17 @@ declare namespace JQueryTerminal {
         rest: string;
     };
 
+    type size = {
+        width: number,
+        height: number
+    };
+    interface geometry {
+        terminal: size;
+        char: size;
+        cols: number;
+        rows: number;
+    }
+
     type AnsiColorType = {
         black: string;
         red: string;
@@ -605,6 +616,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     resume(): JQueryTerminal;
     cols(): number;
     rows(): number;
+    geometry(): JQueryTerminal.geometry;
     history(): JQueryTerminal.History<string>;
     history_state(toggle: boolean): JQueryTerminal;
     clear_history_state(): JQueryTerminal;

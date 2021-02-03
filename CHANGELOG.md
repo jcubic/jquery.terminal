@@ -1,6 +1,7 @@
 ## 2.21.0
 ### Features
 * add wrap and keepWords option to less [#641](https://github.com/jcubic/jquery.terminal/issues/641)
+* add new method geometry to the API [#637](https://github.com/jcubic/jquery.terminal/issues/637)
 ### Bugfix
 * fix parsing JSON code inside strings [#642](https://github.com/jcubic/jquery.terminal/issues/642)
 

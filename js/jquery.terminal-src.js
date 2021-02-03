@@ -8618,6 +8618,20 @@
                 return command_line.history();
             },
             // -------------------------------------------------------------
+            // :: Return size of the terminal instance
+            // -------------------------------------------------------------
+            geometry: function() {
+                return {
+                    terminal: {
+                        width: old_width,
+                        height: old_height
+                    },
+                    char: char_size,
+                    cols: this.cols(),
+                    rows: this.rows()
+                };
+            },
+            // -------------------------------------------------------------
             // :: toggle recording of history state
             // -------------------------------------------------------------
             history_state: function(toggle) {
