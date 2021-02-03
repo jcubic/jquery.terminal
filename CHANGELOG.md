@@ -1,6 +1,8 @@
 ## 2.21.0
 ### Features
 * add wrap and keepWords option to less [#641](https://github.com/jcubic/jquery.terminal/issues/641)
+### Bugfix
+* fix parsing JSON code inside strings [#642](https://github.com/jcubic/jquery.terminal/issues/642)
 
 ## 2.20.2
 ### Bugfix
