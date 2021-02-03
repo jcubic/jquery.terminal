@@ -2964,6 +2964,17 @@ describe('Terminal plugin', function() {
                 expect(term.history().data()).toEqual([]);
             });
         });
+        describe('geometry', function() {
+            var term = $('<div/>').css({
+                width: 800,
+                height: 600
+            }).appendTo('body').terminal($.noop, {
+                numChars: 100,
+                numRows: 25
+            });
+            expect(term.geometry()).toMatchSnapshot();
+            term.remove();
+        });
         describe('exit', function() {
             it('should add exit command', function() {
                 var term = $('<div/>').terminal($.noop, {

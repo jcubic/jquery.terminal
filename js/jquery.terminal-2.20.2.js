@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 03 Feb 2021 15:24:28 +0000
+ * Date: Wed, 03 Feb 2021 21:07:55 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4486,7 +4486,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 03 Feb 2021 15:24:28 +0000',
+        date: 'Wed, 03 Feb 2021 21:07:55 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5747,8 +5747,8 @@
                             return '';
                         }
                         var quote = string[0];
-                        var re = new RegExp("(^|(?:\\\\\\\\(?:\\\\\\\\)*))" + quote, "g");
-                        string = string.replace(re, '$1').replace(new RegExp(quote + '$'), '');
+                        var re = new RegExp("(\\\\\\\\(?:\\\\\\\\)*)" + quote, "g");
+                        string = string.replace(re, '$1').replace(/^['"]|['"]$/g, '');
                         if (quote === "'") {
                             string = string.replace(/"/g, '\\"');
                         }

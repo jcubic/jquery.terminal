@@ -5747,8 +5747,8 @@
                             return '';
                         }
                         var quote = string[0];
-                        var re = new RegExp("(^|(?:\\\\\\\\(?:\\\\\\\\)*))" + quote, "g");
-                        string = string.replace(re, '$1').replace(new RegExp(quote + '$'), '');
+                        var re = new RegExp("(\\\\\\\\(?:\\\\\\\\)*)" + quote, "g");
+                        string = string.replace(re, '$1').replace(/^['"]|['"]$/g, '');
                         if (quote === "'") {
                             string = string.replace(/"/g, '\\"');
                         }

@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[` 1`] = `
+Object {
+  "char": Object {
+    "height": 0,
+    "width": 0,
+  },
+  "cols": 100,
+  "rows": 25,
+  "terminal": Object {
+    "height": 0,
+    "width": 0,
+  },
+}
+`;
+
 exports[`Terminal plugin cmd plugin should move cursor 1`] = `
 Array [
   5,
