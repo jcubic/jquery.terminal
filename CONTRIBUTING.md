@@ -18,31 +18,46 @@ devel. I need to run the script when I'm releasing new version. To help me remem
 contribution, please modify template/Makefile.in and update line `UPDATE_CONTRIBUTORS=1` it should be 1 which
 is true (0 is false). On each build it will show red reminder message and it will stop build when run on master.
 
+## Building the project
+
+The process of building the project is very simple all you need is this:
+
+```bash
+clone https://github.com/jcubic/jquery.terminal.git
+cd jquery.terminal
+npm install
+make
+```
+
+While developing you can use -src versions they are work fine. Make will just create
+Release files that have proper version number, create minified files and build emoji
+css.
 
 ## Test
 
 You should run test to make sure you don't break anything, to run tests from browser you need to run
 
-```
+```bash
 npm install
 make test
 ```
 
 and run ESlint and JSONLint using:
 
-```
+```bash
 make lint
 ```
 you can also run test coverage using
 
-```
+```bash
 make coverage
 ```
 
 ## README
 
-if you want to modify readme please modify the one in templates directory because that one is source file with {{VER}}
-markers that get filled with current version when running `make`.
+if you want to modify readme please modify the one in `./templates` directory, because
+that one is source file with {{VER}} markers that get filled with current version when
+running `make`.
 
 ## Release Cycle
 
@@ -87,3 +102,4 @@ make publish
   after that it will delete the directory.
 
 * New version is ready.
+
