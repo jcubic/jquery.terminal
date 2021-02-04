@@ -6,7 +6,9 @@
 \___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/_/_/  \/\__\_\___/
          \/          /____/                      version 2.21.0
 ```
-https://terminal.jcubic.pl
+# jQuery Terminal is [browser based terminal emulator](https://terminal.jcubic.pl)
+
+The library allow to create custom CLI applications in Browser.
 
 [![npm](https://img.shields.io/badge/npm-2.21.0-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.21.0-yellow.svg)
