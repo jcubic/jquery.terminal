@@ -75,6 +75,17 @@ declare namespace JQueryTerminal {
         rest: string;
     };
 
+    type size = {
+        width: number,
+        height: number
+    };
+    interface geometry {
+        terminal: size;
+        char: size;
+        cols: number;
+        rows: number;
+    }
+
     type AnsiColorType = {
         black: string;
         red: string;
@@ -295,7 +306,11 @@ interface JQuery<TElement = HTMLElement> {
     visible(): JQuery;
     hidden(): JQuery;
     // plugins
-    less(text: JQueryTerminal.LessArgument, options?: {formatters?: boolean}): JQueryTerminal;
+    less(text: JQueryTerminal.LessArgument, options?: {
+        formatters?: boolean,
+        wrap?: boolean,
+        keepWords?: boolean
+    }): JQueryTerminal;
 }
 
 interface JQueryStatic {
@@ -601,6 +616,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     resume(): JQueryTerminal;
     cols(): number;
     rows(): number;
+    geometry(): JQueryTerminal.geometry;
     history(): JQueryTerminal.History<string>;
     history_state(toggle: boolean): JQueryTerminal;
     clear_history_state(): JQueryTerminal;

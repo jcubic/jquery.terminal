@@ -5747,8 +5747,11 @@
                             return '';
                         }
                         var quote = string[0];
-                        var re = new RegExp("(^|(?:\\\\(?:\\\\)*)?)" + quote, "g");
-                        string = string.replace(re, "$1");
+                        var re = new RegExp("(\\\\\\\\(?:\\\\\\\\)*)" + quote, "g");
+                        string = string.replace(re, '$1').replace(/^['"]|['"]$/g, '');
+                        if (quote === "'") {
+                            string = string.replace(/"/g, '\\"');
+                        }
                     }
                     string = '"' + string + '"';
                     // use build in function to parse rest of escaped characters
@@ -8613,6 +8616,20 @@
             // -------------------------------------------------------------
             history: function() {
                 return command_line.history();
+            },
+            // -------------------------------------------------------------
+            // :: Return size of the terminal instance
+            // -------------------------------------------------------------
+            geometry: function() {
+                return {
+                    terminal: {
+                        width: old_width,
+                        height: old_height
+                    },
+                    char: char_size,
+                    cols: this.cols(),
+                    rows: this.rows()
+                };
             },
             // -------------------------------------------------------------
             // :: toggle recording of history state

@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[` 1`] = `
+Object {
+  "char": Object {
+    "height": 0,
+    "width": 0,
+  },
+  "cols": 100,
+  "rows": 25,
+  "terminal": Object {
+    "height": 0,
+    "width": 0,
+  },
+}
+`;
+
 exports[`Terminal plugin cmd plugin should move cursor 1`] = `
 Array [
   5,
@@ -339,6 +354,204 @@ exports[`Terminal utils $.terminal.from_ansi should render ANSI art 2`] = `
                                                     [[;#A50;#000]▀ ▀ ▀  ▀]     [[;#A50;#000]▄▀ ][[b;#555;#000]bs]
                                                                     [[;#000;]░░▒▓]
 "
+`;
+
+exports[`Terminal utils $.terminal.less should split image 1`] = `
+"xxx
+
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+[[@;;;;data:image/jpg;<BLOB>]]
+
+xxx
+~
+~"
+`;
+
+exports[`Terminal utils $.terminal.parse_arguments should create array of arguments and convert types 1`] = `
+Array [
+  "foo bar",
+  "baz",
+  /\\^asd \\[x\\]/,
+  "str str",
+  10,
+  10000000000,
+  "",
+  "foobar",
+  "foo",
+]
+`;
+
+exports[`Terminal utils $.terminal.parse_command should handle JSON inside string 1`] = `
+Object {
+  "args": Array [
+    "{\\"wrap\\": true}",
+  ],
+  "args_quotes": Array [
+    "\\"",
+  ],
+  "command": "test \\"{\\\\\\"wrap\\\\\\": true}\\"",
+  "name": "test",
+  "rest": "\\"{\\\\\\"wrap\\\\\\": true}\\"",
+}
+`;
+
+exports[`Terminal utils $.terminal.parse_command should handle JSON inside string 2`] = `
+Object {
+  "args": Array [
+    "{\\"wrap\\": true}",
+  ],
+  "args_quotes": Array [
+    "'",
+  ],
+  "command": "test '{\\"wrap\\": true}'",
+  "name": "test",
+  "rest": "'{\\"wrap\\": true}'",
+}
+`;
+
+exports[`Terminal utils $.terminal.parse_command should handle JSON inside string 3`] = `
+Object {
+  "args": Array [
+    "xxx\\"xxx\\"xxx",
+    "y",
+  ],
+  "args_quotes": Array [
+    "\\"",
+    "",
+  ],
+  "command": "test \\"xxx\\\\\\"xxx\\\\\\"xxx\\" y",
+  "name": "test",
+  "rest": "\\"xxx\\\\\\"xxx\\\\\\"xxx\\" y",
+}
+`;
+
+exports[`Terminal utils $.terminal.parse_command should handle JSON string 1`] = `
+Object {
+  "args": Array [
+    "[error]}",
+  ],
+  "args_quotes": Array [
+    "",
+  ],
+  "command": "{\\"demo\\": [\\"error\\"]}",
+  "name": "{\\"demo\\":",
+  "rest": "[\\"error\\"]}",
+}
+`;
+
+exports[`Terminal utils $.terminal.parse_command should split and parse command 1`] = `
+Object {
+  "args": Array [
+    "foo bar",
+    "baz",
+    /\\^asd \\[x\\]/,
+    "str str",
+    10,
+    10000000000,
+    "",
+    "foobar",
+    "foo",
+  ],
+  "args_quotes": Array [
+    "\\"",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "\\"",
+    "",
+    "'",
+  ],
+  "command": "test \\"foo bar\\" baz /^asd [x]/ str\\\\ str 10 1e10 \\"\\" foo\\"bar\\" 'foo'",
+  "name": "test",
+  "rest": "\\"foo bar\\" baz /^asd [x]/ str\\\\ str 10 1e10 \\"\\" foo\\"bar\\" 'foo'",
+}
+`;
+
+exports[`Terminal utils $.terminal.split_arguments should create array of arguments 1`] = `
+Array [
+  "foo bar",
+  "baz",
+  "/^asd [x]/",
+  "str str",
+  "10",
+  "1e10",
+  "",
+  "foo\\"bar\\"",
+  "foo",
+]
+`;
+
+exports[`Terminal utils $.terminal.split_command Should split command 1`] = `
+Object {
+  "args": Array [
+    "foo bar",
+    "baz",
+    "/^asd [x]/",
+    "str str",
+    "10",
+    "1e10",
+    "",
+    "foo\\"bar\\"",
+    "foo",
+  ],
+  "args_quotes": Array [
+    "\\"",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "\\"",
+    "",
+    "'",
+  ],
+  "command": "test \\"foo bar\\" baz /^asd [x]/ str\\\\ str 10 1e10 \\"\\" foo\\"bar\\" 'foo'",
+  "name": "test",
+  "rest": "\\"foo bar\\" baz /^asd [x]/ str\\\\ str 10 1e10 \\"\\" foo\\"bar\\" 'foo'",
+}
 `;
 
 exports[`Terminal utils $.terminal.split_equal split emoji encoded from apply_formatters 1`] = `

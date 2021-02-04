@@ -172,7 +172,7 @@
             }
             term.set_prompt(prompt);
             var to_print = lines.slice(pos, pos + rows - 1);
-            var should_substring = to_print.filter(function(line) {
+            var should_substring = options.wrap ? false : to_print.filter(function(line) {
                 var len = $.terminal.length(line);
                 return len > cols;
             }).length;
@@ -187,6 +187,11 @@
                 }
             }
             term.echo(to_print.join('\n'));
+            if (term.find('.terminal-output').is(':empty')) {
+                // sometimes the output is not flushed not idea why
+                // TODO: investigate
+                term.flush();
+            }
         }
         // -------------------------------------------------------------------------------
         function quit() {
@@ -227,12 +232,25 @@
             rows = term.rows();
             fixed_output();
             function cont(l) {
-                original_lines = l;
+                original_lines = process_optional_wrap(l);
                 lines = original_lines.slice();
                 if (in_search) {
                     search(last_found);
                 } else {
                     print();
+                }
+            }
+            function process_optional_wrap(arg) {
+                if (arg instanceof Array) {
+                    if (options.wrap) {
+                        arg = arg.join('\n');
+                        return $.terminal.split_equal(arg, cols, options.keepWords);
+                    }
+                    return arg;
+                } else if (options.wrap) {
+                    return $.terminal.split_equal(arg, cols, options.keepWords);
+                } else {
+                    return [arg];
                 }
             }
             function run(arg) {
@@ -441,15 +459,19 @@
                     } else if (key === 'Q') {
                         quit();
                     } else if (key === 'ARROWRIGHT') {
-                        left += Math.round(cols / 2);
-                        print();
-                    } else if (key === 'ARROWLEFT') {
-                        left -= Math.round(cols / 2);
-                        if (left < 0) {
-                            left = 0;
+                        if (!options.wrap) {
+                            left += Math.round(cols / 2);
+                            print();
                         }
-                        print();
-                        // scroll
+                    } else if (key === 'ARROWLEFT') {
+                        if (!options.wrap) {
+                            left -= Math.round(cols / 2);
+                            if (left < 0) {
+                                left = 0;
+                            }
+                            print();
+                            // scroll
+                        }
                     } else if (lines.length > rows) {
                         if (key === 'ARROWUP') { //up
                             if (pos > 0) {

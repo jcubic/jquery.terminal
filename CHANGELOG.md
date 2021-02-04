@@ -1,3 +1,10 @@
+## 2.21.0
+### Features
+* add wrap and keepWords option to less [#641](https://github.com/jcubic/jquery.terminal/issues/641)
+* add new method geometry to the API [#637](https://github.com/jcubic/jquery.terminal/issues/637)
+### Bugfix
+* fix parsing JSON code inside strings [#642](https://github.com/jcubic/jquery.terminal/issues/642)
+
 ## 2.20.2
 ### Bugfix
 * fix bold background and default color in Unix formatting (another ANSI artwork issue)
