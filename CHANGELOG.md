@@ -1,3 +1,7 @@
+## 2.21.1
+### Bugfix
+* fix scrolling whole page when using mouse wheel in less
+
 ## 2.21.0
 ### Features
 * add wrap and keepWords option to less [#641](https://github.com/jcubic/jquery.terminal/issues/641)
