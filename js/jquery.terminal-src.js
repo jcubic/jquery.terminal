@@ -176,12 +176,12 @@
      */
     ctx.sprintf = sprintf;
     ctx.vsprintf = vsprintf;
-})(typeof global !== "undefined" ? global : window);
+})(typeof global !== "undefined" ? global : self || window);
 // -----------------------------------------------------------------------
 /* eslint-enable */
 // UMD taken from https://github.com/umdjs/umd
 (function(factory, undefined) {
-    var root = typeof window !== 'undefined' ? window : global;
+    var root = typeof window !== 'undefined' ? window : self || global;
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
@@ -197,7 +197,7 @@
                 // build a jQuery instance, we normalize how we use modules
                 // that require this pattern but the window provided is a noop
                 // if it's defined (how jquery works)
-                if (window !== undefined) {
+                if (typeof window !== 'undefined') {
                     jQuery = require('jquery');
                 } else {
                     jQuery = require('jquery')(root);
@@ -670,7 +670,7 @@
                     handler.$timerID = fn.$timerID;
 
                     if (!element.$timers[label][fn.$timerID]) {
-                        element.$timers[label][fn.$timerID] = window.setInterval(handler, interval);
+                        element.$timers[label][fn.$timerID] = setInterval(handler, interval);
                     }
 
                     if (!this.global[label]) {
@@ -693,13 +693,13 @@
                         } else if (timers[label]) {
                             if (fn) {
                                 if (fn.$timerID) {
-                                    window.clearInterval(timers[label][fn.$timerID]);
+                                    clearInterval(timers[label][fn.$timerID]);
                                     delete timers[label][fn.$timerID];
                                 }
                             } else {
                                 for (var _fn in timers[label]) {
                                     if (timers[label].hasOwnProperty(_fn)) {
-                                        window.clearInterval(timers[label][_fn]);
+                                        clearInterval(timers[label][_fn]);
                                         delete timers[label][_fn];
                                     }
                                 }
@@ -1097,11 +1097,11 @@
             var height = container.height();
             return bottom > 0 && top <= height;
         }
-        if (window.IntersectionObserver) {
+        if (root.IntersectionObserver) {
             return function(container) {
                 var node = this[0];
                 var defer = jQuery.Deferred();
-                var item_observer = new window.IntersectionObserver(function(entries) {
+                var item_observer = new root.IntersectionObserver(function(entries) {
                     defer.resolve(entries[0].isIntersecting && entries[0].ratio === 1);
                     item_observer.unobserve(node);
                 }, {
@@ -1160,6 +1160,9 @@
     // taken from https://hacks.mozilla.org/2011/09/detecting-and-generating-
     // css-animations-in-javascript/
     var animation_supported = (function() {
+        if (typeof document === 'undefined') {
+            return false;
+        }
         var animation = false,
             domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
             elm = document.createElement('div');
@@ -1179,7 +1182,7 @@
         return animation;
     })();
     // -------------------------------------------------------------------------
-    var agent = window.navigator.userAgent;
+    var agent = (root.navigator || window.navigator).userAgent;
     var is_IE = /MSIE|Trident/.test(agent) || /rv:11.0/i.test(agent);
     var is_IEMobile = /IEMobile/.test(agent);
     // -------------------------------------------------------------------------
@@ -1187,24 +1190,29 @@
         if (is_IE && !is_IEMobile) {
             return false;
         }
+        if (typeof document === 'undefined') {
+            return true; // run without browser context
+        }
         var div = document.createElement('div');
         div.style.width = '1ch';
         return div.style.width === '1ch';
     })();
     // -------------------------------------------------------------------------
-    var is_css_variables_supported = window.CSS && window.CSS.supports &&
-            window.CSS.supports('--fake-var', 0);
+    var is_css_variables_supported = root.CSS && root.CSS.supports &&
+            root.CSS.supports('--fake-var', 0);
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
     var is_key_native = (function is_key_native() {
-        if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
+        if (!('KeyboardEvent' in root && 'key' in root.KeyboardEvent.prototype)) {
             return false;
         }
-        var proto = window.KeyboardEvent.prototype;
+        var proto = root.KeyboardEvent.prototype;
         var get = Object.getOwnPropertyDescriptor(proto, 'key').get;
         return !!get.toString().match(/\[native code\]/);
     })();
+    // -------------------------------------------------------------------------
+    var is_browser = new Function('try {return this===window;}catch(e){return false;}')();
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
         var check = false;
@@ -1217,24 +1225,26 @@
             return true;
         }
         return check;
-    })(navigator.userAgent || navigator.vendor || window.opera);
-
+    })(navigator.userAgent || navigator.vendor || root.opera);
     // -------------------------------------------------------------------------
     // IE ch unit bug detection - better that UserAgent that can be changed
     // -------------------------------------------------------------------------
     var ch_unit_bug = false;
-    $(function() {
-        function width(e) {
-            return e[0].getBoundingClientRect().width;
-        }
-        var base = '<span style="font-family: monospace;visibility:hidden;';
-        var ch = $(base + 'width:1ch;overflow: hidden">&nbsp;</span>').appendTo('body');
-        var space = $(base + '">&nbsp;</span>').appendTo('body');
-        // in FireFox the size of space is fraction larger #579
-        ch_unit_bug = Math.abs(width(ch) - width(space)) > 0.0001;
-        ch.remove();
-        space.remove();
-    });
+    if (is_browser) {
+        $(function() {
+            function width(e) {
+                return e[0].getBoundingClientRect().width;
+            }
+            var base = '<span style="font-family: monospace;visibility:hidden;';
+            var ch = $(base + 'width:1ch;overflow: hidden">&nbsp;</span>');
+            ch.appendTo('body');
+            var space = $(base + '">&nbsp;</span>').appendTo('body');
+            // in FireFox the size of space is fraction larger #579
+            ch_unit_bug = Math.abs(width(ch) - width(space)) > 0.0001;
+            ch.remove();
+            space.remove();
+        });
+    }
     // -----------------------------------------------------------------------
     // :: css helper that work with css variables
     // :: jQuery css method from 3.4 support them by default
@@ -4318,9 +4328,18 @@
     // ---------------------------------------------------------------------
     // :: copy given DOM element text to clipboard
     // ---------------------------------------------------------------------
+    var support_copy = (function() {
+        if (typeof document === 'undefined') {
+            return false;
+        }
+        if (!is_function(document.queryCommandSupported)) {
+            return false;
+        }
+        return document.queryCommandSupported('copy');
+    })();
+    // ---------------------------------------------------------------------
     var text_to_clipboard;
-    if (is_function(document.queryCommandSupported) &&
-        document.queryCommandSupported('copy')) {
+    if (support_copy) {
         text_to_clipboard = function text_to_clipboard($textarea, text) {
             var val = $textarea.val();
             var had_focus = $textarea.is(':focus');
@@ -4352,6 +4371,12 @@
     }
     // ---------------------------------------------------------------------
     var get_textarea_selection = (function() {
+        function noop() {
+            return '';
+        }
+        if (typeof document === 'undefined') {
+            return noop;
+        }
         var textarea = document.createElement('textarea');
         var selectionStart = 'selectionStart' in textarea;
         textarea = null;
@@ -4366,9 +4391,7 @@
                 return range.text();
             };
         } else {
-            return function() {
-                return '';
-            };
+            return noop;
         }
     })();
     // ---------------------------------------------------------------------
@@ -4427,16 +4450,16 @@
     }
     // ---------------------------------------------------------------------
     var select = (function() {
-        if (window.getSelection) {
-            var selection = window.getSelection();
+        if (root.getSelection) {
+            var selection = root.getSelection();
             if (selection.setBaseAndExtent) {
                 return function(start, end) {
-                    var selection = window.getSelection();
+                    var selection = root.getSelection();
                     selection.setBaseAndExtent(start, 0, end, 1);
                 };
             } else {
                 return function(start, end) {
-                    var selection = window.getSelection();
+                    var selection = root.getSelection();
                     var range = document.createRange();
                     range.setStart(start, 0);
                     range.setEnd(end, end.childNodes.length);
@@ -6211,12 +6234,30 @@
         return is_function(object && (object.then || object.done));
     }
     // -----------------------------------------------------------------------
+    if (!Array.isArray) {
+        Array.isArray = function(arg) {
+            return Object.prototype.toString.call(arg) === '[object Array]';
+        };
+    }
+    // -----------------------------------------------------------------------
     function is_array(object) {
-        return get_type(object) === 'array';
+        return Array.isArray(object);
     }
     // -----------------------------------------------------------------------
     function get_type(object) {
-        return typeof object === 'function' ? 'function' : $.type(object);
+        if (typeof object === 'function') {
+            return 'function';
+        }
+        if (object === null) {
+            return object + '';
+        }
+        if (Array.isArray(object)) {
+            return 'array';
+        }
+        if (typeof object === 'object') {
+            return 'object';
+        }
+        return typeof object;
     }
     // -----------------------------------------------------------------------
     // :: TERMINAL PLUGIN CODE

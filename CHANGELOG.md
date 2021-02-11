@@ -1,4 +1,6 @@
-## 2.21.1
+## 2.22.0
+### Features
+* make unix formatting and basic tools work in web worker
 ### Bugfix
 * fix scrolling whole page when using mouse wheel in less
 

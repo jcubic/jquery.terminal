@@ -19,7 +19,7 @@
  */
 /* global define */
 (function(factory) {
-    var root = typeof window !== 'undefined' ? window : global;
+    var root = typeof window !== 'undefined' ? window : self || global;
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
@@ -54,7 +54,7 @@
         factory(root.jQuery);
     }
 })(function($) {
-    var DEBUG = false;
+    var DEBUG = true;
     /* eslint-disable */
     /* istanbul ignore next */
     function warn(str) {
@@ -1267,8 +1267,9 @@
                 this.cursor.x += s_len;
             };
             var use_CR = !!input.match(/\x0D/);
-            var ROWS = $.terminal.active().rows();
-            var COLS = $.terminal.active().cols();
+            var term = $.terminal.active();
+            var ROWS = term && term.rows() || 1000;
+            var COLS = term && term.cols() || 80;
             // correction to CP 437
             // ref: https://unix.stackexchange.com/a/611513/1806
             //      https://unix.stackexchange.com/a/611344/1806
