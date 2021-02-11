@@ -1286,6 +1286,7 @@
                 0x12: '↕',
                 0x14: '¶',
                 0x15: '§',
+                0x16: '▬',
                 0x17: '↨',
                 0x18: '↑',
                 0x19: '↓',
@@ -1313,6 +1314,8 @@
                     } else if (DEBUG) {
                         var mod = code % characters.length;
                         var char = characters[mod];
+                        // eslint-disable-next-line no-console
+                        console.log({code: code, char: char});
                         print.call(this, char);
                     }
                     if (!this.result[this.cursor.y]) {
