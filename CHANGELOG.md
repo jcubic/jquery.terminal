@@ -3,6 +3,7 @@
 * make unix formatting and basic tools work in web worker
 ### Bugfix
 * fix scrolling whole page when using mouse wheel in less
+* fix some missing cp_437 characters for ANSI Art
 
 ## 2.21.0
 ### Features

@@ -1275,13 +1275,21 @@
             //      https://unix.stackexchange.com/a/611344/1806
             var cp_437_control = {
                 0x00: ' ',
+                0x01: '☺',
+                0x02: '☻',
+                0x03: '♥',
+                0x07: '•',
+                0x08: '█',
                 0x0F: '*',
+                0x10: '█',
+                0x11: '◄',
                 0x12: '↕',
+                0x14: '¶',
+                0x15: '§',
+                0x17: '↨',
                 0x18: '↑',
                 0x19: '↓',
-                0x11: '◄',
-                0x1E: '▲',
-                0x10: '█'
+                0x1E: '▲'
             };
             var characters = 'qwertyuiopasdfghjklzxcvbnm';
             var parser_events = {
