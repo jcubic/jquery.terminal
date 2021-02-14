@@ -19,7 +19,7 @@
  */
 /* global define */
 (function(factory) {
-    var root = typeof window !== 'undefined' ? window : global;
+    var root = typeof window !== 'undefined' ? window : self || global;
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
@@ -54,7 +54,7 @@
         factory(root.jQuery);
     }
 })(function($) {
-    var DEBUG = false;
+    var DEBUG = true;
     /* eslint-disable */
     /* istanbul ignore next */
     function warn(str) {
@@ -1267,20 +1267,30 @@
                 this.cursor.x += s_len;
             };
             var use_CR = !!input.match(/\x0D/);
-            var ROWS = $.terminal.active().rows();
-            var COLS = $.terminal.active().cols();
+            var term = $.terminal.active();
+            var ROWS = term && term.rows() || 1000;
+            var COLS = term && term.cols() || 80;
             // correction to CP 437
             // ref: https://unix.stackexchange.com/a/611513/1806
             //      https://unix.stackexchange.com/a/611344/1806
             var cp_437_control = {
                 0x00: ' ',
+                0x01: '☺',
+                0x02: '☻',
+                0x03: '♥',
+                0x07: '•',
+                0x08: '█',
                 0x0F: '*',
+                0x10: '█',
+                0x11: '◄',
                 0x12: '↕',
+                0x14: '¶',
+                0x15: '§',
+                0x16: '▬',
+                0x17: '↨',
                 0x18: '↑',
                 0x19: '↓',
-                0x11: '◄',
-                0x1E: '▲',
-                0x10: '█'
+                0x1E: '▲'
             };
             var characters = 'qwertyuiopasdfghjklzxcvbnm';
             var parser_events = {
@@ -1300,10 +1310,13 @@
                     } else if (code === 9) {
                         print.call(this, '\t');
                     } else if (ansi_art && code in cp_437_control) {
+                        console.log({code: '0x' + code.toString(16)});
                         print.call(this, cp_437_control[code]);
                     } else if (DEBUG) {
                         var mod = code % characters.length;
                         var char = characters[mod];
+                        // eslint-disable-next-line no-console
+                        console.log({code: code, char: char});
                         print.call(this, char);
                     }
                     if (!this.result[this.cursor.y]) {

@@ -420,7 +420,7 @@
                 }
             }
             print();
-            return true;
+            return false;
         }
         term.push($.noop, {
             onResize: refresh_view,

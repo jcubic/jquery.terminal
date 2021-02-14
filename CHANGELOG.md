@@ -1,7 +1,15 @@
+## 2.22.0
+### Features
+* make unix formatting and basic tools work in web worker
+### Bugfix
+* fix scrolling whole page when using mouse wheel in less
+* fix some missing cp_437 characters for ANSI Art
+* fix usage as bookmarklet on StackOverflow (force css of textarea)
+
 ## 2.21.0
 ### Features
-* add wrap and keepWords option to less [#641](https://github.com/jcubic/jquery.terminal/issues/641)
-* add new method geometry to the API [#637](https://github.com/jcubic/jquery.terminal/issues/637)
+* add `wrap` and `keepWords` option to less [#641](https://github.com/jcubic/jquery.terminal/issues/641)
+* add new method `term::geometry` to the API [#637](https://github.com/jcubic/jquery.terminal/issues/637)
 ### Bugfix
 * fix parsing JSON code inside strings [#642](https://github.com/jcubic/jquery.terminal/issues/642)
 
