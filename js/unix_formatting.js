@@ -1310,6 +1310,7 @@
                     } else if (code === 9) {
                         print.call(this, '\t');
                     } else if (ansi_art && code in cp_437_control) {
+                        console.log({code: '0x' + code.toString(16)});
                         print.call(this, cp_437_control[code]);
                     } else if (DEBUG) {
                         var mod = code % characters.length;

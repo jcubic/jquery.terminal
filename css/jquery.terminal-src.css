@@ -23,22 +23,23 @@
     margin: 0;
 }
 .cmd .cmd-clipboard {
-    position: absolute;
-    left: -16px;
-    top: 0;
-    width: 16px;
-    height: 16px;
-    background: transparent;
-    border: none;
-    color: transparent;
-    outline: none;
-    padding: 0;
-    resize: none;
-    z-index: 1000;
-    overflow: hidden;
-    white-space: pre;
-    text-indent: -9999em; /* better cursor hiding for Safari and IE */
-    top: calc(var(--cursor-line, 0) * var(--size, 1) * 14px);
+    all: unset;
+    position: absolute !important;
+    left: -16px !important;
+    top: 0 !important;
+    width: 16px !important;
+    height: 16px !important;
+    background: transparent !important;
+    border: none !important;
+    color: transparent !important;
+    outline: none !important;
+    padding: 0 !important;
+    resize: none !important;
+    z-index: 1000 !important;
+    overflow: hidden !important;
+    white-space: pre !important;
+    text-indent: -9999em !important; /* better cursor hiding for Safari and IE */
+    top: calc(var(--cursor-line, 0) * var(--size, 1) * 14px) !important;
 }
 
 .cmd span.cmd-end-line,
@@ -87,18 +88,19 @@ body.full-screen-terminal .terminal {
     height: 100%;
 }
 .terminal > .terminal-resizer, .terminal > .terminal-font .terminal-resizer {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: -1;
-    height: 100%;
-    border: none;
-    padding: 0;
-    width: 100%
+    all: unset;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    height: 100% !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
 }
 .cmd {
     padding: 0;

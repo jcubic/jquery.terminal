@@ -4,6 +4,7 @@
 ### Bugfix
 * fix scrolling whole page when using mouse wheel in less
 * fix some missing cp_437 characters for ANSI Art
+* fix usage as bookmarklet on StackOverflow (force css of textarea)
 
 ## 2.21.0
 ### Features
