@@ -1,3 +1,7 @@
+## 2.22.1
+### Bugfix
+* remove unsafe eval (function constructor) that b break CSP []()
+
 ## 2.22.0
 ### Features
 * make unix formatting and basic tools work in web worker

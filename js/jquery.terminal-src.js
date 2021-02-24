@@ -1212,7 +1212,13 @@
         return !!get.toString().match(/\[native code\]/);
     })();
     // -------------------------------------------------------------------------
-    var is_browser = new Function('try {return this===window;}catch(e){return false;}')();
+    var is_browser = (function() {
+        try {
+            return this === window;
+        } catch (e) {
+            return false;
+        }
+    })();
     // -------------------------------------------------------------------------
     var is_mobile = (function(a) {
         var check = false;
