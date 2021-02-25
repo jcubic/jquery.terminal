@@ -94,6 +94,7 @@
         term.__echo = term.echo;
         term.__exec = term.exec;
         term.__set_prompt = term.set_prompt;
+        term.__get_prompt = term.get_prompt;
         term.exec = function() {
             last = null;
             if (echo_command) {
@@ -148,5 +149,12 @@
             prompt = new_prompt;
             term.__set_prompt((last || "") + prompt);
         };
+        term.get_prompt = function(){
+            if(last === null){
+                return term.__get_prompt();
+            } else {
+                return prompt;
+            }
+        }
     }
 });
