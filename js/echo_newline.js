@@ -144,5 +144,9 @@
             }
             return term;
         };
+        term.set_prompt = function(new_prompt) {
+            prompt = new_prompt;
+            term.__set_prompt((last || "") + prompt);
+        };
     }
 });
