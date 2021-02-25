@@ -3079,13 +3079,13 @@
                 last_rendered_prompt = prompt;
                 var lines = $.terminal.split_equal(prompt, num_chars).map(function(line) {
                     if (!$.terminal.have_formatting(line)) {
-                        return '[[;;]' + line + ']';
+                        return '[[;;]' + $.terminal.escape_brackets(line) + ']';
                     }
                     return $.terminal.format_split(line).map(function(str) {
                         if ($.terminal.is_formatting(str)) {
                             return str;
                         }
-                        return '[[;;]' + str + ']';
+                        return '[[;;]' + $.terminal.escape_brackets(str) + ']';
                     }).join('');
                 });
                 var options = {
