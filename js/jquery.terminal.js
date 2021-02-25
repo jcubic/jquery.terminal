@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 24 Feb 2021 14:00:19 +0000
+ * Date: Thu, 25 Feb 2021 16:23:40 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3121,6 +3121,8 @@
                         prompt_node.show();
                     }
                     prompt_len = strlen(text(encoded_last_line));
+                } else if (formatted === '') {
+                    prompt_len = 0;
                 }
             }
             return function() {
@@ -4768,7 +4770,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 24 Feb 2021 14:00:19 +0000',
+        date: 'Thu, 25 Feb 2021 16:23:40 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

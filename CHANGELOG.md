@@ -1,6 +1,7 @@
 ## 2.22.1
 ### Bugfix
-* remove unsafe eval (function constructor) that b break CSP []()
+* remove unsafe eval (function constructor) that breaks CSP [#647](https://github.com/jcubic/jquery.terminal/issues/647)
+* fix up/down arrow when prompt is empty string [651](https://github.com/jcubic/jquery.terminal/issues/651)
 
 ## 2.22.0
 ### Features

@@ -3121,6 +3121,8 @@
                         prompt_node.show();
                     }
                     prompt_len = strlen(text(encoded_last_line));
+                } else if (formatted === '') {
+                    prompt_len = 0;
                 }
             }
             return function() {
