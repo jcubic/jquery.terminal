@@ -52,116 +52,122 @@
 })(function($) {
     var init = $.fn.terminal;
     $.fn.terminal = function(interpreter, options) {
+        var last = null;
+        var prompt = null;
+        var orig_prompt = null;
+        function should_echo_command(options) {
+            return options && options.echoCommand !== false || !options;
+        }
+        function patch_options(options) {
+            var keymap = {
+                'ENTER': function(e, original) {
+                    var term = this;
+                    if (last === null) {
+                        if (should_echo_command(options)) {
+                            term.echo_command();
+                        }
+                    } else {
+                        this.__echo(this.__get_prompt() + this.get_command());
+                        this.__set_prompt(prompt);
+                        last = null;
+                        prompt = null;
+                    }
+                    if (options && options.keymap && options.keymap.ENTER) {
+                        options.keymap.ENTER.call(this, e, original);
+                    } else {
+                        original.call(this, e);
+                    }
+                }
+            };
+            var settings = {
+                echoCommand: false,
+                keymap: $.extend({}, options && options.keymap || {}, keymap)
+            };
+            if(options.prompt){
+                orig_prompt = options.prompt;
+            }
+            return $.extend({}, options || {}, settings);
+        }
+        function patch_term(term, echo_command) {
+            if (term.__echo) {
+                return term;
+            }
+            term.__echo = term.echo;
+            term.__exec = term.exec;
+            term.__set_prompt = term.set_prompt;
+            term.__get_prompt = term.get_prompt;
+            term.exec = function() {
+                last = null;
+                if (echo_command) {
+                    this.settings().echoCommand = true;
+                }
+                var ret = term.__exec.apply(this, arguments);
+                if (echo_command) {
+                    this.settings().echoCommand = false;
+                }
+                return ret;
+            };
+            term.echo = function(arg, options) {
+                var settings = $.extend({
+                    newline: true
+                }, options);
+                function process(prompt) {
+                    if (last === null) {
+                        last = arg;
+                    } else {
+                        last += arg;
+                    }
+                    term.__set_prompt(last + prompt);
+                }
+                if (settings.newline === false) {
+                    if (prompt === null) {
+                        prompt = term.get_prompt();
+                    }
+                    if (typeof prompt === 'string') {
+                        process(prompt);
+                    } else {
+                        prompt(process);
+                    }
+                } else {
+                    if (prompt !== null) {
+                        term.__set_prompt(prompt);
+                    }
+                    if (last !== null) {
+                        term.__echo(last + arg, options);
+                    } else if (!arguments.length) {
+                        // original echo check length to test if someone call echo
+                        // with value that is undefined
+                        term.__echo();
+                    } else {
+                        term.__echo(arg, options);
+                    }
+                    last = null;
+                    prompt = null;
+                }
+                return term;
+            };
+            term.set_prompt = function(new_prompt) {
+                console.log(new_prompt.toString());
+                function wrapper(callback) {
+                    function wrap_inner(result) {
+                        callback((last || "") + result);
+                    }
+                    new_prompt(wrap_inner);
+                }
+                prompt = new_prompt;
+                orig_prompt = new_prompt;
+                if (typeof new_prompt === "function") {
+                    term.__set_prompt(wrapper);
+                } else {
+                    term.__set_prompt((last || "") + prompt);
+                }
+            };
+            term.get_prompt = function() {
+                return orig_prompt;
+            };
+        }
         return init.call(this, interpreter, patch_options(options)).each(function() {
             patch_term($(this).data('terminal'), should_echo_command(options));
         });
     };
-    var last = null;
-    var prompt = null;
-    function should_echo_command(options) {
-        return options && options.echoCommand !== false || !options;
-    }
-    function patch_options(options) {
-        var keymap = {
-            'ENTER': function(e, original) {
-                var term = this;
-                if (last === null) {
-                    if (should_echo_command(options)) {
-                        term.echo_command();
-                    }
-                } else {
-                    this.__echo(this.__get_prompt() + this.get_command());
-                    this.__set_prompt(prompt);
-                    last = null;
-                    prompt = null;
-                }
-                if (options && options.keymap && options.keymap.ENTER) {
-                    options.keymap.ENTER.call(this, e, original);
-                } else {
-                    original.call(this, e);
-                }
-            }
-        };
-        var settings = {
-            echoCommand: false,
-            keymap: $.extend({}, options && options.keymap || {}, keymap)
-        };
-        return $.extend({}, options || {}, settings);
-    }
-    function patch_term(term, echo_command) {
-        if (term.__echo) {
-            return term;
-        }
-        term.__echo = term.echo;
-        term.__exec = term.exec;
-        term.__set_prompt = term.set_prompt;
-        term.__get_prompt = term.get_prompt;
-        term.exec = function() {
-            last = null;
-            if (echo_command) {
-                this.settings().echoCommand = true;
-            }
-            var ret = term.__exec.apply(this, arguments);
-            if (echo_command) {
-                this.settings().echoCommand = false;
-            }
-            return ret;
-        };
-        term.echo = function(arg, options) {
-            var settings = $.extend({
-                newline: true
-            }, options);
-            function process(prompt) {
-                if (last === null) {
-                    last = arg;
-                } else {
-                    last += arg;
-                }
-                term.__set_prompt(last + prompt);
-            }
-            if (settings.newline === false) {
-                if (prompt === null) {
-                    prompt = term.get_prompt();
-                }
-                if (typeof prompt === 'string') {
-                    process(prompt);
-                } else {
-                    prompt(process);
-                }
-            } else {
-                if (prompt !== null) {
-                    term.__set_prompt(prompt);
-                }
-                if (last !== null) {
-                    term.__echo(last + arg, options);
-                } else if (!arguments.length) {
-                    // original echo check length to test if someone call echo
-                    // with value that is undefined
-                    term.__echo();
-                } else {
-                    term.__echo(arg, options);
-                }
-                last = null;
-                prompt = null;
-            }
-            return term;
-        };
-        term.set_prompt = function(new_prompt) {
-            function wrapper(callback) {
-                function wrap_inner(result) {
-                    callback((last || "") + result);
-                }
-                new_prompt(wrap_inner);
-            }
-            prompt = new_prompt;
-            if (typeof new_prompt === "function") {
-                term.__set_prompt(wrapper);
-            } else {
-                term.__set_prompt((last || "") + prompt);
-            }
-        };
-        term.get_prompt = function() {
-            return last !== null ? prompt : term.__get_prompt();
-        };
-    }
 });
