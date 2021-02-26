@@ -2657,6 +2657,22 @@ describe('extensions', function() {
             expect(term.get_output()).toEqual('...' + prompt + command);
             expect(term.get_prompt()).toEqual(prompt);
         });
+        it('get_prompt and set_prompt work as expected', function() {
+            var prompt1 = '>>> ';
+            var prompt2 = '~~~ ';
+            var command = 'hello';
+            term.set_prompt(prompt1);
+            term.echo('.', {newline: false});
+            expect(term.get_prompt()).toEqual(prompt1);
+            term.echo('.', {newline: false});
+            expect(term.get_prompt()).toEqual(prompt1);
+            term.set_prompt(prompt2);
+            term.echo('.', {newline: false});
+            expect(term.get_prompt()).toEqual(prompt2);
+            enter(term, command);
+            expect(term.get_output()).toEqual('...' + prompt2 + command);
+            expect(term.get_prompt()).toEqual(prompt2);
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {

@@ -151,7 +151,7 @@
             term.__set_prompt((last || "") + prompt);
         };
         term.get_prompt = function() {
-            return last ? prompt : term.__get_prompt();
+            return last !== null ? prompt : term.__get_prompt();
         };
     }
 });
