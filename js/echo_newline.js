@@ -71,7 +71,7 @@
                     }
                 } else {
                     this.__echo(last + prompt + this.get_command());
-                    this.set_prompt(prompt);
+                    this.__set_prompt(prompt);
                     last = null;
                 }
                 if (options && options.keymap && options.keymap.ENTER) {
@@ -97,6 +97,7 @@
         term.__get_prompt = term.get_prompt;
         term.exec = function() {
             last = null;
+            prompt = null;
             if (echo_command) {
                 this.settings().echoCommand = true;
             }
@@ -149,12 +150,8 @@
             prompt = new_prompt;
             term.__set_prompt((last || "") + prompt);
         };
-        term.get_prompt = function(){
-            if(last === null){
-                return term.__get_prompt();
-            } else {
-                return prompt;
-            }
-        }
+        term.get_prompt = function() {
+            return last ? prompt : term.__get_prompt();
+        };
     }
 });
