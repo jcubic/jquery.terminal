@@ -98,7 +98,6 @@
         term.__get_prompt = term.get_prompt;
         term.exec = function() {
             last = null;
-            prompt = null;
             if (echo_command) {
                 this.settings().echoCommand = true;
             }
@@ -162,7 +161,7 @@
             }
         };
         term.get_prompt = function() {
-            return prompt || term.__get_prompt();
+            return last !== null ? prompt : term.__get_prompt();
         };
     }
 });
