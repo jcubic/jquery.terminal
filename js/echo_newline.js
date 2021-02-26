@@ -70,9 +70,10 @@
                         term.echo_command();
                     }
                 } else {
-                    this.__echo(last + prompt + this.get_command());
+                    this.__echo(this.__get_prompt() + this.get_command());
                     this.__set_prompt(prompt);
                     last = null;
+                    prompt = null;
                 }
                 if (options && options.keymap && options.keymap.ENTER) {
                     options.keymap.ENTER.call(this, e, original);
@@ -141,17 +142,27 @@
                 } else {
                     term.__echo(arg, options);
                 }
-                prompt = null;
                 last = null;
+                prompt = null;
             }
             return term;
         };
         term.set_prompt = function(new_prompt) {
+            function wrapper(callback) {
+                function wrap_inner(result) {
+                    callback((last || "") + result);
+                }
+                new_prompt(wrap_inner);
+            }
             prompt = new_prompt;
-            term.__set_prompt((last || "") + prompt);
+            if (typeof new_prompt === "function") {
+                term.__set_prompt(wrapper);
+            } else {
+                term.__set_prompt((last || "") + prompt);
+            }
         };
         term.get_prompt = function() {
-            return last !== null ? prompt : term.__get_prompt();
+            return prompt || term.__get_prompt();
         };
     }
 });

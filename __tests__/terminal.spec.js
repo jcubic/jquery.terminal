@@ -2673,6 +2673,22 @@ describe('extensions', function() {
             expect(term.get_output()).toEqual('...' + prompt2 + command);
             expect(term.get_prompt()).toEqual(prompt2);
         });
+        it("set_prompt with a function for the prompt", function(){
+            var prompt1 = (cb) => cb('>>> ');
+            var prompt2 = (cb) => cb('~~~ ');
+            var command = 'hello';
+            term.set_prompt(prompt1);
+            term.echo('.', {newline: false});
+            expect(term.get_prompt()).toEqual(prompt1);
+            term.echo('.', {newline: false});
+            expect(term.get_prompt()).toEqual(prompt1);
+            term.set_prompt(prompt2);
+            term.echo('.', {newline: false});
+            expect(term.get_prompt()).toEqual(prompt2);
+            enter(term, command);
+            expect(term.get_output()).toEqual('...' + prompt2 + command);
+            expect(term.get_prompt()).toEqual(prompt2);
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {
