@@ -9387,7 +9387,7 @@
                         cmd_outer.style.top = (-lastRowRect.height).toString() + "px";
                         // Measure length of partial line in characters
                         var char_width = get_char_width();
-                        var prompt_margin = Math.round(partial_widtht / char_width);
+                        var prompt_margin = Math.round(partial_width / char_width);
                         command_line.__set_prompt_margin(prompt_margin);
                     } else {
                         cmd_prompt.style.marginLeft = "0px";
