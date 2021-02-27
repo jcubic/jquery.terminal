@@ -2676,6 +2676,11 @@ describe('extensions', function() {
             expect(term.get_output()).toEqual('...' + prompt2 + command);
             expect(term.get_prompt()).toEqual(prompt2);
         });
+        it('finalize with newline : false', function() {
+            term.echo('foo', {finalize: (a) => a.children().children().css("color", "red"), newline : false});
+            var color = term[0].querySelector(`[data-index='${term.last_index()}`).firstChild.firstChild.style.color;
+            expect(color).toEqual("red");
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {
