@@ -49,4 +49,4 @@
         // istanbul ignore next
         factory(root.jQuery);
     }
-})(function($) {});
+})(function() {}); // eslint-disable-line no-empty-function
