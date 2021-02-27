@@ -9565,10 +9565,16 @@
                             if (render(value, locals)) {
                                 return self;
                             }
+                            var last_line = lines[lines.length - 1];
+                            var last_newline = lines.length === 0 || last_line[1].newline;
+                            var index = lines.length;
+                            if(!last_newline){
+                                index--;
+                            }
                             var next = process_line({
                                 value: value,
                                 options: locals,
-                                index: lines.length
+                                index: index
                             });
                             // queue async functions in echo
                             if (next && next.then) {
@@ -9577,7 +9583,7 @@
                             }
                             // Did previous value end in newline?
                             var last_line = lines[lines.length - 1];
-                            if (lines.length === 0 || last_line[1].newline) {
+                            if (last_newline) {
                                 lines.push([value, $.extend({exec: false}, locals)]);
                             } else {
                                 // If not append current value to it

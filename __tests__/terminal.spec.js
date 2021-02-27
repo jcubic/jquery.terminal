@@ -2948,6 +2948,75 @@ describe('sub plugins', function() {
     });
 });
 describe('Terminal plugin', function() {
+    describe('flush', function(){
+        it('flush', function(){
+            var term = $('<div/>').terminal($.noop, {
+                greetings : "greet"
+            });
+            var cmd = term.find(".cmd");
+
+            expect(term.find(".partial")[0]).toEqual(undefined);
+            expect(term.find("[data-index='0']").text()).toEqual("greet");
+            
+            function getLastLineRect(partial){
+                let child = partial[0].lastElementChild;
+                child.style.width = "";
+                let rect = child.getBoundingClientRect();
+                child.style.width = "100%";
+                return rect;
+            }
+
+            term.echo("###", {newline : false});
+
+            var prompt = term.find(".cmd-prompt");
+            var partial = term.find(".partial");
+            var partial_children = partial.children();
+            var last_line_rect = getLastLineRect(partial);
+            expect(partial.attr("data-index")).toEqual("1");
+            expect(partial_children.length).toEqual(1);
+            expect(cmd.css("top")).toEqual(`${-last_line_rect.height}px`)
+            expect(prompt[0].style.marginLeft).toEqual(`${last_line_rect.width}px`);
+            expect(partial_children.first().text()).toEqual("###");
+
+            term.echo("aaa\nbbb\nccc", {newline : false});
+
+            var prompt = term.find(".cmd-prompt");
+            var partial = term.find(".partial");
+            var partial_children = partial.children();
+            var last_line_rect = getLastLineRect(partial);
+            expect(partial.attr("data-index")).toEqual("1");
+            expect(partial_children.length).toEqual(3);
+            expect(cmd.css("top")).toEqual(`${-last_line_rect.height}px`)
+            expect(prompt[0].style.marginLeft).toEqual(`${last_line_rect.width}px`);
+            expect(partial_children.eq(0).text()).toEqual("###aaa");
+            expect(partial_children.eq(1).text()).toEqual("bbb");
+            expect(partial_children.eq(2).text()).toEqual("ccc");
+            term.refresh();
+
+            var prompt = term.find(".cmd-prompt");
+            var partial = term.find(".partial");
+            var partial_children = partial.children();
+            var last_line_rect = getLastLineRect(partial);
+            expect(partial.attr("data-index")).toEqual("1");
+            expect(partial_children.length).toEqual(3);
+            expect(cmd.css("top")).toEqual(`${-last_line_rect.height}px`)
+            expect(prompt[0].style.marginLeft).toEqual(`${last_line_rect.width}px`);
+            expect(partial_children.eq(0).text()).toEqual("###aaa");
+            expect(partial_children.eq(1).text()).toEqual("bbb");
+            expect(partial_children.eq(2).text()).toEqual("ccc");
+
+            enter(term, "!!!");
+
+            var prompt = term.find(".cmd-prompt");
+            expect(cmd.css("top")).toEqual(`0px`)
+            expect(prompt[0].style.marginLeft).toEqual(`0px`);
+            expect(term.find("[data-index='1']").children().last().text()).toEqual(nbsp("ccc> !!!"));
+            expect(term.find(".partial")[0]).toEqual(undefined);
+
+            term.refresh();
+            expect(term.find("[data-index='1']").children().last().text()).toEqual(nbsp("ccc> !!!"));
+        });
+    });
     describe('jQuery Terminal options', function() {
         describe('prompt', function() {
             it('should set prompt', function() {
