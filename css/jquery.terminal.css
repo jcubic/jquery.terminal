@@ -684,18 +684,14 @@ terminal .terminal-output > div {
     margin-bottom: 10px;
     position: relative;
 }
-div[data-index] > div {
-    width: -moz-fit-content;
-    width: -webkit-fit-content;
-    width: fit-content;
-}
-
 @supports (--css: variables) {
     .terminal,
     .terminal-output > :not(.raw) span[data-text]:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
     .terminal-output > :not(.raw) a,
-    .terminal-output > :not(.raw) div
-    {
+    .terminal-output > :not(.raw) div,
+    .cmd,
+    .cmd span[data-text]:not(.cmd-inverted):not(.token):not(.emoji),
+    .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
