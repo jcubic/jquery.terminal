@@ -9316,7 +9316,7 @@
                     var wrapper;
                     // print all lines
                     var first = true;
-                    var appendingToPartial = false;
+                    var appending_to_partial = false;
                     var partial = $();
                     if (!options.update) {
                         partial = self.find('.partial');
@@ -9327,7 +9327,7 @@
                             if (!partial.length) {
                                 wrapper = $('<div/>');
                             } else if (first) {
-                                appendingToPartial = true;
+                                appending_to_partial = true;
                                 wrapper = partial;
                             }
                             first = false;
@@ -9343,15 +9343,15 @@
                                 wrapper.appendTo(output);
                             }
                             wrapper.attr('data-index', data.index);
-                            appendingToPartial = !data.newline;
-                            wrapper.toggleClass('partial', appendingToPartial);
+                            appending_to_partial = !data.newline;
+                            wrapper.toggleClass('partial', appending_to_partial);
                             data.finalize(wrapper);
                         } else {
                             var line = data.line;
                             var div;
-                            if (appendingToPartial) {
+                            if (appending_to_partial) {
                                 div = wrapper.children().last().append(line);
-                                appendingToPartial = false;
+                                appending_to_partial = false;
                             } else {
                                 var div = $('<div/>').html(line);
                                 if (data.newline) {
@@ -9369,23 +9369,23 @@
                     var cmd_outer = self.find('.cmd');
                     partial = self.find('.partial');
                     if (partial.length === 0) {
-                        cmd_prompt.css('marginLeft', 0);
+                        cmd_prompt.css('margin-left', 0);
                         cmd_outer.css('top', 0);
                         command_line.__set_prompt_margin(0);
                     } else {
-                        var lastRow = partial.children().last();
+                        var last_row = partial.children().last();
                         // Remove width='100%' for two reasons:
                         // 1. so we can measure the width right here
                         // 2. so that the background of this last line of output
                         //    doesn't occlude the first line of input to the right
-                        lastRow.css('width', '');
-                        var lastRowRect = lastRow[0].getBoundingClientRect();
-                        var partial_width = lastRowRect.width;
+                        last_row.css('width', '');
+                        var last_row_rect = last_row[0].getBoundingClientRect();
+                        var partial_width = last_row_rect.width;
                         // Shift command prompt up one line and to the right
                         // enough so that it appears directly next to the
                         // partially constructed output line
                         cmd_prompt.css('margin-left', partial_width);
-                        cmd_outer.css('top', -lastRowRect.height);
+                        cmd_outer.css('top', -last_row_rect.height);
                         // Measure length of partial line in characters
                         var char_width = command_line.char_width;
                         var prompt_margin = Math.round(partial_width / char_width);
