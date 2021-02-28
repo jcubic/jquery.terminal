@@ -2957,7 +2957,7 @@ describe('Terminal plugin', function() {
 
             expect(term.find(".partial")[0]).toEqual(undefined);
             expect(term.find("[data-index='0']").text()).toEqual("greet");
-            
+
             function getLastLineRect(partial){
                 let child = partial[0].lastElementChild;
                 child.style.width = "";

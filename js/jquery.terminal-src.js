@@ -9319,7 +9319,7 @@
                     var appendingToPartial = false;
                     var partial = $();
                     if (!options.update) {
-                        partial = self.find(".partial");
+                        partial = self.find('.partial');
                     }
                     while (output_buffer.length) {
                         var data = output_buffer.shift();
@@ -9344,7 +9344,7 @@
                             }
                             wrapper.attr('data-index', data.index);
                             appendingToPartial = !data.newline;
-                            wrapper.toggleClass("partial", appendingToPartial);
+                            wrapper.toggleClass('partial', appendingToPartial);
                             data.finalize(wrapper);
                         } else {
                             var line = data.line;
@@ -9359,33 +9359,33 @@
                                 }
                                 wrapper.append(div);
                             }
-                            // width = "100%" does some weird extra magic
+                            // width = '100%' does some weird extra magic
                             // that makes the height correct. Any other
                             // value doesn't work.
-                            div.css('width', "100%");
+                            div.css('width', '100%');
                         }
                     }
-                    var cmd_prompt = self.find(".cmd-prompt");
+                    var cmd_prompt = self.find('.cmd-prompt');
                     var cmd_outer = self.find('.cmd');
-                    partial = self.find(".partial");
+                    partial = self.find('.partial');
                     if (partial.length === 0) {
-                        cmd_prompt.css("marginLeft", 0);
-                        cmd_outer.css("top", 0);
+                        cmd_prompt.css('marginLeft', 0);
+                        cmd_outer.css('top', 0);
                         command_line.__set_prompt_margin(0);
                     } else {
                         var lastRow = partial.children().last();
-                        // Remove width="100%" for two reasons:
+                        // Remove width='100%' for two reasons:
                         // 1. so we can measure the width right here
                         // 2. so that the background of this last line of output
                         //    doesn't occlude the first line of input to the right
-                        lastRow.css("width", "");
+                        lastRow.css('width', '');
                         var lastRowRect = lastRow[0].getBoundingClientRect();
                         var partial_width = lastRowRect.width;
                         // Shift command prompt up one line and to the right
                         // enough so that it appears directly next to the
                         // partially constructed output line
-                        cmd_prompt.css("margin-left", partial_width);
-                        cmd_outer.css("top", -lastRowRect.height);
+                        cmd_prompt.css('margin-left', partial_width);
+                        cmd_outer.css('top', -lastRowRect.height);
                         // Measure length of partial line in characters
                         var char_width = command_line.char_width;
                         var prompt_margin = Math.round(partial_width / char_width);
@@ -9393,7 +9393,7 @@
                     }
                     limit_lines();
                     fire_event('onFlush');
-                    var cmd_cursor = self.find(".cmd-cursor");
+                    var cmd_cursor = self.find('.cmd-cursor');
                     var offset = self.find('.cmd').offset();
                     var self_offset = self.offset();
                     setTimeout(function() {
