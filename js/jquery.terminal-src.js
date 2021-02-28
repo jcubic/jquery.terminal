@@ -7500,7 +7500,7 @@
                         }));
                     });
                 }
-                if(!line_settings.newline && string.endsWith('\n')){
+                if (!line_settings.newline && string.endsWith('\n')) {
                     line_settings.newline = true;
                     // This adjusts the value for the caller so that when it
                     // updates the lines list it does the right thing. This is
@@ -9353,7 +9353,7 @@
                                 div = wrapper.children().last().append(line);
                                 appending_to_partial = false;
                             } else {
-                                var div = $('<div/>').html(line);
+                                div = $('<div/>').html(line);
                                 if (data.newline) {
                                     div.addClass('cmd-end-line');
                                 }
