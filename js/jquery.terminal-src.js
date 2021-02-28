@@ -7500,6 +7500,14 @@
                         }));
                     });
                 }
+                if(!line_settings.newline && string.endsWith('\n')){
+                    line_settings.newline = true;
+                    // This adjusts the value for the caller so that when it
+                    // updates the lines list it does the right thing. This is
+                    // necessary in order to avoid messing up the 'data-index'
+                    line.options.newline = true;
+                    string = string.slice(0, -1);
+                }
                 if (string !== '') {
                     if (!line_settings.raw) {
                         if (line_settings.formatters) {
@@ -9340,20 +9348,21 @@
                             data.finalize(wrapper);
                         } else {
                             var line = data.line;
+                            var div;
                             if (appendingToPartial) {
-                                wrapper.children().last().append(line);
+                                div = wrapper.children().last().append(line);
                                 appendingToPartial = false;
                             } else {
                                 var div = $('<div/>').html(line);
-                                // width = "100%" does some weird extra magic
-                                // that makes the height correct. Any other
-                                // value doesn't work.
-                                div.css('width', "100%");
                                 if (data.newline) {
                                     div.addClass('cmd-end-line');
                                 }
                                 wrapper.append(div);
                             }
+                            // width = "100%" does some weird extra magic
+                            // that makes the height correct. Any other
+                            // value doesn't work.
+                            div.css('width', "100%");
                         }
                     }
                     var cmd_prompt = self.find(".cmd-prompt");
@@ -9365,11 +9374,12 @@
                         command_line.__set_prompt_margin(0);
                     } else {
                         var lastRow = partial.children().last();
-                        // Remove width="100%" temporarily so we can measure it
+                        // Remove width="100%" for two reasons:
+                        // 1. so we can measure the width right here
+                        // 2. so that the background of this last line of output
+                        //    doesn't occlude the first line of input to the right
                         lastRow.css("width", "");
                         var lastRowRect = lastRow[0].getBoundingClientRect();
-                        // Put width="100%" back so height is correct
-                        lastRow.css("width", "100%");
                         var partial_width = lastRowRect.width;
                         // Shift command prompt up one line and to the right
                         // enough so that it appears directly next to the
