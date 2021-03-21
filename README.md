@@ -6,11 +6,12 @@
 \___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/_/_/  \/\__\_\___/
          \/          /____/                      version 2.22.0
 ```
-https://terminal.jcubic.pl
+
+[JavaScript Library for Web Based Terminal Emulators](https://terminal.jcubic.pl)
 
 [![npm](https://img.shields.io/badge/npm-2.22.0-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.22.0-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&9fb3dcfddd2a4d346dc8cffbc4089553c068b292)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&baeb28c41dc95ce76ef6efe8947acc14c5d8730b)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&634dd6bdb563cac4da5f3e6ae04ce222)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -76,7 +77,6 @@ Include jQuery library, you can use cdn from https://jquery.com/download/
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 
 ```
-
 
 Then include js/jquery.terminal-2.22.0.min.js and css/jquery.terminal-2.22.0.min.css
 
@@ -248,6 +248,13 @@ jQuery(function($, undefined) {
 More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [Full Documentation](http://terminal.jcubic.pl/api_reference.php) or
 [Getting Started Guide on Wiki](https://github.com/jcubic/jquery.terminal/wiki/Getting-Started).
+
+### Quick Start Tutorials
+
+If you want to start with jQuery Terminal you can look at those tutorials:
+
+* [How to create interactive terminal like website?](https://itnext.io/how-to-create-interactive-terminal-like-website-888bb0972288)
+* [How to Build Simple Terminal like Website using jQuery?](https://www.geeksforgeeks.org/how-to-build-simple-terminal-like-website-using-jquery/)
 
 ### Security
 
