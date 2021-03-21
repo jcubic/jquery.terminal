@@ -29,6 +29,8 @@ users. It can also be used to debug your application.
 
 You can use this JavaScript library to create a web based terminal on any website.
 
+Because with this library you need to code all the commands yourself, you can call it fake terminal emulator. In contrast to library that will give you access to real terminal like online SSH. To have real online SSH I suggest to use [xterm.js](https://github.com/xtermjs/xterm.js) library.
+
 ### Features:
 
 * You can create an interpreter for your JSON-RPC service with one line

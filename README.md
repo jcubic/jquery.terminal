@@ -11,7 +11,7 @@
 
 [![npm](https://img.shields.io/badge/npm-2.22.0-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.22.0-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&baeb28c41dc95ce76ef6efe8947acc14c5d8730b)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&c6ebc691901da774fa782311da7fab9479f376a0)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&634dd6bdb563cac4da5f3e6ae04ce222)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -28,6 +28,8 @@ commands. It's ideal if you want to provide additional functionality for power
 users. It can also be used to debug your application.
 
 You can use this JavaScript library to create a web based terminal on any website.
+
+Because with this library you need to code all the commands yourself, you can call it fake terminal emulator. In contrast to library that will give you access to real terminal like online SSH. To have real online SSH I suggest to use [xterm.js](https://github.com/xtermjs/xterm.js) library.
 
 ### Features:
 
