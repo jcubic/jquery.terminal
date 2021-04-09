@@ -413,7 +413,7 @@
                 if (pos < 0) {
                     pos = 0;
                 }
-            } else {
+            } else if (pos <= lines.length - rows) {
                 pos += scroll_by;
                 if (pos - 1 > lines.length - rows) {
                     pos = lines.length - rows + 1;
