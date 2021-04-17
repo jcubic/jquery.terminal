@@ -2651,11 +2651,35 @@ describe('extensions', function() {
             var command = 'hello';
             term.set_prompt(prompt);
             term.echo('.', {newline: false});
+            expect(term.get_output()).toEqual('.');
             term.echo('.', {newline: false});
+            expect(term.get_output()).toEqual('..');
             term.echo('.', {newline: false});
+            expect(term.get_output()).toEqual('...');
             enter(term, command);
             expect(term.get_output()).toEqual('...' + prompt + command);
             expect(term.get_prompt()).toEqual(prompt);
+        });
+        it('get_prompt and set_prompt work as expected', function() {
+            var prompt1 = '>>> ';
+            var prompt2 = '~~~ ';
+            var command = 'hello';
+            term.set_prompt(prompt1);
+            term.echo('.', {newline: false});
+            expect(term.get_prompt()).toEqual(prompt1);
+            term.echo('.', {newline: false});
+            expect(term.get_prompt()).toEqual(prompt1);
+            term.set_prompt(prompt2);
+            term.echo('.', {newline: false});
+            expect(term.get_prompt()).toEqual(prompt2);
+            enter(term, command);
+            expect(term.get_output()).toEqual('...' + prompt2 + command);
+            expect(term.get_prompt()).toEqual(prompt2);
+        });
+        it('finalize with newline : false', function() {
+            term.echo('foo', {finalize: (a) => a.children().children().css("color", "red"), newline : false});
+            var color = term[0].querySelector(`[data-index='${term.last_index()}`).firstChild.firstChild.style.color;
+            expect(color).toEqual("red");
         });
     });
     describe('autocomplete_menu', function() {
@@ -5482,13 +5506,82 @@ describe('Terminal plugin', function() {
         });
         // missing methods after version
         describe('flush', function() {
-            var term = $('<div/>').terminal($.noop, {greetings: false});
             it('should echo stuff that was called with flush false', function() {
+                var term = $('<div/>').terminal($.noop, {greetings: false});
                 term.echo('foo', {flush: false});
                 term.echo('bar', {flush: false});
                 term.echo('baz', {flush: false});
                 term.flush();
                 expect(term.find('.terminal-output').text()).toEqual('foobarbaz');
+            });
+            it('should flush correctly with newline : false', function(){
+                var term = $('<div/>').terminal($.noop, {
+                    greetings : "greet"
+                });
+                var cmd = term.find(".cmd");
+    
+                expect(term.find(".partial")[0]).toEqual(undefined);
+                expect(term.find("[data-index='0']").text()).toEqual("greet");
+    
+                function getLastLineRect(partial){
+                    let child = partial[0].lastElementChild;
+                    child.style.width = "";
+                    let rect = child.getBoundingClientRect();
+                    child.style.width = "100%";
+                    return rect;
+                }
+    
+                term.echo("###", {newline : false});
+    
+                var prompt = term.find(".cmd-prompt");
+                var partial = term.find(".partial");
+                var partial_children = partial.children();
+                var last_line_rect = getLastLineRect(partial);
+                expect(partial.attr("data-index")).toEqual("1");
+                expect(partial_children.length).toEqual(1);
+                expect(cmd.css("top")).toEqual(`${-last_line_rect.height}px`)
+                expect(prompt[0].style.marginLeft).toEqual(`${last_line_rect.width}px`);
+                expect(partial_children.first().text()).toEqual("###");
+    
+                term.echo("aaa\nbbb\nccc", {newline : false});
+    
+                var prompt = term.find(".cmd-prompt");
+                var partial = term.find(".partial");
+                var partial_children = partial.children();
+                var last_line_rect = getLastLineRect(partial);
+                expect(partial.attr("data-index")).toEqual("1");
+                expect(partial_children.length).toEqual(3);
+                expect(cmd.css("top")).toEqual(`${-last_line_rect.height}px`)
+                expect(prompt[0].style.marginLeft).toEqual(`${last_line_rect.width}px`);
+                expect(partial_children.eq(0).text()).toEqual("###aaa");
+                expect(partial_children.eq(1).text()).toEqual("bbb");
+                expect(partial_children.eq(2).text()).toEqual("ccc");
+                term.refresh();
+    
+                var prompt = term.find(".cmd-prompt");
+                var partial = term.find(".partial");
+                var partial_children = partial.children();
+                var last_line_rect = getLastLineRect(partial);
+                expect(partial.attr("data-index")).toEqual("1");
+                expect(partial_children.length).toEqual(3);
+                expect(cmd.css("top")).toEqual(`${-last_line_rect.height}px`)
+                expect(prompt[0].style.marginLeft).toEqual(`${last_line_rect.width}px`);
+                expect(partial_children.eq(0).text()).toEqual("###aaa");
+                expect(partial_children.eq(1).text()).toEqual("bbb");
+                expect(partial_children.eq(2).text()).toEqual("ccc");
+    
+                enter(term, "!!!");
+    
+                var prompt = term.find(".cmd-prompt");
+                expect(cmd.css("top")).toEqual(`0px`)
+                expect(prompt[0].style.marginLeft).toEqual(`0px`);
+                expect(term.find("[data-index='1']").length).toEqual(1);
+                expect(term.find("[data-index='1']").children().last().text()).toEqual(nbsp("ccc> !!!"));
+                expect(term.find(".partial")[0]).toEqual(undefined);
+    
+                term.refresh();
+                expect(term.find("[data-index='1']").length).toEqual(1);
+                expect(term.find("[data-index='1']").children().last().text()).toEqual(nbsp("ccc> !!!"));
             });
         });
         describe('last_index', function() {

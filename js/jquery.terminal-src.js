@@ -1739,6 +1739,8 @@
         var char_width;
         var last_rendered_prompt;
         var prompt_last_line;
+        var just_prompt_len;
+        var extra_prompt_margin = 0;
         var prompt_len;
         var prompt_node = self.find('.cmd-prompt');
         var reverse_search = false;
@@ -3120,10 +3122,9 @@
                         });
                         prompt_node.show();
                     }
-                    prompt_len = strlen(text(encoded_last_line));
-                } else if (formatted === '') {
-                    prompt_len = 0;
                 }
+                just_prompt_len = strlen(text(encoded_last_line));
+                prompt_len = just_prompt_len + extra_prompt_margin;
             }
             return function() {
                 // the data is used as cancelable reference because we have ref
@@ -3351,6 +3352,11 @@
                     return 0;
                 }
                 return before.split(/\n/).length - 1;
+            },
+            // inform cursor about size of partial output line
+            __set_prompt_margin: function(len) {
+                extra_prompt_margin = len;
+                prompt_len = just_prompt_len + extra_prompt_margin;
             },
             prompt: function(user_prompt) {
                 if (user_prompt === true) {
@@ -7416,7 +7422,8 @@
             }
             output_buffer.push({
                 finalize: options.finalize,
-                index: index
+                index: index,
+                newline: options.newline
             });
         }
         // ---------------------------------------------------------------------
@@ -7492,6 +7499,14 @@
                             value: string
                         }));
                     });
+                }
+                if (!line_settings.newline && string.endsWith('\n')) {
+                    line_settings.newline = true;
+                    // This adjusts the value for the caller so that when it
+                    // updates the lines list it does the right thing. This is
+                    // necessary in order to avoid messing up the 'data-index'
+                    line.options.newline = true;
+                    string = string.slice(0, -1);
                 }
                 if (string !== '') {
                     if (!line_settings.raw) {
@@ -9298,14 +9313,24 @@
                 }, options || {});
                 try {
                     var bottom = self.is_bottom();
-                    output.css('visibilty', 'hidden');
                     var wrapper;
                     // print all lines
-                    // var output_buffer = lines.flush();
+                    var first = true;
+                    var appending_to_partial = false;
+                    var partial = $();
+                    if (!options.update) {
+                        partial = self.find('.partial');
+                    }
                     while (output_buffer.length) {
                         var data = output_buffer.shift();
                         if (data === NEW_LINE) {
-                            wrapper = $(document.createElement('div'));
+                            if (!partial.length) {
+                                wrapper = $('<div/>');
+                            } else if (first) {
+                                appending_to_partial = true;
+                                wrapper = partial;
+                            }
+                            first = false;
                         } else if ($.isPlainObject(data) && is_function(data.finalize)) {
                             // this is finalize function from echo
                             if (options.update) {
@@ -9318,21 +9343,57 @@
                                 wrapper.appendTo(output);
                             }
                             wrapper.attr('data-index', data.index);
+                            appending_to_partial = !data.newline;
+                            wrapper.toggleClass('partial', appending_to_partial);
                             data.finalize(wrapper);
                         } else {
                             var line = data.line;
-                            var div = document.createElement('div');
-                            div.style.width = '100%';
-                            div.innerHTML = line;
-                            if (data.newline) {
-                                div.className = 'cmd-end-line';
+                            var div;
+                            if (appending_to_partial) {
+                                div = wrapper.children().last().append(line);
+                                appending_to_partial = false;
+                            } else {
+                                div = $('<div/>').html(line);
+                                if (data.newline) {
+                                    div.addClass('cmd-end-line');
+                                }
+                                wrapper.append(div);
                             }
-                            wrapper[0].appendChild(div);
+                            // width = '100%' does some weird extra magic
+                            // that makes the height correct. Any other
+                            // value doesn't work.
+                            div.css('width', '100%');
                         }
                     }
+                    var cmd_prompt = self.find('.cmd-prompt');
+                    var cmd_outer = self.find('.cmd');
+                    partial = self.find('.partial');
+                    if (partial.length === 0) {
+                        cmd_prompt.css('margin-left', 0);
+                        cmd_outer.css('top', 0);
+                        command_line.__set_prompt_margin(0);
+                    } else {
+                        var last_row = partial.children().last();
+                        // Remove width='100%' for two reasons:
+                        // 1. so we can measure the width right here
+                        // 2. so that the background of this last line of output
+                        //    doesn't occlude the first line of input to the right
+                        last_row.css('width', '');
+                        var last_row_rect = last_row[0].getBoundingClientRect();
+                        var partial_width = last_row_rect.width;
+                        // Shift command prompt up one line and to the right
+                        // enough so that it appears directly next to the
+                        // partially constructed output line
+                        cmd_prompt.css('margin-left', partial_width);
+                        cmd_outer.css('top', -last_row_rect.height);
+                        // Measure length of partial line in characters
+                        var char_width = self.geometry().char.width;
+                        var prompt_margin = Math.round(partial_width / char_width);
+                        command_line.__set_prompt_margin(prompt_margin);
+                    }
                     limit_lines();
-                    output.css('visibilty', '');
                     fire_event('onFlush');
+                    var cmd_cursor = self.find('.cmd-cursor');
                     var offset = self.find('.cmd').offset();
                     var self_offset = self.offset();
                     setTimeout(function() {
@@ -9342,7 +9403,14 @@
                             '--terminal-y': offset.top - self_offset.top,
                             '--terminal-scroll': self.prop('scrollTop')
                         });
+                        // Firefox won't reflow the cursor automatically, so
+                        // hide it briefly then reshow it
+                        cmd_cursor.hide();
                     }, 0);
+                    setTimeout(function() {
+                        // reshow cursor for firefox
+                        cmd_cursor.show();
+                    }, 10 /* this didn't work with 5ms */);
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
                     }
@@ -9450,7 +9518,8 @@
                             invokeMethods: settings.invokeMethods,
                             onClear: null,
                             formatters: true,
-                            allowedAttributes: settings.allowedAttributes
+                            allowedAttributes: settings.allowedAttributes,
+                            newline: true
                         }, options || {});
                         // finalize function is passed around and invoked
                         // in terminal::flush after content is added to DOM
@@ -9506,17 +9575,34 @@
                             if (render(value, locals)) {
                                 return self;
                             }
+                            var last_line = lines[lines.length - 1];
+                            var last_newline = lines.length === 0 || last_line[1].newline;
+                            var index = lines.length;
+                            if (!last_newline) {
+                                index--;
+                            }
                             var next = process_line({
                                 value: value,
                                 options: locals,
-                                index: lines.length
+                                index: index
                             });
                             // queue async functions in echo
                             if (next && next.then) {
                                 var defer = new DelayQueue();
                                 echo_ready = ready(defer);
                             }
-                            lines.push([value, $.extend({exec: false}, locals)]);
+                            // Did previous value end in newline?
+                            if (last_newline) {
+                                lines.push([value, $.extend({exec: false}, locals)]);
+                            } else {
+                                // If not append current value to it
+                                var old_value = last_line[0];
+                                var string_old_val = stringify_value(old_value);
+                                var string_val = stringify_value(value);
+                                last_line[0] = string_old_val + string_val;
+                                // Update newline field
+                                last_line[1].newline = locals.newline;
+                            }
                             unpromise(next, function() {
                                 // extended commands should be processed only
                                 // once in echo and not on redraw
