@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Wed, 24 Feb 2021 14:00:20 +0000
+ * Date: Sun, 18 Apr 2021 09:06:12 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -108,6 +108,9 @@ body.full-screen-terminal .terminal {
     width: 100%;
     z-index: 300;
 }
+.terminal .cmd {
+    --background: transparent;
+}
 .terminal a[tabindex="1000"],
 .terminal a[tabindex="1000"]:active,
 .terminal a[tabindex="1000"]:focus {
@@ -186,6 +189,7 @@ body.full-screen-terminal .terminal {
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
 }
+
 .cmd .cmd-prompt > span {
     float: left;
 }
@@ -315,6 +319,10 @@ terminal .terminal-output > div {
 .cmd .cmd-prompt {
     position: relative;
     z-index: 200;
+    /* Make sure prompt margin takes up space so that echo with newline : false
+     * works when prompt is empty
+     */
+    float: left;
 }
 .cmd [role="presentation"]:not(.cmd-cursor-line) {
     overflow: hidden;
@@ -683,6 +691,9 @@ terminal .terminal-output > div {
 .terminal .cmd {
     margin-bottom: 10px;
     position: relative;
+}
+.terminal .partial, .terminal .partial > div {
+    display: inline-block;
 }
 @supports (--css: variables) {
     .terminal,
