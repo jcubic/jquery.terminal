@@ -1,3 +1,7 @@
+## 2.23.1
+### Bugfix
+* fix reversed class in cmd (e.g. in less command)
+
 ## 2.23.0
 ### Features
 * include echo without newline into the core of the library
