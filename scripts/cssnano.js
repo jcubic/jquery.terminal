@@ -1,5 +1,5 @@
 var fs = require('fs');
-var nano = require('cssnano');
+var nano = require('cssnano')();
 
 var input = process.argv[2];
 var output = process.argv[3];
