@@ -4,6 +4,7 @@
 ### Bugfix
 * remove unsafe eval (function constructor) that breaks CSP [#647](https://github.com/jcubic/jquery.terminal/issues/647)
 * fix up/down arrow when prompt is empty string [651](https://github.com/jcubic/jquery.terminal/issues/651)
+* fix prompt containing brackets [#648](https://github.com/jcubic/jquery.terminal/issues/648)
 * fix ANSI Art (add saving and restoring cursor using ANSI escape code)
 * fix mouse wheel and touch scroll in less when content is smaller than height of the terminal
 * fix regression in copy/paste with right click
