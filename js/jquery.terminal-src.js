@@ -3106,6 +3106,9 @@
                         $.terminal.format(line, options) +
                         '</span>';
                 }).concat([last_line]).join('\n');
+                // zero width space to make sure prompt margin takes up space,
+                // so that echo with newline: false works when prompt is empty
+                formatted = formatted || '\u206F';
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
