@@ -1,3 +1,13 @@
+## 2.23.0
+### Features
+* include echo without newline into the core of the library
+### Bugfix
+* remove unsafe eval (function constructor) that breaks CSP [#647](https://github.com/jcubic/jquery.terminal/issues/647)
+* fix up/down arrow when prompt is empty string [651](https://github.com/jcubic/jquery.terminal/issues/651)
+* fix ANSI Art (add saving and restoring cursor using ANSI escape code)
+* fix mouse wheel and touch scroll in less when content is smaller than height of the terminal
+* fix regression in copy/paste with right click
+
 ## 2.22.0
 ### Features
 * make unix formatting and basic tools work in web worker

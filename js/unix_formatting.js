@@ -1218,7 +1218,7 @@
             input = input.replace(/\x1A.*/, '');
             input = input.replace(/\r?\n?\x1b\[A\x1b\[[0-9]+C/g, '');
             input = $.terminal.unescape_brackets(input);
-            var code, inside, format, charset;
+            var code, inside, format, charset, saved_cursor;
             var print = function print(s) {
                 var s_len = s.length;
                 if (settings.escapeBrackets) {
@@ -1339,6 +1339,12 @@
                 inst_c: function(collected, params, flag) {
                     var value = params[0] === 0 ? 1 : params[0];
                     switch (flag) {
+                        case 's':
+                            saved_cursor = Object.assign({}, this.cursor);
+                            break;
+                        case 'u':
+                            this.cursor = saved_cursor;
+                            break;
                         case 'A': // UP
                             this.cursor.y -= value;
                             break;
