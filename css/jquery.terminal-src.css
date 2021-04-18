@@ -108,6 +108,9 @@ body.full-screen-terminal .terminal {
     width: 100%;
     z-index: 300;
 }
+.terminal .cmd {
+    --background: transparent;
+}
 .terminal a[tabindex="1000"],
 .terminal a[tabindex="1000"]:active,
 .terminal a[tabindex="1000"]:focus {
@@ -689,21 +692,9 @@ terminal .terminal-output > div {
     margin-bottom: 10px;
     position: relative;
 }
-.terminal .partial {
-    position: relative;
-    z-index: 400;
-}
 .terminal .partial, .terminal .partial > div {
     display: inline-block;
 }
-.terminal div.partial > div {
-    width: -moz-fit-content;
-    width: -webkit-fit-content;
-    width: fit-content;
-    /* display: inline; */
-}
-
-
 @supports (--css: variables) {
     .terminal,
     .terminal-output > :not(.raw) span[data-text]:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),

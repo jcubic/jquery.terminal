@@ -3075,9 +3075,11 @@
         var prev_prompt_data;
         var draw_prompt = (function() {
             function set(prompt) {
-                prompt = $.terminal.apply_formatters(prompt, {prompt: true});
-                prompt = $.terminal.normalize(prompt);
-                prompt = crlf(prompt);
+                if (prompt) {
+                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
+                    prompt = $.terminal.normalize(prompt);
+                    prompt = crlf(prompt);
+                }
                 last_rendered_prompt = prompt;
                 var lines = $.terminal.split_equal(prompt, num_chars).map(function(line) {
                     if (!$.terminal.have_formatting(line)) {
@@ -10697,12 +10699,12 @@
                             if (diff_w > 0) {
                                 width -= Math.ceil(diff_w);
                             }
-                            $clip.css({
-                                left: left,
-                                top: top,
-                                width: width,
-                                height: height
-                            });
+                            $clip.attr('style', [
+                                'left:' + left + 'px !important',
+                                'top:' + top + 'px !important',
+                                'width:' + width + 'px !important',
+                                'height:' + height + 'px !important'
+                            ].join(';'));
                             if (!$clip.is(':focus')) {
                                 $clip.focus();
                             }
