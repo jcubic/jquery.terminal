@@ -9411,11 +9411,10 @@
                         // Firefox won't reflow the cursor automatically, so
                         // hide it briefly then reshow it
                         cmd_cursor.hide();
+                        setTimeout(function() {
+                            cmd_cursor.show();
+                        }, 0);
                     }, 0);
-                    setTimeout(function() {
-                        // reshow cursor for firefox
-                        cmd_cursor.show();
-                    }, 10 /* this didn't work with 5ms */);
                     if ((settings.scrollOnEcho && options.scroll) || bottom) {
                         self.scroll_to_bottom();
                     }
