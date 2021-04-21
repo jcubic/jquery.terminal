@@ -1,3 +1,8 @@
+## 2.23.1
+### Bugfix
+* fix reversed class in cmd (e.g. in less command)
+* fix hack to reflow the cursor in Firefox from #654
+
 ## 2.23.0
 ### Features
 * include echo without newline into the core of the library

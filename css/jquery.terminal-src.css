@@ -108,8 +108,8 @@ body.full-screen-terminal .terminal {
     width: 100%;
     z-index: 300;
 }
-.terminal .cmd {
-    --background: transparent;
+.terminal .cmd, .terminal .cmd div {
+    background: transparent !important;
 }
 .terminal a[tabindex="1000"],
 .terminal a[tabindex="1000"]:active,
