@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 21 Apr 2021 12:35:07 +0000
+ * Date: Thu, 22 Apr 2021 15:02:34 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.23.1',
-        date: 'Wed, 21 Apr 2021 12:35:07 +0000',
+        date: 'Thu, 22 Apr 2021 15:02:34 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8056,7 +8056,7 @@
                 if (!visible) {
                     // try catch for Node.js unit tests
                     try {
-                        self.scroll_to(self.find('.cmd-cursor'));
+                        self.scroll_to(self.find('.cmd-cursor-line'));
                         return true;
                     } catch (e) {
                         return true;

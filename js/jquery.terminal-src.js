@@ -8056,7 +8056,7 @@
                 if (!visible) {
                     // try catch for Node.js unit tests
                     try {
-                        self.scroll_to(self.find('.cmd-cursor'));
+                        self.scroll_to(self.find('.cmd-cursor-line'));
                         return true;
                     } catch (e) {
                         return true;

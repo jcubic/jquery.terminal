@@ -1,3 +1,7 @@
+## 2.23.2
+### Bugfix
+* fix regression in scroll to view mechanism (that cause scroll up randomly)
+
 ## 2.23.1
 ### Bugfix
 * fix reversed class in cmd (e.g. in less command)
