@@ -1,3 +1,7 @@
+## 2.24.0
+### Features
+* add `terminal::typing` API method
+
 ## 2.23.2
 ### Bugfix
 * fix regression in scroll to view mechanism (that cause scroll up randomly)

@@ -8280,7 +8280,7 @@
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i;
-            if (self.enabled()) {
+            if (self.enabled() && !animating) {
                 if (!self.paused()) {
                     result = user_key_down(e);
                     if (result !== undefined) {
@@ -8341,6 +8341,51 @@
                 }
             }
         }
+        // ---------------------------------------------------------------------
+        // :: Typing animation generator
+        // ---------------------------------------------------------------------
+        function typed(finish_typing_fn) {
+            return function typeing_animation(message, delay, onFinish) {
+                animating = true;
+                var prompt = self.get_prompt();
+                var char_i = 0;
+                var len = $.terminal.length(message);
+                if (message.length > 0) {
+                    self.set_prompt('');
+                    var new_prompt = '';
+                    var interval = setInterval(function() {
+                        var chr = $.terminal.substring(message, char_i, char_i + 1);
+                        new_prompt += chr;
+                        self.set_prompt(new_prompt);
+                        char_i++;
+                        if (char_i === len) {
+                            clearInterval(interval);
+                            setTimeout(function() {
+                                // swap command with prompt
+                                finish_typing_fn(message, prompt);
+                                animating = false;
+                                if (is_function(onFinish)) {
+                                    try {
+                                        onFinish.apply(self);
+                                    } catch (e) {
+                                        display_exception(e);
+                                    }
+                                }
+                            }, delay);
+                        }
+                    }, delay);
+                }
+            };
+        }
+        // ---------------------------------------------------------------------
+        var typed_prompt = typed(function(message) {
+            self.set_prompt(message + ' ');
+        });
+        // ---------------------------------------------------------------------
+        var typed_message = typed(function(message, prompt) {
+            self.echo(message);
+            self.set_prompt(prompt);
+        });
         // ---------------------------------------------------------------------
         function ready(queue) {
             return function(fun) {
@@ -9642,6 +9687,27 @@
                 return self;
             },
             // -------------------------------------------------------------
+            typing: function(type, speed, string, finish) {
+                function done() {
+                    d.resolve();
+                    if (is_function(finish)) {
+                        finish.call(self);
+                    }
+                }
+                if (['prompt', 'echo'].indexOf(type) >= 0) {
+                    var d = new $.Deferred();
+                    if (type === 'prompt') {
+                        typed_prompt(string, speed, done);
+                    } else if (type === 'echo') {
+                        typed_message(string, speed, done);
+                    }
+                    return d.promise();
+                } else {
+                    throw new Error('Invalid type only `echo` and `prompt`' +
+                                    ' are supported');
+                }
+            },
+            // -------------------------------------------------------------
             // :: echo red text
             // -------------------------------------------------------------
             error: function(message, options) {
@@ -10233,6 +10299,7 @@
         var command; // for tab completion
         var logins = new Stack(); // stack of logins
         var command_queue = new DelayQueue();
+        var animating = false; // true on typing animation
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
