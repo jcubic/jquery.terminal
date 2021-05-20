@@ -3,6 +3,8 @@
 * add `terminal::typing` API method
 * add `--font` custom property [#662](https://github.com/jcubic/jquery.terminal/issues/662)
 * add alt tag to images from formatting [#661](https://github.com/jcubic/jquery.terminal/issues/661)
+* improve command parser [#657](https://github.com/jcubic/jquery.terminal/issues/657)
+
 ## 2.23.2
 ### Bugfix
 * fix regression in scroll to view mechanism (that cause scroll up randomly)

@@ -6070,6 +6070,11 @@
                     return arg.replace(/\\ /g, ' ');
                 }
             }
+            if (arg === 'true') {
+                return true;
+            } else if (arg === 'false') {
+                return false;
+            }
             var regex = arg.match(re_re);
             if (regex) {
                 return new RegExp(regex[1], regex[2]);
