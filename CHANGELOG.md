@@ -1,6 +1,7 @@
 ## 2.24.0
 ### Features
 * add `terminal::typing` API method
+* add `--font` custom property [#662](https://github.com/jcubic/jquery.terminal/issues/662)
 
 ## 2.23.2
 ### Bugfix
