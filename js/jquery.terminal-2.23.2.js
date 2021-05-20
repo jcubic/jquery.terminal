@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 24 Apr 2021 07:46:02 +0000
+ * Date: Thu, 20 May 2021 17:13:50 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 24 Apr 2021 07:46:02 +0000',
+        date: 'Thu, 20 May 2021 17:13:50 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9688,24 +9688,25 @@
             },
             // -------------------------------------------------------------
             typing: function(type, speed, string, finish) {
+                var d = new $.Deferred();
                 function done() {
                     d.resolve();
                     if (is_function(finish)) {
                         finish.call(self);
                     }
                 }
-                if (['prompt', 'echo'].indexOf(type) >= 0) {
-                    var d = new $.Deferred();
-                    if (type === 'prompt') {
-                        typed_prompt(string, speed, done);
-                    } else if (type === 'echo') {
-                        typed_message(string, speed, done);
+                when_ready(function ready() {
+                    if (['prompt', 'echo'].indexOf(type) >= 0) {
+                        if (type === 'prompt') {
+                            typed_prompt(string, speed, done);
+                        } else if (type === 'echo') {
+                            typed_message(string, speed, done);
+                        }
+                    } else {
+                        d.reject('Invalid type only `echo` and `prompt` are supported');
                     }
-                    return d.promise();
-                } else {
-                    throw new Error('Invalid type only `echo` and `prompt`' +
-                                    ' are supported');
-                }
+                });
+                return d.promise();
             },
             // -------------------------------------------------------------
             // :: echo red text

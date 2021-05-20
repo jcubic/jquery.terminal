@@ -9688,24 +9688,25 @@
             },
             // -------------------------------------------------------------
             typing: function(type, speed, string, finish) {
+                var d = new $.Deferred();
                 function done() {
                     d.resolve();
                     if (is_function(finish)) {
                         finish.call(self);
                     }
                 }
-                if (['prompt', 'echo'].indexOf(type) >= 0) {
-                    var d = new $.Deferred();
-                    if (type === 'prompt') {
-                        typed_prompt(string, speed, done);
-                    } else if (type === 'echo') {
-                        typed_message(string, speed, done);
+                when_ready(function ready() {
+                    if (['prompt', 'echo'].indexOf(type) >= 0) {
+                        if (type === 'prompt') {
+                            typed_prompt(string, speed, done);
+                        } else if (type === 'echo') {
+                            typed_message(string, speed, done);
+                        }
+                    } else {
+                        d.reject('Invalid type only `echo` and `prompt` are supported');
                     }
-                    return d.promise();
-                } else {
-                    throw new Error('Invalid type only `echo` and `prompt`' +
-                                    ' are supported');
-                }
+                });
+                return d.promise();
             },
             // -------------------------------------------------------------
             // :: echo red text
