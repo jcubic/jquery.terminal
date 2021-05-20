@@ -22,7 +22,7 @@ type TypeOrPromise<T> = T | PromiseLike<T>;
 
 declare namespace JQueryTerminal {
     type interpreterFunction = (this: JQueryTerminal, command: string, term: JQueryTerminal) => any;
-    type terminalObjectFunction = (...args: (string | number | RegExp)[]) => (void | TypeOrPromise<echoValue>);
+    type terminalObjectFunction = (...args: (string | number | RegExp)[]) => (void | TypeOrPromise<simpleEchoValue>);
     type Interpreter = string | interpreterFunction | ObjectInterpreter;
     type ObjectInterpreter = {
         [key: string]: ObjectInterpreter | terminalObjectFunction;
@@ -127,11 +127,13 @@ declare namespace JQueryTerminal {
     type keymapObjectOptionalArg = { [key: string]: keymapFunctionOptionalArg };
 
     type commandsCmdFunction<T = Cmd> = (this: T, command: string) => any;
-    type echoValue = string | string[] | Element | JQuery<Element> | (() => string | string[]);
+    type simpleEchoValue = string | string[] | Element | JQuery<Element>;
+    type echoValue = simpleEchoValue | (() => TypeOrPromise<string | string[]>);
+    type echoValueOrPromise = TypeOrPromise<simpleEchoValue> | (() => TypeOrPromise<string | string[]>);
     type errorArgument = string | (() => string) | PromiseLike<string>;
     type setStringFunction = (value: string) => void;
-    type setEchoValueFunction = (value: TypeOrPromise<echoValue>) => void;
-    type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => (void | TypeOrPromise<JQueryTerminal.echoValue>)) | string | null;
+    type setEchoValueFunction = (value: echoValueOrPromise) => void;
+    type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => (void | JQueryTerminal.echoValueOrPromise)) | string | null;
     type cmdPrompt<T = Cmd> = ((this: Cmd, setPrompt: setStringFunction) => void) | string;
 
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
@@ -649,7 +651,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     // options for remove_line is useless but that's how API look like
     remove_line(line: number): JQueryTerminal;
     last_index(): number;
-    echo<TValue = JQueryTerminal.echoValue>(arg: TypeOrPromise<TValue>, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    echo<TValue = JQueryTerminal.echoValueOrPromise>(arg: TValue, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     error(arg: JQueryTerminal.errorArgument, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     exception<T extends Error>(e: T, label?: string): JQueryTerminal;
     scroll(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'scroll'> | false): this;
