@@ -5864,6 +5864,9 @@
                     result = '<img';
                     if (valid_src(data)) {
                         result += ' src="' + data + '"';
+                        if (text) {
+                            result += ' alt="' + text + '"';
+                        }
                     }
                 } else {
                     result = '<span';
