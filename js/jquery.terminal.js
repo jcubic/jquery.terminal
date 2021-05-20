@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 20 May 2021 17:35:29 +0000
+ * Date: Thu, 20 May 2021 18:23:02 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 20 May 2021 17:35:29 +0000',
+        date: 'Thu, 20 May 2021 18:23:02 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5770,6 +5770,37 @@
             });
             // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
+                function pre_process_link() {
+                    var result;
+                    if (data.match(email_re)) {
+                        result = '<a href="mailto:' + data + '"';
+                    } else {
+                        // only http and ftp links (prevent javascript)
+                        // unless user force it with anyLinks option
+                        if (!valid_href(data)) {
+                            data = '';
+                        }
+                        result = '<a target="_blank"';
+                        if (data) {
+                            result += ' href="' + data + '"';
+                        }
+                        result += ' rel="' + rel_attr().join(' ') + '"';
+                    }
+                    // make focus to terminal textarea that will enable
+                    // terminal when pressing tab and terminal is disabled
+                    result += ' tabindex="1000"';
+                    return result;
+                }
+                function pre_process_image() {
+                    var result = '<img';
+                    if (valid_src(data)) {
+                        result += ' src="' + data + '"';
+                        if (text) {
+                            result += ' alt="' + text + '"';
+                        }
+                    }
+                    return result;
+                }
                 var attrs;
                 if (data_text.match(/;/)) {
                     try {
@@ -5843,31 +5874,9 @@
                 }
                 var result;
                 if (style.indexOf('!') !== -1) {
-                    if (data.match(email_re)) {
-                        result = '<a href="mailto:' + data + '"';
-                    } else {
-                        // only http and ftp links (prevent javascript)
-                        // unless user force it with anyLinks option
-                        if (!valid_href(data)) {
-                            data = '';
-                        }
-                        result = '<a target="_blank"';
-                        if (data) {
-                            result += ' href="' + data + '"';
-                        }
-                        result += ' rel="' + rel_attr().join(' ') + '"';
-                    }
-                    // make focus to terminal textarea that will enable
-                    // terminal when pressing tab and terminal is disabled
-                    result += ' tabindex="1000"';
+                    result = pre_process_link();
                 } else if (style.indexOf('@') !== -1) {
-                    result = '<img';
-                    if (valid_src(data)) {
-                        result += ' src="' + data + '"';
-                        if (text) {
-                            result += ' alt="' + text + '"';
-                        }
-                    }
+                    result = pre_process_image();
                 } else {
                     result = '<span';
                 }
@@ -6065,7 +6074,7 @@
                     return arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
                 } else if (arg.match(/\/.*\/[gimy]*$/)) {
                     return arg;
-                } else if (arg.match(/['"]]/)) {
+                } else if (arg.match(/['"`]]/)) {
                     // part of arg is in quote
                     return parse_string(arg);
                 } else {
@@ -6080,7 +6089,7 @@
             var regex = arg.match(re_re);
             if (regex) {
                 return new RegExp(regex[1], regex[2]);
-            } else if (arg.match(/^['"`]/)) {
+            } else if (arg.match(/['"`]/)) {
                 return parse_string(arg);
             } else if (arg.match(/^-?[0-9]+$/)) {
                 return parseInt(arg, 10);
