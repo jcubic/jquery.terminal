@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 20 May 2021 17:27:38 +0000
+ * Date: Thu, 20 May 2021 17:35:29 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1144,12 +1144,12 @@
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)$/gi;
     var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
-    var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
+    var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|`[^`\\]*(?:\\[\S\s][^`\\]*)*`|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
     var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
     var format_exec_re = /(\[\[(?:[^\][]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
-    var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*')/;
+    var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*'|`(?:[^`\\]|\\(?:\\\\)*`|\\\\)*`)/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     var broken_image = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14"><title id="title2">rounded</title><path id="terminal-broken-image" d="m 14,10 h 2 v 1 a 3,3 0 0 1 -3,3 H 3 A 3,3 0 0 1 0,11 H 4.5 A 1.00012,1.00012 0 0 0 5.207,10.707 L 6.5,9.414 7.793,10.707 a 0.99963,0.99963 0 0 0 1.41406,0 l 2.36719,-2.36719 1.80127,1.44092 A 0.99807,0.99807 0 0 0 14,10 Z M 16,3 V 8 H 14.35059 L 12.12451,6.21924 A 0.99846,0.99846 0 0 0 10.793,6.293 L 8.5,8.586 7.207,7.293 a 0.99962,0.99962 0 0 0 -1.41406,0 L 4.08594,9 H 0 V 3 A 3,3 0 0 1 3,0 h 10 a 3,3 0 0 1 3,3 z M 6,4.5 A 1.5,1.5 0 1 0 4.5,6 1.5,1.5 0 0 0 6,4.5 Z" /></svg>';
     var use_broken_image = '<svg class="terminal-broken-image" role="presentation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#terminal-broken-image"/></svg>';
@@ -4757,7 +4757,7 @@
                 return fn(arg);
             });
             var quotes = $.map(array, function(arg) {
-                var m = arg.match(/^(['"]).*\1$/);
+                var m = arg.match(/^(['"`]).*\1$/);
                 return m && m[1] || '';
             });
             var rest = string.slice(name.length).trim();
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 20 May 2021 17:27:38 +0000',
+        date: 'Thu, 20 May 2021 17:35:29 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6039,14 +6039,14 @@
                 return string.split(string_re).map(function(string) {
                     // remove quotes if before are even number of slashes
                     // we don't remove slases becuase they are handled by JSON.parse
-                    if (string.match(/^['"]/)) {
+                    if (string.match(/^['"`]/)) {
                         // fixing regex to match empty string is not worth it
-                        if (string === '""' || string === "''") {
+                        if (string === '""' || string === "''" || string === "``") {
                             return '';
                         }
                         var quote = string[0];
                         var re = new RegExp("(\\\\\\\\(?:\\\\\\\\)*)" + quote, "g");
-                        string = string.replace(re, '$1').replace(/^['"]|['"]$/g, '');
+                        string = string.replace(re, '$1').replace(/^[`'"]|[`'"]$/g, '');
                         if (quote === "'") {
                             string = string.replace(/"/g, '\\"');
                         }
@@ -6059,6 +6059,8 @@
             if (strict === false) {
                 if (arg[0] === "'" && arg[arg.length - 1] === "'") {
                     return arg.replace(/^'|'$/g, '');
+                } else if (arg[0] === "`" && arg[arg.length - 1] === "`") {
+                    return arg.replace(/^`|`$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length - 1] === '"') {
                     return arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
                 } else if (arg.match(/\/.*\/[gimy]*$/)) {
@@ -6078,7 +6080,7 @@
             var regex = arg.match(re_re);
             if (regex) {
                 return new RegExp(regex[1], regex[2]);
-            } else if (arg.match(/['"]/)) {
+            } else if (arg.match(/^['"`]/)) {
                 return parse_string(arg);
             } else if (arg.match(/^-?[0-9]+$/)) {
                 return parseInt(arg, 10);
