@@ -5706,7 +5706,7 @@ describe('Terminal plugin', function() {
                     return new Promise(function(resolve) {
                         setTimeout(function() {
                             resolve(message);
-                        }, 10);
+                        }, 0);
                     });
                 });
                 setTimeout(function() {
@@ -5716,7 +5716,7 @@ describe('Terminal plugin', function() {
                     setTimeout(function() {
                         expect(get_message()).toEqual('hello 2nd timer');
                         done();
-                    }, 100);
+                    }, 400);
                 }, 100);
             });
             it('should print empty line', function() {

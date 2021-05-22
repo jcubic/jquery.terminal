@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.23.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 22 Apr 2021 15:04:05 +0000
+ * Date: Thu, 20 May 2021 18:23:02 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1144,12 +1144,12 @@
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)$/gi;
     var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
-    var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
+    var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|`[^`\\]*(?:\\[\S\s][^`\\]*)*`|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
     var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
     var format_exec_re = /(\[\[(?:[^\][]|\\\])+\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
-    var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*')/;
+    var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*'|`(?:[^`\\]|\\(?:\\\\)*`|\\\\)*`)/;
     var unclosed_strings_re = /^(?=((?:[^"']+|"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*')*))\1./;
     var broken_image = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14"><title id="title2">rounded</title><path id="terminal-broken-image" d="m 14,10 h 2 v 1 a 3,3 0 0 1 -3,3 H 3 A 3,3 0 0 1 0,11 H 4.5 A 1.00012,1.00012 0 0 0 5.207,10.707 L 6.5,9.414 7.793,10.707 a 0.99963,0.99963 0 0 0 1.41406,0 l 2.36719,-2.36719 1.80127,1.44092 A 0.99807,0.99807 0 0 0 14,10 Z M 16,3 V 8 H 14.35059 L 12.12451,6.21924 A 0.99846,0.99846 0 0 0 10.793,6.293 L 8.5,8.586 7.207,7.293 a 0.99962,0.99962 0 0 0 -1.41406,0 L 4.08594,9 H 0 V 3 A 3,3 0 0 1 3,0 h 10 a 3,3 0 0 1 3,3 z M 6,4.5 A 1.5,1.5 0 1 0 4.5,6 1.5,1.5 0 0 0 6,4.5 Z" /></svg>';
     var use_broken_image = '<svg class="terminal-broken-image" role="presentation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#terminal-broken-image"/></svg>';
@@ -4757,7 +4757,7 @@
                 return fn(arg);
             });
             var quotes = $.map(array, function(arg) {
-                var m = arg.match(/^(['"]).*\1$/);
+                var m = arg.match(/^(['"`]).*\1$/);
                 return m && m[1] || '';
             });
             var rest = string.slice(name.length).trim();
@@ -4780,8 +4780,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.23.2',
-        date: 'Thu, 22 Apr 2021 15:04:05 +0000',
+        version: 'DEV',
+        date: 'Thu, 20 May 2021 18:23:02 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5770,6 +5770,37 @@
             });
             // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
+                function pre_process_link() {
+                    var result;
+                    if (data.match(email_re)) {
+                        result = '<a href="mailto:' + data + '"';
+                    } else {
+                        // only http and ftp links (prevent javascript)
+                        // unless user force it with anyLinks option
+                        if (!valid_href(data)) {
+                            data = '';
+                        }
+                        result = '<a target="_blank"';
+                        if (data) {
+                            result += ' href="' + data + '"';
+                        }
+                        result += ' rel="' + rel_attr().join(' ') + '"';
+                    }
+                    // make focus to terminal textarea that will enable
+                    // terminal when pressing tab and terminal is disabled
+                    result += ' tabindex="1000"';
+                    return result;
+                }
+                function pre_process_image() {
+                    var result = '<img';
+                    if (valid_src(data)) {
+                        result += ' src="' + data + '"';
+                        if (text) {
+                            result += ' alt="' + text + '"';
+                        }
+                    }
+                    return result;
+                }
                 var attrs;
                 if (data_text.match(/;/)) {
                     try {
@@ -5843,28 +5874,9 @@
                 }
                 var result;
                 if (style.indexOf('!') !== -1) {
-                    if (data.match(email_re)) {
-                        result = '<a href="mailto:' + data + '"';
-                    } else {
-                        // only http and ftp links (prevent javascript)
-                        // unless user force it with anyLinks option
-                        if (!valid_href(data)) {
-                            data = '';
-                        }
-                        result = '<a target="_blank"';
-                        if (data) {
-                            result += ' href="' + data + '"';
-                        }
-                        result += ' rel="' + rel_attr().join(' ') + '"';
-                    }
-                    // make focus to terminal textarea that will enable
-                    // terminal when pressing tab and terminal is disabled
-                    result += ' tabindex="1000"';
+                    result = pre_process_link();
                 } else if (style.indexOf('@') !== -1) {
-                    result = '<img';
-                    if (valid_src(data)) {
-                        result += ' src="' + data + '"';
-                    }
+                    result = pre_process_image();
                 } else {
                     result = '<span';
                 }
@@ -6036,14 +6048,14 @@
                 return string.split(string_re).map(function(string) {
                     // remove quotes if before are even number of slashes
                     // we don't remove slases becuase they are handled by JSON.parse
-                    if (string.match(/^['"]/)) {
+                    if (string.match(/^['"`]/)) {
                         // fixing regex to match empty string is not worth it
-                        if (string === '""' || string === "''") {
+                        if (string === '""' || string === "''" || string === "``") {
                             return '';
                         }
                         var quote = string[0];
                         var re = new RegExp("(\\\\\\\\(?:\\\\\\\\)*)" + quote, "g");
-                        string = string.replace(re, '$1').replace(/^['"]|['"]$/g, '');
+                        string = string.replace(re, '$1').replace(/^[`'"]|[`'"]$/g, '');
                         if (quote === "'") {
                             string = string.replace(/"/g, '\\"');
                         }
@@ -6056,21 +6068,28 @@
             if (strict === false) {
                 if (arg[0] === "'" && arg[arg.length - 1] === "'") {
                     return arg.replace(/^'|'$/g, '');
+                } else if (arg[0] === "`" && arg[arg.length - 1] === "`") {
+                    return arg.replace(/^`|`$/g, '');
                 } else if (arg[0] === '"' && arg[arg.length - 1] === '"') {
                     return arg.replace(/^"|"$/g, '').replace(/\\([" ])/g, '$1');
                 } else if (arg.match(/\/.*\/[gimy]*$/)) {
                     return arg;
-                } else if (arg.match(/['"]]/)) {
+                } else if (arg.match(/['"`]]/)) {
                     // part of arg is in quote
                     return parse_string(arg);
                 } else {
                     return arg.replace(/\\ /g, ' ');
                 }
             }
+            if (arg === 'true') {
+                return true;
+            } else if (arg === 'false') {
+                return false;
+            }
             var regex = arg.match(re_re);
             if (regex) {
                 return new RegExp(regex[1], regex[2]);
-            } else if (arg.match(/['"]/)) {
+            } else if (arg.match(/['"`]/)) {
                 return parse_string(arg);
             } else if (arg.match(/^-?[0-9]+$/)) {
                 return parseInt(arg, 10);
@@ -8280,7 +8299,7 @@
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i;
-            if (self.enabled()) {
+            if (self.enabled() && !animating) {
                 if (!self.paused()) {
                     result = user_key_down(e);
                     if (result !== undefined) {
@@ -8341,6 +8360,51 @@
                 }
             }
         }
+        // ---------------------------------------------------------------------
+        // :: Typing animation generator
+        // ---------------------------------------------------------------------
+        function typed(finish_typing_fn) {
+            return function typeing_animation(message, delay, onFinish) {
+                animating = true;
+                var prompt = self.get_prompt();
+                var char_i = 0;
+                var len = $.terminal.length(message);
+                if (message.length > 0) {
+                    self.set_prompt('');
+                    var new_prompt = '';
+                    var interval = setInterval(function() {
+                        var chr = $.terminal.substring(message, char_i, char_i + 1);
+                        new_prompt += chr;
+                        self.set_prompt(new_prompt);
+                        char_i++;
+                        if (char_i === len) {
+                            clearInterval(interval);
+                            setTimeout(function() {
+                                // swap command with prompt
+                                finish_typing_fn(message, prompt);
+                                animating = false;
+                                if (is_function(onFinish)) {
+                                    try {
+                                        onFinish.apply(self);
+                                    } catch (e) {
+                                        display_exception(e);
+                                    }
+                                }
+                            }, delay);
+                        }
+                    }, delay);
+                }
+            };
+        }
+        // ---------------------------------------------------------------------
+        var typed_prompt = typed(function(message) {
+            self.set_prompt(message + ' ');
+        });
+        // ---------------------------------------------------------------------
+        var typed_message = typed(function(message, prompt) {
+            self.echo(message);
+            self.set_prompt(prompt);
+        });
         // ---------------------------------------------------------------------
         function ready(queue) {
             return function(fun) {
@@ -9642,6 +9706,28 @@
                 return self;
             },
             // -------------------------------------------------------------
+            typing: function(type, speed, string, finish) {
+                var d = new $.Deferred();
+                function done() {
+                    d.resolve();
+                    if (is_function(finish)) {
+                        finish.call(self);
+                    }
+                }
+                when_ready(function ready() {
+                    if (['prompt', 'echo'].indexOf(type) >= 0) {
+                        if (type === 'prompt') {
+                            typed_prompt(string, speed, done);
+                        } else if (type === 'echo') {
+                            typed_message(string, speed, done);
+                        }
+                    } else {
+                        d.reject('Invalid type only `echo` and `prompt` are supported');
+                    }
+                });
+                return d.promise();
+            },
+            // -------------------------------------------------------------
             // :: echo red text
             // -------------------------------------------------------------
             error: function(message, options) {
@@ -10233,6 +10319,7 @@
         var command; // for tab completion
         var logins = new Stack(); // stack of logins
         var command_queue = new DelayQueue();
+        var animating = false; // true on typing animation
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
