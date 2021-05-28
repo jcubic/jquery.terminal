@@ -1,3 +1,7 @@
+## 2.24.1
+### Bugfix
+* Properly handle promise rejection in login
+
 ## 2.24.0
 ### Features
 * add `terminal::typing` API method
