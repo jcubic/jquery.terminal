@@ -4244,7 +4244,7 @@ describe('Terminal plugin', function() {
         });
         it('should created nested intepreter', function() {
             term.focus();
-            var spy = spyOn(interpereter.foo.bar, 'baz');
+            var spy = jest.spyOn(interpereter.foo.bar, 'baz');
             enter(term, 'foo');
             expect(term.get_prompt()).toEqual('foo> ');
             enter(term, 'bar');
@@ -4356,7 +4356,7 @@ describe('Terminal plugin', function() {
         }]);
         it('value returned by plugin should be the same as in intepreter', function() {
             term.focus();
-            var spy = spyOn(test, 'test');
+            var spy = jest.spyOn(test, 'test');
             enter(term, 'foo');
             expect(test.test).toHaveBeenCalledWith(term);
             enter(term, 'bar');
@@ -5355,7 +5355,7 @@ describe('Terminal plugin', function() {
             var history;
             it('should return history object', function() {
                 history = term.history();
-                expect(history).toEqual(jasmine.any(Object));
+                expect(history).toEqual(expect.any(Object));
             });
             it('should have entered commands', function() {
                 history.clear();
@@ -6178,7 +6178,7 @@ describe('Terminal plugin', function() {
         describe('get_token', function() {
             var term = $('<div/>').terminal();
             it('should call token', function() {
-                spyOn(term, 'token');
+                jest.spyOn(term, 'token');
                 term.get_token();
                 expect(term.token).toHaveBeenCalled();
             });
@@ -6299,7 +6299,7 @@ describe('Terminal plugin', function() {
                 var test = {
                     callback: function() {}
                 };
-                spyOn(test, 'callback');
+                jest.spyOn(test, 'callback');
                 var promise = term.read('foo: ', test.callback);
                 promise.then(test.callback);
                 var text = 'lorem ipsum';
@@ -6310,7 +6310,7 @@ describe('Terminal plugin', function() {
                 var test = {
                     callback: function() {}
                 };
-                spyOn(test, 'callback');
+                jest.spyOn(test, 'callback');
                 term.read('foo: ', test.callback);
                 var text = 'lorem ipsum';
                 enter(term, text);
@@ -6321,8 +6321,8 @@ describe('Terminal plugin', function() {
                     success: function() {},
                     cancel: function() {}
                 };
-                spyOn(test, 'success');
-                spyOn(test, 'cancel');
+                jest.spyOn(test, 'success');
+                jest.spyOn(test, 'cancel');
                 term.read('foo: ', test.success, test.cancel);
                 shortcut(true, false, false, 'd');
                 expect(test.success).not.toHaveBeenCalled();
@@ -6379,7 +6379,7 @@ describe('Terminal plugin', function() {
                 expect(term.get_prompt()).toEqual('login: ');
             });
             it('should create login for JSON-RPC', function() {
-                spyOn(object, 'login');
+                jest.spyOn(object, 'login');
                 term.push('/test', {
                     login: true,
                     name: 'push_login_rpc'
