@@ -2,7 +2,8 @@
 ### Bugfix
 * fix wrong auth tokens when using exec to login
 * fix exec array for async login
-* fix authentication to nested JSON-RPC interpreter without system.describe
+* fix Auth to nested RPC interpreter without system.describe
+* don't echo falsy values from RPC
 
 ## 2.25.0
 ### Features

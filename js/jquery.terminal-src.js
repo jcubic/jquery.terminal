@@ -6966,7 +6966,7 @@
                             display_json_rpc_error(json.error);
                         } else if (is_function(settings.processRPCResponse)) {
                             settings.processRPCResponse.call(self, json.result, self);
-                        } else {
+                        } else if (json.result) {
                             display_object(json.result);
                         }
                         self.resume();

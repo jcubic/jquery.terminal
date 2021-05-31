@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 31 May 2021 13:59:14 +0000
+ * Date: Mon, 31 May 2021 14:24:45 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 31 May 2021 13:59:14 +0000',
+        date: 'Mon, 31 May 2021 14:24:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6966,7 +6966,7 @@
                             display_json_rpc_error(json.error);
                         } else if (is_function(settings.processRPCResponse)) {
                             settings.processRPCResponse.call(self, json.result, self);
-                        } else {
+                        } else if (json.result) {
                             display_object(json.result);
                         }
                         self.resume();
@@ -6991,7 +6991,7 @@
                     // allows to call help without a token
                     interpreter(command.name, command.args);
                 } else {
-                    var token = terminal.token();
+                    var token = terminal.token(true);
                     if (token) {
                         interpreter(command.name, [token].concat(command.args));
                     } else {
@@ -8693,13 +8693,13 @@
                                 (ret.then || ret.done).call(ret, function(token) {
                                     login_callback(user, token);
                                 }).catch(function(err) {
-                                    if (self.paused()) {
-                                        self.resume();
-                                    }
                                     self.pop(undefined, true).pop(undefined, true);
                                     self.error(err.message);
                                     if (is_function(error)) {
                                         error();
+                                    }
+                                    if (self.paused()) {
+                                        self.resume();
                                     }
                                     self.off('terminal.autologin');
                                 });
