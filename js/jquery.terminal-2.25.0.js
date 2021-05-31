@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 31 May 2021 08:52:14 +0000
+ * Date: Mon, 31 May 2021 09:36:36 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.25.0',
-        date: 'Mon, 31 May 2021 08:52:14 +0000',
+        date: 'Mon, 31 May 2021 09:36:36 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10697,11 +10697,12 @@
                 // work weird on mobile
                 $win.on('focus.terminal_' + self.id(), focus_terminal).
                     on('blur.terminal_' + self.id(), blur_terminal);
-                // context is used to check if terminal should not scroll to bottom after right click on:
-                // e.g. img, canvas, a and then click to hide the menu. The problem is that
-                // right click on those elements don't move the textarea to show proper context menu
-                // like save as on images or open on links. See #644 bug
-                var was_context_event;
+                // context is used to check if terminal should not scroll to bottom
+                // after right click on  e.g. img, canvas, a and then click to hide
+                // the menu. The problem is that right click on those elements don't
+                // move the textarea to show proper context menu like save as on images
+                // or open on links. See #644 bug
+                var was_ctx_event;
                 // detect mouse drag
                 (function() {
                     var count = 0;
@@ -10732,8 +10733,8 @@
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
-                        if (was_context_event) {
-                            was_context_event = false;
+                        if (was_ctx_event) {
+                            was_ctx_event = false;
                             return;
                         }
                         if ($target && $target.closest(ignore_elements).length) {
@@ -10775,8 +10776,8 @@
                         event_name = 'mousedown.terminal';
                     }
                     self.on(event_name, function(e) {
-                        was_context_event = get_selected_html() === '' && is_context_event(e);
-                        if (was_context_event) {
+                        was_ctx_event = get_selected_html() === '' && is_context_event(e);
+                        if (was_ctx_event) {
                             var $target = $(e.target);
                             if ($target.is('img,value,audio,object,canvas,a')) {
                                 return;
