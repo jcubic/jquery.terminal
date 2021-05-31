@@ -6991,7 +6991,7 @@
                     // allows to call help without a token
                     interpreter(command.name, command.args);
                 } else {
-                    var token = terminal.token();
+                    var token = terminal.token(true);
                     if (token) {
                         interpreter(command.name, [token].concat(command.args));
                     } else {
@@ -8693,13 +8693,13 @@
                                 (ret.then || ret.done).call(ret, function(token) {
                                     login_callback(user, token);
                                 }).catch(function(err) {
-                                    if (self.paused()) {
-                                        self.resume();
-                                    }
                                     self.pop(undefined, true).pop(undefined, true);
                                     self.error(err.message);
                                     if (is_function(error)) {
                                         error();
+                                    }
+                                    if (self.paused()) {
+                                        self.resume();
                                     }
                                     self.off('terminal.autologin');
                                 });
