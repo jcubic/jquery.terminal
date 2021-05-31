@@ -8577,6 +8577,7 @@
                             prev_command = null;
                             d.resolve();
                         }, function() {
+                            prev_command = null;
                             d.reject();
                         });
                     }
@@ -9988,7 +9989,7 @@
                         fire_event('onPush', [top, interpreters.top()]);
                         prepare_top_interpreter();
                     }
-                    self.pause();
+                    //self.pause();
                     make_interpreter(interpreter, options.login, function(ret) {
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
