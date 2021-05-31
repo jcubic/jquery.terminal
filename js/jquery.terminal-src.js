@@ -8572,6 +8572,9 @@
                         // is resolved
                         var ret = commands(command, silent, true);
                         unpromise(ret, function() {
+                            // reset prev command for push called after exec
+                            // so push didn't get name/prompt from exec command
+                            prev_command = null;
                             d.resolve();
                         }, function() {
                             d.reject();
@@ -9968,7 +9971,7 @@
                         infiniteLogin: false
                     };
                     var push_settings = $.extend({}, defaults, options);
-                    if (!push_settings.name && prev_command && !prev_exec_cmd) {
+                    if (!push_settings.name && prev_command) {
                         // name the interpreter from last command
                         push_settings.name = prev_command.name;
                     }
@@ -9985,7 +9988,7 @@
                         fire_event('onPush', [top, interpreters.top()]);
                         prepare_top_interpreter();
                     }
-                    // self.pause();
+                    self.pause();
                     make_interpreter(interpreter, options.login, function(ret) {
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
