@@ -1,3 +1,7 @@
+## 2.25.1
+### Bugfix
+* fix wrong auth tokens when using exec to login
+
 ## 2.25.0
 ### Features
 * add new API `$.rpc` for JSON-RPC requests

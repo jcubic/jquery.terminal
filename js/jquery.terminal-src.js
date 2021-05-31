@@ -7911,6 +7911,7 @@
                 }
                 if (exec) {
                     prev_exec_cmd = command.trim();
+                    prev_command = $.terminal.split_command(prev_exec_cmd);
                 } else {
                     prev_command = $.terminal.split_command(command);
                 }
