@@ -10697,6 +10697,11 @@
                 // work weird on mobile
                 $win.on('focus.terminal_' + self.id(), focus_terminal).
                     on('blur.terminal_' + self.id(), blur_terminal);
+                // context is used to check if terminal should not scroll to bottom after right click on:
+                // e.g. img, canvas, a and then click to hide the menu. The problem is that
+                // right click on those elements don't move the textarea to show proper context menu
+                // like save as on images or open on links. See #644 bug
+                var was_context_event;
                 // detect mouse drag
                 (function() {
                     var count = 0;
@@ -10727,6 +10732,10 @@
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
+                        if (was_context_event) {
+                            was_context_event = false;
+                            return;
+                        }
                         if ($target && $target.closest(ignore_elements).length) {
                             if (enabled) {
                                 self.disable();
@@ -10766,7 +10775,8 @@
                         event_name = 'mousedown.terminal';
                     }
                     self.on(event_name, function(e) {
-                        if (get_selected_html() === '' && is_context_event(e)) {
+                        was_context_event = get_selected_html() === '' && is_context_event(e);
+                        if (was_context_event) {
                             var $target = $(e.target);
                             if ($target.is('img,value,audio,object,canvas,a')) {
                                 return;
