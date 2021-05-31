@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.25.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 31 May 2021 09:36:36 +0000
+ * Date: Mon, 31 May 2021 15:15:57 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4780,8 +4780,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.25.0',
-        date: 'Mon, 31 May 2021 09:36:36 +0000',
+        version: 'DEV',
+        date: 'Mon, 31 May 2021 15:15:57 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6966,7 +6966,7 @@
                             display_json_rpc_error(json.error);
                         } else if (is_function(settings.processRPCResponse)) {
                             settings.processRPCResponse.call(self, json.result, self);
-                        } else {
+                        } else if (json.result) {
                             display_object(json.result);
                         }
                         self.resume();
@@ -6991,7 +6991,7 @@
                     // allows to call help without a token
                     interpreter(command.name, command.args);
                 } else {
-                    var token = terminal.token();
+                    var token = terminal.token(true);
                     if (token) {
                         interpreter(command.name, [token].concat(command.args));
                     } else {
@@ -7911,6 +7911,7 @@
                 }
                 if (exec) {
                     prev_exec_cmd = command.trim();
+                    prev_command = $.terminal.split_command(prev_exec_cmd);
                 } else {
                     prev_command = $.terminal.split_command(command);
                 }
@@ -8571,8 +8572,12 @@
                         // is resolved
                         var ret = commands(command, silent, true);
                         unpromise(ret, function() {
+                            // reset prev command for push called after exec
+                            // so push didn't get name/prompt from exec command
+                            prev_command = null;
                             d.resolve();
                         }, function() {
+                            prev_command = null;
                             d.reject();
                         });
                     }
@@ -8629,9 +8634,6 @@
                 // so we know how many times call pop
                 var level = self.level();
                 function login_callback(user, token, silent) {
-                    if (self.paused()) {
-                        self.resume();
-                    }
                     if (token) {
                         popUserPass();
                         var name = self.prefix_name(true) + '_';
@@ -8664,6 +8666,9 @@
                             error();
                         }
                     }
+                    if (self.paused()) {
+                        self.resume();
+                    }
                     self.off('terminal.autologin');
                 }
                 self.on('terminal.autologin', function(event, user, token, silent) {
@@ -8689,13 +8694,13 @@
                                 (ret.then || ret.done).call(ret, function(token) {
                                     login_callback(user, token);
                                 }).catch(function(err) {
-                                    if (self.paused()) {
-                                        self.resume();
-                                    }
                                     self.pop(undefined, true).pop(undefined, true);
                                     self.error(err.message);
                                     if (is_function(error)) {
                                         error();
+                                    }
+                                    if (self.paused()) {
+                                        self.resume();
                                     }
                                     self.off('terminal.autologin');
                                 });
@@ -9968,7 +9973,7 @@
                     };
                     var push_settings = $.extend({}, defaults, options);
                     if (!push_settings.name && prev_command) {
-                        // push is called in login
+                        // name the interpreter from last command
                         push_settings.name = prev_command.name;
                     }
                     if (push_settings.prompt === undefined) {
@@ -9984,7 +9989,7 @@
                         fire_event('onPush', [top, interpreters.top()]);
                         prepare_top_interpreter();
                     }
-                    // self.pause();
+                    //self.pause();
                     make_interpreter(interpreter, options.login, function(ret) {
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));

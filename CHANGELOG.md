@@ -1,3 +1,10 @@
+## 2.25.1
+### Bugfix
+* fix wrong auth tokens when using exec to login
+* fix exec array for async login
+* fix Auth to nested RPC interpreter without system.describe
+* don't echo falsy values from RPC
+
 ## 2.25.0
 ### Features
 * add new API `$.rpc` for JSON-RPC requests
@@ -23,7 +30,7 @@
 ## 2.23.1
 ### Bugfix
 * fix reversed class in cmd (e.g. in less command)
-* fix hack to reflow the cursor in Firefox from #654
+* fix hack to reflow the cursor in Firefox from [#654](https://github.com/jcubic/jquery.terminal/issues/654)
 
 ## 2.23.0
 ### Features
