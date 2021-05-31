@@ -1,6 +1,7 @@
 ## 2.25.1
 ### Bugfix
 * fix wrong auth tokens when using exec to login
+* fix exec array for async login
 
 ## 2.25.0
 ### Features

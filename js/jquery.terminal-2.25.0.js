@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 31 May 2021 13:19:04 +0000
+ * Date: Mon, 31 May 2021 13:26:41 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 31 May 2021 13:19:04 +0000',
+        date: 'Mon, 31 May 2021 13:26:41 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8630,9 +8630,6 @@
                 // so we know how many times call pop
                 var level = self.level();
                 function login_callback(user, token, silent) {
-                    if (self.paused()) {
-                        self.resume();
-                    }
                     if (token) {
                         popUserPass();
                         var name = self.prefix_name(true) + '_';
@@ -8664,6 +8661,9 @@
                         if (is_function(error)) {
                             error();
                         }
+                    }
+                    if (self.paused()) {
+                        self.resume();
                     }
                     self.off('terminal.autologin');
                 }

@@ -8630,9 +8630,6 @@
                 // so we know how many times call pop
                 var level = self.level();
                 function login_callback(user, token, silent) {
-                    if (self.paused()) {
-                        self.resume();
-                    }
                     if (token) {
                         popUserPass();
                         var name = self.prefix_name(true) + '_';
@@ -8664,6 +8661,9 @@
                         if (is_function(error)) {
                             error();
                         }
+                    }
+                    if (self.paused()) {
+                        self.resume();
                     }
                     self.off('terminal.autologin');
                 }
