@@ -7561,6 +7561,7 @@
                                     // and lines variable have all extended commands
                                     string = string.replace(/^\[\[|\]\]$/g, '');
                                     if (line_settings.exec) {
+                                        line.options.exec = false;
                                         var trim = string.trim();
                                         if (prev_exec_cmd && prev_exec_cmd === trim) {
                                             prev_exec_cmd = '';
@@ -9671,7 +9672,7 @@
                             }
                             // Did previous value end in newline?
                             if (last_newline) {
-                                lines.push([value, $.extend({exec: false}, locals)]);
+                                lines.push([value, locals]);
                             } else {
                                 // If not append current value to it
                                 var old_value = last_line[0];

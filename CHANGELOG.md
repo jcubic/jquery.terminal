@@ -1,6 +1,7 @@
 ## 2.24.1
 ### Bugfix
 * Properly handle promise rejection in login
+* Fix re executing extended commands on resize [#666](https://github.com/jcubic/jquery.terminal/issues/666)
 
 ## 2.24.0
 ### Features

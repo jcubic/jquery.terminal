@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 28 May 2021 21:58:47 +0000
+ * Date: Mon, 31 May 2021 07:17:37 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 28 May 2021 21:58:47 +0000',
+        date: 'Mon, 31 May 2021 07:17:37 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7561,6 +7561,7 @@
                                     // and lines variable have all extended commands
                                     string = string.replace(/^\[\[|\]\]$/g, '');
                                     if (line_settings.exec) {
+                                        line.options.exec = false;
                                         var trim = string.trim();
                                         if (prev_exec_cmd && prev_exec_cmd === trim) {
                                             prev_exec_cmd = '';
@@ -9671,7 +9672,7 @@
                             }
                             // Did previous value end in newline?
                             if (last_newline) {
-                                lines.push([value, $.extend({exec: false}, locals)]);
+                                lines.push([value, locals]);
                             } else {
                                 // If not append current value to it
                                 var old_value = last_line[0];
