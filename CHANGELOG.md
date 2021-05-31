@@ -1,4 +1,6 @@
-## 2.24.1
+## 2.25.0
+### Features
+* add new API `$.rpc` for JSON-RPC requests
 ### Bugfix
 * properly handle promise rejection in login
 * fix re executing extended commands on resize [#666](https://github.com/jcubic/jquery.terminal/issues/666)

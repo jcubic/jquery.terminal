@@ -6429,6 +6429,18 @@
         return deferred.promise();
     };
     // -----------------------------------------------------------------------
+    $.rpc = function(url, method, params) {
+        var deferred = new $.Deferred();
+        function success(res) {
+            deferred.resolve(res.result);
+        }
+        function error(res) {
+            deferred.reject(res.error.message);
+        }
+        $.jrpc(url, method, params, success, error);
+        return deferred.promise();
+    };
+    // -----------------------------------------------------------------------
     function terminal_ready(term) {
         return !!(term.closest('body').length &&
                   term.is(':visible') &&
