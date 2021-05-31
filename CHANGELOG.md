@@ -1,3 +1,12 @@
+## 2.25.0
+### Features
+* add new API `$.rpc` for JSON-RPC requests
+### Bugfix
+* properly handle promise rejection in login
+* fix re executing extended commands on resize [#666](https://github.com/jcubic/jquery.terminal/issues/666)
+* fix rendering jQuery object with Canvas [#664](https://github.com/jcubic/jquery.terminal/issues/664)
+* fix right mouse click on link to not scroll to cursor [#644](https://github.com/jcubic/jquery.terminal/issues/644)
+
 ## 2.24.0
 ### Features
 * add `terminal::typing` API method

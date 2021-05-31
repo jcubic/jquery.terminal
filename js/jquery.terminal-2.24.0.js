@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.24.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 22 May 2021 11:55:42 +0000
+ * Date: Mon, 31 May 2021 08:50:49 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4780,8 +4780,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.24.0',
-        date: 'Sat, 22 May 2021 11:55:42 +0000',
+        version: 'DEV',
+        date: 'Mon, 31 May 2021 08:50:49 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6429,6 +6429,18 @@
         return deferred.promise();
     };
     // -----------------------------------------------------------------------
+    $.rpc = function(url, method, params) {
+        var deferred = new $.Deferred();
+        function success(res) {
+            deferred.resolve(res.result);
+        }
+        function error(res) {
+            deferred.reject(res.error.message);
+        }
+        $.jrpc(url, method, params, success, error);
+        return deferred.promise();
+    };
+    // -----------------------------------------------------------------------
     function terminal_ready(term) {
         return !!(term.closest('body').length &&
                   term.is(':visible') &&
@@ -6817,17 +6829,7 @@
                 var settings = $.extend({}, options, {
                     raw: true,
                     finalize: function(div) {
-                        var node;
-                        if (value instanceof $.fn.init) {
-                            // deep clone with events - we clone because remove
-                            // from DOM will remove events from original object
-                            node = value.clone(true, true);
-                        } else {
-                            // don't clone html nodes because it will not
-                            // work for canvas or video tag
-                            node = value;
-                        }
-                        div.find('.terminal-render-item').replaceWith(node);
+                        div.find('.terminal-render-item').replaceWith(value);
                         if (options && is_function(options.finalize)) {
                             options.finalize(div, self);
                         }
@@ -7561,6 +7563,7 @@
                                     // and lines variable have all extended commands
                                     string = string.replace(/^\[\[|\]\]$/g, '');
                                     if (line_settings.exec) {
+                                        line.options.exec = false;
                                         var trim = string.trim();
                                         if (prev_exec_cmd && prev_exec_cmd === trim) {
                                             prev_exec_cmd = '';
@@ -8685,6 +8688,16 @@
                             if (ret && is_function(ret.then || ret.done)) {
                                 (ret.then || ret.done).call(ret, function(token) {
                                     login_callback(user, token);
+                                }).catch(function(err) {
+                                    if (self.paused()) {
+                                        self.resume();
+                                    }
+                                    self.pop(undefined, true).pop(undefined, true);
+                                    self.error(err.message);
+                                    if (is_function(error)) {
+                                        error();
+                                    }
+                                    self.off('terminal.autologin');
                                 });
                             }
                         } catch (e) {
@@ -9661,7 +9674,7 @@
                             }
                             // Did previous value end in newline?
                             if (last_newline) {
-                                lines.push([value, $.extend({exec: false}, locals)]);
+                                lines.push([value, locals]);
                             } else {
                                 // If not append current value to it
                                 var old_value = last_line[0];
@@ -10684,6 +10697,11 @@
                 // work weird on mobile
                 $win.on('focus.terminal_' + self.id(), focus_terminal).
                     on('blur.terminal_' + self.id(), blur_terminal);
+                // context is used to check if terminal should not scroll to bottom after right click on:
+                // e.g. img, canvas, a and then click to hide the menu. The problem is that
+                // right click on those elements don't move the textarea to show proper context menu
+                // like save as on images or open on links. See #644 bug
+                var was_context_event;
                 // detect mouse drag
                 (function() {
                     var count = 0;
@@ -10714,6 +10732,10 @@
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
+                        if (was_context_event) {
+                            was_context_event = false;
+                            return;
+                        }
                         if ($target && $target.closest(ignore_elements).length) {
                             if (enabled) {
                                 self.disable();
@@ -10753,7 +10775,8 @@
                         event_name = 'mousedown.terminal';
                     }
                     self.on(event_name, function(e) {
-                        if (get_selected_html() === '' && is_context_event(e)) {
+                        was_context_event = get_selected_html() === '' && is_context_event(e);
+                        if (was_context_event) {
                             var $target = $(e.target);
                             if ($target.is('img,value,audio,object,canvas,a')) {
                                 return;
