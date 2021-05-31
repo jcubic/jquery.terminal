@@ -9968,8 +9968,8 @@
                         infiniteLogin: false
                     };
                     var push_settings = $.extend({}, defaults, options);
-                    if (!push_settings.name && prev_command) {
-                        // push is called in login
+                    if (!push_settings.name && prev_command && !prev_exec_cmd) {
+                        // name the interpreter from last command
                         push_settings.name = prev_command.name;
                     }
                     if (push_settings.prompt === undefined) {

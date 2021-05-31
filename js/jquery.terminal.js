@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 31 May 2021 13:26:41 +0000
+ * Date: Mon, 31 May 2021 13:39:27 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 31 May 2021 13:26:41 +0000',
+        date: 'Mon, 31 May 2021 13:39:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9968,8 +9968,8 @@
                         infiniteLogin: false
                     };
                     var push_settings = $.extend({}, defaults, options);
-                    if (!push_settings.name && prev_command) {
-                        // push is called in login
+                    if (!push_settings.name && prev_command && !prev_exec_cmd) {
+                        // name the interpreter from last command
                         push_settings.name = prev_command.name;
                     }
                     if (push_settings.prompt === undefined) {
