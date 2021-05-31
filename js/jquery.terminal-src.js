@@ -6817,17 +6817,7 @@
                 var settings = $.extend({}, options, {
                     raw: true,
                     finalize: function(div) {
-                        var node;
-                        if (value instanceof $.fn.init) {
-                            // deep clone with events - we clone because remove
-                            // from DOM will remove events from original object
-                            node = value.clone(true, true);
-                        } else {
-                            // don't clone html nodes because it will not
-                            // work for canvas or video tag
-                            node = value;
-                        }
-                        div.find('.terminal-render-item').replaceWith(node);
+                        div.find('.terminal-render-item').replaceWith(value);
                         if (options && is_function(options.finalize)) {
                             options.finalize(div, self);
                         }

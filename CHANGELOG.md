@@ -1,7 +1,8 @@
 ## 2.24.1
 ### Bugfix
-* Properly handle promise rejection in login
-* Fix re executing extended commands on resize [#666](https://github.com/jcubic/jquery.terminal/issues/666)
+* properly handle promise rejection in login
+* fix re executing extended commands on resize [#666](https://github.com/jcubic/jquery.terminal/issues/666)
+* fix rendering jQuery object with Canvas [#664](https://github.com/jcubic/jquery.terminal/issues/664)
 
 ## 2.24.0
 ### Features

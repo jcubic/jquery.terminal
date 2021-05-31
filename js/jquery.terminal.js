@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 31 May 2021 07:17:37 +0000
+ * Date: Mon, 31 May 2021 07:49:27 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 31 May 2021 07:17:37 +0000',
+        date: 'Mon, 31 May 2021 07:49:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6817,17 +6817,7 @@
                 var settings = $.extend({}, options, {
                     raw: true,
                     finalize: function(div) {
-                        var node;
-                        if (value instanceof $.fn.init) {
-                            // deep clone with events - we clone because remove
-                            // from DOM will remove events from original object
-                            node = value.clone(true, true);
-                        } else {
-                            // don't clone html nodes because it will not
-                            // work for canvas or video tag
-                            node = value;
-                        }
-                        div.find('.terminal-render-item').replaceWith(node);
+                        div.find('.terminal-render-item').replaceWith(value);
                         if (options && is_function(options.finalize)) {
                             options.finalize(div, self);
                         }
