@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.25.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 31 May 2021 15:50:26 +0000
+ * Date: Wed, 02 Jun 2021 12:17:41 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4780,8 +4780,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.25.1',
-        date: 'Mon, 31 May 2021 15:50:26 +0000',
+        version: 'DEV',
+        date: 'Wed, 02 Jun 2021 12:17:41 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6966,7 +6966,7 @@
                             display_json_rpc_error(json.error);
                         } else if (is_function(settings.processRPCResponse)) {
                             settings.processRPCResponse.call(self, json.result, self);
-                        } else if (json.result) {
+                        } else if (json.result !== null) {
                             display_object(json.result);
                         }
                         self.resume();

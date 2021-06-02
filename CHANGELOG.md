@@ -1,3 +1,7 @@
+## 2.25.2
+### Bugfix
+* fix return value from JSON-RPC (ignore only null)
+
 ## 2.25.1
 ### Bugfix
 * fix wrong auth tokens when using exec to login
