@@ -238,11 +238,13 @@ declare namespace JQueryTerminal {
         finalize: JQueryTerminal.EchoEventFunction;
         invokeMethods: boolean;
         allowedAttributes: Array<RegExp | string>;
+        delay: number;
+        typing: boolean;
         flush: boolean;
         formatters: boolean;
         keepWords: boolean;
         raw: boolean;
-        newline?: boolean;
+        newline: boolean;
     }
 
     type EchoOptions = {
@@ -250,6 +252,8 @@ declare namespace JQueryTerminal {
         raw?: boolean;
         exec?: boolean;
         invokeMethods?: boolean;
+        delay?: number;
+        typing?: boolean;
         allowedAttributes?: Array<RegExp | string>;
         unmount?: JQueryTerminal.EchoEventFunction;
         onClear?: JQueryTerminal.EchoEventFunction;
@@ -658,7 +662,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     // options for remove_line is useless but that's how API look like
     remove_line(line: number): JQueryTerminal;
     last_index(): number;
-    echo<TValue = JQueryTerminal.echoValueOrPromise>(arg: TValue, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    echo<TValue = JQueryTerminal.echoValueOrPromise>(arg: TValue, options?: JQueryTerminal.EchoOptions): JQueryTerminal | JQuery.Promise<void>;
     error(arg: JQueryTerminal.errorArgument, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     exception<T extends Error>(e: T, label?: string): JQueryTerminal;
     scroll(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'scroll'> | false): this;

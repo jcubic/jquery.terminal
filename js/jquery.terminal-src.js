@@ -8368,7 +8368,7 @@
         // :: Typing animation generator
         // ---------------------------------------------------------------------
         function typed(finish_typing_fn) {
-            return function typeing_animation(message, delay, onFinish) {
+            return function typeing_animation(message, options) {
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -8385,29 +8385,23 @@
                             clearInterval(interval);
                             setTimeout(function() {
                                 // swap command with prompt
-                                finish_typing_fn(message, prompt);
+                                finish_typing_fn(message, prompt, options);
                                 animating = false;
-                                if (is_function(onFinish)) {
-                                    try {
-                                        onFinish.apply(self);
-                                    } catch (e) {
-                                        display_exception(e);
-                                    }
-                                }
-                            }, delay);
+                            }, options.delay);
                         }
-                    }, delay);
+                    }, options.delay);
                 }
             };
         }
         // ---------------------------------------------------------------------
-        var typed_prompt = typed(function(message) {
+        var typed_prompt = typed(function(message, _, options) {
             self.set_prompt(message + ' ');
+            options.finalize();
         });
         // ---------------------------------------------------------------------
-        var typed_message = typed(function(message, prompt) {
-            self.echo(message);
+        var typed_message = typed(function(message, prompt, options) {
             self.set_prompt(prompt);
+            self.echo(message, $.extend({}, options, {typing: false}));
         });
         // ---------------------------------------------------------------------
         function ready(queue) {
@@ -9600,6 +9594,8 @@
                             raw: settings.raw,
                             finalize: $.noop,
                             unmount: $.noop,
+                            delay: 100,
+                            typing: false,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
                             onClear: null,
@@ -9640,6 +9636,16 @@
                         }
                         if (fire_event('onBeforeEcho', [arg]) === false) {
                             return;
+                        }
+                        if (locals.typing) {
+                            if (typeof arg !== 'string') {
+                                throw new Error('echo: Typing animation require string or' +
+                                                ' promise that resolve to string');
+                            }
+                            if (typeof locals.delay !== 'number' || isNaN(locals.delay)) {
+                                throw new Error('echo: Invalid argument, delay need to be a number');
+                            }
+                            return self.typing('echo', locals.delay, arg, locals);
                         }
                         var value;
                         if (typeof arg === 'function') {
@@ -9724,8 +9730,23 @@
                 return self;
             },
             // -------------------------------------------------------------
-            typing: function(type, speed, string, finish) {
+            typing: function(type, delay, string, options) {
                 var d = new $.Deferred();
+                var settings;
+                var finish;
+                if (typeof options === 'object') {
+                    finish = options.finalize || $.noop;
+                    settings = $.extend({}, options, {
+                        delay: delay,
+                        finalize: done
+                    });
+                } else {
+                    finish = options || $.noop;
+                    settings = {
+                        delay: delay,
+                        finalize: done
+                    };
+                }
                 function done() {
                     d.resolve();
                     if (is_function(finish)) {
@@ -9735,9 +9756,9 @@
                 when_ready(function ready() {
                     if (['prompt', 'echo'].indexOf(type) >= 0) {
                         if (type === 'prompt') {
-                            typed_prompt(string, speed, done);
+                            typed_prompt(string, options);
                         } else if (type === 'echo') {
-                            typed_message(string, speed, done);
+                            typed_message(string, options);
                         }
                     } else {
                         d.reject('Invalid type only `echo` and `prompt` are supported');

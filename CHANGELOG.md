@@ -1,6 +1,6 @@
 ## 2.26.0
 ### Feature
-* Better API for prompt typing animation with term::read
+* Better API for prompt typing animation with term::read and term::echo
 ### Bugfix
 * fix return value from JSON-RPC (ignore only null)
 * fix missing TypeScript definitions for `typing` API method
