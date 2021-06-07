@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 07 Jun 2021 10:50:53 +0000
+ * Date: Mon, 07 Jun 2021 13:16:36 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 07 Jun 2021 10:50:53 +0000',
+        date: 'Mon, 07 Jun 2021 13:16:36 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9639,11 +9639,12 @@
                         }
                         if (locals.typing) {
                             if (typeof arg !== 'string') {
-                                throw new Error('echo: Typing animation require string or' +
-                                                ' promise that resolve to string');
+                                throw new Error('echo: Typing animation require string' +
+                                                ' or promise that resolve to string');
                             }
                             if (typeof locals.delay !== 'number' || isNaN(locals.delay)) {
-                                throw new Error('echo: Invalid argument, delay need to be a number');
+                                throw new Error('echo: Invalid argument, delay need to' +
+                                                ' be a number');
                             }
                             return self.typing('echo', locals.delay, arg, locals);
                         }
@@ -9756,9 +9757,9 @@
                 when_ready(function ready() {
                     if (['prompt', 'echo'].indexOf(type) >= 0) {
                         if (type === 'prompt') {
-                            typed_prompt(string, options);
+                            typed_prompt(string, settings);
                         } else if (type === 'echo') {
-                            typed_message(string, options);
+                            typed_message(string, settings);
                         }
                     } else {
                         d.reject('Invalid type only `echo` and `prompt` are supported');

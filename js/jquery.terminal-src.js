@@ -9639,11 +9639,12 @@
                         }
                         if (locals.typing) {
                             if (typeof arg !== 'string') {
-                                throw new Error('echo: Typing animation require string or' +
-                                                ' promise that resolve to string');
+                                throw new Error('echo: Typing animation require string' +
+                                                ' or promise that resolve to string');
                             }
                             if (typeof locals.delay !== 'number' || isNaN(locals.delay)) {
-                                throw new Error('echo: Invalid argument, delay need to be a number');
+                                throw new Error('echo: Invalid argument, delay need to' +
+                                                ' be a number');
                             }
                             return self.typing('echo', locals.delay, arg, locals);
                         }
@@ -9756,9 +9757,9 @@
                 when_ready(function ready() {
                     if (['prompt', 'echo'].indexOf(type) >= 0) {
                         if (type === 'prompt') {
-                            typed_prompt(string, options);
+                            typed_prompt(string, settings);
                         } else if (type === 'echo') {
-                            typed_message(string, options);
+                            typed_message(string, settings);
                         }
                     } else {
                         d.reject('Invalid type only `echo` and `prompt` are supported');
