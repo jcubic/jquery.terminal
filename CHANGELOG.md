@@ -5,6 +5,7 @@
 * fix return value from JSON-RPC (ignore only null)
 * fix missing TypeScript definitions for `typing` API method
 * fix multi-line prompt regression
+* remove extra space after prompt animation
 
 ## 2.25.1
 ### Bugfix

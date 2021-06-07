@@ -8395,7 +8395,7 @@
         }
         // ---------------------------------------------------------------------
         var typed_prompt = typed(function(message, _, options) {
-            self.set_prompt(message + ' ');
+            self.set_prompt(message);
             options.finalize();
         });
         // ---------------------------------------------------------------------
