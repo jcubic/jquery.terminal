@@ -4,6 +4,7 @@
 ### Bugfix
 * fix return value from JSON-RPC (ignore only null)
 * fix missing TypeScript definitions for `typing` API method
+* fix multi-line prompt regression
 
 ## 2.25.1
 ### Bugfix

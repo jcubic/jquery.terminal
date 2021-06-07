@@ -189,8 +189,7 @@ body.full-screen-terminal .terminal {
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
 }
-
-.cmd .cmd-prompt > span {
+.cmd .cmd-prompt > span, .cmd .cmd-prompt:empty {
     float: left;
 }
 .cmd .cmd-prompt ~ div span[style*="width"],
@@ -319,10 +318,6 @@ terminal .terminal-output > div {
 .cmd .cmd-prompt {
     position: relative;
     z-index: 200;
-    /* Make sure prompt margin takes up space so that echo with newline : false
-     * works when prompt is empty
-     */
-    float: left;
 }
 .cmd [role="presentation"]:not(.cmd-cursor-line) {
     overflow: hidden;
