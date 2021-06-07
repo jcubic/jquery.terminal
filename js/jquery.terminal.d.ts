@@ -86,6 +86,13 @@ declare namespace JQueryTerminal {
         rows: number;
     }
 
+    type readOptions = {
+        typing?: boolean;
+        delay?: number;
+        success?: (result: string) => void;
+        cancel?: voidFunction;
+    }
+
     type AnsiColorType = {
         black: string;
         red: string;
@@ -663,7 +670,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     login_name<T extends string | void>(local?: boolean): T;
     name(): string;
     prefix_name(local?: boolean): string;
-    read(message: string, success?: (result: string) => void, cancel?: voidFunction): JQuery.Promise<string>;
+    typing(type: 'echo' | 'prompt', delay: number, message: string, finish: voidFunction): JQuery.Promise<void>;
+    read(message: string, success_or_options?: ((result: string) => void) | JQueryTerminal.readOptions, cancel?: voidFunction): JQuery.Promise<string>;
     push(interpreter: TypeOrArray<JQueryTerminal.Interpreter>, options?: JQueryTerminal.pushOptions): JQueryTerminal;
     pop(echoCommand?: string, silent?: boolean): JQueryTerminal;
     option(options: TerminalOptions | TerminalOption, value?: any): any;

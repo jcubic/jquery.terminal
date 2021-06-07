@@ -9930,6 +9930,28 @@
             // :: wrapper for common use case
             // -------------------------------------------------------------
             read: function(message, success, cancel) {
+                var options;
+                if (typeof arguments[1] === 'object') {
+                    options = $.extend({
+                        typing: false,
+                        delay: 100,
+                        success: $.noop,
+                        cancel: $.noop
+                    }, arguments[1]);
+                } else {
+                    options = {
+                        typing: false,
+                        success: success || $.noop,
+                        cancel: cancel || $.noop
+                    };
+                }
+                if (options.typing) {
+                    var prompt = self.get_prompt();
+                    options.typing = false;
+                    return self.typing('prompt', options.delay, message).then(function() {
+                        return self.set_prompt(prompt).read(message, options);
+                    });
+                }
                 // return from read() should not pause terminal
                 force_awake = true;
                 var defer = jQuery.Deferred();
@@ -9937,8 +9959,8 @@
                 self.push(function(string) {
                     read = true;
                     defer.resolve(string);
-                    if (is_function(success)) {
-                        success(string);
+                    if (is_function(options.success)) {
+                        options.success(string);
                     }
                     self.pop();
                     if (settings.history) {
@@ -9951,8 +9973,8 @@
                     onExit: function() {
                         if (!read) {
                             defer.reject();
-                            if (is_function(cancel)) {
-                                cancel();
+                            if (is_function(options.cancel)) {
+                                options.cancel();
                             }
                         }
                     }
