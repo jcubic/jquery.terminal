@@ -6,6 +6,7 @@
 * fix missing TypeScript definitions for `typing` API method
 * fix multi-line prompt regression
 * remove extra space after prompt animation
+* fix echo string with newline at the end and with newline == false and refresh
 
 ## 2.25.1
 ### Bugfix

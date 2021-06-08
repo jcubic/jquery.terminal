@@ -7526,14 +7526,6 @@
                         }));
                     });
                 }
-                if (!line_settings.newline && string.endsWith('\n')) {
-                    line_settings.newline = true;
-                    // This adjusts the value for the caller so that when it
-                    // updates the lines list it does the right thing. This is
-                    // necessary in order to avoid messing up the 'data-index'
-                    line.options.newline = true;
-                    string = string.slice(0, -1);
-                }
                 if (string !== '') {
                     if (!line_settings.raw) {
                         if (line_settings.formatters) {
@@ -9673,6 +9665,12 @@
                             var index = lines.length;
                             if (!last_newline) {
                                 index--;
+                            }
+                            if (!locals.newline && value.indexOf('\n') !== -1) {
+                                // This adjusts the value, so that when it updates or
+                                // refresh the lines list it does the right thing.
+                                value = value.slice(0, -1);
+                                locals.newline = true;
                             }
                             var next = process_line({
                                 value: value,
