@@ -6432,10 +6432,14 @@
     $.rpc = function(url, method, params) {
         var deferred = new $.Deferred();
         function success(res) {
-            deferred.resolve(res.result);
+            if (res.error) {
+                deferred.reject(res.error);
+            } else {
+                deferred.resolve(res.result);
+            }
         }
-        function error(res) {
-            deferred.reject(res.error.message);
+        function error(jqXHR, status, message) {
+            deferred.reject({message: message});
         }
         $.jrpc(url, method, params, success, error);
         return deferred.promise();
