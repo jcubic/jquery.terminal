@@ -528,6 +528,7 @@ type TerminalOptions = {
     wrap?: boolean;
     checkArity?: boolean;
     invokeMethods?: boolean;
+    useCache?: boolean;
     anyLinks?: boolean;
     raw?: boolean;
     allowedAttributes?: Array<RegExp | string>;

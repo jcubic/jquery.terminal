@@ -6639,6 +6639,7 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
+        useCache: true,
         anyLinks: false,
         linksNoFollow: false,
         processRPCResponse: null,

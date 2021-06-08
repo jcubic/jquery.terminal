@@ -7,6 +7,8 @@
 * fix multi-line prompt regression
 * remove extra space after prompt animation
 * fix echo string with newline at the end and with newline == false and refresh
+* fix $.rpc` helper on Ajax error
+* add default `useCache` option & TypeScript definition
 
 ## 2.25.1
 ### Bugfix

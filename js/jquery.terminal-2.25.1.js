@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 07 Jun 2021 19:36:55 +0000
+ * Date: Tue, 08 Jun 2021 15:28:13 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 07 Jun 2021 19:36:55 +0000',
+        date: 'Tue, 08 Jun 2021 15:28:13 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6432,10 +6432,14 @@
     $.rpc = function(url, method, params) {
         var deferred = new $.Deferred();
         function success(res) {
-            deferred.resolve(res.result);
+            if (res.error) {
+                deferred.reject(res.error);
+            } else {
+                deferred.resolve(res.result);
+            }
         }
-        function error(res) {
-            deferred.reject(res.error.message);
+        function error(jqXHR, status, message) {
+            deferred.reject({message: message});
         }
         $.jrpc(url, method, params, success, error);
         return deferred.promise();
@@ -6635,6 +6639,7 @@
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
+        useCache: true,
         anyLinks: false,
         linksNoFollow: false,
         processRPCResponse: null,
@@ -7525,14 +7530,6 @@
                             value: string
                         }));
                     });
-                }
-                if (!line_settings.newline && string.endsWith('\n')) {
-                    line_settings.newline = true;
-                    // This adjusts the value for the caller so that when it
-                    // updates the lines list it does the right thing. This is
-                    // necessary in order to avoid messing up the 'data-index'
-                    line.options.newline = true;
-                    string = string.slice(0, -1);
                 }
                 if (string !== '') {
                     if (!line_settings.raw) {
@@ -9673,6 +9670,12 @@
                             var index = lines.length;
                             if (!last_newline) {
                                 index--;
+                            }
+                            if (!locals.newline && value.indexOf('\n') !== -1) {
+                                // This adjusts the value, so that when it updates or
+                                // refresh the lines list it does the right thing.
+                                value = value.slice(0, -1);
+                                locals.newline = true;
                             }
                             var next = process_line({
                                 value: value,
