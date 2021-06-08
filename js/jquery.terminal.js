@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 08 Jun 2021 15:28:13 +0000
+ * Date: Tue, 08 Jun 2021 16:23:34 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 08 Jun 2021 15:28:13 +0000',
+        date: 'Tue, 08 Jun 2021 16:23:34 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9671,7 +9671,7 @@
                             if (!last_newline) {
                                 index--;
                             }
-                            if (!locals.newline && value.indexOf('\n') !== -1) {
+                            if (!locals.newline && value[value.length - 1] === '\n') {
                                 // This adjusts the value, so that when it updates or
                                 // refresh the lines list it does the right thing.
                                 value = value.slice(0, -1);

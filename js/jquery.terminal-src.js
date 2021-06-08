@@ -9671,7 +9671,7 @@
                             if (!last_newline) {
                                 index--;
                             }
-                            if (!locals.newline && value.indexOf('\n') !== -1) {
+                            if (!locals.newline && value[value.length - 1] === '\n') {
                                 // This adjusts the value, so that when it updates or
                                 // refresh the lines list it does the right thing.
                                 value = value.slice(0, -1);
