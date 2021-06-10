@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Tue, 08 Jun 2021 18:47:26 +0000
+ * Date: Thu, 10 Jun 2021 13:16:35 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -198,6 +198,9 @@ body.full-screen-terminal .terminal {
 .terminal-ouput span[style*="width"] {
     min-height: 14px;
     min-height: calc(var(--size, 1) * 14px);
+}
+.terminal .terminal-output > :not(.raw) > div, .cmd div {
+    line-height: calc((var(--size) * 14px) + 1px);
 }
 .cmd .cmd-prompt span.fa::before,
 .cmd .cmd-prompt span.fab::before,
