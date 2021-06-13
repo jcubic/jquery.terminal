@@ -86,6 +86,13 @@ declare namespace JQueryTerminal {
         rows: number;
     }
 
+    type readOptions = {
+        typing?: boolean;
+        delay?: number;
+        success?: (result: string) => void;
+        cancel?: voidFunction;
+    }
+
     type AnsiColorType = {
         black: string;
         red: string;
@@ -231,11 +238,13 @@ declare namespace JQueryTerminal {
         finalize: JQueryTerminal.EchoEventFunction;
         invokeMethods: boolean;
         allowedAttributes: Array<RegExp | string>;
+        delay: number;
+        typing: boolean;
         flush: boolean;
         formatters: boolean;
         keepWords: boolean;
         raw: boolean;
-        newline?: boolean;
+        newline: boolean;
     }
 
     type EchoOptions = {
@@ -243,6 +252,8 @@ declare namespace JQueryTerminal {
         raw?: boolean;
         exec?: boolean;
         invokeMethods?: boolean;
+        delay?: number;
+        typing?: boolean;
         allowedAttributes?: Array<RegExp | string>;
         unmount?: JQueryTerminal.EchoEventFunction;
         onClear?: JQueryTerminal.EchoEventFunction;
@@ -517,6 +528,7 @@ type TerminalOptions = {
     wrap?: boolean;
     checkArity?: boolean;
     invokeMethods?: boolean;
+    useCache?: boolean;
     anyLinks?: boolean;
     raw?: boolean;
     allowedAttributes?: Array<RegExp | string>;
@@ -651,7 +663,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     // options for remove_line is useless but that's how API look like
     remove_line(line: number): JQueryTerminal;
     last_index(): number;
-    echo<TValue = JQueryTerminal.echoValueOrPromise>(arg: TValue, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    echo<TValue = JQueryTerminal.echoValueOrPromise>(arg: TValue, options?: JQueryTerminal.EchoOptions): JQueryTerminal | JQuery.Promise<void>;
     error(arg: JQueryTerminal.errorArgument, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     exception<T extends Error>(e: T, label?: string): JQueryTerminal;
     scroll(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'scroll'> | false): this;
@@ -663,7 +675,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     login_name<T extends string | void>(local?: boolean): T;
     name(): string;
     prefix_name(local?: boolean): string;
-    read(message: string, success?: (result: string) => void, cancel?: voidFunction): JQuery.Promise<string>;
+    typing(type: 'echo' | 'prompt', delay: number, message: string, finish: voidFunction): JQuery.Promise<void>;
+    read(message: string, success_or_options?: ((result: string) => void) | JQueryTerminal.readOptions, cancel?: voidFunction): JQuery.Promise<string>;
     push(interpreter: TypeOrArray<JQueryTerminal.Interpreter>, options?: JQueryTerminal.pushOptions): JQueryTerminal;
     pop(echoCommand?: string, silent?: boolean): JQueryTerminal;
     option(options: TerminalOptions | TerminalOption, value?: any): any;

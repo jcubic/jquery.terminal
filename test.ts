@@ -655,6 +655,7 @@ $.terminal.defaults.formatters.push(red);
             ctx.fillRect(10, 10, 90, 90);
         }
     });
+    term.echo("hello", { exec: false });
     // -------------------------------------------------------------------------
     // :: error
     // -------------------------------------------------------------------------
@@ -712,6 +713,15 @@ $.terminal.defaults.formatters.push(red);
     test_type<string>(term.prefix_name());
     test_type<string>(term.prefix_name(true));
     // -------------------------------------------------------------------------
+    // :: typing
+    // -------------------------------------------------------------------------
+    term.typing('echo', 200, 'Hello', function() {
+    }).then(() => {
+    });
+    term.typing('prompt', 200, 'name: ', function() {
+    }).then(() => {
+    });
+    // -------------------------------------------------------------------------
     // :: read
     // -------------------------------------------------------------------------
     term.read("foo", function(s) {
@@ -719,19 +729,30 @@ $.terminal.defaults.formatters.push(red);
     }).then(function(s) {
         s.charCodeAt(0);
     });
+    term.read("foo", {
+        typing: true,
+        delay: 400,
+        success: function(s) {
+            s.toUpperCase();
+        }
+    }).then(function(s) {
+        s.toUpperCase();
+    });
     // -------------------------------------------------------------------------
     // :: push
     // -------------------------------------------------------------------------
     term.push(function(command) {
+        command.toUpperCase();
     });
     term.push(function(command, term) {
+        term.echo(command.toUpperCase());
 
     });
     term.push(function(command) {
-
+        this.echo(command.toUpperCase());
     });
     term.push([function(command, term) {
-
+        term.echo(command.toUpperCase());
     }]);
     term.push("foo.php");
     term.push(["foo.php"]);
