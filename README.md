@@ -11,7 +11,7 @@
 
 [![npm](https://img.shields.io/badge/npm-2.26.0-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.26.0-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&a51fbad87c9947e5d74e088a8ca3522ca861b11b)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&ddfb50a4b5ab475fdd209f2c5be832a801344cae)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&729bf3f8836eb2ffb6d7b6c8956debc8)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -322,4 +322,4 @@ If you have some non-trivial request or need help, you can get paid support at [
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
-Copyright (c) 2011-2021 [Jakub Jankiewicz](https://jcubic.pl/me)
+Copyright (c) 2011-2021 [Jakub T. Jankiewicz](https://jcubic.pl/me)
