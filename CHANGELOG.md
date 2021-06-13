@@ -7,7 +7,7 @@
 * fix multi-line prompt regression
 * remove extra space after prompt animation
 * fix echo string with newline at the end and with newline == false and refresh
-* fix $.rpc` helper on Ajax error
+* fix `$.rpc` helper on Ajax error
 * add default `useCache` option & TypeScript definition
 * fix regression in text selection over prompt with fontawesome (Chrome bug [#1087787](https://bugs.chromium.org/p/chromium/issues/detail?id=1087787#c20))
 * fix cutting off underscore in certain sizes of the terminal
