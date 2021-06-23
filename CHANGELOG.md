@@ -1,3 +1,7 @@
+## 2.26.1
+### Bugfix
+* fix bug in cache (when echo same string two times in a row) [#672](https://github.com/jcubic/jquery.terminal/issues/672)
+
 ## 2.26.0
 ### Feature
 * Better API for prompt typing animation with term::read and term::echo

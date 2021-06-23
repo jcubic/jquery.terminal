@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.26.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 13 Jun 2021 09:03:40 +0000
+ * Date: Wed, 23 Jun 2021 12:08:10 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1017,7 +1017,7 @@
         }
     });
     // -----------------------------------------------------------------------
-    // :: mobile friendly scroll that work without scrollbar (for less)
+    // :: Mobile friendly scroll that work without scrollbar (for less)
     // -----------------------------------------------------------------------
     $.fn.touch_scroll = make_callback_plugin({
         name: 'touch',
@@ -4780,8 +4780,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.26.0',
-        date: 'Sun, 13 Jun 2021 09:03:40 +0000',
+        version: 'DEV',
+        date: 'Wed, 23 Jun 2021 12:08:10 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7533,6 +7533,14 @@
                 }
                 if (string !== '') {
                     if (!line_settings.raw) {
+                        if (settings.useCache) {
+                            var key = string;
+                            if (string_cache && string_cache.has(key)) {
+                                string = string_cache.get(key);
+                                buffer_line(string, line.index, line_settings);
+                                return true;
+                            }
+                        }
                         if (line_settings.formatters) {
                             try {
                                 string = $.terminal.apply_formatters(
@@ -7541,14 +7549,6 @@
                                 );
                             } catch (e) {
                                 display_exception(e, 'FORMATTING');
-                            }
-                        }
-                        if (settings.useCache) {
-                            var key = string;
-                            if (string_cache && string_cache.has(key)) {
-                                string = string_cache.get(key);
-                                buffer_line(string, line.index, line_settings);
-                                return;
                             }
                         }
                         if (line_settings.exec) {

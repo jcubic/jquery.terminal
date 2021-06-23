@@ -1017,7 +1017,7 @@
         }
     });
     // -----------------------------------------------------------------------
-    // :: mobile friendly scroll that work without scrollbar (for less)
+    // :: Mobile friendly scroll that work without scrollbar (for less)
     // -----------------------------------------------------------------------
     $.fn.touch_scroll = make_callback_plugin({
         name: 'touch',
@@ -7533,6 +7533,14 @@
                 }
                 if (string !== '') {
                     if (!line_settings.raw) {
+                        if (settings.useCache) {
+                            var key = string;
+                            if (string_cache && string_cache.has(key)) {
+                                string = string_cache.get(key);
+                                buffer_line(string, line.index, line_settings);
+                                return true;
+                            }
+                        }
                         if (line_settings.formatters) {
                             try {
                                 string = $.terminal.apply_formatters(
@@ -7541,14 +7549,6 @@
                                 );
                             } catch (e) {
                                 display_exception(e, 'FORMATTING');
-                            }
-                        }
-                        if (settings.useCache) {
-                            var key = string;
-                            if (string_cache && string_cache.has(key)) {
-                                string = string_cache.get(key);
-                                buffer_line(string, line.index, line_settings);
-                                return;
                             }
                         }
                         if (line_settings.exec) {
