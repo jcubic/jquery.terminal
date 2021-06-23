@@ -9758,7 +9758,7 @@
                 function done() {
                     d.resolve();
                     if (is_function(finish)) {
-                        finish.call(self);
+                        finish.apply(self, arguments);
                     }
                 }
                 when_ready(function ready() {
