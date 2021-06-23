@@ -1,4 +1,6 @@
-## 2.26.1
+## 2.27.0
+### Feature
+* add CSS to properly render ANSI art
 ### Bugfix
 * fix bug in cache (when echo same string two times in a row) [#672](https://github.com/jcubic/jquery.terminal/issues/672)
 

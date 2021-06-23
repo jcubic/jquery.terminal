@@ -235,6 +235,10 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
 }
+.terminal .ansi > div {
+    line-height: 13px !important;
+    line-height: calc(var(--size, 1) * 13px) !important;
+}
 .cmd span.cmd-prompt, .cmd .cmd-prompt span {
     background-color: transparent !important;
 }
