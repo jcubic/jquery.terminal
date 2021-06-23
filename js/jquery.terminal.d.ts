@@ -239,6 +239,7 @@ declare namespace JQueryTerminal {
         invokeMethods: boolean;
         allowedAttributes: Array<RegExp | string>;
         delay: number;
+        ansi: boolean;
         typing: boolean;
         flush: boolean;
         formatters: boolean;
@@ -254,6 +255,7 @@ declare namespace JQueryTerminal {
         invokeMethods?: boolean;
         delay?: number;
         typing?: boolean;
+        ansi?: boolean;
         allowedAttributes?: Array<RegExp | string>;
         unmount?: JQueryTerminal.EchoEventFunction;
         onClear?: JQueryTerminal.EchoEventFunction;

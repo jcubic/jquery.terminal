@@ -9592,6 +9592,7 @@
                             finalize: $.noop,
                             unmount: $.noop,
                             delay: 100,
+                            ansi: false,
                             typing: false,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
@@ -9606,6 +9607,9 @@
                             locals.finalize = function(div) {
                                 if (locals.raw) {
                                     div.addClass('raw');
+                                }
+                                if (locals.ansi) {
+                                    div.addClass('ansi');
                                 }
                                 try {
                                     if (is_function(finalize)) {
