@@ -325,7 +325,7 @@
   "dependencies": {
     "@types/jquery": "^3.5.5",
     "jquery": "^3.6.0",
-    "prismjs": "^1.23.0",
+    "prismjs": "^1.24.0",
     "wcwidth": "^1.0.1"
   },
   "devDependencies": {
