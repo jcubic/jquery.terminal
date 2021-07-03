@@ -266,7 +266,6 @@ body.full-screen-terminal .terminal {
     display: inline-block;
     width: 2ch;
 }
-
 .terminal, .cmd {
     box-sizing: border-box;
 }
@@ -280,6 +279,10 @@ body.full-screen-terminal .terminal {
 }
 .cmd .cmd-cursor * {
     background-color: transparent;
+}
+.terminal span[style*="width"] span,
+.cmd span[style*="width"] span {
+    width: inherit;
 }
 .cmd div {
     clear: both;

@@ -1,3 +1,7 @@
+## 2.27.1
+### Bugfix
+* fix regression in width ([chess demo](https://codepen.io/jcubic/pen/NWxOZQE))
+
 ## 2.27.0
 ### Feature
 * add CSS and option `ansi` to echo to properly render ANSI art
