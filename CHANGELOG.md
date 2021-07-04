@@ -1,13 +1,10 @@
-## 2.27.1
-### Bugfix
-* fix regression in width ([chess demo](https://codepen.io/jcubic/pen/NWxOZQE))
-
 ## 2.27.0
 ### Feature
 * add CSS and option `ansi` to echo to properly render ANSI art
 ### Bugfix
 * fix bug in cache (when echo same string two times in a row) [#672](https://github.com/jcubic/jquery.terminal/issues/672)
 * fix exception when calling term::echo with typing animation
+* fix regression in width ([chess demo](https://codepen.io/jcubic/pen/NWxOZQE))
 
 ## 2.26.0
 ### Feature
