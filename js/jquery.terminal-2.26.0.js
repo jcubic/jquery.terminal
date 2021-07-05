@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 23 Jun 2021 22:19:11 +0000
+ * Date: Mon, 05 Jul 2021 09:17:03 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4781,7 +4781,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 23 Jun 2021 22:19:11 +0000',
+        date: 'Mon, 05 Jul 2021 09:17:03 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9286,8 +9286,26 @@
             // -------------------------------------------------------------
             // :: Set the prompt of the command line
             // -------------------------------------------------------------
-            set_prompt: function(prompt) {
+            set_prompt: function(prompt, options) {
+                var d = new $.Deferred();
                 when_ready(function ready() {
+                    var settings = $.extend({
+                        typing: false,
+                        delay: 100
+                    }, options);
+                    if (settings.typing) {
+                        if (typeof prompt !== 'string') {
+                            return d.reject('prompt: Typing animation require string');
+                        }
+                        if (typeof settings.delay !== 'number' || isNaN(settings.delay)) {
+                            return d.reject('echo: Invalid argument, delay need to' +
+                                            ' be a number');
+                        }
+                        var p = self.typing('prompt', settings.delay, prompt, settings);
+                        p.then(function() {
+                            d.resolve();
+                        });
+                    }
                     if (is_function(prompt)) {
                         command_line.prompt(function(callback) {
                             prompt.call(self, callback, self);
@@ -9297,6 +9315,9 @@
                     }
                     interpreters.top().prompt = prompt;
                 });
+                if (options && options.typing) {
+                    return d.promise();
+                }
                 return self;
             },
             // -------------------------------------------------------------
@@ -9583,6 +9604,7 @@
             // -------------------------------------------------------------
             echo: function(arg, options) {
                 var arg_defined = arguments.length > 0;
+                var d = new $.Deferred();
                 function echo(arg) {
                     try {
                         var locals = $.extend({
@@ -9640,14 +9662,17 @@
                         }
                         if (locals.typing) {
                             if (typeof arg !== 'string') {
-                                throw new Error('echo: Typing animation require string' +
+                                return d.reject('echo: Typing animation require string' +
                                                 ' or promise that resolve to string');
                             }
                             if (typeof locals.delay !== 'number' || isNaN(locals.delay)) {
-                                throw new Error('echo: Invalid argument, delay need to' +
+                                return d.reject('echo: Invalid argument, delay need to' +
                                                 ' be a number');
                             }
-                            return self.typing('echo', locals.delay, arg, locals);
+                            var p = self.typing('echo', locals.delay, arg, locals);
+                            p.then(function() {
+                                d.resolve();
+                            });
                         }
                         var value;
                         if (typeof arg === 'function') {
@@ -9734,6 +9759,9 @@
                     });
                 } else {
                     echo(arg);
+                }
+                if (options && options.typing) {
+                    return d.promise();
                 }
                 return self;
             },

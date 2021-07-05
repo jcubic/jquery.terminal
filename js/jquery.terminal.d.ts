@@ -195,6 +195,11 @@ declare namespace JQueryTerminal {
         escape: boolean;
     };
 
+    type promptOptions = {
+        delay?: number;
+        typing?: boolean;
+    };
+
     type InterpreterItem = {
         completion: "settings" | JQueryTerminal.Completion;
         history?: boolean;
@@ -653,7 +658,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_position(pos: number, relative?: boolean): JQueryTerminal;
     get_position(): number;
     insert(str: string, stay?: boolean): JQueryTerminal;
-    set_prompt(prompt: JQueryTerminal.ExtendedPrompt): JQueryTerminal;
+    set_prompt(prompt: JQueryTerminal.ExtendedPrompt, options?: JQueryTerminal.promptOptions): JQueryTerminal | JQuery.Promise<void>;
     get_prompt<T extends JQueryTerminal.ExtendedPrompt>(): T;
     set_mask(toggle?: boolean | string): JQueryTerminal;
     get_output<T extends JQueryTerminal.Lines | string[]>(raw?: boolean): T;
