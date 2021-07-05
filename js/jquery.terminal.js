@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 05 Jul 2021 09:17:03 +0000
+ * Date: Mon, 05 Jul 2021 18:14:00 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -181,7 +181,16 @@
 /* eslint-enable */
 // UMD taken from https://github.com/umdjs/umd
 (function(factory, undefined) {
-    var root = typeof window !== 'undefined' ? window : self || global;
+    var root;
+    if (typeof window !== 'undefined') {
+        root = window;
+    } else if (typeof self !== 'undefined') {
+        root = self;
+    } else if (typeof global !== 'undefined') {
+        root = global;
+    } else {
+        throw new Error('Unknow context');
+    }
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
@@ -4781,7 +4790,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 05 Jul 2021 09:17:03 +0000',
+        date: 'Mon, 05 Jul 2021 18:14:00 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

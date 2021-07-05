@@ -7,6 +7,7 @@
 * fix bug in cache (when echo same string two times in a row) [#672](https://github.com/jcubic/jquery.terminal/issues/672)
 * fix exception when calling term::echo with typing animation
 * fix regression in width ([chess demo](https://codepen.io/jcubic/pen/NWxOZQE))
+* fix usage in NodeJS (regression since 2.22.0)
 
 ## 2.26.0
 ### Feature
