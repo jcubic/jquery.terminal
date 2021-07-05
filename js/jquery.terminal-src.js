@@ -181,7 +181,16 @@
 /* eslint-enable */
 // UMD taken from https://github.com/umdjs/umd
 (function(factory, undefined) {
-    var root = typeof window !== 'undefined' ? window : self || global;
+    var root;
+    if (typeof window !== 'undefined') {
+        root = window;
+    } else if (typeof self !== 'undefined') {
+        root = self;
+    } else if (typeof global !== 'undefined') {
+        root = global;
+    } else {
+        throw new Error('Unknow context');
+    }
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
@@ -1017,7 +1026,7 @@
         }
     });
     // -----------------------------------------------------------------------
-    // :: mobile friendly scroll that work without scrollbar (for less)
+    // :: Mobile friendly scroll that work without scrollbar (for less)
     // -----------------------------------------------------------------------
     $.fn.touch_scroll = make_callback_plugin({
         name: 'touch',
@@ -7533,6 +7542,14 @@
                 }
                 if (string !== '') {
                     if (!line_settings.raw) {
+                        if (settings.useCache) {
+                            var key = string;
+                            if (string_cache && string_cache.has(key)) {
+                                string = string_cache.get(key);
+                                buffer_line(string, line.index, line_settings);
+                                return true;
+                            }
+                        }
                         if (line_settings.formatters) {
                             try {
                                 string = $.terminal.apply_formatters(
@@ -7541,14 +7558,6 @@
                                 );
                             } catch (e) {
                                 display_exception(e, 'FORMATTING');
-                            }
-                        }
-                        if (settings.useCache) {
-                            var key = string;
-                            if (string_cache && string_cache.has(key)) {
-                                string = string_cache.get(key);
-                                buffer_line(string, line.index, line_settings);
-                                return;
                             }
                         }
                         if (line_settings.exec) {
@@ -9286,8 +9295,26 @@
             // -------------------------------------------------------------
             // :: Set the prompt of the command line
             // -------------------------------------------------------------
-            set_prompt: function(prompt) {
+            set_prompt: function(prompt, options) {
+                var d = new $.Deferred();
                 when_ready(function ready() {
+                    var settings = $.extend({
+                        typing: false,
+                        delay: 100
+                    }, options);
+                    if (settings.typing) {
+                        if (typeof prompt !== 'string') {
+                            return d.reject('prompt: Typing animation require string');
+                        }
+                        if (typeof settings.delay !== 'number' || isNaN(settings.delay)) {
+                            return d.reject('echo: Invalid argument, delay need to' +
+                                            ' be a number');
+                        }
+                        var p = self.typing('prompt', settings.delay, prompt, settings);
+                        p.then(function() {
+                            d.resolve();
+                        });
+                    }
                     if (is_function(prompt)) {
                         command_line.prompt(function(callback) {
                             prompt.call(self, callback, self);
@@ -9297,6 +9324,9 @@
                     }
                     interpreters.top().prompt = prompt;
                 });
+                if (options && options.typing) {
+                    return d.promise();
+                }
                 return self;
             },
             // -------------------------------------------------------------
@@ -9583,6 +9613,7 @@
             // -------------------------------------------------------------
             echo: function(arg, options) {
                 var arg_defined = arguments.length > 0;
+                var d = new $.Deferred();
                 function echo(arg) {
                     try {
                         var locals = $.extend({
@@ -9592,6 +9623,7 @@
                             finalize: $.noop,
                             unmount: $.noop,
                             delay: 100,
+                            ansi: false,
                             typing: false,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
@@ -9606,6 +9638,9 @@
                             locals.finalize = function(div) {
                                 if (locals.raw) {
                                     div.addClass('raw');
+                                }
+                                if (locals.ansi) {
+                                    div.addClass('ansi');
                                 }
                                 try {
                                     if (is_function(finalize)) {
@@ -9636,14 +9671,17 @@
                         }
                         if (locals.typing) {
                             if (typeof arg !== 'string') {
-                                throw new Error('echo: Typing animation require string' +
+                                return d.reject('echo: Typing animation require string' +
                                                 ' or promise that resolve to string');
                             }
                             if (typeof locals.delay !== 'number' || isNaN(locals.delay)) {
-                                throw new Error('echo: Invalid argument, delay need to' +
+                                return d.reject('echo: Invalid argument, delay need to' +
                                                 ' be a number');
                             }
-                            return self.typing('echo', locals.delay, arg, locals);
+                            var p = self.typing('echo', locals.delay, arg, locals);
+                            p.then(function() {
+                                d.resolve();
+                            });
                         }
                         var value;
                         if (typeof arg === 'function') {
@@ -9731,6 +9769,9 @@
                 } else {
                     echo(arg);
                 }
+                if (options && options.typing) {
+                    return d.promise();
+                }
                 return self;
             },
             // -------------------------------------------------------------
@@ -9754,7 +9795,7 @@
                 function done() {
                     d.resolve();
                     if (is_function(finish)) {
-                        finish.call(self);
+                        finish.apply(self, arguments);
                     }
                 }
                 when_ready(function ready() {

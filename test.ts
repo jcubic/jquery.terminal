@@ -546,7 +546,7 @@ $.terminal.defaults.formatters.push(red);
     // -------------------------------------------------------------------------
     // :: set_prompt
     // -------------------------------------------------------------------------
-    test_type<JQueryTerminal>(term.set_prompt(">>> "));
+    test_type<JQueryTerminal | JQuery.Promise<void>>(term.set_prompt(">>> "));
     term.set_prompt(function(cb) {
         cb(">>> ");
         this.get_command();
@@ -555,6 +555,10 @@ $.terminal.defaults.formatters.push(red);
         this.get_command();
         return Promise.resolve(">>> ");
     });
+    term.set_prompt(function() {
+        this.get_command();
+        return Promise.resolve(">>> ");
+    }, { typing: true, delay: 200 });
     // -------------------------------------------------------------------------
     // :: get_prompt
     // -------------------------------------------------------------------------
@@ -656,6 +660,7 @@ $.terminal.defaults.formatters.push(red);
         }
     });
     term.echo("hello", { exec: false });
+    test_type<JQueryTerminal | JQuery.Promise<void>>(term.echo("foo"));
     // -------------------------------------------------------------------------
     // :: error
     // -------------------------------------------------------------------------
