@@ -10,16 +10,23 @@
     "prompt",
     "console",
     "keyboard",
+    "linux",
+    "unix",
+    "bash",
+    "typing",
     "type",
     "rpc",
     "input",
     "ui"
   ],
+  "bin": {
+    "from-ansi": "./bin/convert.js"
+  },
   "scripts": {
     "test": "make test"
   },
   "author": {
-    "name": "Jakub Jankiewicz",
+    "name": "Jakub T. Jankiewicz",
     "email": "jcubic@onet.pl",
     "url": "https://jcubic.pl/me"
   },
