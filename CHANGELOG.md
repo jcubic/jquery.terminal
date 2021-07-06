@@ -1,8 +1,13 @@
+## 2.27.1
+### Bugfix
+* fix `from_ansi` and add option `--ansi -a`
+
 ## 2.27.0
 ### Feature
 * add CSS and option `ansi` to echo to properly render ANSI art
 * add typing animation to set_prompt [#673](https://github.com/jcubic/jquery.terminal/issues/673)
 * return promise from `set_prompt` and `echo` when using typing animation
+* add `from_ansi` executable [#670](https://github.com/jcubic/jquery.terminal/issues/670)
 * new emoji
 ### Bugfix
 * fix bug in cache (when echo same string two times in a row) [#672](https://github.com/jcubic/jquery.terminal/issues/672)

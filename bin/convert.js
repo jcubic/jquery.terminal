@@ -22,7 +22,7 @@ const ansi = require('ansidec');
 const iconv = require('iconv-lite');
 const lily = require('@jcubic/lily');
 
-const options = lily(process.argv.slice(2));
+const options = lily(process.argv.slice(2), { boolean: ['a', 'ansi'] });
 
 function read_stdin() {
     return new Promise((resolve) => {
@@ -42,9 +42,10 @@ const output = options.o || options.output;
 
 if (options.h || options.help) {
     const bin = path.basename(process.argv[1]);
-    console.log(`usage:\n\t${bin} [--help] [-h] [--input] [-i] <file> [--output] [-o] <file>
+    console.log(`usage:\n\t${bin} [--help] [-h] [--input] [-i] <file> [--output] [-o] <file> [-a] [--ansi]
 
---input -i <file> input ANSI art file
+--ansi -a if this flag is set it will read file or STDIN as ANSI Art (CP437 encoding)
+--input -i <file> input ANSI file
 --output -o <file> output jQuery Terminal formatting file
 
 If no input specified it will read from STDIN
@@ -65,14 +66,20 @@ function process_buffer(buff) {
 }
 
 function format(buff) {
-    var meta = ansi.meta(buff);
-    let cols = 80;
-    if (meta) {
-        buff = buff.slice(0, meta.fileSize);
-        cols = meta.tInfo[0];
+    var text;
+    if (options.ansi || options.a) {
+        var meta = ansi.meta(buff);
+        let cols = 80;
+        if (meta) {
+            buff = buff.slice(0, meta.fileSize);
+            cols = meta.tInfo[0];
+        }
+        text = iconv.decode(buff, 'CP437');
+        return format_lines(text, cols);
+    } else {
+        text = buff.toString();
+        return format_lines(text);
     }
-    var text = iconv.decode(buff, 'CP437');
-    return format_lines(text, cols).join('\n');
 }
 
 function format_lines(str, len) {
@@ -81,12 +88,15 @@ function format_lines(str, len) {
             ansiArt: true
         }
     });
-    var lines = $.terminal.split_equal(str, len || 80);
-    // unix formatting don't handle \r\n at the end
-    if (lines[lines.length - 1] === '') {
-        lines.pop();
+    var lines;
+    if (len) {
+        var lines = $.terminal.split_equal(str, len);
+        // unix formatting don't handle \r\n at the end
+        if (lines[lines.length - 1] === '') {
+            lines.pop();
+        }
+        return lines.join('\n');
+    } else {
+        return str;
     }
-    return lines;
 }
-
-
