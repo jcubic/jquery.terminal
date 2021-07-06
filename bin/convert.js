@@ -1,4 +1,17 @@
 #!/usr/bin/env node
+/**@license
+ *       __ _____                     ________                              __
+ *      / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___  / /
+ *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
+ * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
+ * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
+ *           \/              /____/                              version {{VER}}
+ *
+ * This file is part of jQuery Terminal. https://terminal.jcubic.pl
+ *
+ * Copyright (c) 2010-2021 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Released under the MIT license
+ */
 
 const $ = global.$ = global.jQuery = {
     fn: {
