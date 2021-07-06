@@ -333,6 +333,7 @@
     "@jcubic/lily": "^0.1.0",
     "@types/jquery": "^3.5.5",
     "ansidec": "^0.3.4",
+    "iconv-lite": "^0.6.3",
     "jquery": "^3.6.0",
     "prismjs": "^1.24.0",
     "wcwidth": "^1.0.1"
@@ -343,7 +344,6 @@
     "emoji-datasource-twitter": "^6.0.1",
     "eslint": "^7.27.0",
     "gm": "^1.23.1",
-    "iconv-lite": "^0.6.3",
     "jest": "^27.0.2",
     "jsonlint": "^1.6.3",
     "optimist": "^0.6.1",
