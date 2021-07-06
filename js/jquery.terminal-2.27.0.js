@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2021 Jakub T. Jankiewicz <https://jcubic.pl/m>e
+ * Copyright (c) 2010-2021 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 05 Jul 2021 22:23:42 +0000
+ * Date: Tue, 06 Jul 2021 09:47:31 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4790,7 +4790,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.27.0',
-        date: 'Mon, 05 Jul 2021 22:23:42 +0000',
+        date: 'Tue, 06 Jul 2021 09:47:31 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
