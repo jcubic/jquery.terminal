@@ -1,4 +1,6 @@
-## 2.27.2
+## 2.28.0
+### Feature
+* add forms extension [#610](https://github.com/jcubic/jquery.terminal/issues/610)
 ### Bugfix
 * fix rest of the extension files in NodeJS (regression since 2.22.0)
 

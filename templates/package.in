@@ -163,7 +163,7 @@
   "homepage": "https://terminal.jcubic.pl",
   "eslintConfig": {
     "parserOptions": {
-      "ecmaVersion": 3,
+      "ecmaVersion": 2018,
       "sourceType": "script",
       "ecmaFeatures": {}
     },
