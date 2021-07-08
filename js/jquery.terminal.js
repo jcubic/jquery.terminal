@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 08 Jul 2021 16:15:55 +0000
+ * Date: Thu, 08 Jul 2021 16:19:19 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4790,7 +4790,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 08 Jul 2021 16:15:55 +0000',
+        date: 'Thu, 08 Jul 2021 16:19:19 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5417,7 +5417,8 @@
                 for (var i = stack.length; i--;) {
                     var formatting = stack[i].split(';');
                     if (formatting.length > 5) {
-                        formatting = formatting.slice(0, 5).concat(formatting.slice(5).join(';'));
+                        var last = formatting.slice(5).join(';');
+                        formatting = formatting.slice(0, 5).concat(last);
                     }
                     var style = formatting[0].split(/(-?[@!gbiuso])/g).filter(Boolean);
                     style.forEach(function(s) {
@@ -5432,7 +5433,8 @@
                                 if (!output[class_i]) {
                                     output[class_i] = [];
                                 }
-                                output[class_i] = output[class_i].concat(value.split(/\s+/));
+                                var classes = value.split(/\s+/);
+                                output[class_i] = output[class_i].concat(classes);
                             } else if (j === attrs_i) {
                                 if (!output[attrs_i]) {
                                     output[attrs_i] = {};
@@ -5443,7 +5445,7 @@
                                         output[attrs_i]
                                     );
                                 } catch (e) {
-                                    console.warn('Invalid JSON ' + value);
+                                    warn('Invalid JSON ' + value);
                                 }
                             } else {
                                 output[j] = value;
@@ -5465,17 +5467,14 @@
                 output[0] = output[0].filter(function(s) {
                     return ignore.indexOf(s) === -1 && ignore.indexOf(s[1]) === -1;
                 }).join('');
-                console.log({output});
                 return output.join(';');
             }
             return string.split(re).filter(Boolean).map(function(string) {
                 var style;
                 if (string.match(/^\[\[/)) {
                     var formatting = string.replace(format_re, '$1');
-                    console.log({formatting});
                     var is_formatting = $.terminal.is_formatting(string);
                     string = string.replace(format_split_re, '');
-                    console.log({formatting});
                     stack.push(formatting);
                     if ($.terminal.nested_formatting.__inherit__) {
                         style = get_inherit_style(stack);
