@@ -64,32 +64,52 @@
     }
     // this formatter allow to echo xml where tags are colors like:
     // <red>hello <navy>blue</navy> world</red>
+    // it allso support special tags <big> <img> and <a>
+    // example: term.echo('<big><a href="https://terminal.jcubic.pl">jQuery Terminal</a></big>');
+    var tags = {
+        big: function() {
+            return '[[;;;;;{"style": "--size: 1.5;letter-spacing: 2px"}]';
+        },
+        img: function(attrs) {
+            return '[[@;;;;' + attrs.src + ']' + (attrs.alt || '') + ']';
+        },
+        a: function(attrs) {
+            return '[[!;;;;' + attrs.href + ']';
+        }
+    };
+    var tag_re = /(<\/?\s*[a-zA-Z]+(?: [^>]+)?>)/;
     function xml_formatter(string) {
-        var stack = [];
-        var output = [];
-        var parts = string.split(/(<\/?[a-zA-Z]+>)/);
-        for (var i = 0; i < parts.length; ++i) {
-            if (parts[i][0] === '<') {
-                if (parts[i][1] === '/') {
-                    if (stack.length) {
-                        stack.pop();
+        return string.split(tag_re).map(function(string) {
+            if (string.match(tag_re)) {
+                if (string[1] === '/') {
+                    return ']';
+                }
+                string = string.replace(/^<|>$/g, '');
+                var m = string.match(/^([a-zA-Z]+)(?:\s*(.+))?/);
+                var name = m[1].toLowerCase();
+                var attrs = {};
+                if (m[2]) {
+                    var string_attrs = m[2];
+                    var re = /([a-zA-Z]+)\s*=\s*"([^"]+)"/g;
+                    var match;
+                    while (match = re.exec(string_attrs)) {
+                        var attr_name = match[1];
+                        var value = match[2];
+                        attrs[attr_name] = value;
                     }
+                }
+                if (tags[name]) {
+                    return tags[name](attrs);
                 } else {
-                    stack.push(parts[i].replace(/^<|>$/g, ''));
-                }
-            } else {
-                if (stack.length) {
-                    // top of the stack
-                    output.push('[[;' + stack[stack.length - 1] + ';]');
-                }
-                output.push(parts[i]);
-                if (stack.length) {
-                    output.push(']');
+                    return '[[;' + name + ';]';
                 }
             }
-        }
-        return output.join('');
+            return string;
+        }).join('');
     }
+    xml_formatter.__no_warn__ = true;
+    $.terminal.nested_formatting.__inherit__ = true;
+    $.terminal.defaults.allowedAttributes.push('style');
     $.terminal.xml_formatter = xml_formatter;
     $.terminal.new_formatter(xml_formatter);
 });
