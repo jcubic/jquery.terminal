@@ -3,6 +3,7 @@
 * add forms extension [#610](https://github.com/jcubic/jquery.terminal/issues/610)
 ### Bugfix
 * fix rest of the extension files in NodeJS (regression since 2.22.0)
+* fix inheritance of attributes and classes in nested formatting
 
 ## 2.27.1
 ### Bugfix

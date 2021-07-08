@@ -14,7 +14,7 @@
  *
  * Includes: node-ansiparser, MIT license, Copyright (c) 2014 Joerg Breitbart
  *
- * Last Update in jQuery Terminal 2.11.0
+ * Last Update in jQuery Terminal 2.23.0
  *
  */
 /* global define */

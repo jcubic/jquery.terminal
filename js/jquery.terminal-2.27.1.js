@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.27.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 06 Jul 2021 14:59:48 +0000
+ * Date: Thu, 08 Jul 2021 16:15:55 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4789,8 +4789,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.27.1',
-        date: 'Tue, 06 Jul 2021 14:59:48 +0000',
+        version: 'DEV',
+        date: 'Thu, 08 Jul 2021 16:15:55 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5404,6 +5404,11 @@
             var re = /((?:\[\[(?:[^\][]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
             var format_re = /\[\[([^\][]+)\][\s\S]*/;
             var format_split_re = /^\[\[([^;]*);([^;]*);([^\]]*)\]/;
+            var class_i = 3; // index of the class in formatting
+            var attrs_i = 5; // index of attributes in formatting
+            function unique(value, index, self) {
+                return self.indexOf(value) === index;
+            }
             function get_inherit_style(stack) {
                 var output = [[], '', ''];
                 if (!stack.length) {
@@ -5411,16 +5416,38 @@
                 }
                 for (var i = stack.length; i--;) {
                     var formatting = stack[i].split(';');
+                    if (formatting.length > 5) {
+                        formatting = formatting.slice(0, 5).concat(formatting.slice(5).join(';'));
+                    }
                     var style = formatting[0].split(/(-?[@!gbiuso])/g).filter(Boolean);
                     style.forEach(function(s) {
                         if (output[0].indexOf(s) === -1) {
                             output[0].push(s);
                         }
                     });
-                    for (var j = 1; j < output.length; ++j) {
+                    for (var j = 1; j < formatting.length; ++j) {
                         var value = formatting[j].trim();
-                        if (value && !output[j]) {
-                            output[j] = value;
+                        if (value) {
+                            if (j === class_i) {
+                                if (!output[class_i]) {
+                                    output[class_i] = [];
+                                }
+                                output[class_i] = output[class_i].concat(value.split(/\s+/));
+                            } else if (j === attrs_i) {
+                                if (!output[attrs_i]) {
+                                    output[attrs_i] = {};
+                                }
+                                try {
+                                    output[attrs_i] = $.extend(
+                                        JSON.parse(value),
+                                        output[attrs_i]
+                                    );
+                                } catch (e) {
+                                    console.warn('Invalid JSON ' + value);
+                                }
+                            } else {
+                                output[j] = value;
+                            }
                         }
                     }
                 }
@@ -5429,17 +5456,26 @@
                 }).map(function(s) {
                     return s[1];
                 });
+                if (output[attrs_i]) {
+                    output[attrs_i] = JSON.stringify(output[attrs_i]);
+                }
+                if (output[class_i]) {
+                    output[class_i] = output[class_i].filter(unique).join(' ');
+                }
                 output[0] = output[0].filter(function(s) {
                     return ignore.indexOf(s) === -1 && ignore.indexOf(s[1]) === -1;
                 }).join('');
+                console.log({output});
                 return output.join(';');
             }
             return string.split(re).filter(Boolean).map(function(string) {
                 var style;
                 if (string.match(/^\[\[/)) {
                     var formatting = string.replace(format_re, '$1');
+                    console.log({formatting});
                     var is_formatting = $.terminal.is_formatting(string);
                     string = string.replace(format_split_re, '');
+                    console.log({formatting});
                     stack.push(formatting);
                     if ($.terminal.nested_formatting.__inherit__) {
                         style = get_inherit_style(stack);
