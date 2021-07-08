@@ -106,7 +106,7 @@ eslint:
 	$(ESLINT) js/pipe.js
 	$(ESLINT) js/autocomplete_menu.js
 	$(ESLINT) js/echo_newline.js
-	$(ESLINT) js/form.js
+	$(ESLINT) js/forms.js
 
 skipped_tests:
 	@! grep -E $(skip_re) __tests__/terminal.spec.js
