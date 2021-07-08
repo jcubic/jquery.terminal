@@ -1,3 +1,7 @@
+## 2.27.2
+### Bugfix
+* fix rest of the extension files in NodeJS (regression since 2.22.0)
+
 ## 2.27.1
 ### Bugfix
 * fix `from_ansi` and add option `--ansi -a`
