@@ -65,7 +65,6 @@
     // this formatter allow to echo xml where tags are colors like:
     // <red>hello <navy>blue</navy> world</red>
     // it allso support special tags <big> <img> and <a>
-    // example: term.echo('<big><a href="https://terminal.jcubic.pl">jQuery Terminal</a></big>');
     var tags = {
         big: function() {
             return '[[;;;;;{"style": "--size: 1.5;letter-spacing: 2px"}]';

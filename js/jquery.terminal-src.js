@@ -5447,7 +5447,7 @@
                                 } catch (e) {
                                     warn('Invalid JSON ' + value);
                                 }
-                            } else {
+                            } else if (!output[j]) {
                                 output[j] = value;
                             }
                         }
