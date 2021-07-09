@@ -5501,7 +5501,7 @@
                         warn('Invalid JSON ' + value);
                     }
                 }
-                var output = [[], '', '', '', '', ''];
+                var output = [[], '', ''];
                 if (!stack.length) {
                     return output;
                 }
