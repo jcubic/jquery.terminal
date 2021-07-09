@@ -7,7 +7,7 @@
  *           \/              /____/
  * http://terminal.jcubic.pl
  *
- * This is example of how to create custom formatter for jQuery Terminal
+ * This is example of custom formatter for jQuery Terminal
  *
  * Copyright (c) 2014-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
@@ -64,18 +64,46 @@
     }
     // this formatter allow to echo xml where tags are colors like:
     // <red>hello <navy>blue</navy> world</red>
-    // it allso support special tags <big> <img> and <a>
+    // it allso support special tags e.g. big, wide, img or bold
     var tags = {
-        big: function() {
-            return '[[;;;;;{"style": "--size: 1.5;letter-spacing: 2px"}]';
+        large: function(attrs) {
+            var size = attrs.size || 1.5;
+            return '[[;;;;;{"style": "--size:' + size + '"}]';
+        },
+        wide: function(attrs) {
+            var spacing = attrs.spacing || '2px';
+            return '[[;;;;;{"style": "letter-spacing: ' + spacing + '"}]';
         },
         img: function(attrs) {
             return '[[@;;;;' + attrs.src + ']' + (attrs.alt || '') + ']';
         },
-        a: function(attrs) {
+        bold: function() {
+            return '[[b;rgba(255,255,255,0.9);]';
+        },
+        overline: function() {
+            return '[[o;;]';
+        },
+        strike: function() {
+            return '[[s;;]';
+        },
+        underline: function() {
+            return '[[u;;]';
+        },
+        glow: function() {
+            return '[[g;;]';
+        },
+        italic: function() {
+            return '[[i;;]';
+        },
+        link: function(attrs) {
             return '[[!;;;;' + attrs.href + ']';
         }
     };
+    // short aliases
+    tags.b = tags.bold;
+    tags.a = tags.link;
+    tags.i = tags.italic;
+    tags.big = tags.large;
     var tag_re = /(<\/?\s*[a-zA-Z]+(?: [^>]+)?>)/;
     function xml_formatter(string) {
         return string.split(tag_re).map(function(string) {
@@ -107,7 +135,6 @@
         }).join('');
     }
     xml_formatter.__no_warn__ = true;
-    $.terminal.nested_formatting.__inherit__ = true;
     $.terminal.defaults.allowedAttributes.push('style');
     $.terminal.xml_formatter = xml_formatter;
     $.terminal.new_formatter(xml_formatter);
