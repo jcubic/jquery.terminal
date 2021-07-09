@@ -330,7 +330,7 @@
     }
   },
   "dependencies": {
-    "@jcubic/lily": "^0.1.0",
+    "@jcubic/lily": "^0.2.0",
     "@types/jquery": "^3.5.5",
     "ansidec": "^0.3.4",
     "iconv-lite": "^0.6.3",
