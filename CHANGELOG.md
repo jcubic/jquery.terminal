@@ -1,10 +1,12 @@
 ## 2.28.0
+### Breaking
+* `nested_formatting` inherit styles by default
 ### Feature
 * add forms extension [#610](https://github.com/jcubic/jquery.terminal/issues/610)
-* rewrite xml_formatter and `big`, `img` and `a` tags 
+* rewrite xml_formatter and add new tags
 ### Bugfix
 * fix rest of the extension files in NodeJS (regression since 2.22.0)
-* fix inheritance of attributes and classes in nested formatting
+* fix inheritance of attributes (including styles) and classes in nested formatting
 
 ## 2.27.1
 ### Bugfix

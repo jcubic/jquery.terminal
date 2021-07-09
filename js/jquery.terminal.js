@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 08 Jul 2021 16:19:19 +0000
+ * Date: Fri, 09 Jul 2021 09:23:24 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2727,7 +2727,6 @@
                         formatted_position = max;
                     }
                 }
-                output = $.terminal.normalize(output);
                 return output;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -4790,7 +4789,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 08 Jul 2021 16:19:19 +0000',
+        date: 'Fri, 09 Jul 2021 09:23:24 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5406,11 +5405,103 @@
             var format_split_re = /^\[\[([^;]*);([^;]*);([^\]]*)\]/;
             var class_i = 3; // index of the class in formatting
             var attrs_i = 5; // index of attributes in formatting
+            // ---------------------------------------------------------------------------
             function unique(value, index, self) {
                 return self.indexOf(value) === index;
             }
+            // ---------------------------------------------------------------------------
+            function update_style(new_style, old_style) {
+                new_style = parse_style(new_style);
+                if (!old_style) {
+                    return new_style;
+                }
+                return $.extend(old_style, new_style);
+            }
+            // ---------------------------------------------------------------------------
+            function parse_style(string) {
+                var style = {};
+                string.split(/\s*;\s*/).forEach(function(string) {
+                    var parts = string.split(':').map(function(string) {
+                        return string.trim();
+                    });
+                    var prop = parts[0];
+                    var value = parts[1];
+                    style[prop] = value;
+                });
+                return style;
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_formatting(input) {
+                var result = input.slice();
+                if (input[attrs_i]) {
+                    result[attrs_i] = stringify_attrs(input[attrs_i]);
+                }
+                if (input[class_i]) {
+                    result[class_i] = stringify_class(input[class_i]);
+                }
+                result[0] = stringify_styles(input[0]);
+                return result.join(';');
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_styles(input) {
+                var ignore = input.filter(function(s) {
+                    return s[0] === '-';
+                }).map(function(s) {
+                    return s[1];
+                });
+                return input.filter(function(s) {
+                    return ignore.indexOf(s) === -1 && ignore.indexOf(s[1]) === -1;
+                }).join('');
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_attrs(attrs) {
+                return JSON.stringify(attrs, function(key, value) {
+                    if (key === 'style') {
+                        return stringify_style(value);
+                    }
+                    return value;
+                });
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_class(klass) {
+                return klass.filter(unique).join(' ');
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_style(style) {
+                return Object.keys(style).map(function(prop) {
+                    return prop + ':' + style[prop];
+                }).join(';');
+            }
+            // ---------------------------------------------------------------------------
             function get_inherit_style(stack) {
-                var output = [[], '', ''];
+                function update_attrs(value) {
+                    if (!output[attrs_i]) {
+                        output[attrs_i] = {};
+                    }
+                    try {
+                        var new_attrs = JSON.parse(value);
+                        if (new_attrs.style) {
+                            var new_style = new_attrs.style;
+                            var old_style = output[attrs_i].style;
+                            new_attrs.style = update_style(new_style, old_style);
+                            output[attrs_i] = $.extend(
+                                new_attrs,
+                                output[attrs_i],
+                                {
+                                    style: update_style(new_style, old_style)
+                                }
+                            );
+                        } else {
+                            output[attrs_i] = $.extend(
+                                new_attrs,
+                                output[attrs_i]
+                            );
+                        }
+                    } catch (e) {
+                        warn('Invalid JSON ' + value);
+                    }
+                }
+                var output = [[], '', '', '', '', ''];
                 if (!stack.length) {
                     return output;
                 }
@@ -5436,38 +5527,14 @@
                                 var classes = value.split(/\s+/);
                                 output[class_i] = output[class_i].concat(classes);
                             } else if (j === attrs_i) {
-                                if (!output[attrs_i]) {
-                                    output[attrs_i] = {};
-                                }
-                                try {
-                                    output[attrs_i] = $.extend(
-                                        JSON.parse(value),
-                                        output[attrs_i]
-                                    );
-                                } catch (e) {
-                                    warn('Invalid JSON ' + value);
-                                }
-                            } else {
+                                update_attrs(value);
+                            } else if (!output[j]) {
                                 output[j] = value;
                             }
                         }
                     }
                 }
-                var ignore = output[0].filter(function(s) {
-                    return s[0] === '-';
-                }).map(function(s) {
-                    return s[1];
-                });
-                if (output[attrs_i]) {
-                    output[attrs_i] = JSON.stringify(output[attrs_i]);
-                }
-                if (output[class_i]) {
-                    output[class_i] = output[class_i].filter(unique).join(' ');
-                }
-                output[0] = output[0].filter(function(s) {
-                    return ignore.indexOf(s) === -1 && ignore.indexOf(s[1]) === -1;
-                }).join('');
-                return output.join(';');
+                return stringify_formatting(output);
             }
             return string.split(re).filter(Boolean).map(function(string) {
                 var style;
@@ -6658,8 +6725,8 @@
     // :: Default options
     // -----------------------------------------------------------------------
     $.terminal.nested_formatting.__meta__ = true;
-    // if set to true nested formatting will inherit styles from styles outside
-    $.terminal.nested_formatting.__inherit__ = false;
+    // if set to false nested formatting will not inherit styles colors and attribues
+    $.terminal.nested_formatting.__inherit__ = true;
     // nested formatting will always return different length so we silent the warning
     $.terminal.nested_formatting.__no_warn__ = true;
     $.terminal.defaults = {
