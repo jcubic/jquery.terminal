@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 09 Jul 2021 09:50:14 +0000
+ * Date: Fri, 09 Jul 2021 11:59:39 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4789,7 +4789,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 09 Jul 2021 09:50:14 +0000',
+        date: 'Fri, 09 Jul 2021 11:59:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6978,6 +6978,10 @@
         // :: Display object on terminal
         // ---------------------------------------------------------------------
         function display_object(object) {
+            if ($.terminal.Animation && object instanceof $.terminal.Animation) {
+                object.start(self);
+                return;
+            }
             object = preprocess_value(object);
             if (object === false) {
                 return;

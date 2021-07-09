@@ -6978,6 +6978,10 @@
         // :: Display object on terminal
         // ---------------------------------------------------------------------
         function display_object(object) {
+            if ($.terminal.Animation && object instanceof $.terminal.Animation) {
+                object.start(self);
+                return;
+            }
             object = preprocess_value(object);
             if (object === false) {
                 return;
