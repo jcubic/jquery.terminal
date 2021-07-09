@@ -6911,6 +6911,10 @@
         // :: helper function that use option to render objects
         // ---------------------------------------------------------------------
         function preprocess_value(value, options) {
+            if ($.terminal.Animation && value instanceof $.terminal.Animation) {
+                value.start(self);
+                return false;
+            }
             if (is_function(settings.renderHandler)) {
                 var ret = settings.renderHandler.call(self, value, options, self);
                 if (ret === false) {
@@ -6978,10 +6982,6 @@
         // :: Display object on terminal
         // ---------------------------------------------------------------------
         function display_object(object) {
-            if ($.terminal.Animation && object instanceof $.terminal.Animation) {
-                object.start(self);
-                return;
-            }
             object = preprocess_value(object);
             if (object === false) {
                 return;
