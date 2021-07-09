@@ -181,7 +181,26 @@
         /* eslint-enable no-empty-function */
     }
 
+    // -----------------------------------------------------------------------------------
+    class FramesAnimation extends Animation {
+        constructor(frames, ...args) {
+            super(...args);
+            this._i = 0;
+            this._frames = frames;
+            this._max = frames.length - 1;
+        }
+        render() {
+            if (this._i >= this._max) {
+                this._i = 0;
+            } else {
+                this._i++;
+            }
+            return this._frames[this._i];
+        }
+    }
+
     $.terminal.Renderer = Renderer;
     $.terminal.CanvasRenderer = CanvasRenderer;
     $.terminal.Animation = Animation;
+    $.terminal.FramesAnimation = FramesAnimation;
 });
