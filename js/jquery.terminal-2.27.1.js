@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 09 Jul 2021 12:43:54 +0000
+ * Date: Mon, 12 Jul 2021 07:12:01 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4789,7 +4789,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 09 Jul 2021 12:43:54 +0000',
+        date: 'Mon, 12 Jul 2021 07:12:01 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6821,8 +6821,8 @@
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
                 ' have two arguments',
-            wrongPasswordTryAgain: 'Wrong password try again!',
-            wrongPassword: 'Wrong password!',
+            wrongPasswordTryAgain: 'Wrong username or password try again!',
+            wrongPassword: 'Wrong username or password!',
             ajaxAbortError: 'Error while aborting ajax call!',
             wrongArity: "Wrong number of arguments. Function '%s' expects %s got" +
                 ' %s!',

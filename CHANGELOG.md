@@ -6,6 +6,7 @@
 * rewrite xml_formatter and add new tags
 * add animation interface [#611](https://github.com/jcubic/jquery.terminal/issues/611)
 * use dash `-` as input file to read from STDIN in `from-ansi` executable
+* improve auth error message
 ### Bugfix
 * fix rest of the extension files in NodeJS (regression since 2.22.0)
 * fix inheritance of attributes (including styles) and classes in nested formatting

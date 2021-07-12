@@ -6821,8 +6821,8 @@
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
                 ' have two arguments',
-            wrongPasswordTryAgain: 'Wrong password try again!',
-            wrongPassword: 'Wrong password!',
+            wrongPasswordTryAgain: 'Wrong username or password try again!',
+            wrongPassword: 'Wrong username or password!',
             ajaxAbortError: 'Error while aborting ajax call!',
             wrongArity: "Wrong number of arguments. Function '%s' expects %s got" +
                 ' %s!',
