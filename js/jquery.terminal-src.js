@@ -9420,8 +9420,7 @@
                         p.then(function() {
                             d.resolve();
                         });
-                    }
-                    if (is_function(prompt)) {
+                    } else if (is_function(prompt)) {
                         command_line.prompt(function(callback) {
                             prompt.call(self, callback, self);
                         });
@@ -9788,6 +9787,7 @@
                             p.then(function() {
                                 d.resolve();
                             });
+                            return;
                         }
                         var value;
                         if (typeof arg === 'function') {

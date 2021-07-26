@@ -10,6 +10,7 @@
 ### Bugfix
 * fix rest of the extension files in NodeJS (regression since 2.22.0)
 * fix inheritance of attributes (including styles) and classes in nested formatting
+* fix echo and prompt with animation (using typing options)
 
 ## 2.27.1
 ### Bugfix
