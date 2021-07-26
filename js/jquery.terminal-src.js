@@ -3082,13 +3082,12 @@
         // ---------------------------------------------------------------------
         var prev_prompt_data;
         var draw_prompt = (function() {
-            function set(prompt) {
-                if (prompt) {
-                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
-                    prompt = $.terminal.normalize(prompt);
-                    prompt = crlf(prompt);
+            function format_prompt(prompt) {
+                if (!prompt) {
+                    just_prompt_len = 0;
+                    prompt_len = just_prompt_len + extra_prompt_margin;
+                    return prompt;
                 }
-                last_rendered_prompt = prompt;
                 var lines = $.terminal.split_equal(prompt, num_chars).map(function(line) {
                     if (!$.terminal.have_formatting(line)) {
                         return '[[;;]' + $.terminal.escape_brackets(line) + ']';
@@ -3108,17 +3107,28 @@
                     tabs: settings.tabs
                 });
                 var last_line = $.terminal.format(encoded_last_line, options);
-                var formatted = lines.slice(0, -1).map(function(line) {
+                just_prompt_len = strlen(text(encoded_last_line));
+                prompt_len = just_prompt_len + extra_prompt_margin;
+                return lines.slice(0, -1).map(function(line) {
                     line = $.terminal.encode(line, {
                         tabs: settings.tabs
                     });
                     return '<span class="cmd-line">' +
-                        $.terminal.format(line, options) +
-                        '</span>';
+                           $.terminal.format(line, options) +
+                           '</span>';
                 }).concat([last_line]).join('\n');
+            }
+            function set(prompt) {
+                if (prompt) {
+                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
+                    prompt = $.terminal.normalize(prompt);
+                    prompt = crlf(prompt);
+                }
+                var formatted = format_prompt(prompt);
+                last_rendered_prompt = prompt;
                 // zero width space to make sure prompt margin takes up space,
                 // so that echo with newline: false works when prompt is empty
-                formatted = formatted || '\u206F';
+                formatted = formatted || $.terminal.format('\u200b');
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
@@ -3136,8 +3146,6 @@
                         prompt_node.show();
                     }
                 }
-                just_prompt_len = strlen(text(encoded_last_line));
-                prompt_len = just_prompt_len + extra_prompt_margin;
             }
             return function() {
                 // the data is used as cancelable reference because we have ref
