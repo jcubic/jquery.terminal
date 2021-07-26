@@ -8487,17 +8487,18 @@
         // ---------------------------------------------------------------------
         // :: Typing animation generator
         // ---------------------------------------------------------------------
-        function typed(finish_typing_fn, prefix) {
+        function typed(finish_typing_fn) {
             return function typing_animation(message, options) {
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
                 var len = $.terminal.length(message);
                 if (message.length > 0) {
-                    self.set_prompt('');
                     var new_prompt = '';
                     if (options.prompt) {
                         new_prompt = options.prompt;
+                    } else {
+                        self.set_prompt('');
                     }
                     var interval = setInterval(function() {
                         var chr = $.terminal.substring(message, char_i, char_i + 1);
@@ -8533,7 +8534,7 @@
                 self.echo(prompt + message, $.extend({}, options, {typing: false}));
             });
             return function(prompt, message, options) {
-                return helper(message, $.extend({}, options, { prompt: prompt }));
+                return helper(message, $.extend({}, options, {prompt: prompt}));
             };
         })();
         // ---------------------------------------------------------------------

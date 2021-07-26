@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 26 Jul 2021 10:50:44 +0000
+ * Date: Mon, 26 Jul 2021 15:43:23 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3082,13 +3082,12 @@
         // ---------------------------------------------------------------------
         var prev_prompt_data;
         var draw_prompt = (function() {
-            function set(prompt) {
-                if (prompt) {
-                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
-                    prompt = $.terminal.normalize(prompt);
-                    prompt = crlf(prompt);
+            function format_prompt(prompt) {
+                if (!prompt) {
+                    just_prompt_len = 0;
+                    prompt_len = just_prompt_len + extra_prompt_margin;
+                    return prompt;
                 }
-                last_rendered_prompt = prompt;
                 var lines = $.terminal.split_equal(prompt, num_chars).map(function(line) {
                     if (!$.terminal.have_formatting(line)) {
                         return '[[;;]' + $.terminal.escape_brackets(line) + ']';
@@ -3108,17 +3107,28 @@
                     tabs: settings.tabs
                 });
                 var last_line = $.terminal.format(encoded_last_line, options);
-                var formatted = lines.slice(0, -1).map(function(line) {
+                just_prompt_len = strlen(text(encoded_last_line));
+                prompt_len = just_prompt_len + extra_prompt_margin;
+                return lines.slice(0, -1).map(function(line) {
                     line = $.terminal.encode(line, {
                         tabs: settings.tabs
                     });
                     return '<span class="cmd-line">' +
-                        $.terminal.format(line, options) +
-                        '</span>';
+                           $.terminal.format(line, options) +
+                           '</span>';
                 }).concat([last_line]).join('\n');
+            }
+            function set(prompt) {
+                if (prompt) {
+                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
+                    prompt = $.terminal.normalize(prompt);
+                    prompt = crlf(prompt);
+                }
+                var formatted = format_prompt(prompt);
+                last_rendered_prompt = prompt;
                 // zero width space to make sure prompt margin takes up space,
                 // so that echo with newline: false works when prompt is empty
-                formatted = formatted || '\u206F';
+                formatted = formatted || $.terminal.format('\u200b');
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
@@ -3136,8 +3146,6 @@
                         prompt_node.show();
                     }
                 }
-                just_prompt_len = strlen(text(encoded_last_line));
-                prompt_len = just_prompt_len + extra_prompt_margin;
             }
             return function() {
                 // the data is used as cancelable reference because we have ref
@@ -4789,7 +4797,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 26 Jul 2021 10:50:44 +0000',
+        date: 'Mon, 26 Jul 2021 15:43:23 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8479,17 +8487,18 @@
         // ---------------------------------------------------------------------
         // :: Typing animation generator
         // ---------------------------------------------------------------------
-        function typed(finish_typing_fn, prefix) {
+        function typed(finish_typing_fn) {
             return function typing_animation(message, options) {
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
                 var len = $.terminal.length(message);
                 if (message.length > 0) {
-                    self.set_prompt('');
                     var new_prompt = '';
                     if (options.prompt) {
                         new_prompt = options.prompt;
+                    } else {
+                        self.set_prompt('');
                     }
                     var interval = setInterval(function() {
                         var chr = $.terminal.substring(message, char_i, char_i + 1);
@@ -8525,7 +8534,7 @@
                 self.echo(prompt + message, $.extend({}, options, {typing: false}));
             });
             return function(prompt, message, options) {
-                return helper(message, $.extend({}, options, { prompt: prompt }));
+                return helper(message, $.extend({}, options, {prompt: prompt}));
             };
         })();
         // ---------------------------------------------------------------------
