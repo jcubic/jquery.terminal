@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 26 Jul 2021 09:31:51 +0000
+ * Date: Mon, 26 Jul 2021 10:50:44 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4789,7 +4789,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 26 Jul 2021 09:31:51 +0000',
+        date: 'Mon, 26 Jul 2021 10:50:44 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8479,8 +8479,8 @@
         // ---------------------------------------------------------------------
         // :: Typing animation generator
         // ---------------------------------------------------------------------
-        function typed(finish_typing_fn) {
-            return function typeing_animation(message, options) {
+        function typed(finish_typing_fn, prefix) {
+            return function typing_animation(message, options) {
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -8488,6 +8488,9 @@
                 if (message.length > 0) {
                     self.set_prompt('');
                     var new_prompt = '';
+                    if (options.prompt) {
+                        new_prompt = options.prompt;
+                    }
                     var interval = setInterval(function() {
                         var chr = $.terminal.substring(message, char_i, char_i + 1);
                         new_prompt += chr;
@@ -8515,6 +8518,16 @@
             self.set_prompt(prompt);
             self.echo(message, $.extend({}, options, {typing: false}));
         });
+        // ---------------------------------------------------------------------
+        var typed_enter = (function() {
+            var helper = typed(function(message, prompt, options) {
+                self.set_prompt(prompt);
+                self.echo(prompt + message, $.extend({}, options, {typing: false}));
+            });
+            return function(prompt, message, options) {
+                return helper(message, $.extend({}, options, { prompt: prompt }));
+            };
+        })();
         // ---------------------------------------------------------------------
         function ready(queue) {
             return function(fun) {
@@ -9905,11 +9918,20 @@
                     }
                 }
                 when_ready(function ready() {
-                    if (['prompt', 'echo'].indexOf(type) >= 0) {
+                    if (['prompt', 'echo', 'enter'].indexOf(type) >= 0) {
                         if (type === 'prompt') {
                             typed_prompt(string, settings);
                         } else if (type === 'echo') {
                             typed_message(string, settings);
+                        } else if (type === 'enter') {
+                            var prompt = self.get_prompt();
+                            if (typeof prompt === 'function') {
+                                prompt(function(prompt) {
+                                    typed_enter(prompt, string, settings);
+                                });
+                            } else {
+                                typed_enter(prompt, string, settings);
+                            }
                         }
                     } else {
                         d.reject('Invalid type only `echo` and `prompt` are supported');
