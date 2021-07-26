@@ -8423,7 +8423,10 @@
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i;
-            if (self.enabled() && !animating) {
+            if (animating) {
+                return false;
+            }
+            if (self.enabled()) {
                 if (!self.paused()) {
                     result = user_key_down(e);
                     if (result !== undefined) {

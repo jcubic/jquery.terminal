@@ -13,6 +13,7 @@
 * fix inheritance of attributes (including styles) and classes in nested formatting
 * fix echo and prompt with animation (using typing options)
 * fix empty prompt
+* disable keyboard on typing animation
 
 ## 2.27.1
 ### Bugfix
