@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 26 Jul 2021 16:33:07 +0000
+ * Date: Mon, 02 Aug 2021 11:30:39 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4797,7 +4797,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 26 Jul 2021 16:33:07 +0000',
+        date: 'Mon, 02 Aug 2021 11:30:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9128,7 +9128,7 @@
                 if (settings.numChars) {
                     return settings.numChars;
                 }
-                if (typeof num_chars === 'undefined' || num_chars === 1000) {
+                if (!num_chars || num_chars === 1000) {
                     num_chars = get_num_chars(self, char_size);
                 }
                 return num_chars;
@@ -9141,7 +9141,7 @@
                 if (settings.numRows) {
                     return settings.numRows;
                 }
-                if (typeof num_rows === 'undefined') {
+                if (!num_rows) {
                     num_rows = get_num_rows(self, char_size);
                 }
                 return num_rows;
@@ -9519,6 +9519,7 @@
                     // only if number of chars changed
                     if (new_num_chars !== num_chars ||
                         new_num_rows !== num_rows) {
+                        self.clear_cache();
                         num_chars = new_num_chars;
                         num_rows = new_num_rows;
                         command_line.resize(num_chars);

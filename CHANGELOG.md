@@ -14,6 +14,7 @@
 * fix echo and prompt with animation (using typing options)
 * fix empty prompt
 * disable keyboard on typing animation
+* fix resizing when using default cache [#677](https://github.com/jcubic/jquery.terminal/issues/677)
 
 ## 2.27.1
 ### Bugfix
