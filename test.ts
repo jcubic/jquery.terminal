@@ -4,18 +4,21 @@ import "jquery";
 import "jquery.terminal";
 
 
-function test_type<T>(x: T) {};
+function test_type<T>(x: T): boolean {
+    return x === x;
+};
 // -----------------------------------------------------------------------------
 // :: instance
 // -----------------------------------------------------------------------------
 
 $('.term').terminal(function(command, term) {
-
+    term.echo(command);
 });
 $('.term').terminal(function(command) {
-
+    this.echo(command);
 });
 $('.term').terminal([function(command, term) {
+    term.echo(command);
     return Promise.resolve(document.createElement('div'));
 }]);
 $('.term').terminal("foo.php");
@@ -999,7 +1002,7 @@ $.terminal.defaults.formatters.push(red);
     // -------------------------------------------------------------------------
     var fn: (cb: (prompt: string) => void) => void =  cmd.prompt();
     var prompt: string = cmd.prompt();
-    
+
     test_type<Cmd>(cmd.prompt(function(cb) {
         this.display_position();
         cb(">>> ");
@@ -1051,3 +1054,52 @@ $.terminal.defaults.formatters.push(red);
     test_type<string>(cmd.mask());
     test_type<boolean>(cmd.mask());
 });
+
+// :: Animations
+(function() {
+    var term = $('body').terminal();
+    term.echo(new $.terminal.FramesAnimation([
+        [
+            '.',
+            '|',
+            '.'
+        ],
+        [
+            ' .',
+            ' |',
+            ' .'
+        ],
+        [
+            '  .',
+            '  |',
+            '  .'
+        ],
+        [
+            ' .',
+            ' |',
+            ' .'
+        ],
+        [
+            '.',
+            '|',
+            '.'
+        ]
+    ], 8));
+
+    class BarAnimation extends $.terminal.Animation {
+        _i: number;
+        constructor(...args: any[]) {
+            super(...args);
+            this._i = 0;
+        }
+        render(term: JQueryTerminal) {
+            if (this._i > term.cols()) {
+                this._i = 0;
+            } else {
+                this._i++;
+            }
+            return [new Array(this._i).fill('-').join('')];
+        }
+    }
+    term.echo(new BarAnimation(50));
+})();
