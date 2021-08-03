@@ -352,6 +352,53 @@ declare namespace JQueryTerminal {
     interface FramesAnimation extends Animation {
         new(frames: string[][], fps?: null | number, renderer?: Renderer): FramesAnimation;
     }
+
+    type formStaticTypes = {
+        input: 'input',
+        password: 'password';
+        boolean: 'boolean';
+        checkboxes: 'checkboxes';
+        radio: 'radio';
+    }
+    type formTypes = 'input' | 'password' | 'boolean' | 'checkboxes' | 'radio';
+
+    type simpleInput = {
+        type?: 'input';
+        message?: string;
+        prompt?: string;
+        name?: string;
+    }
+
+    type passwordInput = {
+        type?: 'password';
+        message?: string;
+        prompt?: string;
+        name?: string;
+    }
+
+    type booleanInput = {
+        type?: 'boolean';
+        message?: string;
+        prompt?: string;
+        items?: [RegExp, RegExp];
+        name?: string;
+    }
+
+    type checkboxesInput = {
+        type?: 'checkboxes';
+        message?: string;
+        items: {[key: string]: any};
+        name?: string;
+    }
+
+    type radioInput = {
+        type?: 'radio';
+        message?: string;
+        items: {[key: string]: any};
+        name?: string;
+    }
+    
+    type formData = Array<simpleInput | passwordInput | checkboxesInput | radioInput>;
 }
 
 interface JQuery<TElement = HTMLElement> {
@@ -454,6 +501,16 @@ interface JQueryTerminalStatic {
     CanvasRenderer: JQueryTerminal.Renderer;
     Animation: JQueryTerminal.Animation;
     FramesAnimation: JQueryTerminal.FramesAnimation;
+
+    forms: {
+        types: JQueryTerminal.formStaticTypes,
+        form: (term: JQueryTerminal, data: Array<JQueryTerminal.formData>) => Promise<JQueryTerminal.formData>;
+        checkboxes: (term: JQueryTerminal, data: JQueryTerminal.checkboxesInput) => Promise<any[]>;
+        radio: (term: JQueryTerminal, data: JQueryTerminal.radioInput) => Promise<any>;
+        input: (term: JQueryTerminal, data: JQueryTerminal.simpleInput) => Promise<string>;
+        password: (term: JQueryTerminal, data: JQueryTerminal.passwordInput) => Promise<string>;
+        boolean: (term: JQueryTerminal, data: JQueryTerminal.booleanInput) => Promise<boolean>;
+    };
 }
 
 type TerminalException = {

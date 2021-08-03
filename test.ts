@@ -1055,7 +1055,9 @@ $.terminal.defaults.formatters.push(red);
     test_type<boolean>(cmd.mask());
 });
 
+// -----------------------------------------------------------------------------
 // :: Animations
+// -----------------------------------------------------------------------------
 (function() {
     var term = $('body').terminal();
     term.echo(new $.terminal.FramesAnimation([
@@ -1102,4 +1104,35 @@ $.terminal.defaults.formatters.push(red);
         }
     }
     term.echo(new BarAnimation(50));
+})();
+
+// -----------------------------------------------------------------------------
+// :: Forms
+// -----------------------------------------------------------------------------
+(function() {
+    var term = $('body').terminal();
+
+    $.terminal.forms.input(term, { prompt: "name: " }).then(function(name) {
+        test_type<string>(name);
+    });
+
+    $.terminal.forms.password(term, { prompt: "passwd: " }).then(function(passwd) {
+        test_type<string>(passwd);
+    });
+
+    $.terminal.forms.boolean(term, { items: [/yes/i, /no/i] }).then(function(result) {
+        test_type<boolean>(result);
+    });
+
+    $.terminal.forms.radio(term, { items: {foo: 10, bar: 20, baz: 30}}).then(function(result: number) {
+        test_type<number>(result);
+    });
+
+    $.terminal.forms.checkboxes(term, { items: {foo: 10, bar: 20, baz: 30}}).then(function(ret: number[]) {
+        var result: number = ret.reduce(function(acc, item) {
+            return acc + item;
+        }, 0);
+        test_type<number>(result);
+    });
+
 })();
