@@ -4082,7 +4082,7 @@ describe('Terminal plugin', function() {
             enter(term, 'test');
             enter(term, 'test');
             var last_div = term.find('.terminal-output > div:last-child');
-            expect(last_div.text()).toEqual('Wrong password try again!');
+            expect(last_div.text()).toEqual('Wrong username or password try again!');
             expect(object.login).toHaveBeenCalledWith('test', 'test');
             enter(term, 'demo');
             enter(term, 'demo');
@@ -5159,7 +5159,7 @@ describe('Terminal plugin', function() {
                 enter(term, 'foo');
                 expect(login.callback).toHaveBeenCalled();
                 var last_div = term.find('.terminal-output > div:last-child');
-                expect(last_div.text()).toEqual('Wrong password!');
+                expect(last_div.text()).toEqual('Wrong username or password!');
                 expect(term.get_prompt()).toEqual('> ');
             });
             it('should ask for login/password on wrong user/password', function() {

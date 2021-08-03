@@ -1,3 +1,21 @@
+## 2.28.0
+### Breaking
+* `nested_formatting` inherit styles by default
+### Feature
+* add forms extension [#610](https://github.com/jcubic/jquery.terminal/issues/610)
+* rewrite xml_formatter and add new tags
+* add animation interface [#611](https://github.com/jcubic/jquery.terminal/issues/611)
+* use dash `-` as input file to read from STDIN in `from-ansi` executable
+* improve auth error message
+* add "enter" typing animation with prefix prompt
+### Bugfix
+* fix rest of the extension files in NodeJS (regression since 2.22.0)
+* fix inheritance of attributes (including styles) and classes in nested formatting
+* fix echo and prompt with animation (using typing options)
+* fix empty prompt
+* disable keyboard on typing animation
+* fix resizing when using default cache [#677](https://github.com/jcubic/jquery.terminal/issues/677)
+
 ## 2.27.1
 ### Bugfix
 * fix `from_ansi` and add option `--ansi -a`

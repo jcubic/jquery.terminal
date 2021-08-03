@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.27.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 06 Jul 2021 14:59:48 +0000
+ * Date: Mon, 02 Aug 2021 11:30:39 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2727,7 +2727,6 @@
                         formatted_position = max;
                     }
                 }
-                output = $.terminal.normalize(output);
                 return output;
             } catch (e) {
                 alert_exception('[Formatting]', e.stack);
@@ -3083,13 +3082,12 @@
         // ---------------------------------------------------------------------
         var prev_prompt_data;
         var draw_prompt = (function() {
-            function set(prompt) {
-                if (prompt) {
-                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
-                    prompt = $.terminal.normalize(prompt);
-                    prompt = crlf(prompt);
+            function format_prompt(prompt) {
+                if (!prompt) {
+                    just_prompt_len = 0;
+                    prompt_len = just_prompt_len + extra_prompt_margin;
+                    return prompt;
                 }
-                last_rendered_prompt = prompt;
                 var lines = $.terminal.split_equal(prompt, num_chars).map(function(line) {
                     if (!$.terminal.have_formatting(line)) {
                         return '[[;;]' + $.terminal.escape_brackets(line) + ']';
@@ -3109,17 +3107,28 @@
                     tabs: settings.tabs
                 });
                 var last_line = $.terminal.format(encoded_last_line, options);
-                var formatted = lines.slice(0, -1).map(function(line) {
+                just_prompt_len = strlen(text(encoded_last_line));
+                prompt_len = just_prompt_len + extra_prompt_margin;
+                return lines.slice(0, -1).map(function(line) {
                     line = $.terminal.encode(line, {
                         tabs: settings.tabs
                     });
                     return '<span class="cmd-line">' +
-                        $.terminal.format(line, options) +
-                        '</span>';
+                           $.terminal.format(line, options) +
+                           '</span>';
                 }).concat([last_line]).join('\n');
+            }
+            function set(prompt) {
+                if (prompt) {
+                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
+                    prompt = $.terminal.normalize(prompt);
+                    prompt = crlf(prompt);
+                }
+                var formatted = format_prompt(prompt);
+                last_rendered_prompt = prompt;
                 // zero width space to make sure prompt margin takes up space,
                 // so that echo with newline: false works when prompt is empty
-                formatted = formatted || '\u206F';
+                formatted = formatted || $.terminal.format('\u200b');
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
@@ -3137,8 +3146,6 @@
                         prompt_node.show();
                     }
                 }
-                just_prompt_len = strlen(text(encoded_last_line));
-                prompt_len = just_prompt_len + extra_prompt_margin;
             }
             return function() {
                 // the data is used as cancelable reference because we have ref
@@ -4789,8 +4796,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.27.1',
-        date: 'Tue, 06 Jul 2021 14:59:48 +0000',
+        version: 'DEV',
+        date: 'Mon, 02 Aug 2021 11:30:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5404,35 +5411,138 @@
             var re = /((?:\[\[(?:[^\][]|\\\])+\])?(?:[^\][]|\\\])*\]?)/;
             var format_re = /\[\[([^\][]+)\][\s\S]*/;
             var format_split_re = /^\[\[([^;]*);([^;]*);([^\]]*)\]/;
+            var class_i = 3; // index of the class in formatting
+            var attrs_i = 5; // index of attributes in formatting
+            // ---------------------------------------------------------------------------
+            function unique(value, index, self) {
+                return self.indexOf(value) === index;
+            }
+            // ---------------------------------------------------------------------------
+            function update_style(new_style, old_style) {
+                new_style = parse_style(new_style);
+                if (!old_style) {
+                    return new_style;
+                }
+                return $.extend(old_style, new_style);
+            }
+            // ---------------------------------------------------------------------------
+            function parse_style(string) {
+                var style = {};
+                string.split(/\s*;\s*/).forEach(function(string) {
+                    var parts = string.split(':').map(function(string) {
+                        return string.trim();
+                    });
+                    var prop = parts[0];
+                    var value = parts[1];
+                    style[prop] = value;
+                });
+                return style;
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_formatting(input) {
+                var result = input.slice();
+                if (input[attrs_i]) {
+                    result[attrs_i] = stringify_attrs(input[attrs_i]);
+                }
+                if (input[class_i]) {
+                    result[class_i] = stringify_class(input[class_i]);
+                }
+                result[0] = stringify_styles(input[0]);
+                return result.join(';');
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_styles(input) {
+                var ignore = input.filter(function(s) {
+                    return s[0] === '-';
+                }).map(function(s) {
+                    return s[1];
+                });
+                return input.filter(function(s) {
+                    return ignore.indexOf(s) === -1 && ignore.indexOf(s[1]) === -1;
+                }).join('');
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_attrs(attrs) {
+                return JSON.stringify(attrs, function(key, value) {
+                    if (key === 'style') {
+                        return stringify_style(value);
+                    }
+                    return value;
+                });
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_class(klass) {
+                return klass.filter(unique).join(' ');
+            }
+            // ---------------------------------------------------------------------------
+            function stringify_style(style) {
+                return Object.keys(style).map(function(prop) {
+                    return prop + ':' + style[prop];
+                }).join(';');
+            }
+            // ---------------------------------------------------------------------------
             function get_inherit_style(stack) {
+                function update_attrs(value) {
+                    if (!output[attrs_i]) {
+                        output[attrs_i] = {};
+                    }
+                    try {
+                        var new_attrs = JSON.parse(value);
+                        if (new_attrs.style) {
+                            var new_style = new_attrs.style;
+                            var old_style = output[attrs_i].style;
+                            new_attrs.style = update_style(new_style, old_style);
+                            output[attrs_i] = $.extend(
+                                new_attrs,
+                                output[attrs_i],
+                                {
+                                    style: update_style(new_style, old_style)
+                                }
+                            );
+                        } else {
+                            output[attrs_i] = $.extend(
+                                new_attrs,
+                                output[attrs_i]
+                            );
+                        }
+                    } catch (e) {
+                        warn('Invalid JSON ' + value);
+                    }
+                }
                 var output = [[], '', ''];
                 if (!stack.length) {
                     return output;
                 }
                 for (var i = stack.length; i--;) {
                     var formatting = stack[i].split(';');
+                    if (formatting.length > 5) {
+                        var last = formatting.slice(5).join(';');
+                        formatting = formatting.slice(0, 5).concat(last);
+                    }
                     var style = formatting[0].split(/(-?[@!gbiuso])/g).filter(Boolean);
                     style.forEach(function(s) {
                         if (output[0].indexOf(s) === -1) {
                             output[0].push(s);
                         }
                     });
-                    for (var j = 1; j < output.length; ++j) {
+                    for (var j = 1; j < formatting.length; ++j) {
                         var value = formatting[j].trim();
-                        if (value && !output[j]) {
-                            output[j] = value;
+                        if (value) {
+                            if (j === class_i) {
+                                if (!output[class_i]) {
+                                    output[class_i] = [];
+                                }
+                                var classes = value.split(/\s+/);
+                                output[class_i] = output[class_i].concat(classes);
+                            } else if (j === attrs_i) {
+                                update_attrs(value);
+                            } else if (!output[j]) {
+                                output[j] = value;
+                            }
                         }
                     }
                 }
-                var ignore = output[0].filter(function(s) {
-                    return s[0] === '-';
-                }).map(function(s) {
-                    return s[1];
-                });
-                output[0] = output[0].filter(function(s) {
-                    return ignore.indexOf(s) === -1 && ignore.indexOf(s[1]) === -1;
-                }).join('');
-                return output.join(';');
+                return stringify_formatting(output);
             }
             return string.split(re).filter(Boolean).map(function(string) {
                 var style;
@@ -6623,8 +6733,8 @@
     // :: Default options
     // -----------------------------------------------------------------------
     $.terminal.nested_formatting.__meta__ = true;
-    // if set to true nested formatting will inherit styles from styles outside
-    $.terminal.nested_formatting.__inherit__ = false;
+    // if set to false nested formatting will not inherit styles colors and attribues
+    $.terminal.nested_formatting.__inherit__ = true;
     // nested formatting will always return different length so we silent the warning
     $.terminal.nested_formatting.__no_warn__ = true;
     $.terminal.defaults = {
@@ -6719,8 +6829,8 @@
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
                 ' have two arguments',
-            wrongPasswordTryAgain: 'Wrong password try again!',
-            wrongPassword: 'Wrong password!',
+            wrongPasswordTryAgain: 'Wrong username or password try again!',
+            wrongPassword: 'Wrong username or password!',
             ajaxAbortError: 'Error while aborting ajax call!',
             wrongArity: "Wrong number of arguments. Function '%s' expects %s got" +
                 ' %s!',
@@ -6809,6 +6919,10 @@
         // :: helper function that use option to render objects
         // ---------------------------------------------------------------------
         function preprocess_value(value, options) {
+            if ($.terminal.Animation && value instanceof $.terminal.Animation) {
+                value.start(self);
+                return false;
+            }
             if (is_function(settings.renderHandler)) {
                 var ret = settings.renderHandler.call(self, value, options, self);
                 if (ret === false) {
@@ -8309,7 +8423,10 @@
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
             var result, i;
-            if (self.enabled() && !animating) {
+            if (animating) {
+                return false;
+            }
+            if (self.enabled()) {
                 if (!self.paused()) {
                     result = user_key_down(e);
                     if (result !== undefined) {
@@ -8374,14 +8491,18 @@
         // :: Typing animation generator
         // ---------------------------------------------------------------------
         function typed(finish_typing_fn) {
-            return function typeing_animation(message, options) {
+            return function typing_animation(message, options) {
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
                 var len = $.terminal.length(message);
                 if (message.length > 0) {
-                    self.set_prompt('');
                     var new_prompt = '';
+                    if (options.prompt) {
+                        new_prompt = options.prompt;
+                    } else {
+                        self.set_prompt('');
+                    }
                     var interval = setInterval(function() {
                         var chr = $.terminal.substring(message, char_i, char_i + 1);
                         new_prompt += chr;
@@ -8409,6 +8530,16 @@
             self.set_prompt(prompt);
             self.echo(message, $.extend({}, options, {typing: false}));
         });
+        // ---------------------------------------------------------------------
+        var typed_enter = (function() {
+            var helper = typed(function(message, prompt, options) {
+                self.set_prompt(prompt);
+                self.echo(prompt + message, $.extend({}, options, {typing: false}));
+            });
+            return function(prompt, message, options) {
+                return helper(message, $.extend({}, options, {prompt: prompt}));
+            };
+        })();
         // ---------------------------------------------------------------------
         function ready(queue) {
             return function(fun) {
@@ -8997,7 +9128,7 @@
                 if (settings.numChars) {
                     return settings.numChars;
                 }
-                if (typeof num_chars === 'undefined' || num_chars === 1000) {
+                if (!num_chars || num_chars === 1000) {
                     num_chars = get_num_chars(self, char_size);
                 }
                 return num_chars;
@@ -9010,7 +9141,7 @@
                 if (settings.numRows) {
                     return settings.numRows;
                 }
-                if (typeof num_rows === 'undefined') {
+                if (!num_rows) {
                     num_rows = get_num_rows(self, char_size);
                 }
                 return num_rows;
@@ -9314,8 +9445,7 @@
                         p.then(function() {
                             d.resolve();
                         });
-                    }
-                    if (is_function(prompt)) {
+                    } else if (is_function(prompt)) {
                         command_line.prompt(function(callback) {
                             prompt.call(self, callback, self);
                         });
@@ -9389,6 +9519,7 @@
                     // only if number of chars changed
                     if (new_num_chars !== num_chars ||
                         new_num_rows !== num_rows) {
+                        self.clear_cache();
                         num_chars = new_num_chars;
                         num_rows = new_num_rows;
                         command_line.resize(num_chars);
@@ -9682,6 +9813,7 @@
                             p.then(function() {
                                 d.resolve();
                             });
+                            return;
                         }
                         var value;
                         if (typeof arg === 'function') {
@@ -9799,11 +9931,20 @@
                     }
                 }
                 when_ready(function ready() {
-                    if (['prompt', 'echo'].indexOf(type) >= 0) {
+                    if (['prompt', 'echo', 'enter'].indexOf(type) >= 0) {
                         if (type === 'prompt') {
                             typed_prompt(string, settings);
                         } else if (type === 'echo') {
                             typed_message(string, settings);
+                        } else if (type === 'enter') {
+                            var prompt = self.get_prompt();
+                            if (typeof prompt === 'function') {
+                                prompt(function(prompt) {
+                                    typed_enter(prompt, string, settings);
+                                });
+                            } else {
+                                typed_enter(prompt, string, settings);
+                            }
                         }
                     } else {
                         d.reject('Invalid type only `echo` and `prompt` are supported');

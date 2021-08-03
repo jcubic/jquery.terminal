@@ -53,20 +53,36 @@ function read_stdin() {
 const input = options.i || options.input;
 const output = options.o || options.output;
 
+
+
 if (options.h || options.help) {
+    usage();
+} else if (input) {
+    if (input === '-') {
+        read_stdin().then(process_buffer);
+    } else {
+        fs.readFile(input).then(process_buffer);
+    }
+} else {
+    usage();
+}
+
+function usage() {
     const bin = path.basename(process.argv[1]);
-    console.log(`usage:\n\t${bin} [--help] [-h] [--input] [-i] <file> [--output] [-o] <file> [-a] [--ansi]
+    const space = ' '.repeat(bin.length);
+    console.log('jQuery Terminal utility to convert ANSI escapes');
+    console.log('Copyright (c) 2010-2021 Jakub T. Jankiewicz');
+    console.log(`
+usage:
+  ${bin} [--help] [-h] [--input] [-i] [- | <file>]
+  ${space} [--output] [-o] <file> [-a] [--ansi]
 
 --ansi -a if this flag is set it will read file or STDIN as ANSI Art (CP437 encoding)
---input -i <file> input ANSI file
+--input -i <file> input ANSI file, if - is used it will read from STDIN
 --output -o <file> output jQuery Terminal formatting file
+--help display this help screen
 
-If no input specified it will read from STDIN
 If no output specified it will print to STDOUT`);
-} else if (input) {
-    fs.readFile(input).then(process_buffer);
-} else {
-    read_stdin().then(process_buffer);
 }
 
 function process_buffer(buff) {

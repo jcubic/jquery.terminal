@@ -23,7 +23,17 @@
  */
 /* global define, module, global, wcwidth, require */
 (function(factory) {
-    var root = typeof window !== 'undefined' ? window : global;
+
+    var root;
+    if (typeof window !== 'undefined') {
+        root = window;
+    } else if (typeof self !== 'undefined') {
+        root = self;
+    } else if (typeof global !== 'undefined') {
+        root = global;
+    } else {
+        throw new Error('Unknow context');
+    }
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(['wcwidth'], function(wcwidth) {

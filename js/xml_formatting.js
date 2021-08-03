@@ -7,7 +7,7 @@
  *           \/              /____/
  * http://terminal.jcubic.pl
  *
- * This is example of how to create custom formatter for jQuery Terminal
+ * This is example of custom formatter for jQuery Terminal
  *
  * Copyright (c) 2014-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
@@ -15,7 +15,16 @@
  */
 /* global define */
 (function(factory) {
-    var root = typeof window !== 'undefined' ? window : global;
+    var root;
+    if (typeof window !== 'undefined') {
+        root = window;
+    } else if (typeof self !== 'undefined') {
+        root = self;
+    } else if (typeof global !== 'undefined') {
+        root = global;
+    } else {
+        throw new Error('Unknow context');
+    }
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
@@ -55,32 +64,78 @@
     }
     // this formatter allow to echo xml where tags are colors like:
     // <red>hello <navy>blue</navy> world</red>
+    // it allso support special tags e.g. big, wide, img or bold
+    var tags = {
+        large: function(attrs) {
+            var size = attrs.size || 1.5;
+            return '[[;;;;;{"style": "--size:' + size + '"}]';
+        },
+        wide: function(attrs) {
+            var spacing = attrs.spacing || '2px';
+            return '[[;;;;;{"style": "letter-spacing: ' + spacing + '"}]';
+        },
+        img: function(attrs) {
+            return '[[@;;;;' + attrs.src + ']' + (attrs.alt || '') + ']';
+        },
+        bold: function() {
+            return '[[b;rgba(255,255,255,0.9);]';
+        },
+        overline: function() {
+            return '[[o;;]';
+        },
+        strike: function() {
+            return '[[s;;]';
+        },
+        underline: function() {
+            return '[[u;;]';
+        },
+        glow: function() {
+            return '[[g;;]';
+        },
+        italic: function() {
+            return '[[i;;]';
+        },
+        link: function(attrs) {
+            return '[[!;;;;' + attrs.href + ']';
+        }
+    };
+    // short aliases
+    tags.b = tags.bold;
+    tags.a = tags.link;
+    tags.i = tags.italic;
+    tags.big = tags.large;
+    var tag_re = /(<\/?\s*[a-zA-Z]+(?: [^>]+)?>)/;
     function xml_formatter(string) {
-        var stack = [];
-        var output = [];
-        var parts = string.split(/(<\/?[a-zA-Z]+>)/);
-        for (var i = 0; i < parts.length; ++i) {
-            if (parts[i][0] === '<') {
-                if (parts[i][1] === '/') {
-                    if (stack.length) {
-                        stack.pop();
+        return string.split(tag_re).map(function(string) {
+            if (string.match(tag_re)) {
+                if (string[1] === '/') {
+                    return ']';
+                }
+                string = string.replace(/^<|>$/g, '');
+                var m = string.match(/^([a-zA-Z]+)(?:\s*(.+))?/);
+                var name = m[1].toLowerCase();
+                var attrs = {};
+                if (m[2]) {
+                    var string_attrs = m[2];
+                    var re = /([a-zA-Z]+)\s*=\s*"([^"]+)"/g;
+                    var match;
+                    while (match = re.exec(string_attrs)) {
+                        var attr_name = match[1];
+                        var value = match[2];
+                        attrs[attr_name] = value;
                     }
+                }
+                if (tags[name]) {
+                    return tags[name](attrs);
                 } else {
-                    stack.push(parts[i].replace(/^<|>$/g, ''));
-                }
-            } else {
-                if (stack.length) {
-                    // top of the stack
-                    output.push('[[;' + stack[stack.length - 1] + ';]');
-                }
-                output.push(parts[i]);
-                if (stack.length) {
-                    output.push(']');
+                    return '[[;' + name + ';]';
                 }
             }
-        }
-        return output.join('');
+            return string;
+        }).join('');
     }
+    xml_formatter.__no_warn__ = true;
+    $.terminal.defaults.allowedAttributes.push('style');
     $.terminal.xml_formatter = xml_formatter;
     $.terminal.new_formatter(xml_formatter);
 });

@@ -315,6 +315,90 @@ declare namespace JQueryTerminal {
         forEach(fn: (item: T, index: number) => any): void;
         append(item: T): void;
     }
+
+    type rendererOptions = {
+        color?: string;
+        background?: string;
+        char?: { width: number, height: number };
+    }
+
+    type option = string | { width: number, height: number };
+
+    type rendererFunction = () => string[];
+
+    type clearArgs = {
+        width?: number;
+        height?: number;
+        size?: number;
+    }
+
+    interface Renderer {
+        new(fn: rendererFunction, options: rendererOptions): Renderer;
+        option(arg: string | rendererOptions, value?: option): option;
+        render(): void;
+        line(text: string, x: number, y: number): void;
+        clear(options: clearArgs): void;
+    }
+
+    interface Animation {
+        new(fps?: null | number, renderer?: Renderer): Animation;
+        start(term: JQueryTerminal): void;
+        stop(): void;
+        render(term: JQueryTerminal): string[];
+        mount(): void;
+        unmount(): void;
+    }
+
+    interface FramesAnimation extends Animation {
+        new(frames: string[][], fps?: null | number, renderer?: Renderer): FramesAnimation;
+    }
+
+    type formStaticTypes = {
+        input: 'input',
+        password: 'password';
+        boolean: 'boolean';
+        checkboxes: 'checkboxes';
+        radio: 'radio';
+    }
+    type formTypes = 'input' | 'password' | 'boolean' | 'checkboxes' | 'radio';
+
+    type simpleInput = {
+        type?: 'input';
+        message?: string;
+        prompt?: string;
+        name?: string;
+    }
+
+    type passwordInput = {
+        type?: 'password';
+        message?: string;
+        prompt?: string;
+        name?: string;
+    }
+
+    type booleanInput = {
+        type?: 'boolean';
+        message?: string;
+        prompt?: string;
+        items?: [RegExp, RegExp];
+        name?: string;
+    }
+
+    type checkboxesInput = {
+        type?: 'checkboxes';
+        message?: string;
+        items: {[key: string]: any};
+        name?: string;
+    }
+
+    type radioInput = {
+        type?: 'radio';
+        message?: string;
+        items: {[key: string]: any};
+        name?: string;
+    }
+    
+    type formData = Array<simpleInput | passwordInput | checkboxesInput | radioInput>;
 }
 
 interface JQuery<TElement = HTMLElement> {
@@ -413,6 +497,20 @@ interface JQueryTerminalStatic {
     };
     // xml
     xml_formatter: JQueryTerminal.FormatterFunction;
+    Renderer: JQueryTerminal.Renderer;
+    CanvasRenderer: JQueryTerminal.Renderer;
+    Animation: JQueryTerminal.Animation;
+    FramesAnimation: JQueryTerminal.FramesAnimation;
+
+    forms: {
+        types: JQueryTerminal.formStaticTypes,
+        form: (term: JQueryTerminal, data: Array<JQueryTerminal.formData>) => Promise<JQueryTerminal.formData>;
+        checkboxes: (term: JQueryTerminal, data: JQueryTerminal.checkboxesInput) => Promise<any[]>;
+        radio: (term: JQueryTerminal, data: JQueryTerminal.radioInput) => Promise<any>;
+        input: (term: JQueryTerminal, data: JQueryTerminal.simpleInput) => Promise<string>;
+        password: (term: JQueryTerminal, data: JQueryTerminal.passwordInput) => Promise<string>;
+        boolean: (term: JQueryTerminal, data: JQueryTerminal.booleanInput) => Promise<boolean>;
+    };
 }
 
 type TerminalException = {
