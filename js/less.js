@@ -195,7 +195,15 @@
                     to_print.push('~');
                 }
             }
-            term.echo(to_print.join('\n'));
+            var finalize;
+            if (options.ansi) {
+                finalize = function(div) {
+                    div.addClass('ansi');
+                };
+            }
+            term.echo(to_print.join('\n'), {
+                finalize: finalize
+            });
             if (term.find('.terminal-output').is(':empty')) {
                 // sometimes the output is not flushed not idea why
                 // TODO: investigate
@@ -536,6 +544,7 @@
     $.fn.less = function(text, options) {
         var settings = $.extend({
             onExit: $.noop,
+            ansi: false,
             formatters: false
         }, options);
         if (!(this instanceof $.fn.init && this.terminal)) {
