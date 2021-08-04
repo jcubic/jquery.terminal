@@ -63,6 +63,7 @@
         constructor(render, {
             color = '#cccccc',
             background = 'black',
+            font = 'monospace',
             char = {width: 7, height: 14}
         } = {}) {
             this._options = {
@@ -117,7 +118,7 @@
             this.canvas.height = height;
             this.ctx.fillStyle = this.option('background');
             this.ctx.fillRect(0, 0, width, height);
-            this.ctx.font = `1em monospace`;
+            this.ctx.font = `1em ${this.option('font')}`;
             this.ctx.textBaseline = 'hanging';
             this.ctx.fillStyle = this.option('color');
         }
@@ -153,9 +154,11 @@
                     var style = getComputedStyle(term[0]);
                     var color = style.getPropertyValue('--color') || '#cccccc';
                     var background = style.getPropertyValue('--background') || 'black';
+                    var font = style.getPropertyValue('--font') || 'monospace';
                     self.renderer.option({
                         char: term.geometry().char,
                         background,
+                        font,
                         color
                     });
                     self.renderer.render();
