@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Tue, 03 Aug 2021 14:33:33 +0000
+ * Date: Wed, 04 Aug 2021 06:57:02 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -235,6 +235,10 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
 }
+.terminal span[data-text] span, .cmd span[data-text] span {
+    text-decoration: inherit;
+}
+
 .terminal .ansi > div {
     line-height: 13px !important;
     line-height: calc(var(--size, 1) * 13px) !important;

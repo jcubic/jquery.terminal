@@ -235,6 +235,10 @@ body.full-screen-terminal .terminal {
     color: #aaa;
     background-color: #000;
 }
+.terminal span[data-text] span, .cmd span[data-text] span {
+    text-decoration: inherit;
+}
+
 .terminal .ansi > div {
     line-height: 13px !important;
     line-height: calc(var(--size, 1) * 13px) !important;

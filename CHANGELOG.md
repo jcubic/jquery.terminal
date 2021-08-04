@@ -1,3 +1,7 @@
+## 2.28.1
+### Bugfix
+* fix applying style of text-decoration (e.g. underline)
+
 ## 2.28.0
 ### Breaking
 * `nested_formatting` inherit styles by default
