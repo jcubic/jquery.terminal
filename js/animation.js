@@ -60,12 +60,14 @@
     }
 })(function($) {
     class Renderer {
+        /* eslint-disable no-unused-vars */
         constructor(render, {
             color = '#cccccc',
             background = 'black',
             font = 'monospace',
             char = {width: 7, height: 14}
         } = {}) {
+        /* eslint-enable no-unused-vars */
             this._options = {
                 background,
                 color,
