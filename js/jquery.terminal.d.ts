@@ -141,7 +141,7 @@ declare namespace JQueryTerminal {
     type setStringFunction = (value: string) => void;
     type setEchoValueFunction = (value: echoValueOrPromise) => void;
     type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => (void | JQueryTerminal.echoValueOrPromise)) | string | null;
-    type cmdPrompt<T = Cmd> = ((this: Cmd, setPrompt: setStringFunction) => void) | string;
+    type cmdPrompt<T = Cmd> = ((this: T, setPrompt: setStringFunction) => void) | string;
 
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
@@ -586,7 +586,7 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     column(include_prompt: boolean): number;
     prompt(prompt: JQueryTerminal.cmdPrompt): Cmd;
     prompt(last_render: true): string;
-    prompt<T extends JQueryTerminal.cmdPrompt<void>>(): T;
+    prompt<T extends JQueryTerminal.cmdPrompt>(): T;
     kill_text(): string;
     position(): JQueryCoordinates;
     position<T extends number>(): number;

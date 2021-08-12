@@ -1,6 +1,8 @@
 ## 2.29.0
 ### Feature
 * add animation to exec [#679](https://github.com/jcubic/jquery.terminal/issues/679)
+### Bugfix
+* tweak types for cmd function prompt
 
 ## 2.28.1
 ### Bugfix
