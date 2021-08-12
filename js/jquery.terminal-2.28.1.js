@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 12 Aug 2021 10:13:02 +0000
+ * Date: Thu, 12 Aug 2021 10:37:20 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4800,7 +4800,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.28.1',
-        date: 'Thu, 12 Aug 2021 10:13:02 +0000',
+        date: 'Thu, 12 Aug 2021 10:37:20 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7993,7 +7993,9 @@
                 self.resume();
             }
             // -----------------------------------------------------------------
-
+            function is_animation_promise(ret) {
+                return is_function(ret.done || ret.then) && animating;
+            }
             // -----------------------------------------------------------------
             function invoke() {
                 // Call user interpreter function
@@ -8001,7 +8003,7 @@
                 if (result) {
                     // auto pause/resume when user return promises
                     // it should not pause when user return promise from read()
-                    if (!force_awake) {
+                    if (!force_awake && !is_animation_promise(result)) {
                         self.pause(settings.softPause);
                     }
                     force_awake = false;

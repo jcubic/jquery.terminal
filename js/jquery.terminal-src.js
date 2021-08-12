@@ -7993,7 +7993,9 @@
                 self.resume();
             }
             // -----------------------------------------------------------------
-
+            function is_animation_promise(ret) {
+                return is_function(ret.done || ret.then) && animating;
+            }
             // -----------------------------------------------------------------
             function invoke() {
                 // Call user interpreter function
@@ -8001,7 +8003,7 @@
                 if (result) {
                     // auto pause/resume when user return promises
                     // it should not pause when user return promise from read()
-                    if (!force_awake) {
+                    if (!force_awake && !is_animation_promise(result)) {
                         self.pause(settings.softPause);
                     }
                     force_awake = false;
