@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 12 Aug 2021 10:08:02 +0000
+ * Date: Thu, 12 Aug 2021 10:13:02 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3503,6 +3503,9 @@
                 return self;
             },
             invoke_key: function(shortcut) {
+                if (!enabled) {
+                    warn('invoke_key("' + shortcut + '") called on disabled terminal');
+                }
                 var keys = shortcut.toUpperCase().split('+');
                 var key = keys.pop();
                 var ctrl = keys.indexOf('CTRL') !== -1;
@@ -4797,7 +4800,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.28.1',
-        date: 'Thu, 12 Aug 2021 10:08:02 +0000',
+        date: 'Thu, 12 Aug 2021 10:13:02 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

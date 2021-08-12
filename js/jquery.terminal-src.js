@@ -3503,6 +3503,9 @@
                 return self;
             },
             invoke_key: function(shortcut) {
+                if (!enabled) {
+                    warn('invoke_key("' + shortcut + '") called on disabled terminal');
+                }
                 var keys = shortcut.toUpperCase().split('+');
                 var key = keys.pop();
                 var ctrl = keys.indexOf('CTRL') !== -1;
