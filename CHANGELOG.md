@@ -1,3 +1,7 @@
+## 2.29.0
+### Feature
+* add animation to exec [#679](https://github.com/jcubic/jquery.terminal/issues/679)
+
 ## 2.28.1
 ### Bugfix
 * fix applying style of text-decoration (e.g. underline)

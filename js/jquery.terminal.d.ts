@@ -145,6 +145,13 @@ declare namespace JQueryTerminal {
 
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
+    type execOptions = {
+        typing?: boolean;
+        delay?: number;
+        silent?: boolean;
+        deferred?: JQuery.Deferred<void>
+    }
+
     type pushOptions = {
         infiniteLogin?: boolean;
         prompt?: ExtendedPrompt;
@@ -397,7 +404,7 @@ declare namespace JQueryTerminal {
         items: {[key: string]: any};
         name?: string;
     }
-    
+
     type formData = Array<simpleInput | passwordInput | checkboxesInput | radioInput>;
 }
 
@@ -719,7 +726,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     export_view(): JQueryTerminal.View;
     import_view(view: JQueryTerminal.View): JQueryTerminal;
     save_state(command?: string, ignore_hash?: boolean, index?: number): JQueryTerminal;
-    exec(command: string, silent?: boolean, deferred?: JQuery.Deferred<void>): JQuery.Promise<void>;
+    exec(command: string, silent_or_options?: boolean | JQueryTerminal.execOptions, options?: JQueryTerminal.execOptions): JQuery.Promise<void>;
     autologin(user: string, token: string, silent?: boolean): JQueryTerminal;
     // there is success and error callbacks because we call this function from terminal and auth function can
     // be created by user

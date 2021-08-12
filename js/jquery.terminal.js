@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 04 Aug 2021 06:57:27 +0000
+ * Date: Thu, 12 Aug 2021 09:40:51 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4797,7 +4797,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.28.1',
-        date: 'Wed, 04 Aug 2021 06:57:27 +0000',
+        date: 'Thu, 12 Aug 2021 09:40:51 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8680,15 +8680,44 @@
             // :: Execute a command, it will handle commands that do AJAX
             // :: calls and have delays, if the second argument is set to
             // :: true it will not echo executed command
+            // :: if second argument is object is used as options
             // -------------------------------------------------------------
-            exec: function(command, silent, deferred) {
-                var d = deferred || new $.Deferred();
+            exec: function(command, silent, options) {
+                function invoke(silent) {
+                    // commands may return promise from user code
+                    // it will resolve exec promise when user promise
+                    // is resolved
+                    var ret = commands(command, silent, true);
+                    unpromise(ret, function() {
+                        // reset prev command for push called after exec
+                        // so push didn't get name/prompt from exec command
+                        prev_command = null;
+                        d.resolve();
+                    }, function() {
+                        prev_command = null;
+                        d.reject();
+                    });
+                }
+                if (silent && typeof silent === 'object') {
+                    options = silent;
+                    silent = null;
+                }
+                var settings = $.extend({
+                    deferred: new $.Deferred(),
+                    silent: false,
+                    typing: false,
+                    delay: 100
+                }, options);
+                if (silent === null) {
+                    silent = settings.silent;
+                }
+                var d = settings.deferred;
                 cmd_ready(function ready() {
                     if ($.isArray(command)) {
                         (function recur() {
                             var cmd = command.shift();
                             if (cmd) {
-                                self.exec(cmd, silent).done(recur);
+                                self.exec(cmd, silent, options).done(recur);
                             } else {
                                 d.resolve();
                             }
@@ -8696,21 +8725,17 @@
                     } else if (paused) {
                         // both commands executed here (resume will call Term::exec)
                         // delay command multiple time
-                        delayed_commands.push([command, silent, d]);
-                    } else {
-                        // commands may return promise from user code
-                        // it will resolve exec promise when user promise
-                        // is resolved
-                        var ret = commands(command, silent, true);
-                        unpromise(ret, function() {
-                            // reset prev command for push called after exec
-                            // so push didn't get name/prompt from exec command
-                            prev_command = null;
-                            d.resolve();
-                        }, function() {
-                            prev_command = null;
-                            d.reject();
+                        delayed_commands.push([command, silent, settings]);
+                    } else if (settings.typing && !silent) {
+                        var delay = settings.delay;
+                        var ret = self.typing('enter', delay, command, {
+                            delay: delay
                         });
+                        ret.then(function() {
+                            invoke(true);
+                        });
+                    } else {
+                        invoke(silent);
                     }
                 });
                 // while testing it didn't executed last exec when using this

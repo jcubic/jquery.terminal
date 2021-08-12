@@ -391,7 +391,9 @@ $.terminal.defaults.formatters.push(red);
     // -------------------------------------------------------------------------
     term.exec("foo");
     term.exec("foo", true);
-    term.exec("foo", true, jQuery.Deferred()).then(function() {
+    term.exec("foo", true, {typing: true, delay: 200}).then(function() {
+    });
+    term.exec("foo", {silent: true, typing: true, delay: 200}).then(function() {
     });
     // -------------------------------------------------------------------------
     // :: autologin
