@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 12 Aug 2021 09:40:51 +0000
+ * Date: Thu, 12 Aug 2021 10:08:02 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4797,7 +4797,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.28.1',
-        date: 'Thu, 12 Aug 2021 09:40:51 +0000',
+        date: 'Thu, 12 Aug 2021 10:08:02 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6757,6 +6757,7 @@
         memory: false,
         cancelableAjax: true,
         processArguments: true,
+        execAnimation: false,
         linksNoReferrer: false,
         useCache: true,
         anyLinks: false,
@@ -8702,16 +8703,16 @@
                     options = silent;
                     silent = null;
                 }
-                var settings = $.extend({
+                var exec_settings = $.extend({
                     deferred: new $.Deferred(),
                     silent: false,
-                    typing: false,
+                    typing: settings.execAnimation,
                     delay: 100
                 }, options);
                 if (silent === null) {
-                    silent = settings.silent;
+                    silent = exec_settings.silent;
                 }
-                var d = settings.deferred;
+                var d = exec_settings.deferred;
                 cmd_ready(function ready() {
                     if ($.isArray(command)) {
                         (function recur() {
@@ -8726,8 +8727,8 @@
                         // both commands executed here (resume will call Term::exec)
                         // delay command multiple time
                         delayed_commands.push([command, silent, settings]);
-                    } else if (settings.typing && !silent) {
-                        var delay = settings.delay;
+                    } else if (exec_settings.typing && !silent) {
+                        var delay = exec_settings.delay;
                         var ret = self.typing('enter', delay, command, {
                             delay: delay
                         });

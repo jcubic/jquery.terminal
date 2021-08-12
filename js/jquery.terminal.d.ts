@@ -652,6 +652,7 @@ type TerminalOptions = {
     memory?: boolean;
     cancelableAjax?: boolean;
     processArguments?: boolean;
+    execAnimation?: boolean;
     linksNoReferrer?: boolean;
     javascriptLinks?: boolean;
     processRPCResponse?: null | JQueryTerminal.processRPCResponseFunction;
