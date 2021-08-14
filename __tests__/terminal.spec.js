@@ -4936,11 +4936,12 @@ describe('Terminal plugin', function() {
             });
             var arr = [];
             for (var i = 0; i<10; i++) {
+                arr.push('> foo');
                 arr.push('Hello ' + i);
             }
             var test_str = arr.join('\n');
             function text_echoed() {
-                return term.find('.terminal-output > div:not(.terminal-command)')
+                return term.find('.terminal-output > div')
                     .map(function() {
                         return $(this).text();
                     }).get().join('\n');
@@ -4949,15 +4950,20 @@ describe('Terminal plugin', function() {
                 term.clear();
                 counter = 0;
                 var i = 0;
-                return new Promise(function(resolve) {
+                return new Promise(function(resolve, reject) {
                     (function recur() {
-                        if (i++ < 10) {
-                            term.exec('foo').then(recur);
-                        } else {
-                            expect(text_echoed()).toEqual(test_str);
-                            resolve();
+                        try {
+                            if (i++ < 10) {
+                                term.exec('foo').then(recur).catch(reject);
+                            } else {
+                                resolve();
+                            }
+                        } catch(e) {
+                            reject(e);
                         }
                     })();
+                }).then(() => {
+                    expect(text_echoed()).toEqual(test_str);
                 });
             });
             it('should execute functions in order when used delayed commands', function() {

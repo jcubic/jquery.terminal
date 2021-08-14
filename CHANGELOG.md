@@ -5,6 +5,7 @@
 * if interpreter returns a promise and it's animating the terminal will not pause (for exec array)
 ### Bugfix
 * tweak types for cmd function prompt
+* fix broken order of execution in `exec` when using pause/resume
 
 ## 2.28.1
 ### Bugfix

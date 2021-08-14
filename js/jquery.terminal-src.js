@@ -6659,8 +6659,16 @@
         return get_type(object) === 'function';
     }
     // -----------------------------------------------------------------------
+    function is_object(object) {
+        return object && typeof object === 'object';
+    }
+    // -----------------------------------------------------------------------
     function is_promise(object) {
-        return is_function(object && (object.then || object.done));
+        return is_object(object) && is_function(object.then || object.done);
+    }
+    // -----------------------------------------------------------------------
+    function is_deferred(object) {
+        return is_promise(object) && is_function(object.promise);
     }
     // -----------------------------------------------------------------------
     if (!Array.isArray) {
@@ -8003,8 +8011,12 @@
                 if (result) {
                     // auto pause/resume when user return promises
                     // it should not pause when user return promise from read()
-                    if (!force_awake && !is_animation_promise(result)) {
-                        self.pause(settings.softPause);
+                    if (!force_awake) {
+                        if (is_animation_promise(result)) {
+                            paused = true;
+                        } else {
+                            self.pause(settings.softPause);
+                        }
                     }
                     force_awake = false;
                     var error = make_label_error('Command');
@@ -8014,13 +8026,16 @@
                     } else {
                         return $.when(result).done(show).catch(error);
                     }
-                } else if (paused) {
-                    resume_callbacks.push(function() {
-                        // exec with resume/pause in user code
-                        after_exec();
-                    });
                 } else {
-                    after_exec();
+                    if (paused) {
+                        resume_callbacks.push(function() {
+                            // exec with resume/pause in user code
+                            after_exec();
+                        });
+                    } else {
+                        after_exec();
+                    }
+                    return deferred.promise();
                 }
             }
             // -----------------------------------------------------------------
@@ -8709,13 +8724,16 @@
                     silent = null;
                 }
                 var exec_settings = $.extend({
-                    deferred: new $.Deferred(),
+                    deferred: null,
                     silent: false,
                     typing: settings.execAnimation,
                     delay: 100
                 }, options);
                 if (silent === null) {
                     silent = exec_settings.silent;
+                }
+                if (!is_deferred(exec_settings.deferred)) {
+                    exec_settings.deferred = new $.Deferred();
                 }
                 var d = exec_settings.deferred;
                 cmd_ready(function ready() {
@@ -8731,14 +8749,18 @@
                     } else if (paused) {
                         // both commands executed here (resume will call Term::exec)
                         // delay command multiple time
-                        delayed_commands.push([command, silent, settings]);
+                        delayed_commands.push([command, silent, exec_settings]);
                     } else if (exec_settings.typing && !silent) {
                         var delay = exec_settings.delay;
+                        paused = true;
                         var ret = self.typing('enter', delay, command, {
                             delay: delay
                         });
                         ret.then(function() {
                             invoke(true);
+                        });
+                        d.then(function() {
+                            paused = false;
                         });
                     } else {
                         invoke(silent);
