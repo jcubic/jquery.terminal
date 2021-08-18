@@ -11,13 +11,11 @@
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&70026302c303f552d50247385b6873083e3b11db)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=devel&7e6f8fbfd10d76234295d93c9d8c25b8d7b7e01d)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&7870b158c3d05d4005770f4ff7eafdd2)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![LICENSE MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
-
-[![Paid Support](https://github.com/jcubic/jquery.terminal/blob/master/.github/support.svg?raw=true)](https://xscode.com/jcubic/jquery.terminal)
 
 ### Summary
 
@@ -313,10 +311,6 @@ Projects used:
 * [jQuery Caret](https://github.com/accursoft/caret) by Gideon Sireling (3-BSD)
 * [sprintf.js](https://github.com/alexei/sprintf.js) by [Alexandru Mărășteanu](http://alexei.ro/) (3-BSD)
 * [node-ansiparser](https://github.com/netzkolchose/node-ansiparser) by Joerg Breitbart (MIT)
-
-### Paid Support
-
-If you have some non-trivial request or need help, you can get paid support at [xs:code](https://xscode.com/jcubic/jquery.terminal).
 
 ### License
 
