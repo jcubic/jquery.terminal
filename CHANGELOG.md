@@ -3,6 +3,7 @@
 * add animation to `exec` and `execAnimation` option [#679](https://github.com/jcubic/jquery.terminal/issues/679)
 * add warning when calling invoke_key on disabled terminal [#678](https://github.com/jcubic/jquery.terminal/issues/678)
 * if interpreter returns a promise and it's animating the terminal will not pause (for exec array)
+* allow to use brackets inside extended commands (e.g. JavaScript code to hide commands)
 ### Bugfix
 * tweak types for cmd function prompt
 * fix broken order of execution in `exec` when using pause/resume

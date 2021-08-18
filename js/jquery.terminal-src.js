@@ -1155,7 +1155,8 @@
     var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
     var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|`[^`\\]*(?:\\[\S\s][^`\\]*)*`|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
     var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
-    var format_exec_re = /(\[\[(?:[^\][]|\\\])+\]\])/;
+    var format_exec_split_re = /(\[\[(?:-?[@!gbiuso])*;[^\]]+\](?:\\[[\]]|[^\]])*\]|\[\[[\s\S]+?\]\])/;
+    var format_exec_re = /(\[\[[\s\S]+?\]\])/;
     var float_re = /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
     var re_re = /^\/((?:\\\/|[^/]|\[[^\]]*\/[^\]]*\])+)\/([gimsuy]*)$/;
     var string_re = /("(?:[^"\\]|\\(?:\\\\)*"|\\\\)*"|'(?:[^'\\]|\\(?:\\\\)*'|\\\\)*'|`(?:[^`\\]|\\(?:\\\\)*`|\\\\)*`)/;
@@ -4876,6 +4877,12 @@
             return typeof str === 'string' && !!str.match(format_full_re);
         },
         // ---------------------------------------------------------------------
+        is_extended_command: function is_extended_command(str) {
+            return typeof str === 'string' &&
+                str.match(format_exec_re) &&
+                !$.terminal.is_formatting(str);
+        },
+        // ---------------------------------------------------------------------
         // :: return array of formatting and text between them
         // ---------------------------------------------------------------------
         format_split: function format_split(str) {
@@ -7687,10 +7694,9 @@
                             }
                         }
                         if (line_settings.exec) {
-                            var parts = string.split(format_exec_re);
+                            var parts = string.split(format_exec_split_re);
                             string = $.map(parts, function(string) {
-                                if (string && string.match(format_exec_re) &&
-                                    !$.terminal.is_formatting(string)) {
+                                if ($.terminal.is_extended_command(string)) {
                                     // redraw should not execute commands and it have
                                     // and lines variable have all extended commands
                                     string = string.replace(/^\[\[|\]\]$/g, '');
@@ -10063,7 +10069,7 @@
                 }
                 if (e.stack) {
                     var stack = $.terminal.escape_brackets(e.stack);
-                    self.echo(stack.split(/\n/g).map(function(trace) {
+                    var output = stack.split(/\n/g).map(function(trace) {
                         // nested formatting will handle urls but that formatting
                         // can be removed - this code was created before
                         // that formatting existed (see commit ce01c3f5)
@@ -10071,7 +10077,8 @@
                             trace.replace(url_re, function(url) {
                                 return ']' + url + '[[;;;terminal-error]';
                             }) + ']';
-                    }).join('\n'), {
+                    }).join('\n');
+                    self.echo(output, {
                         finalize: function(div) {
                             div.addClass('terminal-exception terminal-stack-trace');
                         },
