@@ -7,6 +7,7 @@
 ### Bugfix
 * tweak types for cmd function prompt
 * fix broken order of execution in `exec` when using pause/resume
+* fix mixing extended commands and terminal formatting
 
 ## 2.28.1
 ### Bugfix

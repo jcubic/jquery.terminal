@@ -5556,7 +5556,7 @@
             }
             return string.split(re).filter(Boolean).map(function(string) {
                 var style;
-                if (string.match(/^\[\[/)) {
+                if (string.match(/^\[\[/) && !$.terminal.is_extended_command(string)) {
                     var formatting = string.replace(format_re, '$1');
                     var is_formatting = $.terminal.is_formatting(string);
                     string = string.replace(format_split_re, '');

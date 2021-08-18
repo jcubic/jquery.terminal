@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 18 Aug 2021 17:35:27 +0000
+ * Date: Wed, 18 Aug 2021 17:39:30 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4801,7 +4801,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 18 Aug 2021 17:35:27 +0000',
+        date: 'Wed, 18 Aug 2021 17:39:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5556,7 +5556,7 @@
             }
             return string.split(re).filter(Boolean).map(function(string) {
                 var style;
-                if (string.match(/^\[\[/)) {
+                if (string.match(/^\[\[/) && !$.terminal.is_extended_command(string)) {
                     var formatting = string.replace(format_re, '$1');
                     var is_formatting = $.terminal.is_formatting(string);
                     string = string.replace(format_split_re, '');
