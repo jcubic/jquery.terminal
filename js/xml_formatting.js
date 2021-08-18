@@ -135,6 +135,7 @@
         }).join('');
     }
     xml_formatter.__no_warn__ = true;
+    xml_formatter.tags = tags;
     $.terminal.defaults.allowedAttributes.push('style');
     $.terminal.xml_formatter = xml_formatter;
     $.terminal.new_formatter(xml_formatter);
