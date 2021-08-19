@@ -64,15 +64,17 @@
     }
     // this formatter allow to echo xml where tags are colors like:
     // <red>hello <navy>blue</navy> world</red>
-    // it allso support special tags e.g. big, wide, img or bold
+    // it allso support special tags e.g. link, img or bold
     var tags = {
-        size: function(attrs) {
-            var size = attrs.size || 1;
-            return '[[;;;;;{"style": "--size:' + size + '"}]';
-        },
-        wide: function(attrs) {
-            var spacing = attrs.spacing || '2px';
-            return '[[;;;;;{"style": "letter-spacing: ' + spacing + '"}]';
+        font: function(attrs) {
+            var style = [];
+            if ('size' in attrs) {
+                style.push('--size:' + attrs.size);
+            }
+            if ('spacing' in attrs) {
+                style.push('letter-spacing: ' + attrs.spacing);
+            }
+            return '[[;;;;;{"style": "' + style.join(';') + '"}]';
         },
         img: function(attrs) {
             return '[[@;;;;' + attrs.src + ']' + (attrs.alt || '') + ']';
