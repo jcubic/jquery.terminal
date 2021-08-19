@@ -7,6 +7,7 @@
 * if interpreter returns a promise and it's animating the terminal will not pause (for exec array)
 * allow to use brackets inside extended commands (e.g. JavaScript code to hide commands)
 * expose `$.terminal.xml_formatter.tags`
+* add `--glow` [conditional hack](https://www.kizu.ru/conditions-for-css-variables/)
 ### Bugfix
 * tweak types for cmd function prompt
 * fix broken order of execution in `exec` when using pause/resume

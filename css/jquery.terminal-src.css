@@ -700,6 +700,16 @@ terminal .terminal-output > div {
 /* padding added as margin to .cmd to fix FireFox bug see: https://stackoverflow.com/q/29986977/387194 */
 .terminal {
     padding-bottom: 0;
+    /* conditionals in CSS ref: https://www.kizu.ru/conditions-for-css-variables/ */
+    --glow: 0;
+    text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
+}
+.terminal .terminal-output > :not(.raw) .error,
+.terminal .terminal-output > :not(.raw) .error * {
+    text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
+}
+.terminal .terminal-output > :not(.raw) a[href] {
+    text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
 }
 .terminal .cmd {
     margin-bottom: 10px;
