@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 18 Aug 2021 17:39:30 +0000
+ * Date: Thu, 19 Aug 2021 17:55:31 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2744,7 +2744,7 @@
                 before: before
             });
             return $.terminal.format(encoded, {
-                char_width: settings.char_width,
+                charWidth: settings.charWidth,
                 allowedAttributes: settings.allowedAttributes || []
             });
         }
@@ -3101,7 +3101,7 @@
                     }).join('');
                 });
                 var options = {
-                    char_width: settings.char_width
+                    charWidth: settings.charWidth
                 };
                 prompt_last_line = lines[lines.length - 1];
                 var encoded_last_line = $.terminal.encode(lines[lines.length - 1], {
@@ -4404,8 +4404,8 @@
         if (is_ch_unit_supported) {
             return 'width: ' + len + 'ch';
         } else if (!is_css_variables_supported) {
-            if (options.char_width) {
-                return 'width: ' + (options.char_width * len) + 'px';
+            if (options.charWidth) {
+                return 'width: ' + (options.charWidth * len) + 'px';
             }
         } else {
             return '--length: ' + len;
@@ -4413,7 +4413,7 @@
         return '';
     }
     // -------------------------------------------------------------------------
-    // options {char_width}
+    // options {charWidth}
     function extra_css(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
@@ -4801,7 +4801,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 18 Aug 2021 17:39:30 +0000',
+        date: 'Thu, 19 Aug 2021 17:55:31 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5805,7 +5805,7 @@
                 linksNoReferrer: false,
                 linksNoFollow: false,
                 allowedAttributes: [],
-                char_width: undefined,
+                charWidth: undefined,
                 escape: true,
                 anyLinks: false
             }, options || {});
@@ -7556,14 +7556,15 @@
                 linksNoReferrer: settings.linksNoReferrer,
                 linksNoFollow: settings.linksNoFollow,
                 anyLinks: settings.anyLinks,
-                char_width: char_size.width,
+                charWidth: char_size.width,
+                useCache: true,
                 escape: false,
                 allowedAttributes: options.allowedAttributes || []
             };
-            var use_cache = settings.useCache && format_cache;
+            var use_cache = format_cache && settings.useCache && format_options.useCache;
             function format_buff(arg, newline) {
-                var args = JSON.stringify([arg, format_options]);
                 if (use_cache) {
+                    var args = JSON.stringify([arg, format_options]);
                     if (format_cache.has(args)) {
                         return format_cache.get(args);
                     }
@@ -7656,10 +7657,12 @@
         function process_line(line) {
             // prevent exception in display exception
             try {
+                var use_cache = true || !is_function(line.value);
                 var line_settings = $.extend({
                     exec: true,
                     raw: false,
                     finalize: $.noop,
+                    useCache: use_cache,
                     invokeMethods: false,
                     formatters: true,
                     convertLinks: settings.convertLinks
@@ -7675,7 +7678,7 @@
                 }
                 if (string !== '') {
                     if (!line_settings.raw) {
-                        if (settings.useCache) {
+                        if (settings.useCache && use_cache) {
                             var key = string;
                             if (string_cache && string_cache.has(key)) {
                                 string = string_cache.get(key);
@@ -7743,7 +7746,7 @@
                     }
                 }
                 var arg = array || string;
-                if (string_cache && key) {
+                if (string_cache && key && use_cache) {
                     string_cache.set(key, arg);
                 }
                 buffer_line(arg, line.index, line_settings);
@@ -10879,7 +10882,7 @@
                 onPaste: settings.onPaste,
                 width: '100%',
                 enabled: false,
-                char_width: char_size.width,
+                charWidth: char_size.width,
                 keydown: key_down,
                 keymap: terminal_init_keymap,
                 clickTimeout: settings.clickTimeout,
@@ -11177,7 +11180,7 @@
                 var width = char_size.width;
                 char_size = get_char_size(self);
                 if (width !== char_size.width) {
-                    command_line.option('char_width', char_size.width).refresh();
+                    command_line.option('charWidth', char_size.width).refresh();
                 }
             }
             resize();
