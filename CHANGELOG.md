@@ -1,4 +1,6 @@
 ## 2.29.0
+### Breaking
+* remove undocumented `<large>`/`<big>` and add `<size>` tags to xml formatter
 ### Feature
 * add animation to `exec` and `execAnimation` option [#679](https://github.com/jcubic/jquery.terminal/issues/679)
 * add warning when calling invoke_key on disabled terminal [#678](https://github.com/jcubic/jquery.terminal/issues/678)

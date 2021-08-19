@@ -66,8 +66,8 @@
     // <red>hello <navy>blue</navy> world</red>
     // it allso support special tags e.g. big, wide, img or bold
     var tags = {
-        large: function(attrs) {
-            var size = attrs.size || 1.5;
+        size: function(attrs) {
+            var size = attrs.size || 1;
             return '[[;;;;;{"style": "--size:' + size + '"}]';
         },
         wide: function(attrs) {
@@ -103,7 +103,6 @@
     tags.b = tags.bold;
     tags.a = tags.link;
     tags.i = tags.italic;
-    tags.big = tags.large;
     var tag_re = /(<\/?\s*[a-zA-Z]+(?: [^>]+)?>)/;
     function xml_formatter(string) {
         return string.split(tag_re).map(function(string) {
@@ -140,3 +139,5 @@
     $.terminal.xml_formatter = xml_formatter;
     $.terminal.new_formatter(xml_formatter);
 });
+
+
