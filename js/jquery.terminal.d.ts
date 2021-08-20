@@ -196,7 +196,7 @@ declare namespace JQueryTerminal {
     type formatOptions = {
         linksNoReferrer?: boolean;
         anyLinks?: boolean;
-        char_width?: number;
+        charWidth?: number;
         linksNoFollow?: boolean;
         allowedAttributes: string[];
         escape: boolean;
@@ -545,7 +545,7 @@ type CmdOptions = {
     width?: number;
     historyFilter?: JQueryTerminal.historyFilter;
     commands?: JQueryTerminal.commandsCmdFunction;
-    char_width?: number;
+    charWidth?: number;
     onCommandChange?: (this: Cmd, command: string) => void;
     name?: string;
     keypress?: JQueryTerminal.KeyEventHandler<Cmd>;
@@ -557,7 +557,7 @@ type CmdOptions = {
 type CmdOption = "mask" | "caseSensitiveSearch" | "historySize" | "prompt" | "enabled" |
     "history" | "tabs" | "onPositionChange" | "clickTimeout" | "holdTimeout" | "onPaste" |
     "holdRepeatTimeout" | "repeatTimeoutKeys" | "width" | "historyFilter" | "commands" |
-    "char_width" | "onCommandChange" | "name" | "keypress" | "keydown" | "mobileDelete";
+    "charWidth" | "onCommandChange" | "name" | "keypress" | "keydown" | "mobileDelete";
 
 // we copy methods from jQuery to overwrite it
 // see: https://github.com/Microsoft/TypeScript/issues/978
