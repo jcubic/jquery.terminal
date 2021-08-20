@@ -1957,7 +1957,6 @@
                 prev_command = '';
                 no_keydown = true;
 
-                self.set('');
                 var promise;
                 if (settings.commands) {
                     promise = settings.commands.call(self, tmp);
@@ -1969,6 +1968,7 @@
                         draw_prompt();
                     }
                 }
+                self.set('');
                 clip.val('');
                 clip.$node.focus();
                 return false;

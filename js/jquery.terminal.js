@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 19 Aug 2021 17:55:31 +0000
+ * Date: Fri, 20 Aug 2021 12:14:42 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1957,7 +1957,6 @@
                 prev_command = '';
                 no_keydown = true;
 
-                self.set('');
                 var promise;
                 if (settings.commands) {
                     promise = settings.commands.call(self, tmp);
@@ -1969,6 +1968,7 @@
                         draw_prompt();
                     }
                 }
+                self.set('');
                 clip.val('');
                 clip.$node.focus();
                 return false;
@@ -4801,7 +4801,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 19 Aug 2021 17:55:31 +0000',
+        date: 'Fri, 20 Aug 2021 12:14:42 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

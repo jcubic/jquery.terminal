@@ -12,6 +12,7 @@
 * tweak types for cmd function prompt
 * fix broken order of execution in `exec` when using pause/resume
 * fix mixing extended commands and terminal formatting
+* fix invoking `get_command()` in interpreter (clear command after user action)
 
 ## 2.28.1
 ### Bugfix
