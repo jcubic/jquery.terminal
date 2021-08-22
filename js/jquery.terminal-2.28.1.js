@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 20 Aug 2021 12:14:42 +0000
+ * Date: Sun, 22 Aug 2021 08:57:01 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4764,7 +4764,8 @@
         }
     })();
     // -------------------------------------------------------------------------
-    function process_command(string, fn) {
+    function process_command(original, fn) {
+        var string = original.trim();
         var array = string.match(command_re) || [];
         if (array.length) {
             var name = array.shift();
@@ -4782,7 +4783,7 @@
             });
             var rest = string.slice(name.length).trim();
             return {
-                command: string,
+                command: original,
                 name: name,
                 args: args,
                 args_quotes: quotes,
@@ -4790,7 +4791,7 @@
             };
         } else {
             return {
-                command: string,
+                command: original,
                 name: '',
                 args: [],
                 args_quotes: [],
@@ -4801,7 +4802,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 20 Aug 2021 12:14:42 +0000',
+        date: 'Sun, 22 Aug 2021 08:57:01 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
