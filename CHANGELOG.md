@@ -1,6 +1,6 @@
 ## 2.29.0
 ### Breaking
-* remove undocumented `<large>`/`<big>`/`<wide>` and add `<font>` tag to xml formatter
+* remove undocumented `<large>`/`<big>`/`<wide>` and add `<font>` tag to XML formatter
 ### Feature
 * add animation to `exec` and `execAnimation` option [#679](https://github.com/jcubic/jquery.terminal/issues/679)
 * add warning when calling invoke_key on disabled terminal [#678](https://github.com/jcubic/jquery.terminal/issues/678)
@@ -13,6 +13,7 @@
 * fix broken order of execution in `exec` when using pause/resume
 * fix mixing extended commands and terminal formatting
 * fix invoking `get_command()` in interpreter (clear command after user action)
+* fix parse_command when command have leading spaces [#681](https://github.com/jcubic/jquery.terminal/issues/681)
 
 ## 2.28.1
 ### Bugfix
