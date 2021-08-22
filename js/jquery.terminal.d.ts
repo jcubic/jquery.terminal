@@ -141,9 +141,16 @@ declare namespace JQueryTerminal {
     type setStringFunction = (value: string) => void;
     type setEchoValueFunction = (value: echoValueOrPromise) => void;
     type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => (void | JQueryTerminal.echoValueOrPromise)) | string | null;
-    type cmdPrompt<T = Cmd> = ((this: Cmd, setPrompt: setStringFunction) => void) | string;
+    type cmdPrompt<T = Cmd> = ((this: T, setPrompt: setStringFunction) => void) | string;
 
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
+
+    type execOptions = {
+        typing?: boolean;
+        delay?: number;
+        silent?: boolean;
+        deferred?: JQuery.Deferred<void>
+    }
 
     type pushOptions = {
         infiniteLogin?: boolean;
@@ -189,7 +196,7 @@ declare namespace JQueryTerminal {
     type formatOptions = {
         linksNoReferrer?: boolean;
         anyLinks?: boolean;
-        char_width?: number;
+        charWidth?: number;
         linksNoFollow?: boolean;
         allowedAttributes: string[];
         escape: boolean;
@@ -397,7 +404,7 @@ declare namespace JQueryTerminal {
         items: {[key: string]: any};
         name?: string;
     }
-    
+
     type formData = Array<simpleInput | passwordInput | checkboxesInput | radioInput>;
 }
 
@@ -538,7 +545,7 @@ type CmdOptions = {
     width?: number;
     historyFilter?: JQueryTerminal.historyFilter;
     commands?: JQueryTerminal.commandsCmdFunction;
-    char_width?: number;
+    charWidth?: number;
     onCommandChange?: (this: Cmd, command: string) => void;
     name?: string;
     keypress?: JQueryTerminal.KeyEventHandler<Cmd>;
@@ -550,7 +557,7 @@ type CmdOptions = {
 type CmdOption = "mask" | "caseSensitiveSearch" | "historySize" | "prompt" | "enabled" |
     "history" | "tabs" | "onPositionChange" | "clickTimeout" | "holdTimeout" | "onPaste" |
     "holdRepeatTimeout" | "repeatTimeoutKeys" | "width" | "historyFilter" | "commands" |
-    "char_width" | "onCommandChange" | "name" | "keypress" | "keydown" | "mobileDelete";
+    "charWidth" | "onCommandChange" | "name" | "keypress" | "keydown" | "mobileDelete";
 
 // we copy methods from jQuery to overwrite it
 // see: https://github.com/Microsoft/TypeScript/issues/978
@@ -579,7 +586,7 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     column(include_prompt: boolean): number;
     prompt(prompt: JQueryTerminal.cmdPrompt): Cmd;
     prompt(last_render: true): string;
-    prompt<T extends JQueryTerminal.cmdPrompt<void>>(): T;
+    prompt<T extends JQueryTerminal.cmdPrompt>(): T;
     kill_text(): string;
     position(): JQueryCoordinates;
     position<T extends number>(): number;
@@ -645,6 +652,7 @@ type TerminalOptions = {
     memory?: boolean;
     cancelableAjax?: boolean;
     processArguments?: boolean;
+    execAnimation?: boolean;
     linksNoReferrer?: boolean;
     javascriptLinks?: boolean;
     processRPCResponse?: null | JQueryTerminal.processRPCResponseFunction;
@@ -719,7 +727,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     export_view(): JQueryTerminal.View;
     import_view(view: JQueryTerminal.View): JQueryTerminal;
     save_state(command?: string, ignore_hash?: boolean, index?: number): JQueryTerminal;
-    exec(command: string, silent?: boolean, deferred?: JQuery.Deferred<void>): JQuery.Promise<void>;
+    exec(command: string, silent_or_options?: boolean | JQueryTerminal.execOptions, options?: JQueryTerminal.execOptions): JQuery.Promise<void>;
     autologin(user: string, token: string, silent?: boolean): JQueryTerminal;
     // there is success and error callbacks because we call this function from terminal and auth function can
     // be created by user

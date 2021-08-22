@@ -4883,6 +4883,50 @@ describe('Terminal plugin', function() {
             });
         });
 
+        describe('typing animation', function() {
+            var term = $('<div/>').terminal({
+                foo: function() {
+                    return this.echo('HELLO foo', { typing: true });
+                },
+                bar: function() {
+                    return this.echo('HELLO bar', { typing: true });
+                }
+            }, {greetings: false});
+            beforeEach(function() {
+                term.clear();
+            });
+            it('should invoke commands in order when using array', function() {
+                return term.exec(['foo', 'bar']).then(function() {
+                    expect(term.get_output().split('\n')).toEqual([
+                        '> foo',
+                        'HELLO foo',
+                        '> bar',
+                        'HELLO bar'
+                    ]);
+                });
+            });
+            it('should invoke commands in order when usinng multiple exec calls sync', function() {
+                return Promise.all([term.exec('foo'), term.exec('bar')]).then(function() {
+                    expect(term.get_output().split('\n')).toEqual([
+                        '> foo',
+                        'HELLO foo',
+                        '> bar',
+                        'HELLO bar'
+                    ]);
+                });
+            });
+            it('should invoke commands in order when usinng multiple exec calls async', async function() {
+                await term.exec('foo');
+                await term.exec('bar');
+                expect(term.get_output().split('\n')).toEqual([
+                    '> foo',
+                    'HELLO foo',
+                    '> bar',
+                    'HELLO bar'
+                ]);
+            });
+        });
+
         describe('exec', function() {
             var counter = 0;
             var interpreter;
@@ -4936,11 +4980,12 @@ describe('Terminal plugin', function() {
             });
             var arr = [];
             for (var i = 0; i<10; i++) {
+                arr.push('> foo');
                 arr.push('Hello ' + i);
             }
             var test_str = arr.join('\n');
             function text_echoed() {
-                return term.find('.terminal-output > div:not(.terminal-command)')
+                return term.find('.terminal-output > div')
                     .map(function() {
                         return $(this).text();
                     }).get().join('\n');
@@ -4949,15 +4994,20 @@ describe('Terminal plugin', function() {
                 term.clear();
                 counter = 0;
                 var i = 0;
-                return new Promise(function(resolve) {
+                return new Promise(function(resolve, reject) {
                     (function recur() {
-                        if (i++ < 10) {
-                            term.exec('foo').then(recur);
-                        } else {
-                            expect(text_echoed()).toEqual(test_str);
-                            resolve();
+                        try {
+                            if (i++ < 10) {
+                                term.exec('foo').then(recur).catch(reject);
+                            } else {
+                                resolve();
+                            }
+                        } catch(e) {
+                            reject(e);
                         }
                     })();
+                }).then(() => {
+                    expect(text_echoed()).toEqual(test_str);
                 });
             });
             it('should execute functions in order when used delayed commands', function() {

@@ -17,8 +17,6 @@
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![LICENSE MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
 
-[![Paid Support](https://github.com/jcubic/jquery.terminal/blob/master/.github/support.svg?raw=true)](https://xscode.com/jcubic/jquery.terminal)
-
 ### Summary
 
 jQuery Terminal Emulator is a plugin for creating command line interpreters in
@@ -313,10 +311,6 @@ Projects used:
 * [jQuery Caret](https://github.com/accursoft/caret) by Gideon Sireling (3-BSD)
 * [sprintf.js](https://github.com/alexei/sprintf.js) by [Alexandru Mărășteanu](http://alexei.ro/) (3-BSD)
 * [node-ansiparser](https://github.com/netzkolchose/node-ansiparser) by Joerg Breitbart (MIT)
-
-### Paid Support
-
-If you have some non-trivial request or need help, you can get paid support at [xs:code](https://xscode.com/jcubic/jquery.terminal).
 
 ### License
 

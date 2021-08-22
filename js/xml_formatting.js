@@ -64,15 +64,17 @@
     }
     // this formatter allow to echo xml where tags are colors like:
     // <red>hello <navy>blue</navy> world</red>
-    // it allso support special tags e.g. big, wide, img or bold
+    // it allso support special tags e.g. link, img or bold
     var tags = {
-        large: function(attrs) {
-            var size = attrs.size || 1.5;
-            return '[[;;;;;{"style": "--size:' + size + '"}]';
-        },
-        wide: function(attrs) {
-            var spacing = attrs.spacing || '2px';
-            return '[[;;;;;{"style": "letter-spacing: ' + spacing + '"}]';
+        font: function(attrs) {
+            var style = [];
+            if ('size' in attrs) {
+                style.push('--size:' + attrs.size);
+            }
+            if ('spacing' in attrs) {
+                style.push('letter-spacing: ' + attrs.spacing);
+            }
+            return '[[;;;;;{"style": "' + style.join(';') + '"}]';
         },
         img: function(attrs) {
             return '[[@;;;;' + attrs.src + ']' + (attrs.alt || '') + ']';
@@ -103,7 +105,6 @@
     tags.b = tags.bold;
     tags.a = tags.link;
     tags.i = tags.italic;
-    tags.big = tags.large;
     var tag_re = /(<\/?\s*[a-zA-Z]+(?: [^>]+)?>)/;
     function xml_formatter(string) {
         return string.split(tag_re).map(function(string) {
@@ -135,7 +136,10 @@
         }).join('');
     }
     xml_formatter.__no_warn__ = true;
+    xml_formatter.tags = tags;
     $.terminal.defaults.allowedAttributes.push('style');
     $.terminal.xml_formatter = xml_formatter;
     $.terminal.new_formatter(xml_formatter);
 });
+
+
