@@ -4883,6 +4883,50 @@ describe('Terminal plugin', function() {
             });
         });
 
+        describe('typing animation', function() {
+            var term = $('<div/>').terminal({
+                foo: function() {
+                    return this.echo('HELLO foo', { typing: true });
+                },
+                bar: function() {
+                    return this.echo('HELLO bar', { typing: true });
+                }
+            }, {greetings: false});
+            beforeEach(function() {
+                term.clear();
+            });
+            it('should invoke commands in order when using array', function() {
+                return term.exec(['foo', 'bar']).then(function() {
+                    expect(term.get_output().split('\n')).toEqual([
+                        '> foo',
+                        'HELLO foo',
+                        '> bar',
+                        'HELLO bar'
+                    ]);
+                });
+            });
+            it('should invoke commands in order when usinng multiple exec calls sync', function() {
+                return Promise.all([term.exec('foo'), term.exec('bar')]).then(function() {
+                    expect(term.get_output().split('\n')).toEqual([
+                        '> foo',
+                        'HELLO foo',
+                        '> bar',
+                        'HELLO bar'
+                    ]);
+                });
+            });
+            it('should invoke commands in order when usinng multiple exec calls async', async function() {
+                await term.exec('foo');
+                await term.exec('bar');
+                expect(term.get_output().split('\n')).toEqual([
+                    '> foo',
+                    'HELLO foo',
+                    '> bar',
+                    'HELLO bar'
+                ]);
+            });
+        });
+
         describe('exec', function() {
             var counter = 0;
             var interpreter;
