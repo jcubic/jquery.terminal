@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 22 Aug 2021 09:54:22 +0000
+ * Date: Mon, 23 Aug 2021 13:46:00 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -23,7 +23,6 @@
     margin: 0;
 }
 .cmd .cmd-clipboard {
-    all: unset;
     position: absolute !important;
     left: -16px !important;
     top: 0 !important;
@@ -88,7 +87,6 @@ body.full-screen-terminal .terminal {
     height: 100%;
 }
 .terminal > .terminal-resizer, .terminal > .terminal-font .terminal-resizer {
-    all: unset;
     position: absolute !important;
     top: 0 !important;
     right: 0 !important;

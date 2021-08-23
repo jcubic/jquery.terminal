@@ -23,7 +23,6 @@
     margin: 0;
 }
 .cmd .cmd-clipboard {
-    all: unset;
     position: absolute !important;
     left: -16px !important;
     top: 0 !important;
@@ -88,7 +87,6 @@ body.full-screen-terminal .terminal {
     height: 100%;
 }
 .terminal > .terminal-resizer, .terminal > .terminal-font .terminal-resizer {
-    all: unset;
     position: absolute !important;
     top: 0 !important;
     right: 0 !important;
