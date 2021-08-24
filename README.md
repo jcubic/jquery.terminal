@@ -11,7 +11,7 @@
 
 [![npm](https://img.shields.io/badge/npm-2.29.1-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.29.1-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&cfb2d8d66ed4a423434bb1b61104791bd06569c8)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&40b691eb799628956d7b1ae011fc081643af775a)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&48f3c30711c7c99ea3b04234a5de4db9)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -330,6 +330,10 @@ Other code used inside the project or inspired by:
 * [Detecting and generating CSS animations in JavaScript](https://hacks.mozilla.org/2011/09/detecting-and-generating-css-animations-in-javascript/) by Chris Heilmann
 * [polyfill for `KeyboardEvent.prototype.key`](https://github.com/cvan/keyboardevent-key-polyfill/) by Christopher Robert Van Wiemeersch (CC0)
 * [wheel event detection](https://web.archive.org/web/20180523065743/https://developer.mozilla.org/en-US/docs/Web/Events/wheel) by MDN
+
+Personal thanks:
+* [T.J. Crowder](https://stackoverflow.com/users/157247/t-j-crowder) for helping with tracking_replace on [StackOveflow](https://stackoverflow.com/a/46756077/387194)
+* [@jerch](https://github.com/jerch) for helping with ANSI Parsing
 
 ### License
 
