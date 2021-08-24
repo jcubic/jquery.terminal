@@ -11,7 +11,7 @@
 
 [![npm](https://img.shields.io/badge/npm-2.29.1-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.29.1-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&01601c17b41ced1e4e01622f17e5f8a03cd79930)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&cfb2d8d66ed4a423434bb1b61104791bd06569c8)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&48f3c30711c7c99ea3b04234a5de4db9)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -43,16 +43,18 @@ Because with this library you need to code all the commands yourself, you can ca
   when user type command)
 
 * Command Tree - you can use nested objects. Each command will invoke a
-  function, if the value is an object it will create a new interpreter and
-  use the function from that object as commands. You can use as many nested
-  object/commands as you like. If the value is a string it will create
-  JSON-RPC service.
+  function (own REPL), if the value is an object it will create a new
+  interpreter and use the function from that object as commands. You can
+  use as many nested object/commands as you like. If the value is a string
+  it will create JSON-RPC service.
 
 * Support for command line history, it uses Local Storage if possible.
 
 * Support for tab completion.
 
 * Includes keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
+
+* Bash reverse history search (CTRL+R / CTRL+G).
 
 * Multiple terminals on one page (every terminal can have different
   commands, its own authentication function and its own command history).
@@ -64,9 +66,19 @@ Because with this library you need to code all the commands yourself, you can ca
 * Using extended commands you can change working of the terminal without
   touching the front-end code (using echo method and terminal formatting
   like syntax). Read more in
-  [docs](https://terminal.jcubic.pl/api_reference.php#extended_commands)
+  [docs](https://terminal.jcubic.pl/api_reference.php#extended_commands).
 
-* Full mobile support
+* Easy way to change the style of the terminal (like color or cursor animation).
+
+* Chinese and Japanese character support.
+
+* You can use ASCII forms and collect information from users.
+
+* Animation (including typing effect and Canvas canvas adapter).
+
+* Support ANSI escapes codes.
+
+* Full mobile support.
 
 ### Installation
 
@@ -300,17 +312,24 @@ If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 | :---: | :---: | :---: | :---: | :---:  |
 <!-- CONTRIBUTORS-WWW-END -->
 
+### Acknowledge
 
-### Credits
-
-Projects used:
-
+Projects include with main file:
 * [Storage plugin](https://sites.google.com/site/daveschindler/jquery-html5-storage-plugin) by Dave Schindler (MIT)
 * [jQuery Timers](http://jquery.offput.ca/every/) (WTFPL)
 * [Cross-Browser Split](http://blog.stevenlevithan.com/archives/cross-browser-split) by [Steven Levithan](http://stevenlevithan.com/) (MIT)
 * [jQuery Caret](https://github.com/accursoft/caret) by Gideon Sireling (3-BSD)
 * [sprintf.js](https://github.com/alexei/sprintf.js) by [Alexandru Mărășteanu](http://alexei.ro/) (3-BSD)
 * [node-ansiparser](https://github.com/netzkolchose/node-ansiparser) by Joerg Breitbart (MIT)
+* [emoji regex](https://github.com/mathiasbynens/emoji-regex) by Mathias Bynens (MIT)
+
+Other code used inside the project or inspired by:
+* [How to detect iPad and iPad OS version in iOS 13 and Up?](https://stackoverflow.com/a/57924983/387194s) (StackOverflow)
+* [How do I scroll to an element within an overflowed Div?](https://stackoverflow.com/a/18927969/387194) (StackOverflow)
+* [isInViewport](https://github.com/zeusdeux/isInViewport) by Mudit Ameta (MIT)
+* [Detecting and generating CSS animations in JavaScript](https://hacks.mozilla.org/2011/09/detecting-and-generating-css-animations-in-javascript/) by Chris Heilmann
+* [polyfill for `KeyboardEvent.prototype.key`](https://github.com/cvan/keyboardevent-key-polyfill/) by Christopher Robert Van Wiemeersch (CC0)
+* [wheel event detection](https://web.archive.org/web/20180523065743/https://developer.mozilla.org/en-US/docs/Web/Events/wheel) by MDN
 
 ### License
 
