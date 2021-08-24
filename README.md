@@ -11,7 +11,7 @@
 
 [![npm](https://img.shields.io/badge/npm-2.29.1-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.29.1-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&40b691eb799628956d7b1ae011fc081643af775a)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&55e110c6938e6d87c33399c5782e6893a85be4a4)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&48f3c30711c7c99ea3b04234a5de4db9)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -55,6 +55,8 @@ Because with this library you need to code all the commands yourself, you can ca
 * Includes keyboard shortcut from bash like CTRL+A, CTRL+D, CTRL+E etc.
 
 * Bash reverse history search (CTRL+R / CTRL+G).
+
+* You can create and overwrite existing keyboard shortcuts.
 
 * Multiple terminals on one page (every terminal can have different
   commands, its own authentication function and its own command history).
@@ -314,7 +316,7 @@ If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 
 ### Acknowledge
 
-Projects include with main file:
+Projects include with the source code:
 * [Storage plugin](https://sites.google.com/site/daveschindler/jquery-html5-storage-plugin) by Dave Schindler (MIT)
 * [jQuery Timers](http://jquery.offput.ca/every/) (WTFPL)
 * [Cross-Browser Split](http://blog.stevenlevithan.com/archives/cross-browser-split) by [Steven Levithan](http://stevenlevithan.com/) (MIT)

@@ -56,6 +56,8 @@ Because with this library you need to code all the commands yourself, you can ca
 
 * Bash reverse history search (CTRL+R / CTRL+G).
 
+* You can create and overwrite existing keyboard shortcuts.
+
 * Multiple terminals on one page (every terminal can have different
   commands, its own authentication function and its own command history).
 
@@ -314,7 +316,7 @@ If you want to contribute read [CONTRIBUTING.md](CONTRIBUTING.md) first. Here ar
 
 ### Acknowledge
 
-Projects include with main file:
+Projects include with the source code:
 * [Storage plugin](https://sites.google.com/site/daveschindler/jquery-html5-storage-plugin) by Dave Schindler (MIT)
 * [jQuery Timers](http://jquery.offput.ca/every/) (WTFPL)
 * [Cross-Browser Split](http://blog.stevenlevithan.com/archives/cross-browser-split) by [Steven Levithan](http://stevenlevithan.com/) (MIT)
