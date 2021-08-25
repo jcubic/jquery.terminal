@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.29.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 23 Aug 2021 13:47:08 +0000
+ * Date: Sun, 29 Aug 2021 17:29:07 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1148,10 +1148,10 @@
     var format_end_re = /\[\[(?:-?[@!gbiuso])*;[^;]*;[^\]]*\]?$/i;
     var self_closing_re = /^(?:\[\[)?[^;]*@[^;]*;/;
     var color_re = /^(?:#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([^)]+\)|hsla?\([^)]+\))$/i;
-    var url_re = /(\bhttps?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
-    var url_nf_re = /\b(?![^"\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)/gi;
+    var url_re = /(\b(?:file|ftp|https?):\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'\\<>\][)])+)/gi;
+    var url_nf_re = /\b(?![^"\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'\\<>\][)])+)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
-    var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\][)])+)$/gi;
+    var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\\\][)])+)$/gi;
     var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
     var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|`[^`\\]*(?:\\[\S\s][^`\\]*)*`|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
     var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
@@ -4801,8 +4801,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.29.1',
-        date: 'Mon, 23 Aug 2021 13:47:08 +0000',
+        version: 'DEV',
+        date: 'Sun, 29 Aug 2021 17:29:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5892,15 +5892,15 @@
             }
             // -----------------------------------------------------------------
             var valid_href = with_url_validation(function(url) {
-                return url.match(/^((https?|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
+                return url.match(/^((https?|file|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
             });
             // -----------------------------------------------------------------
             var valid_src = with_url_validation(function(url) {
-                return url.match(/^(https?:|blob:|data:)/) || is_path(url);
+                return url.match(/^(https?:|file:|blob:|data:)/) || is_path(url);
             });
             // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
-                function pre_process_link() {
+                function pre_process_link(data) {
                     var result;
                     if (data.match(email_re)) {
                         result = '<a href="mailto:' + data + '"';
@@ -5921,7 +5921,7 @@
                     result += ' tabindex="1000"';
                     return result;
                 }
-                function pre_process_image() {
+                function pre_process_image(data) {
                     var result = '<img';
                     if (valid_src(data)) {
                         result += ' src="' + data + '"';
@@ -6004,9 +6004,9 @@
                 }
                 var result;
                 if (style.indexOf('!') !== -1) {
-                    result = pre_process_link();
+                    result = pre_process_link(data);
                 } else if (style.indexOf('@') !== -1) {
-                    result = pre_process_image();
+                    result = pre_process_image(data);
                 } else {
                     result = '<span';
                 }
@@ -7628,16 +7628,18 @@
                 }
                 return _;
             }
-            if (!$.terminal.have_formatting(string)) {
+            function linkify(string) {
                 return string.replace(email_re, '[[!;;]$1]').
                     replace(url_nf_re, '[[!;;]$1]');
+            }
+            if (!$.terminal.have_formatting(string)) {
+                return linkify(string);
             }
             return $.terminal.format_split(string).map(function(str) {
                 if ($.terminal.is_formatting(str)) {
                     return str.replace(format_parts_re, format);
                 } else {
-                    return str.replace(email_re, '[[!;;]$1]').
-                        replace(url_nf_re, '[[!;;]$1]');
+                    return linkify(str);
                 }
             }).join('');
         }

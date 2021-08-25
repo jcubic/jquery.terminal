@@ -1,3 +1,7 @@
+## 2.29.2
+### Bugfix
+* fix linkify of urls
+
 ## 2.29.1
 ### Bugfix
 * remove `all: unset` CSS that was breaking resizing events and visibility of textarea
