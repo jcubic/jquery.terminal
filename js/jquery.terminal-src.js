@@ -7913,7 +7913,6 @@
                     break;
             }
             var options = {
-                convertLinks: false,
                 exec: false,
                 formatters: false,
                 finalize: function finalize(div) {

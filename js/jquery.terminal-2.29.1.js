@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 29 Aug 2021 17:29:07 +0000
+ * Date: Sun, 29 Aug 2021 17:31:08 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4802,7 +4802,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 29 Aug 2021 17:29:07 +0000',
+        date: 'Sun, 29 Aug 2021 17:31:08 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7913,7 +7913,6 @@
                     break;
             }
             var options = {
-                convertLinks: false,
                 exec: false,
                 formatters: false,
                 finalize: function finalize(div) {

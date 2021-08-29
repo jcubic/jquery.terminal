@@ -1,6 +1,7 @@
 ## 2.29.2
 ### Bugfix
-* fix linkify of urls
+* fix linkify of urls (better url detection)
+* fix linkify urls in command line (enable link in cmd)
 
 ## 2.29.1
 ### Bugfix
