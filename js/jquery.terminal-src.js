@@ -3129,7 +3129,7 @@
                 last_rendered_prompt = prompt;
                 // zero width space to make sure prompt margin takes up space,
                 // so that echo with newline: false works when prompt is empty
-                formatted = formatted || $.terminal.format('\u200b');
+                formatted = formatted || $.terminal.format('[[;;]\u200b]');
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
                     prompt_node.html(formatted);
@@ -3142,7 +3142,11 @@
                         spans.each(function() {
                             var self = $(this);
                             var len = strlen(self.text());
-                            self.css('width', len + 'ch');
+                            if (len === 0) {
+                                self.css('width', 1);
+                            } else {
+                                self.css('width', len + 'ch');
+                            }
                         });
                         prompt_node.show();
                     }
@@ -4401,7 +4405,9 @@
     }
     // -------------------------------------------------------------------------
     function char_width_prop(len, options) {
-        if (is_ch_unit_supported) {
+        if (len === 0) {
+            return 'width: 1px';
+        } else if (is_ch_unit_supported) {
             return 'width: ' + len + 'ch';
         } else if (!is_css_variables_supported) {
             if (options.charWidth) {
@@ -9681,7 +9687,10 @@
                         // 1. so we can measure the width right here
                         // 2. so that the background of this last line of output
                         //    doesn't occlude the first line of input to the right
-                        last_row.css('width', '');
+                        last_row.css({
+                            width: '',
+                            display: 'inline-block'
+                        });
                         var last_row_rect = last_row[0].getBoundingClientRect();
                         var partial_width = last_row_rect.width;
                         // Shift command prompt up one line and to the right
