@@ -3,6 +3,7 @@
 * fix linkify of urls (better url detection)
 * fix linkify urls in command line (enable link in cmd)
 * fix two bugs with echo without newline (when prompt have 0 width and lines have different length)
+* fix applying glow shadow to transparent text
 
 ## 2.29.1
 ### Bugfix
