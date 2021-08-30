@@ -1,0 +1,18 @@
+Script started on 2021-08-30 11:31:34+02:00 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="80" LINES="48"]
+]777;notify;Command completed;./script.sh \]777;precmd\]0;kuba@jcubic:~/projects\]7;file://jcubic/home/kuba/projects\[?2004h]0;kuba@jcubic: ~/projects[01;32mkuba@jcubic[00m:[01;34m~/projects[00m$ mkdir demo
+[?2004l]777;preexec\]777;notify;Command completed;mkdir demo\]777;precmd\]0;kuba@jcubic:~/projects\]7;file://jcubic/home/kuba/projects\[?2004h]0;kuba@jcubic: ~/projects[01;32mkuba@jcubic[00m:[01;34m~/projects[00m$ cd demo
+[?2004l]777;preexec\/home/kuba/projects/demo
+]777;notify;Command completed;cd demo\]777;precmd\]0;kuba@jcubic:~/projects/demo\]7;file://jcubic/home/kuba/projects/demo\[?2004h]0;kuba@jcubic: ~/projects/demo[01;32mkuba@jcubic[00m:[01;34m~/projects/demo[00m$ echo "echo Hello, World!" > script.sh
+[?2004l]777;preexec\]777;notify;Command completed;echo "echo Hello, World!" > script.sh\]777;precmd\]0;kuba@jcubic:~/projects/demo\]7;file://jcubic/home/kuba/projects/demo\[?2004h]0;kuba@jcubic: ~/projects/demo[01;32mkuba@jcubic[00m:[01;34m~/projects/demo[00m$ ls -l
+[?2004l]777;preexec\total 4
+-rw-rw-r--. 1 kuba kuba 19 Aug 30 11:31 script.sh
+]777;notify;Command completed;ls -l\]777;precmd\]0;kuba@jcubic:~/projects/demo\]7;file://jcubic/home/kuba/projects/demo\[?2004h]0;kuba@jcubic: ~/projects/demo[01;32mkuba@jcubic[00m:[01;34m~/projects/demo[00m$ chmod a+x script.sh 
+[?2004l]777;preexec\]777;notify;Command completed;chmod a+x script.sh \]777;precmd\]0;kuba@jcubic:~/projects/demo\]7;file://jcubic/home/kuba/projects/demo\[?2004h]0;kuba@jcubic: ~/projects/demo[01;32mkuba@jcubic[00m:[01;34m~/projects/demo[00m$ ls -l
+[?2004l]777;preexec\total 4
+-rwxrwxr-x. 1 kuba kuba 19 Aug 30 11:31 [0m[01;32mscript.sh[0m
+]777;notify;Command completed;ls -l\]777;precmd\]0;kuba@jcubic:~/projects/demo\]7;file://jcubic/home/kuba/projects/demo\[?2004h]0;kuba@jcubic: ~/projects/demo[01;32mkuba@jcubic[00m:[01;34m~/projects/demo[00m$ ./script.sh 
+[?2004l]777;preexec\Hello, World!
+]777;notify;Command completed;./script.sh \]777;precmd\]0;kuba@jcubic:~/projects/demo\]7;file://jcubic/home/kuba/projects/demo\[?2004h]0;kuba@jcubic: ~/projects/demo[01;32mkuba@jcubic[00m:[01;34m~/projects/demo[00m$ [?2004l
+exit
+
+Script done on 2021-08-30 11:32:06+02:00 [COMMAND_EXIT_CODE="0"]

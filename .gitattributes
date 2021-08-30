@@ -1,5 +1,4 @@
-* text eol=lf
-.* text eol=lf
+bash.* text eol=crlf
 js/jquery.terminal-[0-9.]* binary
 js/jquery.terminal.min.js binary
 js/jquery.terminal.js binary
