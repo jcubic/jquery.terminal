@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 30 Aug 2021 14:52:04 +0000
+ * Date: Tue, 31 Aug 2021 17:55:28 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4808,7 +4808,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 30 Aug 2021 14:52:04 +0000',
+        date: 'Tue, 31 Aug 2021 17:55:28 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7880,17 +7880,14 @@
                 if (type === 'string') {
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
-                    try {
-                        var ret = settings.greetings.call(self, self.echo);
-                        var error = make_label_error('Greetings');
-                        unpromise(ret, self.echo, function(e) {
-                            error(e);
+                    self.echo(function() {
+                        try {
+                            return settings.greetings.call(self, self.echo);
+                        } catch (e) {
                             settings.greetings = null;
-                        });
-                    } catch (e) {
-                        settings.greetings = null;
-                        display_exception(e, 'greetings');
-                    }
+                            display_exception(e, 'greetings');
+                        }
+                    });
                 } else {
                     self.error(strings().wrongGreetings);
                 }
@@ -8283,7 +8280,13 @@
             prepare_top_interpreter();
             show_greetings();
             if (lines.length) {
-                self.refresh(); // for case when showing long error before init
+                // for case when showing long error before init
+                if (echo_delay.length) {
+                    // for case when greetting is async function
+                    $.when.apply($, echo_delay).then(self.refresh);
+                } else {
+                    self.refresh();
+                }
             }
             // was_paused flag is workaround for case when user call exec before
             // login and pause in onInit, 3rd exec will have proper timing (will
@@ -9904,6 +9907,9 @@
                             }
                             value = ret;
                         }
+                        if (is_promise(value)) {
+                            echo_promise = true;
+                        }
                         unpromise(value, function(value) {
                             if (render(value, locals)) {
                                 return self;
@@ -9926,9 +9932,8 @@
                                 index: index
                             });
                             // queue async functions in echo
-                            if (next && next.then) {
-                                var defer = new DelayQueue();
-                                echo_ready = ready(defer);
+                            if (is_promise(next)) {
+                                echo_promise = true;
                             }
                             // Did previous value end in newline?
                             if (last_newline) {
@@ -9949,9 +9954,11 @@
                                     self.flush();
                                     fire_event('onAfterEcho', [arg]);
                                 }
-                                if (defer) {
-                                    defer.resolve();
-                                    echo_ready = null;
+                                echo_promise = false;
+                                var original = echo_delay;
+                                echo_delay = [];
+                                for (var i = 0; i < original.length; ++i) {
+                                    self.echo.apply(self, original[i]);
                                 }
                             });
                         });
@@ -9965,12 +9972,8 @@
                         }
                     }
                 }
-                if (arg !== undefined && is_function(arg.then)) {
-                    $.when(arg).done(echo).catch(make_label_error('Echo'));
-                } else if (echo_ready) {
-                    echo_ready(function() {
-                        echo(arg);
-                    });
+                if (echo_promise) {
+                    echo_delay.push([arg, options]);
                 } else {
                     echo(arg);
                 }
@@ -10627,7 +10630,8 @@
         self.data('terminal', self);
         // synchronize the echo calls (used for async functions) that need
         // to be called in order
-        var echo_ready;
+        var echo_delay = [];
+        var echo_promise = false;
         // var names = []; // stack if interpreter names
         var prev_command; // used for name on the terminal if not defined
         var prev_exec_cmd;

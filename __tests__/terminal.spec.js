@@ -248,7 +248,6 @@ global.URL = window.URL = {
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
-require('../js/echo_newline')(global.$);
 require('../js/autocomplete_menu')(global.$);
 require('../js/less')(global.$);
 
@@ -5973,6 +5972,56 @@ describe('Terminal plugin', function() {
                     await delay(50);
                     expect(count(term.clear)).toEqual(2);
                     expect(term.find('.terminal-error').length).toEqual(0);
+                });
+            });
+            describe('async echo', function() {
+                var term;
+                function render(text, delay) {
+                    return new Promise(resolve => {
+                        setTimeout(() => resolve(text), delay);
+                    });
+                }
+                beforeEach(function() {
+                    term = $('<div/>').terminal($.noop, {greetings: false});
+                });
+                afterEach(function() {
+                    term.remove();
+                });
+                it('should render multiple async functions in order', async function() {
+                    term.echo(() => render('lorem', 10));
+                    term.echo('foo');
+                    term.echo(() => render('ipsum', 10));
+                    term.echo('bar');
+                    term.echo(() => render('dolor', 10));
+                    term.echo('baz');
+                    // not sure why but 100 delay is too short
+                    await delay(300);
+                    expect(output('.terminal-output div div', term)).toEqual([
+                        'lorem',
+                        'foo',
+                        'ipsum',
+                        'bar',
+                        'dolor',
+                        'baz'
+                    ]);
+                });
+                it('should render multiple promises in order', async function() {
+                    term.echo(render('lorem', 10));
+                    term.echo('foo');
+                    term.echo(render('ipsum', 10));
+                    term.echo('bar');
+                    term.echo(render('dolor', 10));
+                    term.echo('baz');
+                    // here 100 delay it's ok
+                    await delay(100);
+                    expect(output('.terminal-output div div', term)).toEqual([
+                        'lorem',
+                        'foo',
+                        'ipsum',
+                        'bar',
+                        'dolor',
+                        'baz'
+                    ]);
                 });
             });
         });
