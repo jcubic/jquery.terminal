@@ -332,6 +332,7 @@ Other code used inside the project or inspired by:
 * [Detecting and generating CSS animations in JavaScript](https://hacks.mozilla.org/2011/09/detecting-and-generating-css-animations-in-javascript/) by Chris Heilmann
 * [polyfill for `KeyboardEvent.prototype.key`](https://github.com/cvan/keyboardevent-key-polyfill/) by Christopher Robert Van Wiemeersch (CC0)
 * [wheel event detection](https://web.archive.org/web/20180523065743/https://developer.mozilla.org/en-US/docs/Web/Events/wheel) by MDN
+* [CodeMirror](https://codemirror.net/) by Marijn Haverbeke, was inspiration for some clipboard handling solutions.
 
 Personal thanks:
 * [T.J. Crowder](https://stackoverflow.com/users/157247/t-j-crowder) for helping with tracking_replace on [StackOveflow](https://stackoverflow.com/a/46756077/387194)
