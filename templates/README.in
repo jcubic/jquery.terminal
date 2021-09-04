@@ -14,7 +14,8 @@
 [![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch={{BRANCH}}&{{COMMIT}})](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch={{BRANCH}}&{{CHECKSUM}})](https://coveralls.io/github/jcubic/jquery.terminal?branch={{BRANCH}})
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
-[![](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
+[![Paid Support](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
+[![](https://img.shields.io/badge/paid-support-354465.svg)](https://support.jcubic.pl/)
 [![LICENSE MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
 
 ### Summary
@@ -337,6 +338,9 @@ Other code used inside the project or inspired by:
 Personal thanks:
 * [T.J. Crowder](https://stackoverflow.com/users/157247/t-j-crowder) for helping with tracking_replace on [StackOveflow](https://stackoverflow.com/a/46756077/387194)
 * [@jerch](https://github.com/jerch) for helping with ANSI Parsing
+
+### Paid Support
+You can request paid support, you can find details at [support.jcubic.pl](https://support.jcubic.pl/).
 
 ### License
 
