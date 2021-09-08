@@ -9375,7 +9375,7 @@
             geometry: function() {
                 var style = window.getComputedStyle(self[0]);
                 function padding(name) {
-                    return parseInt(style.getPropertyValue('padding-' + name), 10);
+                    return parseInt(style.getPropertyValue('padding-' + name), 10) || 0;
                 }
                 var left = padding('left');
                 var right = padding('right');
@@ -9845,7 +9845,8 @@
                         cmd_prompt.css('margin-left', 0);
                         cmd_outer.css('top', 0);
                         command_line.__set_prompt_margin(0);
-                        last_row = self.find('.terminal-output div:last-child div:last-child');
+                        last_row = self.find('.terminal-output div:last-child ' +
+                                             'div:last-child');
                         last_row.css({
                             width: '100%',
                             display: ''

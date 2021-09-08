@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 08 Sep 2021 17:02:45 +0000
+ * Date: Wed, 08 Sep 2021 18:31:52 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5033,7 +5033,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 08 Sep 2021 17:02:45 +0000',
+        date: 'Wed, 08 Sep 2021 18:31:52 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9375,7 +9375,7 @@
             geometry: function() {
                 var style = window.getComputedStyle(self[0]);
                 function padding(name) {
-                    return parseInt(style.getPropertyValue('padding-' + name), 10);
+                    return parseInt(style.getPropertyValue('padding-' + name), 10) || 0;
                 }
                 var left = padding('left');
                 var right = padding('right');
@@ -9845,7 +9845,8 @@
                         cmd_prompt.css('margin-left', 0);
                         cmd_outer.css('top', 0);
                         command_line.__set_prompt_margin(0);
-                        last_row = self.find('.terminal-output div:last-child div:last-child');
+                        last_row = self.find('.terminal-output div:last-child ' +
+                                             'div:last-child');
                         last_row.css({
                             width: '100%',
                             display: ''
