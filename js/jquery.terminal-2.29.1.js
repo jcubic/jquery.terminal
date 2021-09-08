@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 08 Sep 2021 16:51:59 +0000
+ * Date: Wed, 08 Sep 2021 17:02:45 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5033,7 +5033,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 08 Sep 2021 16:51:59 +0000',
+        date: 'Wed, 08 Sep 2021 17:02:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9373,10 +9373,24 @@
             // :: Return size of the terminal instance
             // -------------------------------------------------------------
             geometry: function() {
+                var style = window.getComputedStyle(self[0]);
+                function padding(name) {
+                    return parseInt(style.getPropertyValue('padding-' + name), 10);
+                }
+                var left = padding('left');
+                var right = padding('right');
+                var top = padding('top');
+                var bottom = padding('bottom');
                 return {
                     terminal: {
-                        width: old_width,
-                        height: old_height
+                        padding: {
+                            left: left,
+                            right: right,
+                            top: top,
+                            bottom: bottom
+                        },
+                        width: old_width + left + right,
+                        height: old_height + top + bottom
                     },
                     char: char_size,
                     cols: this.cols(),

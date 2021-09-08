@@ -80,6 +80,12 @@ declare namespace JQueryTerminal {
         height: number
     };
     interface geometry {
+        padding: {
+            left: number,
+            right: number,
+            top: number,
+            bottom: number
+        };
         terminal: size;
         char: size;
         cols: number;

@@ -9373,10 +9373,24 @@
             // :: Return size of the terminal instance
             // -------------------------------------------------------------
             geometry: function() {
+                var style = window.getComputedStyle(self[0]);
+                function padding(name) {
+                    return parseInt(style.getPropertyValue('padding-' + name), 10);
+                }
+                var left = padding('left');
+                var right = padding('right');
+                var top = padding('top');
+                var bottom = padding('bottom');
                 return {
                     terminal: {
-                        width: old_width,
-                        height: old_height
+                        padding: {
+                            left: left,
+                            right: right,
+                            top: top,
+                            bottom: bottom
+                        },
+                        width: old_width + left + right,
+                        height: old_height + top + bottom
                     },
                     char: char_size,
                     cols: this.cols(),

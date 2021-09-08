@@ -9,6 +9,7 @@
 * fix `get_output()` on lines that are promises [#687](https://github.com/jcubic/jquery.terminal/issues/687)
 * fix echo newline when one of the values is promise or function
 * fix invalid css when partial output is no longer partial
+* add padding to terminal size i `term::geometry()` [#686](https://github.com/jcubic/jquery.terminal/issues/686)
 
 ## 2.29.1
 ### Bugfix
