@@ -284,7 +284,7 @@ function spy(obj, method) {
 }
 function delay(delay, fn = (x) => x) {
     return new Promise((resolve) => {
-        if (delay === 0) {
+        if (delay === 0 && typeof setImmediate !== 'undefined') {
             setImmediate(resolve);
         } else {
             setTimeout(resolve, delay);
@@ -2674,6 +2674,30 @@ describe('extensions', function() {
             enter(term, command);
             expect(term.get_output()).toEqual('...' + prompt2 + command);
             expect(term.get_prompt()).toEqual(prompt2);
+        });
+        it('should render async', async function() {
+            function render(text, time) {
+                return delay(time, () => text);
+            }
+            var spec = [
+                () => term.echo('hello', {newline: false}).echo(render(', world', 0)),
+                () => term.echo('hello', {newline: false}).echo(() => render(', world', 0)),
+
+                () => term.echo(render('hello', 0), {newline: false}).echo(', world'),
+                () => term.echo(() => render('hello', 0), {newline: false}).echo(', world'),
+
+                () => term.echo(() => render('hello', 0), {newline: false}).echo(() => render(', world', 0)),
+                () => term.echo(render('hello', 0), {newline: false}).echo(render(', world', 0)),
+
+                () => term.echo(() => render('hello', 0), {newline: false}).echo(render(', world', 0)),
+                () => term.echo(render('hello', 0), {newline: false}).echo(() => render(', world', 0))
+            ];
+            for (const fn of spec) {
+                term.clear();
+                fn();
+                await delay(50);
+                expect(output(term)).toEqual(['hello, world']);
+            }
         });
         it('finalize with newline : false', function() {
             term.echo('foo', {finalize: (a) => a.children().children().css("color", "red"), newline : false});

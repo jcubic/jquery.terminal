@@ -1617,6 +1617,138 @@
         });
     }
     // -------------------------------------------------------------------------
+    function OutputLines(settings) {
+        this._settings = settings;
+        this._lines = [];
+    }
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.join = function() {
+        var args = [].slice.call(arguments);
+        if (args.some(is_function)) {
+            return function() {
+                return args.reduce(function(acc, arg) {
+                    if (is_function(acc)) {
+                        acc = acc();
+                    }
+                    if (is_function(arg)) {
+                        arg = arg();
+                    }
+                    if (is_promise(acc) || is_promise(arg)) {
+                        return $.when(acc, arg).then(function(acc, arg) {
+                            return acc + arg;
+                        });
+                    }
+                    return arg;
+                });
+            };
+        } else if (args.some(is_promise)) {
+            return args.reduce(function(acc, arg) {
+                return $.when(acc, arg).then(function(acc, arg) {
+                    return acc + arg;
+                });
+            });
+        }
+        return args.join('');
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.import = function(data) {
+        this._lines = data;
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.push = function(data) {
+        var value = data[0];
+        var options = data[1];
+        if (this.has_newline()) {
+            this._lines.push(data);
+        } else {
+            var last_line = this.last_line();
+            last_line[0] = this.join(last_line[0], value);
+            last_line[1].newline = options.newline;
+        }
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.clear = function(fn) {
+        this._lines.forEach(function(line, i) {
+            var options = line[1];
+            if (is_function(options.onClear)) {
+                options.onClear.call(self, fn(i));
+            }
+        });
+        this._lines = [];
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.data = function() {
+        return this._lines;
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.has_newline = function() {
+        if (this._lines.length === 0) {
+            return true;
+        }
+        return this.last_line()[1].newline;
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.last_line = function() {
+        var len = this._lines.length;
+        return this._lines[len - 1];
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.update = function(index, value, options) {
+        if (value === null) {
+            this._lines.splice(index, 1);
+        } else {
+            this._lines[index][0] = value;
+            if (options) {
+                this._lines[index][1] = $.extend(this._lines[index][1], options);
+            }
+            return this._lines[index][1];
+        }
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.length = function() {
+        return this._lines.length;
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.valid_index = function(index) {
+        return !!this._lines[index];
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.render = function(cols, fn) {
+        var settings = this._settings();
+        var lines_to_show = [];
+        if (settings.outputLimit >= 0) {
+            // flush will limit lines but if there is lot of
+            // lines we don't need to show them and then remove
+            // them from terminal
+            var limit;
+            if (settings.outputLimit === 0) {
+                limit = cols;
+            } else {
+                limit = settings.outputLimit;
+            }
+            this._lines.forEach(function(line, index) {
+                var value = line[0];
+                var options = line[1];
+                lines_to_show.push({
+                    value: value,
+                    index: index,
+                    options: options
+                });
+            });
+            var pivot = lines_to_show.length - limit - 1;
+            lines_to_show = lines_to_show.slice(pivot);
+        } else {
+            lines_to_show = this._lines.map(function(line, index) {
+                return {
+                    value: line[0],
+                    index: index,
+                    options: line[1]
+                };
+            });
+        }
+        return fn(lines_to_show);
+    };
+    // -------------------------------------------------------------------------
     // :: FormatBuffer is a class that buffer line printed on terminal
     // :: with optional format of the text, the class also usse cache
     // :: the options in the constructor is a function that should returns
@@ -7704,14 +7836,14 @@
                  options.wrap === true);
         }
         // ---------------------------------------------------------------------
-        var string_cache;
+        var line_cache;
         if ('Map' in root) {
-            string_cache = new Map();
+            line_cache = new Map();
         }
         function process_line(line) {
             // prevent exception in display exception
             try {
-                var use_cache = true || !is_function(line.value);
+                var use_cache = !is_function(line.value);
                 var line_settings = $.extend({
                     exec: true,
                     raw: false,
@@ -7726,16 +7858,17 @@
                     // handle function that return a promise #629
                     return string.then(function(string) {
                         process_line($.extend(line, {
-                            value: string
+                            value: string,
+                            options: line_settings
                         }));
                     });
                 }
                 if (string !== '') {
                     if (!line_settings.raw) {
-                        if (settings.useCache && use_cache) {
+                        if (settings.useCache && line_settings.useCache) {
                             var key = string;
-                            if (string_cache && string_cache.has(key)) {
-                                string = string_cache.get(key);
+                            if (line_cache && line_cache.has(key)) {
+                                string = line_cache.get(key);
                                 buffer.append(string, line.index, line_settings);
                                 return true;
                             }
@@ -7800,8 +7933,8 @@
                     }
                 }
                 var arg = array || string;
-                if (string_cache && key && use_cache) {
-                    string_cache.set(key, arg);
+                if (line_cache && key && use_cache) {
+                    line_cache.set(key, arg);
                 }
                 buffer.append(arg, line.index, line_settings);
             } catch (e) {
@@ -7831,47 +7964,17 @@
                 // we don't want reflow while processing lines
                 var detached_output = output.empty().detach();
             }
-            var lines_to_show = [];
-            // Dead code
-            if (settings.outputLimit >= 0) {
-                // flush will limit lines but if there is lot of
-                // lines we don't need to show them and then remove
-                // them from terminal
-                var limit;
-                if (settings.outputLimit === 0) {
-                    limit = self.rows();
-                } else {
-                    limit = settings.outputLimit;
-                }
-                lines.forEach(function(line, index) {
-                    var value = line[0];
-                    var options = line[1];
-                    lines_to_show.push({
-                        value: value,
-                        index: index,
-                        options: options
-                    });
-                });
-                var pivot = lines_to_show.length - limit - 1;
-                lines_to_show = lines_to_show.slice(pivot);
-            } else {
-                lines_to_show = lines.map(function(line, index) {
-                    return {
-                        value: line[0],
-                        index: index,
-                        options: line[1]
-                    };
-                });
-            }
             try {
                 buffer.clear();
-                unpromise(lines_to_show.map(function(line) {
-                    return process_line(line);
+                unpromise(lines.render(self.rows(), function(lines_to_show) {
+                    return lines_to_show.map(function(line) {
+                        return process_line(line);
+                    });
                 }), function() {
+                    self.flush(options);
                     if (!options.update) {
                         command_line.before(detached_output); // reinsert output
                     }
-                    self.flush(options);
                     fire_event('onAfterRedraw');
                 });
             } catch (e) {
@@ -8679,13 +8782,9 @@
             // -------------------------------------------------------------
             clear: function() {
                 if (fire_event('onClear') !== false) {
-                    lines.forEach(function(line, i) {
-                        var options = line[1];
-                        if (is_function(options.onClear)) {
-                            options.onClear.call(self, get_node(i));
-                        }
+                    lines.clear(function(i) {
+                        return get_node(i);
                     });
-                    lines = [];
                     output[0].innerHTML = '';
                     self.prop({scrollTop: 0});
                 }
@@ -8704,7 +8803,7 @@
                     prompt: self.get_prompt(),
                     command: self.get_command(),
                     position: command_line.position(),
-                    lines: clone(lines),
+                    lines: clone(lines.data()),
                     interpreters: interpreters.clone(),
                     history: command_line.history().data
                 }, user_export);
@@ -8725,9 +8824,9 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    lines = clone(view.lines).filter(function(line) {
+                    lines.import(clone(view.lines).filter(function(line) {
                         return line[0];
-                    });
+                    }));
                     if (view.interpreters instanceof Stack) {
                         interpreters = view.interpreters;
                     }
@@ -9429,7 +9528,7 @@
             // -------------------------------------------------------------
             clear_cache: 'Map' in root ? function() {
                 buffer.clear_cache();
-                string_cache.clear();
+                line_cache.clear();
                 return self;
             } : function() {
                 return self;
@@ -9601,12 +9700,13 @@
             // -------------------------------------------------------------
             get_output: function(raw) {
                 if (raw) {
-                    return lines;
+                    return lines.data();
                 } else {
-                    var items = $.map(lines, function(item) {
-                        return is_function(item[0]) ? item[0]() : item[0];
-                    });
-                    return unpromise(items, function(lines) {
+                    return unpromise(lines.render(self.rows(), function(lines) {
+                        return lines.map(function(item) {
+                            return is_function(item.value) ? item.value() : item.value;
+                        });
+                    }), function(lines) {
                         return lines.join('\n');
                     });
                 }
@@ -9796,12 +9896,12 @@
             update: function(line, value, options) {
                 when_ready(function ready() {
                     if (line < 0) {
-                        line = lines.length + line; // yes +
+                        line = lines.length() + line; // yes +
                     }
-                    if (!lines[line]) {
+                    if (!lines.valid_index(line)) {
                         self.error('Invalid line number ' + line);
                     } else if (value === null) {
-                        lines.splice(line, 1);
+                        lines.update(line, null);
                         output.find('[data-index=' + line + ']').remove();
                     } else {
                         value = preprocess_value(value, {
@@ -9817,14 +9917,11 @@
                                 value = ret[0];
                                 options = ret[1];
                             }
-                            lines[line][0] = value;
-                            if (options) {
-                                lines[line][1] = $.extend(lines[line][1], options);
-                            }
+                            options = lines.update(line, value, options);
                             var next = process_line({
                                 value: value,
                                 index: line,
-                                options: lines[line][1]
+                                options: options
                             });
                             // process_line can return a promise
                             // value is function that resolve to promise
@@ -9851,7 +9948,7 @@
             // :: after something is echo on the terminal
             // -------------------------------------------------------------
             last_index: function() {
-                return lines.length - 1;
+                return lines.length() - 1;
             },
             // -------------------------------------------------------------
             // :: Print data to the terminal output. It can have options
@@ -9960,9 +10057,8 @@
                             if (render(value, locals)) {
                                 return self;
                             }
-                            var last_line = lines[lines.length - 1];
-                            var last_newline = lines.length === 0 || last_line[1].newline;
-                            var index = lines.length;
+                            var index = lines.length();
+                            var last_newline = lines.has_newline();
                             if (!last_newline) {
                                 index--;
                             }
@@ -9981,18 +10077,7 @@
                             if (is_promise(next)) {
                                 echo_promise = true;
                             }
-                            // Did previous value end in newline?
-                            if (last_newline) {
-                                lines.push([value, locals]);
-                            } else {
-                                // If not append current value to it
-                                var old_value = last_line[0];
-                                var string_old_val = stringify_value(old_value);
-                                var string_val = stringify_value(value);
-                                last_line[0] = string_old_val + string_val;
-                                // Update newline field
-                                last_line[1].newline = locals.newline;
-                            }
+                            lines.push([value, locals]);
                             unpromise(next, function() {
                                 // extended commands should be processed only
                                 // once in echo and not on redraw
@@ -10724,7 +10809,9 @@
         delete settings.formatters;
         // used to throw error when calling methods on destroyed terminal
         var defunct = false;
-        var lines = [];
+        var lines = new OutputLines(function() {
+            return settings;
+        });
         var storage = new StorageHelper(settings.memory);
         var enabled = settings.enabled;
         var frozen = false;
