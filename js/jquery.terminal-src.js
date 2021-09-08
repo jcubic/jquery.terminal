@@ -1083,7 +1083,9 @@
                     return value && (is_function(value.done) || is_function(value.then));
                 });
                 if (promises.length) {
-                    var result = $.when.apply($, value).then(callback);
+                    var result = $.when.apply($, value).then(function() {
+                        return callback([].slice.call(arguments));
+                    });
                     if (is_function(value.catch)) {
                         result.catch(error);
                     }
@@ -9558,9 +9560,12 @@
                 if (raw) {
                     return lines;
                 } else {
-                    return $.map(lines, function(item) {
+                    var items = $.map(lines, function(item) {
                         return is_function(item[0]) ? item[0]() : item[0];
-                    }).join('\n');
+                    });
+                    return unpromise(items, function(lines) {
+                        return lines.join('\n');
+                    });
                 }
             },
             // -------------------------------------------------------------

@@ -6,6 +6,7 @@
 * fix applying glow shadow to transparent text
 * fix async responsive greetings
 * fix multiple echo of async functions and promises mixed with strings
+* fix `get_output()` on lines that are promises [#687](https://github.com/jcubic/jquery.terminal/issues/687)
 
 ## 2.29.1
 ### Bugfix
