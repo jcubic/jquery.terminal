@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 08 Sep 2021 07:59:37 +0000
+ * Date: Wed, 08 Sep 2021 11:51:48 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1472,7 +1472,7 @@
     // -------------------------------------------------------------------------
     // :: Class for Worker that do some computation when needed
     // :: if validation function return false it mean that condition changed
-    // :: and cache need to be cleared. If value was not prcessed it will run
+    // :: and cache need to be cleared. If value was not processed it will run
     // :: the action
     // -------------------------------------------------------------------------
     function WorkerCache(options) {
@@ -1616,6 +1616,97 @@
             }
         });
     }
+    // -------------------------------------------------------------------------
+    // :: FormatBuffer is a class that buffer line printed on terminal
+    // :: with optional format of the text, the class also usse cache
+    // :: the options in the constructor is a function that should returns
+    // :: settings for given format, the settings may change while the terminal
+    // :: is running, that's why they are dynamic in form of a function
+    // -------------------------------------------------------------------------
+    function FormatBuffer(options) {
+        this._options = options;
+        if ('Map' in root) {
+            this._format_cache = new Map();
+        }
+        this._output_buffer = [];
+    }
+    // -------------------------------------------------------------------------
+    FormatBuffer.NEW_LINE = 1;
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.format = function format(arg, newline) {
+        var use_cache = this._format_cache && this._settings.useCache;
+
+        if (use_cache) {
+            var args = JSON.stringify([arg, this._settings]);
+            if (this._format_cache.has(args)) {
+                return this._format_cache.get(args);
+            }
+        }
+        var data = {
+            line: $.terminal.format(
+                arg,
+                this._settings
+            ),
+            newline: newline
+        };
+        if (use_cache) {
+            this._format_cache.set(args, data);
+        }
+        return data;
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.empty = function() {
+        return !this._output_buffer.length;
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.append = function(arg, index, options) {
+        this._settings = $.extend({
+            useCache: true
+        }, this._options(options));
+
+        this._output_buffer.push(FormatBuffer.NEW_LINE);
+
+        if (arg instanceof Array) {
+            for (var i = 0, len = arg.length; i < len; ++i) {
+                if (arg[i] === '' || arg[i] === '\r') {
+                    this._output_buffer.push({line: '<span></span>'});
+                } else {
+                    var formatted = this.format(arg[i], i === len - 1);
+                    this._output_buffer.push(formatted);
+                }
+            }
+        } else if (!options.raw) {
+            this._output_buffer.push(this.format(arg));
+        } else {
+            this._output_buffer.push({line: arg});
+        }
+        this._output_buffer.push({
+            finalize: options.finalize,
+            index: index,
+            newline: options.newline
+        });
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.clear_cache = function() {
+        if (this._format_cache) {
+            this._format_cache.clear();
+        }
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.clear = function() {
+        this._output_buffer = [];
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.flush = function(render) {
+        while (this._output_buffer.length) {
+            var data = this._output_buffer.shift();
+            if (data === FormatBuffer.NEW_LINE) {
+                render();
+            } else {
+                render(data);
+            }
+        }
+    };
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
@@ -4810,7 +4901,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 08 Sep 2021 07:59:37 +0000',
+        date: 'Wed, 08 Sep 2021 11:51:48 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7544,71 +7635,23 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: Draw line - can have line breaks and be longer than the width of
-        // :: the terminal, there are 2 options raw and finalize
+        // :: FormatBuffer is used to to buffer the lines that echoed
+        // :: it have append function that have 2 options raw and finalize
         // :: raw - will not encode the string and finalize if a function that
         // :: will have div container of the line as first argument
-        // :: NOTE: it formats and appends lines to output_buffer. The actual
-        // :: append to terminal output happens in the flush function
+        // :: actuall echo to the terminal happen when calling flush
         // ---------------------------------------------------------------------
-        var output_buffer = [];
-        var NEW_LINE = 1;
-        var format_cache;
-        if ('Map' in root) {
-            format_cache = new Map();
-        }
-        function buffer_line(arg, index, options) {
-            // urls should always have formatting to keep url if split
-            var i, len;
-            output_buffer.push(NEW_LINE);
-            var format_options = {
+        var buffer = new FormatBuffer(function(options) {
+            return {
                 linksNoReferrer: settings.linksNoReferrer,
                 linksNoFollow: settings.linksNoFollow,
                 anyLinks: settings.anyLinks,
                 charWidth: char_size.width,
-                useCache: true,
+                useCache: settings.useCache,
                 escape: false,
                 allowedAttributes: options.allowedAttributes || []
             };
-            var use_cache = format_cache && settings.useCache && format_options.useCache;
-            function format_buff(arg, newline) {
-                if (use_cache) {
-                    var args = JSON.stringify([arg, format_options]);
-                    if (format_cache.has(args)) {
-                        return format_cache.get(args);
-                    }
-                }
-                var data = {
-                    line: $.terminal.format(
-                        arg,
-                        format_options
-                    ),
-                    newline: newline
-                };
-                if (use_cache) {
-                    format_cache.set(args, data);
-                }
-                return data;
-            }
-            if (arg instanceof Array) {
-                for (i = 0, len = arg.length; i < len; ++i) {
-                    if (arg[i] === '' || arg[i] === '\r') {
-                        output_buffer.push({line: '<span></span>'});
-                    } else {
-                        output_buffer.push(format_buff(arg[i], i === len - 1));
-                    }
-                }
-            } else if (!options.raw) {
-                output_buffer.push(format_buff(arg));
-            } else {
-                output_buffer.push({line: arg});
-            }
-            output_buffer.push({
-                finalize: options.finalize,
-                index: index,
-                newline: options.newline
-            });
-        }
+        });
         // ---------------------------------------------------------------------
         function links(string) {
             function format(_, style, color, background, _class, data, text) {
@@ -7693,7 +7736,7 @@
                             var key = string;
                             if (string_cache && string_cache.has(key)) {
                                 string = string_cache.get(key);
-                                buffer_line(string, line.index, line_settings);
+                                buffer.append(string, line.index, line_settings);
                                 return true;
                             }
                         }
@@ -7760,9 +7803,9 @@
                 if (string_cache && key && use_cache) {
                     string_cache.set(key, arg);
                 }
-                buffer_line(arg, line.index, line_settings);
+                buffer.append(arg, line.index, line_settings);
             } catch (e) {
-                output_buffer = [];
+                buffer.clear();
                 // don't display exception if exception throw in terminal
                 if (is_function(settings.exceptionHandler)) {
                     settings.exceptionHandler.call(self, e, 'TERMINAL');
@@ -7821,7 +7864,7 @@
                 });
             }
             try {
-                output_buffer = [];
+                buffer.clear();
                 unpromise(lines_to_show.map(function(line) {
                     return process_line(line);
                 }), function() {
@@ -9385,7 +9428,7 @@
             // :: cache is used if option useCache is set to true
             // -------------------------------------------------------------
             clear_cache: 'Map' in root ? function() {
-                format_cache.clear();
+                buffer.clear_cache();
                 string_cache.clear();
                 return self;
             } : function() {
@@ -9638,17 +9681,15 @@
                     if (!options.update) {
                         partial = self.find('.partial');
                     }
-                    while (output_buffer.length) {
-                        var data = output_buffer.shift();
-                        if (data === NEW_LINE) {
+                    buffer.flush(function(data) {
+                        if (!data) { // newline
                             if (!partial.length) {
                                 wrapper = $('<div/>');
                             } else if (first) {
                                 appending_to_partial = true;
                                 wrapper = partial;
                             }
-                            first = false;
-                        } else if ($.isPlainObject(data) && is_function(data.finalize)) {
+                        } else if (is_function(data.finalize)) {
                             // this is finalize function from echo
                             if (options.update) {
                                 var selector = '> div[data-index=' + data.index + ']';
@@ -9681,7 +9722,7 @@
                             // value doesn't work.
                             div.css('width', '100%');
                         }
-                    }
+                    });
                     var cmd_prompt = self.find('.cmd-prompt');
                     var cmd_outer = self.find('.cmd');
                     partial = self.find('.partial');
@@ -9745,7 +9786,7 @@
                         alert_exception('[Flush]', e1);
                     }
                 } finally {
-                    output_buffer = [];
+                    buffer.clear();
                 }
                 return self;
             },
@@ -9874,7 +9915,7 @@
                         })(locals.finalize);
                         if (locals.flush) {
                             // flush buffer if there was no flush after previous echo
-                            if (output_buffer.length) {
+                            if (!buffer.empty()) {
                                 self.flush();
                             }
                         }
