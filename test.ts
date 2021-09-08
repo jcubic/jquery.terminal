@@ -577,8 +577,12 @@ $.terminal.defaults.formatters.push(red);
     // -------------------------------------------------------------------------
     // :: get_output
     // -------------------------------------------------------------------------
-    test_type<string[]>(term.get_output());
-    var lines: JQueryTerminal.Lines = term.get_output();
+    test_type<string>(term.get_output());
+    term.get_output<PromiseLike<string>>().then(function(str) {
+        test_type<string>(str);
+    });
+    var lines = term.get_output(true);
+    test_type<JQueryTerminal.Lines>(lines);
     test_type<number>(lines[0].index);
     var div = $('<div/>');
     lines[0].options.finalize.call(term, div);
