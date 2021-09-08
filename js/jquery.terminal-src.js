@@ -9826,12 +9826,18 @@
                     var cmd_prompt = self.find('.cmd-prompt');
                     var cmd_outer = self.find('.cmd');
                     partial = self.find('.partial');
+                    var last_row;
                     if (partial.length === 0) {
                         cmd_prompt.css('margin-left', 0);
                         cmd_outer.css('top', 0);
                         command_line.__set_prompt_margin(0);
+                        last_row = self.find('.terminal-output div:last-child div:last-child');
+                        last_row.css({
+                            width: '100%',
+                            display: ''
+                        });
                     } else {
-                        var last_row = partial.children().last();
+                        last_row = partial.children().last();
                         // Remove width='100%' for two reasons:
                         // 1. so we can measure the width right here
                         // 2. so that the background of this last line of output

@@ -8,6 +8,7 @@
 * fix multiple echo of async functions and promises mixed with strings
 * fix `get_output()` on lines that are promises [#687](https://github.com/jcubic/jquery.terminal/issues/687)
 * fix echo newline when one of the values is promise or function
+* fix invalid css when partial output is no longer partial
 
 ## 2.29.1
 ### Bugfix
