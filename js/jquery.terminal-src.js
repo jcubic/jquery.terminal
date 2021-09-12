@@ -1617,7 +1617,7 @@
         });
     }
     // -------------------------------------------------------------------------
-    function OutputLines(settings, buffer) {
+    function OutputLines(settings) {
         this._settings = settings;
         this._lines = [];
         this._snapshot = [];
