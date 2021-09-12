@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 12 Sep 2021 11:39:53 +0000
+ * Date: Sun, 12 Sep 2021 16:33:03 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1617,10 +1617,38 @@
         });
     }
     // -------------------------------------------------------------------------
-    function OutputLines(settings) {
+    function OutputLines(settings, buffer) {
         this._settings = settings;
         this._lines = [];
+        this._snapshot = [];
     }
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.make_snapshot = function(snapshot) {
+        this._snapshot.push(snapshot);
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.get_partial = function() {
+        var last = this._snapshot[this._snapshot.length - 1];
+        return last;
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.update_snapshot = function(index, snapshot) {
+        this._snapshot[index] = snapshot;
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.limit_snapshot = function(limit) {
+        this._snapshot = this._snapshot.slice(limit);
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.clear_snapshot = function() {
+        this._snapshot = [];
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.get_snapshot = function() {
+        return this._snapshot.reduce(function(acc, arr) {
+            return acc.concat(arr);
+        }, []).join('\n');
+    };
     // -------------------------------------------------------------------------
     OutputLines.prototype.join = function() {
         var args = [].slice.call(arguments);
@@ -1675,6 +1703,7 @@
             }
         });
         this._lines = [];
+        this._snapshot = [];
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.data = function() {
@@ -1716,6 +1745,7 @@
     OutputLines.prototype.render = function(cols, fn) {
         var settings = this._settings();
         var lines_to_show = [];
+        this._snapshot = [];
         if (settings.outputLimit >= 0) {
             // flush will limit lines but if there is lot of
             // lines we don't need to show them and then remove
@@ -1765,7 +1795,7 @@
     // -------------------------------------------------------------------------
     FormatBuffer.NEW_LINE = 1;
     // -------------------------------------------------------------------------
-    FormatBuffer.prototype.format = function format(arg, newline) {
+    FormatBuffer.prototype.format = function format(arg, newline, raw) {
         var use_cache = this._format_cache && this._settings.useCache;
 
         if (use_cache) {
@@ -1779,6 +1809,7 @@
                 arg,
                 this._settings
             ),
+            raw: raw,
             newline: newline
         };
         if (use_cache) {
@@ -1791,7 +1822,7 @@
         return !this._output_buffer.length;
     };
     // -------------------------------------------------------------------------
-    FormatBuffer.prototype.append = function(arg, index, options) {
+    FormatBuffer.prototype.append = function(arg, index, options, raw) {
         this._settings = $.extend({
             useCache: true
         }, this._options(options));
@@ -1799,18 +1830,19 @@
         this._output_buffer.push(FormatBuffer.NEW_LINE);
 
         if (arg instanceof Array) {
+            var raw_lines = raw.split('\n');
             for (var i = 0, len = arg.length; i < len; ++i) {
                 if (arg[i] === '' || arg[i] === '\r') {
-                    this._output_buffer.push({line: '<span></span>'});
+                    this._output_buffer.push({line: '<span></span>', raw: ''});
                 } else {
-                    var formatted = this.format(arg[i], i === len - 1);
+                    var formatted = this.format(arg[i], i === len - 1, raw_lines[i]);
                     this._output_buffer.push(formatted);
                 }
             }
         } else if (!options.raw) {
-            this._output_buffer.push(this.format(arg));
+            this._output_buffer.push(this.format(arg, false, raw));
         } else {
-            this._output_buffer.push({line: arg});
+            this._output_buffer.push({line: arg, raw: raw});
         }
         this._output_buffer.push({
             finalize: options.finalize,
@@ -5033,7 +5065,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 12 Sep 2021 11:39:53 +0000',
+        date: 'Sun, 12 Sep 2021 16:33:03 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5113,6 +5145,17 @@
             return typeof str === 'string' &&
                 str.match(format_exec_re) &&
                 !$.terminal.is_formatting(str);
+        },
+        // ---------------------------------------------------------------------
+        each_extended_command: function(string, fn) {
+            var parts = string.split(format_exec_split_re);
+            return $.map(parts, function(string) {
+                if ($.terminal.is_extended_command(string)) {
+                    var command = string.replace(/^\[\[|\]\]$/g, '');
+                    return fn(command) || '';
+                }
+                return string;
+            }).join('');
         },
         // ---------------------------------------------------------------------
         // :: return array of formatting and text between them
@@ -7767,24 +7810,6 @@
             }
         }
         // ---------------------------------------------------------------------
-        // :: FormatBuffer is used to to buffer the lines that echoed
-        // :: it have append function that have 2 options raw and finalize
-        // :: raw - will not encode the string and finalize if a function that
-        // :: will have div container of the line as first argument
-        // :: actuall echo to the terminal happen when calling flush
-        // ---------------------------------------------------------------------
-        var buffer = new FormatBuffer(function(options) {
-            return {
-                linksNoReferrer: settings.linksNoReferrer,
-                linksNoFollow: settings.linksNoFollow,
-                anyLinks: settings.anyLinks,
-                charWidth: char_size.width,
-                useCache: settings.useCache,
-                escape: false,
-                allowedAttributes: options.allowedAttributes || []
-            };
-        });
-        // ---------------------------------------------------------------------
         function links(string) {
             function format(_, style, color, background, _class, data, text) {
                 function formatting(s, text) {
@@ -7840,6 +7865,33 @@
         if ('Map' in root) {
             line_cache = new Map();
         }
+        // ---------------------------------------------------------------------
+        function process_extended_commands(string, line, line_settings) {
+            if (line_settings.exec || line.options.clear_exec) {
+                return $.terminal.each_extended_command(string, function(command) {
+                    // redraw should not execute commands and it have
+                    // and lines variable have all extended commands
+                    if (line_settings.exec) {
+                        line.options.exec = false;
+                        line.options.clear_exec = true;
+                        var trim = command.trim();
+                        if (prev_exec_cmd && prev_exec_cmd === trim) {
+                            prev_exec_cmd = '';
+                            self.error(strings().recursiveLoop);
+                        } else {
+                            prev_exec_cmd = trim;
+                            $.terminal.extended_command(self, command, {
+                                invokeMethods: line_settings.invokeMethods
+                            }).then(function() {
+                                prev_exec_cmd = '';
+                            });
+                        }
+                    }
+                });
+            }
+            return string;
+        }
+        // ---------------------------------------------------------------------
         function process_line(line) {
             // prevent exception in display exception
             try {
@@ -7868,8 +7920,13 @@
                         if (settings.useCache && line_settings.useCache) {
                             var key = string;
                             if (line_cache && line_cache.has(key)) {
-                                string = line_cache.get(key);
-                                buffer.append(string, line.index, line_settings);
+                                var data = line_cache.get(key);
+                                buffer.append(
+                                    data.input,
+                                    line.index,
+                                    line_settings,
+                                    data.raw
+                                );
                                 return true;
                             }
                         }
@@ -7883,38 +7940,14 @@
                                 display_exception(e, 'FORMATTING');
                             }
                         }
-                        var parts = string.split(format_exec_split_re);
-                        string = $.map(parts, function(string) {
-                            if ($.terminal.is_extended_command(string)) {
-                                // redraw should not execute commands and it have
-                                // and lines variable have all extended commands
-                                string = string.replace(/^\[\[|\]\]$/g, '');
-                                if (line_settings.exec) {
-                                    line.options.exec = false;
-                                    var trim = string.trim();
-                                    if (prev_exec_cmd && prev_exec_cmd === trim) {
-                                        prev_exec_cmd = '';
-                                        self.error(strings().recursiveLoop);
-                                    } else {
-                                        prev_exec_cmd = trim;
-                                        $.terminal.extended_command(self, string, {
-                                            invokeMethods: line_settings.invokeMethods
-                                        }).then(function() {
-                                            prev_exec_cmd = '';
-                                        });
-                                    }
-                                }
-                                return '';
-                            } else {
-                                return string;
-                            }
-                        }).join('');
+                        string = process_extended_commands(string, line, line_settings);
                         if (string === '') {
                             return;
                         }
                         if (line_settings.convertLinks) {
                             string = links(string);
                         }
+                        var raw_string = string;
                         string = crlf($.terminal.normalize(string));
                         string = $.terminal.encode(string, {
                             tabs: settings.tabs
@@ -7932,9 +7965,9 @@
                 }
                 var arg = array || string;
                 if (line_cache && key && use_cache) {
-                    line_cache.set(key, arg);
+                    line_cache.set(key, {input: arg, raw: raw_string});
                 }
-                buffer.append(arg, line.index, line_settings);
+                buffer.append(arg, line.index, line_settings, raw_string);
             } catch (e) {
                 buffer.clear();
                 // don't display exception if exception throw in terminal
@@ -8011,6 +8044,7 @@
                             $self.remove();
                         }
                     });
+                    lines.limit_snapshot(max);
                 }
             }
         }
@@ -9709,18 +9743,13 @@
             },
             // -------------------------------------------------------------
             // :: Return the ouput of the terminal as text
+            // :: the output may contain user terminal formatting
             // -------------------------------------------------------------
             get_output: function(raw) {
                 if (raw) {
                     return lines.data();
                 } else {
-                    return unpromise(lines.render(self.rows(), function(lines) {
-                        return lines.map(function(item) {
-                            return is_function(item.value) ? item.value() : item.value;
-                        });
-                    }), function(lines) {
-                        return lines.join('\n');
-                    });
+                    return lines.get_snapshot();
                 }
             },
             // -------------------------------------------------------------
@@ -9783,130 +9812,152 @@
                     update: false,
                     scroll: true
                 }, options || {});
-                try {
-                    var bottom = self.is_bottom();
-                    var wrapper;
-                    // print all lines
-                    var first = true;
-                    var appending_to_partial = false;
-                    var partial = $();
-                    if (!options.update) {
+                when_ready(function ready() {
+                    try {
+                        var bottom = self.is_bottom();
+                        var wrapper;
+                        // print all lines
+                        var first = true;
+                        var appending_to_partial = false;
+                        var partial = $();
+                        var snapshot;
+                        if (!options.update) {
+                            partial = self.find('.partial');
+                            snapshot = lines.get_partial();
+                        }
+                        // TODO: refactor buffer.flush(), there is way
+                        //       to many levels of abstractions in one place
+                        buffer.flush(function(data) {
+                            if (!data) { // newline
+                                if (!partial.length) {
+                                    wrapper = $('<div/>');
+                                    snapshot = [];
+                                } else if (first) {
+                                    appending_to_partial = true;
+                                    wrapper = partial;
+                                }
+                            } else if (is_function(data.finalize)) {
+                                // this is finalize function from echo
+                                if (options.update) {
+                                    lines.update_snapshot(data.index, snapshot);
+                                    var selector = '> div[data-index=' + data.index + ']';
+                                    var node = output.find(selector);
+                                    if (node.html() !== wrapper.html()) {
+                                        node.replaceWith(wrapper);
+                                    }
+                                } else {
+                                    wrapper.appendTo(output);
+                                    if (!partial.length) {
+                                        lines.make_snapshot(snapshot);
+                                    }
+                                }
+                                wrapper.attr('data-index', data.index);
+                                appending_to_partial = !data.newline;
+                                wrapper.toggleClass('partial', appending_to_partial);
+                                data.finalize(wrapper);
+                            } else {
+                                var line = data.line;
+                                var div;
+                                if (typeof data.raw === 'string') {
+                                    if (appending_to_partial) {
+                                        snapshot[snapshot.length - 1] += data.raw;
+                                    } else {
+                                        snapshot.push(data.raw);
+                                    }
+                                }
+                                if (appending_to_partial) {
+                                    div = wrapper.children().last().append(line);
+                                    appending_to_partial = false;
+                                } else {
+                                    div = $('<div/>').html(line);
+                                    if (data.newline) {
+                                        div.addClass('cmd-end-line');
+                                    }
+                                    wrapper.append(div);
+                                }
+                                // width = '100%' does some weird extra magic
+                                // that makes the height correct. Any other
+                                // value doesn't work.
+                                div.css('width', '100%');
+                            }
+                        });
+                        var cmd_prompt = self.find('.cmd-prompt');
+                        var cmd_outer = self.find('.cmd');
                         partial = self.find('.partial');
-                    }
-                    buffer.flush(function(data) {
-                        if (!data) { // newline
-                            if (!partial.length) {
-                                wrapper = $('<div/>');
-                            } else if (first) {
-                                appending_to_partial = true;
-                                wrapper = partial;
-                            }
-                        } else if (is_function(data.finalize)) {
-                            // this is finalize function from echo
-                            if (options.update) {
-                                var selector = '> div[data-index=' + data.index + ']';
-                                var node = output.find(selector);
-                                if (node.html() !== wrapper.html()) {
-                                    node.replaceWith(wrapper);
-                                }
-                            } else {
-                                wrapper.appendTo(output);
-                            }
-                            wrapper.attr('data-index', data.index);
-                            appending_to_partial = !data.newline;
-                            wrapper.toggleClass('partial', appending_to_partial);
-                            data.finalize(wrapper);
+                        var last_row;
+                        if (partial.length === 0) {
+                            cmd_prompt.css('margin-left', 0);
+                            cmd_outer.css('top', 0);
+                            command_line.__set_prompt_margin(0);
+                            last_row = self.find('.terminal-output div:last-child ' +
+                                                 'div:last-child');
+                            last_row.css({
+                                width: '100%',
+                                display: ''
+                            });
                         } else {
-                            var line = data.line;
-                            var div;
-                            if (appending_to_partial) {
-                                div = wrapper.children().last().append(line);
-                                appending_to_partial = false;
-                            } else {
-                                div = $('<div/>').html(line);
-                                if (data.newline) {
-                                    div.addClass('cmd-end-line');
-                                }
-                                wrapper.append(div);
-                            }
-                            // width = '100%' does some weird extra magic
-                            // that makes the height correct. Any other
-                            // value doesn't work.
-                            div.css('width', '100%');
+                            last_row = partial.children().last();
+                            // Remove width='100%' for two reasons:
+                            // 1. so we can measure the width right here
+                            // 2. so that the background of this last line of output
+                            //    doesn't occlude the first line of input to the right
+                            last_row.css({
+                                width: '',
+                                display: 'inline-block'
+                            });
+                            var last_row_rect = last_row[0].getBoundingClientRect();
+                            var partial_width = last_row_rect.width;
+                            // Shift command prompt up one line and to the right
+                            // enough so that it appears directly next to the
+                            // partially constructed output line
+                            cmd_prompt.css('margin-left', partial_width);
+                            cmd_outer.css('top', -last_row_rect.height);
+                            // Measure length of partial line in characters
+                            var char_width = self.geometry().char.width;
+                            var prompt_margin = Math.round(partial_width / char_width);
+                            command_line.__set_prompt_margin(prompt_margin);
                         }
-                    });
-                    var cmd_prompt = self.find('.cmd-prompt');
-                    var cmd_outer = self.find('.cmd');
-                    partial = self.find('.partial');
-                    var last_row;
-                    if (partial.length === 0) {
-                        cmd_prompt.css('margin-left', 0);
-                        cmd_outer.css('top', 0);
-                        command_line.__set_prompt_margin(0);
-                        last_row = self.find('.terminal-output div:last-child ' +
-                                             'div:last-child');
-                        last_row.css({
-                            width: '100%',
-                            display: ''
-                        });
-                    } else {
-                        last_row = partial.children().last();
-                        // Remove width='100%' for two reasons:
-                        // 1. so we can measure the width right here
-                        // 2. so that the background of this last line of output
-                        //    doesn't occlude the first line of input to the right
-                        last_row.css({
-                            width: '',
-                            display: 'inline-block'
-                        });
-                        var last_row_rect = last_row[0].getBoundingClientRect();
-                        var partial_width = last_row_rect.width;
-                        // Shift command prompt up one line and to the right
-                        // enough so that it appears directly next to the
-                        // partially constructed output line
-                        cmd_prompt.css('margin-left', partial_width);
-                        cmd_outer.css('top', -last_row_rect.height);
-                        // Measure length of partial line in characters
-                        var char_width = self.geometry().char.width;
-                        var prompt_margin = Math.round(partial_width / char_width);
-                        command_line.__set_prompt_margin(prompt_margin);
-                    }
-                    limit_lines();
-                    fire_event('onFlush');
-                    var cmd_cursor = self.find('.cmd-cursor');
-                    var offset = self.find('.cmd').offset();
-                    var self_offset = self.offset();
-                    setTimeout(function() {
-                        css(self[0], {
-                            '--terminal-height': self.height(),
-                            '--terminal-x': offset.left - self_offset.left,
-                            '--terminal-y': offset.top - self_offset.top,
-                            '--terminal-scroll': self.prop('scrollTop')
-                        });
-                        // Firefox won't reflow the cursor automatically, so
-                        // hide it briefly then reshow it
-                        cmd_cursor.hide();
+                        limit_lines();
+                        fire_event('onFlush');
+                        var cmd_cursor = self.find('.cmd-cursor');
+                        var offset = self.find('.cmd').offset();
+                        var self_offset = self.offset();
                         setTimeout(function() {
-                            cmd_cursor.show();
+                            css(self[0], {
+                                '--terminal-height': self.height(),
+                                '--terminal-x': offset.left - self_offset.left,
+                                '--terminal-y': offset.top - self_offset.top,
+                                '--terminal-scroll': self.prop('scrollTop')
+                            });
+                            // Firefox won't reflow the cursor automatically, so
+                            // hide it briefly then reshow it
+                            cmd_cursor.hide();
+                            setTimeout(function() {
+                                cmd_cursor.show();
+                            }, 0);
                         }, 0);
-                    }, 0);
-                    if ((settings.scrollOnEcho && options.scroll) || bottom) {
-                        self.scroll_to_bottom();
-                    }
-                } catch (e1) {
-                    if (is_function(settings.exceptionHandler)) {
-                        try {
-                            settings.exceptionHandler.call(self, e1, 'TERMINAL (Flush)');
-                        } catch (e2) {
-                            settings.exceptionHandler = $.noop;
-                            alert_exception('[exceptionHandler]', e2);
+                        if ((settings.scrollOnEcho && options.scroll) || bottom) {
+                            self.scroll_to_bottom();
                         }
-                    } else {
-                        alert_exception('[Flush]', e1);
+                    } catch (e1) {
+                        if (is_function(settings.exceptionHandler)) {
+                            try {
+                                settings.exceptionHandler.call(
+                                    self,
+                                    e1,
+                                    'TERMINAL (Flush)'
+                                );
+                            } catch (e2) {
+                                settings.exceptionHandler = $.noop;
+                                alert_exception('[exceptionHandler]', e2);
+                            }
+                        } else {
+                            alert_exception('[Flush]', e1);
+                        }
+                    } finally {
+                        buffer.clear();
                     }
-                } finally {
-                    buffer.clear();
-                }
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -10828,6 +10879,24 @@
         delete settings.formatters;
         // used to throw error when calling methods on destroyed terminal
         var defunct = false;
+        // ---------------------------------------------------------------------
+        // :: FormatBuffer is used to to buffer the lines that echoed
+        // :: it have append function that have 2 options raw and finalize
+        // :: raw - will not encode the string and finalize if a function that
+        // :: will have div container of the line as first argument
+        // :: actuall echo to the terminal happen when calling flush
+        // ---------------------------------------------------------------------
+        var buffer = new FormatBuffer(function(options) {
+            return {
+                linksNoReferrer: settings.linksNoReferrer,
+                linksNoFollow: settings.linksNoFollow,
+                anyLinks: settings.anyLinks,
+                charWidth: char_size.width,
+                useCache: settings.useCache,
+                escape: false,
+                allowedAttributes: options.allowedAttributes || []
+            };
+        });
         var lines = new OutputLines(function() {
             return settings;
         });
