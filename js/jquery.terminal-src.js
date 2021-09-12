@@ -7883,34 +7883,32 @@
                                 display_exception(e, 'FORMATTING');
                             }
                         }
-                        if (line_settings.exec) {
-                            var parts = string.split(format_exec_split_re);
-                            string = $.map(parts, function(string) {
-                                if ($.terminal.is_extended_command(string)) {
-                                    // redraw should not execute commands and it have
-                                    // and lines variable have all extended commands
-                                    string = string.replace(/^\[\[|\]\]$/g, '');
-                                    if (line_settings.exec) {
-                                        line.options.exec = false;
-                                        var trim = string.trim();
-                                        if (prev_exec_cmd && prev_exec_cmd === trim) {
+                        var parts = string.split(format_exec_split_re);
+                        string = $.map(parts, function(string) {
+                            if ($.terminal.is_extended_command(string)) {
+                                // redraw should not execute commands and it have
+                                // and lines variable have all extended commands
+                                string = string.replace(/^\[\[|\]\]$/g, '');
+                                if (line_settings.exec) {
+                                    line.options.exec = false;
+                                    var trim = string.trim();
+                                    if (prev_exec_cmd && prev_exec_cmd === trim) {
+                                        prev_exec_cmd = '';
+                                        self.error(strings().recursiveLoop);
+                                    } else {
+                                        prev_exec_cmd = trim;
+                                        $.terminal.extended_command(self, string, {
+                                            invokeMethods: line_settings.invokeMethods
+                                        }).then(function() {
                                             prev_exec_cmd = '';
-                                            self.error(strings().recursiveLoop);
-                                        } else {
-                                            prev_exec_cmd = trim;
-                                            $.terminal.extended_command(self, string, {
-                                                invokeMethods: line_settings.invokeMethods
-                                            }).then(function() {
-                                                prev_exec_cmd = '';
-                                            });
-                                        }
+                                        });
                                     }
-                                    return '';
-                                } else {
-                                    return string;
                                 }
-                            }).join('');
-                        }
+                                return '';
+                            } else {
+                                return string;
+                            }
+                        }).join('');
                         if (string === '') {
                             return;
                         }

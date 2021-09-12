@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 08 Sep 2021 18:31:52 +0000
+ * Date: Sun, 12 Sep 2021 11:39:53 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5033,7 +5033,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 08 Sep 2021 18:31:52 +0000',
+        date: 'Sun, 12 Sep 2021 11:39:53 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7883,34 +7883,32 @@
                                 display_exception(e, 'FORMATTING');
                             }
                         }
-                        if (line_settings.exec) {
-                            var parts = string.split(format_exec_split_re);
-                            string = $.map(parts, function(string) {
-                                if ($.terminal.is_extended_command(string)) {
-                                    // redraw should not execute commands and it have
-                                    // and lines variable have all extended commands
-                                    string = string.replace(/^\[\[|\]\]$/g, '');
-                                    if (line_settings.exec) {
-                                        line.options.exec = false;
-                                        var trim = string.trim();
-                                        if (prev_exec_cmd && prev_exec_cmd === trim) {
+                        var parts = string.split(format_exec_split_re);
+                        string = $.map(parts, function(string) {
+                            if ($.terminal.is_extended_command(string)) {
+                                // redraw should not execute commands and it have
+                                // and lines variable have all extended commands
+                                string = string.replace(/^\[\[|\]\]$/g, '');
+                                if (line_settings.exec) {
+                                    line.options.exec = false;
+                                    var trim = string.trim();
+                                    if (prev_exec_cmd && prev_exec_cmd === trim) {
+                                        prev_exec_cmd = '';
+                                        self.error(strings().recursiveLoop);
+                                    } else {
+                                        prev_exec_cmd = trim;
+                                        $.terminal.extended_command(self, string, {
+                                            invokeMethods: line_settings.invokeMethods
+                                        }).then(function() {
                                             prev_exec_cmd = '';
-                                            self.error(strings().recursiveLoop);
-                                        } else {
-                                            prev_exec_cmd = trim;
-                                            $.terminal.extended_command(self, string, {
-                                                invokeMethods: line_settings.invokeMethods
-                                            }).then(function() {
-                                                prev_exec_cmd = '';
-                                            });
-                                        }
+                                        });
                                     }
-                                    return '';
-                                } else {
-                                    return string;
                                 }
-                            }).join('');
-                        }
+                                return '';
+                            } else {
+                                return string;
+                            }
+                        }).join('');
                         if (string === '') {
                             return;
                         }

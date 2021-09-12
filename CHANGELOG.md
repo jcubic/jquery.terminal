@@ -10,6 +10,7 @@
 * fix echo newline when one of the values is promise or function
 * fix invalid css when partial output is no longer partial
 * add padding to terminal size i `term::geometry()` [#686](https://github.com/jcubic/jquery.terminal/issues/686)
+* clear extended commands from view when calling `import_view` [#690](https://github.com/jcubic/jquery.terminal/issues/7690)
 
 ## 2.29.1
 ### Bugfix
