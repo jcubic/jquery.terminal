@@ -699,7 +699,7 @@ terminal .terminal-output > div {
 .terminal {
     padding-bottom: 0;
     /* conditionals in CSS ref: https://www.kizu.ru/conditions-for-css-variables/ */
-    --glow: 0;
+    /* --glow: 0; */
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
 }
 .terminal .terminal-output > :not(.raw) .error,

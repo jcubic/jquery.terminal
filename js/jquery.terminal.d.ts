@@ -80,6 +80,12 @@ declare namespace JQueryTerminal {
         height: number
     };
     interface geometry {
+        padding: {
+            left: number,
+            right: number,
+            top: number,
+            bottom: number
+        };
         terminal: size;
         char: size;
         cols: number;
@@ -767,7 +773,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_prompt(prompt: JQueryTerminal.ExtendedPrompt, options?: JQueryTerminal.promptOptions): JQueryTerminal | JQuery.Promise<void>;
     get_prompt<T extends JQueryTerminal.ExtendedPrompt>(): T;
     set_mask(toggle?: boolean | string): JQueryTerminal;
-    get_output<T extends JQueryTerminal.Lines | string[]>(raw?: boolean): T;
+    get_output(): string;
+    get_output(raw: boolean):  JQueryTerminal.Lines;
     resize(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'resize'> | false): this;
     resize(width?: number, height?: number): JQueryTerminal;
     refresh(): JQueryTerminal;

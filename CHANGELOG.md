@@ -1,3 +1,17 @@
+## 2.29.2
+### Bugfix
+* fix linkify of urls (better url detection)
+* fix linkify urls in command line (enable link in cmd)
+* fix two bugs with echo without newline (when prompt have 0 width and lines have different length)
+* fix applying glow shadow to transparent text
+* fix async responsive greetings
+* fix multiple echo of async functions and promises mixed with strings
+* fix `get_output()` on lines that are promises [#687](https://github.com/jcubic/jquery.terminal/issues/687)
+* fix echo newline when one of the values is promise or function
+* fix invalid css when partial output is no longer partial
+* add padding to terminal size i `term::geometry()` [#686](https://github.com/jcubic/jquery.terminal/issues/686)
+* clear extended commands from view when calling `import_view` [#690](https://github.com/jcubic/jquery.terminal/issues/7690)
+
 ## 2.29.1
 ### Bugfix
 * remove `all: unset` CSS that was breaking resizing events and visibility of textarea

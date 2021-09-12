@@ -248,7 +248,6 @@ global.URL = window.URL = {
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
-require('../js/echo_newline')(global.$);
 require('../js/autocomplete_menu')(global.$);
 require('../js/less')(global.$);
 
@@ -285,7 +284,7 @@ function spy(obj, method) {
 }
 function delay(delay, fn = (x) => x) {
     return new Promise((resolve) => {
-        if (delay === 0) {
+        if (delay === 0 && typeof setImmediate !== 'undefined') {
             setImmediate(resolve);
         } else {
             setTimeout(resolve, delay);
@@ -2676,6 +2675,30 @@ describe('extensions', function() {
             expect(term.get_output()).toEqual('...' + prompt2 + command);
             expect(term.get_prompt()).toEqual(prompt2);
         });
+        it('should render async', async function() {
+            function render(text, time) {
+                return delay(time, () => text);
+            }
+            var spec = [
+                () => term.echo('hello', {newline: false}).echo(render(', world', 0)),
+                () => term.echo('hello', {newline: false}).echo(() => render(', world', 0)),
+
+                () => term.echo(render('hello', 0), {newline: false}).echo(', world'),
+                () => term.echo(() => render('hello', 0), {newline: false}).echo(', world'),
+
+                () => term.echo(() => render('hello', 0), {newline: false}).echo(() => render(', world', 0)),
+                () => term.echo(render('hello', 0), {newline: false}).echo(render(', world', 0)),
+
+                () => term.echo(() => render('hello', 0), {newline: false}).echo(render(', world', 0)),
+                () => term.echo(render('hello', 0), {newline: false}).echo(() => render(', world', 0))
+            ];
+            for (const fn of spec) {
+                term.clear();
+                fn();
+                await delay(50);
+                expect(output(term)).toEqual(['hello, world']);
+            }
+        });
         it('finalize with newline : false', function() {
             term.echo('foo', {finalize: (a) => a.children().children().css("color", "red"), newline : false});
             var color = term[0].querySelector(`[data-index='${term.last_index()}`).firstChild.firstChild.style.color;
@@ -4152,39 +4175,33 @@ describe('Terminal plugin', function() {
                 expect(term.export_view().interpreters.top().completion).toBeFalsy();
                 term.destroy().remove();
             });
-            it('should display error on invalid JSON', function(done) {
+            it('should display error on invalid JSON', async function() {
                 var term = $('<div/>').appendTo('body').terminal('/not-json', {greetings: false});
-                setTimeout(function() {
-                    enter(term, 'foo');
-                    setTimeout(function() {
-                        var output = [
-                            '> foo',
-                            '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON - Server responded:',
-                            'Response]'
-                        ].join('\n');
-                        expect(term.get_output()).toEqual(output);
-                        term.destroy().remove();
-                        done();
-                    }, 200);
-                }, 200);
+                await delay(200);
+                enter(term, 'foo');
+                await delay(200);
+                var output = [
+                    '> foo',
+                    '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON - Server responded:',
+                    'Response]'
+                ].join('\n');
+                expect(term.get_output()).toEqual(output);
+                term.destroy().remove();
             });
-            it('should display error on Invalid JSON-RPC response', function(done) {
+            it('should display error on Invalid JSON-RPC response', async function() {
                 var term = $('<div/>').appendTo('body').terminal('/not-rpc', {
                     greetings: false
                 });
-                setTimeout(function() {
-                    enter(term, 'foo');
-                    setTimeout(function() {
-                        var output = [
-                            '> foo',
-                            '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
-                            '{"foo": "bar"}]'
-                        ].join('\n');
-                        expect(term.get_output()).toEqual(output);
-                        term.destroy().remove();
-                        done();
-                    }, 200);
-                }, 200);
+                await delay(200);
+                enter(term, 'foo');
+                await delay(200);
+                var output = [
+                    '> foo',
+                    '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
+                    '{"foo": "bar"}]'
+                ].join('\n');
+                expect(term.get_output()).toEqual(output);
+                term.destroy().remove();
             });
         });
     });
@@ -5973,6 +5990,56 @@ describe('Terminal plugin', function() {
                     await delay(50);
                     expect(count(term.clear)).toEqual(2);
                     expect(term.find('.terminal-error').length).toEqual(0);
+                });
+            });
+            describe('async echo', function() {
+                var term;
+                function render(text, delay) {
+                    return new Promise(resolve => {
+                        setTimeout(() => resolve(text), delay);
+                    });
+                }
+                beforeEach(function() {
+                    term = $('<div/>').terminal($.noop, {greetings: false});
+                });
+                afterEach(function() {
+                    term.remove();
+                });
+                it('should render multiple async functions in order', async function() {
+                    term.echo(() => render('lorem', 10));
+                    term.echo('foo');
+                    term.echo(() => render('ipsum', 10));
+                    term.echo('bar');
+                    term.echo(() => render('dolor', 10));
+                    term.echo('baz');
+                    // not sure why but 100 delay is too short
+                    await delay(300);
+                    expect(output('.terminal-output div div', term)).toEqual([
+                        'lorem',
+                        'foo',
+                        'ipsum',
+                        'bar',
+                        'dolor',
+                        'baz'
+                    ]);
+                });
+                it('should render multiple promises in order', async function() {
+                    term.echo(render('lorem', 10));
+                    term.echo('foo');
+                    term.echo(render('ipsum', 10));
+                    term.echo('bar');
+                    term.echo(render('dolor', 10));
+                    term.echo('baz');
+                    // here 100 delay it's ok
+                    await delay(100);
+                    expect(output('.terminal-output div div', term)).toEqual([
+                        'lorem',
+                        'foo',
+                        'ipsum',
+                        'bar',
+                        'dolor',
+                        'baz'
+                    ]);
                 });
             });
         });
