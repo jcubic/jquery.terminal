@@ -4175,39 +4175,33 @@ describe('Terminal plugin', function() {
                 expect(term.export_view().interpreters.top().completion).toBeFalsy();
                 term.destroy().remove();
             });
-            it('should display error on invalid JSON', function(done) {
+            it('should display error on invalid JSON', async function() {
                 var term = $('<div/>').appendTo('body').terminal('/not-json', {greetings: false});
-                setTimeout(function() {
-                    enter(term, 'foo');
-                    setTimeout(function() {
-                        var output = [
-                            '> foo',
-                            '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON - Server responded:',
-                            'Response]'
-                        ].join('\n');
-                        expect(term.get_output()).toEqual(output);
-                        term.destroy().remove();
-                        done();
-                    }, 200);
-                }, 200);
+                await delay(200);
+                enter(term, 'foo');
+                await delay(200);
+                var output = [
+                    '> foo',
+                    '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON - Server responded:',
+                    'Response]'
+                ].join('\n');
+                expect(term.get_output()).toEqual(output);
+                term.destroy().remove();
             });
-            it('should display error on Invalid JSON-RPC response', function(done) {
+            it('should display error on Invalid JSON-RPC response', async function() {
                 var term = $('<div/>').appendTo('body').terminal('/not-rpc', {
                     greetings: false
                 });
-                setTimeout(function() {
-                    enter(term, 'foo');
-                    setTimeout(function() {
-                        var output = [
-                            '> foo',
-                            '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
-                            '{"foo": "bar"}]'
-                        ].join('\n');
-                        expect(term.get_output()).toEqual(output);
-                        term.destroy().remove();
-                        done();
-                    }, 200);
-                }, 200);
+                await delay(200);
+                enter(term, 'foo');
+                await delay(200);
+                var output = [
+                    '> foo',
+                    '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
+                    '{"foo": "bar"}]'
+                ].join('\n');
+                expect(term.get_output()).toEqual(output);
+                term.destroy().remove();
             });
         });
     });
