@@ -335,7 +335,7 @@
     "ansidec": "^0.3.4",
     "iconv-lite": "^0.6.3",
     "jquery": "^3.6.0",
-    "prismjs": "^1.24.1",
+    "prismjs": "^1.25.0",
     "wcwidth": "^1.0.1"
   },
   "devDependencies": {
