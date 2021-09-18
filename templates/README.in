@@ -86,7 +86,11 @@ Because with this library you need to code all the commands yourself, you can ca
 
 ### Demo
 
-You can test current version in this URL:
+You can test current version at this URL:
+
+* [https://jcubic.github.io/jquery.terminal/](https://jcubic.github.io/jquery.terminal/)
+
+or if it doesn't use latest version (because of jsDelivr cache) you can force it with this URL:
 
 * [https://jcubic.github.io/jquery.terminal/?ver={{VER}}](https://jcubic.github.io/jquery.terminal/?ver={{VER}})
 
@@ -94,7 +98,7 @@ And development version using:
 
 * [https://jcubic.github.io/jquery.terminal/?ver=devel](https://jcubic.github.io/jquery.terminal/?ver=devel)
 
-You can use any version you want, everything what [jsDevlr GH API accepts](https://www.jsdelivr.com/?docs=gh).
+You can use any version you want, everything what [jsDelivr GH API accepts](https://www.jsdelivr.com/?docs=gh).
 
 ### Installation
 

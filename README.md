@@ -11,7 +11,7 @@
 
 [![npm](https://img.shields.io/badge/npm-2.29.2-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.29.2-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&7554d6ca88992a23404f551e23ee1efa22db4bb2)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&bb91ffc4b4398af12b230d331aa1ae42d49f03d7)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&adf0be0159c06fd2998bde8bcba30c02)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![Paid Support](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -86,7 +86,11 @@ Because with this library you need to code all the commands yourself, you can ca
 
 ### Demo
 
-You can test current version in this URL:
+You can test current version at this URL:
+
+* [https://jcubic.github.io/jquery.terminal/](https://jcubic.github.io/jquery.terminal/)
+
+or if it doesn't use latest version (because of jsDelivr cache) you can force it with this URL:
 
 * [https://jcubic.github.io/jquery.terminal/?ver=2.29.2](https://jcubic.github.io/jquery.terminal/?ver=2.29.2)
 
@@ -94,7 +98,7 @@ And development version using:
 
 * [https://jcubic.github.io/jquery.terminal/?ver=devel](https://jcubic.github.io/jquery.terminal/?ver=devel)
 
-You can use any version you want, everything what [jsDevlr GH API accepts](https://www.jsdelivr.com/?docs=gh).
+You can use any version you want, everything what [jsDelivr GH API accepts](https://www.jsdelivr.com/?docs=gh).
 
 ### Installation
 
