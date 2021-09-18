@@ -6,16 +6,8 @@
     <meta name="googlebot" content="noindex"/>
     <link rel="shortcut icon" href="favicon.ico"/>
     <meta name="viewport" content="user-scalable=no, width=device-width">
-    <link rel="stylesheet" href="https://rawgit.com/jcubic/jquery.terminal/master/css/jquery.terminal.css"/>
-    <link rel="stylesheet" href="https://unpkg.com/prismjs@1.14.0/themes/prism.css"/>
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="https://unpkg.com/js-polyfills/keyboard.js"></script>
-    <script src="https://unpkg.com/prismjs@1.8.1/prism.js"></script>
-    <script src="js/jquery.terminal.js"></script>
-    <script src="js/jquery.mousewheel-min.js"></script>
-    <script src="js/less.js"></script>
-    <script src="js/prism.js"></script>
-    <script src="js/unix_formatting.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-polyfills/keyboard.js"></script>
     <script>
      function query() {
          var result = {};
@@ -42,12 +34,18 @@
      };
      var args = query();
      var file = args.file || 'browser_test_files/base.js';
-     var base = 'https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@';
-     var ver = args.ver || 'devel';
      var files = [
-         base + ver + '/js/jquery.terminal.js',
-         base + ver + '/css/jquery.terminal.css'
+         '/js/jquery.terminal.min.js',
+         '/js/less.js',
+         '/css/jquery.terminal.min.css',
+         '/js/prism.js',
+         '/js/unix_formatting.js'
      ];
+     var base = 'https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@';
+     var ver = args.ver || 'master';
+     files = files.map(function(file) {
+         return base + ver + file;
+     });
      if (file.match(/^browser_test_files/)) {
          files.push(file);
      }
