@@ -11,7 +11,7 @@
 
 [![npm](https://img.shields.io/badge/npm-2.29.2-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-2.29.2-yellow.svg)
-[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&77a53d0fa1f6d6f10ac30e5729d83b447b82b735)](https://travis-ci.org/jcubic/jquery.terminal)
+[![travis](https://travis-ci.org/jcubic/jquery.terminal.svg?branch=master&7554d6ca88992a23404f551e23ee1efa22db4bb2)](https://travis-ci.org/jcubic/jquery.terminal)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&adf0be0159c06fd2998bde8bcba30c02)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![Paid Support](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
@@ -81,7 +81,20 @@ Because with this library you need to code all the commands yourself, you can ca
 
 * Support ANSI escapes codes.
 
-* Full mobile support.
+* Good mobile support, see open issues:
+  * Cursor issues on mobile [#620](https://github.com/jcubic/jquery.terminal/issues/620)
+
+### Demo
+
+You can test current version in this URL:
+
+* [https://jcubic.github.io/jquery.terminal/?ver=2.29.2](https://jcubic.github.io/jquery.terminal/?ver=2.29.2)
+
+And development version using:
+
+* [https://jcubic.github.io/jquery.terminal/?ver=devel](https://jcubic.github.io/jquery.terminal/?ver=devel)
+
+You can use any version you want, everything what [jsDevlr GH API accepts](https://www.jsdelivr.com/?docs=gh).
 
 ### Installation
 

@@ -81,7 +81,20 @@ Because with this library you need to code all the commands yourself, you can ca
 
 * Support ANSI escapes codes.
 
-* Full mobile support.
+* Good mobile support, see open issues:
+  * Cursor issues on mobile [#620](https://github.com/jcubic/jquery.terminal/issues/620)
+
+### Demo
+
+You can test current version in this URL:
+
+* [https://jcubic.github.io/jquery.terminal/?ver={{VER}}](https://jcubic.github.io/jquery.terminal/?ver={{VER}})
+
+And development version using:
+
+* [https://jcubic.github.io/jquery.terminal/?ver=devel](https://jcubic.github.io/jquery.terminal/?ver=devel)
+
+You can use any version you want, everything what [jsDevlr GH API accepts](https://www.jsdelivr.com/?docs=gh).
 
 ### Installation
 
