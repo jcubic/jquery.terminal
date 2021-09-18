@@ -6,7 +6,7 @@ CP=cp
 RM=rm
 CAT=cat
 DATE=`date -uR`
-GIT=git
+GIT=LC_ALL=C git
 BRANCH=`git branch | grep '^*' | sed 's/* //'`
 UGLIFY=../node_modules/.bin/uglifyjs
 JSONLINT=./node_modules/.bin/jsonlint
@@ -21,7 +21,7 @@ URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
 UPDATE_CONTRIBUTORS=0
 
-.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
+.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji templates/package.in
 
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
 
@@ -64,6 +64,9 @@ README.md: templates/README.in .$(VERSION) __tests__/terminal.spec.js
 
 .$(VERSION): Makefile
 	touch .$(VERSION)
+
+templates/package.in:
+	$(SED) 's/"version": "[^"]\+"/"version": "{{V''ER}}"/' package.json > templates/package.in
 
 Makefile: templates/Makefile.in
 	$(SED) -e "s/{{VER""SION}}/"$(VERSION)"/" templates/Makefile.in > Makefile
@@ -144,7 +147,7 @@ contributors: contributors-www.json contributors.json
 lint: eslint jsonlint
 
 checkout:
-	@git status | sed "1,/not staged/d" | grep modified | sed "s/.*modified:\s*\(.*\)/\1/" | tr '\n' ' ' | sed -e "s/.*/git checkout &; touch &/" | bash
+	@$(GIT) status | sed "1,/not staged/d" | grep modified | sed "s/.*modified:\s*\(.*\)/\1/" | tr '\n' ' ' | sed -e "s/.*/git checkout &; touch &/" | bash
 
 
 update-contributors:
