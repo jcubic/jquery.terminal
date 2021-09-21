@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.29.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 12 Sep 2021 17:15:46 +0000
+ * Date: Tue, 21 Sep 2021 15:37:35 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5064,8 +5064,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.29.2',
-        date: 'Sun, 12 Sep 2021 17:15:46 +0000',
+        version: 'DEV',
+        date: 'Tue, 21 Sep 2021 15:37:35 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9889,12 +9889,15 @@
                             cmd_prompt.css('margin-left', 0);
                             cmd_outer.css('top', 0);
                             command_line.__set_prompt_margin(0);
-                            last_row = self.find('.terminal-output div:last-child ' +
-                                                 'div:last-child');
-                            last_row.css({
-                                width: '100%',
-                                display: ''
-                            });
+                            last_row = self.find('.terminal-output div:last-child' +
+                                                 ' div:last-child');
+                            // check if the div is parital fix #695
+                            if (last_row.css('display') === 'inline-block') {
+                                last_row.css({
+                                    width: '100%',
+                                    display: ''
+                                });
+                            }
                         } else {
                             last_row = partial.children().last();
                             // Remove width='100%' for two reasons:

@@ -1,3 +1,7 @@
+## 2.29.3
+### Bugfix
+* fix echo raw interfering with echo without newline [#695](https://github.com/jcubic/jquery.terminal/issues/695)
+
 ## 2.29.2
 ### Bugfix
 * fix linkify of urls (better url detection)

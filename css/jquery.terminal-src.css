@@ -222,7 +222,7 @@ body.full-screen-terminal .terminal {
 .cmd {
     font-size: 12px;
 }
-.terminal-output div div::before {
+.terminal-output > div:not(.raw) div::before {
     content: '\0200B';
     width: 0;
     float: left;

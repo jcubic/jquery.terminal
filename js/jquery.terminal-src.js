@@ -9889,12 +9889,15 @@
                             cmd_prompt.css('margin-left', 0);
                             cmd_outer.css('top', 0);
                             command_line.__set_prompt_margin(0);
-                            last_row = self.find('.terminal-output div:last-child ' +
-                                                 'div:last-child');
-                            last_row.css({
-                                width: '100%',
-                                display: ''
-                            });
+                            last_row = self.find('.terminal-output div:last-child' +
+                                                 ' div:last-child');
+                            // check if the div is parital fix #695
+                            if (last_row.css('display') === 'inline-block') {
+                                last_row.css({
+                                    width: '100%',
+                                    display: ''
+                                });
+                            }
                         } else {
                             last_row = partial.children().last();
                             // Remove width='100%' for two reasons:
