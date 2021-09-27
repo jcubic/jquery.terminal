@@ -1,6 +1,7 @@
 ## 2.29.3
 ### Bugfix
 * fix echo raw interfering with echo without newline [#695](https://github.com/jcubic/jquery.terminal/issues/695)
+* update hash with proper array if hash is escaped
 
 ## 2.29.2
 ### Bugfix

@@ -8436,6 +8436,14 @@
             return cursor.is_fully_in_viewport(self).then(scroll_to_view);
         }
         // ---------------------------------------------------------------------
+        function replace_hash(state) {
+            if (typeof history !== 'undefined' && history.replaceState) {
+                var new_hash = '#' + JSON.stringify(state);
+                var url = location.href.replace(/#.*$/, new_hash);
+                history.replaceState(null, '', url);
+            }
+        }
+        // ---------------------------------------------------------------------
         function hashchange() {
             if (fire_hash_change && settings.execHash) {
                 try {
@@ -11589,6 +11597,10 @@
                             var hash = location.hash.replace(/^#/, '');
                             // yes no var - local inside terminal
                             hash_commands = JSON.parse(decodeURIComponent(hash));
+                            if (!hash.match(/\[/)) {
+                                // fix the hash to look like array if it's not
+                                replace_hash(hash_commands);
+                            }
                             var i = 0;
                             (function recur() {
                                 var spec = hash_commands[i++];

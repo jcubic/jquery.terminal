@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 21 Sep 2021 15:37:35 +0000
+ * Date: Mon, 27 Sep 2021 13:41:33 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5065,7 +5065,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 21 Sep 2021 15:37:35 +0000',
+        date: 'Mon, 27 Sep 2021 13:41:33 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8436,6 +8436,14 @@
             return cursor.is_fully_in_viewport(self).then(scroll_to_view);
         }
         // ---------------------------------------------------------------------
+        function replace_hash(state) {
+            if (typeof history !== 'undefined' && history.replaceState) {
+                var new_hash = '#' + JSON.stringify(state);
+                var url = location.href.replace(/#.*$/, new_hash);
+                history.replaceState(null, '', url);
+            }
+        }
+        // ---------------------------------------------------------------------
         function hashchange() {
             if (fire_hash_change && settings.execHash) {
                 try {
@@ -11589,6 +11597,10 @@
                             var hash = location.hash.replace(/^#/, '');
                             // yes no var - local inside terminal
                             hash_commands = JSON.parse(decodeURIComponent(hash));
+                            if (!hash.match(/\[/)) {
+                                // fix the hash to look like array if it's not
+                                replace_hash(hash_commands);
+                            }
                             var i = 0;
                             (function recur() {
                                 var spec = hash_commands[i++];
