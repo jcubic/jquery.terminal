@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 27 Sep 2021 13:41:33 +0000
+ * Date: Thu, 30 Sep 2021 10:39:07 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5065,7 +5065,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 27 Sep 2021 13:41:33 +0000',
+        date: 'Thu, 30 Sep 2021 10:39:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9800,11 +9800,15 @@
                 return self;
             },
             // -------------------------------------------------------------
-            // :: redraw the terminal
+            // :: redraw the terminal and invalidate cache
             // -------------------------------------------------------------
             refresh: function() {
                 if (char_size.width !== 0) {
                     self[0].style.setProperty('--char-width', char_size.width);
+                }
+                self.clear_cache();
+                if (command) {
+                    command_line.resize();
                 }
                 redraw({
                     scroll: false,

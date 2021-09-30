@@ -9800,11 +9800,15 @@
                 return self;
             },
             // -------------------------------------------------------------
-            // :: redraw the terminal
+            // :: redraw the terminal and invalidate cache
             // -------------------------------------------------------------
             refresh: function() {
                 if (char_size.width !== 0) {
                     self[0].style.setProperty('--char-width', char_size.width);
+                }
+                self.clear_cache();
+                if (command) {
+                    command_line.resize();
                 }
                 redraw({
                     scroll: false,
