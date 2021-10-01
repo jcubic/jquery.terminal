@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Tue, 21 Sep 2021 15:37:39 +0000
+ * Date: Fri, 01 Oct 2021 12:25:26 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -899,10 +899,6 @@ terminal .terminal-output > div {
 }
 .cursor-wrapper {
     position: relative;
-}
-/* images */
-.terminal-output div[style*="100%;"] {
-    overflow: hidden;
 }
 .terminal-output img {
     display: block;

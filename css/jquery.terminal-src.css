@@ -900,10 +900,6 @@ terminal .terminal-output > div {
 .cursor-wrapper {
     position: relative;
 }
-/* images */
-.terminal-output div[style*="100%;"] {
-    overflow: hidden;
-}
 .terminal-output img {
     display: block;
 }
