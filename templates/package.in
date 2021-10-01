@@ -330,8 +330,8 @@
     }
   },
   "dependencies": {
-    "@jcubic/lily": "^0.2.0",
-    "@types/jquery": "^3.5.5",
+    "@jcubic/lily": "^0.3.0",
+    "@types/jquery": "^3.5.6",
     "ansidec": "^0.3.4",
     "iconv-lite": "^0.6.3",
     "jquery": "^3.6.0",
@@ -340,16 +340,16 @@
   },
   "devDependencies": {
     "coveralls": "^3.1.1",
-    "cssnano": "^5.0.6",
+    "cssnano": "^5.0.8",
     "emoji-datasource-twitter": "^7.0.2",
-    "eslint": "^7.30.0",
+    "eslint": "^7.32.0",
     "gm": "^1.23.1",
-    "jest": "^27.0.6",
+    "jest": "^27.2.4",
     "jsonlint": "^1.6.3",
     "optimist": "^0.6.1",
-    "postcss": "^8.3.5",
-    "typescript": "^4.3.5",
-    "uglify-js": "^3.13.10"
+    "postcss": "^8.3.8",
+    "typescript": "^4.4.3",
+    "uglify-js": "^3.14.2"
   },
   "optionalDependencies": {
     "fsevents": "^2.3.2"
