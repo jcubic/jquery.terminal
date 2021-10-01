@@ -222,7 +222,7 @@ body.full-screen-terminal .terminal {
 .cmd {
     font-size: 12px;
 }
-.terminal-output div div::before {
+.terminal-output > div:not(.raw) div::before {
     content: '\0200B';
     width: 0;
     float: left;
@@ -899,10 +899,6 @@ terminal .terminal-output > div {
 }
 .cursor-wrapper {
     position: relative;
-}
-/* images */
-.terminal-output div[style*="100%;"] {
-    overflow: hidden;
 }
 .terminal-output img {
     display: block;

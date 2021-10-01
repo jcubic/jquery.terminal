@@ -8436,6 +8436,14 @@
             return cursor.is_fully_in_viewport(self).then(scroll_to_view);
         }
         // ---------------------------------------------------------------------
+        function replace_hash(state) {
+            if (typeof history !== 'undefined' && history.replaceState) {
+                var new_hash = '#' + JSON.stringify(state);
+                var url = location.href.replace(/#.*$/, new_hash);
+                history.replaceState(null, '', url);
+            }
+        }
+        // ---------------------------------------------------------------------
         function hashchange() {
             if (fire_hash_change && settings.execHash) {
                 try {
@@ -8468,6 +8476,15 @@
                     self.refresh();
                 }
             }
+            function next() {
+                onPause = $.noop;
+                if (!was_paused && self.enabled()) {
+                    // resume login if user didn't call pause in onInit
+                    // if user pause in onInit wait with exec until it
+                    // resume
+                    self.resume(true);
+                }
+            }
             // was_paused flag is workaround for case when user call exec before
             // login and pause in onInit, 3rd exec will have proper timing (will
             // execute after onInit resume)
@@ -8476,19 +8493,17 @@
                 onPause = function() { // local in terminal
                     was_paused = true;
                 };
+                var ret;
                 try {
-                    settings.onInit.call(self, self);
+                    ret = settings.onInit.call(self, self);
                 } catch (e) {
                     display_exception(e, 'OnInit');
                     // throw e; // it will be catched by terminal
                 } finally {
-                    onPause = $.noop;
-                    if (!was_paused && self.enabled()) {
-                        // resume login if user didn't call pause in onInit
-                        // if user pause in onInit wait with exec until it
-                        // resume
-                        self.resume(true);
-                    }
+                    unpromise(ret, next, function(e) {
+                        display_exception(e, 'OnInit');
+                        next();
+                    });
                 }
             }
             if (first_instance) {
@@ -9792,11 +9807,15 @@
                 return self;
             },
             // -------------------------------------------------------------
-            // :: redraw the terminal
+            // :: redraw the terminal and invalidate cache
             // -------------------------------------------------------------
             refresh: function() {
                 if (char_size.width !== 0) {
                     self[0].style.setProperty('--char-width', char_size.width);
+                }
+                self.clear_cache();
+                if (command) {
+                    command_line.resize();
                 }
                 redraw({
                     scroll: false,
@@ -9889,12 +9908,15 @@
                             cmd_prompt.css('margin-left', 0);
                             cmd_outer.css('top', 0);
                             command_line.__set_prompt_margin(0);
-                            last_row = self.find('.terminal-output div:last-child ' +
-                                                 'div:last-child');
-                            last_row.css({
-                                width: '100%',
-                                display: ''
-                            });
+                            last_row = self.find('.terminal-output div:last-child' +
+                                                 ' div:last-child');
+                            // check if the div is parital fix #695
+                            if (last_row.css('display') === 'inline-block') {
+                                last_row.css({
+                                    width: '100%',
+                                    display: ''
+                                });
+                            }
                         } else {
                             last_row = partial.children().last();
                             // Remove width='100%' for two reasons:
@@ -11586,6 +11608,10 @@
                             var hash = location.hash.replace(/^#/, '');
                             // yes no var - local inside terminal
                             hash_commands = JSON.parse(decodeURIComponent(hash));
+                            if (!hash.match(/\[/)) {
+                                // fix the hash to look like array if it's not
+                                replace_hash(hash_commands);
+                            }
                             var i = 0;
                             (function recur() {
                                 var spec = hash_commands[i++];

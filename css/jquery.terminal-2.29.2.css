@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.29.2
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 12 Sep 2021 17:15:47 +0000
+ * Date: Fri, 01 Oct 2021 12:25:26 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -222,7 +222,7 @@ body.full-screen-terminal .terminal {
 .cmd {
     font-size: 12px;
 }
-.terminal-output div div::before {
+.terminal-output > div:not(.raw) div::before {
     content: '\0200B';
     width: 0;
     float: left;
@@ -899,10 +899,6 @@ terminal .terminal-output > div {
 }
 .cursor-wrapper {
     position: relative;
-}
-/* images */
-.terminal-output div[style*="100%;"] {
-    overflow: hidden;
 }
 .terminal-output img {
     display: block;
