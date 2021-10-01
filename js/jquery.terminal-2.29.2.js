@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 30 Sep 2021 10:39:07 +0000
+ * Date: Fri, 01 Oct 2021 12:35:24 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5065,7 +5065,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 30 Sep 2021 10:39:07 +0000',
+        date: 'Fri, 01 Oct 2021 12:35:24 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8476,6 +8476,15 @@
                     self.refresh();
                 }
             }
+            function next() {
+                onPause = $.noop;
+                if (!was_paused && self.enabled()) {
+                    // resume login if user didn't call pause in onInit
+                    // if user pause in onInit wait with exec until it
+                    // resume
+                    self.resume(true);
+                }
+            }
             // was_paused flag is workaround for case when user call exec before
             // login and pause in onInit, 3rd exec will have proper timing (will
             // execute after onInit resume)
@@ -8484,19 +8493,17 @@
                 onPause = function() { // local in terminal
                     was_paused = true;
                 };
+                var ret;
                 try {
-                    settings.onInit.call(self, self);
+                    ret = settings.onInit.call(self, self);
                 } catch (e) {
                     display_exception(e, 'OnInit');
                     // throw e; // it will be catched by terminal
                 } finally {
-                    onPause = $.noop;
-                    if (!was_paused && self.enabled()) {
-                        // resume login if user didn't call pause in onInit
-                        // if user pause in onInit wait with exec until it
-                        // resume
-                        self.resume(true);
-                    }
+                    unpromise(ret, next, function(e) {
+                        display_exception(e, 'OnInit');
+                        next();
+                    });
                 }
             }
             if (first_instance) {

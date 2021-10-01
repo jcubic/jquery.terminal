@@ -4,6 +4,7 @@
 * update hash with proper array if hash is escaped
 * invalidate cache and update CMD on `term::refresh()` [#699](https://github.com/jcubic/jquery.terminal/issues/699)
 * allow to add horizontal scrollbar with single wrap options [#692](https://github.com/jcubic/jquery.terminal/issues/692)
+* handle promise rejection in onInit [#691](https://github.com/jcubic/jquery.terminal/issues/691)
 
 ## 2.29.2
 ### Bugfix
