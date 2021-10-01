@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 01 Oct 2021 12:40:15 +0000
+ * Date: Fri, 01 Oct 2021 13:31:18 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1092,6 +1092,10 @@
                     return result;
                 }
             }
+            // TODO: investigate why it break when called
+            //       when value is undefined
+            //       when moving this line outside if
+            //       it breaks all completion unit tests
             return callback(value);
         }
     }
@@ -5065,7 +5069,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.29.3',
-        date: 'Fri, 01 Oct 2021 12:40:15 +0000',
+        date: 'Fri, 01 Oct 2021 13:31:18 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8498,12 +8502,15 @@
                     ret = settings.onInit.call(self, self);
                 } catch (e) {
                     display_exception(e, 'OnInit');
-                    // throw e; // it will be catched by terminal
                 } finally {
-                    unpromise(ret, next, function(e) {
-                        display_exception(e, 'OnInit');
+                    if (!is_promise(ret)) {
                         next();
-                    });
+                    } else {
+                        ret.then(next).catch(function(e) {
+                            display_exception(e, 'OnInit');
+                            next();
+                        });
+                    }
                 }
             }
             if (first_instance) {

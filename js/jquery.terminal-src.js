@@ -1092,6 +1092,10 @@
                     return result;
                 }
             }
+            // TODO: investigate why it break when called
+            //       when value is undefined
+            //       when moving this line outside if
+            //       it breaks all completion unit tests
             return callback(value);
         }
     }
@@ -8498,12 +8502,15 @@
                     ret = settings.onInit.call(self, self);
                 } catch (e) {
                     display_exception(e, 'OnInit');
-                    // throw e; // it will be catched by terminal
                 } finally {
-                    unpromise(ret, next, function(e) {
-                        display_exception(e, 'OnInit');
+                    if (!is_promise(ret)) {
                         next();
-                    });
+                    } else {
+                        ret.then(next).catch(function(e) {
+                            display_exception(e, 'OnInit');
+                            next();
+                        });
+                    }
                 }
             }
             if (first_instance) {
