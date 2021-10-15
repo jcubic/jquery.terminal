@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 01 Oct 2021 13:31:18 +0000
+ * Date: Fri, 15 Oct 2021 13:26:39 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1837,7 +1837,7 @@
             var raw_lines = raw.split('\n');
             for (var i = 0, len = arg.length; i < len; ++i) {
                 if (arg[i] === '' || arg[i] === '\r') {
-                    this._output_buffer.push({line: '<span></span>', raw: ''});
+                    this._output_buffer.push({line: '', raw: ''});
                 } else {
                     var formatted = this.format(arg[i], i === len - 1, raw_lines[i]);
                     this._output_buffer.push(formatted);
@@ -5069,7 +5069,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.29.3',
-        date: 'Fri, 01 Oct 2021 13:31:18 +0000',
+        date: 'Fri, 15 Oct 2021 13:26:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

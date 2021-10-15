@@ -1837,7 +1837,7 @@
             var raw_lines = raw.split('\n');
             for (var i = 0, len = arg.length; i < len; ++i) {
                 if (arg[i] === '' || arg[i] === '\r') {
-                    this._output_buffer.push({line: '<span></span>', raw: ''});
+                    this._output_buffer.push({line: '', raw: ''});
                 } else {
                     var formatted = this.format(arg[i], i === len - 1, raw_lines[i]);
                     this._output_buffer.push(formatted);
