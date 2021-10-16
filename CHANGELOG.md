@@ -1,3 +1,7 @@
+## 2.29.5
+### Bugfix
+* fix empty prompt when no wcwidth is included
+
 ## 2.29.4
 ### Bugfix
 * fix empty lines when print single multi-line string

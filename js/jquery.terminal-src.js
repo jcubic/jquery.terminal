@@ -4250,6 +4250,8 @@
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
             return function(string) {
+                // fix empty prompt that use 0 width space
+                string = string.replace(/\u200B/g, '');
                 return $.terminal.length(string);
             };
         } else {
@@ -6365,6 +6367,9 @@
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
         length: function(string, raw) {
+            if (!string) {
+                return 0;
+            }
             return $.terminal.split_characters(raw ? string : text(string)).length;
         },
         // ---------------------------------------------------------------------

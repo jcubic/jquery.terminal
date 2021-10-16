@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 15 Oct 2021 13:27:04 +0000
+ * Date: Sat, 16 Oct 2021 07:39:45 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4250,6 +4250,8 @@
     var strlen = (function() {
         if (typeof wcwidth === 'undefined') {
             return function(string) {
+                // fix empty prompt that use 0 width space
+                string = string.replace(/\u200B/g, '');
                 return $.terminal.length(string);
             };
         } else {
@@ -5069,7 +5071,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.29.4',
-        date: 'Fri, 15 Oct 2021 13:27:04 +0000',
+        date: 'Sat, 16 Oct 2021 07:39:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6365,6 +6367,9 @@
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
         length: function(string, raw) {
+            if (!string) {
+                return 0;
+            }
             return $.terminal.split_characters(raw ? string : text(string)).length;
         },
         // ---------------------------------------------------------------------
