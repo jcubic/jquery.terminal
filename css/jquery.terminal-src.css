@@ -61,6 +61,7 @@
     position: relative;
     line-height: initial;
     overflow-y: auto;
+    scrollbar-gutter: stable;
 }
 terminal.terminal-temp {
     visibility: hidden;
