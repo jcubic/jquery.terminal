@@ -231,7 +231,7 @@
     /* eslint-disable */
     /* istanbul ignore next */
     function debug(str) {
-        if (false) {
+        if (true) {
             console.log(str);
             //$.terminal.active().echo(str);
         }
@@ -1932,7 +1932,9 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var $node = $('<div class="cmd-editable" contenteditable/>').attr({
+                var $node = $('<div class="cmd-editable" ' +
+                              'contenteditable="plaintext-only"' +
+                              ' spellcheck="false"/>').attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
@@ -4099,7 +4101,12 @@
             doc.trigger(event);
         }
         var skip_input = false;
-        function input_event() {
+        function finalize_input_event() {
+            prev_command = command;
+            skip_insert = false;
+            no_keydown = true;
+        }
+        function input_event(e) {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
@@ -4111,9 +4118,19 @@
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
-            if ((no_keydown || process || ((no_keypress || dead_key) && !skip_insert &&
-                                          (single_key || no_key) && !backspace)) &&
-                val !== command) {
+            if (no_keydown || process || ((no_keypress || dead_key) &&
+                                          !skip_insert &&
+                                          (single_key || no_key) && !backspace)) {
+                if (val && val === command) {
+                    if (is_android) {
+                        // ignore autocomplete on GBoard keyboard #693
+                        if (no_keydown) {
+                            event('keydown', 'Enter', 13);
+                        }
+                    }
+                    finalize_input_event();
+                    return;
+                }
                 var pos = position;
                 // backspace is set in keydown if no keydown we need to get new one
                 if (no_keydown) {
@@ -4170,9 +4187,7 @@
                     self.position(pos + Math.abs(val.length - prev_command.length));
                 }
             }
-            prev_command = command;
-            skip_insert = false;
-            no_keydown = true;
+            finalize_input_event();
         }
         doc.bind('keypress.cmd', keypress_event);
         doc.bind('keydown.cmd', keydown_event);

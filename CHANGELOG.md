@@ -1,3 +1,8 @@
+## 2.29.6
+### Bugfix
+* fix bug on Android with GBoard keyboard [#693](https://github.com/jcubic/jquery.terminal/issues/693)
+* fix refresh when scrollbar appear (using `scrollbar-gutter`)
+
 ## 2.29.5
 ### Bugfix
 * fix empty prompt when no wcwidth is included
