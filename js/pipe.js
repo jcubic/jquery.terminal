@@ -289,11 +289,13 @@
                         return d.promise();
                     }
                 },
-                echo: function(string) {
+                echo: function(string, options) {
                     if (overwrite_buffer) {
                         overwrite_buffer = false;
                         tty.buffer = '';
                     }
+                    tty.options = tty.options || [];
+                    tty.options.push(options);
                     tty.buffer = (tty.buffer || '') + string + '\n';
                 },
                 push: function() {
@@ -394,6 +396,7 @@
                     error(sprintf(strings(term).commandNotFound, cmd.name));
                 }
             } else {
+                term = term.duplicate();
                 $.extend(term, tty);
                 var stop_error = false;
                 var promise = loop(function(cmd) {

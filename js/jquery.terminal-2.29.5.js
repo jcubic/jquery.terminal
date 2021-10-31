@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 30 Oct 2021 09:43:10 +0000
+ * Date: Sun, 31 Oct 2021 09:17:47 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -231,7 +231,7 @@
     /* eslint-disable */
     /* istanbul ignore next */
     function debug(str) {
-        if (true) {
+        if (false) {
             console.log(str);
             //$.terminal.active().echo(str);
         }
@@ -4106,7 +4106,7 @@
             skip_insert = false;
             no_keydown = true;
         }
-        function input_event(e) {
+        function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')');
@@ -5086,7 +5086,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 30 Oct 2021 09:43:10 +0000',
+        date: 'Sun, 31 Oct 2021 09:17:47 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8847,7 +8847,7 @@
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
-        $.extend(self, $.omap({
+        var public_api = $.omap({
             id: function() {
                 return terminal_id;
             },
@@ -10848,6 +10848,13 @@
                     var limit = scroll_height - settings.scrollBottomOffset;
                     return scroll_top + height > limit;
                 }
+            },
+            // -------------------------------------------------------------
+            // :: create terminal object clone, used my pipe
+            // -------------------------------------------------------------
+            duplicate: function() {
+                var copy = $(self);
+                return $.extends(copy, public_api);
             }
         }, function(name, fun) {
             // wrap all functions and display execptions
@@ -10869,7 +10876,8 @@
                     }
                 }
             };
-        }));
+        });
+        $.extend(self, public_api);
         // -----------------------------------------------------------------
         // :: INIT CODE
         // -----------------------------------------------------------------
