@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 31 Oct 2021 09:17:47 +0000
+ * Date: Sun, 28 Nov 2021 08:31:54 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1933,8 +1933,8 @@
         if (is_mobile) {
             clip = (function() {
                 var $node = $('<div class="cmd-editable" ' +
-                              'contenteditable="plaintext-only"' +
-                              ' spellcheck="false"/>').attr({
+                              'contenteditable="plaintext-only" ' +
+                              'spellcheck="false"/>').attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
@@ -5086,7 +5086,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 31 Oct 2021 09:17:47 +0000',
+        date: 'Sun, 28 Nov 2021 08:31:54 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6211,9 +6211,6 @@
                         }
                         result += ' rel="' + rel_attr().join(' ') + '"';
                     }
-                    // make focus to terminal textarea that will enable
-                    // terminal when pressing tab and terminal is disabled
-                    result += ' tabindex="1000"';
                     return result;
                 }
                 function pre_process_image(data) {

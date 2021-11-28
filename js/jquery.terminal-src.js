@@ -1933,8 +1933,8 @@
         if (is_mobile) {
             clip = (function() {
                 var $node = $('<div class="cmd-editable" ' +
-                              'contenteditable="plaintext-only"' +
-                              ' spellcheck="false"/>').attr({
+                              'contenteditable="plaintext-only" ' +
+                              'spellcheck="false"/>').attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
@@ -6211,9 +6211,6 @@
                         }
                         result += ' rel="' + rel_attr().join(' ') + '"';
                     }
-                    // make focus to terminal textarea that will enable
-                    // terminal when pressing tab and terminal is disabled
-                    result += ' tabindex="1000"';
                     return result;
                 }
                 function pre_process_image(data) {
