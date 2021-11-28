@@ -132,7 +132,7 @@
                     return '[[;' + name + ';]';
                 }
             }
-            return string;
+            return string.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
         }).join('');
     }
     xml_formatter.__no_warn__ = true;
