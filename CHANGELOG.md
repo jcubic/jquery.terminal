@@ -4,6 +4,7 @@
 * fix refresh when scrollbar appear (using `scrollbar-gutter`)
 * fix link color to pass WCAG contrast ratio
 * remove tabindex attribute on links
+* add label to clipboard textarea for a11y
 
 ## 2.29.5
 ### Bugfix

@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 28 Nov 2021 08:31:54 +0000
+ * Date: Sun, 28 Nov 2021 09:14:06 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1314,6 +1314,17 @@
         }
     }
     // ---------------------------------------------------------------------
+    // ref: https://stackoverflow.com/a/6248722/387194
+    function generate_id() {
+        // I generate the UID from two parts here
+        // to ensure the random number provide enough bits.
+        var firstPart = (Math.random() * 46656) | 0;
+        var secondPart = (Math.random() * 46656) | 0;
+        firstPart = ("000" + firstPart.toString(36)).slice(-3);
+        secondPart = ("000" + secondPart.toString(36)).slice(-3);
+        return firstPart + secondPart;
+    }
+    // ---------------------------------------------------------------------
     // :; detect if mouse event happen on scrollbar
     // ---------------------------------------------------------------------
     function scrollbar_event(e, node) {
@@ -1985,11 +1996,16 @@
             self.addClass('cmd-mobile');
         } else {
             clip = (function() {
+                var id = generate_id();
                 var $node = $('<textarea>').attr({
                     autocapitalize: 'off',
                     spellcheck: 'false',
+                    id: id,
                     tabindex: settings.tabindex
                 }).addClass('cmd-clipboard').appendTo(self);
+                // some a11y to make lighthouse happy
+                $node.before('<label class="visually-hidden" for="' + id + '">' +
+                             'Clipbard textarea for jQuery Terminal</label>');
                 return {
                     $node: $node,
                     val: function(value) {
@@ -5086,7 +5102,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 28 Nov 2021 08:31:54 +0000',
+        date: 'Sun, 28 Nov 2021 09:14:06 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

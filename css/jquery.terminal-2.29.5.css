@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 28 Nov 2021 08:23:37 +0000
+ * Date: Sun, 28 Nov 2021 09:14:08 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -40,7 +40,15 @@
     text-indent: -9999em !important; /* better cursor hiding for Safari and IE */
     top: calc(var(--cursor-line, 0) * var(--size, 1) * 14px) !important;
 }
-
+.visually-hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
 .cmd span.cmd-end-line,
 .cmd span.cmd-end-line span,
 .cmd div.cmd-end-line span[data-text]:last-child,
