@@ -2,6 +2,7 @@
 ### Bugfix
 * fix bug on Android with GBoard keyboard [#693](https://github.com/jcubic/jquery.terminal/issues/693)
 * fix refresh when scrollbar appear (using `scrollbar-gutter`)
+* fix link color to pass WCAG contrast ratio
 
 ## 2.29.5
 ### Bugfix
