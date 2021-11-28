@@ -1,4 +1,7 @@
-## 2.29.6
+## 2.30.0
+### Features
+* add `span` to xml formatting
+* allow to use class attribute in XML formatting (`span`, `link`, and `img`)
 ### Bugfix
 * fix bug on Android with GBoard keyboard [#693](https://github.com/jcubic/jquery.terminal/issues/693)
 * fix refresh when scrollbar appear (using `scrollbar-gutter`)
