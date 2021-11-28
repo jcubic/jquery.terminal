@@ -195,6 +195,7 @@ body.full-screen-terminal .terminal {
 }
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
+    clear: both;
 }
 .cmd .cmd-prompt > span, .cmd .cmd-prompt:empty {
     float: left;
@@ -234,6 +235,7 @@ body.full-screen-terminal .terminal {
 .terminal-output > div:not(.raw) div::before {
     content: '\0200B';
     width: 0;
+    float: left;
     display: inline-block;
 }
 .terminal, terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
