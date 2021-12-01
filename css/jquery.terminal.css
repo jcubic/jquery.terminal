@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 28 Nov 2021 16:51:50 +0000
+ * Date: Wed, 01 Dec 2021 09:19:10 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -195,6 +195,7 @@ body.full-screen-terminal .terminal {
 }
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
+    clear: both;
 }
 .cmd .cmd-prompt > span, .cmd .cmd-prompt:empty {
     float: left;
