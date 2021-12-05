@@ -2695,12 +2695,15 @@ describe('extensions', function() {
             for (const fn of spec) {
                 term.clear();
                 fn();
-                await delay(50);
+                await delay(100);
                 expect(output(term)).toEqual(['hello, world']);
             }
         });
         it('finalize with newline : false', function() {
-            term.echo('foo', {finalize: (a) => a.children().children().css("color", "red"), newline : false});
+            term.echo('foo', {
+                finalize: (a) => a.children().children().css("color", "red"),
+                newline : false
+            });
             var color = term[0].querySelector(`[data-index='${term.last_index()}`).firstChild.firstChild.style.color;
             expect(color).toEqual("red");
         });
