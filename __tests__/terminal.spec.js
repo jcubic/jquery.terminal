@@ -844,13 +844,13 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noopener" tabindex="1000" data-text>https:'+
+                        ' rel="noopener" data-text>https:'+
                         '//terminal.jcubic.pl</a>',
                     {}
                 ],
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noreferrer noopener" tabindex="1000" data-'+
+                        ' rel="noreferrer noopener" data-'+
                         'text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true
@@ -874,22 +874,22 @@ describe('Terminal utils', function() {
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000" data-text>xss</a>'
+                        ' data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
                     '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="noopener" tabindex="1000" data-text>xss</a>'
+                        ' rel="noopener" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000" data-text>xss</a>'
+                        ' data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000" data-text>xss</a>'
+                        ' data-text>xss</a>'
                 ],
             ];
             tests.forEach(function(spec) {
@@ -904,13 +904,13 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noopener" tabindex="1000" data-te'+
+                        ' rel="nofollow noopener" data-te'+
                         'xt>https://terminal.jcubic.pl</a>',
                     {linksNoFollow: true}
                 ],
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noreferrer noopener" tabindex="1000"'+
+                        ' rel="nofollow noreferrer noopener"'+
                         ' data-text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true,
