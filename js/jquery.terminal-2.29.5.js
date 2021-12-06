@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 06 Dec 2021 17:14:33 +0000
+ * Date: Mon, 06 Dec 2021 18:37:32 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5102,7 +5102,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 06 Dec 2021 17:14:33 +0000',
+        date: 'Mon, 06 Dec 2021 18:37:32 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10863,11 +10863,11 @@
                 }
             },
             // -------------------------------------------------------------
-            // :: create terminal object clone, used my pipe
+            // :: create terminal object clone, used by pipe
             // -------------------------------------------------------------
             duplicate: function() {
                 var copy = $(self);
-                return $.extends(copy, public_api);
+                return $.extend(copy, public_api);
             }
         }, function(name, fun) {
             // wrap all functions and display execptions

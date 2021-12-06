@@ -10863,11 +10863,11 @@
                 }
             },
             // -------------------------------------------------------------
-            // :: create terminal object clone, used my pipe
+            // :: create terminal object clone, used by pipe
             // -------------------------------------------------------------
             duplicate: function() {
                 var copy = $(self);
-                return $.extends(copy, public_api);
+                return $.extend(copy, public_api);
             }
         }, function(name, fun) {
             // wrap all functions and display execptions
