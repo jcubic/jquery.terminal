@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 28 Nov 2021 09:14:06 +0000
+ * Date: Mon, 06 Dec 2021 17:14:33 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5102,7 +5102,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 28 Nov 2021 09:14:06 +0000',
+        date: 'Mon, 06 Dec 2021 17:14:33 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

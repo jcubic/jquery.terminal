@@ -11,7 +11,7 @@
 
 [![npm](https://img.shields.io/badge/npm-{{VER}}-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-{{VER}}-yellow.svg)
-[![travis](https://travis-ci.com/jcubic/jquery.terminal.svg?branch={{BRANCH}}&{{COMMIT}})](https://travis-ci.com/github/jcubic/jquery.terminal)
+[![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch={{BRANCH}}&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch={{BRANCH}}&{{CHECKSUM}})](https://coveralls.io/github/jcubic/jquery.terminal?branch={{BRANCH}})
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![Paid Support](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
