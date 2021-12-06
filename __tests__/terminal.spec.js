@@ -3595,7 +3595,6 @@ describe('Terminal plugin', function() {
                 term.focus();
                 term.insert('foo bar');
                 var clip = term.find('textarea');
-                clip.val(clip.val().replace(/.$/, ''));
                 doc.one('keydown', function(e) {
                     expect(e.which).toBe(8);
                     setTimeout(function() {
@@ -3606,7 +3605,10 @@ describe('Terminal plugin', function() {
                         done();
                     }, 300);
                 });
-                doc.trigger('input');
+                setTimeout(function() {
+                    clip.val(clip.val().replace(/.$/, ''));
+                    doc.trigger('input');
+                }, 100);
             });
         });
         describe('enter text', function() {

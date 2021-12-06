@@ -8,6 +8,9 @@
 * fix link color to pass WCAG contrast ratio
 * remove tabindex attribute on links
 * add label to clipboard textarea for a11y
+* allow to escape angle brackets in XML formatting [#710](https://github.com/jcubic/jquery.terminal/issues/710)
+* fix black line before the image [#708](https://github.com/jcubic/jquery.terminal/issues/708)
+
 
 ## 2.29.5
 ### Bugfix

@@ -396,7 +396,7 @@
                     error(sprintf(strings(term).commandNotFound, cmd.name));
                 }
             } else {
-                term = term.duplicate();
+                //term = term.duplicate();
                 $.extend(term, tty);
                 var stop_error = false;
                 var promise = loop(function(cmd) {

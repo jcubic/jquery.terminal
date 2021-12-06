@@ -65,9 +65,9 @@ exports[`Terminal utils $.terminal.format should filter out attribute in JSON 1`
 
 exports[`Terminal utils $.terminal.format should handle JSON 1`] = `"<span title=\\"foo\\" data-foo=\\"bar\\" data-text=\\"foo\\"><span>foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should handle emails 1`] = `"<a href=\\"mailto:jcubic@onet.pl\\" tabindex=\\"1000\\" data-text>jcubic@onet.pl</a>"`;
+exports[`Terminal utils $.terminal.format should handle emails 1`] = `"<a href=\\"mailto:jcubic@onet.pl\\" data-text>jcubic@onet.pl</a>"`;
 
-exports[`Terminal utils $.terminal.format should handle emails 2`] = `"<a href=\\"mailto:jcubic@onet.pl\\" tabindex=\\"1000\\" data-text>j</a><a href=\\"mailto:jcubic@onet.pl\\" tabindex=\\"1000\\" data-text>cubic@onet.pl</a>"`;
+exports[`Terminal utils $.terminal.format should handle emails 2`] = `"<a href=\\"mailto:jcubic@onet.pl\\" data-text>j</a><a href=\\"mailto:jcubic@onet.pl\\" data-text>cubic@onet.pl</a>"`;
 
 exports[`Terminal utils $.terminal.format should handle wider characters without formatting 1`] = `"<span style=\\"width: 24ch\\" data-text=\\"ターミナルウィンドウは黒\\"><span style=\\"width: 24ch\\"><span style=\\"width: 2ch\\">タ</span><span style=\\"width: 2ch\\">ー</span><span style=\\"width: 2ch\\">ミ</span><span style=\\"width: 2ch\\">ナ</span><span style=\\"width: 2ch\\">ル</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">ィ</span><span style=\\"width: 2ch\\">ン</span><span style=\\"width: 2ch\\">ド</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">は</span><span style=\\"width: 2ch\\">黒</span></span></span><span style=\\"width: 4ch\\" data-text=\\"です\\"><span><span style=\\"width: 4ch\\"><span style=\\"width: 2ch\\">で</span><span style=\\"width: 2ch\\">す</span></span></span></span>"`;
 
