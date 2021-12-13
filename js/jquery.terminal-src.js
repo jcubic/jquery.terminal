@@ -1872,6 +1872,14 @@
         }
     };
     // -------------------------------------------------------------------------
+    FormatBuffer.prototype.output = function() {
+        return this._output_buffer.slice();
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.is_empty = function() {
+        return !this._output_buffer.length;
+    };
+    // -------------------------------------------------------------------------
     FormatBuffer.prototype.clear = function() {
         this._output_buffer = [];
     };
@@ -9873,6 +9881,9 @@
                 }, options || {});
                 when_ready(function ready() {
                     try {
+                        if (buffer.is_empty()) {
+                            return self;
+                        }
                         var bottom = self.is_bottom();
                         var scroll = (settings.scrollOnEcho && options.scroll) || bottom;
                         var wrapper;
