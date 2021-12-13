@@ -9874,6 +9874,7 @@
                 when_ready(function ready() {
                     try {
                         var bottom = self.is_bottom();
+                        var scroll = (settings.scrollOnEcho && options.scroll) || bottom;
                         var wrapper;
                         // print all lines
                         var first = true;
@@ -9896,6 +9897,12 @@
                                     wrapper = partial;
                                 }
                             } else if (is_function(data.finalize)) {
+                                if (scroll) {
+                                    wrapper.find('img').on('load', function() {
+                                        console.log('bottom');
+                                        self.scroll_to_bottom();
+                                    });
+                                }
                                 // this is finalize function from echo
                                 if (options.update) {
                                     lines.update_snapshot(data.index, snapshot);
@@ -9998,7 +10005,7 @@
                                 cmd_cursor.show();
                             }, 0);
                         }, 0);
-                        if ((settings.scrollOnEcho && options.scroll) || bottom) {
+                        if (scroll) {
                             self.scroll_to_bottom();
                         }
                     } catch (e1) {
@@ -10128,7 +10135,8 @@
                                     if (is_function(finalize)) {
                                         finalize.call(self, div);
                                     }
-                                    div.find('img').each(function() {
+                                    var $images = div.find('img');
+                                    $images.each(function() {
                                         var self = $(this);
                                         var img = new Image();
                                         img.onerror = function() {
