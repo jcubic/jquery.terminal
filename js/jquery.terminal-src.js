@@ -8219,7 +8219,7 @@
                 }
             }
             // -----------------------------------------------------------------
-            function after_exec() {
+            function before_exec() {
                 // variables defined later in commands
                 if (!exec) {
                     change_hash = true;
@@ -8228,6 +8228,9 @@
                     }
                     change_hash = saved_change_hash;
                 }
+            }
+            // -----------------------------------------------------------------
+            function after_exec() {
                 deferred.resolve();
                 fire_event('onAfterCommand', [command]);
             }
@@ -8245,6 +8248,7 @@
             }
             // -----------------------------------------------------------------
             function invoke() {
+                before_exec();
                 // Call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
                 if (result) {

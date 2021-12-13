@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 13 Dec 2021 21:31:59 +0000
+ * Date: Mon, 13 Dec 2021 21:50:23 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5110,7 +5110,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 13 Dec 2021 21:31:59 +0000',
+        date: 'Mon, 13 Dec 2021 21:50:23 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8219,7 +8219,7 @@
                 }
             }
             // -----------------------------------------------------------------
-            function after_exec() {
+            function before_exec() {
                 // variables defined later in commands
                 if (!exec) {
                     change_hash = true;
@@ -8228,6 +8228,9 @@
                     }
                     change_hash = saved_change_hash;
                 }
+            }
+            // -----------------------------------------------------------------
+            function after_exec() {
                 deferred.resolve();
                 fire_event('onAfterCommand', [command]);
             }
@@ -8245,6 +8248,7 @@
             }
             // -----------------------------------------------------------------
             function invoke() {
+                before_exec();
                 // Call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
                 if (result) {

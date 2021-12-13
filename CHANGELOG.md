@@ -12,6 +12,7 @@
 * fix black line before the image [#708](https://github.com/jcubic/jquery.terminal/issues/708)
 * fix scroll to bottom when echo an image [#716](https://github.com/jcubic/jquery.terminal/issues/716)
 * fix multiple echo with `!flush && !newline` [#709](https://github.com/jcubic/jquery.terminal/issues/709)
+* fix updating hash for long async commands [#703](https://github.com/jcubic/jquery.terminal/issues/703)
 
 ## 2.29.5
 ### Bugfix
