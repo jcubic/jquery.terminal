@@ -2707,6 +2707,14 @@ describe('extensions', function() {
             var color = term[0].querySelector(`[data-index='${term.last_index()}`).firstChild.firstChild.style.color;
             expect(color).toEqual("red");
         });
+        it('should print multiple !flush && !newline', function() {
+            term.echo('foo, ', {newline: false, flush: false});
+            term.echo('bar, ', {newline: false, flush: false});
+            term.echo('baz, ', {newline: false, flush: false});
+            term.flush();
+            expect(term.get_output()).toEqual('foo, bar, baz, ');
+            expect(output(term)).toEqual(['foo, bar, baz, ']);
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {
