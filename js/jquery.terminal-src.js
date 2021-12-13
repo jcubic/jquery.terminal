@@ -9899,7 +9899,7 @@
                         // TODO: refactor buffer.flush(), there is way
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
-                            if (!data) { // newline
+                            if (!data) {
                                 if (!partial.length) {
                                     wrapper = $('<div/>');
                                     snapshot = [];
@@ -9930,6 +9930,9 @@
                                 wrapper.attr('data-index', data.index);
                                 appending_to_partial = !data.newline;
                                 wrapper.toggleClass('partial', appending_to_partial);
+                                if (appending_to_partial) {
+                                    partial = wrapper;
+                                }
                                 data.finalize(wrapper);
                             } else {
                                 var line = data.line;

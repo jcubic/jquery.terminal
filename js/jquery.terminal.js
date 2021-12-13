@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 13 Dec 2021 11:28:24 +0000
+ * Date: Mon, 13 Dec 2021 21:31:59 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1870,6 +1870,14 @@
         if (this._format_cache) {
             this._format_cache.clear();
         }
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.output = function() {
+        return this._output_buffer.slice();
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.is_empty = function() {
+        return !this._output_buffer.length;
     };
     // -------------------------------------------------------------------------
     FormatBuffer.prototype.clear = function() {
@@ -5102,7 +5110,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 13 Dec 2021 11:28:24 +0000',
+        date: 'Mon, 13 Dec 2021 21:31:59 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9873,6 +9881,9 @@
                 }, options || {});
                 when_ready(function ready() {
                     try {
+                        if (buffer.is_empty()) {
+                            return self;
+                        }
                         var bottom = self.is_bottom();
                         var scroll = (settings.scrollOnEcho && options.scroll) || bottom;
                         var wrapper;
@@ -9888,7 +9899,7 @@
                         // TODO: refactor buffer.flush(), there is way
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
-                            if (!data) { // newline
+                            if (!data) {
                                 if (!partial.length) {
                                     wrapper = $('<div/>');
                                     snapshot = [];
@@ -9919,6 +9930,9 @@
                                 wrapper.attr('data-index', data.index);
                                 appending_to_partial = !data.newline;
                                 wrapper.toggleClass('partial', appending_to_partial);
+                                if (appending_to_partial) {
+                                    partial = wrapper;
+                                }
                                 data.finalize(wrapper);
                             } else {
                                 var line = data.line;
