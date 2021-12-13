@@ -9899,7 +9899,6 @@
                             } else if (is_function(data.finalize)) {
                                 if (scroll) {
                                     wrapper.find('img').on('load', function() {
-                                        console.log('bottom');
                                         self.scroll_to_bottom();
                                     });
                                 }
