@@ -1884,15 +1884,21 @@
         this._output_buffer = [];
     };
     // -------------------------------------------------------------------------
-    FormatBuffer.prototype.flush = function(render) {
-        while (this._output_buffer.length) {
-            var data = this._output_buffer.shift();
+    FormatBuffer.prototype.forEach = function(fn) {
+        var i = 0;
+        while (i < this._output_buffer.length) {
+            var data = this._output_buffer[i++];
             if (data === FormatBuffer.NEW_LINE) {
-                render();
+                fn();
             } else {
-                render(data);
+                fn(data);
             }
         }
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.flush = function(render) {
+        this.forEach(render);
+        this.clear();
     };
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
@@ -8007,6 +8013,8 @@
                             array = string.split(/\n/);
                         }
                     }
+                } else {
+                    raw_string = '';
                 }
                 var arg = array || string;
                 if (line_cache && key && use_cache) {
@@ -10893,6 +10901,37 @@
             duplicate: function() {
                 var copy = $(self);
                 return $.extend(copy, public_api);
+            },
+            // -------------------------------------------------------------
+            // :: return output flush buffer
+            // -------------------------------------------------------------
+            get_output_buffer: function(options) {
+                var settings = $.extend({
+                    render: true
+                }, options);
+                var output = [];
+                var append = false;
+                buffer.forEach(function(data) {
+                    if (data) {
+                        if (is_function(data.finalize)) {
+                            append = !data.newline;
+                        } else {
+                            console.log(data);
+                            if (append) {
+                                var last = output.length - 1;
+                                output[last] += data.raw;
+                            } else {
+                                output.push(data.raw);
+                            }
+                        }
+                    }
+                });
+                return output;
+            },
+            // -------------------------------------------------------------
+            buffer_clean: function() {
+                buffer.clear();
+                return self;
             }
         }, function(name, fun) {
             // wrap all functions and display execptions
