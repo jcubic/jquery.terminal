@@ -40,7 +40,15 @@
     text-indent: -9999em !important; /* better cursor hiding for Safari and IE */
     top: calc(var(--cursor-line, 0) * var(--size, 1) * 14px) !important;
 }
-
+.visually-hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
 .cmd span.cmd-end-line,
 .cmd span.cmd-end-line span,
 .cmd div.cmd-end-line span[data-text]:last-child,
@@ -61,6 +69,7 @@
     position: relative;
     line-height: initial;
     overflow-y: auto;
+    scrollbar-gutter: stable;
 }
 terminal.terminal-temp {
     visibility: hidden;
@@ -120,20 +129,20 @@ body.full-screen-terminal .terminal {
     color: #000 !important;
 }
 .terminal .terminal-output > :not(.raw) a[href], .cmd a[href] {
-    color: #0F60FF;
-    color: var(--link-color, #0F60FF);
+    color: #3377FF;
+    color: var(--link-color, #3377FF);
     cursor: pointer;
 }
 .cmd a[href]:not(.terminal-inverted),
 .terminal .terminal-output > :not(.raw) a[href]:not(.terminal-inverted) {
-    --color: var(--link-color, #0F60FF);
+    --color: var(--link-color, #3377FF);
 }
 .terminal .terminal-output > :not(.raw) a[href].terminal-inverted {
     background: var(--color, #ccc);
 }
 .terminal .terminal-output > :not(.raw) a[href]:hover, .cmd a[href]:hover {
-    background-color: #0F60FF;
-    background-color: var(--link-color, #0F60FF) !important;
+    background-color: #3377FF;
+    background-color: var(--link-color, #3377FF) !important;
     color: #000;
     color: var(--background, #000) !important;
     text-decoration: none;
@@ -144,16 +153,16 @@ body.full-screen-terminal .terminal {
      * shorter and simple solution
      * it's hard to overwrite long :not selector (:not(a span) don't work)
      */
-    color: #0F60FF !important;
-    --color: var(--link-color, #0F60FF);
-    color: var(--link-color, #0F60FF) !important;
+    color: #3377FF !important;
+    --color: var(--link-color, #3377FF);
+    color: var(--link-color, #3377FF) !important;
     text-decoration: underline;
 }
 
 .terminal .terminal-output > :not(.raw) a[href]:hover span,
 .cmd a[href]:hover span {
-    background-color: #0F60FF !important;
-    background-color: var(--link-color, #0F60FF) !important;
+    background-color: #3377FF !important;
+    background-color: var(--link-color, #3377FF) !important;
     color: #000 !important;
     color: var(--background, #000) !important;
     text-decoration: none;
@@ -186,6 +195,7 @@ body.full-screen-terminal .terminal {
 }
 .terminal .terminal-output > div:not(.raw) div {
     white-space: nowrap;
+    clear: both;
 }
 .cmd .cmd-prompt > span, .cmd .cmd-prompt:empty {
     float: left;
@@ -225,6 +235,7 @@ body.full-screen-terminal .terminal {
 .terminal-output > div:not(.raw) div::before {
     content: '\0200B';
     width: 0;
+    float: left;
     display: inline-block;
 }
 .terminal, terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
@@ -345,7 +356,7 @@ terminal .terminal-output > div {
     --original-color: var(--color, #aaa);
 }
 .cmd a[href] {
-    --original-color: var(--link-color, #0F60FF);
+    --original-color: var(--link-color, #3377FF);
 }
 /* DEFAULT ANIMATION */
 @-webkit-keyframes terminal-blink {

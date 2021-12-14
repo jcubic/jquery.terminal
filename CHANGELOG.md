@@ -1,3 +1,20 @@
+## 2.30.0
+### Features
+* add `span` to xml formatting
+* allow to use class attribute in XML formatting (`span`, `link`, and `img`)
+* new API methods `clear_buffer()` and `get_output_buffer()` [#717](https://github.com/jcubic/jquery.terminal/issues/717)
+### Bugfix
+* fix bug on Android with GBoard keyboard [#693](https://github.com/jcubic/jquery.terminal/issues/693)
+* fix refresh when scrollbar appear (using `scrollbar-gutter`)
+* fix link color to pass WCAG contrast ratio
+* remove tabindex attribute on links
+* add label to clipboard textarea for a11y
+* allow to escape angle brackets in XML formatting [#710](https://github.com/jcubic/jquery.terminal/issues/710)
+* fix black line before the image [#708](https://github.com/jcubic/jquery.terminal/issues/708)
+* fix scroll to bottom when echo an image [#716](https://github.com/jcubic/jquery.terminal/issues/716)
+* fix multiple echo with `!flush && !newline` [#709](https://github.com/jcubic/jquery.terminal/issues/709)
+* fix updating hash for long async commands [#703](https://github.com/jcubic/jquery.terminal/issues/703)
+
 ## 2.29.5
 ### Bugfix
 * fix empty prompt when no wcwidth is included

@@ -21,15 +21,15 @@ URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
 UPDATE_CONTRIBUTORS=0
 
-.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji templates/package.in
+.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
 
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
 
 bower.json: templates/bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
 
-package.json: templates/package.in .$(VERSION)
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/package.in > package.json
+package.json: .$(VERSION)
+	$(SED) -i 's/"version": "[^"]\+"/"version": "$(VERSION)"/' package.json
 
 js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js
@@ -64,9 +64,6 @@ README.md: templates/README.in .$(VERSION) __tests__/terminal.spec.js
 
 .$(VERSION): Makefile
 	touch .$(VERSION)
-
-templates/package.in:
-	$(SED) 's/"version": "[^"]\+"/"version": "{{V''ER}}"/' package.json > templates/package.in
 
 Makefile: templates/Makefile.in
 	$(SED) -e "s/{{VER""SION}}/"$(VERSION)"/" templates/Makefile.in > Makefile

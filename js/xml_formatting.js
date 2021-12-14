@@ -77,7 +77,8 @@
             return '[[;;;;;{"style": "' + style.join(';') + '"}]';
         },
         img: function(attrs) {
-            return '[[@;;;;' + attrs.src + ']' + (attrs.alt || '') + ']';
+            var alt = attrs.alt || '';
+            return '[[@;;;' + attrs.class + ';' + attrs.src + ']' + alt + ']';
         },
         bold: function() {
             return '[[b;rgba(255,255,255,0.9);]';
@@ -97,8 +98,11 @@
         italic: function() {
             return '[[i;;]';
         },
+        span: function(attrs) {
+            return '[[;;;' + attrs.class + ']';
+        },
         link: function(attrs) {
-            return '[[!;;;;' + attrs.href + ']';
+            return '[[!;;;' + attrs.class + ';' + attrs.href + ';]';
         }
     };
     // short aliases
@@ -132,7 +136,7 @@
                     return '[[;' + name + ';]';
                 }
             }
-            return string;
+            return string.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
         }).join('');
     }
     xml_formatter.__no_warn__ = true;

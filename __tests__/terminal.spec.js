@@ -844,13 +844,13 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noopener" tabindex="1000" data-text>https:'+
+                        ' rel="noopener" data-text>https:'+
                         '//terminal.jcubic.pl</a>',
                     {}
                 ],
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noreferrer noopener" tabindex="1000" data-'+
+                        ' rel="noreferrer noopener" data-'+
                         'text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true
@@ -874,22 +874,22 @@ describe('Terminal utils', function() {
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000" data-text>xss</a>'
+                        ' data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
                     '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="noopener" tabindex="1000" data-text>xss</a>'
+                        ' rel="noopener" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000" data-text>xss</a>'
+                        ' data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
                     '<a target="_blank" rel="noopener"' +
-                        ' tabindex="1000" data-text>xss</a>'
+                        ' data-text>xss</a>'
                 ],
             ];
             tests.forEach(function(spec) {
@@ -904,13 +904,13 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noopener" tabindex="1000" data-te'+
+                        ' rel="nofollow noopener" data-te'+
                         'xt>https://terminal.jcubic.pl</a>',
                     {linksNoFollow: true}
                 ],
                 [
                     '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noreferrer noopener" tabindex="1000"'+
+                        ' rel="nofollow noreferrer noopener"'+
                         ' data-text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true,
@@ -2707,6 +2707,25 @@ describe('extensions', function() {
             var color = term[0].querySelector(`[data-index='${term.last_index()}`).firstChild.firstChild.style.color;
             expect(color).toEqual("red");
         });
+        it('should print multiple !flush && !newline', function() {
+            term.echo('foo, ', {newline: false, flush: false});
+            term.echo('bar, ', {newline: false, flush: false});
+            term.echo('baz, ', {newline: false, flush: false});
+            term.flush();
+            expect(term.get_output()).toMatchSnapshot();
+            expect(output(term)).toMatchSnapshot();
+        });
+        it('should print mixed newline with !flush', function() {
+            term.echo('foo, ', {newline: false, flush: false});
+            term.echo('bar', {newline: false, flush: false});
+            term.echo('', {flush: false});
+            term.echo('baz, ', {newline: false, flush: false});
+            term.echo('quux', {newline: false, flush: false});
+            term.echo('', {flush: false});
+            term.flush();
+            expect(term.get_output()).toMatchSnapshot();
+            expect(output(term)).toMatchSnapshot();
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {
@@ -3595,7 +3614,6 @@ describe('Terminal plugin', function() {
                 term.focus();
                 term.insert('foo bar');
                 var clip = term.find('textarea');
-                clip.val(clip.val().replace(/.$/, ''));
                 doc.one('keydown', function(e) {
                     expect(e.which).toBe(8);
                     setTimeout(function() {
@@ -3606,7 +3624,10 @@ describe('Terminal plugin', function() {
                         done();
                     }, 300);
                 });
-                doc.trigger('input');
+                setTimeout(function() {
+                    clip.val(clip.val().replace(/.$/, ''));
+                    doc.trigger('input');
+                }, 100);
             });
         });
         describe('enter text', function() {
@@ -5652,6 +5673,31 @@ describe('Terminal plugin', function() {
                 term.refresh();
                 expect(term.find("[data-index='1']").length).toEqual(1);
                 expect(term.find("[data-index='1']").children().last().text()).toEqual(nbsp("ccc> !!!"));
+            });
+        });
+        describe('output_buffer', function() {
+            var term = $('<div/>').terminal($.noop, {greetings: false});
+            beforeEach(() => {
+                term.clear();
+            });
+            it('should return buffer with flush and newline', () => {
+                term.echo('foo ', {newline: false, flush: false});
+                term.echo('bar', {flush: false});
+                term.echo('lorem', {newline: false, flush: false});
+                term.echo(' ipsum', {flush: false});
+                expect(term.get_output_buffer()).toMatchSnapshot();
+                expect(term.get_output_buffer({html: true})).toMatchSnapshot();
+            });
+            it('should return clear the buffer', () => {
+                term.echo('foo ', {newline: false, flush: false});
+                term.echo('bar', {flush: false});
+                term.echo('lorem', {newline: false, flush: false});
+                term.echo(' ipsum', {flush: false});
+                expect(term.get_output_buffer()).toMatchSnapshot();
+                expect(term.get_output_buffer({html: true})).toMatchSnapshot();
+                term.clear_buffer();
+                expect(term.get_output()).toEqual('');
+                expect(output(term)).toEqual([]);
             });
         });
         describe('last_index', function() {

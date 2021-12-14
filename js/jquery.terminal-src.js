@@ -1314,6 +1314,17 @@
         }
     }
     // ---------------------------------------------------------------------
+    // ref: https://stackoverflow.com/a/6248722/387194
+    function generate_id() {
+        // I generate the UID from two parts here
+        // to ensure the random number provide enough bits.
+        var firstPart = (Math.random() * 46656) | 0;
+        var secondPart = (Math.random() * 46656) | 0;
+        firstPart = ("000" + firstPart.toString(36)).slice(-3);
+        secondPart = ("000" + secondPart.toString(36)).slice(-3);
+        return firstPart + secondPart;
+    }
+    // ---------------------------------------------------------------------
     // :; detect if mouse event happen on scrollbar
     // ---------------------------------------------------------------------
     function scrollbar_event(e, node) {
@@ -1861,19 +1872,33 @@
         }
     };
     // -------------------------------------------------------------------------
+    FormatBuffer.prototype.output = function() {
+        return this._output_buffer.slice();
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.is_empty = function() {
+        return !this._output_buffer.length;
+    };
+    // -------------------------------------------------------------------------
     FormatBuffer.prototype.clear = function() {
         this._output_buffer = [];
     };
     // -------------------------------------------------------------------------
-    FormatBuffer.prototype.flush = function(render) {
-        while (this._output_buffer.length) {
-            var data = this._output_buffer.shift();
+    FormatBuffer.prototype.forEach = function(fn) {
+        var i = 0;
+        while (i < this._output_buffer.length) {
+            var data = this._output_buffer[i++];
             if (data === FormatBuffer.NEW_LINE) {
-                render();
+                fn();
             } else {
-                render(data);
+                fn(data);
             }
         }
+    };
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.flush = function(render) {
+        this.forEach(render);
+        this.clear();
     };
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
@@ -1932,7 +1957,9 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var $node = $('<div class="cmd-editable" contenteditable/>').attr({
+                var $node = $('<div class="cmd-editable" ' +
+                              'contenteditable="plaintext-only" ' +
+                              'spellcheck="false"/>').attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
@@ -1983,11 +2010,16 @@
             self.addClass('cmd-mobile');
         } else {
             clip = (function() {
+                var id = generate_id();
                 var $node = $('<textarea>').attr({
                     autocapitalize: 'off',
                     spellcheck: 'false',
+                    id: id,
                     tabindex: settings.tabindex
                 }).addClass('cmd-clipboard').appendTo(self);
+                // some a11y to make lighthouse happy
+                $node.before('<label class="visually-hidden" for="' + id + '">' +
+                             'Clipbard textarea for jQuery Terminal</label>');
                 return {
                     $node: $node,
                     val: function(value) {
@@ -4099,6 +4131,11 @@
             doc.trigger(event);
         }
         var skip_input = false;
+        function finalize_input_event() {
+            prev_command = command;
+            skip_insert = false;
+            no_keydown = true;
+        }
         function input_event() {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
@@ -4111,9 +4148,19 @@
             // Some Androids don't fire keypress - #39
             // if there is dead_key we also need to grab real character #158
             // Firefox/Android with google keyboard don't fire keydown and keyup #319
-            if ((no_keydown || process || ((no_keypress || dead_key) && !skip_insert &&
-                                          (single_key || no_key) && !backspace)) &&
-                val !== command) {
+            if (no_keydown || process || ((no_keypress || dead_key) &&
+                                          !skip_insert &&
+                                          (single_key || no_key) && !backspace)) {
+                if (val && val === command) {
+                    if (is_android) {
+                        // ignore autocomplete on GBoard keyboard #693
+                        if (no_keydown) {
+                            event('keydown', 'Enter', 13);
+                        }
+                    }
+                    finalize_input_event();
+                    return;
+                }
                 var pos = position;
                 // backspace is set in keydown if no keydown we need to get new one
                 if (no_keydown) {
@@ -4170,9 +4217,7 @@
                     self.position(pos + Math.abs(val.length - prev_command.length));
                 }
             }
-            prev_command = command;
-            skip_insert = false;
-            no_keydown = true;
+            finalize_input_event();
         }
         doc.bind('keypress.cmd', keypress_event);
         doc.bind('keydown.cmd', keydown_event);
@@ -6196,9 +6241,6 @@
                         }
                         result += ' rel="' + rel_attr().join(' ') + '"';
                     }
-                    // make focus to terminal textarea that will enable
-                    // terminal when pressing tab and terminal is disabled
-                    result += ' tabindex="1000"';
                     return result;
                 }
                 function pre_process_image(data) {
@@ -7971,6 +8013,8 @@
                             array = string.split(/\n/);
                         }
                     }
+                } else {
+                    raw_string = '';
                 }
                 var arg = array || string;
                 if (line_cache && key && use_cache) {
@@ -8183,7 +8227,7 @@
                 }
             }
             // -----------------------------------------------------------------
-            function after_exec() {
+            function before_exec() {
                 // variables defined later in commands
                 if (!exec) {
                     change_hash = true;
@@ -8192,6 +8236,9 @@
                     }
                     change_hash = saved_change_hash;
                 }
+            }
+            // -----------------------------------------------------------------
+            function after_exec() {
                 deferred.resolve();
                 fire_event('onAfterCommand', [command]);
             }
@@ -8209,6 +8256,7 @@
             }
             // -----------------------------------------------------------------
             function invoke() {
+                before_exec();
                 // Call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
                 if (result) {
@@ -8832,7 +8880,7 @@
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
-        $.extend(self, $.omap({
+        var public_api = $.omap({
             id: function() {
                 return terminal_id;
             },
@@ -8841,6 +8889,7 @@
             // -------------------------------------------------------------
             clear: function() {
                 if (fire_event('onClear') !== false) {
+                    buffer.clear();
                     lines.clear(function(i) {
                         return get_node(i);
                     });
@@ -9845,7 +9894,11 @@
                 }, options || {});
                 when_ready(function ready() {
                     try {
+                        if (buffer.is_empty()) {
+                            return self;
+                        }
                         var bottom = self.is_bottom();
+                        var scroll = (settings.scrollOnEcho && options.scroll) || bottom;
                         var wrapper;
                         // print all lines
                         var first = true;
@@ -9859,15 +9912,21 @@
                         // TODO: refactor buffer.flush(), there is way
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
-                            if (!data) { // newline
+                            if (!data) {
                                 if (!partial.length) {
                                     wrapper = $('<div/>');
                                     snapshot = [];
                                 } else if (first) {
+                                    first = false;
                                     appending_to_partial = true;
                                     wrapper = partial;
                                 }
                             } else if (is_function(data.finalize)) {
+                                if (scroll) {
+                                    wrapper.find('img').on('load', function() {
+                                        self.scroll_to_bottom();
+                                    });
+                                }
                                 // this is finalize function from echo
                                 if (options.update) {
                                     lines.update_snapshot(data.index, snapshot);
@@ -9885,6 +9944,9 @@
                                 wrapper.attr('data-index', data.index);
                                 appending_to_partial = !data.newline;
                                 wrapper.toggleClass('partial', appending_to_partial);
+                                if (appending_to_partial) {
+                                    partial = wrapper;
+                                }
                                 data.finalize(wrapper);
                             } else {
                                 var line = data.line;
@@ -9970,7 +10032,7 @@
                                 cmd_cursor.show();
                             }, 0);
                         }, 0);
-                        if ((settings.scrollOnEcho && options.scroll) || bottom) {
+                        if (scroll) {
                             self.scroll_to_bottom();
                         }
                     } catch (e1) {
@@ -10100,7 +10162,8 @@
                                     if (is_function(finalize)) {
                                         finalize.call(self, div);
                                     }
-                                    div.find('img').each(function() {
+                                    var $images = div.find('img');
+                                    $images.each(function() {
                                         var self = $(this);
                                         var img = new Image();
                                         img.onerror = function() {
@@ -10833,6 +10896,56 @@
                     var limit = scroll_height - settings.scrollBottomOffset;
                     return scroll_top + height > limit;
                 }
+            },
+            // -------------------------------------------------------------
+            // :: create terminal object clone, used by pipe
+            // -------------------------------------------------------------
+            duplicate: function() {
+                var copy = $(self);
+                return $.extend(copy, public_api);
+            },
+            // -------------------------------------------------------------
+            // :: return output flush buffer
+            // -------------------------------------------------------------
+            get_output_buffer: function(options) {
+                var settings = $.extend({
+                    html: false
+                }, options);
+                var result = [];
+                var append = false;
+                buffer.forEach(function(data) {
+                    if (data) {
+                        if (is_function(data.finalize)) {
+                            append = !data.newline;
+                        } else {
+                            var output;
+                            if (settings.html) {
+                                output = data.line;
+                            } else {
+                                output = data.raw;
+                            }
+                            if (append) {
+                                var last = result.length - 1;
+                                result[last] += output;
+                            } else {
+                                result.push(output);
+                            }
+                        }
+                    }
+                });
+                if (settings.html) {
+                    return result.map(function(line) {
+                        return '<div>' + line + '</div>';
+                    }).join('\n');
+                }
+                return result.join('\n');
+            },
+            // -------------------------------------------------------------
+            // :: clear flush buffer
+            // -------------------------------------------------------------
+            clear_buffer: function() {
+                buffer.clear();
+                return self;
             }
         }, function(name, fun) {
             // wrap all functions and display execptions
@@ -10854,7 +10967,8 @@
                     }
                 }
             };
-        }));
+        });
+        $.extend(self, public_api);
         // -----------------------------------------------------------------
         // :: INIT CODE
         // -----------------------------------------------------------------
