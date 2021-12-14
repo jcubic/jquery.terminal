@@ -8889,6 +8889,7 @@
             // -------------------------------------------------------------
             clear: function() {
                 if (fire_event('onClear') !== false) {
+                    buffer.clear();
                     lines.clear(function(i) {
                         return get_node(i);
                     });
@@ -9916,6 +9917,7 @@
                                     wrapper = $('<div/>');
                                     snapshot = [];
                                 } else if (first) {
+                                    first = false;
                                     appending_to_partial = true;
                                     wrapper = partial;
                                 }
@@ -10907,29 +10909,41 @@
             // -------------------------------------------------------------
             get_output_buffer: function(options) {
                 var settings = $.extend({
-                    render: true
+                    html: false
                 }, options);
-                var output = [];
+                var result = [];
                 var append = false;
                 buffer.forEach(function(data) {
                     if (data) {
                         if (is_function(data.finalize)) {
                             append = !data.newline;
                         } else {
-                            console.log(data);
-                            if (append) {
-                                var last = output.length - 1;
-                                output[last] += data.raw;
+                            var output;
+                            if (settings.html) {
+                                output = data.line;
                             } else {
-                                output.push(data.raw);
+                                output = data.raw;
+                            }
+                            if (append) {
+                                var last = result.length - 1;
+                                result[last] += output;
+                            } else {
+                                result.push(output);
                             }
                         }
                     }
                 });
-                return output;
+                if (settings.html) {
+                    return result.map(function(line) {
+                        return '<div>' + line + '</div>';
+                    }).join('\n');
+                }
+                return result.join('\n');
             },
             // -------------------------------------------------------------
-            buffer_clean: function() {
+            // :: clear flush buffer
+            // -------------------------------------------------------------
+            clear_buffer: function() {
                 buffer.clear();
                 return self;
             }

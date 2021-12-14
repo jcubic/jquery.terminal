@@ -2712,8 +2712,19 @@ describe('extensions', function() {
             term.echo('bar, ', {newline: false, flush: false});
             term.echo('baz, ', {newline: false, flush: false});
             term.flush();
-            expect(term.get_output()).toEqual('foo, bar, baz, ');
-            expect(output(term)).toEqual(['foo, bar, baz, ']);
+            expect(term.get_output()).toMatchSnapshot();
+            expect(output(term)).toMatchSnapshot();
+        });
+        it('should print mixed newline with !flush', function() {
+            term.echo('foo, ', {newline: false, flush: false});
+            term.echo('bar', {newline: false, flush: false});
+            term.echo('', {flush: false});
+            term.echo('baz, ', {newline: false, flush: false});
+            term.echo('quux', {newline: false, flush: false});
+            term.echo('', {flush: false});
+            term.flush();
+            expect(term.get_output()).toMatchSnapshot();
+            expect(output(term)).toMatchSnapshot();
         });
     });
     describe('autocomplete_menu', function() {
@@ -5662,6 +5673,31 @@ describe('Terminal plugin', function() {
                 term.refresh();
                 expect(term.find("[data-index='1']").length).toEqual(1);
                 expect(term.find("[data-index='1']").children().last().text()).toEqual(nbsp("ccc> !!!"));
+            });
+        });
+        describe('output_buffer', function() {
+            var term = $('<div/>').terminal($.noop, {greetings: false});
+            beforeEach(() => {
+                term.clear();
+            });
+            it('should return buffer with flush and newline', () => {
+                term.echo('foo ', {newline: false, flush: false});
+                term.echo('bar', {flush: false});
+                term.echo('lorem', {newline: false, flush: false});
+                term.echo(' ipsum', {flush: false});
+                expect(term.get_output_buffer()).toMatchSnapshot();
+                expect(term.get_output_buffer({html: true})).toMatchSnapshot();
+            });
+            it('should return clear the buffer', () => {
+                term.echo('foo ', {newline: false, flush: false});
+                term.echo('bar', {flush: false});
+                term.echo('lorem', {newline: false, flush: false});
+                term.echo(' ipsum', {flush: false});
+                expect(term.get_output_buffer()).toMatchSnapshot();
+                expect(term.get_output_buffer({html: true})).toMatchSnapshot();
+                term.clear_buffer();
+                expect(term.get_output()).toEqual('');
+                expect(output(term)).toEqual([]);
             });
         });
         describe('last_index', function() {
