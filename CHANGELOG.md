@@ -1,3 +1,7 @@
+## 2.30.1
+### Bugfix
+* fix record built-in commands in URL hash
+
 ## 2.30.0
 ### Features
 * add `span` to xml formatting

@@ -8256,7 +8256,6 @@
             }
             // -----------------------------------------------------------------
             function invoke() {
-                before_exec();
                 // Call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
                 if (result) {
@@ -8316,6 +8315,7 @@
                         command_line.history().append(command);
                     }
                 }
+                before_exec();
                 var interpreter = interpreters.top();
                 if (!silent && settings.echoCommand) {
                     echo_command(command);
