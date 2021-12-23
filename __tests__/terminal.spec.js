@@ -4926,6 +4926,9 @@ describe('Terminal plugin', function() {
 
         describe('typing animation', function() {
             var term = $('<div/>').terminal({
+                echo: function(value) {
+                    this.echo(value);
+                },
                 foo: function() {
                     return this.echo('HELLO foo', { typing: true });
                 },
@@ -4964,6 +4967,19 @@ describe('Terminal plugin', function() {
                     'HELLO foo',
                     '> bar',
                     'HELLO bar'
+                ]);
+            });
+            it('should animate exec array with sync commands #722', async function() {
+                await term.exec(['echo HELLO', 'echo WORLD', 'echo !'], {
+                    typing: 10
+                });
+                expect(term.get_output().split('\n')).toEqual([
+                    '> echo HELLO',
+                    'HELLO',
+                    '> echo WORLD',
+                    'WORLD',
+                    '> echo !',
+                    '!'
                 ]);
             });
         });

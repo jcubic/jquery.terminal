@@ -9029,6 +9029,7 @@
                             delay: delay
                         });
                         ret.then(function() {
+                            paused = false;
                             invoke(true);
                         });
                         d.then(function() {
