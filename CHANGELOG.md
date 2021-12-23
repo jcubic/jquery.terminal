@@ -1,3 +1,7 @@
+## 2.30.2
+### Bugfix
+* ix animated exec array with sync commands [#722](https://github.com/jcubic/jquery.terminal/issues/722)
+
 ## 2.30.1
 ### Bugfix
 * fix record built-in commands in URL hash
