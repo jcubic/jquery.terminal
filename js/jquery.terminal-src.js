@@ -1925,7 +1925,7 @@
                     if (ret && ret.then) {
                         ret.then(set).catch(error);
                     }
-                } catch(e) {
+                } catch (e) {
                     error(e);
                 }
                 break;
@@ -3488,7 +3488,9 @@
                 var data = prev_prompt_data = {
                     set: set
                 };
-                with_prompt(prompt, set, self);
+                with_prompt(prompt, function(prompt) {
+                    daa.set(prompt);
+                }, self);
             };
         })();
         // ---------------------------------------------------------------------
