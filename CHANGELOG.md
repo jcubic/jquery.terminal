@@ -1,7 +1,10 @@
 ## 2.30.3
+### Features
+* scroll to bottom for each line in multiline typing animation
+* allow to use `--glow: 1` with default animation
+
 ### Bugfix
 * fix prompt that return string or promise (in animation and set_prompt) [#724](https://github.com/jcubic/jquery.terminal/issues/724)
-* scroll to bottom for each line in multiline typing animation
 
 ## 2.30.2
 ### Bugfix

@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Thu, 23 Dec 2021 14:52:27 +0000
+ * Date: Thu, 23 Dec 2021 20:23:53 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -365,6 +365,9 @@ terminal .terminal-output > div {
         background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
+        box-shadow: 0 0 calc(var(--glow) * 3px) #aaa;
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
@@ -379,6 +382,9 @@ terminal .terminal-output > div {
         background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
+        box-shadow: 0 0 calc(var(--glow) * 3px) #aaa;
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
@@ -392,11 +398,16 @@ terminal .terminal-output > div {
         background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
+        box-shadow: 0 0 calc(var(--glow) * 3px) #aaa;
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
         color: inherit;
         color: var(--original-background, var(--original-color, #aaa));
+        -webkit-box-shadow: none;
+        box-shadow: none;
     }
 }
 /* GLOW ANIMATION */
