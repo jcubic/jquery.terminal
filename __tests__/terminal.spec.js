@@ -2995,6 +2995,10 @@ describe('sub plugins', function() {
 describe('Terminal plugin', function() {
     describe('jQuery Terminal options', function() {
         describe('prompt', function() {
+            it('should have default prompt', function() {
+                var term = $('<div/>').terminal($.noop);
+                expect(term.get_prompt()).toEqual('> ');
+            });
             it('should set prompt', function() {
                 var prompt = '>>> ';
                 var term = $('<div/>').terminal($.noop, {
@@ -3002,9 +3006,30 @@ describe('Terminal plugin', function() {
                 });
                 expect(term.get_prompt()).toEqual(prompt);
             });
-            it('should have default prompt', function() {
-                var term = $('<div/>').terminal($.noop);
-                expect(term.get_prompt()).toEqual('> ');
+            it('should render function that return string', () => {
+                var term = $('<div/>').terminal($.noop, {
+                    prompt: function() {
+                        return '>>>'
+                    }
+                });
+                expect(term.find('.cmd-prompt').text()).toEqual('>>>');
+            });
+            it('should render funtion that return promise', async () => {
+                var term = $('<div/>').terminal($.noop, {
+                    prompt: function() {
+                        return Promise.resolve('>>>');
+                    }
+                });
+                await delay(10);
+                expect(term.find('.cmd-prompt').text()).toEqual('>>>');
+            });
+            it('should render funtion that call callback', () => {
+                var term = $('<div/>').terminal($.noop, {
+                    prompt: function(fn) {
+                        fn('>>>');
+                    }
+                });
+                expect(term.find('.cmd-prompt').text()).toEqual('>>>');
             });
         });
         describe('history', function() {
@@ -4971,7 +4996,8 @@ describe('Terminal plugin', function() {
             });
             it('should animate exec array with sync commands #722', async function() {
                 await term.exec(['echo HELLO', 'echo WORLD', 'echo !'], {
-                    typing: 10
+                    typing: true,
+                    delay: 0
                 });
                 expect(term.get_output().split('\n')).toEqual([
                     '> echo HELLO',
@@ -4981,6 +5007,37 @@ describe('Terminal plugin', function() {
                     '> echo !',
                     '!'
                 ]);
+            });
+            it('should handle exec animation when using prompt that return string #724', async () => {
+                var term = $('<div/>').terminal({
+                    echo: function(arg) {
+                        this.echo(arg);
+                    }
+                }, {
+                    greetings: false,
+                    prompt: function() {
+                        return '>>> '
+                    }
+                });
+                async function test() {
+                    await term.exec(['echo HELLO', 'echo WORLD', 'echo !'], {
+                        typing: true,
+                        delay: 0
+                    });
+                    expect(term.get_output().split('\n')).toEqual([
+                        '>>> echo HELLO',
+                        'HELLO',
+                        '>>> echo WORLD',
+                        'WORLD',
+                        '>>> echo !',
+                        '!'
+                    ]);
+                }
+                await test();
+                term.clear().set_prompt(function() {
+                    return Promise.resolve('>>> ');
+                });
+                await test();
             });
         });
 
@@ -5731,6 +5788,34 @@ describe('Terminal plugin', function() {
                 expect(term.last_index()).toEqual(term.find('.terminal-output div div').length-1);
                 var last_line = term.find('.terminal-output > div:eq(' + term.last_index() + ') div');
                 expect(last_line.text()).toEqual('Lorem');
+            });
+        });
+        describe('set_prompt', function() {
+            var term;
+            beforeEach(() => {
+                term = $('<div/>').terminal();
+            });
+            function get_prompt() {
+                return term.find('.cmd-prompt').text();
+            }
+            it('should render prompt when using function that returns promise', async function() {
+                term.set_prompt(function() {
+                    return Promise.resolve('>>>');
+                });
+                await delay(10);
+                expect(get_prompt()).toEqual('>>>');
+            });
+            it('should render prompt when using function that return string', function() {
+                term.set_prompt(function() {
+                    return '>>>';
+                });
+                expect(get_prompt()).toEqual('>>>');
+            });
+            it('should render prompt when using function that use callback', function() {
+                term.set_prompt(function(fn) {
+                    fn('>>>');
+                });
+                expect(get_prompt()).toEqual('>>>');
             });
         });
         describe('echo', function() {

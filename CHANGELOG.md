@@ -1,3 +1,7 @@
+## 2.30.3
+### Bugfix
+* fix prompt that return string or promise (in animation and set_prompt) [#724](https://github.com/jcubic/jquery.terminal/issues/724)
+
 ## 2.30.2
 ### Bugfix
 * fix animated exec array with sync commands [#722](https://github.com/jcubic/jquery.terminal/issues/722)

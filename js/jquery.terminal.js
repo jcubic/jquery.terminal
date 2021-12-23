@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 23 Dec 2021 14:52:26 +0000
+ * Date: Thu, 23 Dec 2021 18:40:32 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1901,6 +1901,37 @@
         this.clear();
     };
     // -------------------------------------------------------------------------
+    // :: function that handle all cases of prompt and call the function set
+    // :: with a string
+    // -------------------------------------------------------------------------
+    function with_prompt(prompt, set, context) {
+        function error(e) {
+            var prompt = $.terminal.escape_brackets('[ERR]> ');
+            set('[[;red;]' + prompt + ']');
+            alert_exception('Prompt', e);
+        }
+        switch (typeof prompt) {
+            case 'string':
+                set(prompt);
+                break;
+            case 'function':
+                try {
+                    var ret = prompt.call(context, function(string) {
+                        set(string);
+                    });
+                    if (typeof ret === 'string') {
+                        set(ret);
+                    }
+                    if (ret && ret.then) {
+                        ret.then(set).catch(error);
+                    }
+                } catch(e) {
+                    error(e);
+                }
+                break;
+        }
+    }
+    // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
     var cmd_index = 0;
@@ -3454,29 +3485,10 @@
                     // remove reference for garbage collector
                     prev_prompt_data = null;
                 }
-                switch (typeof prompt) {
-                    case 'string':
-                        set(prompt);
-                        break;
-                    case 'function':
-                        var data = prev_prompt_data = {
-                            set: set
-                        };
-                        var ret = prompt.call(self, function(string) {
-                            data.set(string);
-                        });
-                        if (typeof ret === 'string') {
-                            data.set(ret);
-                        }
-                        if (ret && ret.then) {
-                            ret.then(data.set).catch(function(e) {
-                                var prompt = $.terminal.escape_brackets('[ERR]> ');
-                                data.set('[[;red;]' + prompt + ']');
-                                alert_exception('Prompt', e);
-                            });
-                        }
-                        break;
-                }
+                var data = prev_prompt_data = {
+                    set: set
+                };
+                with_prompt(prompt, set, self);
             };
         })();
         // ---------------------------------------------------------------------
@@ -5116,7 +5128,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.30.2',
-        date: 'Thu, 23 Dec 2021 14:52:26 +0000',
+        date: 'Thu, 23 Dec 2021 18:40:32 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8830,7 +8842,9 @@
         var typed_enter = (function() {
             var helper = typed(function(message, prompt, options) {
                 self.set_prompt(prompt);
-                self.echo(prompt + message, $.extend({}, options, {typing: false}));
+                with_prompt(prompt, function(prompt) {
+                    self.echo(prompt + message, $.extend({}, options, {typing: false}));
+                }, self);
             });
             return function(prompt, message, options) {
                 return helper(message, $.extend({}, options, {prompt: prompt}));
@@ -9787,7 +9801,7 @@
                         });
                     } else if (is_function(prompt)) {
                         command_line.prompt(function(callback) {
-                            prompt.call(self, callback, self);
+                            return prompt.call(self, callback, self);
                         });
                     } else {
                         command_line.prompt(prompt);
@@ -10312,14 +10326,9 @@
                         } else if (type === 'echo') {
                             typed_message(string, settings);
                         } else if (type === 'enter') {
-                            var prompt = self.get_prompt();
-                            if (typeof prompt === 'function') {
-                                prompt(function(prompt) {
-                                    typed_enter(prompt, string, settings);
-                                });
-                            } else {
+                            with_prompt(self.get_prompt(), function(prompt) {
                                 typed_enter(prompt, string, settings);
-                            }
+                            }, self);
                         }
                     } else {
                         d.reject('Invalid type only `echo` and `prompt` are supported');
