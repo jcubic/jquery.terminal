@@ -3489,7 +3489,7 @@
                     set: set
                 };
                 with_prompt(prompt, function(prompt) {
-                    daa.set(prompt);
+                    data.set(prompt);
                 }, self);
             };
         })();
@@ -8813,10 +8813,14 @@
                     } else {
                         self.set_prompt('');
                     }
+                    var bottom = self.is_bottom();
                     var interval = setInterval(function() {
                         var chr = $.terminal.substring(message, char_i, char_i + 1);
                         new_prompt += chr;
                         self.set_prompt(new_prompt);
+                        if (chr === '\n' && bottom) {
+                            self.scroll_to_bottom();
+                        }
                         char_i++;
                         if (char_i === len) {
                             clearInterval(interval);

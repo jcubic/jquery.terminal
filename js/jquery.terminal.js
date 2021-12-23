@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 23 Dec 2021 18:57:14 +0000
+ * Date: Thu, 23 Dec 2021 19:29:33 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -3489,7 +3489,7 @@
                     set: set
                 };
                 with_prompt(prompt, function(prompt) {
-                    daa.set(prompt);
+                    data.set(prompt);
                 }, self);
             };
         })();
@@ -5130,7 +5130,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.30.2',
-        date: 'Thu, 23 Dec 2021 18:57:14 +0000',
+        date: 'Thu, 23 Dec 2021 19:29:33 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8813,10 +8813,14 @@
                     } else {
                         self.set_prompt('');
                     }
+                    var bottom = self.is_bottom();
                     var interval = setInterval(function() {
                         var chr = $.terminal.substring(message, char_i, char_i + 1);
                         new_prompt += chr;
                         self.set_prompt(new_prompt);
+                        if (chr === '\n' && bottom) {
+                            self.scroll_to_bottom();
+                        }
                         char_i++;
                         if (char_i === len) {
                             clearInterval(interval);
