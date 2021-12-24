@@ -8802,6 +8802,7 @@
         // ---------------------------------------------------------------------
         function typed(finish_typing_fn) {
             return function typing_animation(message, options) {
+                var formattted = $.terminal.apply_formatters(message);
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -8815,7 +8816,7 @@
                     }
                     var bottom = self.is_bottom();
                     var interval = setInterval(function() {
-                        var chr = $.terminal.substring(message, char_i, char_i + 1);
+                        var chr = $.terminal.substring(formattted, char_i, char_i + 1);
                         new_prompt += chr;
                         self.set_prompt(new_prompt);
                         if (chr === '\n' && bottom) {

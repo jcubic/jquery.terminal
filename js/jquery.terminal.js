@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.30.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 23 Dec 2021 19:29:33 +0000
+ * Date: Fri, 24 Dec 2021 21:35:49 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5129,8 +5129,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.30.2',
-        date: 'Thu, 23 Dec 2021 19:29:33 +0000',
+        version: 'DEV',
+        date: 'Fri, 24 Dec 2021 21:35:49 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8802,6 +8802,7 @@
         // ---------------------------------------------------------------------
         function typed(finish_typing_fn) {
             return function typing_animation(message, options) {
+                var formattted = $.terminal.apply_formatters(message);
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -8815,7 +8816,7 @@
                     }
                     var bottom = self.is_bottom();
                     var interval = setInterval(function() {
-                        var chr = $.terminal.substring(message, char_i, char_i + 1);
+                        var chr = $.terminal.substring(formattted, char_i, char_i + 1);
                         new_prompt += chr;
                         self.set_prompt(new_prompt);
                         if (chr === '\n' && bottom) {
