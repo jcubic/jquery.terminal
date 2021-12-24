@@ -5,6 +5,7 @@
 ### Bugfix
 * fix prompt that return string or promise (in animation and set_prompt) [#724](https://github.com/jcubic/jquery.terminal/issues/724)
 * fix formatting in typing animation [#721](https://github.com/jcubic/jquery.terminal/issues/721)
+* fix formatting colors and `--glow` [#725](https://github.com/jcubic/jquery.terminal/issues/725)
 
 ## 2.30.2
 ### Bugfix
