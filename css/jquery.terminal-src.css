@@ -365,7 +365,6 @@ terminal .terminal-output > div {
         background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
-        box-shadow: 0 0 calc(var(--glow) * 3px) #aaa;
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
