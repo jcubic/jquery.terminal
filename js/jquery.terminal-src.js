@@ -8806,7 +8806,7 @@
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
-                var len = $.terminal.length(message);
+                var len = $.terminal.length(formattted);
                 if (message.length > 0) {
                     var new_prompt = '';
                     if (options.prompt) {
