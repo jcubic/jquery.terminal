@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 24 Dec 2021 21:53:36 +0000
+ * Date: Sun, 26 Dec 2021 22:26:30 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5130,7 +5130,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 24 Dec 2021 21:53:36 +0000',
+        date: 'Sun, 26 Dec 2021 22:26:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7116,6 +7116,7 @@
         cancelableAjax: true,
         processArguments: true,
         execAnimation: false,
+        execAnimationDelay: 100,
         linksNoReferrer: false,
         useCache: true,
         anyLinks: false,
@@ -8858,6 +8859,40 @@
             };
         })();
         // ---------------------------------------------------------------------
+        function with_typing(kind, else_fn, finalize_fn) {
+            return function with_typing_fn(string, options) {
+                var d = new $.Deferred();
+                when_ready(function ready() {
+                    var locals = $.extend({
+                        typing: false,
+                        delay: settings.execAnimationDelay
+                    }, options);
+                    if (locals.typing) {
+                        if (typeof string !== 'string') {
+                            return d.reject(kind + ': Typing animation require string');
+                        }
+                        if (typeof locals.delay !== 'number' || isNaN(locals.delay)) {
+                            return d.reject(kind + ': Invalid argument, delay need to' +
+                                            ' be a number');
+                        }
+                        var p = self.typing(kind, locals.delay, string, locals);
+                        p.then(function() {
+                            d.resolve();
+                        });
+                    } else {
+                        else_fn(string, locals);
+                    }
+                    if (is_function(finalize_fn)) {
+                        finalize_fn(string, locals);
+                    }
+                });
+                if (options && options.typing) {
+                    return d.promise();
+                }
+                return self;
+            };
+        }
+        // ---------------------------------------------------------------------
         function ready(queue) {
             return function(fun) {
                 queue.add(fun);
@@ -9019,8 +9054,8 @@
                 var exec_settings = $.extend({
                     deferred: null,
                     silent: false,
-                    typing: settings.execAnimation,
-                    delay: 100
+                    typing: false,
+                    delay: settings.execAnimationDelay
                 }, options);
                 if (silent === null) {
                     silent = exec_settings.silent;
@@ -9734,11 +9769,9 @@
                 return command_line.get();
             },
             // -------------------------------------------------------------
-            // :: echo command and previous prompt (used by echo_newline.js)
+            // :: better API than echo_command that supports animation
             // -------------------------------------------------------------
-            echo_command: function(command) {
-                return echo_command(command);
-            },
+            enter: with_typing('enter', echo_command),
             // -------------------------------------------------------------
             // :: Change the command line to the new one
             // -------------------------------------------------------------
@@ -9787,39 +9820,17 @@
             // -------------------------------------------------------------
             // :: Set the prompt of the command line
             // -------------------------------------------------------------
-            set_prompt: function(prompt, options) {
-                var d = new $.Deferred();
-                when_ready(function ready() {
-                    var settings = $.extend({
-                        typing: false,
-                        delay: 100
-                    }, options);
-                    if (settings.typing) {
-                        if (typeof prompt !== 'string') {
-                            return d.reject('prompt: Typing animation require string');
-                        }
-                        if (typeof settings.delay !== 'number' || isNaN(settings.delay)) {
-                            return d.reject('echo: Invalid argument, delay need to' +
-                                            ' be a number');
-                        }
-                        var p = self.typing('prompt', settings.delay, prompt, settings);
-                        p.then(function() {
-                            d.resolve();
-                        });
-                    } else if (is_function(prompt)) {
-                        command_line.prompt(function(callback) {
-                            return prompt.call(self, callback, self);
-                        });
-                    } else {
-                        command_line.prompt(prompt);
-                    }
-                    interpreters.top().prompt = prompt;
-                });
-                if (options && options.typing) {
-                    return d.promise();
+            set_prompt: with_typing('prompt', function(prompt) {
+                if (is_function(prompt)) {
+                    command_line.prompt(function(callback) {
+                        return prompt.call(self, callback, self);
+                    });
+                } else {
+                    command_line.prompt(prompt);
                 }
-                return self;
-            },
+            }, function(prompt) {
+                interpreters.top().prompt = prompt;
+            }),
             // -------------------------------------------------------------
             // :: Return the prompt used by the terminal
             // -------------------------------------------------------------
@@ -10160,7 +10171,7 @@
                             raw: settings.raw,
                             finalize: $.noop,
                             unmount: $.noop,
-                            delay: 100,
+                            delay: settings.execAnimationDelay,
                             ansi: false,
                             typing: false,
                             keepWords: false,
@@ -10533,7 +10544,7 @@
                 if (typeof arguments[1] === 'object') {
                     options = $.extend({
                         typing: false,
-                        delay: 100,
+                        delay: settings.execAnimationDelay,
                         success: $.noop,
                         cancel: $.noop
                     }, arguments[1]);
@@ -11719,7 +11730,7 @@
             }
             // -------------------------------------------------------------
             // :: helper
-            function exec_spec(spec) {
+            function exec_spec(spec, options) {
                 var terminal = terminals.get()[spec[0]];
                 // execute if belong to this terminal
                 var defer = $.Deferred();
@@ -11729,14 +11740,14 @@
                         return defer.promise();
                     } else if (paused) {
                         resume_callbacks.push(function() {
-                            return terminal.exec(spec[2]).done(function() {
+                            return terminal.exec(spec[2], options).done(function() {
                                 terminal.save_state(spec[2], true, spec[1]);
                                 defer.resolve();
                             });
                         });
                         return defer.promise();
                     } else {
-                        return terminal.exec(spec[2]).done(function() {
+                        return terminal.exec(spec[2], options).done(function() {
                             terminal.save_state(spec[2], true, spec[1]);
                         });
                     }
@@ -11756,10 +11767,14 @@
                                 replace_hash(hash_commands);
                             }
                             var i = 0;
+                            var options = {
+                                typing: settings.execAnimation,
+                                delay: settings.execAnimationDelay
+                            };
                             (function recur() {
                                 var spec = hash_commands[i++];
                                 if (spec) {
-                                    exec_spec(spec).done(recur);
+                                    exec_spec(spec, options).done(recur);
                                 } else {
                                     change_hash = true;
                                 }
