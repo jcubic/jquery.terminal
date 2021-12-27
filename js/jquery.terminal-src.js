@@ -8242,7 +8242,7 @@
                 }
             }
             // -----------------------------------------------------------------
-            function before_exec() {
+            function before_async_exec() {
                 // variables defined later in commands
                 if (!exec) {
                     change_hash = true;
@@ -8273,6 +8273,7 @@
             function invoke() {
                 // Call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
+                before_async_exec();
                 if (result) {
                     // auto pause/resume when user return promises
                     // it should not pause when user return promise from read()
@@ -8330,7 +8331,6 @@
                         command_line.history().append(command);
                     }
                 }
-                before_exec();
                 var interpreter = interpreters.top();
                 if (!silent && settings.echoCommand) {
                     echo_command(command);
@@ -8343,6 +8343,7 @@
                 // after delay
                 var saved_change_hash = change_hash;
                 if (command.match(/^\s*login\s*$/) && self.token(true)) {
+                    before_async_exec();
                     if (self.level() > 1) {
                         self.logout(true);
                     } else {
@@ -8351,6 +8352,7 @@
                     after_exec();
                 } else if (settings.exit && command.match(/^\s*exit\s*$/) &&
                            !in_login) {
+                    before_async_exec();
                     var level = self.level();
                     if (level === 1 && self.get_token() || level > 1) {
                         if (self.get_token(true)) {
@@ -8361,6 +8363,7 @@
                     after_exec();
                 } else if (settings.clear && command.match(/^\s*clear\s*$/) &&
                            !in_login) {
+                    before_async_exec();
                     self.clear();
                     after_exec();
                 } else {
