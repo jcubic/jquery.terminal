@@ -1901,6 +1901,37 @@
         this.clear();
     };
     // -------------------------------------------------------------------------
+    // :: function that handle all cases of prompt and call the function set
+    // :: with a string
+    // -------------------------------------------------------------------------
+    function with_prompt(prompt, set, context) {
+        function error(e) {
+            var prompt = $.terminal.escape_brackets('[ERR]> ');
+            set('[[;red;]' + prompt + ']');
+            alert_exception('Prompt', e);
+        }
+        switch (typeof prompt) {
+            case 'string':
+                set(prompt);
+                break;
+            case 'function':
+                try {
+                    var ret = prompt.call(context, function(string) {
+                        set(string);
+                    });
+                    if (typeof ret === 'string') {
+                        set(ret);
+                    }
+                    if (ret && ret.then) {
+                        ret.then(set).catch(error);
+                    }
+                } catch (e) {
+                    error(e);
+                }
+                break;
+        }
+    }
+    // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
     var cmd_index = 0;
@@ -3454,29 +3485,12 @@
                     // remove reference for garbage collector
                     prev_prompt_data = null;
                 }
-                switch (typeof prompt) {
-                    case 'string':
-                        set(prompt);
-                        break;
-                    case 'function':
-                        var data = prev_prompt_data = {
-                            set: set
-                        };
-                        var ret = prompt.call(self, function(string) {
-                            data.set(string);
-                        });
-                        if (typeof ret === 'string') {
-                            data.set(ret);
-                        }
-                        if (ret && ret.then) {
-                            ret.then(data.set).catch(function(e) {
-                                var prompt = $.terminal.escape_brackets('[ERR]> ');
-                                data.set('[[;red;]' + prompt + ']');
-                                alert_exception('Prompt', e);
-                            });
-                        }
-                        break;
-                }
+                var data = prev_prompt_data = {
+                    set: set
+                };
+                with_prompt(prompt, function(prompt) {
+                    data.set(prompt);
+                }, self);
             };
         })();
         // ---------------------------------------------------------------------
@@ -7102,6 +7116,7 @@
         cancelableAjax: true,
         processArguments: true,
         execAnimation: false,
+        execAnimationDelay: 100,
         linksNoReferrer: false,
         useCache: true,
         anyLinks: false,
@@ -8227,7 +8242,7 @@
                 }
             }
             // -----------------------------------------------------------------
-            function before_exec() {
+            function before_async_exec() {
                 // variables defined later in commands
                 if (!exec) {
                     change_hash = true;
@@ -8258,6 +8273,7 @@
             function invoke() {
                 // Call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
+                before_async_exec();
                 if (result) {
                     // auto pause/resume when user return promises
                     // it should not pause when user return promise from read()
@@ -8315,7 +8331,6 @@
                         command_line.history().append(command);
                     }
                 }
-                before_exec();
                 var interpreter = interpreters.top();
                 if (!silent && settings.echoCommand) {
                     echo_command(command);
@@ -8328,6 +8343,7 @@
                 // after delay
                 var saved_change_hash = change_hash;
                 if (command.match(/^\s*login\s*$/) && self.token(true)) {
+                    before_async_exec();
                     if (self.level() > 1) {
                         self.logout(true);
                     } else {
@@ -8336,6 +8352,7 @@
                     after_exec();
                 } else if (settings.exit && command.match(/^\s*exit\s*$/) &&
                            !in_login) {
+                    before_async_exec();
                     var level = self.level();
                     if (level === 1 && self.get_token() || level > 1) {
                         if (self.get_token(true)) {
@@ -8346,6 +8363,7 @@
                     after_exec();
                 } else if (settings.clear && command.match(/^\s*clear\s*$/) &&
                            !in_login) {
+                    before_async_exec();
                     self.clear();
                     after_exec();
                 } else {
@@ -8788,10 +8806,11 @@
         // ---------------------------------------------------------------------
         function typed(finish_typing_fn) {
             return function typing_animation(message, options) {
+                var formattted = $.terminal.apply_formatters(message);
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
-                var len = $.terminal.length(message);
+                var len = $.terminal.length(formattted);
                 if (message.length > 0) {
                     var new_prompt = '';
                     if (options.prompt) {
@@ -8799,10 +8818,14 @@
                     } else {
                         self.set_prompt('');
                     }
+                    var bottom = self.is_bottom();
                     var interval = setInterval(function() {
-                        var chr = $.terminal.substring(message, char_i, char_i + 1);
+                        var chr = $.terminal.substring(formattted, char_i, char_i + 1);
                         new_prompt += chr;
                         self.set_prompt(new_prompt);
+                        if (chr === '\n' && bottom) {
+                            self.scroll_to_bottom();
+                        }
                         char_i++;
                         if (char_i === len) {
                             clearInterval(interval);
@@ -8830,12 +8853,48 @@
         var typed_enter = (function() {
             var helper = typed(function(message, prompt, options) {
                 self.set_prompt(prompt);
-                self.echo(prompt + message, $.extend({}, options, {typing: false}));
+                with_prompt(prompt, function(prompt) {
+                    self.echo(prompt + message, $.extend({}, options, {typing: false}));
+                }, self);
             });
             return function(prompt, message, options) {
                 return helper(message, $.extend({}, options, {prompt: prompt}));
             };
         })();
+        // ---------------------------------------------------------------------
+        function with_typing(kind, else_fn, finalize_fn) {
+            return function with_typing_fn(string, options) {
+                var d = new $.Deferred();
+                when_ready(function ready() {
+                    var locals = $.extend({
+                        typing: false,
+                        delay: settings.execAnimationDelay
+                    }, options);
+                    if (locals.typing) {
+                        if (typeof string !== 'string') {
+                            return d.reject(kind + ': Typing animation require string');
+                        }
+                        if (typeof locals.delay !== 'number' || isNaN(locals.delay)) {
+                            return d.reject(kind + ': Invalid argument, delay need to' +
+                                            ' be a number');
+                        }
+                        var p = self.typing(kind, locals.delay, string, locals);
+                        p.then(function() {
+                            d.resolve();
+                        });
+                    } else {
+                        else_fn(string, locals);
+                    }
+                    if (is_function(finalize_fn)) {
+                        finalize_fn(string, locals);
+                    }
+                });
+                if (options && options.typing) {
+                    return d.promise();
+                }
+                return self;
+            };
+        }
         // ---------------------------------------------------------------------
         function ready(queue) {
             return function(fun) {
@@ -8998,8 +9057,8 @@
                 var exec_settings = $.extend({
                     deferred: null,
                     silent: false,
-                    typing: settings.execAnimation,
-                    delay: 100
+                    typing: false,
+                    delay: settings.execAnimationDelay
                 }, options);
                 if (silent === null) {
                     silent = exec_settings.silent;
@@ -9713,11 +9772,9 @@
                 return command_line.get();
             },
             // -------------------------------------------------------------
-            // :: echo command and previous prompt (used by echo_newline.js)
+            // :: better API than echo_command that supports animation
             // -------------------------------------------------------------
-            echo_command: function(command) {
-                return echo_command(command);
-            },
+            enter: with_typing('enter', echo_command),
             // -------------------------------------------------------------
             // :: Change the command line to the new one
             // -------------------------------------------------------------
@@ -9766,39 +9823,17 @@
             // -------------------------------------------------------------
             // :: Set the prompt of the command line
             // -------------------------------------------------------------
-            set_prompt: function(prompt, options) {
-                var d = new $.Deferred();
-                when_ready(function ready() {
-                    var settings = $.extend({
-                        typing: false,
-                        delay: 100
-                    }, options);
-                    if (settings.typing) {
-                        if (typeof prompt !== 'string') {
-                            return d.reject('prompt: Typing animation require string');
-                        }
-                        if (typeof settings.delay !== 'number' || isNaN(settings.delay)) {
-                            return d.reject('echo: Invalid argument, delay need to' +
-                                            ' be a number');
-                        }
-                        var p = self.typing('prompt', settings.delay, prompt, settings);
-                        p.then(function() {
-                            d.resolve();
-                        });
-                    } else if (is_function(prompt)) {
-                        command_line.prompt(function(callback) {
-                            prompt.call(self, callback, self);
-                        });
-                    } else {
-                        command_line.prompt(prompt);
-                    }
-                    interpreters.top().prompt = prompt;
-                });
-                if (options && options.typing) {
-                    return d.promise();
+            set_prompt: with_typing('prompt', function(prompt) {
+                if (is_function(prompt)) {
+                    command_line.prompt(function(callback) {
+                        return prompt.call(self, callback, self);
+                    });
+                } else {
+                    command_line.prompt(prompt);
                 }
-                return self;
-            },
+            }, function(prompt) {
+                interpreters.top().prompt = prompt;
+            }),
             // -------------------------------------------------------------
             // :: Return the prompt used by the terminal
             // -------------------------------------------------------------
@@ -10139,7 +10174,7 @@
                             raw: settings.raw,
                             finalize: $.noop,
                             unmount: $.noop,
-                            delay: 100,
+                            delay: settings.execAnimationDelay,
                             ansi: false,
                             typing: false,
                             keepWords: false,
@@ -10312,14 +10347,9 @@
                         } else if (type === 'echo') {
                             typed_message(string, settings);
                         } else if (type === 'enter') {
-                            var prompt = self.get_prompt();
-                            if (typeof prompt === 'function') {
-                                prompt(function(prompt) {
-                                    typed_enter(prompt, string, settings);
-                                });
-                            } else {
+                            with_prompt(self.get_prompt(), function(prompt) {
                                 typed_enter(prompt, string, settings);
-                            }
+                            }, self);
                         }
                     } else {
                         d.reject('Invalid type only `echo` and `prompt` are supported');
@@ -10517,7 +10547,7 @@
                 if (typeof arguments[1] === 'object') {
                     options = $.extend({
                         typing: false,
-                        delay: 100,
+                        delay: settings.execAnimationDelay,
                         success: $.noop,
                         cancel: $.noop
                     }, arguments[1]);
@@ -11703,7 +11733,7 @@
             }
             // -------------------------------------------------------------
             // :: helper
-            function exec_spec(spec) {
+            function exec_spec(spec, options) {
                 var terminal = terminals.get()[spec[0]];
                 // execute if belong to this terminal
                 var defer = $.Deferred();
@@ -11713,14 +11743,14 @@
                         return defer.promise();
                     } else if (paused) {
                         resume_callbacks.push(function() {
-                            return terminal.exec(spec[2]).done(function() {
+                            return terminal.exec(spec[2], options).done(function() {
                                 terminal.save_state(spec[2], true, spec[1]);
                                 defer.resolve();
                             });
                         });
                         return defer.promise();
                     } else {
-                        return terminal.exec(spec[2]).done(function() {
+                        return terminal.exec(spec[2], options).done(function() {
                             terminal.save_state(spec[2], true, spec[1]);
                         });
                     }
@@ -11740,10 +11770,14 @@
                                 replace_hash(hash_commands);
                             }
                             var i = 0;
+                            var options = {
+                                typing: settings.execAnimation,
+                                delay: settings.execAnimationDelay
+                            };
                             (function recur() {
                                 var spec = hash_commands[i++];
                                 if (spec) {
-                                    exec_spec(spec).done(recur);
+                                    exec_spec(spec, options).done(recur);
                                 } else {
                                     change_hash = true;
                                 }

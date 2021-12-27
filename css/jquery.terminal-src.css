@@ -136,9 +136,15 @@ body.full-screen-terminal .terminal {
 .cmd a[href]:not(.terminal-inverted),
 .terminal .terminal-output > :not(.raw) a[href]:not(.terminal-inverted) {
     --color: var(--link-color, #3377FF);
+    /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
+    /* --glow: 0; */
+    text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
 }
 .terminal .terminal-output > :not(.raw) a[href].terminal-inverted {
     background: var(--color, #ccc);
+    /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
+    /* --glow: 0; */
+    text-shadow: 0 0 calc(var(--glow) * 5px) var(--background, #000);
 }
 .terminal .terminal-output > :not(.raw) a[href]:hover, .cmd a[href]:hover {
     background-color: #3377FF;
@@ -365,6 +371,8 @@ terminal .terminal-output > div {
         background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
@@ -379,6 +387,8 @@ terminal .terminal-output > div {
         background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
@@ -392,11 +402,15 @@ terminal .terminal-output > div {
         background-color: var(--original-color, #aaa);
         color: #000;
         color: var(--background, #000);
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
         color: inherit;
         color: var(--original-background, var(--original-color, #aaa));
+        -webkit-box-shadow: none;
+        box-shadow: none;
     }
 }
 /* GLOW ANIMATION */
@@ -708,9 +722,6 @@ terminal .terminal-output > div {
 /* padding added as margin to .cmd to fix FireFox bug see: https://stackoverflow.com/q/29986977/387194 */
 .terminal {
     padding-bottom: 0;
-    /* conditionals in CSS ref: https://www.kizu.ru/conditions-for-css-variables/ */
-    /* --glow: 0; */
-    text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
 }
 .terminal .terminal-output > :not(.raw) .error,
 .terminal .terminal-output > :not(.raw) .error * {
@@ -736,6 +747,9 @@ terminal .terminal-output > div {
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
+        /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
+        /* --glow: 0; */
+        text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
     }
     .terminal span[style*="--length"] {
         /*
