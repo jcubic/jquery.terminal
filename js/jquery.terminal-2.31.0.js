@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 27 Dec 2021 10:26:13 +0000
+ * Date: Thu, 30 Dec 2021 10:53:02 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5130,7 +5130,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.31.0',
-        date: 'Mon, 27 Dec 2021 10:26:13 +0000',
+        date: 'Thu, 30 Dec 2021 10:53:02 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6180,7 +6180,9 @@
                     return text;
                 } else {
                     return data.replace(/&#93;/g, ']')
-                        .replace(/>/g, '&gt;').replace(/</g, '&lt;');
+                        .replace(/>/g, '&gt;')
+                        .replace(/</g, '&lt;')
+                        .replace(/"/g, '&quot;');
                 }
             }
             // -----------------------------------------------------------------
@@ -6365,7 +6367,7 @@
                 } else if (style.indexOf('@') !== -1) {
                     result += ' data-text/>';
                 } else {
-                    result += ' data-text="' + data.replace(/"/g, '&quot;') + '">' +
+                    result += ' data-text="' + data + '">' +
                         '<span>' + text + '</span></span>';
                 }
                 return result;
@@ -6386,7 +6388,7 @@
                     } else {
                         text = safe(text);
                         text = text.replace(/\\\]/, '&#93;');
-                        var data = text;
+                        var data = clean_data(text);
                         var extra = extra_css(text, settings);
                         var prefix;
                         if (extra.length) {
