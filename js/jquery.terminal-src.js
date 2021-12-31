@@ -6934,9 +6934,11 @@
                 visiblity: 'hidden',
                 position: 'absolute'
             });
-            $prompt.appendTo(term.find('.cmd')).html('&nbsp;');
+            $prompt.appendTo(term.find('.cmd'))
+                .html('&nbsp;')
+                .wrap('<div class="cmd-wrapper"/>');
             rect = $prompt[0].getBoundingClientRect();
-            $prompt.remove();
+            $prompt.parent().remove();
         } else {
             var temp = $('<div class="terminal terminal-temp"><div class="terminal-' +
                          'wrapper"><div class="terminal-output"><div><div class="te' +
@@ -6977,7 +6979,8 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var height = terminal.find('.terminal-fill').height();
+        var fill = terminal.find('.terminal-fill');
+        var height = fill.height();
         return Math.floor(height / char_size.height);
     }
     // -----------------------------------------------------------------------

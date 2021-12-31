@@ -1,3 +1,7 @@
+## 2.31.2
+### Bugfix
+* fix calculating number of rows (affecting less command)
+
 ## 2.31.1
 ### Bugfix
 * fixing low severity self XSS with potential more security implications [#727](https://github.com/jcubic/jquery.terminal/issues/727)
