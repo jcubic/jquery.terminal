@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.31.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 30 Dec 2021 10:56:33 +0000
+ * Date: Fri, 31 Dec 2021 18:43:12 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5129,8 +5129,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.31.1',
-        date: 'Thu, 30 Dec 2021 10:56:33 +0000',
+        version: 'DEV',
+        date: 'Fri, 31 Dec 2021 18:43:12 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6934,9 +6934,11 @@
                 visiblity: 'hidden',
                 position: 'absolute'
             });
-            $prompt.appendTo(term.find('.cmd')).html('&nbsp;');
+            $prompt.appendTo(term.find('.cmd'))
+                .html('&nbsp;')
+                .wrap('<div class="cmd-wrapper"/>');
             rect = $prompt[0].getBoundingClientRect();
-            $prompt.remove();
+            $prompt.parent().remove();
         } else {
             var temp = $('<div class="terminal terminal-temp"><div class="terminal-' +
                          'wrapper"><div class="terminal-output"><div><div class="te' +
@@ -6977,7 +6979,8 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var height = terminal.find('.terminal-fill').height();
+        var fill = terminal.find('.terminal-fill');
+        var height = fill.height();
         return Math.floor(height / char_size.height);
     }
     // -----------------------------------------------------------------------
