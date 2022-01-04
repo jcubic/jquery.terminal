@@ -92,6 +92,12 @@ declare namespace JQueryTerminal {
         rows: number;
     }
 
+    type insertOptions = {
+        typing?: boolean;
+        delay?: number;
+        stay?: boolean;
+    }
+
     type readOptions = {
         typing?: boolean;
         delay?: number;
@@ -110,12 +116,22 @@ declare namespace JQueryTerminal {
         white: string;
     }
 
+    type TypingAnimations = 'echo' | 'prompt' | 'animation' | 'command';
+
     type LessArgument = string | ((cols: number, cb: (text: string) => void) => void) | string[];
 
     type ParsedOptions = {
         _: string[];
         [key: string]: boolean | string | string[];
     };
+
+    type FormatterFunctionOptions = {
+        echo: boolean;
+        animation: boolean;
+        prompt: boolean;
+        command: boolean;
+        position: number;
+    }
 
     type FormatterRegExpFunction = (...args: string[]) => string;
     type FormaterRegExpReplacement = string | FormatterRegExpFunction;
@@ -124,10 +140,11 @@ declare namespace JQueryTerminal {
         __warn__?: boolean;
         __meta__?: boolean;
     };
-    type FormatterFunction = ((str: string, options?: JSONObject) => (string | [string, number])) & FormatterFunctionPropsInterface;
+    type FormatterFunction = ((str: string, options?: FormatterFunctionOptions) => (string | [string, number])) & FormatterFunctionPropsInterface;
     type FormatterArrayOptions = {
         loop?: boolean;
         echo?: boolean;
+        animation?: boolean;
         command?: boolean;
         prompt?: boolean;
     };
@@ -493,6 +510,7 @@ interface JQueryTerminalStatic {
     prism(lang: string, text: string): string;
     prism_formatters: {
         command: boolean,
+        animation: boolean,
         echo: boolean,
         prompt: boolean
     },
@@ -769,7 +787,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_command(cmd: string, silent?: boolean): JQueryTerminal;
     set_position(pos: number, relative?: boolean): JQueryTerminal;
     get_position(): number;
-    insert(str: string, stay?: boolean): JQueryTerminal;
+    insert(str: string, stay_or_options?: boolean | JQueryTerminal.insertOptions): JQueryTerminal;
     set_prompt(prompt: JQueryTerminal.ExtendedPrompt, options?: JQueryTerminal.promptOptions): JQueryTerminal | JQuery.Promise<void>;
     get_prompt<T extends JQueryTerminal.ExtendedPrompt>(): T;
     set_mask(toggle?: boolean | string): JQueryTerminal;
@@ -795,7 +813,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     login_name<T extends string | void>(local?: boolean): T;
     name(): string;
     prefix_name(local?: boolean): string;
-    typing(type: 'echo' | 'prompt', delay: number, message: string, finish: voidFunction): JQuery.Promise<void>;
+    typing(type: JQueryTerminal.TypingAnimations, delay: number, message: string, finish: voidFunction): JQuery.Promise<void>;
     read(message: string, success_or_options?: ((result: string) => void) | JQueryTerminal.readOptions, cancel?: voidFunction): JQuery.Promise<string>;
     push(interpreter: TypeOrArray<JQueryTerminal.Interpreter>, options?: JQueryTerminal.pushOptions): JQueryTerminal;
     pop(echoCommand?: string, silent?: boolean): JQueryTerminal;

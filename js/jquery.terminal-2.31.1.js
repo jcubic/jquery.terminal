@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 31 Dec 2021 18:43:12 +0000
+ * Date: Tue, 04 Jan 2022 16:49:09 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1910,26 +1910,32 @@
             set('[[;red;]' + prompt + ']');
             alert_exception('Prompt', e);
         }
+        function done(prompt) {
+            set(prompt);
+            deferred.resolve();
+        }
+        var deferred = new $.Deferred();
         switch (typeof prompt) {
             case 'string':
-                set(prompt);
+                done(prompt);
                 break;
             case 'function':
                 try {
                     var ret = prompt.call(context, function(string) {
-                        set(string);
+                        done(string);
                     });
                     if (typeof ret === 'string') {
-                        set(ret);
+                        done(ret);
                     }
                     if (ret && ret.then) {
-                        ret.then(set).catch(error);
+                        ret.then(done).catch(error);
                     }
                 } catch (e) {
                     error(e);
                 }
                 break;
         }
+        return deferred.promise();
     }
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
@@ -5130,7 +5136,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 31 Dec 2021 18:43:12 +0000',
+        date: 'Tue, 04 Jan 2022 16:49:09 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8811,7 +8817,9 @@
         // ---------------------------------------------------------------------
         function typed(finish_typing_fn) {
             return function typing_animation(message, options) {
-                var formattted = $.terminal.apply_formatters(message);
+                var formattted = $.terminal.apply_formatters(message, {
+                    animation: true
+                });
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -8849,6 +8857,19 @@
             self.set_prompt(message);
             options.finalize();
         });
+        // ---------------------------------------------------------------------
+        var typed_insert = (function() {
+            var helper = typed(function(message, prompt, options) {
+                self.set_prompt(prompt);
+                self.insert(message);
+                options.finalize();
+            });
+            return function(prompt, command, options) {
+                return helper(command, $.extend({}, options, {
+                    prompt: prompt + self.get_command()
+                }));
+            };
+        })();
         // ---------------------------------------------------------------------
         var typed_message = typed(function(message, prompt, options) {
             self.set_prompt(prompt);
@@ -9811,15 +9832,43 @@
             // -------------------------------------------------------------
             // :: Insert text into the command line after the cursor
             // -------------------------------------------------------------
-            insert: function(string, stay) {
+            insert: function(string, options) {
                 if (typeof string === 'string') {
+                    var locals;
+                    var defaults = {
+                        stay: false,
+                        typing: false,
+                        delay: 100
+                    };
+                    if (!is_object(options)) {
+                        options = {
+                            stay: options
+                        };
+                    }
+                    locals = $.extend(defaults, options);
+                    var d = new $.Deferred();
                     when_ready(function ready() {
+                        function done() {
+                            if (settings.scrollOnEcho || bottom) {
+                                self.scroll_to_bottom();
+                            }
+                        }
                         var bottom = self.is_bottom();
-                        command_line.insert(string, stay);
-                        if (settings.scrollOnEcho || bottom) {
-                            self.scroll_to_bottom();
+                        if (locals.typing) {
+                            var delay = locals.delay;
+                            var p = self.typing('insert', delay, string, settings);
+                            p.then(function() {
+                                done();
+                                d.resolve();
+                            });
+                        } else {
+                            command_line.insert(string, settings.stay);
+                            done();
                         }
                     });
+                    if (locals.typing) {
+                        return d.promise();
+                    }
                     return self;
                 } else {
                     throw new Error(sprintf(strings().notAString, 'insert'));
@@ -10345,8 +10394,12 @@
                         finish.apply(self, arguments);
                     }
                 }
+                var animations = ['prompt', 'echo', 'enter', 'insert'];
+                function valid_animation() {
+                    return animations.indexOf(type) >= 0;
+                }
                 when_ready(function ready() {
-                    if (['prompt', 'echo', 'enter'].indexOf(type) >= 0) {
+                    if (valid_animation()) {
                         if (type === 'prompt') {
                             typed_prompt(string, settings);
                         } else if (type === 'echo') {
@@ -10354,6 +10407,10 @@
                         } else if (type === 'enter') {
                             with_prompt(self.get_prompt(), function(prompt) {
                                 typed_enter(prompt, string, settings);
+                            }, self);
+                        } else if (type === 'insert') {
+                            with_prompt(self.get_prompt(), function(prompt) {
+                                typed_insert(prompt, string, settings);
                             }, self);
                         }
                     } else {
