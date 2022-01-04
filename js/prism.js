@@ -205,6 +205,7 @@
     };
     $.terminal.prism_formatters = {
         echo: true,
+        animation: true,
         command: true
     };
     $.terminal.syntax = function syntax(language) {
