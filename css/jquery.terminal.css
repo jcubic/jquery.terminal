@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 31 Dec 2021 18:43:13 +0000
+ * Date: Tue, 04 Jan 2022 13:19:13 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -723,8 +723,9 @@ terminal .terminal-output > div {
 .terminal {
     padding-bottom: 0;
 }
-.terminal .terminal-output > :not(.raw) .error,
-.terminal .terminal-output > :not(.raw) .error * {
+.terminal .terminal-output > :not(.raw) .terminal-error,
+.terminal .terminal-output > :not(.raw) .terminal-error * {
+    --color: var(--error-color, red);
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
 }
 .terminal .terminal-output > :not(.raw) a[href] {
@@ -747,6 +748,8 @@ terminal .terminal-output > div {
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
+    }
+    .terminal [data-text], .cmd [data-text] {
         /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
         /* --glow: 0; */
         text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
