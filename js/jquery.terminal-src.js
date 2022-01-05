@@ -221,7 +221,10 @@
     } else {
         // Browser
         // istanbul ignore next
-        factory(root.jQuery, root.wcwidth, root);
+        if (!root.jQuery) {
+            root.$ = root.cash;
+        }
+        factory(root.jQuery || root.cash, root.wcwidth, root);
     }
 })(function($, wcwidth, root, undefined) {
     'use strict';

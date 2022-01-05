@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 04 Jan 2022 16:49:09 +0000
+ * Date: Wed, 05 Jan 2022 18:19:07 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -221,7 +221,10 @@
     } else {
         // Browser
         // istanbul ignore next
-        factory(root.jQuery, root.wcwidth, root);
+        if (!root.jQuery) {
+            root.$ = root.cash;
+        }
+        factory(root.jQuery || root.cash, root.wcwidth, root);
     }
 })(function($, wcwidth, root, undefined) {
     'use strict';
@@ -5136,7 +5139,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 04 Jan 2022 16:49:09 +0000',
+        date: 'Wed, 05 Jan 2022 18:19:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
