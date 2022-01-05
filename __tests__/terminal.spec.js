@@ -5039,6 +5039,12 @@ describe('Terminal plugin', function() {
                 });
                 await test();
             });
+            it('should animation insert', async () => {
+                await term.insert('hello', { typing: true, delay: 0});
+                expect(term.get_command()).toEqual('hello');
+                await term.insert('_world', { typing: true, delay: 0});
+                expect(term.get_command()).toEqual('hello_world');
+            });
         });
 
         describe('exec', function() {
