@@ -5047,6 +5047,24 @@ describe('Terminal plugin', function() {
             });
         });
 
+        fdescribe('animation', function() {
+            var term = $('<div/>').terminal();
+            beforeEach(() => {
+                term.clear();
+            });
+            it('should disable input', async () => {
+                var promise = term.animation(function() {
+                    return delay(100);
+                });
+                await delay(50);
+                term.focus();
+                type('HELLO');
+                expect(term.get_command()).toEqual('');
+                await promise;
+                expect(term.get_command()).toEqual('');
+            });
+        });
+
         describe('exec', function() {
             var counter = 0;
             var interpreter;

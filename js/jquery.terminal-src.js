@@ -8293,7 +8293,7 @@
                     // it should not pause when user return promise from read()
                     if (!force_awake) {
                         if (is_animation_promise(result)) {
-                            paused = true;
+                            states.PAUSED = true;
                         } else {
                             self.pause(settings.softPause);
                         }
@@ -8307,7 +8307,7 @@
                         return $.when(result).done(show).catch(error);
                     }
                 } else {
-                    if (paused) {
+                    if (states.PAUSED) {
                         resume_callbacks.push(function() {
                             // exec with resume/pause in user code
                             after_exec();
@@ -8749,12 +8749,12 @@
         // ---------------------------------------------------------------------
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
-            // then one terminal)
+            // than one terminal)
             var result, i;
-            if (animating) {
+            if (self.animating()) {
                 return false;
             }
-            if (self.enabled()) {
+            if (self.enabled() && !self.frozen()) {
                 if (!self.paused()) {
                     result = user_key_down(e);
                     if (result !== undefined) {
@@ -8807,7 +8807,7 @@
         // ---------------------------------------------------------------------
         function key_press(e) {
             var top = interpreters.top();
-            if (enabled && (!paused || !settings.pauseEvents)) {
+            if (allow_input()) {
                 if (is_function(top.keypress)) {
                     return top.keypress.call(self, e, self);
                 } else if (is_function(settings.keypress)) {
@@ -8994,7 +8994,7 @@
                 var user_export = fire_event('onExport');
                 user_export = user_export || {};
                 return $.extend({}, {
-                    focus: enabled,
+                    focus: states.ENABLED,
                     mask: command_line.mask(),
                     prompt: self.get_prompt(),
                     command: self.get_command(),
@@ -9106,22 +9106,22 @@
                                 d.resolve();
                             }
                         })();
-                    } else if (paused) {
+                    } else if (states.PAUSED) {
                         // both commands executed here (resume will call Term::exec)
                         // delay command multiple time
                         delayed_commands.push([command, silent, exec_settings]);
                     } else if (exec_settings.typing && !silent) {
                         var delay = exec_settings.delay;
-                        paused = true;
+                        states.PAUSED = true;
                         var ret = self.typing('enter', delay, command, {
                             delay: delay
                         });
                         ret.then(function() {
-                            paused = false;
+                            states.PAUSED = false;
                             invoke(true);
                         });
                         d.then(function() {
-                            paused = false;
+                            states.PAUSED = false;
                         });
                     } else {
                         invoke(silent);
@@ -9492,7 +9492,7 @@
             // :: Return true if terminal is paused false otherwise
             // -------------------------------------------------------------
             paused: function() {
-                return paused;
+                return states.PAUSED;
             },
             // -------------------------------------------------------------
             // :: Pause the terminal, it should be used for ajax calls
@@ -9500,7 +9500,7 @@
             pause: function(visible) {
                 cmd_ready(function ready() {
                     onPause();
-                    paused = true;
+                    states.PAUSED = true;
                     command_line.disable(visible || is_android);
                     if (!visible) {
                         command_line.find('.cmd-prompt').hidden();
@@ -9514,8 +9514,8 @@
             // -------------------------------------------------------------
             resume: function(silent) {
                 cmd_ready(function ready() {
-                    paused = false;
-                    if (enabled && terminals.front() === self) {
+                    states.PAUSED = false;
+                    if (states.ENABLED && terminals.front() === self) {
                         command_line.enable(silent);
                     }
                     command_line.find('.cmd-prompt').visible();
@@ -9658,7 +9658,7 @@
                     if (terminals.length() === 1) {
                         if (toggle === false) {
                             self.disable(silent);
-                        } else {
+                        } else if (!states.FROZEN) {
                             self.enable(silent);
                         }
                     } else if (toggle === false) {
@@ -9683,7 +9683,9 @@
                             }
                         }
                         terminals.set(self);
-                        self.enable(silent);
+                        if (!(states.ENABLED || states.FROZEN || states.TYPING)) {
+                            self.enable(silent);
+                        }
                     }
                 });
                 return self;
@@ -9693,11 +9695,11 @@
             // -------------------------------------------------------------
             freeze: function(freeze) {
                 when_ready(function ready() {
-                    if (freeze) {
+                    if (freeze === true || freeze === undefined) {
                         self.disable();
-                        frozen = true;
+                        states.FROZEN = true;
                     } else {
-                        frozen = false;
+                        states.FROZEN = false;
                         self.enable();
                     }
                 });
@@ -9707,24 +9709,24 @@
             // :: check if terminal is frozen
             // -------------------------------------------------------------
             frozen: function() {
-                return frozen;
+                return states.FROZEN;
             },
             // -------------------------------------------------------------
             // :: Enable the terminal
             // -------------------------------------------------------------
             enable: function(silent) {
-                if (!enabled && !frozen) {
+                if (!(states.ENABLED || states.FROZEN)) {
                     if (num_chars === undefined) {
                         // enabling first time
                         self.resize();
                     }
                     cmd_ready(function ready() {
                         var ret;
-                        if (!silent && !enabled) {
+                        if (!(silent || states.ENABLED)) {
                             fire_event('onFocus');
                         }
                         if (!silent && ret === undefined || silent) {
-                            enabled = true;
+                            states.ENABLED = true;
                             if (!self.paused()) {
                                 command_line.enable(true);
                             }
@@ -9750,11 +9752,11 @@
             disable: function(silent) {
                 cmd_ready(function ready() {
                     var ret;
-                    if (!silent && enabled) {
+                    if (!silent && states.ENABLED) {
                         ret = fire_event('onBlur');
                     }
                     if (!silent && ret === undefined || silent) {
-                        enabled = false;
+                        states.ENABLED = false;
                         command_line.disable();
                     }
                 });
@@ -9764,7 +9766,7 @@
             // :: return true if the terminal is enabled
             // -------------------------------------------------------------
             enabled: function() {
-                return enabled;
+                return states.ENABLED;
             },
             // -------------------------------------------------------------
             // :: Return the terminal signature depending on the size of the terminal
@@ -10684,7 +10686,7 @@
                     if (top) {
                         top.mask = command_line.mask();
                     }
-                    var was_paused = paused;
+                    var was_paused = states.PAUSED;
                     function init() {
                         fire_event('onPush', [top, interpreters.top()]);
                         prepare_top_interpreter();
@@ -11042,6 +11044,28 @@
             clear_buffer: function() {
                 buffer.clear();
                 return self;
+            },
+            // -------------------------------------------------------------
+            animating: function() {
+                return states.TYPING;
+            },
+            // -------------------------------------------------------------
+            // :: API for animation sequance
+            // -------------------------------------------------------------
+            animation: function(fn) {
+                var deferred = new $.Deferred();
+                if (typeof fn === 'function') {
+                    states.TYPING = true;
+                    when_ready(function() {
+                        return unpromise(fn(), function() {
+                            states.TYPING = false;
+                            deferred.resolve();
+                        });
+                    });
+                } else {
+                    deferred.resolve();
+                }
+                return deferred.promise();
             }
         }, function(name, fun) {
             // wrap all functions and display execptions
@@ -11109,6 +11133,21 @@
             },
             options || {}
         );
+        // ---------------------------------------------------------------------
+        var states = {
+            ENABLED: settings.enabled,
+            PAUSED: false,
+            TYPING: false,
+            FROZEN: false
+        };
+        // ---------------------------------------------------------------------
+        function allow_input() {
+            return states.ENABLED && (
+                !(states.PAUSED ||
+                  states.TYPING ||
+                  states.FROZEN) || !settings.pauseEvents);
+        }
+        // ---------------------------------------------------------------------
         if (typeof settings.width === 'number') {
             self.width(settings.width);
         }
@@ -11145,9 +11184,6 @@
             return settings;
         });
         var storage = new StorageHelper(settings.memory);
-        var enabled = settings.enabled;
-        var frozen = false;
-        var paused = false;
         var autologin = true; // set to false if onBeforeLogin return false
         var interpreters;
         var command_line;
@@ -11202,7 +11238,7 @@
         }
         // -------------------------------------------------------------------------------
         function blur_terminal() {
-            old_enabled = enabled;
+            old_enabled = states.ENABLED;
             self.disable().find('.cmd textarea').trigger('blur', [true]);
         }
         // -------------------------------------------------------------------------------
@@ -11433,7 +11469,7 @@
                         if (e.target.tagName.toLowerCase() === 'a') {
                             return;
                         }
-                        if (!frozen && e.touches.length === 1) {
+                        if (!states.FROZEN && e.touches.length === 1) {
                             enabled = self.enabled();
                             var point = e.touches[0];
                             start = {
@@ -11515,13 +11551,13 @@
                             return;
                         }
                         if ($target && $target.closest(ignore_elements).length) {
-                            if (enabled) {
+                            if (states.ENABLED) {
                                 self.disable();
                             }
                         } else if (get_selected_html() === '' && $target) {
                             if (++count === 1) {
-                                if (!frozen) {
-                                    if (!enabled) {
+                                if (!states.FROZEN) {
+                                    if (!states.ENABLED) {
                                         self.focus();
                                         self.scroll_to_bottom();
                                     } else {
@@ -11652,7 +11688,7 @@
                 }
                 // refocus because links have tabindex in case where user want
                 // tab change urls, we can ignore this function on click
-                if (enabled) {
+                if (states.ENABLED) {
                     self.find('.cmd textarea').focus();
                 }
             });
@@ -11784,7 +11820,7 @@
             }
             command_queue.resolve();
             // touch devices need touch event to get virtual keyboard
-            if (enabled && self.is(':visible') && !is_mobile) {
+            if (states.ENABLED && self.is(':visible') && !is_mobile) {
                 self.focus(undefined, true);
             } else {
                 self.disable();
@@ -11806,7 +11842,7 @@
                     if (!spec[2]) {
                         defer.resolve();
                         return defer.promise();
-                    } else if (paused) {
+                    } else if (states.PAUSED) {
                         resume_callbacks.push(function() {
                             return terminal.exec(spec[2], options).done(function() {
                                 terminal.save_state(spec[2], true, spec[1]);
