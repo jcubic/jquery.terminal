@@ -7,6 +7,7 @@
 * fix prism and typing animation [#726](https://github.com/jcubic/jquery.terminal/issues/726)
 * fix various TypeScript typing errors
 * fix spacing between lines
+* fix wrong mouse cursor on terminal cursor and character before
 
 ## 2.31.1
 ### Bugfix
