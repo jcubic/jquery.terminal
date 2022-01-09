@@ -757,7 +757,7 @@ terminal .terminal-output > div {
     .terminal [data-text], .cmd [data-text] {
         /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
         /* --glow: 0; */
-        text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
+        text-shadow: var(--text-shadow, 0 0 calc(var(--glow) * 5px) var(--color, #ccc));
     }
     .terminal span[style*="--length"] {
         /*
