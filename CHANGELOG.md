@@ -1,6 +1,7 @@
 ## 2.32.0
 ### Features
 * add insert typing animation
+* add `--text-shadow` css variable
 ### Bugfix
 * fix calculating number of rows (affecting less command)
 * fix glow with prism and error messages [#729](https://github.com/jcubic/jquery.terminal/issues/729)
