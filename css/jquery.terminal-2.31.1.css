@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Tue, 04 Jan 2022 13:19:13 +0000
+ * Date: Sun, 09 Jan 2022 10:28:15 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -242,6 +242,10 @@ body.full-screen-terminal .terminal {
     content: '\0200B';
     width: 0;
     float: left;
+}
+.terminal-output > div:not(.raw) div::before,
+.terminal span[data-text],
+.cmd span[data-text] {
     display: inline-block;
 }
 .terminal, terminal-output > div:not(.raw) div > span:not(.token):not(.inverted):not(.terminal-inverted):not(.cmd-inverted):not(.terminal-error):not(.emoji),
