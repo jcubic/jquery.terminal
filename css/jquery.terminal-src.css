@@ -349,6 +349,7 @@ terminal .terminal-output > div {
 .cmd [role="presentation"].cmd-cursor-line {
     position: relative;
     z-index: 100;
+    cursor: text;
 }
 /* prompt above cursor line */
 .cmd .cmd-prompt {
