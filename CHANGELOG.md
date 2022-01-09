@@ -5,7 +5,8 @@
 * fix calculating number of rows (affecting less command)
 * fix glow with prism and error messages [#729](https://github.com/jcubic/jquery.terminal/issues/729)
 * fix prism and typing animation [#726](https://github.com/jcubic/jquery.terminal/issues/726)
-* fix various typing errors
+* fix various TypeScript typing errors
+* fix spacing between lines
 
 ## 2.31.1
 ### Bugfix
