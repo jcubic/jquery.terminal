@@ -9275,7 +9275,7 @@
             before_cursor: function(word) {
                 var pos = command_line.position();
                 var command = command_line.get().slice(0, pos);
-                var cmd_strings = command.split(' ');
+                var cmd_strings = command.split(/\s/);
                 var string; // string before cursor that will be completed
                 if (word) {
                     if (cmd_strings.length === 1) {
