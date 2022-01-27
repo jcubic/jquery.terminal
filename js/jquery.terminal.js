@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 05 Jan 2022 18:19:07 +0000
+ * Date: Thu, 27 Jan 2022 08:37:09 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5139,7 +5139,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 05 Jan 2022 18:19:07 +0000',
+        date: 'Thu, 27 Jan 2022 08:37:09 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9275,7 +9275,7 @@
             before_cursor: function(word) {
                 var pos = command_line.position();
                 var command = command_line.get().slice(0, pos);
-                var cmd_strings = command.split(' ');
+                var cmd_strings = command.split(/\s/);
                 var string; // string before cursor that will be completed
                 if (word) {
                     if (cmd_strings.length === 1) {
