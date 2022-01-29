@@ -10111,7 +10111,7 @@
                         var cmd_cursor = self.find('.cmd-cursor');
                         var offset = self.find('.cmd').offset();
                         var self_offset = self.offset();
-                        setTimeout(function() {
+                        self.stopTime('flush').oneTime(1, 'flush', function() {
                             css(self[0], {
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
@@ -10121,10 +10121,10 @@
                             // Firefox won't reflow the cursor automatically, so
                             // hide it briefly then reshow it
                             cmd_cursor.hide();
-                            setTimeout(function() {
+                            self.oneTime(1, 'flush', function() {
                                 cmd_cursor.show();
-                            }, 0);
-                        }, 0);
+                            });
+                        });
                         if (scroll) {
                             self.scroll_to_bottom();
                         }

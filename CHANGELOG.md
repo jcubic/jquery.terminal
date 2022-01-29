@@ -9,6 +9,7 @@
 * fix various TypeScript typing errors
 * fix spacing between lines
 * fix wrong mouse cursor on terminal cursor and character before
+* fix catastrophic reflow when executing hundreds of echos in a loop
 
 ## 2.31.1
 ### Bugfix

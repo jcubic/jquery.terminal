@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 27 Jan 2022 08:37:09 +0000
+ * Date: Sat, 29 Jan 2022 15:38:40 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5139,7 +5139,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 27 Jan 2022 08:37:09 +0000',
+        date: 'Sat, 29 Jan 2022 15:38:40 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10111,7 +10111,7 @@
                         var cmd_cursor = self.find('.cmd-cursor');
                         var offset = self.find('.cmd').offset();
                         var self_offset = self.offset();
-                        setTimeout(function() {
+                        self.stopTime('flush').oneTime(1, 'flush', function() {
                             css(self[0], {
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
@@ -10121,10 +10121,10 @@
                             // Firefox won't reflow the cursor automatically, so
                             // hide it briefly then reshow it
                             cmd_cursor.hide();
-                            setTimeout(function() {
+                            self.oneTime(1, 'flush', function() {
                                 cmd_cursor.show();
-                            }, 0);
-                        }, 0);
+                            });
+                        });
                         if (scroll) {
                             self.scroll_to_bottom();
                         }
