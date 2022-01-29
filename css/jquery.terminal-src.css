@@ -238,12 +238,12 @@ body.full-screen-terminal .terminal {
 .cmd {
     font-size: 12px;
 }
-.terminal-output > div:not(.raw) div::before {
+.terminal-output > div:not(.raw) div::before,
+.cmd .cmd-line::before {
     content: '\0200B';
     width: 0;
-    float: left;
+    display: inline-block;
 }
-.terminal-output > div:not(.raw) div::before,
 .terminal span[data-text],
 .cmd span[data-text] {
     display: inline-block;

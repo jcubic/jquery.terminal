@@ -10,6 +10,7 @@
 * fix spacing between lines
 * fix wrong mouse cursor on terminal cursor and character before
 * fix catastrophic reflow when executing hundreds of echos in a loop
+* fix empty lines in prompt (visible when using typing animation) [#734](https://github.com/jcubic/jquery.terminal/issues/734)
 
 ## 2.31.1
 ### Bugfix
