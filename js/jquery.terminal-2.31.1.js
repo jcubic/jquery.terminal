@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 29 Jan 2022 15:38:40 +0000
+ * Date: Sat, 05 Feb 2022 23:18:39 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1997,9 +1997,8 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var $node = $('<div class="cmd-editable" ' +
-                              'contenteditable="plaintext-only" ' +
-                              'spellcheck="false"/>').attr({
+                var $node = $('<div class="cmd-editable"/>').attr({
+                    contenteditable: 'plaintext-only',
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
@@ -5139,7 +5138,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 29 Jan 2022 15:38:40 +0000',
+        date: 'Sat, 05 Feb 2022 23:18:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

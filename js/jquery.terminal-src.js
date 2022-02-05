@@ -1997,9 +1997,8 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var $node = $('<div class="cmd-editable" ' +
-                              'contenteditable="plaintext-only" ' +
-                              'spellcheck="false"/>').attr({
+                var $node = $('<div class="cmd-editable"/>').attr({
+                    contenteditable: 'plaintext-only',
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
