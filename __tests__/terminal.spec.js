@@ -1411,6 +1411,14 @@ describe('Terminal utils', function() {
             var output = $.terminal.split_equal(text, 100, true);
             expect(output).toEqual([$.terminal.normalize(text)]);
         });
+        it('should retain leading spaces', function() {
+            var text = `This
+                is
+                   a
+                      test`;
+            var output = $.terminal.split_equal(text, 100, true);
+            expect(output).toEqual(text.split('\n'));
+        });
     });
     describe('Cycle', function() {
         describe('create', function() {
@@ -5879,7 +5887,7 @@ describe('Terminal plugin', function() {
                 term.clear().echo(line, {keepWords: true});
                 expect(output()).toEqual(lines);
             });
-            it('should strip whitespace', function() {
+            it('should strip traling whitespace', function() {
                 var words = ['lorem', 'ipsum', 'dolor', 'sit', 'amet'];
                 var input = [];
                 var i;
@@ -5891,7 +5899,7 @@ describe('Terminal plugin', function() {
                 for (i = 80; i < 200; i+=10) {
                     term.option('numChars', i);
                     output().forEach(function(line) {
-                        expect(line.match(/^\s+|\s+$/)).toBeFalsy();
+                        expect(line.match(/\s+$/)).toBeFalsy();
                     });
                 }
                 term.option('numChars', numChars);
