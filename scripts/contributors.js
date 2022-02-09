@@ -3,7 +3,7 @@
 var https = require('https');
 var path = require('path');
 var fs = require('fs');
-var argv = require('optimist').argv;
+var argv = require('@jcubic/lily')(process.argv.slice(2));
 var request = require('request');
 
 

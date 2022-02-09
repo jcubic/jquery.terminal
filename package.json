@@ -346,7 +346,6 @@
     "gm": "^1.23.1",
     "jest": "^27.4.5",
     "jsonlint-mod": "^1.7.6",
-    "optimist": "^0.6.1",
     "postcss": "^8.4.5",
     "typescript": "^4.5.4",
     "uglify-js": "^3.14.5"
