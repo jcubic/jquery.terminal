@@ -3,6 +3,7 @@
 * add insert typing animation
 * add `--text-shadow` css variable
 * new API method `parse_formatting`
+* allow to use terminal style of external element [#731](https://github.com/jcubic/jquery.terminal/issues/731)
 ### Bugfix
 * fix calculating number of rows (affecting less command)
 * fix glow with prism and error messages [#729](https://github.com/jcubic/jquery.terminal/issues/729)

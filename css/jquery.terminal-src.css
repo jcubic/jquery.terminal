@@ -128,25 +128,31 @@ body.full-screen-terminal .terminal {
     background-color: #aaa !important;
     color: #000 !important;
 }
-.terminal .terminal-output > :not(.raw) a[href], .cmd a[href] {
+.terminal .terminal-output > :not(.raw) a[href],
+.cmd a[href],
+.terminal.external a[href] {
     color: #3377FF;
     color: var(--link-color, #3377FF);
     cursor: pointer;
 }
 .cmd a[href]:not(.terminal-inverted),
-.terminal .terminal-output > :not(.raw) a[href]:not(.terminal-inverted) {
+.terminal .terminal-output > :not(.raw) a[href]:not(.terminal-inverted),
+.terminal.external a[href]:not(.terminal-inverted) {
     --color: var(--link-color, #3377FF);
     /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
     /* --glow: 0; */
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
 }
-.terminal .terminal-output > :not(.raw) a[href].terminal-inverted {
+.terminal .terminal-output > :not(.raw) a[href].terminal-inverted,
+.terminal.external a[href].terminal-inverted {
     background: var(--color, #ccc);
     /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
     /* --glow: 0; */
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--background, #000);
 }
-.terminal .terminal-output > :not(.raw) a[href]:hover, .cmd a[href]:hover {
+.terminal .terminal-output > :not(.raw) a[href]:hover,
+.cmd a[href]:hover,
+.terminal.external a[href]:hover {
     background-color: #3377FF;
     background-color: var(--link-color, #3377FF) !important;
     color: #000;
@@ -154,7 +160,8 @@ body.full-screen-terminal .terminal {
     text-decoration: none;
 }
 .terminal .terminal-output > :not(.raw) a[href] span,
-.cmd a[href] span {
+.cmd a[href] span,
+.terminal.external a[href] span {
     /*
      * shorter and simple solution
      * it's hard to overwrite long :not selector (:not(a span) don't work)
@@ -164,9 +171,9 @@ body.full-screen-terminal .terminal {
     color: var(--link-color, #3377FF) !important;
     text-decoration: underline;
 }
-
 .terminal .terminal-output > :not(.raw) a[href]:hover span,
-.cmd a[href]:hover span {
+.cmd a[href]:hover span,
+.terminal.external a[href]:hover span {
     background-color: #3377FF !important;
     background-color: var(--link-color, #3377FF) !important;
     color: #000 !important;
@@ -206,14 +213,17 @@ body.full-screen-terminal .terminal {
 .cmd .cmd-prompt > span, .cmd .cmd-prompt:empty {
     float: left;
 }
-.cmd [data-text] span, .terminal [data-text] span {
+.cmd [data-text] span,
+.terminal [data-text] span {
     display: inline-block;
 }
 .terminal-ouput span[style*="width"] {
     min-height: 14px;
     min-height: calc(var(--size, 1) * 14px);
 }
-.terminal .terminal-output > :not(.raw) > div, .cmd div {
+.terminal .terminal-output > :not(.raw) > div,
+.cmd div,
+.terminal.external div {
     line-height: calc((var(--size) * 14px) + 1px);
 }
 .cmd .cmd-prompt span.fa::before,
@@ -256,7 +266,6 @@ body.full-screen-terminal .terminal {
 .terminal span[data-text] span, .cmd span[data-text] span {
     text-decoration: inherit;
 }
-
 .terminal .ansi > div {
     line-height: 13px !important;
     line-height: calc(var(--size, 1) * 13px) !important;
@@ -750,6 +759,7 @@ terminal .terminal-output > div {
     .terminal-output > :not(.raw) div,
     .cmd,
     .cmd span[data-text]:not(.cmd-inverted):not(.token):not(.emoji),
+    .terminal.external [data-text],
     .cmd div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
