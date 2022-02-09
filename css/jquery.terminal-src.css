@@ -727,7 +727,7 @@ terminal .terminal-output > div {
     pointer-events: none;
     box-sizing: border-box;
 }
-.terminal, .terminal .terminal-fill, .cmd-editable {
+.terminal:not(.external), .terminal .terminal-fill, .cmd-editable {
     padding: 10px;
 }
 .cmd-editable {
