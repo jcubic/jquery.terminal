@@ -498,6 +498,7 @@ interface JQueryTerminalStatic {
     parse_command(str: string): JQueryTerminal.ParsedCommand<number | RegExp | string>;
     split_command(str: string): JQueryTerminal.ParsedCommand<string>;
     parse_options(arg: string | string[], options?: { booleans: string[] }): JQueryTerminal.ParsedOptions;
+    parse_formatting(arg: string): string[];
     extended_command(term: JQueryTerminal, str: string): void;
     /**
      * formatter is an object that can be used in RegExp functions
