@@ -2,7 +2,8 @@
 
 var fs = require('fs');
 var path = require('path');
-var argv = require('optimist').argv;
+var lily = require('@jcubic/lily');
+var argv = lily(process.argv.slice(2));
 
 function usage(error) {
     if (error) {
