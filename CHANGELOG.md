@@ -12,6 +12,7 @@
 * fix catastrophic reflow when executing hundreds of echos in a loop
 * fix empty lines in prompt (visible when using typing animation) [#734](https://github.com/jcubic/jquery.terminal/issues/734)
 * fix trimming whitespace with echo keep_words [#738](https://github.com/jcubic/jquery.terminal/issues/738)
+* fix JSON working on processing nested formatting with html entities [#735](https://github.com/jcubic/jquery.terminal/issues/735)
 
 ## 2.31.1
 ### Bugfix

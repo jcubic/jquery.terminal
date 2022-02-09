@@ -5872,7 +5872,7 @@
                     return output;
                 }
                 for (var i = stack.length; i--;) {
-                    var formatting = stack[i].split(';');
+                    var formatting = $.terminal.parse_formatting(stack[i]);
                     if (formatting.length > 5) {
                         var last = formatting.slice(5).join(';');
                         formatting = formatting.slice(0, 5).concat(last);
@@ -6144,6 +6144,19 @@
                 formatters.splice(i - 1);
                 throw new $.terminal.Exception('formatting', msg, e.stack);
             }
+        },
+        // ---------------------------------------------------------------------
+        // :: helper function that return array of formatting
+        // :: it handles html entites inside text #735
+        // ---------------------------------------------------------------------
+        parse_formatting: function(string) {
+            var formatting = $.terminal.unescape_brackets(string).split(';');
+            var text_part = 4;
+            if (formatting.length >= 5) {
+                var escaped = $.terminal.escape_brackets(formatting[text_part]);
+                formatting[text_part] = escaped;
+            }
+            return formatting;
         },
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
