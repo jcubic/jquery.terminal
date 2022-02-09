@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 05 Feb 2022 23:18:39 +0000
+ * Date: Wed, 09 Feb 2022 13:17:39 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5138,7 +5138,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 05 Feb 2022 23:18:39 +0000',
+        date: 'Wed, 09 Feb 2022 13:17:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5659,7 +5659,7 @@
                             // replace html entities with characters
                             var stripped = text(line).substring(data.space_count);
                             // real length, not counting formatting
-                            stripped = stripped.slice(0, length).trim();
+                            stripped = stripped.slice(0, length).replace(/\s+$/, '');
                             var text_len = strlen(stripped);
                             if (stripped.match(/\s/) || text_len < length) {
                                 can_break = true;
@@ -5686,7 +5686,7 @@
                             new_index = data.index + chr.length - 1;
                         }
                         if (keep_words) {
-                            output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
+                            output = output.replace(/(&nbsp;|\s)+$/g, '');
                         }
                         first_index = (new_index || data.index) + 1;
                         if (prev_format) {
