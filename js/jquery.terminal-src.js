@@ -6456,8 +6456,14 @@
         // :: after adding align tabs arr.join('\t\t') looks much better
         // ---------------------------------------------------------------------
         columns: function(array, cols, space) {
-            var no_formatting = array.map(function(string) {
-                return $.terminal.strip(string);
+            array = array.map(function(value) {
+                if (typeof value !== 'string') {
+                    return String(value);
+                }
+                return value;
+            });
+            var no_formatting = array.map(function(value) {
+                return $.terminal.strip(value);
             });
             var lengths = no_formatting.map(function(string) {
                 return strlen(string);

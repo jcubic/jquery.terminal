@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 09 Feb 2022 15:22:46 +0000
+ * Date: Sat, 19 Feb 2022 20:57:15 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5138,7 +5138,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 09 Feb 2022 15:22:46 +0000',
+        date: 'Sat, 19 Feb 2022 20:57:15 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6456,8 +6456,14 @@
         // :: after adding align tabs arr.join('\t\t') looks much better
         // ---------------------------------------------------------------------
         columns: function(array, cols, space) {
-            var no_formatting = array.map(function(string) {
-                return $.terminal.strip(string);
+            array = array.map(function(value) {
+                if (typeof value !== 'string') {
+                    return String(value);
+                }
+                return value;
+            });
+            var no_formatting = array.map(function(value) {
+                return $.terminal.strip(value);
             });
             var lengths = no_formatting.map(function(string) {
                 return strlen(string);
