@@ -17,6 +17,7 @@
 * fix JSON working on processing nested formatting with html entities [#735](https://github.com/jcubic/jquery.terminal/issues/735)
 * fix echo array of numbers [#747](https://github.com/jcubic/jquery.terminal/issues/747)
 * improve performance when terminal don't have height
+* fix partial text (echo without newline) rendering [#751](https://github.com/jcubic/jquery.terminal/issues/751)
 
 ## 2.31.1
 ### Bugfix
