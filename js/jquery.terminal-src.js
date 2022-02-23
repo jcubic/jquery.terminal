@@ -1798,7 +1798,7 @@
     };
     // -------------------------------------------------------------------------
     // :: FormatBuffer is a class that buffer line printed on terminal
-    // :: with optional format of the text, the class also usse cache
+    // :: with optional format of the text, the class also use cache
     // :: the options in the constructor is a function that should returns
     // :: settings for given format, the settings may change while the terminal
     // :: is running, that's why they are dynamic in form of a function
@@ -8067,6 +8067,7 @@
                 if (line_cache && key && use_cache) {
                     line_cache.set(key, {input: arg, raw: raw_string});
                 }
+                console.log({arg, array});
                 buffer.append(arg, line.index, line_settings, raw_string);
             } catch (e) {
                 buffer.clear();
@@ -9958,8 +9959,10 @@
                     height = self.height();
                     if (typeof settings.numChars !== 'undefined' ||
                         typeof settings.numRows !== 'undefined') {
-                        command_line.resize(settings.numChars);
-                        self.refresh();
+                        if (typeof settings.numChars !== 'undefined') {
+                            command_line.resize(settings.numChars);
+                            self.refresh();
+                        }
                         fire_event('onResize');
                         return;
                     }
@@ -9971,8 +9974,10 @@
                         self.clear_cache();
                         num_chars = new_num_chars;
                         num_rows = new_num_rows;
-                        command_line.resize(num_chars);
-                        self.refresh();
+                        if (new_num_chars !== num_chars) {
+                            command_line.resize(num_chars);
+                            self.refresh();
+                        }
                         fire_event('onResize');
                     }
                 }
@@ -10136,12 +10141,14 @@
                                 '--terminal-y': offset.top - self_offset.top,
                                 '--terminal-scroll': self.prop('scrollTop')
                             });
-                            // Firefox won't reflow the cursor automatically, so
-                            // hide it briefly then reshow it
-                            cmd_cursor.hide();
-                            self.oneTime(1, 'flush', function() {
-                                cmd_cursor.show();
-                            });
+                            if (enabled) {
+                                // Firefox won't reflow the cursor automatically, so
+                                // hide it briefly then reshow it
+                                cmd_cursor.hide();
+                                self.oneTime(1, 'flush', function() {
+                                    cmd_cursor.show();
+                                });
+                            }
                         });
                         if (scroll) {
                             self.scroll_to_bottom();
