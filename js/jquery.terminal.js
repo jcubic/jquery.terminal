@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 23 Feb 2022 10:33:22 +0000
+ * Date: Wed, 23 Feb 2022 16:50:33 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5138,7 +5138,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 23 Feb 2022 10:33:22 +0000',
+        date: 'Wed, 23 Feb 2022 16:50:33 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8067,7 +8067,6 @@
                 if (line_cache && key && use_cache) {
                     line_cache.set(key, {input: arg, raw: raw_string});
                 }
-                console.log({arg, array});
                 buffer.append(arg, line.index, line_settings, raw_string);
             } catch (e) {
                 buffer.clear();
@@ -9972,12 +9971,12 @@
                     if (new_num_chars !== num_chars ||
                         new_num_rows !== num_rows) {
                         self.clear_cache();
-                        num_chars = new_num_chars;
-                        num_rows = new_num_rows;
                         if (new_num_chars !== num_chars) {
                             command_line.resize(num_chars);
                             self.refresh();
                         }
+                        num_chars = new_num_chars;
+                        num_rows = new_num_rows;
                         fire_event('onResize');
                     }
                 }
