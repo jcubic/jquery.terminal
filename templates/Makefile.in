@@ -11,7 +11,7 @@ BRANCH=`git branch | grep '^*' | sed 's/* //'`
 UGLIFY=../node_modules/.bin/uglifyjs
 JSONLINT=./node_modules/.bin/jsonlint
 JEST=./node_modules/.bin/jest
-CSSNANO=node ./scripts/cssnano.js
+CSSNANO=./scripts/cssnano.js
 ESLINT=./node_modules/.bin/eslint
 TSC=./node_modules/.bin/tsc
 SPEC_CHECKSUM=`md5sum __tests__/terminal.spec.js | cut -d' ' -f 1`
@@ -19,7 +19,7 @@ COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 TOKEN=cat .github.token | tr -d '\n'
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
-UPDATE_CONTRIBUTORS=0
+UPDATE_CONTRIBUTORS=1
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
 

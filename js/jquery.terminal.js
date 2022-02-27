@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.31.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 30 Dec 2021 10:56:33 +0000
+ * Date: Wed, 23 Feb 2022 16:50:33 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -221,7 +221,10 @@
     } else {
         // Browser
         // istanbul ignore next
-        factory(root.jQuery, root.wcwidth, root);
+        if (!root.jQuery) {
+            root.$ = root.cash;
+        }
+        factory(root.jQuery || root.cash, root.wcwidth, root);
     }
 })(function($, wcwidth, root, undefined) {
     'use strict';
@@ -1795,7 +1798,7 @@
     };
     // -------------------------------------------------------------------------
     // :: FormatBuffer is a class that buffer line printed on terminal
-    // :: with optional format of the text, the class also usse cache
+    // :: with optional format of the text, the class also use cache
     // :: the options in the constructor is a function that should returns
     // :: settings for given format, the settings may change while the terminal
     // :: is running, that's why they are dynamic in form of a function
@@ -1910,26 +1913,32 @@
             set('[[;red;]' + prompt + ']');
             alert_exception('Prompt', e);
         }
+        function done(prompt) {
+            set(prompt);
+            deferred.resolve();
+        }
+        var deferred = new $.Deferred();
         switch (typeof prompt) {
             case 'string':
-                set(prompt);
+                done(prompt);
                 break;
             case 'function':
                 try {
                     var ret = prompt.call(context, function(string) {
-                        set(string);
+                        done(string);
                     });
                     if (typeof ret === 'string') {
-                        set(ret);
+                        done(ret);
                     }
                     if (ret && ret.then) {
-                        ret.then(set).catch(error);
+                        ret.then(done).catch(error);
                     }
                 } catch (e) {
                     error(e);
                 }
                 break;
         }
+        return deferred.promise();
     }
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
@@ -1988,9 +1997,8 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var $node = $('<div class="cmd-editable" ' +
-                              'contenteditable="plaintext-only" ' +
-                              'spellcheck="false"/>').attr({
+                var $node = $('<div class="cmd-editable"/>').attr({
+                    contenteditable: 'plaintext-only',
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
@@ -5129,8 +5137,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.31.1',
-        date: 'Thu, 30 Dec 2021 10:56:33 +0000',
+        version: 'DEV',
+        date: 'Wed, 23 Feb 2022 16:50:33 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5651,7 +5659,7 @@
                             // replace html entities with characters
                             var stripped = text(line).substring(data.space_count);
                             // real length, not counting formatting
-                            stripped = stripped.slice(0, length).trim();
+                            stripped = stripped.slice(0, length).replace(/\s+$/, '');
                             var text_len = strlen(stripped);
                             if (stripped.match(/\s/) || text_len < length) {
                                 can_break = true;
@@ -5678,7 +5686,7 @@
                             new_index = data.index + chr.length - 1;
                         }
                         if (keep_words) {
-                            output = output.replace(/^(&nbsp;|\s)+|(&nbsp;|\s)+$/g, '');
+                            output = output.replace(/(&nbsp;|\s)+$/g, '');
                         }
                         first_index = (new_index || data.index) + 1;
                         if (prev_format) {
@@ -5864,7 +5872,7 @@
                     return output;
                 }
                 for (var i = stack.length; i--;) {
-                    var formatting = stack[i].split(';');
+                    var formatting = $.terminal.parse_formatting(stack[i]);
                     if (formatting.length > 5) {
                         var last = formatting.slice(5).join(';');
                         formatting = formatting.slice(0, 5).concat(last);
@@ -6448,8 +6456,14 @@
         // :: after adding align tabs arr.join('\t\t') looks much better
         // ---------------------------------------------------------------------
         columns: function(array, cols, space) {
-            var no_formatting = array.map(function(string) {
-                return $.terminal.strip(string);
+            array = array.map(function(value) {
+                if (typeof value !== 'string') {
+                    return String(value);
+                }
+                return value;
+            });
+            var no_formatting = array.map(function(value) {
+                return $.terminal.strip(value);
             });
             var lengths = no_formatting.map(function(string) {
                 return strlen(string);
@@ -6650,6 +6664,19 @@
                 result[rest.value] = true;
             }
             return result;
+        },
+        // ---------------------------------------------------------------------
+        // :: helper function that return array of formatting
+        // :: it handles html entites inside text #735
+        // ---------------------------------------------------------------------
+        parse_formatting: function(string) {
+            var formatting = $.terminal.unescape_brackets(string).split(';');
+            var text_part = 4;
+            if (formatting.length >= 5) {
+                var escaped = $.terminal.escape_brackets(formatting[text_part]);
+                formatting[text_part] = escaped;
+            }
+            return formatting;
         },
         // ---------------------------------------------------------------------
         // :: function executed for each text inside [[ .... ]] in echo
@@ -6934,9 +6961,11 @@
                 visiblity: 'hidden',
                 position: 'absolute'
             });
-            $prompt.appendTo(term.find('.cmd')).html('&nbsp;');
+            $prompt.appendTo(term.find('.cmd'))
+                .html('&nbsp;')
+                .wrap('<div class="cmd-wrapper"/>');
             rect = $prompt[0].getBoundingClientRect();
-            $prompt.remove();
+            $prompt.parent().remove();
         } else {
             var temp = $('<div class="terminal terminal-temp"><div class="terminal-' +
                          'wrapper"><div class="terminal-output"><div><div class="te' +
@@ -6977,7 +7006,8 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var height = terminal.find('.terminal-fill').height();
+        var fill = terminal.find('.terminal-fill');
+        var height = fill.height();
         return Math.floor(height / char_size.height);
     }
     // -----------------------------------------------------------------------
@@ -8808,7 +8838,9 @@
         // ---------------------------------------------------------------------
         function typed(finish_typing_fn) {
             return function typing_animation(message, options) {
-                var formattted = $.terminal.apply_formatters(message);
+                var formattted = $.terminal.apply_formatters(message, {
+                    animation: true
+                });
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -8846,6 +8878,19 @@
             self.set_prompt(message);
             options.finalize();
         });
+        // ---------------------------------------------------------------------
+        var typed_insert = (function() {
+            var helper = typed(function(message, prompt, options) {
+                self.set_prompt(prompt);
+                self.insert(message);
+                options.finalize();
+            });
+            return function(prompt, command, options) {
+                return helper(command, $.extend({}, options, {
+                    prompt: prompt + self.get_command()
+                }));
+            };
+        })();
         // ---------------------------------------------------------------------
         var typed_message = typed(function(message, prompt, options) {
             self.set_prompt(prompt);
@@ -9248,7 +9293,7 @@
             before_cursor: function(word) {
                 var pos = command_line.position();
                 var command = command_line.get().slice(0, pos);
-                var cmd_strings = command.split(' ');
+                var cmd_strings = command.split(/\s/);
                 var string; // string before cursor that will be completed
                 if (word) {
                     if (cmd_strings.length === 1) {
@@ -9808,15 +9853,43 @@
             // -------------------------------------------------------------
             // :: Insert text into the command line after the cursor
             // -------------------------------------------------------------
-            insert: function(string, stay) {
+            insert: function(string, options) {
                 if (typeof string === 'string') {
+                    var locals;
+                    var defaults = {
+                        stay: false,
+                        typing: false,
+                        delay: 100
+                    };
+                    if (!is_object(options)) {
+                        options = {
+                            stay: options
+                        };
+                    }
+                    locals = $.extend(defaults, options);
+                    var d = new $.Deferred();
                     when_ready(function ready() {
+                        function done() {
+                            if (settings.scrollOnEcho || bottom) {
+                                self.scroll_to_bottom();
+                            }
+                        }
                         var bottom = self.is_bottom();
-                        command_line.insert(string, stay);
-                        if (settings.scrollOnEcho || bottom) {
-                            self.scroll_to_bottom();
+                        if (locals.typing) {
+                            var delay = locals.delay;
+                            var p = self.typing('insert', delay, string, settings);
+                            p.then(function() {
+                                done();
+                                d.resolve();
+                            });
+                        } else {
+                            command_line.insert(string, settings.stay);
+                            done();
                         }
                     });
+                    if (locals.typing) {
+                        return d.promise();
+                    }
                     return self;
                 } else {
                     throw new Error(sprintf(strings().notAString, 'insert'));
@@ -9885,8 +9958,10 @@
                     height = self.height();
                     if (typeof settings.numChars !== 'undefined' ||
                         typeof settings.numRows !== 'undefined') {
-                        command_line.resize(settings.numChars);
-                        self.refresh();
+                        if (typeof settings.numChars !== 'undefined') {
+                            command_line.resize(settings.numChars);
+                            self.refresh();
+                        }
                         fire_event('onResize');
                         return;
                     }
@@ -9896,10 +9971,12 @@
                     if (new_num_chars !== num_chars ||
                         new_num_rows !== num_rows) {
                         self.clear_cache();
+                        if (new_num_chars !== num_chars) {
+                            command_line.resize(num_chars);
+                            self.refresh();
+                        }
                         num_chars = new_num_chars;
                         num_rows = new_num_rows;
-                        command_line.resize(num_chars);
-                        self.refresh();
                         fire_event('onResize');
                     }
                 }
@@ -10056,20 +10133,22 @@
                         var cmd_cursor = self.find('.cmd-cursor');
                         var offset = self.find('.cmd').offset();
                         var self_offset = self.offset();
-                        setTimeout(function() {
+                        self.stopTime('flush').oneTime(1, 'flush', function() {
                             css(self[0], {
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
                                 '--terminal-scroll': self.prop('scrollTop')
                             });
-                            // Firefox won't reflow the cursor automatically, so
-                            // hide it briefly then reshow it
-                            cmd_cursor.hide();
-                            setTimeout(function() {
-                                cmd_cursor.show();
-                            }, 0);
-                        }, 0);
+                            if (enabled) {
+                                // Firefox won't reflow the cursor automatically, so
+                                // hide it briefly then reshow it
+                                cmd_cursor.hide();
+                                self.oneTime(1, 'flush', function() {
+                                    cmd_cursor.show();
+                                });
+                            }
+                        });
                         if (scroll) {
                             self.scroll_to_bottom();
                         }
@@ -10342,8 +10421,12 @@
                         finish.apply(self, arguments);
                     }
                 }
+                var animations = ['prompt', 'echo', 'enter', 'insert'];
+                function valid_animation() {
+                    return animations.indexOf(type) >= 0;
+                }
                 when_ready(function ready() {
-                    if (['prompt', 'echo', 'enter'].indexOf(type) >= 0) {
+                    if (valid_animation()) {
                         if (type === 'prompt') {
                             typed_prompt(string, settings);
                         } else if (type === 'echo') {
@@ -10351,6 +10434,10 @@
                         } else if (type === 'enter') {
                             with_prompt(self.get_prompt(), function(prompt) {
                                 typed_enter(prompt, string, settings);
+                            }, self);
+                        } else if (type === 'insert') {
+                            with_prompt(self.get_prompt(), function(prompt) {
+                                typed_insert(prompt, string, settings);
                             }, self);
                         }
                     } else {

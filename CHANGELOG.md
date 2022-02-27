@@ -1,3 +1,24 @@
+## 2.32.0
+### Features
+* add insert typing animation
+* add `--text-shadow` css variable
+* new API method `parse_formatting`
+* allow to use terminal style of external element [#731](https://github.com/jcubic/jquery.terminal/issues/731)
+### Bugfix
+* fix calculating number of rows (affecting less command)
+* fix glow with prism and error messages [#729](https://github.com/jcubic/jquery.terminal/issues/729)
+* fix prism and typing animation [#726](https://github.com/jcubic/jquery.terminal/issues/726)
+* fix various TypeScript typing errors
+* fix spacing between lines
+* fix wrong mouse cursor on terminal cursor and character before
+* fix catastrophic reflow when executing hundreds of echos in a loop
+* fix empty lines in prompt (visible when using typing animation) [#734](https://github.com/jcubic/jquery.terminal/issues/734)
+* fix trimming whitespace with echo keep_words [#738](https://github.com/jcubic/jquery.terminal/issues/738)
+* fix JSON working on processing nested formatting with html entities [#735](https://github.com/jcubic/jquery.terminal/issues/735)
+* fix echo array of numbers [#747](https://github.com/jcubic/jquery.terminal/issues/747)
+* improve performance when terminal don't have height
+* fix partial text (echo without newline) rendering [#751](https://github.com/jcubic/jquery.terminal/issues/751)
+
 ## 2.31.1
 ### Bugfix
 * fixing low severity self XSS with potential more security implications [#727](https://github.com/jcubic/jquery.terminal/issues/727)
