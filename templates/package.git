@@ -57,6 +57,10 @@
       "url": "https://github.com/johanjordaan"
     },
     {
+      "name": "Snyk bot",
+      "url": "https://snyk.io"
+    },
+    {
       "name": "Florian Schäfer",
       "url": "https://github.com/fschaefer"
     },
@@ -74,7 +78,7 @@
     },
     {
       "name": "7twin",
-      "url": "https://7twin.com"
+      "url": "https://github.com/7twin"
     },
     {
       "name": "Abdelrahman Omran",
@@ -98,7 +102,7 @@
     },
     {
       "name": "Jarry Shaw",
-      "url": "https://jarryshaw.me"
+      "url": "https://www.jarryshaw.me"
     },
     {
       "name": "Jon Steinich",
@@ -117,7 +121,11 @@
       "url": "https://github.com/exit1"
     },
     {
-      "name": "Robert Wikman",
+      "name": "Liumeo",
+      "url": "https://github.com/eagleoflqj"
+    },
+    {
+      "name": "Robert W",
       "url": "https://github.com/rbw"
     },
     {
@@ -145,7 +153,7 @@
       "url": "https://www.linkedin.com/in/steve-kirkegard"
     },
     {
-      "name": "Juraj Vitko",
+      "name": "youurayy",
       "url": "https://github.com/youurayy"
     }
   ],

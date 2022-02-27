@@ -1,4 +1,4 @@
-VERSION=2.31.1
+VERSION=2.32.0
 SED=sed
 CD=cd
 NPM=npm
@@ -23,7 +23,7 @@ UPDATE_CONTRIBUTORS=1
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css
 
 bower.json: templates/bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
@@ -138,7 +138,7 @@ contributors: contributors-www.json contributors.json
 	./scripts/update-contributors-readme contributors.json "CONTRIBUTORS" templates/README.in
 	./scripts/update-contributors-readme contributors-www.json "CONTRIBUTORS-WWW" templates/README.in
 	./scripts/update-contributors-readme contributors-www.json "CONTRIBUTORS" www/README.md
-	./scripts/update-contributors-package.js -j contributors.json -f templates/package.in
+	./scripts/update-contributors-package.js -j contributors.json -f package.json
 	./scripts/update-contributors-package.js -j contributors.json -f templates/package.git
 
 lint: eslint jsonlint
