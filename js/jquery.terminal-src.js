@@ -5648,6 +5648,7 @@
                 var output;
                 var line_length = line.length;
                 var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);
+                var leading_spaces = !!line.match(/^(&nbsp;|\s)/);
                 $.terminal.iterate_formatting(line, function(data) {
                     var chr, substring;
                     if (data.length >= length || data.last ||
@@ -5687,6 +5688,9 @@
                         }
                         if (keep_words) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
+                            if (!leading_spaces) {
+                                output = output.replace(/^(&nbsp;|\s)+/g, '');
+                            }
                         }
                         first_index = (new_index || data.index) + 1;
                         if (prev_format) {

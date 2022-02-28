@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.32.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 27 Feb 2022 23:37:06 +0000
+ * Date: Mon, 28 Feb 2022 20:13:44 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5137,8 +5137,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.32.0',
-        date: 'Sun, 27 Feb 2022 23:37:06 +0000',
+        version: 'DEV',
+        date: 'Mon, 28 Feb 2022 20:13:44 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5648,6 +5648,7 @@
                 var output;
                 var line_length = line.length;
                 var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);
+                var leading_spaces = !!line.match(/^(&nbsp;|\s)/);
                 $.terminal.iterate_formatting(line, function(data) {
                     var chr, substring;
                     if (data.length >= length || data.last ||
@@ -5687,6 +5688,9 @@
                         }
                         if (keep_words) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
+                            if (!leading_spaces) {
+                                output = output.replace(/^(&nbsp;|\s)+/g, '');
+                            }
                         }
                         first_index = (new_index || data.index) + 1;
                         if (prev_format) {
