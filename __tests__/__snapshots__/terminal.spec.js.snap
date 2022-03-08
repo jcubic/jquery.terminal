@@ -580,6 +580,32 @@ Object {
 }
 `;
 
+exports[`Terminal utils $.terminal.split_equal should remove leadnig spaces 1`] = `
+Array [
+  "This   is    some",
+  "text   with",
+  "spaces",
+]
+`;
+
+exports[`Terminal utils $.terminal.split_equal should retain leading spaces 1`] = `
+Array [
+  "This",
+  "                is",
+  "                   a",
+  "                      test",
+]
+`;
+
+exports[`Terminal utils $.terminal.split_equal should retain leading spaces when wrapping 1`] = `
+Array [
+  "This",
+  "                is",
+  "                   a",
+  "                      test",
+]
+`;
+
 exports[`Terminal utils $.terminal.split_equal split emoji encoded from apply_formatters 1`] = `
 Array [
   "ZZZZZZz",

@@ -433,7 +433,6 @@ var support_animations = (function() {
     return animation;
 })();
 
-
 describe('Terminal utils', function() {
     var command = 'test "foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" \'foo\'';
     var args = '"foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" \'foo\'';
@@ -1417,7 +1416,19 @@ describe('Terminal utils', function() {
                    a
                       test`;
             var output = $.terminal.split_equal(text, 100, true);
-            expect(output).toEqual(text.split('\n'));
+            expect(output).toMatchSnapshot();
+        });
+        it('should remove leadnig spaces', function() {
+            var output = $.terminal.split_equal('This   is    some    text   with   spaces', 20, true);
+            expect(output).toMatchSnapshot();
+        });
+        it('should retain leading spaces when wrapping', function() {
+            var text = `This
+                is
+                   a
+                      test`;
+            var output = $.terminal.split_equal(text, 50, true);
+            expect(output).toMatchSnapshot();
         });
     });
     describe('Cycle', function() {
