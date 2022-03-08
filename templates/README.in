@@ -81,8 +81,7 @@ Because with this library you need to code all the commands yourself, you can ca
 
 * Support ANSI escapes codes.
 
-* Good mobile support, see open issues:
-  * Cursor issues on mobile [#620](https://github.com/jcubic/jquery.terminal/issues/620)
+* Experimental mobile support, see [open issues](https://github.com/jcubic/jquery.terminal/labels/mobile)
 
 ### Demo
 
