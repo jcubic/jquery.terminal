@@ -9975,12 +9975,13 @@
                     if (new_num_chars !== num_chars ||
                         new_num_rows !== num_rows) {
                         self.clear_cache();
-                        if (new_num_chars !== num_chars) {
+                        var changed = new_num_chars !== num_chars;
+                        num_chars = new_num_chars;
+                        num_rows = new_num_rows;
+                        if (changed) {
                             command_line.resize(num_chars);
                             self.refresh();
                         }
-                        num_chars = new_num_chars;
-                        num_rows = new_num_rows;
                         fire_event('onResize');
                     }
                 }

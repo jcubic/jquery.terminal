@@ -1,6 +1,7 @@
 ## 2.32.1
 ### Bugfix
-* Leading spaces with echo + keepWords [#754](https://github.com/jcubic/jquery.terminal/issues/754)
+* leading spaces with echo + keepWords [#754](https://github.com/jcubic/jquery.terminal/issues/754)
+* fix loading hidden terminal
 
 ## 2.32.0
 ### Features

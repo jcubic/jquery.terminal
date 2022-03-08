@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 28 Feb 2022 20:13:44 +0000
+ * Date: Tue, 08 Mar 2022 22:03:44 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5138,7 +5138,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 28 Feb 2022 20:13:44 +0000',
+        date: 'Tue, 08 Mar 2022 22:03:44 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9975,12 +9975,13 @@
                     if (new_num_chars !== num_chars ||
                         new_num_rows !== num_rows) {
                         self.clear_cache();
-                        if (new_num_chars !== num_chars) {
+                        var changed = new_num_chars !== num_chars;
+                        num_chars = new_num_chars;
+                        num_rows = new_num_rows;
+                        if (changed) {
                             command_line.resize(num_chars);
                             self.refresh();
                         }
-                        num_chars = new_num_chars;
-                        num_rows = new_num_rows;
                         fire_event('onResize');
                     }
                 }
