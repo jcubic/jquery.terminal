@@ -12,6 +12,8 @@ about: Found bug in the library
 
 ### Browser and OS
 
+### Additional notes
+
 <!--
 You can create demo by forking this codepen http://codepen.io/jcubic/pen/MbVMwO
 
