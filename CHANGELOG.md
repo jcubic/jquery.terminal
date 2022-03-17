@@ -1,3 +1,7 @@
+## 2.32.2
+### Bugfix
+* fix flicker of dynamic prompt on enter [#757](https://github.com/jcubic/jquery.terminal/issues/757)
+
 ## 2.32.1
 ### Bugfix
 * leading spaces with echo + keepWords [#754](https://github.com/jcubic/jquery.terminal/issues/754)
