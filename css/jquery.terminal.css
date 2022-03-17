@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Thu, 17 Mar 2022 16:32:57 +0000
+ * Date: Thu, 17 Mar 2022 23:59:32 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -943,7 +943,7 @@ terminal .terminal-output > div {
     position: relative;
 }
 .terminal-output img {
-    display: block;
+    vertical-align: top;
 }
 .cmd img {
     height: 14px;

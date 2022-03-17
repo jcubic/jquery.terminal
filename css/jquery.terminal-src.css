@@ -943,7 +943,7 @@ terminal .terminal-output > div {
     position: relative;
 }
 .terminal-output img {
-    display: block;
+    vertical-align: top;
 }
 .cmd img {
     height: 14px;
