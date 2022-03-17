@@ -62,6 +62,7 @@ running `make`.
 ## Release Cycle
 
 * New version is developed on devel branch
+* When bug is fixed (or feature implemented) it's not closed only `resolved` label is added
 * Each fix and feature need to be added to CHANGELOG.md file
 * After random number of feature and bugfixes are done, the code need to be merged with master
 
@@ -73,7 +74,7 @@ git merge devel --no-ff -m 'merge with devel'
 * then the next version need to be created, last version from CHANGELOG need to be used
 to call version script that rename files that have version at the end.
 
-``bash
+```bash
 ./scripts/version 2.21.0
 make
 git commit -am 'version 2.21.0'
@@ -90,8 +91,10 @@ in new commit and tag need to be added again.
   on GitHub. Just click releases -> draft new release then pick the version
   and copy paste what's in CHANGELOG.md file.
 
-* After you git confirmation that CI (travis) run successfully you can release
-  to npm. By calling:
+* When new release is done, issues that have `resovled` label are closed.
+
+* After you git confirmation that CI (travis) run successfully you can close issues
+  labeled with `resolved` and release to npm. By calling:
 
 ```bash
 make publish
