@@ -10,7 +10,6 @@ Please only modify `js/jquery.terminal-src.js`/`css/jquery.terminal-src.css` fil
 
 Non tech contribution are also welcome, if you find a bug in documentation on the website you can file an issue to [jcubic/jquery.terminal-www](https://github.com/jcubic/jquery.terminal-www).
 
-
 ## List of contributors with avatars
 
 To update the list, the script need to be run when change is merged to master and since all merges are done on
@@ -46,11 +45,6 @@ and run ESlint and JSONLint using:
 
 ```bash
 make lint
-```
-you can also run test coverage using
-
-```bash
-make coverage
 ```
 
 ## README
