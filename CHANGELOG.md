@@ -1,6 +1,7 @@
 ## 2.32.2
 ### Bugfix
 * fix flicker of dynamic prompt on enter [#757](https://github.com/jcubic/jquery.terminal/issues/757)
+* fix re-rendering of jQuery/DOM nodes [#759](https://github.com/jcubic/jquery.terminal/issues/759)
 
 ## 2.32.1
 ### Bugfix

@@ -1857,14 +1857,15 @@
                     this._output_buffer.push(formatted);
                 }
             }
-        } else if (!options.raw) {
-            this._output_buffer.push(this.format(arg, false, raw));
-        } else {
+        } else if (options.raw) {
             this._output_buffer.push({line: arg, raw: raw});
+        } else {
+            this._output_buffer.push(this.format(arg, false, raw));
         }
         this._output_buffer.push({
             finalize: options.finalize,
             index: index,
+            raw: options.raw,
             newline: options.newline
         });
     };
@@ -8102,9 +8103,7 @@
             try {
                 buffer.clear();
                 unpromise(lines.render(self.rows(), function(lines_to_show) {
-                    return lines_to_show.map(function(line) {
-                        return process_line(line);
-                    });
+                    return lines_to_show.map(process_line);
                 }), function() {
                     self.flush(options);
                     if (!options.update) {
@@ -10042,6 +10041,10 @@
                                     wrapper = partial;
                                 }
                             } else if (is_function(data.finalize)) {
+                                if (options.update && data.raw === true && data.newline) {
+                                    // don't re-render html and jQuery/DOM nodes #759
+                                    return;
+                                }
                                 if (scroll) {
                                     wrapper.find('img').on('load', function() {
                                         self.scroll_to_bottom();
