@@ -67,14 +67,17 @@
     // it allso support special tags e.g. link, img or bold
     var tags = {
         font: function(attrs) {
-            var style = [];
+            var styles = [];
             if ('size' in attrs) {
-                style.push('--size:' + attrs.size);
+                styles.push('--size:' + attrs.size);
             }
             if ('spacing' in attrs) {
-                style.push('letter-spacing: ' + attrs.spacing);
+                styles.push('letter-spacing: ' + attrs.spacing);
             }
-            return '[[;;;;;{"style": "' + style.join(';') + '"}]';
+            var background = attrs.background || '';
+            var color = attrs.color || '';
+            var style = styles.length ? '{"style": "' + styles.join(';') + '"}' : '';
+            return '[[;' + color + ';' + background + ';;;' + style + ']';
         },
         img: function(attrs) {
             var alt = attrs.alt || '';
@@ -145,5 +148,3 @@
     $.terminal.xml_formatter = xml_formatter;
     $.terminal.new_formatter(xml_formatter);
 });
-
-

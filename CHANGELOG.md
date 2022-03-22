@@ -1,4 +1,6 @@
-## 2.32.2
+## 2.33.0
+### Features
+* add color and background attributes to font tag in xml formatter
 ### Bugfix
 * fix flicker of dynamic prompt on enter [#757](https://github.com/jcubic/jquery.terminal/issues/757)
 * fix re-rendering of jQuery/DOM nodes [#759](https://github.com/jcubic/jquery.terminal/issues/759)
