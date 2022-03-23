@@ -67,9 +67,9 @@ exports[`Terminal plugin jQuery Terminal methods output_buffer should return cle
 <div><span data-text=\\"lorem\\">lorem</span><span data-text=\\"&nbsp;ipsum\\">&nbsp;ipsum</span></div>"
 `;
 
-exports[`Terminal plugin prompt should format prompt 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff;\\" data-text=\\">>>\\"><span style=\\"width: 3ch;\\">&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span style=\\"width: 1ch;\\">&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should format prompt 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff\\" data-text=\\">>>\\"><span style=\\"width: 3ch;\\">&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span style=\\"width: 1ch;\\">&nbsp;</span></span>"`;
 
-exports[`Terminal plugin prompt should format prompt 2`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff;\\" data-text=\\">>>\\"><span style=\\"width: 3ch;\\">&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span style=\\"width: 1ch;\\">&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should format prompt 2`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff\\" data-text=\\">>>\\"><span style=\\"width: 3ch;\\">&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span style=\\"width: 1ch;\\">&nbsp;</span></span>"`;
 
 exports[`Terminal plugin prompt should return prompt 1`] = `"<span data-text=\\">>>&nbsp;\\"><span style=\\"width: 4ch;\\">&gt;&gt;&gt;&nbsp;</span></span>"`;
 
@@ -79,7 +79,7 @@ exports[`Terminal plugin prompt should set prompt 2`] = `"<span data-text=\\">>>
 
 exports[`Terminal plugin terminal create / terminal destroy should have default prompt 1`] = `"<span data-text=\\">&nbsp;\\"><span style=\\"width: 2ch;\\">&gt;&nbsp;</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should create html span tags with style and classes 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;--color:#fff;--original-color:#fff;text-shadow:0 0 5px #fff;background-color:#000;--background:#000;\\" data-text=\\"Foo\\"><span>Foo</span></span><span style=\\"font-style:italic;\\" class=\\"foo\\" data-text=\\"Bar\\"><span>Bar</span></span><span style=\\"text-decoration:underline line-through overline;\\" data-text=\\"Baz\\"><span>Baz</span></span>"`;
+exports[`Terminal utils $.terminal.format should create html span tags with style and classes 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;--color:#fff;--original-color:#fff;text-shadow:0 0 5px #fff;background-color:#000;--background:#000\\" data-text=\\"Foo\\"><span>Foo</span></span><span style=\\"font-style:italic\\" class=\\"foo\\" data-text=\\"Bar\\"><span>Bar</span></span><span style=\\"text-decoration:underline line-through overline\\" data-text=\\"Baz\\"><span>Baz</span></span>"`;
 
 exports[`Terminal utils $.terminal.format should filter out attribute in JSON 1`] = `"<span title=\\"foo\\" data-text=\\"foo\\"><span>foo</span></span>"`;
 
@@ -89,7 +89,11 @@ exports[`Terminal utils $.terminal.format should handle emails 1`] = `"<a href=\
 
 exports[`Terminal utils $.terminal.format should handle emails 2`] = `"<a href=\\"mailto:jcubic@onet.pl\\" data-text>j</a><a href=\\"mailto:jcubic@onet.pl\\" data-text>cubic@onet.pl</a>"`;
 
-exports[`Terminal utils $.terminal.format should handle wider characters without formatting 1`] = `"<span style=\\"width: 24ch\\" data-text=\\"ターミナルウィンドウは黒\\"><span style=\\"width: 24ch\\"><span style=\\"width: 2ch\\">タ</span><span style=\\"width: 2ch\\">ー</span><span style=\\"width: 2ch\\">ミ</span><span style=\\"width: 2ch\\">ナ</span><span style=\\"width: 2ch\\">ル</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">ィ</span><span style=\\"width: 2ch\\">ン</span><span style=\\"width: 2ch\\">ド</span><span style=\\"width: 2ch\\">ウ</span><span style=\\"width: 2ch\\">は</span><span style=\\"width: 2ch\\">黒</span></span></span><span style=\\"width: 4ch\\" data-text=\\"です\\"><span><span style=\\"width: 4ch\\"><span style=\\"width: 2ch\\">で</span><span style=\\"width: 2ch\\">す</span></span></span></span>"`;
+exports[`Terminal utils $.terminal.format should handle wider characters without formatting 1`] = `"<span style=\\"width:24ch\\" data-text=\\"ターミナルウィンドウは黒\\"><span style=\\"width:24ch\\"><span style=\\"width:2ch\\">タ</span><span style=\\"width:2ch\\">ー</span><span style=\\"width:2ch\\">ミ</span><span style=\\"width:2ch\\">ナ</span><span style=\\"width:2ch\\">ル</span><span style=\\"width:2ch\\">ウ</span><span style=\\"width:2ch\\">ィ</span><span style=\\"width:2ch\\">ン</span><span style=\\"width:2ch\\">ド</span><span style=\\"width:2ch\\">ウ</span><span style=\\"width:2ch\\">は</span><span style=\\"width:2ch\\">黒</span></span></span><span style=\\"width:4ch\\" data-text=\\"です\\"><span><span style=\\"width:4ch\\"><span style=\\"width:2ch\\">で</span><span style=\\"width:2ch\\">す</span></span></span></span>"`;
+
+exports[`Terminal utils $.terminal.format should merge clolor with empty style 1`] = `"<span style=\\"color:green;--color:green;--original-color:green\\" data-text=\\"Foo\\"><span>Foo</span></span>"`;
+
+exports[`Terminal utils $.terminal.format should merge clolor with empty style 2`] = `"<span style=\\"color:green;--color:green;--original-color:green\\" data-text=\\"Foo\\"><span>Foo</span></span>"`;
 
 exports[`Terminal utils $.terminal.format should merge color style with style attr 1`] = `"<span style=\\"color:green;--color:green;--original-color:green;--size: 2\\" data-text=\\"Foo\\"><span>Foo</span></span>"`;
 
@@ -101,7 +105,7 @@ exports[`Terminal utils $.terminal.format should not duplicate and don't overwri
 
 exports[`Terminal utils $.terminal.format should parse JSON if semicolon in value 1`] = `"<span title=\\"foo ; bar\\" data-text=\\"foo\\"><span>foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should skip empty parts 1`] = `"<span data-text=\\"x\\">x</span><span style=\\"font-weight:bold;\\" data-text=\\"y\\"><span>y</span></span><span style=\\"font-weight:bold;\\" data-text=\\"z\\"><span>z</span></span>"`;
+exports[`Terminal utils $.terminal.format should skip empty parts 1`] = `"<span data-text=\\"x\\">x</span><span style=\\"font-weight:bold\\" data-text=\\"y\\"><span>y</span></span><span style=\\"font-weight:bold\\" data-text=\\"z\\"><span>z</span></span>"`;
 
 exports[`Terminal utils $.terminal.from_ansi should convert ansi to terminal formatting 1`] = `"[[;#5555FF;]Hello][[;#640000;#0AA]Foo][[biu;#44D544;#A0A]B[[sb;;]a]r][[;#000;#AAA]Baz][[;#006400;#ffff00]Quux]"`;
 

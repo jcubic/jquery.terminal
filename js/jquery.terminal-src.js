@@ -4734,32 +4734,47 @@
             return result.position;
         }
     }
-    // -------------------------------------------------------------------------
-    function char_width_prop(len, options) {
-        if (len === 0) {
-            return 'width: 1px';
-        } else if (is_ch_unit_supported) {
-            return 'width: ' + len + 'ch';
-        } else if (!is_css_variables_supported) {
-            if (options.charWidth) {
-                return 'width: ' + (options.charWidth * len) + 'px';
-            }
-        } else {
-            return '--length: ' + len;
-        }
-        return '';
+    // -----------------------------------------------------------------
+    function style_to_string(styles) {
+        return Object.keys(styles).map(function(prop) {
+            return prop + ':' + styles[prop];
+        }).join(';');
     }
     // -------------------------------------------------------------------------
-    // options {charWidth}
+    function escape_html_attr(value) {
+        return value.replace(/"/g, '&quot;');
+    }
+    // -------------------------------------------------------------------------
+    function char_width_object(len, options) {
+        var result = {};
+        if (len === 0) {
+            result['width'] = '1px';
+        } else if (is_ch_unit_supported) {
+            result['width'] = len + 'ch';
+        } else if (!is_css_variables_supported) {
+            if (options.charWidth) {
+                result['width'] = (options.charWidth * len) + 'px';
+            }
+        } else {
+            result['--length'] = len;
+        }
+        return result;
+    }
+    // -------------------------------------------------------------------------
+    // :: options {charWidth}
+    // -------------------------------------------------------------------------
+    function char_width_prop(len, options) {
+        return style_to_string(char_width_object(len, options));
+    }
+    // -------------------------------------------------------------------------
     function extra_css(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
             if (len > 1 && len !== $.terminal.length(bare)) {
-                return char_width_prop(len, options);
+                return char_width_object(len, options);
             }
         }
-        return '';
     }
     // -------------------------------------------------------------------------
     function wide_characters(text, options) {
@@ -6199,17 +6214,27 @@
                 }
             }
             // -----------------------------------------------------------------
-            function add_attrs(attrs) {
+            function attrs_to_string(style, attrs) {
                 if (attrs) {
                     var keys = filter_attr_names(Object.keys(attrs));
                     if (keys.length) {
                         return ' ' + keys.map(function(name) {
-                            var value = attrs[name].replace(/"/g, '&quot;');
+                            var value = escape_html_attr(attrs[name]);
+                            if (name === 'style') {
+                                // merge style attr and colors #617
+                                value = value ? style + ';' + value : style;
+                            }
+                            if (!value) {
+                                return name;
+                            }
                             return name + '="' + value + '"';
                         }).join(' ');
                     }
                 }
-                return '';
+                if (!style) {
+                    return '';
+                }
+                return ' style="' + style + '"';
             }
             // -----------------------------------------------------------------
             function rel_attr() {
@@ -6307,9 +6332,9 @@
                     // but this escape is not needed when echo - don't know why
                     text = text.replace(/\\\\/g, '\\');
                 }
-                var style_str = '';
+                var styles = {};
                 if (style.indexOf('b') !== -1) {
-                    style_str += 'font-weight:bold;';
+                    styles['font-weight'] = 'bold';
                 }
                 var text_decoration = [];
                 if (style.indexOf('u') !== -1) {
@@ -6322,36 +6347,35 @@
                     text_decoration.push('overline');
                 }
                 if (text_decoration.length) {
-                    style_str += 'text-decoration:' +
-                        text_decoration.join(' ') + ';';
+                    styles['text-decoration'] = text_decoration.join(' ');
                 }
                 if (style.indexOf('i') !== -1) {
-                    style_str += 'font-style:italic;';
+                    styles['font-style'] = 'italic';
                 }
                 if ($.terminal.valid_color(color)) {
-                    style_str += [
-                        'color:' + color,
-                        '--color:' + color,
-                        '--original-color:' + color
-                    ].join(';') + ';';
+                    $.extend(styles, {
+                        'color': color,
+                        '--color': color,
+                        '--original-color': color
+                    });
                     if (style.indexOf('!') !== -1) {
-                        style_str += '--link-color:' + color + ';';
+                        styles['--link-color'] = color;
                     }
                     if (style.indexOf('g') !== -1) {
-                        style_str += 'text-shadow:0 0 5px ' + color + ';';
+                        styles['text-shadow'] = '0 0 5px ' + color;
                     }
                 }
                 if ($.terminal.valid_color(background)) {
-                    style_str += [
-                        'background-color:' + background,
-                        '--background:' + background
-                    ].join(';') + ';';
+                    $.extend(styles, {
+                        'background-color': background,
+                        '--background': background
+                    });
                 }
                 var data = clean_data(data_text, text);
                 var extra = extra_css(text, settings);
                 if (extra) {
                     text = wide_characters(text, settings);
-                    style_str += extra;
+                    $.extend(styles, extra);
                 }
                 var result;
                 if (style.indexOf('!') !== -1) {
@@ -6361,15 +6385,8 @@
                 } else {
                     result = '<span';
                 }
-                if (attrs && attrs.style) {
-                    // merge style attr and colors #617
-                    attrs.style = style_str + attrs.style;
-                    style_str = '';
-                }
-                result += add_attrs(attrs);
-                if (style_str !== '') {
-                    result += ' style="' + style_str + '"';
-                }
+                var style_str = style_to_string(styles);
+                result += attrs_to_string(style_str, attrs);
                 if (_class !== '') {
                     result += ' class="' + _class + '"';
                 }
@@ -6404,9 +6421,9 @@
                         var data = clean_data(text);
                         var extra = extra_css(text, settings);
                         var prefix;
-                        if (extra.length) {
+                        if (extra) {
                             text = wide_characters(text, settings);
-                            prefix = '<span style="' + extra + '"';
+                            prefix = '<span style="' + style_to_string(extra) + '"';
                         } else {
                             prefix = '<span';
                         }
