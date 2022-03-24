@@ -41,11 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
-<<<<<<< Updated upstream
- * Date: Thu, 17 Mar 2022 20:07:47 +0000
-=======
- * Date: Wed, 23 Mar 2022 21:19:18 +0000
->>>>>>> Stashed changes
+ * Date: Thu, 24 Mar 2022 21:19:54 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5158,11 +5154,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-<<<<<<< Updated upstream
-        date: 'Thu, 17 Mar 2022 20:07:47 +0000',
-=======
-        date: 'Wed, 23 Mar 2022 21:19:18 +0000',
->>>>>>> Stashed changes
+        date: 'Thu, 24 Mar 2022 21:19:54 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
