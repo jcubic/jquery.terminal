@@ -548,6 +548,37 @@ terminal .terminal-output > div {
       box-shadow: none;
   }
 }
+/* NONE ANIMATION */
+@-webkit-keyframes terminal-none {
+    0%, 100% {
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
+        color: #000;
+        color: var(--background, #000);
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+    }
+}
+@-moz-keyframes terminal-none {
+    0%, 100% {
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
+        color: #000;
+        color: var(--background, #000);
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+    }
+}
+@keyframes terminal-none {
+    0%, 100% {
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
+        color: #000;
+        color: var(--background, #000);
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+    }
+}
 .underline-animation .cmd .cmd-cursor.cmd-blink > span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span,
 .underline-animation .cmd .cmd-cursor.cmd-blink a,
 .underline-animation .cmd .cmd-cursor.cmd-blink .fa,

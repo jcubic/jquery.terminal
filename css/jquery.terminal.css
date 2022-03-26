@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 26 Mar 2022 16:05:02 +0000
+ * Date: Sat, 26 Mar 2022 16:10:26 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -547,6 +547,37 @@ terminal .terminal-output > div {
   50.1%, 100% {
       box-shadow: none;
   }
+}
+/* NONE ANIMATION */
+@-webkit-keyframes terminal-none {
+    0%, 100% {
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
+        color: #000;
+        color: var(--background, #000);
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+    }
+}
+@-moz-keyframes terminal-none {
+    0%, 100% {
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
+        color: #000;
+        color: var(--background, #000);
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+    }
+}
+@keyframes terminal-none {
+    0%, 100% {
+        background-color: #aaa;
+        background-color: var(--original-color, #aaa);
+        color: #000;
+        color: var(--background, #000);
+        -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+        box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
+    }
 }
 .underline-animation .cmd .cmd-cursor.cmd-blink > span[data-text]:not(.emoji):not(.fa):not(.far):not(.fas) span,
 .underline-animation .cmd .cmd-cursor.cmd-blink a,
