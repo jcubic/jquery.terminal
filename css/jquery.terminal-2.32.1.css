@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Thu, 24 Mar 2022 21:39:10 +0000
+ * Date: Sat, 26 Mar 2022 16:05:02 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -24,10 +24,13 @@
 }
 .cmd .cmd-clipboard {
     position: absolute !important;
-    left: -16px !important;
+    let: -16px;
+    left: calc(-16px / var(--pixel-density, 1)) !important;
     top: 0 !important;
-    width: 16px !important;
-    height: 16px !important;
+    width: 16px;
+    height: 16px;
+    width: calc(16px / var(--pixel-density, 1)) !important;
+    height: calc(16px / var(--pixel-density, 1)) !important;
     background: transparent !important;
     border: none !important;
     color: transparent !important;
@@ -38,7 +41,7 @@
     overflow: hidden !important;
     white-space: pre !important;
     text-indent: -9999em !important; /* better cursor hiding for Safari and IE */
-    top: calc(var(--cursor-line, 0) * var(--size, 1) * 14px) !important;
+    top: calc(var(--cursor-line, 0) * var(--size, 1) * (14px / var(--pixel-density, 1))) !important;
 }
 .visually-hidden {
     clip: rect(0 0 0 0);
@@ -48,6 +51,8 @@
     position: absolute;
     white-space: nowrap;
     width: 1px;
+    top: 0;
+    left: 0;
 }
 .cmd span.cmd-end-line,
 .cmd span.cmd-end-line span,
@@ -95,7 +100,16 @@ body.full-screen-terminal .terminal {
     min-height: 100%;
     height: 100%;
 }
-.terminal > .terminal-resizer, .terminal > .terminal-font .terminal-resizer {
+.terminal > .terminal-pixel {
+    position: absolute;
+    display: inline;
+    left: -2px;
+    top: -2px;
+    width: 1px;
+    height: 1px;
+}
+.terminal > .terminal-resizer,
+.terminal > .terminal-font .terminal-resizer {
     position: absolute !important;
     top: 0 !important;
     right: 0 !important;
@@ -219,12 +233,12 @@ body.full-screen-terminal .terminal {
 }
 .terminal-ouput span[style*="width"] {
     min-height: 14px;
-    min-height: calc(var(--size, 1) * 14px);
+    min-height: calc(var(--size, 1) * (14px / var(--pixel-density, 1)));
 }
 .terminal .terminal-output > :not(.raw) > div,
 .cmd div,
 .terminal.external div {
-    line-height: calc((var(--size) * 14px) + 1px);
+    line-height: calc((var(--size) * (14px / var(--pixel-density, 1))) + 1px);
 }
 .cmd .cmd-prompt span.fa::before,
 .cmd .cmd-prompt span.fab::before,
@@ -268,13 +282,14 @@ body.full-screen-terminal .terminal {
 }
 .terminal .ansi > div {
     line-height: 13px !important;
-    line-height: calc(var(--size, 1) * 13px) !important;
+    line-height: calc(var(--size, 1) * (13px / var(--pixel-density, 1))) !important;
 }
 .cmd span.cmd-prompt, .cmd .cmd-prompt span {
     background-color: transparent !important;
 }
 .terminal-output .emoji, .cmd .emoji {
     height: 12px;
+    height: calc(12px / var(--pixel-density, 1));
     background-size: contain;
     background-repeat: no-repeat;
     color: transparent;
@@ -598,12 +613,12 @@ terminal .terminal-output > div {
         0%, 50% {
             border-bottom-color: var(--color, #aaa);
             line-height: 12px;
-            line-height: calc(var(--size, 1) * 12px);
+            line-height: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
         }
         50.1%, 100% {
             border-bottom-color: var(--background, #000);
             line-height: 12px;
-            line-height: calc(var(--size, 1) * 12px);
+            line-height: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
         }
     }
 }
@@ -728,7 +743,7 @@ terminal .terminal-output > div {
     box-sizing: border-box;
 }
 .terminal:not(.external), .terminal .terminal-fill, .cmd-editable {
-    padding: 10px;
+    padding: calc((10px / var(--pixel-density, 1)));
 }
 .cmd-editable {
     padding-top: 0;
@@ -746,7 +761,7 @@ terminal .terminal-output > div {
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
 }
 .terminal .cmd {
-    margin-bottom: 10px;
+    margin-bottom: calc(10px / var(--pixel-density, 1));
     position: relative;
 }
 .terminal .partial, .terminal .partial > div {
@@ -784,13 +799,13 @@ terminal .terminal-output > div {
     .cmd,
     .cmd span,
     .cmd div {
-        font-size: calc(var(--size, 1) * 12px);
+        font-size: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
     }
     .terminal-output .emoji, .cmd .emoji {
-        height: calc(var(--size, 1) * 12px);
+        height: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
     }
     .cmd .clipboard {
-        top: calc(var(--size, 1) * 14 * var(--cursor-line, 0) * 1px);
+        top: calc(var(--size, 1) * (14 / var(--pixel-density, 1)) * var(--cursor-line, 0) * 1px);
     }
     .terminal .inverted, .cmd.cmd.cmd .inverted, .cmd.cmd.cmd .cmd-inverted {
         background-color: var(--color, #aaa) !important;
@@ -947,7 +962,7 @@ terminal .terminal-output > div {
 }
 .cmd img {
     height: 14px;
-    height: calc(var(--size, 1) * 14px);
+    height: calc(var(--size, 1) * (14px / var(--pixel-density, 1)));
     border: 1px solid transparent;
 }
 .cmd-cursor img {
@@ -955,7 +970,7 @@ terminal .terminal-output > div {
     border-color: var(--color, #ccc);
 }
 .terminal-output svg.terminal-broken-image {
-    height: calc(var(--size, 1) * 14px);
+    height: calc(var(--size, 1) * (14px / var(--pixel-density, 1)));
 }
 .terminal-output svg.terminal-broken-image use {
     fill: var(--color, #ccc);
@@ -979,7 +994,9 @@ terminal .terminal-output > div {
 .terminal-scroll-marker {
     position: relative;
     height: 1px;
+    height: calc(1px / var(--pixel-density, 1));
     margin-top: -1px;
+    margin-top: calc(-1px / var(--pixel-density, 1));
     z-index: 100;
 }
 .terminal-scroll-marker div {
@@ -1021,8 +1038,8 @@ terminal .terminal-output > div {
     opacity: 0.01;
 }
 .terminal::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: calc(6px / var(--pixel-density, 1));
+    height: calc(6px / var(--pixel-density, 1));
     background: var(--background, #000);
 }
 .terminal::-webkit-scrollbar-thumb {

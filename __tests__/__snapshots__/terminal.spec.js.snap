@@ -7,6 +7,7 @@ Object {
     "width": 0,
   },
   "cols": 100,
+  "density": 1,
   "rows": 25,
   "terminal": Object {
     "height": 0,

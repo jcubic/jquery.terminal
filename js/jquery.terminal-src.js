@@ -2931,7 +2931,7 @@
             var $prompt = self.find('.cmd-prompt');
             var html = $prompt.html();
             $prompt.html('<span>&nbsp;</span>');
-            var width = $prompt.find('span')[0].getBoundingClientRect().width;
+            var width = $prompt.find('span').get(0).getBoundingClientRect().width;
             $prompt.html(html);
             return width;
         }
@@ -6977,7 +6977,7 @@
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
     function get_char_size(term) {
-        var rect;
+        var result;
         if (terminal_ready(term)) {
             var $prompt = term.find('.cmd-prompt').clone().css({
                 visiblity: 'hidden',
@@ -6986,13 +6986,17 @@
             $prompt.appendTo(term.find('.cmd'))
                 .html('&nbsp;')
                 .wrap('<div class="cmd-wrapper"/>');
-            rect = $prompt[0].getBoundingClientRect();
+            result = {
+                width: $prompt.width(),
+                height: $prompt.height()
+            };
             $prompt.parent().remove();
         } else {
             var temp = $('<div class="terminal terminal-temp"><div class="terminal-' +
                          'wrapper"><div class="terminal-output"><div><div class="te' +
                          'rminal-line" style="float: left"><span>&nbsp;</span></div' +
-                         '></div></div></div>').appendTo('body');
+                         '></div></div><div class="terminal-pixel"></div></div>')
+                .appendTo('body');
             temp.addClass(term.attr('class')).attr('id', term.attr('id'));
             if (term) {
                 var style = term.attr('style');
@@ -7003,13 +7007,11 @@
                     temp.attr('style', style);
                 }
             }
-            rect = temp.find('.terminal-line')[0].getBoundingClientRect();
-        }
-        var result = {
-            width: rect.width,
-            height: rect.height
-        };
-        if (temp) {
+            var node = temp.find('.terminal-line');
+            result = {
+                width: node.width(),
+                height: node.height()
+            };
             temp.remove();
         }
         return result;
@@ -9627,6 +9629,7 @@
                         width: old_width + left + right,
                         height: old_height + top + bottom
                     },
+                    density: pixel_density,
                     char: char_size,
                     cols: this.cols(),
                     rows: this.rows()
@@ -10008,7 +10011,10 @@
             // -------------------------------------------------------------
             refresh: function() {
                 if (char_size.width !== 0) {
-                    self[0].style.setProperty('--char-width', char_size.width);
+                    css(self[0], {
+                        '--char-width': char_size.width,
+                        '--pixel-density': pixel_density
+                    });
                 }
                 self.clear_cache();
                 if (command) {
@@ -10949,6 +10955,7 @@
                     self.resizer('unbind');
                     self.touch_scroll('unbind');
                     font_resizer.resizer('unbind').remove();
+                    pixel_resizer.resizer('unbind').remove();
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
                     self.unbind('click wheel mousewheel mousedown mouseup');
@@ -11164,10 +11171,6 @@
         if (typeof settings.height === 'number') {
             self.height(settings.height);
         }
-        var char_size = get_char_size(self);
-        // this is needed when terminal have selector with --size that is not
-        // bare .terminal so fake terminal will not get the proper size #602
-        var need_char_size_recalculate = !terminal_ready(self);
         // so it's the same as in TypeScript definition for options
         delete settings.formatters;
         // used to throw error when calling methods on destroyed terminal
@@ -11214,10 +11217,16 @@
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
+        var pixel_resizer = $('<div class="terminal-pixel"/>').appendTo(self);
         var fill = $('<div class="terminal-fill"/>').appendTo(self);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
+        var pixel_density = get_pixel_size();
+        var char_size = get_char_size(self);
+        // this is needed when terminal have selector with --size that is not
+        // bare .terminal so fake terminal will not get the proper size #602
+        var need_char_size_recalculate = !terminal_ready(self);
         // before login event
         if (settings.login && fire_event('onBeforeLogin') === false) {
             autologin = false;
@@ -11248,6 +11257,11 @@
                 self.focus();
                 self.scroll_to_bottom();
             }
+        }
+        // -------------------------------------------------------------------------------
+        function get_pixel_size() {
+            var rect = pixel_resizer[0].getBoundingClientRect();
+            return rect.width || 1;
         }
         // -------------------------------------------------------------------------------
         function blur_terminal() {
@@ -11713,20 +11727,28 @@
                 }
             }
             resize();
-            function resize() {
+            function resize(force) {
                 if (self.is(':visible')) {
                     var width = fill.width();
                     var height = fill.height();
+                    var new_pixel_density = get_pixel_size();
+                    css(self[0], {
+                        '--pixel-density': new_pixel_density
+                    });
                     if (need_char_size_recalculate) {
                         need_char_size_recalculate = !terminal_ready(self);
-                        calculate_char_size();
+                        if (!need_char_size_recalculate) {
+                            char_size = get_char_size(self);
+                            calculate_char_size();
+                        }
                     }
                     // prevent too many calculations in IE
-                    if (old_height !== height || old_width !== width) {
+                    if (old_height !== height || old_width !== width || force) {
                         self.resize();
                     }
                     old_height = height;
                     old_width = width;
+                    pixel_density = new_pixel_density;
                 }
             }
             function create_resizers() {
@@ -11736,6 +11758,10 @@
                 self.resizer('unbind').resizer(resize, options);
                 font_resizer.resizer('unbind').resizer(function() {
                     calculate_char_size();
+                    self.resize();
+                }, options);
+                pixel_resizer.resizer('unbind').resizer(function() {
+                    pixel_density = get_pixel_size();
                     self.resize();
                 }, options);
             }
