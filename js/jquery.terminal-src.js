@@ -9235,6 +9235,7 @@
                 // so we know how many times call pop
                 var level = self.level();
                 function login_callback(user, token, silent) {
+                    var next;
                     if (token) {
                         popUserPass();
                         var name = self.prefix_name(true) + '_';
@@ -9242,13 +9243,7 @@
                         storage.set(name + 'login', user);
                         in_login = false;
                         fire_event('onAfterLogin', [user, token]);
-                        if (is_function(success)) {
-                            // will be used internaly since users know
-                            // when login success (they decide when
-                            // it happen by calling the callback -
-                            // this funtion)
-                            success();
-                        }
+                        next = success;
                     } else {
                         if (infinite) {
                             if (!silent) {
@@ -9263,12 +9258,17 @@
                             self.pop(undefined, true).pop(undefined, true);
                         }
                         // used only to call pop in push
-                        if (is_function(error)) {
-                            error();
-                        }
+                        next = error;
                     }
                     if (self.paused()) {
                         self.resume();
+                    }
+                    // will be used internaly since users know
+                    // when login success (they decide when
+                    // it happen by calling the callback -
+                    // this funtion)
+                    if (is_function(next)) {
+                        next();
                     }
                     self.off('terminal.autologin');
                 }

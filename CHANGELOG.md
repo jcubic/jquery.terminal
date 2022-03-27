@@ -9,6 +9,7 @@
 * fix regression in less + images
 * fix embedding Terminal inside SVG [#744](https://github.com/jcubic/jquery.terminal/issues/744)
 * fix when login function is not async
+* fix calling login_name in dynamic prompt
 
 ## 2.32.1
 ### Bugfix
