@@ -1290,6 +1290,21 @@
         }
     }
     // -----------------------------------------------------------------------
+    // :: return CSS property with pixel size & proper
+    // -----------------------------------------------------------------------
+    function style_prop(name, value, important) {
+        var props = [
+            name + ':' + value + 'px',
+            name + ':' + 'calc(' + value + 'px / var(--pixel-density, 1))'
+        ];
+        if (important) {
+            props = props.map(function(prop) {
+                return prop + ' !important';
+            });
+        }
+        return props.join(';');
+    }
+    // -----------------------------------------------------------------------
     // :: hide elements from screen readers
     // -----------------------------------------------------------------------
     function a11y_hide(element) {
@@ -11636,7 +11651,7 @@
                             var width = 5 * 14;
                             var rect = self[0].getBoundingClientRect();
                             // we need width without scrollbar
-                            var content_width = fill.outerWidth();
+                            var content_width = fill.outerWidth() * pixel_density;
                             // fix jumping when click near bottom or left edge #592
                             var diff_h = (top + cmd_rect.top + height);
                             diff_h = diff_h - rect.height - rect.top;
@@ -11651,10 +11666,10 @@
                                 width -= Math.ceil(diff_w);
                             }
                             $clip.attr('style', [
-                                'left:' + left + 'px !important',
-                                'top:' + top + 'px !important',
-                                'width:' + width + 'px !important',
-                                'height:' + height + 'px !important'
+                                style_prop('left', left, true),
+                                style_prop('top', top, true),
+                                style_prop('width', width, true),
+                                style_prop('height', height, true)
                             ].join(';'));
                             if (!$clip.is(':focus')) {
                                 $clip.focus();
@@ -11774,9 +11789,8 @@
                     var top = $('<div class="terminal-scroll-marker"/>').appendTo(self);
                     var marker = top;
                     if (settings.scrollBottomOffset !== -1) {
-                        marker = $('<div/>').css({
-                            height: settings.scrollBottomOffset
-                        }).appendTo(top);
+                        var style = style_prop('height', settings.scrollBottomOffset);
+                        marker = $('<div style="' + style + '"/>').appendTo(top);
                     }
                     is_bottom_observer = new IntersectionObserver(bottom_detect, {
                         root: self[0]
