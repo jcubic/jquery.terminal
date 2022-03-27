@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 27 Mar 2022 15:03:58 +0000
+ * Date: Sun, 27 Mar 2022 22:48:55 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5169,7 +5169,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 27 Mar 2022 15:03:58 +0000',
+        date: 'Sun, 27 Mar 2022 22:48:55 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9291,21 +9291,19 @@
                                 silent) {
                                 login_callback(user, token, silent);
                             });
-                            if (ret && is_function(ret.then || ret.done)) {
-                                (ret.then || ret.done).call(ret, function(token) {
-                                    login_callback(user, token);
-                                }).catch(function(err) {
-                                    self.pop(undefined, true).pop(undefined, true);
-                                    self.error(err.message);
-                                    if (is_function(error)) {
-                                        error();
-                                    }
-                                    if (self.paused()) {
-                                        self.resume();
-                                    }
-                                    self.off('terminal.autologin');
-                                });
-                            }
+                            unpromise(ret, function(token) {
+                                login_callback(user, token);
+                            }, function(err) {
+                                self.pop(undefined, true).pop(undefined, true);
+                                self.error(err.message);
+                                if (is_function(error)) {
+                                    error();
+                                }
+                                if (self.paused()) {
+                                    self.resume();
+                                }
+                                self.off('terminal.autologin');
+                            });
                         } catch (e) {
                             display_exception(e, 'AUTH');
                         }
@@ -11750,7 +11748,6 @@
                     var width = fill.width();
                     var height = fill.height();
                     var new_pixel_density = get_pixel_size();
-                    console.log({new_pixel_density});
                     css(self[0], {
                         '--pixel-density': new_pixel_density
                     });
@@ -11791,7 +11788,8 @@
             }
             function create_bottom_detect() {
                 if (window.IntersectionObserver) {
-                    var top = $('<div class="terminal-scroll-marker"/>').appendTo(scroller);
+                    var top = $('<div class="terminal-scroll-marker"/>')
+                        .appendTo(scroller);
                     var marker = top;
                     if (settings.scrollBottomOffset !== -1) {
                         var style = style_prop('height', settings.scrollBottomOffset);

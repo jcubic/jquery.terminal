@@ -9291,21 +9291,19 @@
                                 silent) {
                                 login_callback(user, token, silent);
                             });
-                            if (ret && is_function(ret.then || ret.done)) {
-                                (ret.then || ret.done).call(ret, function(token) {
-                                    login_callback(user, token);
-                                }).catch(function(err) {
-                                    self.pop(undefined, true).pop(undefined, true);
-                                    self.error(err.message);
-                                    if (is_function(error)) {
-                                        error();
-                                    }
-                                    if (self.paused()) {
-                                        self.resume();
-                                    }
-                                    self.off('terminal.autologin');
-                                });
-                            }
+                            unpromise(ret, function(token) {
+                                login_callback(user, token);
+                            }, function(err) {
+                                self.pop(undefined, true).pop(undefined, true);
+                                self.error(err.message);
+                                if (is_function(error)) {
+                                    error();
+                                }
+                                if (self.paused()) {
+                                    self.resume();
+                                }
+                                self.off('terminal.autologin');
+                            });
                         } catch (e) {
                             display_exception(e, 'AUTH');
                         }

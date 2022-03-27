@@ -8,6 +8,7 @@
 * fix re-rendering of jQuery/DOM nodes [#759](https://github.com/jcubic/jquery.terminal/issues/759)
 * fix regression in less + images
 * fix embedding Terminal inside SVG [#744](https://github.com/jcubic/jquery.terminal/issues/744)
+* fix when login function is not async
 
 ## 2.32.1
 ### Bugfix
