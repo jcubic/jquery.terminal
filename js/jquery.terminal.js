@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 27 Mar 2022 11:29:21 +0000
+ * Date: Sun, 27 Mar 2022 15:03:58 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5169,7 +5169,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 27 Mar 2022 11:29:21 +0000',
+        date: 'Sun, 27 Mar 2022 15:03:58 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10576,17 +10576,17 @@
                 var pos;
                 amount = Math.round(amount);
                 if (self.prop) { // work with jQuery > 1.6
-                    if (amount > self.prop('scrollTop') && amount > 0) {
-                        self.prop('scrollTop', 0);
+                    if (amount > scroller.prop('scrollTop') && amount > 0) {
+                        scroller.prop('scrollTop', 0);
                     }
-                    pos = self.prop('scrollTop');
-                    self.scrollTop(pos + amount);
+                    pos = scroller.prop('scrollTop');
+                    scroller.scrollTop(pos + amount);
                 } else {
-                    if (amount > self.prop('scrollTop') && amount > 0) {
-                        self.prop('scrollTop', 0);
+                    if (amount > scroller.prop('scrollTop') && amount > 0) {
+                        scroller.prop('scrollTop', 0);
                     }
-                    pos = self.prop('scrollTop');
-                    self.scrollTop(pos + amount);
+                    pos = scroller.prop('scrollTop');
+                    scroller.scrollTop(pos + amount);
                 }
                 return self;
             },
@@ -10974,7 +10974,7 @@
                     pixel_resizer.resizer('unbind').remove();
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
-                    self.unbind('click wheel mousewheel mousedown mouseup');
+                    self.unbind('click mousedown mouseup');
                     self.removeData('terminal').removeClass('terminal').
                         unbind('.terminal');
                     if (settings.width) {
@@ -10985,7 +10985,8 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
-                    self.find('.terminal-fill, .terminal-font').remove();
+                    self.find('.terminal-fill, .terminal-font, .terminal-scroller')
+                        .remove();
                     self.stopTime();
                     terminals.remove(terminal_id);
                     if (visibility_observer) {
@@ -11044,7 +11045,7 @@
                 } else {
                     scrollHeight = self.attr('scrollHeight');
                 }
-                self.scrollTop(scrollHeight);
+                scroller.scrollTop(scrollHeight);
                 return self;
             },
             // -------------------------------------------------------------
@@ -11230,7 +11231,8 @@
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
         });
-        var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
+        var scroller = $('<div class="terminal-scroller"/>').appendTo(self);
+        var wrapper = $('<div class="terminal-wrapper"/>').appendTo(scroller);
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var pixel_resizer = $('<div class="terminal-pixel"/>').appendTo(self);
@@ -11709,7 +11711,7 @@
                     var $textarea = self.find('textarea');
                     var rect = self[0].getBoundingClientRect();
                     var height = self[0].scrollHeight;
-                    var scrollTop = self.scrollTop();
+                    var scrollTop = scroller.scrollTop();
                     var diff = height - (scrollTop + rect.height);
                     // if scrolled to bottom top need to be aligned with cursor line
                     // done by CSS file using css variables
@@ -11743,11 +11745,12 @@
                 }
             }
             resize();
-            function resize(force) {
+            function resize() {
                 if (self.is(':visible')) {
                     var width = fill.width();
                     var height = fill.height();
                     var new_pixel_density = get_pixel_size();
+                    console.log({new_pixel_density});
                     css(self[0], {
                         '--pixel-density': new_pixel_density
                     });
@@ -11759,7 +11762,9 @@
                         }
                     }
                     // prevent too many calculations in IE
-                    if (old_height !== height || old_width !== width || force) {
+                    if (old_height !== height ||
+                        old_width !== width ||
+                        pixel_density !== new_pixel_density) {
                         self.resize();
                     }
                     old_height = height;
@@ -11786,7 +11791,7 @@
             }
             function create_bottom_detect() {
                 if (window.IntersectionObserver) {
-                    var top = $('<div class="terminal-scroll-marker"/>').appendTo(self);
+                    var top = $('<div class="terminal-scroll-marker"/>').appendTo(scroller);
                     var marker = top;
                     if (settings.scrollBottomOffset !== -1) {
                         var style = style_prop('height', settings.scrollBottomOffset);
@@ -11993,7 +11998,7 @@
                 }
                 if ($.event.special.mousewheel) {
                     // we keep mousewheel plugin just in case
-                    self.on('mousewheel', mousewheel);
+                    scroller.on('mousewheel', mousewheel);
                 } else {
                     // detection take from:
                     // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
@@ -12019,7 +12024,7 @@
                         mousewheel(e, -delta);
                     });
                 }
-                self.touch_scroll(function(event) {
+                scroller.touch_scroll(function(event) {
                     var delta = event.current.clientY - event.previous.clientY;
                     var ret;
                     var interpreter = interpreters.top();

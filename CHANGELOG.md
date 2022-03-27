@@ -2,6 +2,7 @@
 ### Features
 * add color and background attributes to font tag in xml formatter
 * add `terminal-none` animation
+* allow to easily change border-radius on terminal [#766](https://github.com/jcubic/jquery.terminal/issues/766)
 ### Bugfix
 * fix flicker of dynamic prompt on enter [#757](https://github.com/jcubic/jquery.terminal/issues/757)
 * fix re-rendering of jQuery/DOM nodes [#759](https://github.com/jcubic/jquery.terminal/issues/759)
