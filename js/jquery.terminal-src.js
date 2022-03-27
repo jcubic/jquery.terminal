@@ -8220,6 +8220,7 @@
             var options = {
                 exec: false,
                 formatters: false,
+                convertLinks: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);

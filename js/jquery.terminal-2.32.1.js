@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 26 Mar 2022 16:05:01 +0000
+ * Date: Sun, 27 Mar 2022 10:38:45 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5154,7 +5154,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 26 Mar 2022 16:05:01 +0000',
+        date: 'Sun, 27 Mar 2022 10:38:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8220,6 +8220,7 @@
             var options = {
                 exec: false,
                 formatters: false,
+                convertLinks: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);
