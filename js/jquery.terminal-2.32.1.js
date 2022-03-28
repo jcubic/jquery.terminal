@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 28 Mar 2022 09:17:45 +0000
+ * Date: Mon, 28 Mar 2022 13:51:00 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1345,9 +1345,11 @@
     // ---------------------------------------------------------------------
     // :; detect if mouse event happen on scrollbar
     // ---------------------------------------------------------------------
-    function scrollbar_event(e, node) {
+    function scrollbar_event(e, node, pixel_density) {
+        pixel_density = pixel_density || 1;
         var left = node.offset().left;
-        return node.outerWidth() <= e.clientX - left;
+        var max_width = node.outerWidth() * pixel_density;
+        return max_width <= e.clientX - left;
     }
     // ---------------------------------------------------------------------
     // :: Return exception message as string
@@ -5169,7 +5171,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 28 Mar 2022 09:17:45 +0000',
+        date: 'Mon, 28 Mar 2022 13:51:00 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11251,7 +11253,7 @@
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var pixel_resizer = $('<div class="terminal-pixel"/>').appendTo(self);
-        var fill = $('<div class="terminal-fill"/>').appendTo(self);
+        var fill = $('<div class="terminal-fill"/>').appendTo(scroller);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
@@ -11602,7 +11604,7 @@
                     var ignore_elements = '.terminal-output textarea,' +
                         '.terminal-output input';
                     self.mousedown(function(e) {
-                        if (!scrollbar_event(e, fill)) {
+                        if (!scrollbar_event(e, fill, pixel_density)) {
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
