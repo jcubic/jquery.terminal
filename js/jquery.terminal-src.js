@@ -7288,6 +7288,7 @@
             notAString: '%s function: argument is not a string',
             redrawError: 'Internal error, wrong position in cmd redraw',
             invalidStrings: 'Command %s have unclosed strings',
+            invalidMask: 'Invalid mask used only string or boolean allowed',
             defunctTerminal: "You can't call method on terminal that was destroyed"
         }
     };
@@ -8211,6 +8212,23 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: apply command mask to command
+        // ---------------------------------------------------------------------
+        function mask_command(command) {
+            var mask = command_line.mask();
+            switch (typeof mask) {
+                case 'string':
+                    return command.replace(/./g, mask);
+                case 'boolean':
+                    if (mask) {
+                        return command.replace(/./g, settings.maskChar);
+                    } else {
+                        return $.terminal.escape_formatting(command);
+                    }
+            }
+            throw new $.terminal.Exception(strings().invalidMask);
+        }
+        // ---------------------------------------------------------------------
         // :: Display prompt and last command
         // ---------------------------------------------------------------------
         function echo_command(command) {
@@ -8219,19 +8237,7 @@
             }
             // true will return last rendered string
             var prompt = command_line.prompt(true);
-            var mask = command_line.mask();
-            switch (typeof mask) {
-                case 'string':
-                    command = command.replace(/./g, mask);
-                    break;
-                case 'boolean':
-                    if (mask) {
-                        command = command.replace(/./g, settings.maskChar);
-                    } else {
-                        command = $.terminal.escape_formatting(command);
-                    }
-                    break;
-            }
+            command = mask_command(command);
             var options = {
                 exec: false,
                 formatters: false,
@@ -8893,6 +8899,14 @@
                     var bottom = self.is_bottom();
                     var interval = setInterval(function() {
                         var chr = $.terminal.substring(formattted, char_i, char_i + 1);
+                        if (options.mask) {
+                            var mask = command_line.mask();
+                            if (mask === 'string') {
+                                chr = mask;
+                            } else if (mask) {
+                                chr = settings.maskChar;
+                            }
+                        }
                         new_prompt += chr;
                         self.set_prompt(new_prompt);
                         if (chr === '\n' && bottom) {
@@ -8939,11 +8953,14 @@
             var helper = typed(function(message, prompt, options) {
                 self.set_prompt(prompt);
                 with_prompt(prompt, function(prompt) {
-                    self.echo(prompt + message, $.extend({}, options, {typing: false}));
+                    var output = prompt + mask_command(message);
+                    self.echo(output, $.extend({}, options, {typing: false}));
                 }, self);
             });
             return function(prompt, message, options) {
-                return helper(message, $.extend({}, options, {prompt: prompt}));
+                return helper(message, $.extend({}, options, {
+                    prompt: prompt, mask: true
+                }));
             };
         })();
         // ---------------------------------------------------------------------
