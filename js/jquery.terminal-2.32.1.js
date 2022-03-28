@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 28 Mar 2022 08:59:49 +0000
+ * Date: Mon, 28 Mar 2022 09:17:45 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5169,7 +5169,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 28 Mar 2022 08:59:49 +0000',
+        date: 'Mon, 28 Mar 2022 09:17:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8901,7 +8901,7 @@
                         var chr = $.terminal.substring(formattted, char_i, char_i + 1);
                         if (options.mask) {
                             var mask = command_line.mask();
-                            if (mask === 'string') {
+                            if (typeof mask === 'string') {
                                 chr = mask;
                             } else if (mask) {
                                 chr = settings.maskChar;

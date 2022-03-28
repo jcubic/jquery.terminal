@@ -8901,7 +8901,7 @@
                         var chr = $.terminal.substring(formattted, char_i, char_i + 1);
                         if (options.mask) {
                             var mask = command_line.mask();
-                            if (mask === 'string') {
+                            if (typeof mask === 'string') {
                                 chr = mask;
                             } else if (mask) {
                                 chr = settings.maskChar;
