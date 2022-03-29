@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 28 Mar 2022 13:51:00 +0000
+ * Date: Tue, 29 Mar 2022 14:23:50 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -4565,8 +4565,8 @@
         "&thinsp;": " ",
         "&zwnj;": "‌",
         "&zwj;": "‍",
-        "&lrm;": "‎",
-        "&rlm;": "‏",
+        "&lrm;": "\u200e",
+        "&rlm;": "\u200f",
         "&ndash;": "–",
         "&mdash;": "—",
         "&lsquo;": "‘",
@@ -5171,7 +5171,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 28 Mar 2022 13:51:00 +0000',
+        date: 'Tue, 29 Mar 2022 14:23:50 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
