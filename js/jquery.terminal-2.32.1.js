@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 29 Mar 2022 14:23:50 +0000
+ * Date: Sun, 10 Apr 2022 10:26:37 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5171,7 +5171,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 29 Mar 2022 14:23:50 +0000',
+        date: 'Sun, 10 Apr 2022 10:26:37 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10181,12 +10181,12 @@
                                 display: 'inline-block'
                             });
                             var last_row_rect = last_row[0].getBoundingClientRect();
-                            var partial_width = last_row_rect.width;
+                            var partial_width = last_row_rect.width / pixel_density;
                             // Shift command prompt up one line and to the right
                             // enough so that it appears directly next to the
                             // partially constructed output line
                             cmd_prompt.css('margin-left', partial_width);
-                            cmd_outer.css('top', -last_row_rect.height);
+                            cmd_outer.css('top', -last_row_rect.height / pixel_density);
                             // Measure length of partial line in characters
                             var char_width = self.geometry().char.width;
                             var prompt_margin = Math.round(partial_width / char_width);
