@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 10 Apr 2022 10:26:37 +0000
+ * Date: Sat, 16 Apr 2022 13:23:43 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5171,7 +5171,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 10 Apr 2022 10:26:37 +0000',
+        date: 'Sat, 16 Apr 2022 13:23:43 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

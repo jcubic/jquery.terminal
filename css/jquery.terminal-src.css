@@ -75,6 +75,7 @@
     line-height: initial;
 }
 .terminal-scroller {
+    position: relative;
     overflow-y: auto;
     scrollbar-gutter: stable;
     height: 100%;
@@ -704,6 +705,16 @@ terminal .terminal-output > div {
     border-color: #000;
 }
 */
+/* fix selection/click on text that was echo without newline while prompt is relocated */
+.terminal .cmd {
+    pointer-events: none;
+}
+.terminal .cmd-prompt * {
+    pointer-events: visible;
+}
+.terminal .cmd-wrapper > div, .terminal .cmd textarea {
+    pointer-events: visible;
+}
 .terminal h1::selection,
 .terminal h2::selection,
 .terminal h3::selection,
