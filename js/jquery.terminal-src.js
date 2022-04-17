@@ -8899,22 +8899,37 @@
                         self.set_prompt('');
                     }
                     var bottom = self.is_bottom();
+                    var skipped = false;
+                    $(document).bind('keyup.cmd', function(e) {
+                        //skip on enter
+                        if (e.which === 13) {
+                            skipped = true;
+                        }
+                    });
                     var interval = setInterval(function() {
-                        var chr = $.terminal.substring(formattted, char_i, char_i + 1);
-                        if (options.mask) {
-                            var mask = command_line.mask();
-                            if (typeof mask === 'string') {
-                                chr = mask;
-                            } else if (mask) {
-                                chr = settings.maskChar;
+                        if (!skipped) {
+                            var chr = $.terminal
+                                .substring(formattted, char_i, char_i + 1);
+                            if (options.mask) {
+                                var mask = command_line.mask();
+                                if (typeof mask === 'string') {
+                                    chr = mask;
+                                } else if (mask) {
+                                    chr = settings.maskChar;
+                                }
                             }
+                            new_prompt += chr;
+                            self.set_prompt(new_prompt);
+                            if (chr === '\n' && bottom) {
+                                self.scroll_to_bottom();
+                            }
+                            char_i++;
+                        } else {
+                            var chrRest = $.terminal.substring(formattted, char_i, len);
+                            new_prompt += chrRest;
+                            self.set_prompt(new_prompt);
+                            char_i = len;
                         }
-                        new_prompt += chr;
-                        self.set_prompt(new_prompt);
-                        if (chr === '\n' && bottom) {
-                            self.scroll_to_bottom();
-                        }
-                        char_i++;
                         if (char_i === len) {
                             clearInterval(interval);
                             setTimeout(function() {
@@ -8922,6 +8937,7 @@
                                 finish_typing_fn(message, prompt, options);
                                 animating = false;
                             }, options.delay);
+                            $(document).unbind('keyup.cmd');
                         }
                     }, options.delay);
                 }
