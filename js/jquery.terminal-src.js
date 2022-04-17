@@ -8901,8 +8901,8 @@
                     var bottom = self.is_bottom();
                     var skipped = false;
                     $(document).bind('keyup.cmd', function(e) {
-                        //skip on enter
-                        if (e.which === 13) {
+                        //skip on "end"
+                        if (e.which === 35) {
                             skipped = true;
                         }
                     });
