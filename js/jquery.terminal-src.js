@@ -8818,7 +8818,7 @@
             var result, i;
             if (animating) {
                 if (e.which === settings.skipKey) {
-                    self.skip(1);
+                    self.skip();
                 }
                 return false;
             }
@@ -8904,7 +8904,7 @@
                     }
                     var bottom = self.is_bottom();
                     var interval = setInterval(function() {
-                        if (!self.skip_event()) {
+                        if (!skip) {
                             var chr = $.terminal
                                 .substring(formattted, char_i, char_i + 1);
                             if (options.mask) {
@@ -8922,6 +8922,7 @@
                             }
                             char_i++;
                         } else {
+                            self.skip_stop();
                             var chrRest = $.terminal.substring(formattted, char_i, len);
                             new_prompt += chrRest;
                             self.set_prompt(new_prompt);
@@ -9622,31 +9623,13 @@
             // -------------------------------------------------------------
             // :: Skip the next terminal animations
             // -------------------------------------------------------------
-            skip: function(num = 0, reset = true) {
-                if (reset) {
-                    self.skip_stop();
-                }
-                if (num >= 1) {
-                    skip_count = num;
-                } else {
-                    skip = true;
-                }
+            skip: function() {
+                skip = true;
             },
             // -------------------------------------------------------------
-            // :: Evaluate if something should be skipped and count it
-            // -------------------------------------------------------------
-            skip_event: function() {
-                if (skip_count > 0) {
-                    skip_count--;
-                    return true;
-                }
-                return skip;
-            },
-            // -------------------------------------------------------------
-            // :: Stop skipping current terminal animations
+            // :: Stop skipping the next terminal animations
             // -------------------------------------------------------------
             skip_stop: function() {
-                skip_count = 0;
                 skip = false;
             },
             // -------------------------------------------------------------
@@ -11222,8 +11205,7 @@
         var logins = new Stack(); // stack of logins
         var command_queue = new DelayQueue();
         var animating = false; // true on typing animation
-        var skip = false; // true if skipping forever
-        var skip_count = 0; // number of skips chained
+        var skip = false; // true if skipping currently
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
