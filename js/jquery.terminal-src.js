@@ -8899,15 +8899,8 @@
                         self.set_prompt('');
                     }
                     var bottom = self.is_bottom();
-                    var skipped = false;
-                    $(document).bind('keyup.cmd', function(e) {
-                        //skip on "end"
-                        if (e.which === 35) {
-                            skipped = true;
-                        }
-                    });
                     var interval = setInterval(function() {
-                        if (!skipped) {
+                        if (!self.skip_event()) {
                             var chr = $.terminal
                                 .substring(formattted, char_i, char_i + 1);
                             if (options.mask) {
@@ -8937,7 +8930,6 @@
                                 finish_typing_fn(message, prompt, options);
                                 animating = false;
                             }, options.delay);
-                            $(document).unbind('keyup.cmd');
                         }
                     }, options.delay);
                 }
@@ -9622,6 +9614,36 @@
                     fire_event('onResume');
                 });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: Skip the next terminal animations
+            // -------------------------------------------------------------
+            skip: function(num = 0, reset = true) {
+                if (reset) {
+                    self.skip_stop();
+                }
+                if (num >= 1) {
+                    skip_count = num;
+                } else {
+                    skip = true;
+                }
+            },
+            // -------------------------------------------------------------
+            // :: Evaluate if something should be skipped and count it
+            // -------------------------------------------------------------
+            skip_event: function() {
+                if (skip_count > 0) {
+                    skip_count--;
+                    return true;
+                }
+                return skip;
+            },
+            // -------------------------------------------------------------
+            // :: Stop skipping current terminal animations
+            // -------------------------------------------------------------
+            skip_stop: function() {
+                skip_count = 0;
+                skip = false;
             },
             // -------------------------------------------------------------
             // :: Return the number of characters that fit into the width of
@@ -11196,6 +11218,8 @@
         var logins = new Stack(); // stack of logins
         var command_queue = new DelayQueue();
         var animating = false; // true on typing animation
+        var skip = false; // true if skipping forever
+        var skip_count = 0; // number of skips chained
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
