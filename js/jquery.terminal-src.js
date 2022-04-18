@@ -7236,6 +7236,7 @@
         doubleTab: null,
         doubleTabEchoCommand: false,
         completion: false,
+        skipKey: 13,
         onInit: $.noop,
         onClear: $.noop,
         onBlur: $.noop,
@@ -8816,6 +8817,9 @@
             // then one terminal)
             var result, i;
             if (animating) {
+                if (e.which === settings.skipKey) {
+                    self.skip(1);
+                }
                 return false;
             }
             if (self.enabled()) {
