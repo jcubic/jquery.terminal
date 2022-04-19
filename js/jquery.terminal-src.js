@@ -7236,7 +7236,6 @@
         doubleTab: null,
         doubleTabEchoCommand: false,
         completion: false,
-        skipKey: 13,
         onInit: $.noop,
         onClear: $.noop,
         onBlur: $.noop,
@@ -8817,9 +8816,6 @@
             // then one terminal)
             var result, i;
             if (animating) {
-                if (e.which === settings.skipKey) {
-                    self.skip();
-                }
                 return false;
             }
             if (self.enabled()) {
@@ -9631,6 +9627,12 @@
             // -------------------------------------------------------------
             skip_stop: function() {
                 skip = false;
+            },
+            // -------------------------------------------------------------
+            // :: Return if key animation is running
+            // -------------------------------------------------------------
+            animating: function() {
+                return animating;
             },
             // -------------------------------------------------------------
             // :: Return the number of characters that fit into the width of
