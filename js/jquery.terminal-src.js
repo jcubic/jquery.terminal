@@ -8900,21 +8900,30 @@
                     }
                     var bottom = self.is_bottom();
                     var interval = setInterval(function() {
-                        var chr = $.terminal.substring(formattted, char_i, char_i + 1);
-                        if (options.mask) {
-                            var mask = command_line.mask();
-                            if (typeof mask === 'string') {
-                                chr = mask;
-                            } else if (mask) {
-                                chr = settings.maskChar;
+                        if (!skip) {
+                            var chr = $.terminal
+                                .substring(formattted, char_i, char_i + 1);
+                            if (options.mask) {
+                                var mask = command_line.mask();
+                                if (typeof mask === 'string') {
+                                    chr = mask;
+                                } else if (mask) {
+                                    chr = settings.maskChar;
+                                }
                             }
+                            new_prompt += chr;
+                            self.set_prompt(new_prompt);
+                            if (chr === '\n' && bottom) {
+                                self.scroll_to_bottom();
+                            }
+                            char_i++;
+                        } else {
+                            self.skip_stop();
+                            var chrRest = $.terminal.substring(formattted, char_i, len);
+                            new_prompt += chrRest;
+                            self.set_prompt(new_prompt);
+                            char_i = len;
                         }
-                        new_prompt += chr;
-                        self.set_prompt(new_prompt);
-                        if (chr === '\n' && bottom) {
-                            self.scroll_to_bottom();
-                        }
-                        char_i++;
                         if (char_i === len) {
                             clearInterval(interval);
                             setTimeout(function() {
@@ -9606,6 +9615,24 @@
                     fire_event('onResume');
                 });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: Skip the next terminal animations
+            // -------------------------------------------------------------
+            skip: function() {
+                skip = true;
+            },
+            // -------------------------------------------------------------
+            // :: Stop skipping the next terminal animations
+            // -------------------------------------------------------------
+            skip_stop: function() {
+                skip = false;
+            },
+            // -------------------------------------------------------------
+            // :: Return if key animation is running
+            // -------------------------------------------------------------
+            animating: function() {
+                return animating;
             },
             // -------------------------------------------------------------
             // :: Return the number of characters that fit into the width of
@@ -11180,6 +11207,7 @@
         var logins = new Stack(); // stack of logins
         var command_queue = new DelayQueue();
         var animating = false; // true on typing animation
+        var skip = false; // true if skipping currently
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
