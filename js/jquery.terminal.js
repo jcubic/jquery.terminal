@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 03 May 2022 13:10:48 +0000
+ * Date: Tue, 03 May 2022 13:22:50 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5186,7 +5186,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 03 May 2022 13:10:48 +0000',
+        date: 'Tue, 03 May 2022 13:22:50 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8903,8 +8903,7 @@
                     var bottom = self.is_bottom();
                     var interval = setInterval(function() {
                         if (!skip) {
-                            var chr = $.terminal
-                                .substring(formattted, char_i, char_i + 1);
+                            var chr = $.terminal.substring(formattted, char_i, char_i + 1);
                             if (options.mask) {
                                 var mask = command_line.mask();
                                 if (typeof mask === 'string') {
@@ -8966,8 +8965,15 @@
             var helper = typed(function(message, prompt, options) {
                 self.set_prompt(prompt);
                 with_prompt(prompt, function(prompt) {
-                    var output = prompt + mask_command(message);
-                    self.echo(output, $.extend({}, options, {typing: false}));
+                    var command = mask_command(message);
+                    command = $.terminal.apply_formatters(command, {command: true});
+                    var output = prompt + command;
+                    options = $.extend({}, options, {
+                        typing: false,
+                        formatters: false,
+                        convertLinks: false
+                    });
+                    self.echo(output, options);
                 }, self);
             });
             return function(prompt, message, options) {
