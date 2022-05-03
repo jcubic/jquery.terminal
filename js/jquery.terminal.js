@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 03 May 2022 13:22:50 +0000
+ * Date: Tue, 03 May 2022 14:01:12 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5186,7 +5186,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 03 May 2022 13:22:50 +0000',
+        date: 'Tue, 03 May 2022 14:01:12 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5479,7 +5479,7 @@
                         ++length;
                         offset = 1;
                         i += 1;
-                    } else if (!braket || !have_formatting) {
+                    } else if (!braket || !have_formatting || (in_text && !formatting)) {
                         ++count;
                         ++length;
                     }
@@ -5732,6 +5732,7 @@
                             if (data.last && last_bracket && chr !== ']') {
                                 output += ']';
                             }
+                            console.log({output, len: output.length, data});
                             new_index = data.index + chr.length - 1;
                         }
                         if (keep_words) {

@@ -14,6 +14,7 @@
 * fix selection/click on text that was echo without newline (when prompt is still in same line)
 * fix exception when outputLimit is used [#776](https://github.com/jcubic/jquery.terminal/issues/776)
 * fix showing links for emails like prompt [#768](https://github.com/jcubic/jquery.terminal/issues/768)
+* fix line wrapping when text between formatting have brackets [#772](https://github.com/jcubic/jquery.terminal/issues/772)
 
 ## 2.32.1
 ### Bugfix

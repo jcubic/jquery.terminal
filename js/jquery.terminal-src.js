@@ -5479,7 +5479,7 @@
                         ++length;
                         offset = 1;
                         i += 1;
-                    } else if (!braket || !have_formatting) {
+                    } else if (!braket || !have_formatting || (in_text && !formatting)) {
                         ++count;
                         ++length;
                     }
@@ -5732,6 +5732,7 @@
                             if (data.last && last_bracket && chr !== ']') {
                                 output += ']';
                             }
+                            console.log({output, len: output.length, data});
                             new_index = data.index + chr.length - 1;
                         }
                         if (keep_words) {
