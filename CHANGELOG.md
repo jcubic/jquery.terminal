@@ -1,3 +1,22 @@
+## 2.33.0
+### Features
+* add a color and background attributes to the font tag in the xml formatter
+* add `terminal-none` animation
+* allow to easily change border-radius on terminal [#766](https://github.com/jcubic/jquery.terminal/issues/766)
+* add clear_cache to cmd
+### Bugfix
+* fix flicker of dynamic prompt on enter [#757](https://github.com/jcubic/jquery.terminal/issues/757)
+* fix re-rendering of jQuery/DOM nodes [#759](https://github.com/jcubic/jquery.terminal/issues/759)
+* fix regression in less + images
+* fix embedding the Terminal inside SVG [#744](https://github.com/jcubic/jquery.terminal/issues/744)
+* fix when the login function is not async
+* fix calling login_name in dynamic prompt
+* fix masking command on typing animation [#770](https://github.com/jcubic/jquery.terminal/issues/770)
+* fix selection/click on text that was echo without newline (when prompt is still in same line)
+* fix exception when outputLimit is used [#776](https://github.com/jcubic/jquery.terminal/issues/776)
+* fix showing links for emails like prompt [#768](https://github.com/jcubic/jquery.terminal/issues/768)
+* fix line wrapping when text between formatting have brackets [#772](https://github.com/jcubic/jquery.terminal/issues/772)
+
 ## 2.32.1
 ### Bugfix
 * leading spaces with echo + keepWords [#754](https://github.com/jcubic/jquery.terminal/issues/754)

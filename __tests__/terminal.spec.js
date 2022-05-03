@@ -984,6 +984,17 @@ describe('Terminal utils', function() {
             });
             expect(output).toMatchSnapshot();
         });
+        it('should merge clolor with empty style', function() {
+            var input = '[[;green;;;;{"style": ""}]Foo]';
+            var output = $.terminal.format(input, {
+                allowedAttributes: ['style']
+            });
+            expect(output).toMatchSnapshot();
+            output = $.terminal.format(input, {
+                allowedAttributes: []
+            });
+            expect(output).toMatchSnapshot();
+        });
     });
     describe('$.terminal.strip', function() {
         it('should remove formatting', function() {

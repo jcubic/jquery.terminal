@@ -1290,6 +1290,21 @@
         }
     }
     // -----------------------------------------------------------------------
+    // :: return CSS property with pixel size & proper
+    // -----------------------------------------------------------------------
+    function style_prop(name, value, important) {
+        var props = [
+            name + ':' + value + 'px',
+            name + ':' + 'calc(' + value + 'px / var(--pixel-density, 1))'
+        ];
+        if (important) {
+            props = props.map(function(prop) {
+                return prop + ' !important';
+            });
+        }
+        return props.join(';');
+    }
+    // -----------------------------------------------------------------------
     // :: hide elements from screen readers
     // -----------------------------------------------------------------------
     function a11y_hide(element) {
@@ -1330,9 +1345,11 @@
     // ---------------------------------------------------------------------
     // :; detect if mouse event happen on scrollbar
     // ---------------------------------------------------------------------
-    function scrollbar_event(e, node) {
+    function scrollbar_event(e, node, pixel_density) {
+        pixel_density = pixel_density || 1;
         var left = node.offset().left;
-        return node.outerWidth() <= e.clientX - left;
+        var max_width = node.outerWidth() * pixel_density;
+        return max_width <= e.clientX - left;
     }
     // ---------------------------------------------------------------------
     // :: Return exception message as string
@@ -1514,6 +1531,10 @@
             this._cache.clear();
         }
         return test;
+    };
+    // -------------------------------------------------------------------------
+    WorkerCache.prototype.clear = function() {
+        this._cache.clear();
     };
     // -------------------------------------------------------------------------
     WorkerCache.prototype.get = function(key) {
@@ -1735,6 +1756,21 @@
         return this.last_line()[1].newline;
     };
     // -------------------------------------------------------------------------
+    // :: call when line is out of view when outputLimit is used
+    // :: NOTE: it's not called when less plugin is used onClear is called
+    // :: instead because less call term::clear() after export old view
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.unmount = function(node) {
+        var index = node.data('index');
+        var line = this._lines[index];
+        if (line) {
+            var options = line[1];
+            if (is_function(options.unmount)) {
+                options.unmount.call(self, node);
+            }
+        }
+    };
+    // -------------------------------------------------------------------------
     OutputLines.prototype.last_line = function() {
         var len = this._lines.length;
         return this._lines[len - 1];
@@ -1857,14 +1893,15 @@
                     this._output_buffer.push(formatted);
                 }
             }
-        } else if (!options.raw) {
-            this._output_buffer.push(this.format(arg, false, raw));
-        } else {
+        } else if (options.raw) {
             this._output_buffer.push({line: arg, raw: raw});
+        } else {
+            this._output_buffer.push(this.format(arg, false, raw));
         }
         this._output_buffer.push({
             finalize: options.finalize,
             index: index,
+            raw: options.raw,
             newline: options.newline
         });
     };
@@ -2930,7 +2967,7 @@
             var $prompt = self.find('.cmd-prompt');
             var html = $prompt.html();
             $prompt.html('<span>&nbsp;</span>');
-            var width = $prompt.find('span')[0].getBoundingClientRect().width;
+            var width = $prompt.find('span').get(0).getBoundingClientRect().width;
             $prompt.html(html);
             return width;
         }
@@ -3822,6 +3859,11 @@
                 }
                 return self;
             },
+            clear_cache: 'Map' in root ? function() {
+                cmd_line_worker.clear();
+            } : function() {
+                return self;
+            },
             invoke_key: function(shortcut) {
                 if (!enabled) {
                     warn('invoke_key("' + shortcut + '") called on disabled terminal');
@@ -4547,8 +4589,8 @@
         "&thinsp;": " ",
         "&zwnj;": "‌",
         "&zwj;": "‍",
-        "&lrm;": "‎",
-        "&rlm;": "‏",
+        "&lrm;": "\u200e",
+        "&rlm;": "\u200f",
         "&ndash;": "–",
         "&mdash;": "—",
         "&lsquo;": "‘",
@@ -4733,32 +4775,47 @@
             return result.position;
         }
     }
-    // -------------------------------------------------------------------------
-    function char_width_prop(len, options) {
-        if (len === 0) {
-            return 'width: 1px';
-        } else if (is_ch_unit_supported) {
-            return 'width: ' + len + 'ch';
-        } else if (!is_css_variables_supported) {
-            if (options.charWidth) {
-                return 'width: ' + (options.charWidth * len) + 'px';
-            }
-        } else {
-            return '--length: ' + len;
-        }
-        return '';
+    // -----------------------------------------------------------------
+    function style_to_string(styles) {
+        return Object.keys(styles).map(function(prop) {
+            return prop + ':' + styles[prop];
+        }).join(';');
     }
     // -------------------------------------------------------------------------
-    // options {charWidth}
+    function escape_html_attr(value) {
+        return value.replace(/"/g, '&quot;');
+    }
+    // -------------------------------------------------------------------------
+    function char_width_object(len, options) {
+        var result = {};
+        if (len === 0) {
+            result['width'] = '1px';
+        } else if (is_ch_unit_supported) {
+            result['width'] = len + 'ch';
+        } else if (!is_css_variables_supported) {
+            if (options.charWidth) {
+                result['width'] = (options.charWidth * len) + 'px';
+            }
+        } else {
+            result['--length'] = len;
+        }
+        return result;
+    }
+    // -------------------------------------------------------------------------
+    // :: options {charWidth}
+    // -------------------------------------------------------------------------
+    function char_width_prop(len, options) {
+        return style_to_string(char_width_object(len, options));
+    }
+    // -------------------------------------------------------------------------
     function extra_css(text, options) {
         if (typeof wcwidth !== 'undefined') {
             var bare = bare_text(text);
             var len = strlen(bare);
             if (len > 1 && len !== $.terminal.length(bare)) {
-                return char_width_prop(len, options);
+                return char_width_object(len, options);
             }
         }
-        return '';
     }
     // -------------------------------------------------------------------------
     function wide_characters(text, options) {
@@ -5431,7 +5488,7 @@
                         ++length;
                         offset = 1;
                         i += 1;
-                    } else if (!braket || !have_formatting) {
+                    } else if (!braket || !have_formatting || (in_text && !formatting)) {
                         ++count;
                         ++length;
                     }
@@ -6198,17 +6255,27 @@
                 }
             }
             // -----------------------------------------------------------------
-            function add_attrs(attrs) {
+            function attrs_to_string(style, attrs) {
                 if (attrs) {
                     var keys = filter_attr_names(Object.keys(attrs));
                     if (keys.length) {
                         return ' ' + keys.map(function(name) {
-                            var value = attrs[name].replace(/"/g, '&quot;');
+                            var value = escape_html_attr(attrs[name]);
+                            if (name === 'style') {
+                                // merge style attr and colors #617
+                                value = value ? style + ';' + value : style;
+                            }
+                            if (!value) {
+                                return name;
+                            }
                             return name + '="' + value + '"';
                         }).join(' ');
                     }
                 }
-                return '';
+                if (!style) {
+                    return '';
+                }
+                return ' style="' + style + '"';
             }
             // -----------------------------------------------------------------
             function rel_attr() {
@@ -6306,9 +6373,9 @@
                     // but this escape is not needed when echo - don't know why
                     text = text.replace(/\\\\/g, '\\');
                 }
-                var style_str = '';
+                var styles = {};
                 if (style.indexOf('b') !== -1) {
-                    style_str += 'font-weight:bold;';
+                    styles['font-weight'] = 'bold';
                 }
                 var text_decoration = [];
                 if (style.indexOf('u') !== -1) {
@@ -6321,36 +6388,35 @@
                     text_decoration.push('overline');
                 }
                 if (text_decoration.length) {
-                    style_str += 'text-decoration:' +
-                        text_decoration.join(' ') + ';';
+                    styles['text-decoration'] = text_decoration.join(' ');
                 }
                 if (style.indexOf('i') !== -1) {
-                    style_str += 'font-style:italic;';
+                    styles['font-style'] = 'italic';
                 }
                 if ($.terminal.valid_color(color)) {
-                    style_str += [
-                        'color:' + color,
-                        '--color:' + color,
-                        '--original-color:' + color
-                    ].join(';') + ';';
+                    $.extend(styles, {
+                        'color': color,
+                        '--color': color,
+                        '--original-color': color
+                    });
                     if (style.indexOf('!') !== -1) {
-                        style_str += '--link-color:' + color + ';';
+                        styles['--link-color'] = color;
                     }
                     if (style.indexOf('g') !== -1) {
-                        style_str += 'text-shadow:0 0 5px ' + color + ';';
+                        styles['text-shadow'] = '0 0 5px ' + color;
                     }
                 }
                 if ($.terminal.valid_color(background)) {
-                    style_str += [
-                        'background-color:' + background,
-                        '--background:' + background
-                    ].join(';') + ';';
+                    $.extend(styles, {
+                        'background-color': background,
+                        '--background': background
+                    });
                 }
                 var data = clean_data(data_text, text);
                 var extra = extra_css(text, settings);
                 if (extra) {
                     text = wide_characters(text, settings);
-                    style_str += extra;
+                    $.extend(styles, extra);
                 }
                 var result;
                 if (style.indexOf('!') !== -1) {
@@ -6360,15 +6426,8 @@
                 } else {
                     result = '<span';
                 }
-                if (attrs && attrs.style) {
-                    // merge style attr and colors #617
-                    attrs.style = style_str + attrs.style;
-                    style_str = '';
-                }
-                result += add_attrs(attrs);
-                if (style_str !== '') {
-                    result += ' style="' + style_str + '"';
-                }
+                var style_str = style_to_string(styles);
+                result += attrs_to_string(style_str, attrs);
                 if (_class !== '') {
                     result += ' class="' + _class + '"';
                 }
@@ -6403,9 +6462,9 @@
                         var data = clean_data(text);
                         var extra = extra_css(text, settings);
                         var prefix;
-                        if (extra.length) {
+                        if (extra) {
                             text = wide_characters(text, settings);
-                            prefix = '<span style="' + extra + '"';
+                            prefix = '<span style="' + style_to_string(extra) + '"';
                         } else {
                             prefix = '<span';
                         }
@@ -6959,7 +7018,7 @@
     // :: $('<div/>').terminal().echo('foo bar').appendTo('body');
     // -----------------------------------------------------------------------
     function get_char_size(term) {
-        var rect;
+        var result;
         if (terminal_ready(term)) {
             var $prompt = term.find('.cmd-prompt').clone().css({
                 visiblity: 'hidden',
@@ -6968,13 +7027,17 @@
             $prompt.appendTo(term.find('.cmd'))
                 .html('&nbsp;')
                 .wrap('<div class="cmd-wrapper"/>');
-            rect = $prompt[0].getBoundingClientRect();
+            result = {
+                width: $prompt.width(),
+                height: $prompt.height()
+            };
             $prompt.parent().remove();
         } else {
             var temp = $('<div class="terminal terminal-temp"><div class="terminal-' +
                          'wrapper"><div class="terminal-output"><div><div class="te' +
                          'rminal-line" style="float: left"><span>&nbsp;</span></div' +
-                         '></div></div></div>').appendTo('body');
+                         '></div></div><div class="terminal-pixel"></div></div>')
+                .appendTo('body');
             temp.addClass(term.attr('class')).attr('id', term.attr('id'));
             if (term) {
                 var style = term.attr('style');
@@ -6985,13 +7048,11 @@
                     temp.attr('style', style);
                 }
             }
-            rect = temp.find('.terminal-line')[0].getBoundingClientRect();
-        }
-        var result = {
-            width: rect.width,
-            height: rect.height
-        };
-        if (temp) {
+            var node = temp.find('.terminal-line');
+            result = {
+                width: node.width(),
+                height: node.height()
+            };
             temp.remove();
         }
         return result;
@@ -7253,6 +7314,7 @@
             notAString: '%s function: argument is not a string',
             redrawError: 'Internal error, wrong position in cmd redraw',
             invalidStrings: 'Command %s have unclosed strings',
+            invalidMask: 'Invalid mask used only string or boolean allowed',
             defunctTerminal: "You can't call method on terminal that was destroyed"
         }
     };
@@ -7331,19 +7393,6 @@
                 }
             }
             return value;
-        }
-        // ---------------------------------------------------------------------
-        // :: call when line is out of view when outputLimit is used
-        // :: NOTE: it's not called when less plugin is used onClear is called
-        // :: instead because less call term::clear() after export old view
-        // ---------------------------------------------------------------------
-        function unmount(node) {
-            var index = node.data('index');
-            var line = lines[index];
-            var options = line[1];
-            if (is_function(options.unmount)) {
-                options.unmount.call(self, node);
-            }
         }
         // ---------------------------------------------------------------------
         // :: helper function used in render and in update
@@ -8102,9 +8151,7 @@
             try {
                 buffer.clear();
                 unpromise(lines.render(self.rows(), function(lines_to_show) {
-                    return lines_to_show.map(function(line) {
-                        return process_line(line);
-                    });
+                    return lines_to_show.map(process_line);
                 }), function() {
                     self.flush(options);
                     if (!options.update) {
@@ -8142,7 +8189,7 @@
                     parents.each(function() {
                         var $self = $(this);
                         if ($self.is(':empty')) {
-                            unmount($self);
+                            lines.unmount($self);
                             // there can be divs inside parent that
                             // was not removed
                             $self.remove();
@@ -8178,6 +8225,23 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: apply command mask to command
+        // ---------------------------------------------------------------------
+        function mask_command(command) {
+            var mask = command_line.mask();
+            switch (typeof mask) {
+                case 'string':
+                    return command.replace(/./g, mask);
+                case 'boolean':
+                    if (mask) {
+                        return command.replace(/./g, settings.maskChar);
+                    } else {
+                        return $.terminal.escape_formatting(command);
+                    }
+            }
+            throw new $.terminal.Exception(strings().invalidMask);
+        }
+        // ---------------------------------------------------------------------
         // :: Display prompt and last command
         // ---------------------------------------------------------------------
         function echo_command(command) {
@@ -8186,22 +8250,11 @@
             }
             // true will return last rendered string
             var prompt = command_line.prompt(true);
-            var mask = command_line.mask();
-            switch (typeof mask) {
-                case 'string':
-                    command = command.replace(/./g, mask);
-                    break;
-                case 'boolean':
-                    if (mask) {
-                        command = command.replace(/./g, settings.maskChar);
-                    } else {
-                        command = $.terminal.escape_formatting(command);
-                    }
-                    break;
-            }
+            command = mask_command(command);
             var options = {
                 exec: false,
                 formatters: false,
+                convertLinks: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('terminal-command'));
                     fire_event('onEchoCommand', [div, command]);
@@ -8858,13 +8911,30 @@
                     }
                     var bottom = self.is_bottom();
                     var interval = setInterval(function() {
-                        var chr = $.terminal.substring(formattted, char_i, char_i + 1);
-                        new_prompt += chr;
-                        self.set_prompt(new_prompt);
-                        if (chr === '\n' && bottom) {
-                            self.scroll_to_bottom();
+                        if (!skip) {
+                            var chr = $.terminal
+                                .substring(formattted, char_i, char_i + 1);
+                            if (options.mask) {
+                                var mask = command_line.mask();
+                                if (typeof mask === 'string') {
+                                    chr = mask;
+                                } else if (mask) {
+                                    chr = settings.maskChar;
+                                }
+                            }
+                            new_prompt += chr;
+                            self.set_prompt(new_prompt);
+                            if (chr === '\n' && bottom) {
+                                self.scroll_to_bottom();
+                            }
+                            char_i++;
+                        } else {
+                            self.skip_stop();
+                            var chrRest = $.terminal.substring(formattted, char_i, len);
+                            new_prompt += chrRest;
+                            self.set_prompt(new_prompt);
+                            char_i = len;
                         }
-                        char_i++;
                         if (char_i === len) {
                             clearInterval(interval);
                             setTimeout(function() {
@@ -8905,11 +8975,21 @@
             var helper = typed(function(message, prompt, options) {
                 self.set_prompt(prompt);
                 with_prompt(prompt, function(prompt) {
-                    self.echo(prompt + message, $.extend({}, options, {typing: false}));
+                    var command = mask_command(message);
+                    command = $.terminal.apply_formatters(command, {command: true});
+                    var output = prompt + command;
+                    options = $.extend({}, options, {
+                        typing: false,
+                        formatters: false,
+                        convertLinks: false
+                    });
+                    self.echo(output, options);
                 }, self);
             });
             return function(prompt, message, options) {
-                return helper(message, $.extend({}, options, {prompt: prompt}));
+                return helper(message, $.extend({}, options, {
+                    prompt: prompt, mask: true
+                }));
             };
         })();
         // ---------------------------------------------------------------------
@@ -9201,6 +9281,7 @@
                 // so we know how many times call pop
                 var level = self.level();
                 function login_callback(user, token, silent) {
+                    var next;
                     if (token) {
                         popUserPass();
                         var name = self.prefix_name(true) + '_';
@@ -9208,13 +9289,7 @@
                         storage.set(name + 'login', user);
                         in_login = false;
                         fire_event('onAfterLogin', [user, token]);
-                        if (is_function(success)) {
-                            // will be used internaly since users know
-                            // when login success (they decide when
-                            // it happen by calling the callback -
-                            // this funtion)
-                            success();
-                        }
+                        next = success;
                     } else {
                         if (infinite) {
                             if (!silent) {
@@ -9229,12 +9304,17 @@
                             self.pop(undefined, true).pop(undefined, true);
                         }
                         // used only to call pop in push
-                        if (is_function(error)) {
-                            error();
-                        }
+                        next = error;
                     }
                     if (self.paused()) {
                         self.resume();
+                    }
+                    // will be used internaly since users know
+                    // when login success (they decide when
+                    // it happen by calling the callback -
+                    // this funtion)
+                    if (is_function(next)) {
+                        next();
                     }
                     self.off('terminal.autologin');
                 }
@@ -9257,21 +9337,19 @@
                                 silent) {
                                 login_callback(user, token, silent);
                             });
-                            if (ret && is_function(ret.then || ret.done)) {
-                                (ret.then || ret.done).call(ret, function(token) {
-                                    login_callback(user, token);
-                                }).catch(function(err) {
-                                    self.pop(undefined, true).pop(undefined, true);
-                                    self.error(err.message);
-                                    if (is_function(error)) {
-                                        error();
-                                    }
-                                    if (self.paused()) {
-                                        self.resume();
-                                    }
-                                    self.off('terminal.autologin');
-                                });
-                            }
+                            unpromise(ret, function(token) {
+                                login_callback(user, token);
+                            }, function(err) {
+                                self.pop(undefined, true).pop(undefined, true);
+                                self.error(err.message);
+                                if (is_function(error)) {
+                                    error();
+                                }
+                                if (self.paused()) {
+                                    self.resume();
+                                }
+                                self.off('terminal.autologin');
+                            });
                         } catch (e) {
                             display_exception(e, 'AUTH');
                         }
@@ -9557,6 +9635,24 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: Skip the next terminal animations
+            // -------------------------------------------------------------
+            skip: function() {
+                skip = true;
+            },
+            // -------------------------------------------------------------
+            // :: Stop skipping the next terminal animations
+            // -------------------------------------------------------------
+            skip_stop: function() {
+                skip = false;
+            },
+            // -------------------------------------------------------------
+            // :: Return if key animation is running
+            // -------------------------------------------------------------
+            animating: function() {
+                return animating;
+            },
+            // -------------------------------------------------------------
             // :: Return the number of characters that fit into the width of
             // :: the terminal
             // -------------------------------------------------------------
@@ -9611,6 +9707,7 @@
                         width: old_width + left + right,
                         height: old_height + top + bottom
                     },
+                    density: pixel_density,
                     char: char_size,
                     cols: this.cols(),
                     rows: this.rows()
@@ -9762,6 +9859,7 @@
             clear_cache: 'Map' in root ? function() {
                 buffer.clear_cache();
                 line_cache.clear();
+                command_line.clear_cache();
                 return self;
             } : function() {
                 return self;
@@ -9992,7 +10090,10 @@
             // -------------------------------------------------------------
             refresh: function() {
                 if (char_size.width !== 0) {
-                    self[0].style.setProperty('--char-width', char_size.width);
+                    css(self[0], {
+                        '--char-width': char_size.width,
+                        '--pixel-density': pixel_density
+                    });
                 }
                 self.clear_cache();
                 if (command) {
@@ -10042,6 +10143,10 @@
                                     wrapper = partial;
                                 }
                             } else if (is_function(data.finalize)) {
+                                if (options.update && data.raw === true && data.newline) {
+                                    // don't re-render html and jQuery/DOM nodes #759
+                                    return;
+                                }
                                 if (scroll) {
                                     wrapper.find('img').on('load', function() {
                                         self.scroll_to_bottom();
@@ -10122,12 +10227,12 @@
                                 display: 'inline-block'
                             });
                             var last_row_rect = last_row[0].getBoundingClientRect();
-                            var partial_width = last_row_rect.width;
+                            var partial_width = last_row_rect.width / pixel_density;
                             // Shift command prompt up one line and to the right
                             // enough so that it appears directly next to the
                             // partially constructed output line
                             cmd_prompt.css('margin-left', partial_width);
-                            cmd_outer.css('top', -last_row_rect.height);
+                            cmd_outer.css('top', -last_row_rect.height / pixel_density);
                             // Measure length of partial line in characters
                             var char_width = self.geometry().char.width;
                             var prompt_margin = Math.round(partial_width / char_width);
@@ -10534,17 +10639,17 @@
                 var pos;
                 amount = Math.round(amount);
                 if (self.prop) { // work with jQuery > 1.6
-                    if (amount > self.prop('scrollTop') && amount > 0) {
-                        self.prop('scrollTop', 0);
+                    if (amount > scroller.prop('scrollTop') && amount > 0) {
+                        scroller.prop('scrollTop', 0);
                     }
-                    pos = self.prop('scrollTop');
-                    self.scrollTop(pos + amount);
+                    pos = scroller.prop('scrollTop');
+                    scroller.scrollTop(pos + amount);
                 } else {
-                    if (amount > self.prop('scrollTop') && amount > 0) {
-                        self.prop('scrollTop', 0);
+                    if (amount > scroller.prop('scrollTop') && amount > 0) {
+                        scroller.prop('scrollTop', 0);
                     }
-                    pos = self.prop('scrollTop');
-                    self.scrollTop(pos + amount);
+                    pos = scroller.prop('scrollTop');
+                    scroller.scrollTop(pos + amount);
                 }
                 return self;
             },
@@ -10929,9 +11034,10 @@
                     self.resizer('unbind');
                     self.touch_scroll('unbind');
                     font_resizer.resizer('unbind').remove();
+                    pixel_resizer.resizer('unbind').remove();
                     $(document).unbind('.terminal_' + self.id());
                     $(window).unbind('.terminal_' + self.id());
-                    self.unbind('click wheel mousewheel mousedown mouseup');
+                    self.unbind('click mousedown mouseup');
                     self.removeData('terminal').removeClass('terminal').
                         unbind('.terminal');
                     if (settings.width) {
@@ -10942,7 +11048,8 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
-                    self.find('.terminal-fill, .terminal-font').remove();
+                    self.find('.terminal-fill, .terminal-font, .terminal-scroller')
+                        .remove();
                     self.stopTime();
                     terminals.remove(terminal_id);
                     if (visibility_observer) {
@@ -11001,7 +11108,7 @@
                 } else {
                     scrollHeight = self.attr('scrollHeight');
                 }
-                self.scrollTop(scrollHeight);
+                scroller.scrollTop(scrollHeight);
                 return self;
             },
             // -------------------------------------------------------------
@@ -11119,6 +11226,7 @@
         var logins = new Stack(); // stack of logins
         var command_queue = new DelayQueue();
         var animating = false; // true on typing animation
+        var skip = false; // true if skipping currently
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
@@ -11144,10 +11252,6 @@
         if (typeof settings.height === 'number') {
             self.height(settings.height);
         }
-        var char_size = get_char_size(self);
-        // this is needed when terminal have selector with --size that is not
-        // bare .terminal so fake terminal will not get the proper size #602
-        var need_char_size_recalculate = !terminal_ready(self);
         // so it's the same as in TypeScript definition for options
         delete settings.formatters;
         // used to throw error when calling methods on destroyed terminal
@@ -11191,13 +11295,20 @@
         $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
         });
-        var wrapper = $('<div class="terminal-wrapper"/>').appendTo(self);
+        var scroller = $('<div class="terminal-scroller"/>').appendTo(self);
+        var wrapper = $('<div class="terminal-wrapper"/>').appendTo(scroller);
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
-        var fill = $('<div class="terminal-fill"/>').appendTo(self);
+        var pixel_resizer = $('<div class="terminal-pixel"/>').appendTo(self);
+        var fill = $('<div class="terminal-fill"/>').appendTo(scroller);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
+        var pixel_density = get_pixel_size();
+        var char_size = get_char_size(self);
+        // this is needed when terminal have selector with --size that is not
+        // bare .terminal so fake terminal will not get the proper size #602
+        var need_char_size_recalculate = !terminal_ready(self);
         // before login event
         if (settings.login && fire_event('onBeforeLogin') === false) {
             autologin = false;
@@ -11228,6 +11339,11 @@
                 self.focus();
                 self.scroll_to_bottom();
             }
+        }
+        // -------------------------------------------------------------------------------
+        function get_pixel_size() {
+            var rect = pixel_resizer[0].getBoundingClientRect();
+            return rect.width || 1;
         }
         // -------------------------------------------------------------------------------
         function blur_terminal() {
@@ -11535,7 +11651,7 @@
                     var ignore_elements = '.terminal-output textarea,' +
                         '.terminal-output input';
                     self.mousedown(function(e) {
-                        if (!scrollbar_event(e, fill)) {
+                        if (!scrollbar_event(e, fill, pixel_density)) {
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
@@ -11601,7 +11717,7 @@
                             var width = 5 * 14;
                             var rect = self[0].getBoundingClientRect();
                             // we need width without scrollbar
-                            var content_width = fill.outerWidth();
+                            var content_width = fill.outerWidth() * pixel_density;
                             // fix jumping when click near bottom or left edge #592
                             var diff_h = (top + cmd_rect.top + height);
                             diff_h = diff_h - rect.height - rect.top;
@@ -11616,10 +11732,10 @@
                                 width -= Math.ceil(diff_w);
                             }
                             $clip.attr('style', [
-                                'left:' + left + 'px !important',
-                                'top:' + top + 'px !important',
-                                'width:' + width + 'px !important',
-                                'height:' + height + 'px !important'
+                                style_prop('left', left, true),
+                                style_prop('top', top, true),
+                                style_prop('width', width, true),
+                                style_prop('height', height, true)
                             ].join(';'));
                             if (!$clip.is(':focus')) {
                                 $clip.focus();
@@ -11659,7 +11775,7 @@
                     var $textarea = self.find('textarea');
                     var rect = self[0].getBoundingClientRect();
                     var height = self[0].scrollHeight;
-                    var scrollTop = self.scrollTop();
+                    var scrollTop = scroller.scrollTop();
                     var diff = height - (scrollTop + rect.height);
                     // if scrolled to bottom top need to be aligned with cursor line
                     // done by CSS file using css variables
@@ -11697,16 +11813,26 @@
                 if (self.is(':visible')) {
                     var width = fill.width();
                     var height = fill.height();
+                    var new_pixel_density = get_pixel_size();
+                    css(self[0], {
+                        '--pixel-density': new_pixel_density
+                    });
                     if (need_char_size_recalculate) {
                         need_char_size_recalculate = !terminal_ready(self);
-                        calculate_char_size();
+                        if (!need_char_size_recalculate) {
+                            char_size = get_char_size(self);
+                            calculate_char_size();
+                        }
                     }
                     // prevent too many calculations in IE
-                    if (old_height !== height || old_width !== width) {
+                    if (old_height !== height ||
+                        old_width !== width ||
+                        pixel_density !== new_pixel_density) {
                         self.resize();
                     }
                     old_height = height;
                     old_width = width;
+                    pixel_density = new_pixel_density;
                 }
             }
             function create_resizers() {
@@ -11718,18 +11844,22 @@
                     calculate_char_size();
                     self.resize();
                 }, options);
+                pixel_resizer.resizer('unbind').resizer(function() {
+                    pixel_density = get_pixel_size();
+                    self.resize();
+                }, options);
             }
             function bottom_detect(intersections) {
                 is_bottom_detected = intersections[0].intersectionRatio === 1;
             }
             function create_bottom_detect() {
                 if (window.IntersectionObserver) {
-                    var top = $('<div class="terminal-scroll-marker"/>').appendTo(self);
+                    var top = $('<div class="terminal-scroll-marker"/>')
+                        .appendTo(scroller);
                     var marker = top;
                     if (settings.scrollBottomOffset !== -1) {
-                        marker = $('<div/>').css({
-                            height: settings.scrollBottomOffset
-                        }).appendTo(top);
+                        var style = style_prop('height', settings.scrollBottomOffset);
+                        marker = $('<div style="' + style + '"/>').appendTo(top);
                     }
                     is_bottom_observer = new IntersectionObserver(bottom_detect, {
                         root: self[0]
@@ -11932,7 +12062,7 @@
                 }
                 if ($.event.special.mousewheel) {
                     // we keep mousewheel plugin just in case
-                    self.on('mousewheel', mousewheel);
+                    scroller.on('mousewheel', mousewheel);
                 } else {
                     // detection take from:
                     // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
@@ -11958,7 +12088,7 @@
                         mousewheel(e, -delta);
                     });
                 }
-                self.touch_scroll(function(event) {
+                scroller.touch_scroll(function(event) {
                     var delta = event.current.clientY - event.previous.clientY;
                     var ret;
                     var interpreter = interpreters.top();
