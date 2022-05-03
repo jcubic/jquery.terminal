@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 03 May 2022 14:04:01 +0000
+ * Date: Tue, 03 May 2022 14:24:20 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5186,7 +5186,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 03 May 2022 14:04:01 +0000',
+        date: 'Tue, 03 May 2022 14:24:20 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8413,7 +8413,12 @@
                 }
                 var interpreter = interpreters.top();
                 if (!silent && settings.echoCommand) {
-                    echo_command(command);
+                    // wait for the next queue task, so if prompt is dynamic
+                    // and changed by non async command it will pick up
+                    // new a prompt #757
+                    setTimeout(function() {
+                        echo_command(command);
+                    }, 0);
                 }
                 // new promise will be returned to exec that will resolve his
                 // returned promise

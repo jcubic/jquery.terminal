@@ -8413,7 +8413,12 @@
                 }
                 var interpreter = interpreters.top();
                 if (!silent && settings.echoCommand) {
-                    echo_command(command);
+                    // wait for the next queue task, so if prompt is dynamic
+                    // and changed by non async command it will pick up
+                    // new a prompt #757
+                    setTimeout(function() {
+                        echo_command(command);
+                    }, 0);
                 }
                 // new promise will be returned to exec that will resolve his
                 // returned promise
