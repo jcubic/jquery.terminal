@@ -1752,6 +1752,21 @@
         return this.last_line()[1].newline;
     };
     // -------------------------------------------------------------------------
+    // :: call when line is out of view when outputLimit is used
+    // :: NOTE: it's not called when less plugin is used onClear is called
+    // :: instead because less call term::clear() after export old view
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.unmount = function(node) {
+        var index = node.data('index');
+        var line = this._lines[index];
+        if (line) {
+            var options = line[1];
+            if (is_function(options.unmount)) {
+                options.unmount.call(self, node);
+            }
+        }
+    };
+    // -------------------------------------------------------------------------
     OutputLines.prototype.last_line = function() {
         var len = this._lines.length;
         return this._lines[len - 1];
@@ -7371,19 +7386,6 @@
             return value;
         }
         // ---------------------------------------------------------------------
-        // :: call when line is out of view when outputLimit is used
-        // :: NOTE: it's not called when less plugin is used onClear is called
-        // :: instead because less call term::clear() after export old view
-        // ---------------------------------------------------------------------
-        function unmount(node) {
-            var index = node.data('index');
-            var line = lines[index];
-            var options = line[1];
-            if (is_function(options.unmount)) {
-                options.unmount.call(self, node);
-            }
-        }
-        // ---------------------------------------------------------------------
         // :: helper function used in render and in update
         // ---------------------------------------------------------------------
         function prepare_render(value, options) {
@@ -8178,7 +8180,7 @@
                     parents.each(function() {
                         var $self = $(this);
                         if ($self.is(':empty')) {
-                            unmount($self);
+                            lines.unmount($self);
                             // there can be divs inside parent that
                             // was not removed
                             $self.remove();

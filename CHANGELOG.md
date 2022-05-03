@@ -12,6 +12,7 @@
 * fix calling login_name in dynamic prompt
 * fix masking command on typing animation [#770](https://github.com/jcubic/jquery.terminal/issues/770)
 * fix selection/click on text that was echo without newline (when prompt is still in same line)
+* fix exception when outputLimit is used [#776](https://github.com/jcubic/jquery.terminal/issues/776)
 
 ## 2.32.1
 ### Bugfix

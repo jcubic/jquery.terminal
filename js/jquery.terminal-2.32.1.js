@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 16 Apr 2022 13:23:43 +0000
+ * Date: Tue, 03 May 2022 13:10:48 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1750,6 +1750,21 @@
             return true;
         }
         return this.last_line()[1].newline;
+    };
+    // -------------------------------------------------------------------------
+    // :: call when line is out of view when outputLimit is used
+    // :: NOTE: it's not called when less plugin is used onClear is called
+    // :: instead because less call term::clear() after export old view
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.unmount = function(node) {
+        var index = node.data('index');
+        var line = this._lines[index];
+        if (line) {
+            var options = line[1];
+            if (is_function(options.unmount)) {
+                options.unmount.call(self, node);
+            }
+        }
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.last_line = function() {
@@ -5171,7 +5186,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 16 Apr 2022 13:23:43 +0000',
+        date: 'Tue, 03 May 2022 13:10:48 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7371,19 +7386,6 @@
             return value;
         }
         // ---------------------------------------------------------------------
-        // :: call when line is out of view when outputLimit is used
-        // :: NOTE: it's not called when less plugin is used onClear is called
-        // :: instead because less call term::clear() after export old view
-        // ---------------------------------------------------------------------
-        function unmount(node) {
-            var index = node.data('index');
-            var line = lines[index];
-            var options = line[1];
-            if (is_function(options.unmount)) {
-                options.unmount.call(self, node);
-            }
-        }
-        // ---------------------------------------------------------------------
         // :: helper function used in render and in update
         // ---------------------------------------------------------------------
         function prepare_render(value, options) {
@@ -8178,7 +8180,7 @@
                     parents.each(function() {
                         var $self = $(this);
                         if ($self.is(':empty')) {
-                            unmount($self);
+                            lines.unmount($self);
                             // there can be divs inside parent that
                             // was not removed
                             $self.remove();
@@ -8900,21 +8902,30 @@
                     }
                     var bottom = self.is_bottom();
                     var interval = setInterval(function() {
-                        var chr = $.terminal.substring(formattted, char_i, char_i + 1);
-                        if (options.mask) {
-                            var mask = command_line.mask();
-                            if (typeof mask === 'string') {
-                                chr = mask;
-                            } else if (mask) {
-                                chr = settings.maskChar;
+                        if (!skip) {
+                            var chr = $.terminal
+                                .substring(formattted, char_i, char_i + 1);
+                            if (options.mask) {
+                                var mask = command_line.mask();
+                                if (typeof mask === 'string') {
+                                    chr = mask;
+                                } else if (mask) {
+                                    chr = settings.maskChar;
+                                }
                             }
+                            new_prompt += chr;
+                            self.set_prompt(new_prompt);
+                            if (chr === '\n' && bottom) {
+                                self.scroll_to_bottom();
+                            }
+                            char_i++;
+                        } else {
+                            self.skip_stop();
+                            var chrRest = $.terminal.substring(formattted, char_i, len);
+                            new_prompt += chrRest;
+                            self.set_prompt(new_prompt);
+                            char_i = len;
                         }
-                        new_prompt += chr;
-                        self.set_prompt(new_prompt);
-                        if (chr === '\n' && bottom) {
-                            self.scroll_to_bottom();
-                        }
-                        char_i++;
                         if (char_i === len) {
                             clearInterval(interval);
                             setTimeout(function() {
@@ -9606,6 +9617,24 @@
                     fire_event('onResume');
                 });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: Skip the next terminal animations
+            // -------------------------------------------------------------
+            skip: function() {
+                skip = true;
+            },
+            // -------------------------------------------------------------
+            // :: Stop skipping the next terminal animations
+            // -------------------------------------------------------------
+            skip_stop: function() {
+                skip = false;
+            },
+            // -------------------------------------------------------------
+            // :: Return if key animation is running
+            // -------------------------------------------------------------
+            animating: function() {
+                return animating;
             },
             // -------------------------------------------------------------
             // :: Return the number of characters that fit into the width of
@@ -11180,6 +11209,7 @@
         var logins = new Stack(); // stack of logins
         var command_queue = new DelayQueue();
         var animating = false; // true on typing animation
+        var skip = false; // true if skipping currently
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
