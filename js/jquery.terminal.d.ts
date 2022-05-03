@@ -630,6 +630,7 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
         false): this;
     // jQuery Terminal method
     resize(num_chars?: number): Cmd;
+    clear_cache(): Cmd;
     enable(): Cmd;
     isenabled(): boolean;
     disable(focus?: boolean): Cmd;

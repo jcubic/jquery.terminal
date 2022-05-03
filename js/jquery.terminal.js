@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 03 May 2022 14:04:01 +0000
+ * Date: Tue, 03 May 2022 15:07:01 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1531,6 +1531,10 @@
             this._cache.clear();
         }
         return test;
+    };
+    // -------------------------------------------------------------------------
+    WorkerCache.prototype.clear = function() {
+        this._cache.clear();
     };
     // -------------------------------------------------------------------------
     WorkerCache.prototype.get = function(key) {
@@ -3855,6 +3859,11 @@
                 }
                 return self;
             },
+            clear_cache: 'Map' in root ? function() {
+                cmd_line_worker.clear();
+            } : function() {
+                return self;
+            },
             invoke_key: function(shortcut) {
                 if (!enabled) {
                     warn('invoke_key("' + shortcut + '") called on disabled terminal');
@@ -5186,7 +5195,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 03 May 2022 14:04:01 +0000',
+        date: 'Tue, 03 May 2022 15:07:01 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9850,6 +9859,7 @@
             clear_cache: 'Map' in root ? function() {
                 buffer.clear_cache();
                 line_cache.clear();
+                command_line.clear_cache();
                 return self;
             } : function() {
                 return self;

@@ -1533,6 +1533,10 @@
         return test;
     };
     // -------------------------------------------------------------------------
+    WorkerCache.prototype.clear = function() {
+        this._cache.clear();
+    };
+    // -------------------------------------------------------------------------
     WorkerCache.prototype.get = function(key) {
         if (!this._cache) {
             return this._action(key);
@@ -3853,6 +3857,11 @@
                     redraw();
                     draw_prompt();
                 }
+                return self;
+            },
+            clear_cache: 'Map' in root ? function() {
+                cmd_line_worker.clear();
+            } : function() {
                 return self;
             },
             invoke_key: function(shortcut) {
@@ -9850,6 +9859,7 @@
             clear_cache: 'Map' in root ? function() {
                 buffer.clear_cache();
                 line_cache.clear();
+                command_line.clear_cache();
                 return self;
             } : function() {
                 return self;
