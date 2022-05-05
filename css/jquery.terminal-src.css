@@ -790,7 +790,7 @@ terminal .terminal-output > div {
     box-sizing: border-box;
 }
 .terminal-scroller, .terminal .terminal-fill, .cmd-editable {
-    padding: calc((10px / var(--pixel-density, 1)));
+    padding: calc(10px / var(--pixel-density, 1));
 }
 .cmd-editable {
     padding-top: 0;

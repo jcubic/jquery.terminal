@@ -1,3 +1,7 @@
+## 2.33.1
+### Bugfix
+* fix padding removed by minifier
+
 ## 2.33.0
 ### Features
 * add a color and background attributes to the font tag in the xml formatter
