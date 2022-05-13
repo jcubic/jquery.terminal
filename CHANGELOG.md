@@ -1,3 +1,7 @@
+## 2.33.2
+### Bugfix
+* fix scroll to bottom [#777](https://github.com/jcubic/jquery.terminal/issues/777)
+
 ## 2.33.1
 ### Bugfix
 * fix padding removed by minifier
