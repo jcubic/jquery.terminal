@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.33.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 05 May 2022 17:12:32 +0000
+ * Date: Fri, 13 May 2022 10:17:36 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5194,8 +5194,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.33.1',
-        date: 'Thu, 05 May 2022 17:12:32 +0000',
+        version: 'DEV',
+        date: 'Fri, 13 May 2022 10:17:36 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11096,17 +11096,18 @@
             // :: ref: https://stackoverflow.com/a/18927969/387194
             // -------------------------------------------------------------
             scroll_to: function(elem) {
-                var scroll = self.scrollTop() - self.offset().top + $(elem).offset().top;
-                self.scrollTop(scroll);
+                var scroll = scroller.scrollTop() - self.offset().top +
+                    $(elem).offset().top;
+                scroller.scrollTop(scroll);
                 return self;
             },
             // -------------------------------------------------------------
             scroll_to_bottom: function() {
                 var scrollHeight;
                 if (self.prop) {
-                    scrollHeight = self.prop('scrollHeight');
+                    scrollHeight = scroller.prop('scrollHeight');
                 } else {
-                    scrollHeight = self.attr('scrollHeight');
+                    scrollHeight = scroller.attr('scrollHeight');
                 }
                 scroller.scrollTop(scrollHeight);
                 return self;
@@ -11122,9 +11123,9 @@
                     return is_bottom_detected;
                 } else {
                     var scroll_height, scroll_top, height;
-                    scroll_height = self[0].scrollHeight;
-                    scroll_top = self[0].scrollTop;
-                    height = self[0].offsetHeight;
+                    scroll_height = scroller[0].scrollHeight;
+                    scroll_top = scroller[0].scrollTop;
+                    height = scroller[0].offsetHeight;
                     var limit = scroll_height - settings.scrollBottomOffset;
                     return scroll_top + height > limit;
                 }

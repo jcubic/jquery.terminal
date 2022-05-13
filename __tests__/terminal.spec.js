@@ -6383,15 +6383,16 @@ describe('Terminal plugin', function() {
                 height: 100,
                 numRows: 10
             });
+            var scroller = term.find('.terminal-scroller');
             it('should change scrollTop', function() {
                 for (var i = 0; i < 20; i++) {
                     term.echo('text ' + i);
                 }
-                var pos = term.prop('scrollTop');
+                var pos = scroller.prop('scrollTop');
                 term.scroll(10);
-                expect(term.prop('scrollTop')).toEqual(pos + 10);
+                expect(scroller.prop('scrollTop')).toEqual(pos + 10);
                 term.scroll(-10);
-                expect(term.prop('scrollTop')).toEqual(pos);
+                expect(scroller.prop('scrollTop')).toEqual(pos);
             });
         });
         describe('logout/token', function() {
