@@ -11096,7 +11096,8 @@
             // :: ref: https://stackoverflow.com/a/18927969/387194
             // -------------------------------------------------------------
             scroll_to: function(elem) {
-                var scroll = scroller.scrollTop() - self.offset().top + $(elem).offset().top;
+                var scroll = scroller.scrollTop() - self.offset().top +
+                    $(elem).offset().top;
                 scroller.scrollTop(scroll);
                 return self;
             },
