@@ -1,3 +1,7 @@
+## 2.33.3
+### Bugfix
+* fix newline in minified js file [#780](https://github.com/jcubic/jquery.terminal/issues/780)
+
 ## 2.33.2
 ### Bugfix
 * fix scroll to bottom [#777](https://github.com/jcubic/jquery.terminal/issues/777)
