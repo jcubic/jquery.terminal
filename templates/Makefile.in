@@ -135,9 +135,9 @@ contributors-www.json:
 	./scripts/contributors.js -u jcubic -r jquery.terminal-www > contributors-www.json
 
 contributors: contributors-www.json contributors.json
-	./scripts/update-contributors-readme contributors.json "CONTRIBUTORS" templates/README.in
-	./scripts/update-contributors-readme contributors-www.json "CONTRIBUTORS-WWW" templates/README.in
-	./scripts/update-contributors-readme contributors-www.json "CONTRIBUTORS" www/README.md
+	./scripts/update-contributors-readme jquery.terminal contributors.json "CONTRIBUTORS" templates/README.in
+	./scripts/update-contributors-readme jquery.terminal-www contributors-www.json "CONTRIBUTORS-WWW" templates/README.in
+	./scripts/update-contributors-readme jquery.terminal-www contributors-www.json "CONTRIBUTORS" www/README.md
 	./scripts/update-contributors-package.js -j contributors.json -f package.json
 	./scripts/update-contributors-package.js -j contributors.json -f templates/package.git
 

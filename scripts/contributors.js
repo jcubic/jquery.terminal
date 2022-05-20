@@ -99,7 +99,7 @@ function get_api(argv) {
 }
 
 
-if ((argv.f && argv.m) || (argv.u && argv.r)) {
+if (((argv.f && argv.m) || (argv.u && argv.r)) && argv.r) {
     (argv.f ? get_file(argv.f) : get_api(argv)).then(function(contributors) {
         if (argv.m) {
             var split = split_equal(contributors, 7);
@@ -109,7 +109,7 @@ if ((argv.f && argv.m) || (argv.u && argv.r)) {
                     return '[<img src="' + contributor.avatar + '" width="100px;"/>' +
                         '<br /><sub>' + contributor.name + '</sub>](' +
                         contributor.url + ')<br>[commits](https://github.com/jcubic' +
-                        '/jquery.terminal/commits?author=' + contributor.login + ')';
+                        '/' + argv.r + '/commits?author=' + contributor.login + ')';
                 }).join(' | ') + ' |';
             });
             rows.splice(1, 0, align);
