@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 26 May 2022 11:22:23 +0000
+ * Date: Thu, 26 May 2022 11:26:09 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5195,7 +5195,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 26 May 2022 11:22:23 +0000',
+        date: 'Thu, 26 May 2022 11:26:09 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10029,6 +10029,12 @@
                     command_line.mask(mask === true ? settings.maskChar : mask);
                 });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: Return current mask value
+            // -------------------------------------------------------------
+            get_mask: function() {
+                return command_line.mask();
             },
             // -------------------------------------------------------------
             // :: Return the ouput of the terminal as text

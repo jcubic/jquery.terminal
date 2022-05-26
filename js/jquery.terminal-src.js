@@ -10031,6 +10031,12 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: Return current mask value
+            // -------------------------------------------------------------
+            get_mask: function() {
+                return command_line.mask();
+            },
+            // -------------------------------------------------------------
             // :: Return the ouput of the terminal as text
             // :: the output may contain user terminal formatting
             // -------------------------------------------------------------
