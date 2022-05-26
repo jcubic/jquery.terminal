@@ -1,6 +1,7 @@
 ---
 name: Question
 about: Question about the library
+labels: ["question"]
 ---
 
 ### I have question related to jQuery Terminal

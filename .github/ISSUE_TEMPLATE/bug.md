@@ -1,6 +1,7 @@
 ---
 name: Bug Report
 about: Found bug in the library
+labels: ["Bug"]
 ---
 ### Issue summary
 
