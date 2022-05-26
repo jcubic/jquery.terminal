@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.33.3
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 20 May 2022 15:41:40 +0000
+ * Date: Thu, 26 May 2022 11:22:24 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,

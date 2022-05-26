@@ -10794,6 +10794,9 @@
                 if (settings.history) {
                     command_line.history().disable();
                 }
+                if (is_function(options.onReady)) {
+                    options.onReady.call(self);
+                }
                 return defer.promise();
             },
             // -------------------------------------------------------------
