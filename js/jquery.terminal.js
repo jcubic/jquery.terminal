@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 26 May 2022 11:26:09 +0000
+ * Date: Thu, 26 May 2022 15:46:03 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2119,7 +2119,7 @@
         var last_rendered_prompt;
         var prompt_last_line;
         var just_prompt_len;
-        var extra_prompt_margin = 0;
+        var prompt_offset = 0;
         var prompt_len;
         var prompt_node = self.find('.cmd-prompt');
         var reverse_search = false;
@@ -3015,7 +3015,8 @@
                 prompt = prompt_node.text();
             }
             prompt = $.terminal.escape_brackets(prompt);
-            var re = new RegExp('^' + $.terminal.escape_regex(prompt));
+            var prompt_marker = get_prompt_marker();
+            var re = new RegExp('^' + prompt_marker + $.terminal.escape_regex(prompt));
             var array;
             if (string.match(/\n/)) {
                 var tmp = string.split('\n');
@@ -3044,7 +3045,7 @@
                     }
                 }
             } else {
-                array = split(prompt + string, num_chars);
+                array = split(prompt_marker + prompt + string, num_chars);
                 array[0] = array[0].replace(re, '');
             }
             // fix issue with cursor that was cut off #379
@@ -3448,6 +3449,16 @@
             };
         })();
         // ---------------------------------------------------------------------
+        // :: return prompt filler for the margin set in terminal when using
+        // :: newline: false
+        // ---------------------------------------------------------------------
+        function get_prompt_marker() {
+            if (prompt_offset) {
+                return new Array(prompt_offset + 1).join('\uFFFF');
+            }
+            return '';
+        }
+        // ---------------------------------------------------------------------
         // :: Draw prompt that can be a function or a string
         // ---------------------------------------------------------------------
         var prev_prompt_data;
@@ -3455,10 +3466,16 @@
             function format_prompt(prompt) {
                 if (!prompt) {
                     just_prompt_len = 0;
-                    prompt_len = just_prompt_len + extra_prompt_margin;
+                    prompt_len = just_prompt_len + prompt_offset;
                     return prompt;
                 }
-                var lines = $.terminal.split_equal(prompt, num_chars).map(function(line) {
+                var prompt_marker = get_prompt_marker();
+                var tmp_prompt = prompt_marker + prompt;
+                var lines = $.terminal.split_equal(tmp_prompt, num_chars);
+                lines = lines.map(function(line) {
+                    return line.replace(/^\uFFFF+/, '');
+                }).filter(Boolean);
+                lines = lines.map(function(line) {
                     if (!$.terminal.have_formatting(line)) {
                         return '[[;;]' + $.terminal.escape_brackets(line) + ']';
                     }
@@ -3478,7 +3495,7 @@
                 });
                 var last_line = $.terminal.format(encoded_last_line, options);
                 just_prompt_len = strlen(text(encoded_last_line));
-                prompt_len = just_prompt_len + extra_prompt_margin;
+                prompt_len = just_prompt_len + prompt_offset;
                 return lines.slice(0, -1).map(function(line) {
                     line = $.terminal.encode(line, {
                         tabs: settings.tabs
@@ -3733,8 +3750,8 @@
             },
             // inform cursor about size of partial output line
             __set_prompt_margin: function(len) {
-                extra_prompt_margin = len;
-                prompt_len = just_prompt_len + extra_prompt_margin;
+                prompt_offset = len;
+                prompt_len = just_prompt_len + prompt_offset;
             },
             prompt: function(user_prompt) {
                 if (user_prompt === true) {
@@ -5195,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 26 May 2022 11:26:09 +0000',
+        date: 'Thu, 26 May 2022 15:46:03 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10205,13 +10222,12 @@
                                 div.css('width', '100%');
                             }
                         });
-                        var cmd_prompt = self.find('.cmd-prompt');
-                        var cmd_outer = self.find('.cmd');
+                        var cmd_prompt = command_line.find('.cmd-prompt');
                         partial = self.find('.partial');
                         var last_row;
                         if (partial.length === 0) {
                             cmd_prompt.css('margin-left', 0);
-                            cmd_outer.css('top', 0);
+                            command_line.css('top', 0);
                             command_line.__set_prompt_margin(0);
                             last_row = self.find('.terminal-output div:last-child' +
                                                  ' div:last-child');
@@ -10222,27 +10238,20 @@
                                     display: ''
                                 });
                             }
-                        } else {
+                        } else if (snapshot.length && snapshot[snapshot.length - 1]) {
+                            var len = $.terminal.length(snapshot[snapshot.length - 1]);
+                            len %= self.cols();
                             last_row = partial.children().last();
-                            // Remove width='100%' for two reasons:
-                            // 1. so we can measure the width right here
-                            // 2. so that the background of this last line of output
-                            //    doesn't occlude the first line of input to the right
-                            last_row.css({
-                                width: '',
-                                display: 'inline-block'
-                            });
                             var last_row_rect = last_row[0].getBoundingClientRect();
-                            var partial_width = last_row_rect.width / pixel_density;
                             // Shift command prompt up one line and to the right
                             // enough so that it appears directly next to the
                             // partially constructed output line
-                            cmd_prompt.css('margin-left', partial_width);
-                            cmd_outer.css('top', -last_row_rect.height / pixel_density);
-                            // Measure length of partial line in characters
-                            var char_width = self.geometry().char.width;
-                            var prompt_margin = Math.round(partial_width / char_width);
-                            command_line.__set_prompt_margin(prompt_margin);
+                            var size = is_ch_unit_supported ? len + 'ch' : len + 'px';
+                            css(command_line[0], {
+                                'top': (-last_row_rect.height / pixel_density) + 'px',
+                                '--prompt-offset': size
+                            });
+                            command_line.__set_prompt_margin(len);
                         }
                         limit_lines();
                         fire_event('onFlush');

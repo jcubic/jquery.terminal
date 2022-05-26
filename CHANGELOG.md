@@ -1,3 +1,8 @@
+## 2.33.4
+### Bugfix
+* fix line wrapping of cmd when using echo: newline [#773](https://github.com/jcubic/jquery.terminal/issues/773)
+* fix text selection on echo without newline text
+
 ## 2.33.3
 ### Bugfix
 * fix newline in minified js file [#780](https://github.com/jcubic/jquery.terminal/issues/780)

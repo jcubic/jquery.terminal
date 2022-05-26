@@ -712,7 +712,12 @@ terminal .terminal-output > div {
 .terminal .cmd-prompt * {
     pointer-events: visible;
 }
-.terminal .cmd-wrapper > div, .terminal .cmd textarea {
+.cmd-prompt > span:first-child {
+    margin-left: var(--prompt-offset);
+}
+.terminal .cmd-wrapper > div:not(.cmd-cursor-line),
+.terminal .cmd-cursor-line > span,
+.terminal .cmd textarea {
     pointer-events: visible;
 }
 .terminal h1::selection,

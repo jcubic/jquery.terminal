@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Thu, 26 May 2022 11:22:24 +0000
+ * Date: Thu, 26 May 2022 15:46:04 +0000
  */
 
 .terminal .terminal-output .format, .cmd .format,
@@ -712,7 +712,12 @@ terminal .terminal-output > div {
 .terminal .cmd-prompt * {
     pointer-events: visible;
 }
-.terminal .cmd-wrapper > div, .terminal .cmd textarea {
+.cmd-prompt > span:first-child {
+    margin-left: var(--prompt-offset);
+}
+.terminal .cmd-wrapper > div:not(.cmd-cursor-line),
+.terminal .cmd-cursor-line > span,
+.terminal .cmd textarea {
     pointer-events: visible;
 }
 .terminal h1::selection,
