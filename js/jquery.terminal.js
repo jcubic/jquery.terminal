@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 26 May 2022 15:46:03 +0000
+ * Date: Sun, 12 Jun 2022 18:58:05 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5212,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 26 May 2022 15:46:03 +0000',
+        date: 'Sun, 12 Jun 2022 18:58:05 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11717,7 +11717,9 @@
                         event_name = 'mousedown.terminal';
                     }
                     self.on(event_name, function(e) {
-                        was_ctx_event = get_selected_html() === '' && is_context_event(e);
+                        was_ctx_event = get_selected_html() === '' &&
+                            is_context_event(e) &&
+                            !e.ctrlKey;
                         if (was_ctx_event) {
                             var $target = $(e.target);
                             if ($target.is('img,value,audio,object,canvas,a')) {

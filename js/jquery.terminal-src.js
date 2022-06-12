@@ -11717,7 +11717,9 @@
                         event_name = 'mousedown.terminal';
                     }
                     self.on(event_name, function(e) {
-                        was_ctx_event = get_selected_html() === '' && is_context_event(e);
+                        was_ctx_event = get_selected_html() === '' &&
+                            is_context_event(e) &&
+                            !e.ctrlKey;
                         if (was_ctx_event) {
                             var $target = $(e.target);
                             if ($target.is('img,value,audio,object,canvas,a')) {
