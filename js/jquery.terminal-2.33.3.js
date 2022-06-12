@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 12 Jun 2022 18:58:05 +0000
+ * Date: Sun, 12 Jun 2022 20:32:54 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5212,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 12 Jun 2022 18:58:05 +0000',
+        date: 'Sun, 12 Jun 2022 20:32:54 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5418,8 +5418,8 @@
             }
             // ----------------------------------------------------------------
             function is_text(i) {
-                return not_formatting && (string[i] !== ']' || !have_formatting)
-                    && !opening;
+                return not_formatting && !opening &&
+                    ((string[i] !== ']' && !closing_formatting) || !have_formatting);
             }
             // ----------------------------------------------------------------
             // :: function will skip to next character in main loop
@@ -5465,12 +5465,14 @@
             var re_ent = /(&[^;]+);$/;
             for (var i = 0; i < string.length; i++) {
                 var substring = string.slice(i);
+                var closing_formatting = false;
                 match = substring.match(format_start_re);
                 if (match) {
                     formatting = match[1];
                     in_text = false;
                 } else if (formatting) {
                     if (string[i] === ']') {
+                        closing_formatting = in_text;
                         if (in_text) {
                             formatting = '';
                             in_text = false;

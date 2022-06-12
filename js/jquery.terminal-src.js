@@ -5418,8 +5418,8 @@
             }
             // ----------------------------------------------------------------
             function is_text(i) {
-                return not_formatting && (string[i] !== ']' || !have_formatting)
-                    && !opening;
+                return not_formatting && !opening &&
+                    ((string[i] !== ']' && !closing_formatting) || !have_formatting);
             }
             // ----------------------------------------------------------------
             // :: function will skip to next character in main loop
@@ -5465,12 +5465,14 @@
             var re_ent = /(&[^;]+);$/;
             for (var i = 0; i < string.length; i++) {
                 var substring = string.slice(i);
+                var closing_formatting = false;
                 match = substring.match(format_start_re);
                 if (match) {
                     formatting = match[1];
                     in_text = false;
                 } else if (formatting) {
                     if (string[i] === ']') {
+                        closing_formatting = in_text;
                         if (in_text) {
                             formatting = '';
                             in_text = false;
