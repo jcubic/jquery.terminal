@@ -5075,6 +5075,14 @@ describe('Terminal plugin', function() {
                 await term.insert('_world', { typing: true, delay: 0});
                 expect(term.get_command()).toEqual('hello_world');
             });
+            // issue #797
+            it('should resolve animation after async command', async () => {
+                term.echo(delay(0, () => "A"));
+                const fn = jest.fn();
+                term.echo("B", { typing: true, delay: 0 }).then(fn);
+                await delay(200);
+                expect(fn).toHaveBeenCalled();
+            });
         });
 
         describe('exec', function() {

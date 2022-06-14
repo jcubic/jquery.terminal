@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 14 Jun 2022 20:21:33 +0000
+ * Date: Tue, 14 Jun 2022 22:36:03 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5212,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 14 Jun 2022 20:21:33 +0000',
+        date: 'Tue, 14 Jun 2022 22:36:03 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10372,9 +10372,9 @@
             // ::   advanced server side controling of terminal
             // :: you can echo: promise, function, strings array or string
             // -------------------------------------------------------------
-            echo: function(arg, options) {
+            echo: function(arg, options, deferred) {
                 var arg_defined = arguments.length > 0;
-                var d = new $.Deferred();
+                var d = deferred || new $.Deferred();
                 function cont() {
                     echo_promise = false;
                     var original = echo_delay;
@@ -10522,12 +10522,17 @@
                         }
                     }
                 }
+                var animation = options && options.typing;
                 if (echo_promise) {
-                    echo_delay.push([arg, options]);
+                    var args = [arg, options];
+                    if (animation) {
+                        args.push(d);
+                    }
+                    echo_delay.push(args);
                 } else {
                     echo(arg);
                 }
-                if (options && options.typing) {
+                if (animation) {
                     return d.promise();
                 }
                 return self;

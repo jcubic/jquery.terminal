@@ -8,7 +8,7 @@
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
 [![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch=devel&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&d6690de257147887b9c38f73c9cdd577)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&874620357ad31a35421ea4b585c4546a)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![Paid Support](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![](https://img.shields.io/badge/paid-support-354465.svg)](https://support.jcubic.pl/)
