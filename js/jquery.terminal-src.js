@@ -8534,6 +8534,7 @@
                 maybe_append_name(name);
             }
             var login = self.login_name(true);
+            // name change history
             command_line.name(name + (login ? '_' + login : ''));
             var prompt = interpreter.prompt;
             if (is_function(prompt)) {

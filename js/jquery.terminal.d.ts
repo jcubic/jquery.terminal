@@ -168,6 +168,8 @@ declare namespace JQueryTerminal {
 
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
+    type MouseWheelCallback = (event: MouseEvent, delta: number, self: JQueryTerminal) => boolean | void;
+
     type execOptions = {
         typing?: boolean;
         delay?: number;
@@ -181,6 +183,9 @@ declare namespace JQueryTerminal {
         login?: LoginArgument;
         name?: string;
         completion?: Completion;
+        onExit: () => void;
+        onStart: () => void;
+        mousewheel?: MouseWheelCallback;
     }
 
     type historyFilterFunction = (command: string) => boolean;
@@ -669,6 +674,7 @@ type TerminalOptions = {
     useCache?: boolean;
     anyLinks?: boolean;
     raw?: boolean;
+    mousewheel?: JQueryTerminal.MouseWheelCallback;
     allowedAttributes?: Array<RegExp | string>;
     tabindex?: number;
     keymap?: JQueryTerminal.keymapObject;
