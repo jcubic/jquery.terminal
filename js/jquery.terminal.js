@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 12 Jun 2022 20:32:54 +0000
+ * Date: Tue, 14 Jun 2022 19:47:16 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1089,8 +1089,8 @@
                     var result = $.when.apply($, value).then(function() {
                         return callback([].slice.call(arguments));
                     });
-                    if (is_function(value.catch)) {
-                        result.catch(error);
+                    if (is_function(result.catch)) {
+                        result = result.catch(error);
                     }
                     return result;
                 }
@@ -5212,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 12 Jun 2022 20:32:54 +0000',
+        date: 'Tue, 14 Jun 2022 19:47:16 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8534,6 +8534,7 @@
                 maybe_append_name(name);
             }
             var login = self.login_name(true);
+            // name change history
             command_line.name(name + (login ? '_' + login : ''));
             var prompt = interpreter.prompt;
             if (is_function(prompt)) {
@@ -10464,6 +10465,18 @@
                         if (is_promise(value)) {
                             echo_promise = true;
                         }
+                        function cont() {
+                            echo_promise = false;
+                            var original = echo_delay;
+                            echo_delay = [];
+                            for (var i = 0; i < original.length; ++i) {
+                                self.echo.apply(self, original[i]);
+                            }
+                        }
+                        function error(e) {
+                            cont();
+                            display_exception(e, 'ECHO', true);
+                        }
                         unpromise(value, function(value) {
                             if (render(value, locals)) {
                                 return self;
@@ -10496,14 +10509,9 @@
                                     self.flush();
                                     fire_event('onAfterEcho', [arg]);
                                 }
-                                echo_promise = false;
-                                var original = echo_delay;
-                                echo_delay = [];
-                                for (var i = 0; i < original.length; ++i) {
-                                    self.echo.apply(self, original[i]);
-                                }
-                            });
-                        });
+                                cont();
+                            }, error);
+                        }, error);
                     } catch (e) {
                         // if echo throw exception we can't use error to
                         // display that exception

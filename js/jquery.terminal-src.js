@@ -1089,8 +1089,8 @@
                     var result = $.when.apply($, value).then(function() {
                         return callback([].slice.call(arguments));
                     });
-                    if (is_function(value.catch)) {
-                        result.catch(error);
+                    if (is_function(result.catch)) {
+                        result = result.catch(error);
                     }
                     return result;
                 }
@@ -10465,6 +10465,18 @@
                         if (is_promise(value)) {
                             echo_promise = true;
                         }
+                        function cont() {
+                            echo_promise = false;
+                            var original = echo_delay;
+                            echo_delay = [];
+                            for (var i = 0; i < original.length; ++i) {
+                                self.echo.apply(self, original[i]);
+                            }
+                        }
+                        function error(e) {
+                            cont();
+                            display_exception(e, 'ECHO', true);
+                        }
                         unpromise(value, function(value) {
                             if (render(value, locals)) {
                                 return self;
@@ -10497,14 +10509,9 @@
                                     self.flush();
                                     fire_event('onAfterEcho', [arg]);
                                 }
-                                echo_promise = false;
-                                var original = echo_delay;
-                                echo_delay = [];
-                                for (var i = 0; i < original.length; ++i) {
-                                    self.echo.apply(self, original[i]);
-                                }
-                            });
-                        });
+                                cont();
+                            }, error);
+                        }, error);
                     } catch (e) {
                         // if echo throw exception we can't use error to
                         // display that exception
