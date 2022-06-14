@@ -10375,6 +10375,18 @@
             echo: function(arg, options) {
                 var arg_defined = arguments.length > 0;
                 var d = new $.Deferred();
+                function cont() {
+                    echo_promise = false;
+                    var original = echo_delay;
+                    echo_delay = [];
+                    for (var i = 0; i < original.length; ++i) {
+                        self.echo.apply(self, original[i]);
+                    }
+                }
+                function error(e) {
+                    cont();
+                    display_exception(e, 'ECHO', true);
+                }
                 function echo(arg) {
                     try {
                         var locals = $.extend({
@@ -10464,18 +10476,6 @@
                         }
                         if (is_promise(value)) {
                             echo_promise = true;
-                        }
-                        function cont() {
-                            echo_promise = false;
-                            var original = echo_delay;
-                            echo_delay = [];
-                            for (var i = 0; i < original.length; ++i) {
-                                self.echo.apply(self, original[i]);
-                            }
-                        }
-                        function error(e) {
-                            cont();
-                            display_exception(e, 'ECHO', true);
                         }
                         unpromise(value, function(value) {
                             if (render(value, locals)) {

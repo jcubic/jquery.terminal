@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 14 Jun 2022 19:47:16 +0000
+ * Date: Tue, 14 Jun 2022 20:21:33 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5212,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 14 Jun 2022 19:47:16 +0000',
+        date: 'Tue, 14 Jun 2022 20:21:33 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10375,6 +10375,18 @@
             echo: function(arg, options) {
                 var arg_defined = arguments.length > 0;
                 var d = new $.Deferred();
+                function cont() {
+                    echo_promise = false;
+                    var original = echo_delay;
+                    echo_delay = [];
+                    for (var i = 0; i < original.length; ++i) {
+                        self.echo.apply(self, original[i]);
+                    }
+                }
+                function error(e) {
+                    cont();
+                    display_exception(e, 'ECHO', true);
+                }
                 function echo(arg) {
                     try {
                         var locals = $.extend({
@@ -10464,18 +10476,6 @@
                         }
                         if (is_promise(value)) {
                             echo_promise = true;
-                        }
-                        function cont() {
-                            echo_promise = false;
-                            var original = echo_delay;
-                            echo_delay = [];
-                            for (var i = 0; i < original.length; ++i) {
-                                self.echo.apply(self, original[i]);
-                            }
-                        }
-                        function error(e) {
-                            cont();
-                            display_exception(e, 'ECHO', true);
                         }
                         unpromise(value, function(value) {
                             if (render(value, locals)) {
