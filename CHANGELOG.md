@@ -5,6 +5,10 @@
 ### Bugfix
 * fix line wrapping of cmd when using echo: newline [#773](https://github.com/jcubic/jquery.terminal/issues/773)
 * fix text selection on echo without newline text
+* fix rejected promises from echo [#790](https://github.com/jcubic/jquery.terminal/issues/790)
+* improve TypeScript types for typing animation [#794](https://github.com/jcubic/jquery.terminal/issues/794)
+* add missing mousewheel typing animation [#795](https://github.com/jcubic/jquery.terminal/issues/795)
+* fix iterate formatting over closing bracket [#792](https://github.com/jcubic/jquery.terminal/issues/792)
 
 ## 2.33.3
 ### Bugfix
