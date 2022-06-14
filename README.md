@@ -351,6 +351,12 @@ Personal thanks:
 * [T.J. Crowder](https://stackoverflow.com/users/157247/t-j-crowder) for helping with tracking_replace on [StackOveflow](https://stackoverflow.com/a/46756077/387194)
 * [@jerch](https://github.com/jerch) for helping with ANSI Parsing
 
+Also thanks to:
+
+[![BrowserStack](https://user-images.githubusercontent.com/587740/39730261-9c65c4d8-522e-11e8-9f12-16b349377a35.png)](http://browserstack.com/)
+
+for cross-device testing opportunity.
+
 ### Paid Support
 You can request paid support, you can find details at [support.jcubic.pl](https://support.jcubic.pl/).
 
