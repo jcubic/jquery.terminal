@@ -5581,7 +5581,10 @@
         // :: each character is wrapped into formatting from input string
         // :: or empty formatting so it will create span when using with ::format
         // ---------------------------------------------------------------------
-        partition: function partition(string) {
+        partition: function partition(string, options) {
+            var settings = $.extend({
+                wrap: true
+            }, options);
             if (!$.terminal.have_formatting(string)) {
                 var chars = $.terminal.split_characters(string);
                 return chars.map(wrap);
@@ -5598,7 +5601,7 @@
                     if (string.match(/\\]$/)) {
                         string = string.replace(/\\]/g, '\\\\]');
                     }
-                } else {
+                } else if (settings.wrap) {
                     string = wrap(string);
                 }
                 return string;
@@ -8930,10 +8933,10 @@
                         self.set_prompt('');
                     }
                     var bottom = self.is_bottom();
+                    var chars = $.terminal.partition(formattted, {wrap: false});
                     var interval = setInterval(function() {
                         if (!skip) {
-                            var chr = $.terminal
-                                .substring(formattted, char_i, char_i + 1);
+                            var chr = chars[char_i];
                             if (options.mask) {
                                 var mask = command_line.mask();
                                 if (typeof mask === 'string') {

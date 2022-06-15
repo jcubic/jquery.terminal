@@ -2,6 +2,7 @@
 ### Features
 * add `term::get_mask` method [#785](https://github.com/jcubic/jquery.terminal/issues/785)
 * add `onReady` event to `term::read` [#779](https://github.com/jcubic/jquery.terminal/issues/779)
+* improve performance of typing animation
 ### Bugfix
 * fix line wrapping of cmd when using echo: newline [#773](https://github.com/jcubic/jquery.terminal/issues/773)
 * fix text selection on echo without newline text
