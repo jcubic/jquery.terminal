@@ -10228,7 +10228,6 @@
                                 div.css('width', '100%');
                             }
                         });
-                        var cmd_prompt = command_line.find('.cmd-prompt');
                         partial = self.find('.partial');
                         var last_row;
                         if (partial.length === 0) {
