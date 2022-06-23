@@ -10232,8 +10232,10 @@
                         partial = self.find('.partial');
                         var last_row;
                         if (partial.length === 0) {
-                            cmd_prompt.css('margin-left', 0);
-                            command_line.css('top', 0);
+                            css(command_line[0], {
+                                '--prompt-offset': '',
+                                top: ''
+                            });
                             command_line.__set_prompt_margin(0);
                             last_row = self.find('.terminal-output div:last-child' +
                                                  ' div:last-child');
