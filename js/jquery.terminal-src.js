@@ -11085,7 +11085,7 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
-                    self.find('.terminal-fill, .terminal-font, .terminal-scroller')
+                    self.find('.terminal-fill, .terminal-font')
                         .remove();
                     self.stopTime();
                     terminals.remove(terminal_id);
@@ -11098,7 +11098,7 @@
                     }
                     var scroll_marker = self.find('.terminal-scroll-marker');
                     if (is_bottom_observer) {
-                        is_bottom_observer.disconnect(scroll_marker[0]);
+                        is_bottom_observer.unobserve(scroll_marker[0]);
                     }
                     scroll_marker.remove();
                     if (mutation_observer) {
