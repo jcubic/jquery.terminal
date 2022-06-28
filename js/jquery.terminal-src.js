@@ -11115,7 +11115,7 @@
                         ].join(' '));
                     }
                     output.remove();
-                    wrapper.remove();
+                    scroller.remove();
                     if (body_terminal) {
                         var $body = $(body_terminal);
                         if ($body.attr('class') === 'full-screen-terminal') {

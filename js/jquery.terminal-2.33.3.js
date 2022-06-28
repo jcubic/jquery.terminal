@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 28 Jun 2022 12:07:37 +0000
+ * Date: Tue, 28 Jun 2022 13:36:55 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5212,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 28 Jun 2022 12:07:37 +0000',
+        date: 'Tue, 28 Jun 2022 13:36:55 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11115,7 +11115,7 @@
                         ].join(' '));
                     }
                     output.remove();
-                    wrapper.remove();
+                    scroller.remove();
                     if (body_terminal) {
                         var $body = $(body_terminal);
                         if ($body.attr('class') === 'full-screen-terminal') {
