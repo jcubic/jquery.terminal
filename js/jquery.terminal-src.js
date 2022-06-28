@@ -10526,17 +10526,17 @@
                         }
                     }
                 }
-                var animation = options && options.typing;
+                var is_animation = options && options.typing;
                 if (echo_promise) {
                     var args = [arg, options];
-                    if (animation) {
+                    if (is_animation) {
                         args.push(d);
                     }
                     echo_delay.push(args);
                 } else {
                     echo(arg);
                 }
-                if (animation) {
+                if (is_animation) {
                     return d.promise();
                 }
                 return self;
@@ -11098,7 +11098,7 @@
                     }
                     var scroll_marker = self.find('.terminal-scroll-marker');
                     if (is_bottom_observer) {
-                        is_bottom_observer.unobserve(scroll_marker[0]);
+                        is_bottom_observer.disconnect(scroll_marker[0]);
                     }
                     scroll_marker.remove();
                     if (mutation_observer) {

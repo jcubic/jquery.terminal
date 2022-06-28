@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 23 Jun 2022 13:26:27 +0000
+ * Date: Tue, 28 Jun 2022 10:59:20 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5212,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 23 Jun 2022 13:26:27 +0000',
+        date: 'Tue, 28 Jun 2022 10:59:20 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10526,17 +10526,17 @@
                         }
                     }
                 }
-                var animation = options && options.typing;
+                var is_animation = options && options.typing;
                 if (echo_promise) {
                     var args = [arg, options];
-                    if (animation) {
+                    if (is_animation) {
                         args.push(d);
                     }
                     echo_delay.push(args);
                 } else {
                     echo(arg);
                 }
-                if (animation) {
+                if (is_animation) {
                     return d.promise();
                 }
                 return self;
@@ -11098,7 +11098,7 @@
                     }
                     var scroll_marker = self.find('.terminal-scroll-marker');
                     if (is_bottom_observer) {
-                        is_bottom_observer.unobserve(scroll_marker[0]);
+                        is_bottom_observer.disconnect(scroll_marker[0]);
                     }
                     scroll_marker.remove();
                     if (mutation_observer) {

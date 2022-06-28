@@ -11,6 +11,7 @@
 * add missing mousewheel typing animation [#795](https://github.com/jcubic/jquery.terminal/issues/795)
 * fix iterate formatting over closing bracket [#792](https://github.com/jcubic/jquery.terminal/issues/792)
 * fix resolving promise from echo typing animation when previous command was async [#797](https://github.com/jcubic/jquery.terminal/issues/797)
+* fix double exception in terminal::destroy
 
 ## 2.33.3
 ### Bugfix
