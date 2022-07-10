@@ -10413,6 +10413,9 @@
                         // finalize function is passed around and invoked
                         // in terminal::flush after content is added to DOM
                         (function(finalize) {
+                            if (is_node(arg)) {
+                                return;
+                            }
                             locals.finalize = function(div) {
                                 if (locals.raw) {
                                     div.addClass('raw');
