@@ -251,6 +251,9 @@ require('../js/pipe')(global.$);
 require('../js/autocomplete_menu')(global.$);
 require('../js/less')(global.$);
 
+// this is needed for testing less plugin
+global.$.terminal.defaults.imagePause = false;
+
 var fs = require('fs');
 var util = require('util');
 fs.readFileAsync = util.promisify(fs.readFile);

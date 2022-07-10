@@ -7238,6 +7238,7 @@
         execAnimation: false,
         execAnimationDelay: 100,
         linksNoReferrer: false,
+        imagePause: true,
         useCache: true,
         anyLinks: false,
         linksNoFollow: false,
@@ -10428,14 +10429,36 @@
                                         finalize.call(self, div);
                                     }
                                     var $images = div.find('img');
+                                    var defers = [];
+                                    var has_images = $images.length;
+                                    var should_pause = has_images && settings.imagePause;
+                                    if (should_pause) {
+                                        self.pause();
+                                    }
                                     $images.each(function() {
                                         var self = $(this);
                                         var img = new Image();
+                                        var defer;
                                         img.onerror = function() {
                                             self.replaceWith(use_broken_image);
+                                            if (defer) {
+                                                defer.resolve();
+                                            }
                                         };
+                                        if (settings.imagePause) {
+                                            defer = new $.Deferred();
+                                            defers.push(defer.promise());
+                                            self.on('load', function() {
+                                                defer.resolve();
+                                            });
+                                        }
                                         img.src = this.src;
                                     });
+                                    if (should_pause) {
+                                        $.when.apply($, defers).then(function() {
+                                            self.resume();
+                                        });
+                                    }
                                 } catch (e) {
                                     display_exception(e, 'USER:echo(finalize)');
                                     finalize = null;

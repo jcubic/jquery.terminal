@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 10 Jul 2022 20:25:42 +0000
+ * Date: Sun, 10 Jul 2022 21:24:43 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5212,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 10 Jul 2022 20:25:42 +0000',
+        date: 'Sun, 10 Jul 2022 21:24:43 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7238,6 +7238,7 @@
         execAnimation: false,
         execAnimationDelay: 100,
         linksNoReferrer: false,
+        imagePause: true,
         useCache: true,
         anyLinks: false,
         linksNoFollow: false,
@@ -10413,6 +10414,9 @@
                         // finalize function is passed around and invoked
                         // in terminal::flush after content is added to DOM
                         (function(finalize) {
+                            if (is_node(arg)) {
+                                return;
+                            }
                             locals.finalize = function(div) {
                                 if (locals.raw) {
                                     div.addClass('raw');
@@ -10425,14 +10429,36 @@
                                         finalize.call(self, div);
                                     }
                                     var $images = div.find('img');
+                                    var defers = [];
+                                    var has_images = $images.length;
+                                    var should_pause = has_images && settings.imagePause;
+                                    if (should_pause) {
+                                        self.pause();
+                                    }
                                     $images.each(function() {
                                         var self = $(this);
                                         var img = new Image();
+                                        var defer;
                                         img.onerror = function() {
                                             self.replaceWith(use_broken_image);
+                                            if (defer) {
+                                                defer.resolve();
+                                            }
                                         };
+                                        if (settings.imagePause) {
+                                            defer = new $.Deferred();
+                                            defers.push(defer.promise());
+                                            self.on('load', function() {
+                                                defer.resolve();
+                                            });
+                                        }
                                         img.src = this.src;
                                     });
+                                    if (should_pause) {
+                                        $.when.apply($, defers).then(function() {
+                                            self.resume();
+                                        });
+                                    }
                                 } catch (e) {
                                     display_exception(e, 'USER:echo(finalize)');
                                     finalize = null;
