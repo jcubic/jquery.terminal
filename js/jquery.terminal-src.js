@@ -9654,8 +9654,9 @@
                     if (fn) {
                         fn();
                     }
-                    self.scroll_to_bottom();
-                    fire_event('onResume');
+                    if (fire_event('onResume') !== false) {
+                        self.scroll_to_bottom();
+                    }
                 });
                 return self;
             },
