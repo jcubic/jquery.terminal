@@ -12,9 +12,8 @@
  * Copyright (c) 2011-2022 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Tue, 14 Jun 2022 22:57:58 +0000
+ * Date: Sun, 10 Jul 2022 21:44:40 +0000
  */
-
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
     display: inline-block;
@@ -1121,4 +1120,9 @@ terminal .terminal-output > div {
     to {
         color: var(--background);
      }
+}
+@media (prefers-reduced-motion) {
+    :root {
+        --animation: terminal-none;
+    }
 }

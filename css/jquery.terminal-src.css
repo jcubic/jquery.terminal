@@ -1121,3 +1121,8 @@ terminal .terminal-output > div {
         color: var(--background);
      }
 }
+@media (prefers-reduced-motion) {
+    :root {
+        --animation: terminal-none;
+    }
+}
