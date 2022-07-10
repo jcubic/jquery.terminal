@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 28 Jun 2022 13:36:55 +0000
+ * Date: Sun, 10 Jul 2022 20:25:42 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5212,7 +5212,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 28 Jun 2022 13:36:55 +0000',
+        date: 'Sun, 10 Jul 2022 20:25:42 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5418,8 +5418,9 @@
             }
             // ----------------------------------------------------------------
             function is_text(i) {
-                return not_formatting && !opening &&
-                    ((string[i] !== ']' && !closing_formatting) || !have_formatting);
+                return (not_formatting && !opening &&
+                        ((string[i] !== ']' && !closing_formatting) ||
+                         !have_formatting)) || (in_text && !formatting);
             }
             // ----------------------------------------------------------------
             // :: function will skip to next character in main loop

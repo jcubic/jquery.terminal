@@ -5418,8 +5418,9 @@
             }
             // ----------------------------------------------------------------
             function is_text(i) {
-                return not_formatting && !opening &&
-                    ((string[i] !== ']' && !closing_formatting) || !have_formatting);
+                return (not_formatting && !opening &&
+                        ((string[i] !== ']' && !closing_formatting) ||
+                         !have_formatting)) || (in_text && !formatting);
             }
             // ----------------------------------------------------------------
             // :: function will skip to next character in main loop

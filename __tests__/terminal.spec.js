@@ -678,6 +678,18 @@ describe('Terminal utils', function() {
                 expect($.terminal.substring(input, spec[0], 200)).toEqual(spec[1]);
             });
         });
+        it('should partition the string with brackets outside of formatting', function() {
+            // issue #792
+            var text = "[this] is some [[random]] text [[;red;]hello], [[world]]";
+            var len = $.terminal.length(text);
+            var result = [];
+            for (var i = 0; i < len; ++i) {
+                result.push($.terminal.substring(text, i,i+1));
+            }
+            for (let str of result) {
+                expect($.terminal.length(str)).toEqual(1);
+            }
+        });
         it('should return substring when input starts from normal text', function() {
             var input = 'Lorem Ipsum [[;;]Dolor]';
             expect($.terminal.substring(input, 10, 200)).toEqual('m [[;;]Dolor]');
