@@ -93,8 +93,6 @@ declare namespace JQueryTerminal {
     }
 
     type insertOptions = {
-        typing?: boolean;
-        delay?: number;
         stay?: boolean;
     }
 
@@ -116,7 +114,7 @@ declare namespace JQueryTerminal {
         white: string;
     }
 
-    type TypingAnimations = 'echo' | 'prompt' | 'animation' | 'command';
+    type TypingAnimations = 'echo' | 'prompt' | 'enter' | 'command';
 
     type LessArgument = string | ((cols: number, cb: (text: string) => void) => void) | string[];
 
@@ -168,12 +166,12 @@ declare namespace JQueryTerminal {
 
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
+    type MouseWheelCallback = (event: MouseEvent, delta: number, self: JQueryTerminal) => boolean | void;
+
     type execOptions = {
-        typing?: boolean;
-        delay?: number;
         silent?: boolean;
         deferred?: JQuery.Deferred<void>
-    }
+    } & JQueryTerminal.animationOptions;
 
     type pushOptions = {
         infiniteLogin?: boolean;
@@ -181,6 +179,9 @@ declare namespace JQueryTerminal {
         login?: LoginArgument;
         name?: string;
         completion?: Completion;
+        onExit?: () => void;
+        onStart?: () => void;
+        mousewheel?: MouseWheelCallback;
     }
 
     type historyFilterFunction = (command: string) => boolean;
@@ -225,9 +226,9 @@ declare namespace JQueryTerminal {
         escape: boolean;
     };
 
-    type promptOptions = {
+    type animationOptions = {
         delay?: number;
-        typing?: boolean;
+        typing: boolean;
     };
 
     type InterpreterItem = {
@@ -288,8 +289,6 @@ declare namespace JQueryTerminal {
         raw?: boolean;
         exec?: boolean;
         invokeMethods?: boolean;
-        delay?: number;
-        typing?: boolean;
         ansi?: boolean;
         allowedAttributes?: Array<RegExp | string>;
         unmount?: JQueryTerminal.EchoEventFunction;
@@ -669,6 +668,7 @@ type TerminalOptions = {
     useCache?: boolean;
     anyLinks?: boolean;
     raw?: boolean;
+    mousewheel?: JQueryTerminal.MouseWheelCallback;
     allowedAttributes?: Array<RegExp | string>;
     tabindex?: number;
     keymap?: JQueryTerminal.keymapObject;
@@ -753,7 +753,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     export_view(): JQueryTerminal.View;
     import_view(view: JQueryTerminal.View): JQueryTerminal;
     save_state(command?: string, ignore_hash?: boolean, index?: number): JQueryTerminal;
-    exec(command: string, silent_or_options?: boolean | JQueryTerminal.execOptions, options?: JQueryTerminal.execOptions): JQuery.Promise<void>;
+    exec(command: string, silent?: boolean | JQueryTerminal.execOptions, options?: JQueryTerminal.execOptions): JQuery.Promise<void>;
     autologin(user: string, token: string, silent?: boolean): JQueryTerminal;
     // there is success and error callbacks because we call this function from terminal and auth function can
     // be created by user
@@ -789,8 +789,12 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_command(cmd: string, silent?: boolean): JQueryTerminal;
     set_position(pos: number, relative?: boolean): JQueryTerminal;
     get_position(): number;
-    insert(str: string, stay_or_options?: boolean | JQueryTerminal.insertOptions): JQueryTerminal;
-    set_prompt(prompt: JQueryTerminal.ExtendedPrompt, options?: JQueryTerminal.promptOptions): JQueryTerminal | JQuery.Promise<void>;
+    enter(str: string, options: JQueryTerminal.animationOptions): JQuery.Promise<void>;
+    enter(str: string): JQueryTerminal;
+    insert(str: string, options: JQueryTerminal.insertOptions & JQueryTerminal.animationOptions): JQuery.Promise<void>;
+    insert(str: string, stay?: boolean): JQueryTerminal;
+    set_prompt(prompt: JQueryTerminal.ExtendedPrompt, options: JQueryTerminal.animationOptions): JQuery.Promise<void>;
+    set_prompt(prompt: JQueryTerminal.ExtendedPrompt): JQueryTerminal;
     get_prompt<T extends JQueryTerminal.ExtendedPrompt>(): T;
     set_mask(toggle?: boolean | string): JQueryTerminal;
     get_output(): string;
@@ -803,7 +807,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     // options for remove_line is useless but that's how API look like
     remove_line(line: number): JQueryTerminal;
     last_index(): number;
-    echo<TValue = JQueryTerminal.echoValueOrPromise>(arg: TValue, options?: JQueryTerminal.EchoOptions): JQueryTerminal | JQuery.Promise<void>;
+    echo(arg: string, options: JQueryTerminal.animationOptions & JQueryTerminal.EchoOptions): JQuery.Promise<void>;
+    echo<TValue = JQueryTerminal.echoValueOrPromise>(arg: TValue, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     error(arg: JQueryTerminal.errorArgument, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     exception<T extends Error>(e: T, label?: string): JQueryTerminal;
     scroll(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'scroll'> | false): this;

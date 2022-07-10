@@ -7,7 +7,7 @@
  *           \/              /____/                              version {{VER}}
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
- * Copyright (c) 2010-2018 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2022 Jakub T. Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Image Credit: Author Peter Hamer, source Wikipedia
@@ -250,6 +250,9 @@ require('../js/unix_formatting')(global.$);
 require('../js/pipe')(global.$);
 require('../js/autocomplete_menu')(global.$);
 require('../js/less')(global.$);
+
+// this is needed for testing less plugin
+global.$.terminal.defaults.imagePause = false;
 
 var fs = require('fs');
 var util = require('util');
@@ -677,6 +680,18 @@ describe('Terminal utils', function() {
                 expect($.terminal.substring(input, spec[0], 102)).toEqual(spec[1]);
                 expect($.terminal.substring(input, spec[0], 200)).toEqual(spec[1]);
             });
+        });
+        it('should partition the string with brackets outside of formatting', function() {
+            // issue #792
+            var text = "[this] is some [[random]] text [[;red;]hello], [[world]]";
+            var len = $.terminal.length(text);
+            var result = [];
+            for (var i = 0; i < len; ++i) {
+                result.push($.terminal.substring(text, i,i+1));
+            }
+            for (let str of result) {
+                expect($.terminal.length(str)).toEqual(1);
+            }
         });
         it('should return substring when input starts from normal text', function() {
             var input = 'Lorem Ipsum [[;;]Dolor]';
@@ -5075,6 +5090,14 @@ describe('Terminal plugin', function() {
                 await term.insert('_world', { typing: true, delay: 0});
                 expect(term.get_command()).toEqual('hello_world');
             });
+            // issue #797
+            it('should resolve animation after async command', async () => {
+                term.echo(delay(0, () => "A"));
+                const fn = jest.fn();
+                term.echo("B", { typing: true, delay: 0 }).then(fn);
+                await delay(200);
+                expect(fn).toHaveBeenCalled();
+            });
         });
 
         describe('exec', function() {
@@ -5716,72 +5739,68 @@ describe('Terminal plugin', function() {
             });
             it('should flush correctly with newline : false', function(){
                 var term = $('<div/>').terminal($.noop, {
-                    greetings : "greet"
+                    greetings : 'greet'
                 });
-                var cmd = term.find(".cmd");
+                var cmd = term.find('.cmd');
 
-                expect(term.find(".partial")[0]).toEqual(undefined);
-                expect(term.find("[data-index='0']").text()).toEqual("greet");
+                expect(term.find('.partial')[0]).toEqual(undefined);
+                expect(term.find('[data-index="0"]').text()).toEqual('greet');
 
                 function getLastLineRect(partial){
                     let child = partial[0].lastElementChild;
-                    child.style.width = "";
+                    child.style.width = '';
                     let rect = child.getBoundingClientRect();
-                    child.style.width = "100%";
+                    child.style.width = '100%';
                     return rect;
                 }
 
-                term.echo("###", {newline : false});
+                term.echo('###', {newline : false});
 
-                var prompt = term.find(".cmd-prompt");
-                var partial = term.find(".partial");
+                var prompt = term.find('.cmd-prompt');
+                var partial = term.find('.partial');
                 var partial_children = partial.children();
                 var last_line_rect = getLastLineRect(partial);
-                expect(partial.attr("data-index")).toEqual("1");
+                expect(partial.attr('data-index')).toEqual('1');
                 expect(partial_children.length).toEqual(1);
-                expect(cmd.css("top")).toEqual(`${-last_line_rect.height}px`);
-                expect(prompt[0].style.marginLeft).toEqual(`${last_line_rect.width}px`);
-                expect(partial_children.first().text()).toEqual("###");
+                expect(cmd.css('top')).toEqual(`${-last_line_rect.height}px`);
+                expect(partial_children.first().text()).toEqual('###');
 
-                term.echo("aaa\nbbb\nccc", {newline : false});
+                term.echo('aaa\nbbb\nccc', {newline : false});
 
-                prompt = term.find(".cmd-prompt");
-                partial = term.find(".partial");
+                prompt = term.find('.cmd-prompt');
+                partial = term.find('.partial');
                 partial_children = partial.children();
                 last_line_rect = getLastLineRect(partial);
-                expect(partial.attr("data-index")).toEqual("1");
+                expect(partial.attr('data-index')).toEqual('1');
                 expect(partial_children.length).toEqual(3);
-                expect(cmd.css("top")).toEqual(`${-last_line_rect.height}px`);
-                expect(prompt[0].style.marginLeft).toEqual(`${last_line_rect.width}px`);
-                expect(partial_children.eq(0).text()).toEqual("###aaa");
-                expect(partial_children.eq(1).text()).toEqual("bbb");
-                expect(partial_children.eq(2).text()).toEqual("ccc");
+                expect(cmd.css('top')).toEqual(`${-last_line_rect.height}px`);
+                expect(partial_children.eq(0).text()).toEqual('###aaa');
+                expect(partial_children.eq(1).text()).toEqual('bbb');
+                expect(partial_children.eq(2).text()).toEqual('ccc');
                 term.refresh();
 
-                prompt = term.find(".cmd-prompt");
-                partial = term.find(".partial");
+                prompt = term.find('.cmd-prompt');
+                partial = term.find('.partial');
                 partial_children = partial.children();
                 last_line_rect = getLastLineRect(partial);
-                expect(partial.attr("data-index")).toEqual("1");
+                expect(partial.attr('data-index')).toEqual('1');
                 expect(partial_children.length).toEqual(3);
-                expect(cmd.css("top")).toEqual(`${-last_line_rect.height}px`);
-                expect(prompt[0].style.marginLeft).toEqual(`${last_line_rect.width}px`);
-                expect(partial_children.eq(0).text()).toEqual("###aaa");
-                expect(partial_children.eq(1).text()).toEqual("bbb");
-                expect(partial_children.eq(2).text()).toEqual("ccc");
+                expect(cmd.css('top')).toEqual(`${-last_line_rect.height}px`);
+                expect(partial_children.eq(0).text()).toEqual('###aaa');
+                expect(partial_children.eq(1).text()).toEqual('bbb');
+                expect(partial_children.eq(2).text()).toEqual('ccc');
 
-                enter(term, "!!!");
+                enter(term, '!!!');
 
-                prompt = term.find(".cmd-prompt");
-                expect(cmd.css("top")).toEqual(`0px`);
-                expect(prompt[0].style.marginLeft).toEqual(`0px`);
-                expect(term.find("[data-index='1']").length).toEqual(1);
-                expect(term.find("[data-index='1']").children().last().text()).toEqual(nbsp("ccc> !!!"));
-                expect(term.find(".partial")[0]).toEqual(undefined);
+                prompt = term.find('.cmd-prompt');
+                expect(cmd.css('top')).toEqual('');
+                expect(term.find('[data-index="1"]').length).toEqual(1);
+                expect(term.find('[data-index="1"]').children().last().text()).toEqual(nbsp('ccc> !!!'));
+                expect(term.find('.partial')[0]).toEqual(undefined);
 
                 term.refresh();
-                expect(term.find("[data-index='1']").length).toEqual(1);
-                expect(term.find("[data-index='1']").children().last().text()).toEqual(nbsp("ccc> !!!"));
+                expect(term.find('[data-index="1"]').length).toEqual(1);
+                expect(term.find('[data-index="1"]').children().last().text()).toEqual(nbsp('ccc> !!!'));
             });
         });
         describe('output_buffer', function() {

@@ -4,17 +4,16 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.33.3
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
  *
- * Copyright (c) 2011-2021 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2011-2022 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 20 May 2022 15:41:40 +0000
+ * Date: Sun, 10 Jul 2022 21:44:40 +0000
  */
-
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
     display: inline-block;
@@ -712,7 +711,12 @@ terminal .terminal-output > div {
 .terminal .cmd-prompt * {
     pointer-events: visible;
 }
-.terminal .cmd-wrapper > div, .terminal .cmd textarea {
+.cmd-prompt > span:first-child {
+    margin-left: var(--prompt-offset);
+}
+.terminal .cmd-wrapper > div:not(.cmd-cursor-line),
+.terminal .cmd-cursor-line > span,
+.terminal .cmd textarea {
     pointer-events: visible;
 }
 .terminal h1::selection,
@@ -1116,4 +1120,9 @@ terminal .terminal-output > div {
     to {
         color: var(--background);
      }
+}
+@media (prefers-reduced-motion) {
+    :root {
+        --animation: terminal-none;
+    }
 }

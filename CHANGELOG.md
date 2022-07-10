@@ -1,3 +1,23 @@
+## 2.34.0
+### Features
+* add `term::get_mask` method [#785](https://github.com/jcubic/jquery.terminal/issues/785)
+* add `onReady` event to `term::read` [#779](https://github.com/jcubic/jquery.terminal/issues/779)
+* improve performance of typing animation
+* add `prefers-reduced-motion` into main CSS
+* pause terminal when images are loading [#802](https://github.com/jcubic/jquery.terminal/issues/802)
+* allow disable scroll to bottom on resume [#800](https://github.com/jcubic/jquery.terminal/issues/800)
+### Bugfix
+* fix line wrapping of cmd when using echo: newline [#773](https://github.com/jcubic/jquery.terminal/issues/773)
+* fix text selection on echo without newline text
+* fix rejected promises from echo [#790](https://github.com/jcubic/jquery.terminal/issues/790)
+* improve TypeScript types for typing animation [#794](https://github.com/jcubic/jquery.terminal/issues/794)
+* add missing mousewheel typing animation [#795](https://github.com/jcubic/jquery.terminal/issues/795)
+* fix iterate formatting over closing bracket [#792](https://github.com/jcubic/jquery.terminal/issues/792)
+* fix resolving promise from echo typing animation when previous command was async [#797](https://github.com/jcubic/jquery.terminal/issues/797)
+* fix double exception in terminal::destroy
+* fix double call to finalize function when echo DOM nodes
+* fix $.terminal.substring [#792](https://github.com/jcubic/jquery.terminal/issues/792)
+
 ## 2.33.3
 ### Bugfix
 * fix newline in minified js file [#780](https://github.com/jcubic/jquery.terminal/issues/780)

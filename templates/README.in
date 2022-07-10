@@ -1,11 +1,7 @@
-```
-      _______                 ________                        __
-     / / _  /_ ____________ _/__  ___/______________  _____  / /
- __ / / // / // / _  / _/ // / / / _  / _/     / /  \/ / _ \/ /
-/  / / // / // / ___/ // // / / / ___/ // / / / / /\  / // / /__
-\___/____ \\__/____/_/ \__ / /_/____/_//_/_/_/_/_/  \/\__\_\___/
-         \/          /____/                      version {{VER}}
-```
+<h1 align="center">
+  <img src="https://github.com/jcubic/jquery.terminal/blob/{{BRANCH}}/assets/ascii_art.svg?raw=true&ver={{VER}}"
+       alt="ASCII Art that represent text jQuery Terminal - JavaScript Library for Web Based Terminal Emulators" />
+</h1>
 
 [JavaScript Library for Web Based Terminal Emulators](https://terminal.jcubic.pl)
 
@@ -355,6 +351,12 @@ Personal thanks:
 * [T.J. Crowder](https://stackoverflow.com/users/157247/t-j-crowder) for helping with tracking_replace on [StackOveflow](https://stackoverflow.com/a/46756077/387194)
 * [@jerch](https://github.com/jerch) for helping with ANSI Parsing
 
+Also thanks to:
+
+[![BrowserStack](https://user-images.githubusercontent.com/587740/39730261-9c65c4d8-522e-11e8-9f12-16b349377a35.png)](http://browserstack.com/)
+
+for cross-device testing opportunity.
+
 ### Paid Support
 You can request paid support, you can find details at [support.jcubic.pl](https://support.jcubic.pl/).
 
@@ -362,4 +364,4 @@ You can request paid support, you can find details at [support.jcubic.pl](https:
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
-Copyright (c) 2011-2021 [Jakub T. Jankiewicz](https://jcubic.pl/me)
+Copyright (c) 2011-2022 [Jakub T. Jankiewicz](https://jcubic.pl/me)

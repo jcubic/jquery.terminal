@@ -24,7 +24,7 @@ UPDATE_CONTRIBUTORS=1
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json assets/ascii_art.svg js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css
 
 bower.json: templates/bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
@@ -86,6 +86,9 @@ emoji:
 
 test:
 	$(JEST) --coverage --env=jsdom --testMatch '**/__tests__/*.spec.js'
+
+assets/ascii_art.svg: templates/ascii_art.svg .$(VERSION)
+	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/ascii_art.svg > assets/ascii_art.svg
 
 test-accept-snapshots:
 	$(JEST) --coverage --env=jsdom --updateSnapshot --testMatch '**/__tests__/*.spec.js'
