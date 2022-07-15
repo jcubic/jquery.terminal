@@ -1,3 +1,7 @@
+## 2.35.0
+### Features
+* add bulletproof solution for generic selector (`*` or `div`) to overwrite terminal style
+
 ## 2.34.0
 ### Features
 * add `term::get_mask` method [#785](https://github.com/jcubic/jquery.terminal/issues/785)
