@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 15 Jul 2022 20:12:32 +0000
+ * Date: Sun, 31 Jul 2022 14:43:30 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2639,9 +2639,7 @@
         }
         // -------------------------------------------------------------------------------
         function up_arrow() {
-            var formatted = formatting(command);
-            formatted = $.terminal.strip(formatted);
-            var before = $.terminal.substring(formatted, 0, position);
+            var before = $.terminal.substring(command, 0, position);
             var col = self.column();
             var cursor_line = self.find('.cmd-cursor-line');
             var line = cursor_line.prevUntil('span').length;
@@ -2655,8 +2653,8 @@
             }
             if (have_newlines(before) || have_wrapping(before, prompt_len)) {
                 var prev = cursor_line.prev();
-                var splitted = prev.is('.cmd-end-line');
-                var lines = simple_split_command_line(formatted);
+                var is_splitted = prev.is('.cmd-end-line');
+                var lines = simple_split_command_line(command);
                 prev = lines[line - 1];
                 var left_over = lines[line].substring(col).length;
                 var diff;
@@ -2666,7 +2664,7 @@
                         diff -= prompt_len;
                     }
                     diff = col + prev.substring(diff).length;
-                    if (splitted) {
+                    if (is_splitted) {
                         ++diff;
                     }
                 } else {
@@ -2681,17 +2679,15 @@
         // -------------------------------------------------------------------------------
         function down_arrow() {
             // use format and strip so we get visual strings (formatting can change text)
-            var formatted = formatting(command);
-            formatted = $.terminal.strip(formatted);
-            var after = $.terminal.substring(formatted, position);
+            var after = $.terminal.substring(command, position);
             if (have_newlines(after) || have_wrapping(after)) {
-                var lines = simple_split_command_line(formatted);
+                var lines = simple_split_command_line(command);
                 var col = self.column();
                 var cursor_line = self.find('.cmd-cursor-line');
                 var $line = cursor_line.prevUntil('span');
                 var line = $line.length;
-                var ending = cursor_line.is('.cmd-end-line');
-                var next_broken = cursor_line.next().is('.cmd-end-line');
+                var is_ending = cursor_line.is('.cmd-end-line');
+                var is_next_broken = cursor_line.next().is('.cmd-end-line');
                 var next = lines[line + 1];
                 if (!next) {
                     return next_history();
@@ -2701,7 +2697,7 @@
                 // move to next line if at the end move to end of next line
                 if (left_over === 0) {
                     diff = next.length;
-                    if (next_broken) {
+                    if (is_next_broken) {
                         diff++;
                     }
                 } else {
@@ -2709,7 +2705,7 @@
                     if (line === 0) {
                         diff += prompt_len;
                     }
-                    if (ending) {
+                    if (is_ending) {
                         // correction for splitted line that don't have extra space
                         diff += 1;
                     }
@@ -3562,6 +3558,30 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: used for display_position and postition
+        // ---------------------------------------------------------------------
+        function column(command, position, include_prompt) {
+            var before = command.substring(0, position);
+            if (position === 0 || !command.length) {
+                return 0;
+            }
+            var re = /\n?([^\n]*)$/;
+            var match = before.match(re);
+            var col = match[1].length;
+            if (!have_newlines(before) &&
+                (include_prompt || have_wrapping(before, prompt_len))) {
+                col += prompt_len;
+            }
+            if (col === 0) {
+                return col;
+            }
+            col %= num_chars;
+            if (col === 0) {
+                return num_chars;
+            }
+            return col;
+        }
+        // ---------------------------------------------------------------------
         // :: Command Line Methods
         // ---------------------------------------------------------------------
         $.extend(self, {
@@ -3720,26 +3740,13 @@
                 self.removeClass('cmd').removeData('cmd').off('.cmd');
                 return self;
             },
+            display_column: function(include_prompt) {
+                var formatted = formatting(command);
+                formatted = $.terminal.strip(formatted);
+                return column(formatted, formatted_position, include_prompt);
+            },
             column: function(include_prompt) {
-                var before = command.substring(0, position);
-                if (position === 0 || !command.length) {
-                    return 0;
-                }
-                var re = /\n?([^\n]*)$/;
-                var match = before.match(re);
-                var col = match[1].length;
-                if (!have_newlines(before) &&
-                    (include_prompt || have_wrapping(before, prompt_len))) {
-                    col += prompt_len;
-                }
-                if (col === 0) {
-                    return col;
-                }
-                col %= num_chars;
-                if (col === 0) {
-                    return num_chars;
-                }
-                return col;
+                return column(command, position, include_prompt);
             },
             line: function() {
                 var before = command.substring(0, position);
@@ -5212,7 +5219,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 15 Jul 2022 20:12:32 +0000',
+        date: 'Sun, 31 Jul 2022 14:43:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

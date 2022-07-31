@@ -1,6 +1,8 @@
 ## 2.35.0
 ### Features
 * add bulletproof solution for generic selector (`*` or `div`) to overwrite terminal style
+### Bugfix
+* fix up/down arrows when moving inside command that has emoji [#608](https://github.com/jcubic/jquery.terminal/issues/608)
 
 ## 2.34.0
 ### Features

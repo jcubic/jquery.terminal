@@ -105,7 +105,7 @@
             return '\\u' + u;
         }).join('');
         var re = new RegExp('(' + unicode + ')', 'g');
-        return [re, '[[;;;emoji ' + short_name + ']⻇]'];
+        return [re, '[[;;;emoji ' + short_name + ']☺]'];
     }
     // create array of numbers out of unified field
     function parse_unified(str) {
@@ -134,12 +134,12 @@
             new RegExp(':(' + names.map(function(name) {
                 return $.terminal.escape_regex(name);
             }).join('|') + '):', 'g'),
-            '[[;;;emoji $1]⻇]'
+            '[[;;;emoji $1]☺]'
         ]);
         Object.keys(text).forEach(function(name) {
             $.terminal.defaults.formatters.push([
                 new RegExp($.terminal.escape_regex(name), 'g'),
-                '[[;;;emoji ' + text[name] + ']⻇]'
+                '[[;;;emoji ' + text[name] + ']☺]'
             ]);
         });
         for (var i = 0; i < emoji_data.length; ++i) {
