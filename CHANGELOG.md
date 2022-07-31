@@ -1,6 +1,7 @@
 ## 2.35.0
 ### Features
 * add bulletproof solution for generic selector (`*` or `div`) to overwrite terminal style
+* use jsDelivr for emoji that is way faster [#810](https://github.com/jcubic/jquery.terminal/issues/810)
 ### Bugfix
 * fix up/down arrows when moving inside command that has emoji [#608](https://github.com/jcubic/jquery.terminal/issues/608)
 
