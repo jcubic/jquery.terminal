@@ -1,9 +1,13 @@
 ## 2.35.0
+### Breaking
+* replace `imagePause` with `externalPause`
 ### Features
 * add bulletproof solution for generic selector (`*` or `div`) to overwrite terminal style
 * use jsDelivr for emoji that is way faster [#810](https://github.com/jcubic/jquery.terminal/issues/810)
+* pause terminal when loading iframes [#816](https://github.com/jcubic/jquery.terminal/issues/816)
 ### Bugfix
 * fix up/down arrows when moving inside command that has emoji [#608](https://github.com/jcubic/jquery.terminal/issues/608)
+* fix pausing when loading images [#807](https://github.com/jcubic/jquery.terminal/issues/807)
 
 ## 2.34.0
 ### Features

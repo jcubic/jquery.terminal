@@ -7276,7 +7276,7 @@
         execAnimation: false,
         execAnimationDelay: 100,
         linksNoReferrer: false,
-        imagePause: true,
+        externalPause: true,
         useCache: true,
         anyLinks: false,
         linksNoFollow: false,
@@ -8409,12 +8409,14 @@
                 fire_event('onAfterCommand', [command]);
             }
             // -----------------------------------------------------------------
-            function show(result) {
+            function show(result, promise) {
                 if (typeof result !== 'undefined') {
                     display_object(result);
                 }
                 after_exec();
-                self.resume();
+                if (promise) {
+                    self.resume();
+                }
             }
             // -----------------------------------------------------------------
             function is_animation_promise(ret) {
@@ -8439,7 +8441,9 @@
                     var error = make_label_error('Command');
                     // when for native Promise object work only in jQuery 3.x
                     if (is_function(result.done || result.then)) {
-                        return unpromise(result, show, error);
+                        return unpromise(result, function(value) {
+                            show(value, true);
+                        }, error);
                     } else {
                         return $.when(result).done(show).catch(error);
                     }
@@ -10472,12 +10476,12 @@
                                             element.replaceWith(use_broken_image);
                                         },
                                         done: function(has_elements) {
-                                            if (has_elements && settings.imagePause) {
+                                            if (has_elements && settings.externalPause) {
                                                 self.resume();
                                             }
                                         },
                                         load: function(has_elements) {
-                                            if (has_elements && settings.imagePause) {
+                                            if (has_elements && settings.externalPause) {
                                                 self.pause();
                                             }
                                         }

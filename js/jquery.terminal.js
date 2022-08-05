@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 05 Aug 2022 19:17:29 +0000
+ * Date: Fri, 05 Aug 2022 20:19:48 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 05 Aug 2022 19:17:29 +0000',
+        date: 'Fri, 05 Aug 2022 20:19:48 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7276,7 +7276,7 @@
         execAnimation: false,
         execAnimationDelay: 100,
         linksNoReferrer: false,
-        imagePause: true,
+        externalPause: true,
         useCache: true,
         anyLinks: false,
         linksNoFollow: false,
@@ -8409,12 +8409,14 @@
                 fire_event('onAfterCommand', [command]);
             }
             // -----------------------------------------------------------------
-            function show(result) {
+            function show(result, promise) {
                 if (typeof result !== 'undefined') {
                     display_object(result);
                 }
                 after_exec();
-                self.resume();
+                if (promise) {
+                    self.resume();
+                }
             }
             // -----------------------------------------------------------------
             function is_animation_promise(ret) {
@@ -8439,7 +8441,9 @@
                     var error = make_label_error('Command');
                     // when for native Promise object work only in jQuery 3.x
                     if (is_function(result.done || result.then)) {
-                        return unpromise(result, show, error);
+                        return unpromise(result, function(value) {
+                            show(value, true);
+                        }, error);
                     } else {
                         return $.when(result).done(show).catch(error);
                     }
@@ -10472,12 +10476,12 @@
                                             element.replaceWith(use_broken_image);
                                         },
                                         done: function(has_elements) {
-                                            if (has_elements && settings.imagePause) {
+                                            if (has_elements && settings.externalPause) {
                                                 self.resume();
                                             }
                                         },
                                         load: function(has_elements) {
-                                            if (has_elements && settings.imagePause) {
+                                            if (has_elements && settings.externalPause) {
                                                 self.pause();
                                             }
                                         }
