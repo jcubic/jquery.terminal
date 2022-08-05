@@ -14,7 +14,7 @@
  *
  * Date: {{DATE}}
  */
-.terminal, .terminal * {
+.terminal, .terminal *, .cmd, .cmd *, .cmd textarea {
     all: revert;
 }
 .terminal .terminal-output .format, .cmd .format,
