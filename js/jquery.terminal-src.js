@@ -10326,9 +10326,13 @@
                                 });
                             }
                         });
-                        if (scroll) {
-                            self.scroll_to_bottom();
-                        }
+                        wrapper.on_load({
+                            done: function() {
+                                if (scroll) {
+                                    self.scroll_to_bottom();
+                                }
+                            }
+                        });
                     } catch (e1) {
                         if (is_function(settings.exceptionHandler)) {
                             try {

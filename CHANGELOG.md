@@ -8,7 +8,7 @@
 ### Bugfix
 * fix up/down arrows when moving inside command that has emoji [#608](https://github.com/jcubic/jquery.terminal/issues/608)
 * fix pausing when loading images [#807](https://github.com/jcubic/jquery.terminal/issues/807)
-
+* fix scroll to bottom on echo images and iframes
 ## 2.34.0
 ### Features
 * add `term::get_mask` method [#785](https://github.com/jcubic/jquery.terminal/issues/785)
