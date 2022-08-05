@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 31 Jul 2022 14:43:30 +0000
+ * Date: Fri, 05 Aug 2022 19:17:29 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -1065,6 +1065,37 @@
             $(this).off('touchstart.scroll touchmove.scroll touchend.scroll');
         }
     });
+    // -----------------------------------------------------------------------
+    // :: This plugin is used to pause terminal when images and iframes
+    // :: are loading
+    // -----------------------------------------------------------------------
+    $.fn.on_load = function(options) {
+        var settings = $.extend({
+            error: $.noop,
+            load: $.noop,
+            done: $.noop
+        }, options);
+        var defers = [];
+        this.find('img,iframe').each(function() {
+            var self = $(this);
+            var defer = new $.Deferred();
+            self.on('load', defer.resolve)
+                .on('error', function() {
+                    settings.error(self);
+                    defer.reject();
+                });
+            defers.push(defer);
+        });
+        settings.load(!!defers.length);
+        if (defers.length) {
+            $.when.apply($, defers).then(function() {
+                settings.done(true);
+            });
+        } else {
+            settings.done(false);
+        }
+        return this;
+    };
     // -----------------------------------------------------------------------
     function jquery_resolve(value) {
         var defer = jQuery.Deferred();
@@ -5219,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 31 Jul 2022 14:43:30 +0000',
+        date: 'Fri, 05 Aug 2022 19:17:29 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10436,37 +10467,21 @@
                                     if (is_function(finalize)) {
                                         finalize.call(self, div);
                                     }
-                                    var $images = div.find('img');
-                                    var defers = [];
-                                    var has_images = $images.length;
-                                    var should_pause = has_images && settings.imagePause;
-                                    if (should_pause) {
-                                        self.pause();
-                                    }
-                                    $images.each(function() {
-                                        var self = $(this);
-                                        var img = new Image();
-                                        var defer;
-                                        img.onerror = function() {
-                                            self.replaceWith(use_broken_image);
-                                            if (defer) {
-                                                defer.resolve();
+                                    div.on_load({
+                                        error: function(element) {
+                                            element.replaceWith(use_broken_image);
+                                        },
+                                        done: function(has_elements) {
+                                            if (has_elements && settings.imagePause) {
+                                                self.resume();
                                             }
-                                        };
-                                        if (settings.imagePause) {
-                                            defer = new $.Deferred();
-                                            defers.push(defer.promise());
-                                            self.on('load', function() {
-                                                defer.resolve();
-                                            });
+                                        },
+                                        load: function(has_elements) {
+                                            if (has_elements && settings.imagePause) {
+                                                self.pause();
+                                            }
                                         }
-                                        img.src = this.src;
                                     });
-                                    if (should_pause) {
-                                        $.when.apply($, defers).then(function() {
-                                            self.resume();
-                                        });
-                                    }
                                 } catch (e) {
                                     display_exception(e, 'USER:echo(finalize)');
                                     finalize = null;

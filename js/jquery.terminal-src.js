@@ -1066,6 +1066,37 @@
         }
     });
     // -----------------------------------------------------------------------
+    // :: This plugin is used to pause terminal when images and iframes
+    // :: are loading
+    // -----------------------------------------------------------------------
+    $.fn.on_load = function(options) {
+        var settings = $.extend({
+            error: $.noop,
+            load: $.noop,
+            done: $.noop
+        }, options);
+        var defers = [];
+        this.find('img,iframe').each(function() {
+            var self = $(this);
+            var defer = new $.Deferred();
+            self.on('load', defer.resolve)
+                .on('error', function() {
+                    settings.error(self);
+                    defer.reject();
+                });
+            defers.push(defer);
+        });
+        settings.load(!!defers.length);
+        if (defers.length) {
+            $.when.apply($, defers).then(function() {
+                settings.done(true);
+            });
+        } else {
+            settings.done(false);
+        }
+        return this;
+    };
+    // -----------------------------------------------------------------------
     function jquery_resolve(value) {
         var defer = jQuery.Deferred();
         defer.resolve(value);
@@ -10436,37 +10467,21 @@
                                     if (is_function(finalize)) {
                                         finalize.call(self, div);
                                     }
-                                    var $images = div.find('img');
-                                    var defers = [];
-                                    var has_images = $images.length;
-                                    var should_pause = has_images && settings.imagePause;
-                                    if (should_pause) {
-                                        self.pause();
-                                    }
-                                    $images.each(function() {
-                                        var self = $(this);
-                                        var img = new Image();
-                                        var defer;
-                                        img.onerror = function() {
-                                            self.replaceWith(use_broken_image);
-                                            if (defer) {
-                                                defer.resolve();
+                                    div.on_load({
+                                        error: function(element) {
+                                            element.replaceWith(use_broken_image);
+                                        },
+                                        done: function(has_elements) {
+                                            if (has_elements && settings.imagePause) {
+                                                self.resume();
                                             }
-                                        };
-                                        if (settings.imagePause) {
-                                            defer = new $.Deferred();
-                                            defers.push(defer.promise());
-                                            self.on('load', function() {
-                                                defer.resolve();
-                                            });
+                                        },
+                                        load: function(has_elements) {
+                                            if (has_elements && settings.imagePause) {
+                                                self.pause();
+                                            }
                                         }
-                                        img.src = this.src;
                                     });
-                                    if (should_pause) {
-                                        $.when.apply($, defers).then(function() {
-                                            self.resume();
-                                        });
-                                    }
                                 } catch (e) {
                                     display_exception(e, 'USER:echo(finalize)');
                                     finalize = null;
