@@ -10451,6 +10451,7 @@
                             delay: settings.execAnimationDelay,
                             ansi: false,
                             typing: false,
+                            externalPause: true,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
                             onClear: null,
@@ -10458,6 +10459,7 @@
                             allowedAttributes: settings.allowedAttributes,
                             newline: true
                         }, options || {});
+                        var should_pause = settings.externalPause && locals.externalPause;
                         // finalize function is passed around and invoked
                         // in terminal::flush after content is added to DOM
                         (function(finalize) {
@@ -10480,12 +10482,12 @@
                                             element.replaceWith(use_broken_image);
                                         },
                                         done: function(has_elements) {
-                                            if (has_elements && settings.externalPause) {
+                                            if (has_elements && should_pause) {
                                                 self.resume();
                                             }
                                         },
                                         load: function(has_elements) {
-                                            if (has_elements && settings.externalPause) {
+                                            if (has_elements && should_pause) {
                                                 self.pause();
                                             }
                                         }

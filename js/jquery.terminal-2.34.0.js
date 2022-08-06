@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 05 Aug 2022 20:26:35 +0000
+ * Date: Sat, 06 Aug 2022 09:58:39 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 05 Aug 2022 20:26:35 +0000',
+        date: 'Sat, 06 Aug 2022 09:58:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10451,6 +10451,7 @@
                             delay: settings.execAnimationDelay,
                             ansi: false,
                             typing: false,
+                            externalPause: true,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
                             onClear: null,
@@ -10458,6 +10459,7 @@
                             allowedAttributes: settings.allowedAttributes,
                             newline: true
                         }, options || {});
+                        var should_pause = settings.externalPause && locals.externalPause;
                         // finalize function is passed around and invoked
                         // in terminal::flush after content is added to DOM
                         (function(finalize) {
@@ -10480,12 +10482,12 @@
                                             element.replaceWith(use_broken_image);
                                         },
                                         done: function(has_elements) {
-                                            if (has_elements && settings.externalPause) {
+                                            if (has_elements && should_pause) {
                                                 self.resume();
                                             }
                                         },
                                         load: function(has_elements) {
-                                            if (has_elements && settings.externalPause) {
+                                            if (has_elements && should_pause) {
                                                 self.pause();
                                             }
                                         }

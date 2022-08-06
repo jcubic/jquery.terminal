@@ -239,7 +239,7 @@ window.HTMLCanvasElement.prototype.toBlob = function(fn) {
 };
 global.URL = window.URL = {
     createObjectURL: function(blob) {
-        return 'data:image/jpg;' + blob;
+        return 'data:image/jpg,' + blob;
     },
     revokeObjectURL: function() {}
 };

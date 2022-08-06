@@ -202,7 +202,8 @@
                 };
             }
             term.echo(to_print.join('\n'), {
-                finalize: finalize
+                finalize: finalize,
+                externalPause: false
             });
             if (term.find('.terminal-output').is(':empty')) {
                 // sometimes the output is not flushed not idea why
