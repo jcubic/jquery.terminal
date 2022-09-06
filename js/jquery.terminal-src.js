@@ -9756,7 +9756,7 @@
             // :: Return size of the terminal instance
             // -------------------------------------------------------------
             geometry: function() {
-                var style = window.getComputedStyle(self[0]);
+                var style = window.getComputedStyle(scroller[0]);
                 function padding(name) {
                     return parseInt(style.getPropertyValue('padding-' + name), 10) || 0;
                 }
