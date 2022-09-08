@@ -6653,14 +6653,14 @@
     (function() {
         // ---------------------------------------------------------------------
         function clean_data(data, text) {
-                if (data === '') {
-                    return text;
-                } else {
-                    return data.replace(/&#93;/g, ']')
-                        .replace(/>/g, '&gt;')
-                        .replace(/</g, '&lt;')
-                        .replace(/"/g, '&quot;');
-                }
+            if (data === '') {
+                return text;
+            } else {
+                return data.replace(/&#93;/g, ']')
+                    .replace(/>/g, '&gt;')
+                    .replace(/</g, '&lt;')
+                    .replace(/"/g, '&quot;');
+            }
         }
         // ---------------------------------------------------------------------
         // test if this is valid Path
@@ -6784,10 +6784,12 @@
                         result.push('href="' + data + '"');
                     }
                     if (attrs) {
-                        if (valid_attrs.includes('target') && attrs.target === undefined) {
+                        if (valid_attrs.includes('target') &&
+                            attrs.target === undefined) {
                             attrs.target = '_blank';
                         }
-                        if (valid_attrs.includes('rel') && attrs.rel === undefined) {
+                        if (valid_attrs.includes('rel') &&
+                            attrs.rel === undefined) {
                             attrs.rel = default_rel;
                         }
                     } else {

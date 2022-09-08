@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 08 Sep 2022 17:28:16 +0000
+ * Date: Thu, 08 Sep 2022 18:52:13 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 08 Sep 2022 17:28:16 +0000',
+        date: 'Thu, 08 Sep 2022 18:52:13 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6653,14 +6653,14 @@
     (function() {
         // ---------------------------------------------------------------------
         function clean_data(data, text) {
-                if (data === '') {
-                    return text;
-                } else {
-                    return data.replace(/&#93;/g, ']')
-                        .replace(/>/g, '&gt;')
-                        .replace(/</g, '&lt;')
-                        .replace(/"/g, '&quot;');
-                }
+            if (data === '') {
+                return text;
+            } else {
+                return data.replace(/&#93;/g, ']')
+                    .replace(/>/g, '&gt;')
+                    .replace(/</g, '&lt;')
+                    .replace(/"/g, '&quot;');
+            }
         }
         // ---------------------------------------------------------------------
         // test if this is valid Path
@@ -6784,10 +6784,12 @@
                         result.push('href="' + data + '"');
                     }
                     if (attrs) {
-                        if (valid_attrs.includes('target') && attrs.target === undefined) {
+                        if (valid_attrs.includes('target') &&
+                            attrs.target === undefined) {
                             attrs.target = '_blank';
                         }
-                        if (valid_attrs.includes('rel') && attrs.rel === undefined) {
+                        if (valid_attrs.includes('rel') &&
+                            attrs.rel === undefined) {
                             attrs.rel = default_rel;
                         }
                     } else {
