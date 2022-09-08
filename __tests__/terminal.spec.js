@@ -857,14 +857,14 @@ describe('Terminal utils', function() {
             var input = '[[!;;]https://terminal.jcubic.pl]';
             var tests = [
                 [
-                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noopener" data-text>https:'+
+                    '<a href="https://terminal.jcubic.pl" rel="noopener" ' +
+                        'target="_blank" data-text>https:'+
                         '//terminal.jcubic.pl</a>',
                     {}
                 ],
                 [
-                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noreferrer noopener" data-'+
+                    '<a href="https://terminal.jcubic.pl" rel="noreferrer '+
+                        'noopener" target="_blank" data-'+
                         'text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true
@@ -878,6 +878,25 @@ describe('Terminal utils', function() {
                 expect(output).toEqual(expected);
             });
         });
+        it('should handle attrs on links', function() {
+            var tests = [
+                [
+                    '[[!;;;;https://example.com;{"target": null, "rel": null}]example]',
+                    '<a href="https://example.com" data-text>example</a>'
+                ],
+                [
+                    '[[!;;;;https://example.com;{"target": "_self", "rel": "noopener"}]example]',
+                    '<a href="https://example.com" target="_self" rel="noopener" data-text>example</a>'
+                ]
+            ];
+            var options = {
+                allowedAttributes: ['target', 'rel']
+            };
+            tests.forEach(function(spec) {
+                var output = $.terminal.format(spec[0], options);
+                expect(output).toEqual(spec[1]);
+            });
+        });
         it('should handle javascript links', function() {
             var js = "javascript".split('').map(function(chr) {
                 return '&#' + chr.charCodeAt(0) + ';';
@@ -887,22 +906,22 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
-                    '<a target="_blank" rel="noopener"' +
+                    '<a rel="noopener" target="_blank"' +
                         ' data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
-                    '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="noopener" data-text>xss</a>'
+                    '<a href="javascript:alert(\'x\')"' +
+                        ' rel="noopener" target="_blank" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
-                    '<a target="_blank" rel="noopener"' +
+                    '<a rel="noopener" target="_blank"' +
                         ' data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
-                    '<a target="_blank" rel="noopener"' +
+                    '<a rel="noopener" target="_blank"' +
                         ' data-text>xss</a>'
                 ],
             ];
@@ -917,14 +936,14 @@ describe('Terminal utils', function() {
             var input = '[[!;;]https://terminal.jcubic.pl]';
             var tests = [
                 [
-                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noopener" data-te'+
+                    '<a href="https://terminal.jcubic.pl"'+
+                        ' rel="nofollow noopener" target="_blank" data-te'+
                         'xt>https://terminal.jcubic.pl</a>',
                     {linksNoFollow: true}
                 ],
                 [
-                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noreferrer noopener"'+
+                    '<a href="https://terminal.jcubic.pl"'+
+                        ' rel="nofollow noreferrer noopener" target="_blank"'+
                         ' data-text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true,

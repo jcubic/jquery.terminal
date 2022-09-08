@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 06 Sep 2022 19:36:03 +0000
+ * Date: Thu, 08 Sep 2022 17:28:16 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 06 Sep 2022 19:36:03 +0000',
+        date: 'Thu, 08 Sep 2022 17:28:16 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6268,276 +6268,6 @@
             }
         },
         // ---------------------------------------------------------------------
-        // :: Replace terminal formatting with html
-        // ---------------------------------------------------------------------
-        format: function format(str, options) {
-            var settings = $.extend({}, {
-                linksNoReferrer: false,
-                linksNoFollow: false,
-                allowedAttributes: [],
-                charWidth: undefined,
-                escape: true,
-                anyLinks: false
-            }, options || {});
-            // -----------------------------------------------------------------
-            function filter_attr_names(names) {
-                if (names.length && settings.allowedAttributes.length) {
-                    return names.filter(function(name) {
-                        if (name === 'data-text') {
-                            return false;
-                        }
-                        var allowed = false;
-                        var filters = settings.allowedAttributes;
-                        for (var i = 0; i < filters.length; ++i) {
-                            if (filters[i] instanceof RegExp) {
-                                if (filters[i].test(name)) {
-                                    allowed = true;
-                                    break;
-                                }
-                            } else if (filters[i] === name) {
-                                allowed = true;
-                                break;
-                            }
-                        }
-                        return allowed;
-                    });
-                }
-                return [];
-            }
-            // -----------------------------------------------------------------
-            function clean_data(data, text) {
-                if (data === '') {
-                    return text;
-                } else {
-                    return data.replace(/&#93;/g, ']')
-                        .replace(/>/g, '&gt;')
-                        .replace(/</g, '&lt;')
-                        .replace(/"/g, '&quot;');
-                }
-            }
-            // -----------------------------------------------------------------
-            function attrs_to_string(style, attrs) {
-                if (attrs) {
-                    var keys = filter_attr_names(Object.keys(attrs));
-                    if (keys.length) {
-                        return ' ' + keys.map(function(name) {
-                            var value = escape_html_attr(attrs[name]);
-                            if (name === 'style') {
-                                // merge style attr and colors #617
-                                value = value ? style + ';' + value : style;
-                            }
-                            if (!value) {
-                                return name;
-                            }
-                            return name + '="' + value + '"';
-                        }).join(' ');
-                    }
-                }
-                if (!style) {
-                    return '';
-                }
-                return ' style="' + style + '"';
-            }
-            // -----------------------------------------------------------------
-            function rel_attr() {
-                var rel = ["noopener"];
-                if (settings.linksNoReferrer) {
-                    rel.unshift("noreferrer");
-                }
-                if (settings.linksNoFollow) {
-                    rel.unshift("nofollow");
-                }
-                return rel;
-            }
-            // -----------------------------------------------------------------
-            // test if this is valid Path
-            // -----------------------------------------------------------------
-            function is_path(url) {
-                return url.match(/^\.{1,2}\//) ||
-                    url.match(/^\//) ||
-                    !(url.match(/\//) || url.match(/^[^:]+:/));
-            }
-            // -----------------------------------------------------------------
-            function with_url_validation(fn) {
-                return function(url) {
-                    if (settings.anyLinks) {
-                        return true;
-                    }
-                    var test = fn(url);
-                    if (!test) {
-                        warn('Invalid URL ' + url + ' only http(s) ftp and Path ' +
-                             'are allowed');
-                    }
-                    return test;
-                };
-            }
-            // -----------------------------------------------------------------
-            var valid_href = with_url_validation(function(url) {
-                return url.match(/^((https?|file|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
-            });
-            // -----------------------------------------------------------------
-            var valid_src = with_url_validation(function(url) {
-                return url.match(/^(https?:|file:|blob:|data:)/) || is_path(url);
-            });
-            // -----------------------------------------------------------------
-            function format(s, style, color, background, _class, data_text, text) {
-                function pre_process_link(data) {
-                    var result;
-                    if (data.match(email_re)) {
-                        result = '<a href="mailto:' + data + '"';
-                    } else {
-                        // only http and ftp links (prevent javascript)
-                        // unless user force it with anyLinks option
-                        if (!valid_href(data)) {
-                            data = '';
-                        }
-                        result = '<a target="_blank"';
-                        if (data) {
-                            result += ' href="' + data + '"';
-                        }
-                        result += ' rel="' + rel_attr().join(' ') + '"';
-                    }
-                    return result;
-                }
-                function pre_process_image(data) {
-                    var result = '<img';
-                    if (valid_src(data)) {
-                        result += ' src="' + data + '"';
-                        if (text) {
-                            result += ' alt="' + text + '"';
-                        }
-                    }
-                    return result;
-                }
-                var attrs;
-                if (data_text.match(/;/)) {
-                    try {
-                        var splitted = data_text.split(';');
-                        var str = splitted.slice(1).join(';')
-                            .replace(/&nbsp;/g, ' ')
-                            .replace(/&lt;/g, '<')
-                            .replace(/&gt;/g, '>');
-                        if (str.match(/^\s*\{[^}]*\}\s*$/)) {
-                            attrs = JSON.parse(str);
-                            data_text = splitted[0];
-                        }
-                    } catch (e) {
-                    }
-                }
-                if (text === '' && !style.match(/@/)) {
-                    return ''; //'<span>&nbsp;</span>';
-                }
-                text = safe(text);
-                text = text.replace(/\\\]/g, '&#93;');
-                if (settings.escape) {
-                    // inside formatting we need to unescape escaped slashes
-                    // but this escape is not needed when echo - don't know why
-                    text = text.replace(/\\\\/g, '\\');
-                }
-                var styles = {};
-                if (style.indexOf('b') !== -1) {
-                    styles['font-weight'] = 'bold';
-                }
-                var text_decoration = [];
-                if (style.indexOf('u') !== -1) {
-                    text_decoration.push('underline');
-                }
-                if (style.indexOf('s') !== -1) {
-                    text_decoration.push('line-through');
-                }
-                if (style.indexOf('o') !== -1) {
-                    text_decoration.push('overline');
-                }
-                if (text_decoration.length) {
-                    styles['text-decoration'] = text_decoration.join(' ');
-                }
-                if (style.indexOf('i') !== -1) {
-                    styles['font-style'] = 'italic';
-                }
-                if ($.terminal.valid_color(color)) {
-                    $.extend(styles, {
-                        'color': color,
-                        '--color': color,
-                        '--original-color': color
-                    });
-                    if (style.indexOf('!') !== -1) {
-                        styles['--link-color'] = color;
-                    }
-                    if (style.indexOf('g') !== -1) {
-                        styles['text-shadow'] = '0 0 5px ' + color;
-                    }
-                }
-                if ($.terminal.valid_color(background)) {
-                    $.extend(styles, {
-                        'background-color': background,
-                        '--background': background
-                    });
-                }
-                var data = clean_data(data_text, text);
-                var extra = extra_css(text, settings);
-                if (extra) {
-                    text = wide_characters(text, settings);
-                    $.extend(styles, extra);
-                }
-                var result;
-                if (style.indexOf('!') !== -1) {
-                    result = pre_process_link(data);
-                } else if (style.indexOf('@') !== -1) {
-                    result = pre_process_image(data);
-                } else {
-                    result = '<span';
-                }
-                var style_str = style_to_string(styles);
-                result += attrs_to_string(style_str, attrs);
-                if (_class !== '') {
-                    result += ' class="' + _class + '"';
-                }
-                // links and image need data-text attribute cmd click behavior
-                // formatter can return links.
-                if (style.indexOf('!') !== -1) {
-                    result += ' data-text>' + text + '</a>';
-                } else if (style.indexOf('@') !== -1) {
-                    result += ' data-text/>';
-                } else {
-                    result += ' data-text="' + data + '">' +
-                        '<span>' + text + '</span></span>';
-                }
-                return result;
-            }
-            if (typeof str === 'string') {
-                // support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
-                var splitted = $.terminal.format_split(str);
-                str = $.map(splitted, function(text) {
-                    if (text === '') {
-                        return text;
-                    } else if ($.terminal.is_formatting(text)) {
-                        // fix &nbsp; inside formatting because encode is called
-                        // before format
-                        text = text.replace(/\[\[[^\]]+\]/, function(text) {
-                            return text.replace(/&nbsp;/g, ' ');
-                        });
-                        return text.replace(format_parts_re, format);
-                    } else {
-                        text = safe(text);
-                        text = text.replace(/\\\]/, '&#93;');
-                        var data = clean_data(text);
-                        var extra = extra_css(text, settings);
-                        var prefix;
-                        if (extra) {
-                            text = wide_characters(text, settings);
-                            prefix = '<span style="' + style_to_string(extra) + '"';
-                        } else {
-                            prefix = '<span';
-                        }
-                        return prefix + ' data-text="' + data + '">' + text + '</span>';
-                    }
-                }).join('');
-                return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');
-            } else {
-                return '';
-            }
-        },
-        // ---------------------------------------------------------------------
         // :: Replace brackets with html entities
         // ---------------------------------------------------------------------
         escape_brackets: function escape_brackets(string) {
@@ -6920,6 +6650,300 @@
             formatters.push(formatter);
         }
     };
+    (function() {
+        // ---------------------------------------------------------------------
+        function clean_data(data, text) {
+                if (data === '') {
+                    return text;
+                } else {
+                    return data.replace(/&#93;/g, ']')
+                        .replace(/>/g, '&gt;')
+                        .replace(/</g, '&lt;')
+                        .replace(/"/g, '&quot;');
+                }
+        }
+        // ---------------------------------------------------------------------
+        // test if this is valid Path
+        // ---------------------------------------------------------------------
+        function is_path(url) {
+            return url.match(/^\.{1,2}\//) ||
+                url.match(/^\//) ||
+                !(url.match(/\//) || url.match(/^[^:]+:/));
+        }
+        // ---------------------------------------------------------------------
+        function with_url_validation(fn, settings) {
+            return function(url) {
+                if (settings.anyLinks) {
+                    return true;
+                }
+                var test = fn(url);
+                if (!test) {
+                    warn('Invalid URL ' + url + ' only http(s) ftp and path ' +
+                         'are allowed');
+                }
+                return test;
+            };
+        }
+        // ---------------------------------------------------------------------
+        // :: Replace terminal formatting with html
+        // ---------------------------------------------------------------------
+        $.terminal.format = function format(str, options) {
+            var settings = $.extend({}, {
+                linksNoReferrer: false,
+                linksNoFollow: false,
+                allowedAttributes: [],
+                charWidth: undefined,
+                escape: true,
+                anyLinks: false
+            }, options || {});
+            // -----------------------------------------------------------------
+            var valid_href = with_url_validation(function(url) {
+                return url.match(/^((https?|file|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
+            }, settings);
+            // -----------------------------------------------------------------
+            var valid_src = with_url_validation(function(url) {
+                return url.match(/^(https?:|file:|blob:|data:)/) || is_path(url);
+            }, settings);
+            // -----------------------------------------------------------------
+            function filter_attr_names(names) {
+                if (names.length && settings.allowedAttributes.length) {
+                    return names.filter(function(name) {
+                        if (name === 'data-text') {
+                            return false;
+                        }
+                        var allowed = false;
+                        var filters = settings.allowedAttributes;
+                        for (var i = 0; i < filters.length; ++i) {
+                            if (filters[i] instanceof RegExp) {
+                                if (filters[i].test(name)) {
+                                    allowed = true;
+                                    break;
+                                }
+                            } else if (filters[i] === name) {
+                                allowed = true;
+                                break;
+                            }
+                        }
+                        return allowed;
+                    });
+                }
+                return [];
+            }
+            // -----------------------------------------------------------------
+            function attrs_to_string(style, attrs) {
+                if (attrs) {
+                    var keys = filter_attr_names(Object.keys(attrs));
+                    if (keys.length) {
+                        var result = keys.map(function(name) {
+                            if (attrs[name] === null) {
+                                return '';
+                            }
+                            if (attrs[name] === true) {
+                                return name;
+                            }
+                            var value = escape_html_attr(attrs[name]);
+                            if (name === 'style') {
+                                // merge style attr and colors #617
+                                value = value ? style + ';' + value : style;
+                            }
+                            return name + '="' + value + '"';
+                        }).filter(Boolean);
+                        if (!result.length) {
+                            return '';
+                        }
+                        return result.join(' ');
+                    }
+                }
+                if (!style) {
+                    return '';
+                }
+                return 'style="' + style + '"';
+            }
+            // -----------------------------------------------------------------
+            function rel_attr() {
+                var rel = ["noopener"];
+                if (settings.linksNoReferrer) {
+                    rel.unshift("noreferrer");
+                }
+                if (settings.linksNoFollow) {
+                    rel.unshift("nofollow");
+                }
+                return rel;
+            }
+            // -----------------------------------------------------------------
+            var default_rel = rel_attr().join(' ');
+            // -----------------------------------------------------------------
+            function pre_process_link(data, attrs, valid_attrs) {
+                if (data.match(email_re)) {
+                    return '<a href="mailto:' + data + '"';
+                } else {
+                    // only http and ftp links (prevent javascript)
+                    // unless user force it with anyLinks option
+                    var result = ['<a'];
+                    if (data && valid_href(data)) {
+                        result.push('href="' + data + '"');
+                    }
+                    if (attrs) {
+                        if (valid_attrs.includes('target') && attrs.target === undefined) {
+                            attrs.target = '_blank';
+                        }
+                        if (valid_attrs.includes('rel') && attrs.rel === undefined) {
+                            attrs.rel = default_rel;
+                        }
+                    } else {
+                        result.push('rel="' + default_rel + '"');
+                        result.push('target="_blank"');
+                    }
+                    return result.join(' ');
+                }
+            }
+            // -----------------------------------------------------------------
+            function pre_process_image(data) {
+                var result = '<img';
+                if (valid_src(data)) {
+                    result += ' src="' + data + '"';
+                    if (text) {
+                        result += ' alt="' + text + '"';
+                    }
+                }
+                return result;
+            }
+            // -----------------------------------------------------------------
+            function format(s, style, color, background, _class, data_text, text) {
+                var attrs;
+                var valid_attrs = [];
+                if (data_text.match(/;/)) {
+                    try {
+                        var splitted = data_text.split(';');
+                        var str = splitted.slice(1).join(';')
+                            .replace(/&nbsp;/g, ' ')
+                            .replace(/&lt;/g, '<')
+                            .replace(/&gt;/g, '>');
+                        if (str.match(/^\s*\{[^}]*\}\s*$/)) {
+                            attrs = JSON.parse(str);
+                            valid_attrs = filter_attr_names(Object.keys(attrs));
+                            data_text = splitted[0];
+                        }
+                    } catch (e) {
+                    }
+                }
+                if (text === '' && !style.match(/@/)) {
+                    return ''; //'<span>&nbsp;</span>';
+                }
+                text = safe(text);
+                text = text.replace(/\\\]/g, '&#93;');
+                if (settings.escape) {
+                    // inside formatting we need to unescape escaped slashes
+                    // but this escape is not needed when echo - don't know why
+                    text = text.replace(/\\\\/g, '\\');
+                }
+                var styles = {};
+                if (style.indexOf('b') !== -1) {
+                    styles['font-weight'] = 'bold';
+                }
+                var text_decoration = [];
+                if (style.indexOf('u') !== -1) {
+                    text_decoration.push('underline');
+                }
+                if (style.indexOf('s') !== -1) {
+                    text_decoration.push('line-through');
+                }
+                if (style.indexOf('o') !== -1) {
+                    text_decoration.push('overline');
+                }
+                if (text_decoration.length) {
+                    styles['text-decoration'] = text_decoration.join(' ');
+                }
+                if (style.indexOf('i') !== -1) {
+                    styles['font-style'] = 'italic';
+                }
+                if ($.terminal.valid_color(color)) {
+                    $.extend(styles, {
+                        'color': color,
+                        '--color': color,
+                        '--original-color': color
+                    });
+                    if (style.indexOf('!') !== -1) {
+                        styles['--link-color'] = color;
+                    }
+                    if (style.indexOf('g') !== -1) {
+                        styles['text-shadow'] = '0 0 5px ' + color;
+                    }
+                }
+                if ($.terminal.valid_color(background)) {
+                    $.extend(styles, {
+                        'background-color': background,
+                        '--background': background
+                    });
+                }
+                var data = clean_data(data_text, text);
+                var extra = extra_css(text, settings);
+                if (extra) {
+                    text = wide_characters(text, settings);
+                    $.extend(styles, extra);
+                }
+                var result;
+                var style_str = style_to_string(styles);
+                if (style.indexOf('!') !== -1) {
+                    result = pre_process_link(data, attrs, valid_attrs);
+                } else if (style.indexOf('@') !== -1) {
+                    result = pre_process_image(data);
+                } else {
+                    result = '<span';
+                }
+                var output_attrs = attrs_to_string(style_str, attrs, valid_attrs);
+                if (output_attrs) {
+                    result += ' ' + output_attrs;
+                }
+                if (_class !== '') {
+                    result += ' class="' + _class + '"';
+                }
+                // links and image need data-text attribute cmd click behavior
+                // formatter can return links.
+                if (style.indexOf('!') !== -1) {
+                    result += ' data-text>' + text + '</a>';
+                } else if (style.indexOf('@') !== -1) {
+                    result += ' data-text/>';
+                } else {
+                    result += ' data-text="' + data + '">' +
+                        '<span>' + text + '</span></span>';
+                }
+                return result;
+            }
+            if (typeof str === 'string') {
+                // support for formating foo[[u;;]bar]baz[[b;#fff;]quux]zzz
+                var splitted = $.terminal.format_split(str);
+                str = $.map(splitted, function(text) {
+                    if (text === '') {
+                        return text;
+                    } else if ($.terminal.is_formatting(text)) {
+                        // fix &nbsp; inside formatting because encode is called
+                        // before format
+                        text = text.replace(/\[\[[^\]]+\]/, function(text) {
+                            return text.replace(/&nbsp;/g, ' ');
+                        });
+                        return text.replace(format_parts_re, format);
+                    } else {
+                        text = safe(text);
+                        text = text.replace(/\\\]/, '&#93;');
+                        var data = clean_data(text);
+                        var extra = extra_css(text, settings);
+                        var prefix;
+                        if (extra) {
+                            text = wide_characters(text, settings);
+                            prefix = '<span style="' + style_to_string(extra) + '"';
+                        } else {
+                            prefix = '<span';
+                        }
+                        return prefix + ' data-text="' + data + '">' + text + '</span>';
+                    }
+                }).join('');
+                return str.replace(/<span><br\s*\/?><\/span>/gi, '<br/>');
+            } else {
+                return '';
+            }
+        };
+    })();
     // -------------------------------------------------------------------------
     $.terminal.Exception = function Terminal_Exception(type, message, stack) {
         if (arguments.length === 1) {
@@ -7344,7 +7368,7 @@
         onBeforeLogin: null,
         onAfterLogout: null,
         onBeforeLogout: null,
-        allowedAttributes: ['title', /^aria-/, 'id', /^data-/],
+        allowedAttributes: ['title', 'target', 'rel', /^aria-/, 'id', /^data-/],
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
                 ' have two arguments',
