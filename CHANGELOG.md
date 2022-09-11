@@ -7,6 +7,7 @@
 * pause terminal when loading iframes [#816](https://github.com/jcubic/jquery.terminal/issues/816)
 * allow to change or remove target and rel tags on links with JSON attributes
 * allow using transparent background [#698](https://github.com/jcubic/jquery.terminal/issues/698)
+* register CSS properties so you can use CSS Transition on terminal colors [#808](https://github.com/jcubic/jquery.terminal/issues/808)
 ### Bugfix
 * fix up/down arrows when moving inside command that has emoji [#608](https://github.com/jcubic/jquery.terminal/issues/608)
 * fix pausing when loading images [#807](https://github.com/jcubic/jquery.terminal/issues/807)

@@ -942,6 +942,26 @@ terminal .terminal-output > div {
 /*
  * overwrite css variables that don't work with selection in Edge
  */
+@property --color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ccc;
+}
+@property --background {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ccc;
+}
+@property --link-color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ccc;
+}
+@property --size {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,
     .terminal h2::selection,
