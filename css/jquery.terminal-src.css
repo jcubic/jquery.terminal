@@ -945,17 +945,17 @@ terminal .terminal-output > div {
 @property --color {
   syntax: '<color>';
   inherits: true;
-  initial-value: #ccc;
+  initial-value: rgba(170, 170, 170, 0.99);
 }
 @property --background {
   syntax: '<color>';
   inherits: true;
-  initial-value: #ccc;
+  initial-value: #000;
 }
 @property --link-color {
   syntax: '<color>';
   inherits: true;
-  initial-value: #ccc;
+  initial-value: #3377FF;
 }
 @property --size {
   syntax: '<number>';

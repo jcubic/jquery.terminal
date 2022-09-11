@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2022 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 11 Sep 2022 16:08:14 +0000
+ * Date: Sun, 11 Sep 2022 18:42:10 +0000
  */
 .terminal, .terminal *, .cmd, .cmd *, .cmd textarea {
     all: revert;
@@ -945,17 +945,17 @@ terminal .terminal-output > div {
 @property --color {
   syntax: '<color>';
   inherits: true;
-  initial-value: #ccc;
+  initial-value: rgba(170, 170, 170, 0.99);
 }
 @property --background {
   syntax: '<color>';
   inherits: true;
-  initial-value: #ccc;
+  initial-value: #000;
 }
 @property --link-color {
   syntax: '<color>';
   inherits: true;
-  initial-value: #ccc;
+  initial-value: #3377FF;
 }
 @property --size {
   syntax: '<number>';
