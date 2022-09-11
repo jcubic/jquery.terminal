@@ -9,6 +9,7 @@
 * allow using transparent background [#698](https://github.com/jcubic/jquery.terminal/issues/698)
 * register CSS properties so you can use CSS Transition on terminal colors [#808](https://github.com/jcubic/jquery.terminal/issues/808)
 * add terminal::blur alias [#813](https://github.com/jcubic/jquery.terminal/issues/813)
+* allow to change scrollbar color with CSS property
 ### Bugfix
 * fix up/down arrows when moving inside command that has emoji [#608](https://github.com/jcubic/jquery.terminal/issues/608)
 * fix pausing when loading images [#807](https://github.com/jcubic/jquery.terminal/issues/807)

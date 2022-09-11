@@ -75,7 +75,8 @@
 .terminal {
     position: relative;
     line-height: initial;
-    --main-background: var(--background, #000);
+    --base-background: var(--background, #000);
+    --base-color: var(--color);
     contain: content;
 }
 .terminal-scroller {
@@ -1110,6 +1111,7 @@ terminal .terminal-output > div {
     background: transparent;
     opacity: 0.01;
 }
+/* Scrollbar */
 .terminal-scroller::-webkit-scrollbar {
     width: calc(6px / var(--pixel-density, 1));
     height: calc(6px / var(--pixel-density, 1));
@@ -1125,6 +1127,13 @@ terminal .terminal-output > div {
     scrollbar-color: #aaa #000;
     scrollbar-color: var(--color, #aaa) var(--background, #000);
     scrollbar-width: thin;
+}
+/*
+ * Allow to change scrollbar color
+ */
+.terminal-wrapper {
+    --color: var(--base-color);
+    --background: var(--base-background);
 }
 .cmd .token {
     --original-color: var(--color);
@@ -1145,7 +1154,7 @@ terminal .terminal-output > div {
 .terminal .cmd *::selection,
 .terminal .terminal-output::selection,
 .terminal .terminal-output *::selection {
-  --background: var(--main-background);
+  --background: var(--base-background);
 }
 @keyframes terminal-ansi-blink {
     to {
