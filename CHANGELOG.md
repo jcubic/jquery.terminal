@@ -6,10 +6,13 @@
 * use jsDelivr for emoji that is way faster [#810](https://github.com/jcubic/jquery.terminal/issues/810)
 * pause terminal when loading iframes [#816](https://github.com/jcubic/jquery.terminal/issues/816)
 * allow to change or remove target and rel tags on links with JSON attributes
+* allow using transparent background [#698](https://github.com/jcubic/jquery.terminal/issues/698)
 ### Bugfix
 * fix up/down arrows when moving inside command that has emoji [#608](https://github.com/jcubic/jquery.terminal/issues/608)
 * fix pausing when loading images [#807](https://github.com/jcubic/jquery.terminal/issues/807)
 * fix scroll to bottom on echo images and iframes
+* fix jump to the end of the command when clicking below cmd [#814](https://github.com/jcubic/jquery.terminal/issues/814)
+* fix selection overlap previous line
 
 ## 2.34.0
 ### Features
