@@ -9902,6 +9902,12 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: Convenient alias
+            // -------------------------------------------------------------
+            blur: function(silent) {
+                return this.focus(false, silent);
+            },
+            // -------------------------------------------------------------
             // :: Disable/Enable terminal that can be enabled by click
             // -------------------------------------------------------------
             freeze: function(freeze) {
