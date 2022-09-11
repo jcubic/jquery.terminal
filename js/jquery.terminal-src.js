@@ -11757,6 +11757,7 @@
                     var textarea = self.find('.cmd textarea');
                     function click() {
                         if ($target.is('.terminal') ||
+                            $target.is('.terminal-scroller') ||
                             $target.is('.terminal-wrapper')) {
                             var len = self.get_command().length;
                             self.set_position(len);

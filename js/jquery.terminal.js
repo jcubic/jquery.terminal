@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 08 Sep 2022 18:52:13 +0000
+ * Date: Sun, 11 Sep 2022 15:54:30 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 08 Sep 2022 18:52:13 +0000',
+        date: 'Sun, 11 Sep 2022 15:54:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11757,6 +11757,7 @@
                     var textarea = self.find('.cmd textarea');
                     function click() {
                         if ($target.is('.terminal') ||
+                            $target.is('.terminal-scroller') ||
                             $target.is('.terminal-wrapper')) {
                             var len = self.get_command().length;
                             self.set_position(len);
