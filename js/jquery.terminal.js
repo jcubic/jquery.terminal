@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 11 Sep 2022 16:11:27 +0000
+ * Date: Sun, 11 Sep 2022 17:52:30 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 11 Sep 2022 16:11:27 +0000',
+        date: 'Sun, 11 Sep 2022 17:52:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9017,7 +9017,7 @@
                             }
                             new_prompt += chr;
                             self.set_prompt(new_prompt);
-                            if (chr === '\n' && bottom) {
+                            if (bottom && (chr === '\n' || !self.is_bottom())) {
                                 self.scroll_to_bottom();
                             }
                             char_i++;

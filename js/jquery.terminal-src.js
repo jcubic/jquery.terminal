@@ -9017,7 +9017,7 @@
                             }
                             new_prompt += chr;
                             self.set_prompt(new_prompt);
-                            if (chr === '\n' && bottom) {
+                            if (bottom && (chr === '\n' || !self.is_bottom())) {
                                 self.scroll_to_bottom();
                             }
                             char_i++;
