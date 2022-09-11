@@ -75,6 +75,8 @@
 .terminal {
     position: relative;
     line-height: initial;
+    --main-background: var(--background, #000);
+    contain: content;
 }
 .terminal-scroller {
     position: relative;
@@ -85,9 +87,6 @@
 }
 terminal.terminal-temp {
     visibility: hidden;
-}
-.terminal {
-    contain: content;
 }
 body.terminal {
     min-height: 100vh;
@@ -1113,6 +1112,20 @@ terminal .terminal-output > div {
 .terminal .terminal-blink, .cmd .terminal-blink {
     animation: terminal-ansi-blink 1s steps(2, start) infinite;
     -webkit-animation: terminal-ansi-blink 1s steps(2, start) infinite;
+}
+/* Allow transparent background #698 */
+.terminal .terminal-output,
+.terminal .terminal-output * {
+  --background: transparent;
+}
+.terminal .cmd * {
+  --background: transparent;
+}
+.terminal .cmd::selection,
+.terminal .cmd *::selection,
+.terminal .terminal-output::selection,
+.terminal .terminal-output *::selection {
+  --background: var(--main-background);
 }
 @keyframes terminal-ansi-blink {
     to {

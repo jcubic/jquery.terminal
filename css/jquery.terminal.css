@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2022 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 05 Aug 2022 22:02:11 +0000
+ * Date: Sun, 11 Sep 2022 15:40:37 +0000
  */
 .terminal, .terminal *, .cmd, .cmd *, .cmd textarea {
     all: revert;
@@ -75,6 +75,8 @@
 .terminal {
     position: relative;
     line-height: initial;
+    --main-background: var(--background, #000);
+    contain: content;
 }
 .terminal-scroller {
     position: relative;
@@ -85,9 +87,6 @@
 }
 terminal.terminal-temp {
     visibility: hidden;
-}
-.terminal {
-    contain: content;
 }
 body.terminal {
     min-height: 100vh;
@@ -246,7 +245,7 @@ body.full-screen-terminal .terminal {
 .cmd div,
 .terminal.external div {
     line-height: 1em;
-    line-height: calc((var(--size) * (14px / var(--pixel-density, 1))) + (1px / var(--pixel-density, 1)));
+    line-height: calc((var(--size) * (16px / var(--pixel-density, 1))) + (1px / var(--pixel-density, 1)));
 }
 .cmd .cmd-prompt span.fa::before,
 .cmd .cmd-prompt span.fab::before,
@@ -1113,6 +1112,20 @@ terminal .terminal-output > div {
 .terminal .terminal-blink, .cmd .terminal-blink {
     animation: terminal-ansi-blink 1s steps(2, start) infinite;
     -webkit-animation: terminal-ansi-blink 1s steps(2, start) infinite;
+}
+/* Allow transparent background #698 */
+.terminal .terminal-output,
+.terminal .terminal-output * {
+  --background: transparent;
+}
+.terminal .cmd * {
+  --background: transparent;
+}
+.terminal .cmd::selection,
+.terminal .cmd *::selection,
+.terminal .terminal-output::selection,
+.terminal .terminal-output *::selection {
+  --background: var(--main-background);
 }
 @keyframes terminal-ansi-blink {
     to {
