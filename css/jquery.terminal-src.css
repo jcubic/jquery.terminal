@@ -246,7 +246,7 @@ body.full-screen-terminal .terminal {
 .cmd div,
 .terminal.external div {
     line-height: 1em;
-    line-height: calc((var(--size) * (14px / var(--pixel-density, 1))) + (1px / var(--pixel-density, 1)));
+    line-height: calc((var(--size) * (16px / var(--pixel-density, 1))) + (1px / var(--pixel-density, 1)));
 }
 .cmd .cmd-prompt span.fa::before,
 .cmd .cmd-prompt span.fab::before,
