@@ -46,6 +46,18 @@ Array [
 
 exports[`Terminal plugin events enter text text should appear and interpreter function should be called 1`] = `"<span data-text=\\">&nbsp;foo\\">&gt;&nbsp;foo</span>"`;
 
+exports[`Terminal plugin jQuery Terminal methods exec should invoke array of commands when each command pause terminal 1`] = `
+"> exec_async_array
+> async_command 0
+calling async 0
+> async_command 1
+calling async 1
+> async_command 2
+calling async 2
+> async_command 3
+calling async 3"
+`;
+
 exports[`Terminal plugin jQuery Terminal methods generic import/export view should import view 1`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span data-text=\\"Hello&nbsp;World!\\">Hello&nbsp;World!</span></div></div><div data-index=\\"1\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;foo\\">&gt;&nbsp;foo</span></div></div><div data-index=\\"2\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;bar\\">&gt;&nbsp;bar</span></div></div>"`;
 
 exports[`Terminal plugin jQuery Terminal methods output_buffer should return buffer with flush and newline 1`] = `

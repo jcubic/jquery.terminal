@@ -5140,6 +5140,16 @@ describe('Terminal plugin', function() {
                         quux: function() {
                             this.echo('quux');
                         }
+                    },
+                    exec_async_array() {
+                        return this.exec(Array.from({length: 4}, (_, i) => `async_command ${i}`));
+                    },
+                    async_command(n) {
+                        this.pause();
+                        setTimeout(() => {
+                            this.echo(`calling async ${n}`);
+                            this.resume();
+                        }, 0);
                     }
                 };
                 spy(interpreter, 'foo');
@@ -5348,10 +5358,20 @@ describe('Terminal plugin', function() {
                 var term = $('<div/>').terminal('/async');
                 term.focus().exec('echo foo bar');
                 term.insert('foo');
-                new Promise((resolve) => {
+                return new Promise((resolve) => {
                     setTimeout(function() {
                         expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
                         expect(term.get_command()).toEqual('foo');
+                        resolve();
+                    }, 800);
+                });
+            });
+            it('should invoke array of commands when each command pause terminal', () => {
+                term.clear();
+                term.focus().exec('exec_async_array');
+                return new Promise((resolve) => {
+                    setTimeout(function() {
+                        expect(term.get_output()).toMatchSnapshot();
                         resolve();
                     }, 800);
                 });
