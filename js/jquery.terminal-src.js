@@ -7100,7 +7100,7 @@
     }
     // -----------------------------------------------------------------------
     function format_stack_trace(stack) {
-        var stack = $.terminal.escape_brackets(stack);
+        stack = $.terminal.escape_brackets(stack);
         return stack.split(/\n/g).map(function(trace) {
             // nested formatting will handle urls but that formatting
             // can be removed - this code was created before
@@ -7486,16 +7486,16 @@
             if (is_function(settings.renderHandler)) {
                 return unpromise(value, function(value) {
                     try {
-                    var ret = settings.renderHandler.call(self, value, options, self);
-                    if (ret === false) {
-                        return false;
-                    }
-                    if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
-                        return ret;
-                    } else {
-                        return value;
-                    }
-                    } catch(e) {
+                        var ret = settings.renderHandler.call(self, value, options, self);
+                        if (ret === false) {
+                            return false;
+                        }
+                        if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
+                            return ret;
+                        } else {
+                            return value;
+                        }
+                    } catch (e) {
                         return [
                             '[[;red;]' + e.message + ']',
                             format_stack_trace(e.stack)

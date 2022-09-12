@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 12 Sep 2022 13:26:48 +0000
+ * Date: Mon, 12 Sep 2022 13:29:20 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 12 Sep 2022 13:26:48 +0000',
+        date: 'Mon, 12 Sep 2022 13:29:20 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7100,7 +7100,7 @@
     }
     // -----------------------------------------------------------------------
     function format_stack_trace(stack) {
-        var stack = $.terminal.escape_brackets(stack);
+        stack = $.terminal.escape_brackets(stack);
         return stack.split(/\n/g).map(function(trace) {
             // nested formatting will handle urls but that formatting
             // can be removed - this code was created before
@@ -7486,16 +7486,16 @@
             if (is_function(settings.renderHandler)) {
                 return unpromise(value, function(value) {
                     try {
-                    var ret = settings.renderHandler.call(self, value, options, self);
-                    if (ret === false) {
-                        return false;
-                    }
-                    if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
-                        return ret;
-                    } else {
-                        return value;
-                    }
-                    } catch(e) {
+                        var ret = settings.renderHandler.call(self, value, options, self);
+                        if (ret === false) {
+                            return false;
+                        }
+                        if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
+                            return ret;
+                        } else {
+                            return value;
+                        }
+                    } catch (e) {
                         return [
                             '[[;red;]' + e.message + ']',
                             format_stack_trace(e.stack)
