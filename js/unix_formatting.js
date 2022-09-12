@@ -528,11 +528,7 @@
         };
         if (options) {
             if (options.unixFormatting) {
-                unixFormatting = $.extend({
-                    escapeBrackets: false,
-                    ansiParser: {},
-                    ansiArt: false
-                }, unixFormatting, options.unixFormatting);
+                $.extend(unixFormatting, options.unixFormatting);
             }
             if ('position' in options) {
                 unixFormatting.position = options.position;
@@ -541,10 +537,7 @@
                 unixFormatting.escapeBrackets = options.unixFormattingEscapeBrackets;
             }
             if ('ansiParser' in options) {
-                unixFormatting.ansiParser = $.extend(
-                    unixFormatting.ansiParser,
-                    options.ansiParser
-                );
+                unixFormatting.ansiParser = options.ansiParser;
             }
         }
         return unixFormatting;
@@ -1409,14 +1402,16 @@
             Object.keys(settings.ansiParser).forEach(function(name) {
                 var original = parser_events[name];
                 var fn = settings.ansiParser[name];
-                parser_events[name] = original ? function() {
-                    if (fn.apply(parser_events, arguments) !== false) {
-                        return original.apply(parser_events, arguments);
-                    }
-                } : function() {
-                    return fn.apply(parser_events, arguments);
-                };
-                settings.ansiParser[name] = parser_events[name];
+                if (typeof fn === 'function') {
+                    parser_events[name] = original ? function() {
+                        if (fn.apply(parser_events, arguments) !== false) {
+                            return original.apply(parser_events, arguments);
+                        }
+                    } : function() {
+                        return fn.apply(parser_events, arguments);
+                    };
+                    settings.ansiParser[name] = parser_events[name];
+                }
             });
             var parser = new AnsiParser(parser_events);
             parser.parse(input);
