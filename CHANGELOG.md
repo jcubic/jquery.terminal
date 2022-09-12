@@ -17,6 +17,8 @@
 * fix jump to the end of the command when clicking below cmd [#814](https://github.com/jcubic/jquery.terminal/issues/814)
 * fix selection overlap previous line
 * fix scroll to bottom while animating [#791](https://github.com/jcubic/jquery.terminal/issues/791)
+* fix rendering of sixel images [#824](https://github.com/jcubic/jquery.terminal/issues/824)
+* fix handling promises in randerHandler
 
 ## 2.34.0
 ### Features

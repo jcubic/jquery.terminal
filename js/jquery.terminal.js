@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 11 Sep 2022 17:52:30 +0000
+ * Date: Mon, 12 Sep 2022 13:26:48 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 11 Sep 2022 17:52:30 +0000',
+        date: 'Mon, 12 Sep 2022 13:26:48 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7099,6 +7099,19 @@
                   term.find('.cmd-prompt').length);
     }
     // -----------------------------------------------------------------------
+    function format_stack_trace(stack) {
+        var stack = $.terminal.escape_brackets(stack);
+        return stack.split(/\n/g).map(function(trace) {
+            // nested formatting will handle urls but that formatting
+            // can be removed - this code was created before
+            // that formatting existed (see commit ce01c3f5)
+            return '[[;;;terminal-error]' +
+                trace.replace(url_re, function(url) {
+                    return ']' + url + '[[;;;terminal-error]';
+                }) + ']';
+        }).join('\n');
+    }
+    // -----------------------------------------------------------------------
     // :: Create fake terminal to calcualte the dimention of one character
     // :: this will make terminal work if terminal div is not added to the
     // :: DOM at init like with:
@@ -7465,20 +7478,30 @@
         // :: helper function that use option to render objects
         // ---------------------------------------------------------------------
         function preprocess_value(value, options) {
+            options = options || {};
             if ($.terminal.Animation && value instanceof $.terminal.Animation) {
                 value.start(self);
                 return false;
             }
             if (is_function(settings.renderHandler)) {
-                var ret = settings.renderHandler.call(self, value, options, self);
-                if (ret === false) {
-                    return false;
-                }
-                if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
-                    return ret;
-                } else {
-                    return value;
-                }
+                return unpromise(value, function(value) {
+                    try {
+                    var ret = settings.renderHandler.call(self, value, options, self);
+                    if (ret === false) {
+                        return false;
+                    }
+                    if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
+                        return ret;
+                    } else {
+                        return value;
+                    }
+                    } catch(e) {
+                        return [
+                            '[[;red;]' + e.message + ']',
+                            format_stack_trace(e.stack)
+                        ].join('\n');
+                    }
+                });
             }
             return value;
         }
@@ -10564,7 +10587,7 @@
                                 value = '';
                             }
                         } else {
-                            var ret = preprocess_value(arg, {});
+                            var ret = preprocess_value(arg);
                             if (ret === false) {
                                 return self;
                             }
@@ -10574,6 +10597,9 @@
                             echo_promise = true;
                         }
                         unpromise(value, function(value) {
+                            if (is_promise(ret) && value === false) {
+                                return;
+                            }
                             if (render(value, locals)) {
                                 return self;
                             }
@@ -10739,17 +10765,7 @@
                     }, 'text');
                 }
                 if (e.stack) {
-                    var stack = $.terminal.escape_brackets(e.stack);
-                    var output = stack.split(/\n/g).map(function(trace) {
-                        // nested formatting will handle urls but that formatting
-                        // can be removed - this code was created before
-                        // that formatting existed (see commit ce01c3f5)
-                        return '[[;;;terminal-error]' +
-                            trace.replace(url_re, function(url) {
-                                return ']' + url + '[[;;;terminal-error]';
-                            }) + ']';
-                    }).join('\n');
-                    self.echo(output, {
+                    self.echo(format_stack_trace(e.stack), {
                         finalize: function(div) {
                             div.addClass('terminal-exception terminal-stack-trace');
                         },
