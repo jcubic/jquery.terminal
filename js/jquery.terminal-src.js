@@ -12011,7 +12011,9 @@
                         marker = $('<div style="' + style + '"/>').appendTo(top);
                     }
                     is_bottom_observer = new IntersectionObserver(bottom_detect, {
-                        root: self[0]
+                        root: scroller[0],
+                        rootMargin: '0px',
+                        threshold: 1.0
                     });
                     is_bottom_observer.observe(marker[0]);
                 }

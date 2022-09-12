@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 12 Sep 2022 13:29:20 +0000
+ * Date: Mon, 12 Sep 2022 18:54:52 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 12 Sep 2022 13:29:20 +0000',
+        date: 'Mon, 12 Sep 2022 18:54:52 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -12011,7 +12011,9 @@
                         marker = $('<div style="' + style + '"/>').appendTo(top);
                     }
                     is_bottom_observer = new IntersectionObserver(bottom_detect, {
-                        root: self[0]
+                        root: scroller[0],
+                        rootMargin: '0px',
+                        threshold: 1.0
                     });
                     is_bottom_observer.observe(marker[0]);
                 }

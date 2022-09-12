@@ -19,6 +19,8 @@
 * fix scroll to bottom while animating [#791](https://github.com/jcubic/jquery.terminal/issues/791)
 * fix rendering of sixel images [#824](https://github.com/jcubic/jquery.terminal/issues/824)
 * fix handling promises in randerHandler
+* fix scroll to bottom during animation [#791](https://github.com/jcubic/jquery.terminal/issues/791)
+* fix `terminal::is_bottom` when using intersection observer
 
 ## 2.34.0
 ### Features
