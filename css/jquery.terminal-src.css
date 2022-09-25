@@ -177,7 +177,7 @@ body.full-screen-terminal .terminal {
     background-color: #3377FF;
     background-color: var(--link-color, #3377FF) !important;
     color: #000;
-    color: var(--background, #000) !important;
+    color: var(--base-background, #000) !important;
     text-decoration: none;
 }
 .terminal .terminal-output > :not(.raw) a[href] span,
