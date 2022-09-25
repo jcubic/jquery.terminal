@@ -156,7 +156,7 @@
             var color = this.option('color');
             var char_width = this._char.width;
             var char_height = this._char.height;
-            line.forEach(function(arr, i) {
+            line.forEach(function(arr) {
                 var text = arr[3];
                 var len = $.terminal.length(text);
                 if (arr[2]) {
