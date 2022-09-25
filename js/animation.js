@@ -9,7 +9,7 @@
  *
  * This file is part of jQuery Terminal that create base class for animation
  *
- * Copyright (c) 2014-2021 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2022 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
