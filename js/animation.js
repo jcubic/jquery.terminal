@@ -154,7 +154,7 @@
         line(line, x, y) {
             var ctx = this.ctx;
             var color = this.option('color');
-            var char_width = this._char.width;
+            var char_width = Math.ceil(this._char.width);
             var char_height = this._char.height;
             line.forEach(function(arr) {
                 var text = arr[3];
