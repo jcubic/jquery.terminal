@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2022 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 25 Sep 2022 13:19:45 +0000
+ * Date: Sun, 25 Sep 2022 14:50:42 +0000
  */
 .terminal, .terminal *, .cmd, .cmd *, .cmd textarea {
     all: revert;

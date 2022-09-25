@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 12 Sep 2022 18:54:52 +0000
+ * Date: Sun, 25 Sep 2022 14:50:41 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5250,7 +5250,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 12 Sep 2022 18:54:52 +0000',
+        date: 'Sun, 25 Sep 2022 14:50:41 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5322,6 +5322,7 @@
         have_formatting: function have_formatting(str) {
             return typeof str === 'string' && !!str.match(format_exist_re);
         },
+        // ---------------------------------------------------------------------
         is_formatting: function is_formatting(str) {
             return typeof str === 'string' && !!str.match(format_full_re);
         },
@@ -6636,6 +6637,29 @@
             } catch (e) {
             }
         })(),
+        // ---------------------------------------------------------------------
+        // :: Function return array of pre processed formatting
+        // :: each item is array of style, color, background, and text
+        // :: if the element is not present or if it's normal text
+        // :: the element is empty string
+        // ---------------------------------------------------------------------
+        process_formatting: function(string) {
+            return $.terminal.format_split(string).map(function(string) {
+                if ($.terminal.is_formatting(string)) {
+                    var parts = string.match(new RegExp(format_parts_re, 'i'));
+                    var text = parts.pop();
+                    for (var i = 1; i <= 2; ++i) {
+                        if (!$.terminal.valid_color(parts[i])) {
+                            parts[i] = '';
+                        }
+                    }
+                    return parts.slice(1, 4).concat(text);
+                } else {
+                    return ['', '', '', string];
+                }
+                return arr;
+            });
+        },
         // ---------------------------------------------------------------------
         // :: helper function that add formatter before nested_formatting
         // ---------------------------------------------------------------------

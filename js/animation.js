@@ -129,6 +129,51 @@
         }
     }
 
+    class FormattingCanvasRenderer extends CanvasRenderer {
+        render() {
+            this._char = this.option('char');
+            var stripped = [];
+            const lines = this._render().map(function(line) {
+                if ($.terminal.have_formatting(line)) {
+                    stripped.push($.terminal.strip(line));
+                } else {
+                    stripped.push(line);
+                }
+                return $.terminal.process_formatting(line);
+            });
+            const max = Math.max(...stripped.map(l => l.length));
+            const width = max * this._char.width;
+            const size = this._char.height;
+            const height = stripped.length * size;
+            this.clear({width, height});
+            for (let index = 0; index < lines.length; ++index) {
+                const line = lines[index];
+                this.line(line, 0, size * index);
+            }
+        }
+        line(line, x, y) {
+            var ctx = this.ctx;
+            var color = this.option('color');
+            var char_width = this._char.width;
+            var char_height = this._char.height;
+            line.forEach(function(arr, i) {
+                var text = arr[3];
+                var len = $.terminal.length(text);
+                if (arr[2]) {
+                    ctx.fillStyle = arr[2];
+                    ctx.fillRect(x, y, char_width * len, char_height);
+                }
+                if (arr[1]) {
+                    ctx.fillStyle = arr[1];
+                } else {
+                    ctx.fillStyle = color;
+                }
+                ctx.fillText(text, x, y);
+                x += len * char_width;
+            });
+        }
+    }
+
     // -----------------------------------------------------------------------------------
     class Animation {
         constructor(fps = null, renderer = CanvasRenderer) {
@@ -206,6 +251,7 @@
 
     $.terminal.Renderer = Renderer;
     $.terminal.CanvasRenderer = CanvasRenderer;
+    $.terminal.FormattingCanvasRenderer = FormattingCanvasRenderer;
     $.terminal.Animation = Animation;
     $.terminal.FramesAnimation = FramesAnimation;
 });
