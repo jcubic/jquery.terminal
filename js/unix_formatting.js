@@ -1268,7 +1268,6 @@
                 }
                 this.cursor.x += s_len;
             };
-            var use_CR = !!input.match(/\x0D/);
             var term = $.terminal.active();
             var ROWS = term && term.rows() || 1000;
             var COLS = term && term.cols() || 80;
@@ -1295,6 +1294,7 @@
                 0x1E: '▲'
             };
             var characters = 'qwertyuiopasdfghjklzxcvbnm';
+            var prev_code;
             var parser_events = {
                 cursor: {x: 0, y: 0},
                 result: [],
@@ -1306,7 +1306,7 @@
                         this.cursor.x = 0;
                     } else if (code === 10) {
                         this.cursor.y++;
-                        if (!use_CR) {
+                        if (prev_code !== 13) {
                             this.cursor.x = 0;
                         }
                     } else if (code === 9) {
@@ -1325,6 +1325,7 @@
                     if (!this.result[this.cursor.y]) {
                         this.result[this.cursor.y] = '';
                     }
+                    prev_code = code;
                 },
                 inst_e: function(collected, flag) {
                     if (collected === '(') {

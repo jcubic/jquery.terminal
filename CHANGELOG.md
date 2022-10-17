@@ -23,6 +23,7 @@
 * fix handling promises in randerHandler
 * fix scroll to bottom during animation [#791](https://github.com/jcubic/jquery.terminal/issues/791)
 * fix `terminal::is_bottom` when using intersection observer
+* fix processing \r in Linux output of unix_formatting
 
 ## 2.34.0
 ### Features
