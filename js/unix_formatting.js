@@ -1212,6 +1212,26 @@
             return ret;
         }
         // -------------------------------------------------------------------------------
+        function empty_line() {
+            return {
+                text: '',
+                formatting: []
+            };
+        }
+        // -------------------------------------------------------------------------------
+        function format_line(line, settings) {
+            return line.formatting.reduce(function(text, formatting) {
+                var before = $.terminal.substring(text, 0, formatting.start);
+                var inside = $.terminal.substring(text, formatting.start, formatting.end);
+                inside = $.terminal.strip(inside);
+                if (settings.escapeBrackets) {
+                    inside = $.terminal.escape_formatting(inside);
+                }
+                var after = $.terminal.substring(text, formatting.end);
+                return before + '[[' + formatting.format + ']' + inside + ']';
+            }, line.text);
+        }
+        // -------------------------------------------------------------------------------
         return function from_ansi(input, options) {
             options = options || {};
             var settings = get_settings(options);
@@ -1220,51 +1240,48 @@
             input = input.replace(/\x1A.*/, '');
             input = input.replace(/\r?\n?\x1b\[A\x1b\[[0-9]+C/g, '');
             input = $.terminal.unescape_brackets(input);
+            var alternative = false;
             var code, inside, format, charset, saved_cursor;
             var print = function print(s) {
+                var output = alternative ? this.alt_output : this.result;
                 var s_len = s.length;
-                if (settings.escapeBrackets) {
-                    s = $.terminal.escape_formatting(s);
-                }
                 if (charset) {
                     s = s.split('').map(function(chr) {
                         return charset[chr] || chr;
                     }).join('');
                 }
-                if (format) {
-                    // this will always need to be escaped
-                    if (s.match(/\\$|[[\]]/) &&
-                        !settings.escapeBrackets &&
-                        !$.terminal.have_formatting(s)) {
-                        s = $.terminal.escape_formatting(s);
-                    }
-                    s = format + s + ']';
-                }
-                var line = this.result[this.cursor.y];
+                var line = output[this.cursor.y];
                 var len, after, before, line_len;
                 if (!line) {
+                    output[this.cursor.y] = empty_line();
                     if (this.cursor.x > 0) {
                         var space = new Array(this.cursor.x + 1).join(' ');
-                        this.result[this.cursor.y] = space + s;
+                        output[this.cursor.y].text = space + s;
                     } else {
-                        this.result[this.cursor.y] = s;
+                        output[this.cursor.y].text = s;
                     }
                 } else {
-                    var stripped = $.terminal.strip(line);
-                    line_len = $.terminal.unescape_brackets(stripped).length;
+                    line_len = line.text.length;
                     if (this.cursor.x === 0) {
-                        after = $.terminal.substring(line, s_len);
-                        this.result[this.cursor.y] = s + after;
+                        after = line.text.substring(s_len);
+                        output[this.cursor.y].text = s + after;
                     } else if (line_len < this.cursor.x) {
                         len = this.cursor.x - (line_len - 1);
-                        this.result[this.cursor.y] += new Array(len).join(' ') + s;
+                        output[this.cursor.y].text += new Array(len).join(' ') + s;
                     } else if (line_len === this.cursor.x) {
-                        this.result[this.cursor.y] += s;
+                        output[this.cursor.y].text += s;
                     } else {
-                        before = $.terminal.substring(line, 0, this.cursor.x);
-                        after = $.terminal.substring(line, this.cursor.x + s_len);
-                        this.result[this.cursor.y] = before + s + after;
+                        before = line.text.substring(0, this.cursor.x);
+                        after = line.text.substring(this.cursor.x + s_len);
+                        output[this.cursor.y].text = before + s + after;
                     }
+                }
+                if (format) {
+                    output[this.cursor.y].formatting.push({
+                        start: this.cursor.x,
+                        end: s_len,
+                        format: format
+                    });
                 }
                 this.cursor.x += s_len;
             };
@@ -1298,6 +1315,7 @@
             var parser_events = {
                 cursor: {x: 0, y: 0},
                 result: [],
+                alt_output: [],
                 state: {},
                 inst_p: print,
                 inst_x: function(flag) {
@@ -1309,6 +1327,8 @@
                         if (prev_code !== 13) {
                             this.cursor.x = 0;
                         }
+                    } else if (code === 8) {
+                        this.cursor.x--;
                     } else if (code === 9) {
                         print.call(this, '\t');
                     } else if (ansi_art && code in cp_437_control) {
@@ -1322,8 +1342,9 @@
                         console.log({code: code, char: char});
                         print.call(this, char);
                     }
-                    if (!this.result[this.cursor.y]) {
-                        this.result[this.cursor.y] = '';
+                    var output = alternative ? this.alt_output : this.result;
+                    if (!output[this.cursor.y]) {
+                        output[this.cursor.y] = empty_line();
                     }
                     prev_code = code;
                 },
@@ -1340,6 +1361,31 @@
                     /* eslint-enable no-console */
                 },
                 inst_c: function(collected, params, flag) {
+                    function is_alternative_screen() {
+                        return collected === '?' && value === 1049;
+                    }
+                    function clear_line(line) {
+                        line.text = '';
+                        line.formatting = [];
+                    }
+                    function erase_line() {
+                        var line = output[cursor.y];
+                        if (!line) {
+                            output[cursor.y] = empty_line();
+                            return;
+                        }
+                        if (!params.length || params[0] === 0) {
+                            var str = line.text.substring(0, cursor.x);
+                            line.text = str;
+                        } else if (params[0] === 1) {
+                            var str = line.text.substring(cursor.x);
+                            line.text = str;
+                        } else if (params[0] === 2) {
+                            clear_line(line);
+                        }
+                    }
+                    var cursor = this.cursor;
+                    var output = alternative ? this.alt_output : this.result;
                     var value = params[0] === 0 ? 1 : params[0];
                     switch (flag) {
                         case 's':
@@ -1368,10 +1414,45 @@
                             this.cursor.x = 0;
                             this.cursor.y -= value;
                             break;
+                        case 'd':
+                            this.cursor.y = value;
+                            break;
+                        case 'J':
+                            erase_line();
+                            if (!params.length || params[0] === 0) {
+                                output.length = this.cursor.y;
+                            } else if (params[0] === 1) {
+                                for (var i = 0; i < this.cursor.y; ++i) {
+                                    clear_line(output[i]);
+                                }
+                            } else if (params[0] === 2) {
+                                output.length = 0;
+                            }
+                            break;
+                        case 'K':
+                            erase_line();
+                            break;
+                        case 'G':
+                            this.cursor.x = params[0] || 0;
+                            break;
                         case 'H':
                             // -1 since CUP is 1-based
                             this.cursor.y = Math.min(params[0] || 1, ROWS) - 1;
                             this.cursor.x = Math.min(params[1] || 1, COLS) - 1;
+                            break;
+                        case 'h':
+                            if (is_alternative_screen()) {
+                                alternative = true;
+                            }
+                            break;
+                        case 'l':
+                            if (is_alternative_screen()) {
+                                alternative = false;
+                                this.result = this.result.concat(this.alt_output);
+                                this.cursor.x = 0;
+                                this.cursor.y = this.result.length - 1;
+                                this.alt_output = [];
+                            }
                             break;
                         case 'm':
                             code = format_ansi(params, this.state, ansi_art);
@@ -1381,12 +1462,12 @@
                                     inside = false;
                                     format = null;
                                 } else {
-                                    format = '[[' + code.join(';') + ']';
+                                    format = code.join(';');
                                 }
                             } else if (empty) {
                                 format = null;
                             } else {
-                                format = '[[' + code.join(';') + ']';
+                                format = code.join(';');
                                 inside = true;
                             }
                             break;
@@ -1416,7 +1497,10 @@
             });
             var parser = new AnsiParser(parser_events);
             parser.parse(input);
-            var output = parser_events.result.join('\n');
+            var output = parser_events.result.map(function(line) {
+                //return format_line(line, settings);
+                return line.text;
+            }).join('\n');
             if (input !== output) {
                 return output;
             }
