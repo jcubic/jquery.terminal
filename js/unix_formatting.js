@@ -1225,7 +1225,7 @@
                 var current = formatting[i];
                 var index = result.findIndex(function(x) {
                     return current.start === x.start &&
-                        current.end == x.end;
+                        current.end === x.end;
                 });
                 if (index === -1) {
                     result.push(current);
@@ -1384,17 +1384,30 @@
                         line.text = '';
                         line.formatting = [];
                     }
+                    function clear_screen() {
+                        erase_line();
+                        if (!params.length || params[0] === 0) {
+                            output.length = this.cursor.y;
+                        } else if (params[0] === 1) {
+                            for (var i = 0; i < this.cursor.y; ++i) {
+                                clear_line(output[i]);
+                            }
+                        } else if (params[0] === 2) {
+                            output.length = 0;
+                        }
+                    }
                     function erase_line() {
                         var line = output[cursor.y];
                         if (!line) {
                             output[cursor.y] = empty_line();
                             return;
                         }
+                        var str;
                         if (!params.length || params[0] === 0) {
-                            var str = line.text.substring(0, cursor.x);
+                            str = line.text.substring(0, cursor.x);
                             line.text = str;
                         } else if (params[0] === 1) {
-                            var str = line.text.substring(cursor.x);
+                            str = line.text.substring(cursor.x);
                             line.text = str;
                         } else if (params[0] === 2) {
                             clear_line(line);
@@ -1434,16 +1447,7 @@
                             this.cursor.y = value;
                             break;
                         case 'J':
-                            erase_line();
-                            if (!params.length || params[0] === 0) {
-                                output.length = this.cursor.y;
-                            } else if (params[0] === 1) {
-                                for (var i = 0; i < this.cursor.y; ++i) {
-                                    clear_line(output[i]);
-                                }
-                            } else if (params[0] === 2) {
-                                output.length = 0;
-                            }
+                            clear_screen();
                             break;
                         case 'K':
                             erase_line();
