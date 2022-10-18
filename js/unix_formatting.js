@@ -1219,8 +1219,24 @@
             };
         }
         // -------------------------------------------------------------------------------
+        function normalize_format(formatting) {
+            var result = [];
+            for (var i = formatting.length; i--;) {
+                var current = formatting[i];
+                var index = result.findIndex(function(x) {
+                    return current.start === x.start &&
+                        current.end == x.end;
+                });
+                if (index === -1) {
+                    result.push(current);
+                }
+            }
+            return result;
+        }
+        // -------------------------------------------------------------------------------
         function format_line(line, settings) {
-            return line.formatting.reduce(function(text, formatting) {
+            var formatting = normalize_format(line.formatting);
+            return formatting.reduce(function(text, formatting) {
                 var before = $.terminal.substring(text, 0, formatting.start);
                 var inside = $.terminal.substring(text, formatting.start, formatting.end);
                 inside = $.terminal.strip(inside);
@@ -1228,7 +1244,7 @@
                     inside = $.terminal.escape_formatting(inside);
                 }
                 var after = $.terminal.substring(text, formatting.end);
-                return before + '[[' + formatting.format + ']' + inside + ']';
+                return before + '[[' + formatting.format + ']' + inside + ']' + after;
             }, line.text);
         }
         // -------------------------------------------------------------------------------
@@ -1279,7 +1295,7 @@
                 if (format) {
                     output[this.cursor.y].formatting.push({
                         start: this.cursor.x,
-                        end: s_len,
+                        end: this.cursor.x + s_len,
                         format: format
                     });
                 }
@@ -1498,8 +1514,7 @@
             var parser = new AnsiParser(parser_events);
             parser.parse(input);
             var output = parser_events.result.map(function(line) {
-                //return format_line(line, settings);
-                return line.text;
+                return format_line(line, settings);
             }).join('\n');
             if (input !== output) {
                 return output;
