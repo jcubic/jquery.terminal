@@ -792,7 +792,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_position(pos: number, relative?: boolean): JQueryTerminal;
     get_position(): number;
     enter(str: string, options: JQueryTerminal.animationOptions): JQuery.Promise<void>;
-    enter(str: string): JQueryTerminal;
+    enter(str?: string): JQueryTerminal;
     insert(str: string, options: JQueryTerminal.insertOptions & JQueryTerminal.animationOptions): JQuery.Promise<void>;
     insert(str: string, stay?: boolean): JQueryTerminal;
     set_prompt(prompt: JQueryTerminal.ExtendedPrompt, options: JQueryTerminal.animationOptions): JQuery.Promise<void>;
