@@ -1387,9 +1387,9 @@
                     function clear_screen() {
                         erase_line();
                         if (!params.length || params[0] === 0) {
-                            output.length = this.cursor.y;
+                            output.length = cursor.y;
                         } else if (params[0] === 1) {
-                            for (var i = 0; i < this.cursor.y; ++i) {
+                            for (var i = 0; i < cursor.y; ++i) {
                                 clear_line(output[i]);
                             }
                         } else if (params[0] === 2) {
