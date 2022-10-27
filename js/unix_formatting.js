@@ -1234,18 +1234,35 @@
             return result;
         }
         // -------------------------------------------------------------------------------
+        function escape_brackets(input, settings, callback) {
+            var result = input.replace(/\[/g, '\uFFFF')
+                .replace(/\]/g, '\uFFFE')
+                .replace(/\\/g, '\uFFFD');
+            result = callback(result);
+            if (settings.escapeBrackets) {
+                return result.replace(/\uFFFF/g, '&#91;')
+                    .replace(/\uFFFE/g, '&#93;')
+                    .replace(/\uFFFD/g, '&#92;');
+            }
+            return result.replace(/\uFFFF/g, '[')
+                .replace(/\uFFFE/g, ']')
+                .replace(/\uFFFD/g, '\\');
+        }
+        // -------------------------------------------------------------------------------
         function format_line(line, settings) {
             var formatting = normalize_format(line.formatting);
-            return formatting.reduce(function(text, formatting) {
-                var before = $.terminal.substring(text, 0, formatting.start);
-                var inside = $.terminal.substring(text, formatting.start, formatting.end);
-                inside = $.terminal.strip(inside);
-                if (settings.escapeBrackets) {
-                    inside = $.terminal.escape_formatting(inside);
-                }
-                var after = $.terminal.substring(text, formatting.end);
-                return before + '[[' + formatting.format + ']' + inside + ']' + after;
-            }, line.text);
+            return escape_brackets(line.text, settings, function(string) {
+                return formatting.reduce(function(result, formatting) {
+                    var start = formatting.start;
+                    var end = formatting.end;
+                    var format = formatting.format;
+                    var before = $.terminal.substring(result, 0, start);
+                    var inside = $.terminal.substring(result, start, end);
+                    var after = $.terminal.substring(result, end);
+                    result = before + '[[' + format + ']' + inside + ']' + after;
+                    return result;
+                }, string);
+            });
         }
         // -------------------------------------------------------------------------------
         return function from_ansi(input, options) {
@@ -1255,7 +1272,6 @@
             // if there are SAUCE record if something after end of file
             input = input.replace(/\x1A.*/, '');
             input = input.replace(/\r?\n?\x1b\[A\x1b\[[0-9]+C/g, '');
-            input = $.terminal.unescape_brackets(input);
             var alternative = false;
             var code, inside, format, charset, saved_cursor;
             var print = function print(s) {
@@ -1302,8 +1318,8 @@
                 this.cursor.x += s_len;
             };
             var term = $.terminal.active();
-            var ROWS = term && term.rows() || 1000;
-            var COLS = term && term.cols() || 80;
+            var ROWS = term && term.rows() || settings.ROWS || 1000;
+            var COLS = term && term.cols() || settings.COLS || 80;
             // correction to CP 437
             // ref: https://unix.stackexchange.com/a/611513/1806
             //      https://unix.stackexchange.com/a/611344/1806
@@ -1380,37 +1396,114 @@
                     function is_alternative_screen() {
                         return collected === '?' && value === 1049;
                     }
-                    function clear_line(line) {
-                        line.text = '';
-                        line.formatting = [];
-                    }
-                    function clear_screen() {
-                        erase_line();
-                        if (!params.length || params[0] === 0) {
-                            output.length = cursor.y;
-                        } else if (params[0] === 1) {
-                            for (var i = 0; i < cursor.y; ++i) {
-                                clear_line(output[i]);
-                            }
-                        } else if (params[0] === 2) {
-                            output.length = 0;
+                    function clear_line(line, state, start, end) {
+                        if (state.background) {
+                            line.text = new Array(COLS + 1).join(' ');
+                            line.formatting = [{
+                                start: start || 0,
+                                end: end || COLS,
+                                format: format
+                            }];
+                        } else {
+                            line.text = '';
+                            line.formatting = [];
                         }
                     }
-                    function erase_line() {
+                    function process_formatting(state) {
+                        code = format_ansi(params, state, ansi_art);
+                        var empty = params.length === 1 && params[0] === 0;
+                        if (inside) {
+                            if (empty) {
+                                inside = false;
+                                format = null;
+                            } else {
+                                format = code.join(';');
+                            }
+                        } else if (empty) {
+                            format = null;
+                        } else {
+                            format = code.join(';');
+                            inside = true;
+                        }
+                    }
+                    function fill(start, end, state) {
+                        for (var y = start; y < end; ++y) {
+                            if (!output[y]) {
+                                output[y] = empty_line();
+                            }
+                            clear_line(output[y], state);
+                        }
+                    }
+                    function clear_screen(state) {
+                        erase_line(state);
+                        if (!params.length || params[0] === 0) {
+                            if (state.background) {
+                                fill(cursor.y, ROWS, state);
+                            } else {
+                                output.length = cursor.y;
+                            }
+                        } else if (params[0] === 1) {
+                            fill(0, cursor.y, state);
+                        } else if (params[0] === 2) {
+                            if (state.background) {
+                                fill(0, ROWS, state);
+                            } else {
+                                output.length = 0;
+                            }
+                        }
+                    }
+                    function erase_characters(state) {
+                        var line = output[cursor.y];
+                        var before = line.text.substring(0, cursor.x);
+                        var count = params[0] || 1;
+                        var after = line.text.substring(cursor.x + count);
+                        var blank = new Array(count + 1).join(' ');
+                        line.text = before + blank + after;
+                        if (state.background) {
+                            var start = cursor.x;
+                            var end = start + count;
+                            line.formatting.push({
+                                start: start,
+                                end: end,
+                                format: format
+                            });
+                        }
+                    }
+                    function erase_line(state) {
                         var line = output[cursor.y];
                         if (!line) {
                             output[cursor.y] = empty_line();
+                            if (params[0] === 1 && state.background) {
+                                clear_line(output[cursor.y], state, 0, cursor.x);
+                            } else {
+                                clear_line(output[cursor.y], state);
+                            }
                             return;
                         }
                         var str;
                         if (!params.length || params[0] === 0) {
                             str = line.text.substring(0, cursor.x);
                             line.text = str;
+                            if (state.background) {
+                                line.text += new Array(COLS - cursor.x + 1).join(' ');
+                                line.formatting.push({
+                                    start: cursor.x,
+                                    end: COLS,
+                                    format: format
+                                });
+                            }
                         } else if (params[0] === 1) {
                             str = line.text.substring(cursor.x);
                             line.text = str;
+                            if (state.background) {
+                                line.formatting.push({
+                                    start: 0,
+                                    end: cursor.x,
+                                    format: format
+                                });
+                            }
                         } else if (params[0] === 2) {
-                            clear_line(line);
+                            clear_line(line, state);
                         }
                     }
                     var cursor = this.cursor;
@@ -1421,7 +1514,7 @@
                             saved_cursor = Object.assign({}, this.cursor);
                             break;
                         case 'u':
-                            this.cursor = saved_cursor;
+                            Object.assign(this.cursor, saved_cursor);
                             break;
                         case 'A': // UP
                             this.cursor.y -= value;
@@ -1444,13 +1537,16 @@
                             this.cursor.y -= value;
                             break;
                         case 'd':
-                            this.cursor.y = value;
+                            this.cursor.y = value - 1;
                             break;
                         case 'J':
-                            clear_screen();
+                            clear_screen(this.state);
+                            break;
+                        case 'X':
+                            erase_characters(this.state);
                             break;
                         case 'K':
-                            erase_line();
+                            erase_line(this.state);
                             break;
                         case 'G':
                             this.cursor.x = params[0] || 0;
@@ -1475,21 +1571,7 @@
                             }
                             break;
                         case 'm':
-                            code = format_ansi(params, this.state, ansi_art);
-                            var empty = params.length === 1 && params[0] === 0;
-                            if (inside) {
-                                if (empty) {
-                                    inside = false;
-                                    format = null;
-                                } else {
-                                    format = code.join(';');
-                                }
-                            } else if (empty) {
-                                format = null;
-                            } else {
-                                format = code.join(';');
-                                inside = true;
-                            }
+                            process_formatting(this.state);
                             break;
                     }
                     if (this.cursor.x < 0) {
