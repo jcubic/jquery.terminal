@@ -493,8 +493,12 @@ describe('Terminal utils', function() {
             expect(output).toEqual(input);
         });
         it('should format plots with moving cursors', function() {
-            return fs.readFileAsync('__tests__/ervy-plot').then(function(plot) {
-                expect($.terminal.from_ansi(plot.toString())).toMatchSnapshot();
+            return Promise.all(['ervy-plot.ans', 'neofetch.ans'].map(file => {
+                return fs.readFileAsync(`__tests__/${file}`, 'utf8');
+            })).then(function(plots) {
+                plots.forEach(function(plot) {
+                    expect($.terminal.from_ansi(plot)).toMatchSnapshot();
+                });
             });
         });
         it('should render ANSI art', function() {

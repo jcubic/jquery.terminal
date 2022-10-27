@@ -230,6 +230,37 @@ exports[`Terminal utils $.terminal.from_ansi should format plots with moving cur
 "
 `;
 
+exports[`Terminal utils $.terminal.from_ansi should format plots with moving cursors 2`] = `
+"Skrypt uruchomiony 2022-10-27 22:14:53+02:00 [COMMAND=\\"neofetch\\" TERM=\\"xterm-256color\\" TTY=\\"/dev/pts/2\\" COLUMNS=\\"118\\" LINES=\\"26\\"]
+[[b;#5555FF;]             .',;::::;,'.]                [[b;#5555FF;]kuba]@[[b;#5555FF;]jcubic] 
+[[b;#5555FF;]         .';:cccccccccccc:;,.]            ----------- 
+[[b;#5555FF;]      .;cccccccccccccccccccccc;.]         [[b;#5555FF;]OS]: Fedora Linux 36 (Xfce) x86_64 
+[[b;#5555FF;]    .:cccccccccccccccccccccccccc:.]       [[b;#5555FF;]Host]: Inspiron 5570 
+[[b;#5555FF;]  .;ccccccccccccc;][[b;#FFF;].:dddl:.][[b;#5555FF;];ccccccc;.]     [[b;#5555FF;]Kernel]: 5.19.16-200.fc36.x86_64 
+[[b;#5555FF;] .:ccccccccccccc;][[b;#FFF;]OWMKOOXMWd][[b;#5555FF;];ccccccc:.]    [[b;#5555FF;]Uptime]: 3 days, 23 hours, 10 mins 
+[[b;#5555FF;].:ccccccccccccc;][[b;#FFF;]KMMc][[b;#5555FF;];cc;][[b;#FFF;]xMMc][[b;#5555FF;]:ccccccc:.]   [[b;#5555FF;]Packages]: 2845 (rpm), 6 (flatpak) 
+[[b;#5555FF;],cccccccccccccc;][[b;#FFF;]MMM.][[b;#5555FF;];cc;][[b;#FFF;];WW:][[b;#5555FF;]:cccccccc,]   [[b;#5555FF;]Shell]: bash 5.2.2 
+[[b;#5555FF;]:cccccccccccccc;][[b;#FFF;]MMM.][[b;#5555FF;];cccccccccccccccc:]   [[b;#5555FF;]Resolution]: 1920x1080 
+[[b;#5555FF;]:ccccccc;][[b;#FFF;]oxOOOo][[b;#5555FF;];][[b;#FFF;]MMM0OOk.][[b;#5555FF;];cccccccccccc:]   [[b;#5555FF;]DE]: Xfce 4.16 
+[[b;#5555FF;]cccccc:][[b;#FFF;]0MMKxdd:][[b;#5555FF;];][[b;#FFF;]MMMkddc.][[b;#5555FF;];cccccccccccc;]   [[b;#5555FF;]WM]: Xfwm4 
+[[b;#5555FF;]ccccc:][[b;#FFF;]XM0'][[b;#5555FF;];cccc;][[b;#FFF;]MMM.][[b;#5555FF;];cccccccccccccccc']   [[b;#5555FF;]WM Theme]: Default 
+[[b;#5555FF;]ccccc;][[b;#FFF;]MMo][[b;#5555FF;];ccccc;][[b;#FFF;]MMW.][[b;#5555FF;];ccccccccccccccc;]    [[b;#5555FF;]Theme]: Adwaita-dark [GTK2], Adwaita [GTK3] 
+[[b;#5555FF;]ccccc;][[b;#FFF;]0MNc.][[b;#5555FF;]ccc][[b;#FFF;].xMMd][[b;#5555FF;]:ccccccccccccccc;]     [[b;#5555FF;]Icons]: Clarity [GTK2/3] 
+[[b;#5555FF;]cccccc;][[b;#FFF;]dNMWXXXWM0:][[b;#5555FF;]:cccccccccccccc:,]      [[b;#5555FF;]Terminal]: xfce4-terminal 
+[[b;#5555FF;]cccccccc;][[b;#FFF;].:odl:.][[b;#5555FF;];cccccccccccccc:,.]       [[b;#5555FF;]Terminal Font]: Monospace 10 
+[[b;#5555FF;]:cccccccccccccccccccccccccccc:'.]         [[b;#5555FF;]CPU]: Intel i7-8550U (8) @ 4.000GHz 
+[[b;#5555FF;].:cccccccccccccccccccccc:;,..]            [[b;#5555FF;]GPU]: Intel UHD Graphics 620 
+[[b;#5555FF;]  '::cccccccccccccc::;,.]                 [[b;#5555FF;]GPU]: AMD ATI Radeon R7 M260/M265 / M340/M360 / M440/M445 / 530/535 / 620/625 Mobile 
+                                         [[b;#5555FF;]Memory]: 7819MiB / 15654MiB 
+
+                                         [[;#000;#000]   ][[;#A00;#A00]   ][[;#008400;#008400]   ][[;#A50;#A50]   ][[;#00A;#00A]   ][[;#A0A;#A0A]   ][[;#0AA;#0AA]   ][[;#AAA;#AAA]   ]
+
+
+
+Skrypt wykonany 2022-10-27 22:14:55+02:00 [KOD_WYJŚCIA=\\"0\\"]
+"
+`;
+
 exports[`Terminal utils $.terminal.from_ansi should render ANSI art 1`] = `
 "
 
