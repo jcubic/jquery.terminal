@@ -1258,6 +1258,7 @@
                     var format = formatting.format;
                     var before = $.terminal.substring(result, 0, start);
                     var inside = $.terminal.substring(result, start, end);
+                    inside = $.terminal.strip(inside);
                     var after = $.terminal.substring(result, end);
                     result = before + '[[' + format + ']' + inside + ']' + after;
                     return result;
@@ -1293,6 +1294,9 @@
                         output[this.cursor.y].text = s;
                     }
                 } else {
+                    if (line.text.match(/< Tak >/) && s === '<') {
+                        //debugger;
+                    }
                     line_len = line.text.length;
                     if (this.cursor.x === 0) {
                         after = line.text.substring(s_len);
@@ -1539,6 +1543,9 @@
                         case 'd':
                             this.cursor.y = value - 1;
                             break;
+                        case 'P':
+                            print.call(this, new Array(value + 1).join(' '));
+                            break;
                         case 'J':
                             clear_screen(this.state);
                             break;
@@ -1555,6 +1562,9 @@
                             // -1 since CUP is 1-based
                             this.cursor.y = Math.min(params[0] || 1, ROWS) - 1;
                             this.cursor.x = Math.min(params[1] || 1, COLS) - 1;
+                            break;
+                        case 'Z':
+                            this.cursor.x = Math.floor(this.cursor.x / 4) * 4;
                             break;
                         case 'h':
                             if (is_alternative_screen()) {
@@ -1601,7 +1611,8 @@
             parser.parse(input);
             var output = parser_events.result.map(function(line) {
                 return format_line(line, settings);
-            }).join('\n');
+            });
+            output = output.join('\n');
             if (input !== output) {
                 return output;
             }

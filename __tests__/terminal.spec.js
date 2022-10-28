@@ -493,17 +493,22 @@ describe('Terminal utils', function() {
             expect(output).toEqual(input);
         });
         it('should format plots with moving cursors', function() {
-            return Promise.all(['ervy-plot.ans', 'neofetch.ans'].map(file => {
-                return fs.readFileAsync(`__tests__/${file}`, 'utf8');
+            return Promise.all(['ervy-plot.ans', 'neofetch.ans', 'dialog.ans'].map(file => {
+                return fs.readFileAsync(`__tests__/__fixtures__/${file}`, 'utf8');
             })).then(function(plots) {
                 plots.forEach(function(plot) {
                     expect($.terminal.from_ansi(plot)).toMatchSnapshot();
                 });
             });
         });
+        it('should render Denis Richie ANSI art', function() {
+            return fs.readFileAsync(`__tests__/__fixtures__/denis.ans`, 'utf8').then(text => {
+                expect($.terminal.from_ansi(text)).toMatchSnapshot();
+            });
+        });
         it('should render ANSI art', function() {
             return Promise.all(['nf-marble.ans', 'bs-pacis.ans'].map(fname => {
-                return fs.readFileAsync(`__tests__/${fname}`).then(data => {
+                return fs.readFileAsync(`__tests__/__fixtures__/${fname}`).then(data => {
                     var str = iconv.decode(data, 'CP437');
                     return $.terminal.from_ansi(str);
                 });
@@ -2263,14 +2268,14 @@ describe('Terminal utils', function() {
         it('should split image', async function() {
             var t = term;
             t.settings().numRows = 50;
-            t.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            t.less('xxx\n[[@;;;;__tests__/__fixtures__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
             await delay(1000);
             expect(t.get_output()).toMatchSnapshot();
         });
         it('should revoke images', async function() {
             var t = term;
             t.settings().numRows = 50;
-            t.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            t.less('xxx\n[[@;;;;__tests__/__fixtures__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
             await delay(1000);
             spy(URL, 'revokeObjectURL');
             key('q');
