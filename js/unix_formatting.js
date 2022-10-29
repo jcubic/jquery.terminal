@@ -1219,21 +1219,6 @@
             };
         }
         // -------------------------------------------------------------------------------
-        function normalize_format(formatting) {
-            var result = [];
-            for (var i = formatting.length; i--;) {
-                var current = formatting[i];
-                var index = result.findIndex(function(x) {
-                    return current.start === x.start &&
-                        current.end === x.end;
-                });
-                if (index === -1) {
-                    result.push(current);
-                }
-            }
-            return result;
-        }
-        // -------------------------------------------------------------------------------
         function escape_brackets(input, settings, callback) {
             var result = input.replace(/\[/g, '\uFFFF')
                 .replace(/\]/g, '\uFFFE')
@@ -1250,9 +1235,8 @@
         }
         // -------------------------------------------------------------------------------
         function format_line(line, settings) {
-            var formatting = normalize_format(line.formatting);
             return escape_brackets(line.text, settings, function(string) {
-                return formatting.reduce(function(result, formatting) {
+                return line.formatting.reduce(function(result, formatting) {
                     var start = formatting.start;
                     var end = formatting.end;
                     var format = formatting.format;
@@ -1294,9 +1278,6 @@
                         output[this.cursor.y].text = s;
                     }
                 } else {
-                    if (line.text.match(/< Tak >/) && s === '<') {
-                        //debugger;
-                    }
                     line_len = line.text.length;
                     if (this.cursor.x === 0) {
                         after = line.text.substring(s_len);
@@ -1313,11 +1294,12 @@
                     }
                 }
                 if (format) {
-                    output[this.cursor.y].formatting.push({
+                    var formatting = {
                         start: this.cursor.x,
                         end: this.cursor.x + s_len,
                         format: format
-                    });
+                    };
+                    output[this.cursor.y].formatting.push(formatting);
                 }
                 this.cursor.x += s_len;
             };
@@ -1364,6 +1346,8 @@
                             this.cursor.x = 0;
                         }
                     } else if (code === 8) {
+                        this.cursor.x--;
+                        print.call(this, ' ');
                         this.cursor.x--;
                     } else if (code === 9) {
                         print.call(this, '\t');
