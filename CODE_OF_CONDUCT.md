@@ -2,7 +2,7 @@
 
 By beeing part of this comminty you agree to follow this short list of rules
 
-1. Just don't be a dick.
+1. Be excellent to each other.
 2. Think before you comment.
 3. Be empathetic to others feeling.
 
