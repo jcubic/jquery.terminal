@@ -1256,7 +1256,6 @@
             var ansi_art = settings.ansiArt;
             // if there are SAUCE record if something after end of file
             input = input.replace(/\x1A.*/, '');
-            input = input.replace(/\r?\n?\x1b\[A\x1b\[[0-9]+C/g, '');
             var alternative = false;
             var code, inside, format, charset, saved_cursor;
             var print = function print(s) {
