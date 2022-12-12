@@ -8,8 +8,9 @@
  * http://terminal.jcubic.pl
  *
  * Monkey patch to add newlinew option for echo method inside jQuery Terminal
+ * this file is depracated the echo without newline was added to the library
  *
- * Copyright (c) 2014-2021 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2022 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */

@@ -10,7 +10,7 @@
  * This is example of how to create less like command for jQuery Terminal
  * the code is based on the one from leash shell and written as jQuery plugin
  *
- * Copyright (c) 2018-2021 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2018-2022 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
@@ -202,7 +202,8 @@
                 };
             }
             term.echo(to_print.join('\n'), {
-                finalize: finalize
+                finalize: finalize,
+                externalPause: false
             });
             if (term.find('.terminal-output').is(':empty')) {
                 // sometimes the output is not flushed not idea why

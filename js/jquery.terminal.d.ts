@@ -776,7 +776,9 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     next(selector?: JQuery.Selector): this;
     next(): JQueryTerminal;
     focus(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'focus'> | false): this;
-    focus(toggle?: boolean): JQueryTerminal;
+    focus(toggle?: boolean, silent?: boolean): JQueryTerminal;
+    blur(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'blur'> | false):  this;
+    blur(silent?: boolean): JQueryTerminal;
     freeze(toggle?: boolean): JQueryTerminal;
     frozen(): boolean;
     enable(silent?: boolean): JQueryTerminal;
@@ -790,7 +792,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_position(pos: number, relative?: boolean): JQueryTerminal;
     get_position(): number;
     enter(str: string, options: JQueryTerminal.animationOptions): JQuery.Promise<void>;
-    enter(str: string): JQueryTerminal;
+    enter(str?: string): JQueryTerminal;
     insert(str: string, options: JQueryTerminal.insertOptions & JQueryTerminal.animationOptions): JQuery.Promise<void>;
     insert(str: string, stay?: boolean): JQueryTerminal;
     set_prompt(prompt: JQueryTerminal.ExtendedPrompt, options: JQueryTerminal.animationOptions): JQuery.Promise<void>;

@@ -17,13 +17,12 @@
  *        // or
  *        term.echo(ascii_table(arr, true)); // this will render first row as header
  *
- * Copyright (c) 2018-2021 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2018-2022 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
 /* global define, module, global, wcwidth, require */
 (function(factory) {
-
     var root;
     if (typeof window !== 'undefined') {
         root = window;
@@ -46,15 +45,30 @@
         root.ascii_table = factory(root.wcwidth);
     }
 })(function(wcwidth, undefined) {
-    var strlen = (function() {
-        if (typeof wcwidth === 'undefined') {
-            return function(string) {
-                return string.length;
-            };
-        } else {
-            return wcwidth;
-        }
-    })();
+    var strlen
+    if (typeof $ !== 'undefined' && $.terminal) {
+        strlen = (function() {
+            if (typeof wcwidth === 'undefined') {
+                return function(string) {
+                    return $.terminal.length(string);
+                };
+            } else {
+                return function(string) {
+                    return wcwidth($.terminal.strip(string));
+                };
+            }
+        })();
+    } else {
+        strlen = (function() {
+            if (typeof wcwidth === 'undefined') {
+                return function(string) {
+                    return string.length;
+                };
+            } else {
+                return wcwidth;
+            }
+        })();
+    }
     function ascii_table(array, header) {
         if (!array.length) {
             return '';

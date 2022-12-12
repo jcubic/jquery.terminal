@@ -1,3 +1,30 @@
+## 2.35.0
+### Breaking
+* replace `imagePause` with `externalPause`
+### Features
+* add bulletproof solution for generic selector (`*` or `div`) to overwrite terminal style
+* use jsDelivr for emoji that is way faster [#810](https://github.com/jcubic/jquery.terminal/issues/810)
+* pause terminal when loading iframes [#816](https://github.com/jcubic/jquery.terminal/issues/816)
+* allow to change or remove target and rel tags on links with JSON attributes
+* allow using transparent background [#698](https://github.com/jcubic/jquery.terminal/issues/698)
+* register CSS properties so you can use CSS Transition on terminal colors [#808](https://github.com/jcubic/jquery.terminal/issues/808)
+* add terminal::blur alias [#813](https://github.com/jcubic/jquery.terminal/issues/813)
+* allow to change scrollbar color with CSS property
+* add `process_formatting` static helper function
+* add `FormattingCanvasRenderer` for color animation [#819](https://github.com/jcubic/jquery.terminal/issues/819)
+### Bugfix
+* fix up/down arrows when moving inside command that has emoji [#608](https://github.com/jcubic/jquery.terminal/issues/608)
+* fix pausing when loading images [#807](https://github.com/jcubic/jquery.terminal/issues/807)
+* fix scroll to bottom on echo images and iframes
+* fix jump to the end of the command when clicking below cmd [#814](https://github.com/jcubic/jquery.terminal/issues/814)
+* fix selection overlap previous line
+* fix scroll to bottom while animating [#791](https://github.com/jcubic/jquery.terminal/issues/791)
+* fix rendering of sixel images [#824](https://github.com/jcubic/jquery.terminal/issues/824)
+* fix handling promises in randerHandler
+* fix scroll to bottom during animation [#791](https://github.com/jcubic/jquery.terminal/issues/791)
+* fix `terminal::is_bottom` when using intersection observer
+* fix processing \r in Linux output of unix_formatting
+
 ## 2.34.0
 ### Features
 * add `term::get_mask` method [#785](https://github.com/jcubic/jquery.terminal/issues/785)

@@ -14,6 +14,9 @@
  *
  * Date: {{DATE}}
  */
+.terminal, .terminal *, .cmd, .cmd *, .cmd textarea {
+    all: revert;
+}
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
     display: inline-block;
@@ -72,6 +75,9 @@
 .terminal {
     position: relative;
     line-height: initial;
+    --base-background: var(--background, #000);
+    --base-color: var(--color);
+    contain: content;
 }
 .terminal-scroller {
     position: relative;
@@ -82,9 +88,6 @@
 }
 terminal.terminal-temp {
     visibility: hidden;
-}
-.terminal {
-    contain: content;
 }
 body.terminal {
     min-height: 100vh;
@@ -174,7 +177,7 @@ body.full-screen-terminal .terminal {
     background-color: #3377FF;
     background-color: var(--link-color, #3377FF) !important;
     color: #000;
-    color: var(--background, #000) !important;
+    color: var(--base-background, #000) !important;
     text-decoration: none;
 }
 .terminal .terminal-output > :not(.raw) a[href] span,
@@ -243,7 +246,7 @@ body.full-screen-terminal .terminal {
 .cmd div,
 .terminal.external div {
     line-height: 1em;
-    line-height: calc((var(--size) * (14px / var(--pixel-density, 1))) + (1px / var(--pixel-density, 1)));
+    line-height: calc((var(--size) * (16px / var(--pixel-density, 1))) + (1px / var(--pixel-density, 1)));
 }
 .cmd .cmd-prompt span.fa::before,
 .cmd .cmd-prompt span.fab::before,
@@ -940,6 +943,26 @@ terminal .terminal-output > div {
 /*
  * overwrite css variables that don't work with selection in Edge
  */
+@property --color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(170, 170, 170, 0.99);
+}
+@property --background {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #000;
+}
+@property --link-color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #3377FF;
+}
+@property --size {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,
     .terminal h2::selection,
@@ -1088,6 +1111,7 @@ terminal .terminal-output > div {
     background: transparent;
     opacity: 0.01;
 }
+/* Scrollbar */
 .terminal-scroller::-webkit-scrollbar {
     width: calc(6px / var(--pixel-density, 1));
     height: calc(6px / var(--pixel-density, 1));
@@ -1104,12 +1128,33 @@ terminal .terminal-output > div {
     scrollbar-color: var(--color, #aaa) var(--background, #000);
     scrollbar-width: thin;
 }
+/*
+ * Allow to change scrollbar color
+ */
+.terminal-wrapper {
+    --color: var(--base-color);
+    --background: var(--base-background);
+}
 .cmd .token {
     --original-color: var(--color);
 }
 .terminal .terminal-blink, .cmd .terminal-blink {
     animation: terminal-ansi-blink 1s steps(2, start) infinite;
     -webkit-animation: terminal-ansi-blink 1s steps(2, start) infinite;
+}
+/* Allow transparent background #698 */
+.terminal .terminal-output,
+.terminal .terminal-output * {
+  --background: transparent;
+}
+.terminal .cmd * {
+  --background: transparent;
+}
+.terminal .cmd::selection,
+.terminal .cmd *::selection,
+.terminal .terminal-output::selection,
+.terminal .terminal-output *::selection {
+  --background: var(--base-background);
 }
 @keyframes terminal-ansi-blink {
     to {

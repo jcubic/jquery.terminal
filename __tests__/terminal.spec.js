@@ -239,7 +239,7 @@ window.HTMLCanvasElement.prototype.toBlob = function(fn) {
 };
 global.URL = window.URL = {
     createObjectURL: function(blob) {
-        return 'data:image/jpg;' + blob;
+        return 'data:image/jpg,' + blob;
     },
     revokeObjectURL: function() {}
 };
@@ -493,18 +493,22 @@ describe('Terminal utils', function() {
             expect(output).toEqual(input);
         });
         it('should format plots with moving cursors', function() {
-            return Promise.all([
-                fs.readFileAsync('__tests__/ervy-plot-01'),
-                fs.readFileAsync('__tests__/ervy-plot-02')
-            ]).then(function(plots) {
+            return Promise.all(['ervy-plot.ans', 'neofetch.ans', 'dialog.ans'].map(file => {
+                return fs.readFileAsync(`__tests__/__fixtures__/${file}`, 'utf8');
+            })).then(function(plots) {
                 plots.forEach(function(plot) {
-                    expect($.terminal.from_ansi(plot.toString())).toMatchSnapshot();
+                    expect($.terminal.from_ansi(plot)).toMatchSnapshot();
                 });
+            });
+        });
+        it('should render Denis Richie ANSI art', function() {
+            return fs.readFileAsync(`__tests__/__fixtures__/denis.ans`, 'utf8').then(text => {
+                expect($.terminal.from_ansi(text)).toMatchSnapshot();
             });
         });
         it('should render ANSI art', function() {
             return Promise.all(['nf-marble.ans', 'bs-pacis.ans'].map(fname => {
-                return fs.readFileAsync(`__tests__/${fname}`).then(data => {
+                return fs.readFileAsync(`__tests__/__fixtures__/${fname}`).then(data => {
                     var str = iconv.decode(data, 'CP437');
                     return $.terminal.from_ansi(str);
                 });
@@ -857,14 +861,14 @@ describe('Terminal utils', function() {
             var input = '[[!;;]https://terminal.jcubic.pl]';
             var tests = [
                 [
-                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noopener" data-text>https:'+
+                    '<a href="https://terminal.jcubic.pl" rel="noopener" ' +
+                        'target="_blank" data-text>https:'+
                         '//terminal.jcubic.pl</a>',
                     {}
                 ],
                 [
-                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="noreferrer noopener" data-'+
+                    '<a href="https://terminal.jcubic.pl" rel="noreferrer '+
+                        'noopener" target="_blank" data-'+
                         'text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true
@@ -878,6 +882,25 @@ describe('Terminal utils', function() {
                 expect(output).toEqual(expected);
             });
         });
+        it('should handle attrs on links', function() {
+            var tests = [
+                [
+                    '[[!;;;;https://example.com;{"target": null, "rel": null}]example]',
+                    '<a href="https://example.com" data-text>example</a>'
+                ],
+                [
+                    '[[!;;;;https://example.com;{"target": "_self", "rel": "noopener"}]example]',
+                    '<a href="https://example.com" target="_self" rel="noopener" data-text>example</a>'
+                ]
+            ];
+            var options = {
+                allowedAttributes: ['target', 'rel']
+            };
+            tests.forEach(function(spec) {
+                var output = $.terminal.format(spec[0], options);
+                expect(output).toEqual(spec[1]);
+            });
+        });
         it('should handle javascript links', function() {
             var js = "javascript".split('').map(function(chr) {
                 return '&#' + chr.charCodeAt(0) + ';';
@@ -887,22 +910,22 @@ describe('Terminal utils', function() {
             var tests = [
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {},
-                    '<a target="_blank" rel="noopener"' +
+                    '<a rel="noopener" target="_blank"' +
                         ' data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;javascript:alert('x')]xss]", {anyLinks: true},
-                    '<a target="_blank" href="javascript:alert(\'x\')"' +
-                        ' rel="noopener" data-text>xss</a>'
+                    '<a href="javascript:alert(\'x\')"' +
+                        ' rel="noopener" target="_blank" data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;" + js + ":alert('x')]xss]", {},
-                    '<a target="_blank" rel="noopener"' +
+                    '<a rel="noopener" target="_blank"' +
                         ' data-text>xss</a>'
                 ],
                 [
                     "[[!;;;;JaVaScRiPt:alert('x')]xss]", {anyLinks: false},
-                    '<a target="_blank" rel="noopener"' +
+                    '<a rel="noopener" target="_blank"' +
                         ' data-text>xss</a>'
                 ],
             ];
@@ -917,14 +940,14 @@ describe('Terminal utils', function() {
             var input = '[[!;;]https://terminal.jcubic.pl]';
             var tests = [
                 [
-                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noopener" data-te'+
+                    '<a href="https://terminal.jcubic.pl"'+
+                        ' rel="nofollow noopener" target="_blank" data-te'+
                         'xt>https://terminal.jcubic.pl</a>',
                     {linksNoFollow: true}
                 ],
                 [
-                    '<a target="_blank" href="https://terminal.jcubic.pl"'+
-                        ' rel="nofollow noreferrer noopener"'+
+                    '<a href="https://terminal.jcubic.pl"'+
+                        ' rel="nofollow noreferrer noopener" target="_blank"'+
                         ' data-text>https://terminal.jcubic.pl</a>',
                     {
                         linksNoReferrer: true,
@@ -2245,14 +2268,14 @@ describe('Terminal utils', function() {
         it('should split image', async function() {
             var t = term;
             t.settings().numRows = 50;
-            t.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            t.less('xxx\n[[@;;;;__tests__/__fixtures__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
             await delay(1000);
             expect(t.get_output()).toMatchSnapshot();
         });
         it('should revoke images', async function() {
             var t = term;
             t.settings().numRows = 50;
-            t.less('xxx\n[[@;;;;__tests__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
+            t.less('xxx\n[[@;;;;__tests__/__fixtures__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg]]\nxxx');
             await delay(1000);
             spy(URL, 'revokeObjectURL');
             key('q');
@@ -5121,6 +5144,16 @@ describe('Terminal plugin', function() {
                         quux: function() {
                             this.echo('quux');
                         }
+                    },
+                    exec_async_array() {
+                        return this.exec(Array.from({length: 4}, (_, i) => `async_command ${i}`));
+                    },
+                    async_command(n) {
+                        this.pause();
+                        setTimeout(() => {
+                            this.echo(`calling async ${n}`);
+                            this.resume();
+                        }, 0);
                     }
                 };
                 spy(interpreter, 'foo');
@@ -5329,10 +5362,20 @@ describe('Terminal plugin', function() {
                 var term = $('<div/>').terminal('/async');
                 term.focus().exec('echo foo bar');
                 term.insert('foo');
-                new Promise((resolve) => {
+                return new Promise((resolve) => {
                     setTimeout(function() {
                         expect(object.echo).toHaveBeenCalledWith('foo', 'bar');
                         expect(term.get_command()).toEqual('foo');
+                        resolve();
+                    }, 800);
+                });
+            });
+            it('should invoke array of commands when each command pause terminal', () => {
+                term.clear();
+                term.focus().exec('exec_async_array');
+                return new Promise((resolve) => {
+                    setTimeout(function() {
+                        expect(term.get_output()).toMatchSnapshot();
                         resolve();
                     }, 800);
                 });
