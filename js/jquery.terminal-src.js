@@ -2066,7 +2066,7 @@
         if (is_mobile) {
             clip = (function() {
                 var $node = $('<div class="cmd-editable"/>').attr({
-                    contenteditable: 'plaintext-only',
+                    contenteditable: true,
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
