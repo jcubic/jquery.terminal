@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version DEV
+ *           \/              /____/                              version 2.35.1
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 23 Dec 2022 23:01:45 +0000
+ * Date: Sat, 24 Dec 2022 11:59:58 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -2065,8 +2065,7 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var $node = $('<div class="cmd-editable"/>').attr({
-                    contenteditable: true,
+                var $node = $('<div class="cmd-editable" contenteditable/>').attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
@@ -2094,7 +2093,7 @@
                                 top: '',
                                 bottom: ''
                             });
-                        }, 400);
+                        }, 100);
                     },
                     focus: function() {
                         css($node[0], {
@@ -5249,8 +5248,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: 'DEV',
-        date: 'Fri, 23 Dec 2022 23:01:45 +0000',
+        version: '2.35.1',
+        date: 'Sat, 24 Dec 2022 11:59:58 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
