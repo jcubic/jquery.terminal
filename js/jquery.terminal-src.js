@@ -2065,8 +2065,7 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var $node = $('<div class="cmd-editable"/>').attr({
-                    contenteditable: 'plaintext-only',
+                var $node = $('<div class="cmd-editable" contenteditable/>').attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false',
@@ -2094,7 +2093,7 @@
                                 top: '',
                                 bottom: ''
                             });
-                        }, 400);
+                        }, 100);
                     },
                     focus: function() {
                         css($node[0], {
