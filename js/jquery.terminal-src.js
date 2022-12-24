@@ -2093,7 +2093,7 @@
                                 top: '',
                                 bottom: ''
                             });
-                        }, 400);
+                        }, 100);
                     },
                     focus: function() {
                         css($node[0], {
