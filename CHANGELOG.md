@@ -1,6 +1,9 @@
-## 2.35.1
+## 2.35.2
 ### Bugfix
 * fix mobile Chrome and Firefox [#846](https://github.com/jcubic/jquery.terminal/issues/846)
+
+## 2.35.1
+* Unpublished because of technical issuess
 
 ## 2.35.0
 ### Breaking
