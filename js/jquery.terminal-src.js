@@ -8344,14 +8344,12 @@
                 if (type === 'string') {
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
-                    self.echo(function() {
-                        try {
-                            return settings.greetings.call(self, self.echo);
-                        } catch (e) {
-                            settings.greetings = null;
-                            display_exception(e, 'greetings');
-                        }
-                    });
+                    try {
+                        settings.greetings.call(self, self.echo);
+                    } catch (e) {
+                        settings.greetings = null;
+                        display_exception(e, 'greetings');
+                    }
                 } else {
                     self.error(strings().wrongGreetings);
                 }
