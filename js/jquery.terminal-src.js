@@ -8345,11 +8345,18 @@
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     self.echo(function() {
-                        try {
-                            return settings.greetings.call(self, self.echo);
-                        } catch (e) {
-                            settings.greetings = null;
-                            display_exception(e, 'greetings');
+                        if (settings.greetings) {
+                            try {
+                                var defer = new $.Deferred();
+                                var ret = settings.greetings.call(self, defer.resolve);
+                                if (ret) {
+                                    defer.resolve(ret);
+                                }
+                                return defer.promise();
+                            } catch (e) {
+                                settings.greetings = null;
+                                display_exception(e, 'greetings');
+                            }
                         }
                     });
                 } else {
