@@ -5580,7 +5580,38 @@ describe('Terminal plugin', function() {
             });
         });
         describe('greetings', function() {
-            it('should show greetings', function(done) {
+            it('should show single greetings when using callback', async () => {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings(cb) {
+                        cb('Hello');
+                    }
+                });
+                await delay(100);
+                expect(term.get_output()).toEqual('Hello');
+            });
+            it('should show greeting when return string', async () => {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings() {
+                        return 'Hello';
+                    }
+                });
+                await delay(100);
+                expect(term.get_output()).toEqual('Hello');
+            });
+            it('should show greetings when return a Promise', async () => {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings() {
+                        return new Promise(resolve => {
+                            setTimeout(() => {
+                                resolve('Hello');
+                            }, 10);
+                        });
+                    }
+                });
+                await delay(100);
+                expect(term.get_output()).toEqual('Hello');
+            });
+            it('should change and display greetings change dynamically', function(done) {
                 var greetings = {
                     fn: function(callback) {
                         setTimeout(function() {

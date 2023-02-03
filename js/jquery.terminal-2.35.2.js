@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 03 Feb 2023 10:40:13 +0000
+ * Date: Fri, 03 Feb 2023 17:56:16 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5249,7 +5249,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 03 Feb 2023 10:40:13 +0000',
+        date: 'Fri, 03 Feb 2023 17:56:16 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
