@@ -1,6 +1,7 @@
 ## 2.35.3
 ### Bugfix
 * fix object returned from the interpreter [#857](https://github.com/jcubic/jquery.terminal/issues/857)
+* fix greetings that use callback [#855](https://github.com/jcubic/jquery.terminal/issues/855)
 
 ## 2.35.2
 ### Bugfix
