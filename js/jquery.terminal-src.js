@@ -8511,7 +8511,7 @@
                     if (!force_awake) {
                         if (is_animation_promise(result)) {
                             paused = true;
-                        } else {
+                        } else if (is_promise(result)) {
                             self.pause(settings.softPause);
                         }
                     }

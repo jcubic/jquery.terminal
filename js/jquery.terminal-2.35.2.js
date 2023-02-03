@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.35.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 05 Jan 2023 19:18:13 +0000
+ * Date: Fri, 03 Feb 2023 10:40:13 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5248,8 +5248,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.35.2',
-        date: 'Thu, 05 Jan 2023 19:18:13 +0000',
+        version: 'DEV',
+        date: 'Fri, 03 Feb 2023 10:40:13 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8345,11 +8345,18 @@
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     self.echo(function() {
-                        try {
-                            return settings.greetings.call(self, self.echo);
-                        } catch (e) {
-                            settings.greetings = null;
-                            display_exception(e, 'greetings');
+                        if (settings.greetings) {
+                            try {
+                                var defer = new $.Deferred();
+                                var ret = settings.greetings.call(self, defer.resolve);
+                                if (ret) {
+                                    defer.resolve(ret);
+                                }
+                                return defer.promise();
+                            } catch (e) {
+                                settings.greetings = null;
+                                display_exception(e, 'greetings');
+                            }
                         }
                     });
                 } else {
@@ -8504,7 +8511,7 @@
                     if (!force_awake) {
                         if (is_animation_promise(result)) {
                             paused = true;
-                        } else {
+                        } else if (is_promise(result)) {
                             self.pause(settings.softPause);
                         }
                     }

@@ -1,3 +1,7 @@
+## 2.35.3
+### Bugfix
+* fix object returned from the interpreter [#857](https://github.com/jcubic/jquery.terminal/issues/857)
+
 ## 2.35.2
 ### Bugfix
 * fix mobile Chrome and Firefox [#846](https://github.com/jcubic/jquery.terminal/issues/846)
