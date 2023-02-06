@@ -3316,6 +3316,36 @@ describe('Terminal plugin', function() {
                 expect(test.exceptionHandler).toHaveBeenCalledWith(exception, 'USER');
             });
         });
+        describe('renderHandler', function() {
+            class Foo {
+                valueOf() {
+                    return "Hello";
+                }
+            }
+            let term;
+            beforeEach(() => {
+                term = $('<div/>').terminal(function() {
+                    return new Foo();
+                }, {
+                    renderHandler(value) {
+                        if (value instanceof Foo) {
+                            this.echo(value.valueOf());
+                            return false;
+                        }
+                    },
+                    greetings: false
+                });
+            });
+            it('should render object from echo', () => {
+                term.echo(new Foo());
+                expect(term.get_output()).toEqual('Hello');
+            });
+            it('should render object from interpreter', () => {
+                term.exec('foo', true);
+                expect(term.get_output()).toEqual('Hello');
+                expect(term.paused()).toBeFalsy(); // #857
+            });
+        });
         describe('pauseEvents', function() {
             var options = {
                 pauseEvents: false,
@@ -5550,7 +5580,38 @@ describe('Terminal plugin', function() {
             });
         });
         describe('greetings', function() {
-            it('should show greetings', function(done) {
+            it('should show single greetings when using callback', async () => {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings(cb) {
+                        cb('Hello');
+                    }
+                });
+                await delay(100);
+                expect(term.get_output()).toEqual('Hello');
+            });
+            it('should show greeting when return string', async () => {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings() {
+                        return 'Hello';
+                    }
+                });
+                await delay(100);
+                expect(term.get_output()).toEqual('Hello');
+            });
+            it('should show greetings when return a Promise', async () => {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings() {
+                        return new Promise(resolve => {
+                            setTimeout(() => {
+                                resolve('Hello');
+                            }, 10);
+                        });
+                    }
+                });
+                await delay(100);
+                expect(term.get_output()).toEqual('Hello');
+            });
+            it('should change and display greetings change dynamically', function(done) {
                 var greetings = {
                     fn: function(callback) {
                         setTimeout(function() {

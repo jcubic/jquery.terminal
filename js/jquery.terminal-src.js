@@ -1105,13 +1105,15 @@
     // -----------------------------------------------------------------------
     function unpromise(value, callback, error) {
         if (value !== undefined) {
-            if (is_function(value.catch)) {
-                value.catch(error);
-            }
-            if (is_function(value.done)) {
-                return value.done(callback);
-            } else if (is_function(value.then)) {
-                return value.then(callback);
+            if (is_promise(value)) {
+                if (is_function(value.catch) && is_function(error)) {
+                    value.catch(error);
+                }
+                if (is_function(value.done)) {
+                    return value.done(callback);
+                } else if (is_function(value.then)) {
+                    return value.then(callback);
+                }
             } else if (value instanceof Array) {
                 var promises = value.filter(function(value) {
                     return value && (is_function(value.done) || is_function(value.then));
@@ -1132,6 +1134,13 @@
             //       it breaks all completion unit tests
             return callback(value);
         }
+    }
+    // -----------------------------------------------------------------------
+    // :: helper to allow to execute unpromise with undefined
+    // :: this is workaround on the problem above
+    // -----------------------------------------------------------------------
+    function always(value) {
+        return value === undefined ? true : value;
     }
     // -----------------------------------------------------------------------
     // :: based on https://github.com/zeusdeux/isInViewport
@@ -8345,11 +8354,18 @@
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     self.echo(function() {
-                        try {
-                            return settings.greetings.call(self, self.echo);
-                        } catch (e) {
-                            settings.greetings = null;
-                            display_exception(e, 'greetings');
+                        if (settings.greetings) {
+                            try {
+                                var defer = new $.Deferred();
+                                var ret = settings.greetings.call(self, defer.resolve);
+                                if (ret) {
+                                    defer.resolve(ret);
+                                }
+                                return defer.promise();
+                            } catch (e) {
+                                settings.greetings = null;
+                                display_exception(e, 'greetings');
+                            }
                         }
                     });
                 } else {
@@ -8504,7 +8520,7 @@
                     if (!force_awake) {
                         if (is_animation_promise(result)) {
                             paused = true;
-                        } else {
+                        } else if (is_promise(result)) {
                             self.pause(settings.softPause);
                         }
                     }
@@ -8693,7 +8709,7 @@
         // ---------------------------------------------------------------------
         function fire_event(name, args, skip_local) {
             args = (args || []).concat([self]); // create new array
-            // even can be fired before interpreters is created
+            // event can be fired before interpreters are created
             var top = interpreters && interpreters.top();
             if (top && is_function(top[name]) && !skip_local) {
                 try {
@@ -9165,6 +9181,133 @@
             };
         }
         // ---------------------------------------------------------------------
+        // :: this even can be used to valid if user and password is valid
+        // :: this is additional protection when using automatic authentication
+        // ---------------------------------------------------------------------
+        function validate_login(user, token_or_password, callback) {
+            var ret = fire_event('onBeforeLogin', [user, token_or_password]);
+            return unpromise(always(ret), callback, 'validate_login');
+        }
+        // ---------------------------------------------------------------------
+        // :: Function changes the prompt of the command line to login
+        // :: with a password and calls the user login function with
+        // :: the callback that expects a token. The login is successful
+        // :: if the user calls it with value that is truthy
+        // ---------------------------------------------------------------------
+        function authentication(auth_callback, infinite, success, error) {
+            // don't store login data in history
+            if (settings.history) {
+                command_line.history().disable();
+            }
+            // so we know how many times call pop
+            var level = self.level();
+            // when autologin and onBeforeLogin return false
+            clear_token();
+            function popUserPass() {
+                while (self.level() > level) {
+                    self.pop(undefined, true);
+                }
+                if (settings.history) {
+                    command_line.history().enable();
+                }
+            }
+            function set_token(user, token) {
+                var name = self.prefix_name(true) + '_';
+                storage.set(name + 'token', token);
+                storage.set(name + 'login', user);
+            }
+            function clear_token() {
+                var name = self.prefix_name(true) + '_';
+                storage.remove(name + 'token');
+                storage.remove(name + 'login');
+            }
+            function login_callback(user, token, silent) {
+                var next;
+                if (token) {
+                    popUserPass();
+                    set_token(user, token);
+                    in_login = false;
+                    fire_event('onAfterLogin', [user, token]);
+                    next = success;
+                } else {
+                    if (infinite) {
+                        if (!silent) {
+                            self.error(strings().wrongPasswordTryAgain);
+                        }
+                        self.pop(undefined, true).set_mask(false);
+                    } else {
+                        in_login = false;
+                        if (!silent) {
+                            self.error(strings().wrongPassword);
+                        }
+                        self.pop(undefined, true).pop(undefined, true);
+                    }
+                    // used only to call pop in push
+                    next = error;
+                }
+                if (self.paused()) {
+                    self.resume();
+                }
+                // will be used internaly since users know
+                // when login success (they decide when
+                // it happen by calling the callback -
+                // this funtion)
+                if (is_function(next)) {
+                    next();
+                }
+                self.off('terminal.autologin');
+            }
+            self.on('terminal.autologin', function(event, user, token, silent) {
+                validate_login(user, token, function(valid) {
+                    if (valid !== false) {
+                        login_callback(user, token, silent);
+                    }
+                });
+            });
+            self.push(function(user) {
+                self.set_mask(settings.maskChar).push(function(pass) {
+                    try {
+                        validate_login(user, pass, function(valid) {
+                            if (valid === false) {
+                                popUserPass();
+                                return;
+                            }
+                            self.pause();
+                            try {
+                                var args = [user, pass, function(token, silent) {
+                                    login_callback(user, token, silent);
+                                }];
+                                var ret = auth_callback.apply(self, args);
+                                unpromise(ret, function(token) {
+                                    login_callback(user, token);
+                                }, function(err) {
+                                    self.pop(undefined, true).pop(undefined, true);
+                                    self.error(err.message);
+                                    if (is_function(error)) {
+                                        error();
+                                    }
+                                    if (self.paused()) {
+                                        self.resume();
+                                    }
+                                    self.off('terminal.autologin');
+                                });
+                            } catch (e) {
+                                display_exception(e, 'AUTH');
+                            }
+                        });
+                    } catch (e) {
+                        display_exception(e, 'AUTH');
+                    }
+                }, {
+                    prompt: strings().password + ': ',
+                    name: 'password'
+                });
+            }, {
+                prompt: strings().login + ': ',
+                name: 'login'
+            });
+        }
+        // ---------------------------------------------------------------------
         function ready(queue) {
             return function(fun) {
                 queue.add(fun);
@@ -9380,125 +9523,40 @@
                 return self;
             },
             // -------------------------------------------------------------
-            // :: Function changes the prompt of the command line to login
-            // :: with a password and calls the user login function with
-            // :: the callback that expects a token. The login is successful
-            // :: if the user calls it with value that is truthy
+            // :: main user authentication mechanism
             // -------------------------------------------------------------
-            login: function(auth, infinite, success, error) {
+            login: function(auth_callback, infinite, success, error) {
                 logins.push([].slice.call(arguments));
                 if (in_login) {
                     throw new Error(sprintf(strings().notWhileLogin, 'login'));
                 }
-                if (!is_function(auth)) {
+                if (!is_function(auth_callback)) {
                     throw new Error(strings().loginIsNotAFunction);
                 }
                 in_login = true;
                 if (self.token() && self.level() === 1 && !autologin) {
                     in_login = false; // logout will call login
                     self.logout(true);
-                } else if (self.token(true) && self.login_name(true)) {
-                    in_login = false;
-                    if (is_function(success)) {
-                        success();
-                    }
-                    return self;
-                }
-                // don't store login data in history
-                if (settings.history) {
-                    command_line.history().disable();
-                }
-                function popUserPass() {
-                    while (self.level() > level) {
-                        self.pop(undefined, true);
-                    }
-                    if (settings.history) {
-                        command_line.history().enable();
-                    }
-                }
-                // so we know how many times call pop
-                var level = self.level();
-                function login_callback(user, token, silent) {
-                    var next;
-                    if (token) {
-                        popUserPass();
-                        var name = self.prefix_name(true) + '_';
-                        storage.set(name + 'token', token);
-                        storage.set(name + 'login', user);
+                } else {
+                    var token = self.token(true);
+                    var login = self.login_name(true);
+                    if (token && login) {
                         in_login = false;
-                        fire_event('onAfterLogin', [user, token]);
-                        next = success;
+                        self.pause();
+                        validate_login(login, token, function(valid) {
+                            if (valid !== false) {
+                                if (is_function(success)) {
+                                    success();
+                                }
+                            } else {
+                                self.resume();
+                                authentication(auth_callback, infinite, success, error);
+                            }
+                        });
                     } else {
-                        if (infinite) {
-                            if (!silent) {
-                                self.error(strings().wrongPasswordTryAgain);
-                            }
-                            self.pop(undefined, true).set_mask(false);
-                        } else {
-                            in_login = false;
-                            if (!silent) {
-                                self.error(strings().wrongPassword);
-                            }
-                            self.pop(undefined, true).pop(undefined, true);
-                        }
-                        // used only to call pop in push
-                        next = error;
+                        authentication(auth_callback, infinite, success, error);
                     }
-                    if (self.paused()) {
-                        self.resume();
-                    }
-                    // will be used internaly since users know
-                    // when login success (they decide when
-                    // it happen by calling the callback -
-                    // this funtion)
-                    if (is_function(next)) {
-                        next();
-                    }
-                    self.off('terminal.autologin');
                 }
-                self.on('terminal.autologin', function(event, user, token, silent) {
-                    if (fire_event('onBeforeLogin', [user, token]) === false) {
-                        return;
-                    }
-                    login_callback(user, token, silent);
-                });
-                self.push(function(user) {
-                    self.set_mask(settings.maskChar).push(function(pass) {
-                        try {
-                            if (fire_event('onBeforeLogin', [user, pass]) === false) {
-                                popUserPass();
-                                return;
-                            }
-                            self.pause();
-                            var ret = auth.call(self, user, pass, function(
-                                token,
-                                silent) {
-                                login_callback(user, token, silent);
-                            });
-                            unpromise(ret, function(token) {
-                                login_callback(user, token);
-                            }, function(err) {
-                                self.pop(undefined, true).pop(undefined, true);
-                                self.error(err.message);
-                                if (is_function(error)) {
-                                    error();
-                                }
-                                if (self.paused()) {
-                                    self.resume();
-                                }
-                                self.off('terminal.autologin');
-                            });
-                        } catch (e) {
-                            display_exception(e, 'AUTH');
-                        }
-                    }, {
-                        prompt: strings().password + ': ',
-                        name: 'password'
-                    });
-                }, {
-                    prompt: strings().login + ': ',
-                    name: 'login'
-                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -10889,13 +10947,13 @@
             // -------------------------------------------------------------
             // :: Function return prefix name for login/token
             // -------------------------------------------------------------
-            prefix_name: function(local) {
+            prefix_name: function(local, max_size) {
                 var name = (settings.name ? settings.name + '_' : '') +
                     terminal_id;
                 if (local && interpreters.size() > 1) {
                     var local_name = interpreters.map(function(intrp) {
                         return intrp.name || '';
-                    }).slice(1).join('_');
+                    }).slice(1, max_size).join('_');
                     if (local_name) {
                         name += '_' + local_name;
                     }
@@ -10990,7 +11048,6 @@
                         fire_event('onPush', [top, interpreters.top()]);
                         prepare_top_interpreter();
                     }
-                    //self.pause();
                     make_interpreter(interpreter, options.login, function(ret) {
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
