@@ -2,7 +2,7 @@
 ### Bugfix
 * fix object returned from the interpreter [#857](https://github.com/jcubic/jquery.terminal/issues/857)
 * fix greetings that use a callback [#855](https://github.com/jcubic/jquery.terminal/issues/855)
-* fix behavior of `onBeforeLogin`
+* fix behavior of `onBeforeLogin` [#856](https://github.com/jcubic/jquery.terminal/issues/856)
 
 ## 2.35.2
 ### Bugfix
