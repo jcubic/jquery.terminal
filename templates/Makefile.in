@@ -9,6 +9,7 @@ CAT=cat
 DATE=`date -uR`
 GIT=LC_ALL=C git
 BRANCH=`git branch | grep '^*' | sed 's/* //'`
+BRANCH_SAFE=`git branch | grep '^*' | sed 's/* //' | sed 's/\//\\\\\//g'`
 UGLIFY=../node_modules/.bin/uglifyjs
 JSONLINT=./node_modules/.bin/jsonlint
 JEST=./node_modules/.bin/jest
@@ -58,9 +59,9 @@ css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal.min.css
 
 README.md: templates/README.in .$(VERSION) __tests__/terminal.spec.js
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e \
-	"s/{{BRANCH}}/$(BRANCH)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" \
+	"s/{{BRANCH}}/$(BRANCH_SAFE)/g" -e "s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" \
 	-e "s/{{COMMIT}}/$(COMMIT)/g" < templates/README.in > README.md || $(SED) -e \
-	"s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH)/g" -e \
+	"s/{{VER}}/$(VERSION)/g" -e "s/{{BRANCH}}/$(BRANCH_SAFE)/g" -e \
 	"s/{{CHECKSUM}}/$(SPEC_CHECKSUM)/" -e "s/{{COMMIT}}/$(COMMIT)/g" < templates/README.in > README.md
 
 .$(VERSION): Makefile
