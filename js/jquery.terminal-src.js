@@ -2134,7 +2134,7 @@
                 }).addClass('cmd-clipboard').appendTo(self);
                 // some a11y to make lighthouse happy
                 $node.before('<label class="visually-hidden" for="' + id + '">' +
-                             'Clipbard textarea for jQuery Terminal</label>');
+                             'Clipboard textarea for jQuery Terminal</label>');
                 return {
                     $node: $node,
                     val: function(value) {
