@@ -5760,7 +5760,16 @@
         // :: split text into lines with equal length so each line can be
         // :: rendered separately (text formatting can be longer then a line).
         // ---------------------------------------------------------------------
-        split_equal: function split_equal(str, length, keep_words) {
+        split_equal: function split_equal(str, length, options) {
+            if (typeof options === 'boolean') {
+                options = {
+                    keepWords: options
+                };
+            }
+            var settings = $.extend({
+                trim: false,
+                keepWords: false
+            }, options);
             var prev_format = '';
             var result = [];
             var array = $.terminal.normalize(str).split(/\n/g);
@@ -5776,6 +5785,10 @@
                 var line_length = line.length;
                 var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);
                 var leading_spaces = !!line.match(/^(&nbsp;|\s)/);
+                if (!$.terminal.have_formatting(str) && line_length < length) {
+                    result.push(line);
+                    continue;
+                }
                 $.terminal.iterate_formatting(line, function(data) {
                     var chr, substring;
                     if (data.length >= length || data.last ||
@@ -5783,7 +5796,7 @@
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
                         // TODO: this need work
-                        if (keep_words && data.space !== -1) {
+                        if (settings.keepWords && data.space !== -1) {
                             // replace html entities with characters
                             var stripped = text(line).substring(data.space_count);
                             // real length, not counting formatting
@@ -5800,7 +5813,7 @@
                             after_index += 1;
                         }
                         var new_index;
-                        if (keep_words && data.space !== -1 &&
+                        if (settings.keepWords && data.space !== -1 &&
                             after_index !== line_length && can_break) {
                             output = line.slice(first_index, data.space);
                             new_index = data.space - 1;
@@ -5813,7 +5826,7 @@
                             }
                             new_index = data.index + chr.length - 1;
                         }
-                        if (keep_words) {
+                        if (settings.trim || settings.keepWords) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
                             if (!leading_spaces) {
                                 output = output.replace(/^(&nbsp;|\s)+/g, '');
@@ -8249,8 +8262,10 @@
                         var array;
                         var cols = line_settings.cols = self.cols();
                         if (should_wrap(string, line_settings)) {
-                            var words = line_settings.keepWords;
-                            array = $.terminal.split_equal(string, cols, words);
+                            array = $.terminal.split_equal(string, cols, {
+                                keepWords: line_settings.keepWords,
+                                trim: true
+                            });
                         } else if (string.match(/\n/)) {
                             array = string.split(/\n/);
                         }
@@ -10099,7 +10114,7 @@
                         return line.length;
                     });
                     if (Math.max.apply(null, lengths) <= cols) {
-                        return signatures[i].join('\n') + '\n';
+                        return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';
                     }
                 }
                 return '';

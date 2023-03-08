@@ -1,3 +1,7 @@
+## 2.36.0
+### Bugfix
+* fix leading spaces in text wrapping
+
 ## 2.35.3
 ### Bugfix
 * fix object returned from the interpreter [#857](https://github.com/jcubic/jquery.terminal/issues/857)

@@ -3401,7 +3401,7 @@ describe('Terminal plugin', function() {
         });
         it('should have signature', function() {
             var sig = term.find('.terminal-output div div').map(function() { return $(this).text(); }).get().join('\n');
-            expect(nbsp(term.signature())).toEqual(sig);
+            expect(sig).toEqual(nbsp(term.signature()));
         });
         it('should have default prompt', function() {
             var prompt = term.find('.cmd-prompt');
