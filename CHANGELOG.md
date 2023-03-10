@@ -1,4 +1,6 @@
 ## 2.36.0
+### Features
+* split_equal accept optional object as 3rd argument with two options `trim` and `keepWords`
 ### Bugfix
 * fix leading spaces in text wrapping
 
