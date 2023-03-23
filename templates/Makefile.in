@@ -71,7 +71,7 @@ Makefile: templates/Makefile.in
 	$(SED) -e "s/{{VER""SION}}/"$(VERSION)"/" templates/Makefile.in > Makefile
 
 import.html: templates/import.in
-	$(SED) -e "s/{{BRANCH}}/$(BRANCH)/g" templates/import.in > import.html
+	$(SED) -e "s/{{BRANCH}}/$(BRANCH_SAFE)/g" templates/import.in > import.html
 
 js/terminal.widget.js: js/terminal.widget.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" js/terminal.widget.in > js/terminal.widget.js
