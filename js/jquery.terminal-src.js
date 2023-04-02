@@ -1177,6 +1177,7 @@
     // -------------------------------------------------------------------------
     /* eslint-disable */
     var entity_re = /(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
+    var space_re = /\s/;
     // regex that match single character at begining and folowing combine character
     // https://en.wikipedia.org/wiki/Combining_character
     var combine_chr_re = /(.(?:[\u0300-\u036F]|[\u1AB0-\u1abE]|[\u1DC0-\u1DF9]|[\u1DFB-\u1DFF]|[\u20D0-\u20F0]|[\uFE20-\uFE2F])+)/;
@@ -4728,7 +4729,7 @@
     }
     // -------------------------------------------------------------------------
     function make_re_fn(re) {
-        return function(string) {
+        return function test_re(string) {
             var m = string.match(re);
             if (starts_with(m)) {
                 return m[1];
@@ -4738,6 +4739,21 @@
     // -------------------------------------------------------------------------
     function starts_with(match) {
         return match && match.index === 0;
+    }
+    // -------------------------------------------------------------------------
+    function is_simple_text(string) {
+        var re = [
+            entity_re,
+            emoji_re,
+            combine_chr_re,
+            astral_symbols_re
+        ];
+        for (var i = 0; i < re.length; ++i) {
+            if (re[i].test(string)) {
+                return false;
+            }
+        }
+        return true;
     }
     // -------------------------------------------------------------------------
     // :: optimized higher order function that it check complex regexes
@@ -4753,12 +4769,12 @@
             emoji_re,
             combine_chr_re
         ].forEach(function(re) {
-            if (string.match(re)) {
+            if (re.test(string)) {
                 tests.push(make_re_fn(re));
             }
         });
-        if (string.match(astral_symbols_re)) {
-            tests.push(function(string) {
+        if (astral_symbols_re.test(string)) {
+            tests.push(function test_astral(string) {
                 var m1 = string.match(astral_symbols_re);
                 if (starts_with(m1)) {
                     var m2 = string.match(combine_chr_re);
@@ -4769,7 +4785,7 @@
                 }
             });
         }
-        return function(string) {
+        return function next_char(string) {
             for (var i = 0; i < tests.length; ++i) {
                 var test = tests[i];
                 var ret = test(string);
@@ -5448,7 +5464,7 @@
         iterate_formatting: function iterate_formatting(string, callback) {
             function is_space(i) {
                 return string.slice(i - 6, i) === '&nbsp;' ||
-                    string.slice(i - 1, i).match(/\s/);
+                    space_re.test(string.slice(i - 1, i));
             }
             // ----------------------------------------------------------------
             function match_entity(index) {
@@ -5654,7 +5670,7 @@
                 }
                 return string;
             }
-            $.terminal.iterate_formatting(string, function(data) {
+            $.terminal.iterate_formatting(string, function callback(data) {
                 if (data.text) {
                     var text = [];
                     if (data.formatting) {
@@ -5686,7 +5702,7 @@
             var end_formatting = '';
             var prev_index;
             var offset = 1;
-            $.terminal.iterate_formatting(string, function(data) {
+            $.terminal.iterate_formatting(string, function callback(data) {
                 if (start_index && data.count === start_index + 1) {
                     start = data.index;
                     if (data.formatting) {
@@ -5723,7 +5739,7 @@
         // :: data attribute in format function - and fix unclosed &
         // ---------------------------------------------------------------------
         normalize: function normalize(string) {
-            string = string.replace(format_re, function(_, format, text) {
+            string = string.replace(format_re, function callback(_, format, text) {
                 if (format.match(self_closing_re) && text === '') {
                     return '[[' + format + '] ]';
                 }
@@ -5783,13 +5799,14 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
-                var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);
-                var leading_spaces = !!line.match(/^(&nbsp;|\s)/);
+                var last_bracket = /\[\[[^\]]+\](?:[^\][]|\\\])+\]$/.test(line);
+                var leading_spaces = /^(&nbsp;|\s)/.test(line);
                 if (!$.terminal.have_formatting(str) && line_length < length) {
                     result.push(line);
                     continue;
                 }
-                $.terminal.iterate_formatting(line, function(data) {
+                var space = /\s/;
+                $.terminal.iterate_formatting(line, function callback(data) {
                     var chr, substring;
                     if (data.length >= length || data.last ||
                         (data.length === length - 1 &&
@@ -5802,7 +5819,7 @@
                             // real length, not counting formatting
                             stripped = stripped.slice(0, length).replace(/\s+$/, '');
                             var text_len = strlen(stripped);
-                            if (stripped.match(/\s/) || text_len < length) {
+                            if (space_re.test(stripped) || text_len < length) {
                                 can_break = true;
                             }
                         }
@@ -5834,7 +5851,7 @@
                         }
                         first_index = (new_index || data.index) + 1;
                         if (prev_format) {
-                            var closed_formatting = output.match(/^[^\]]*\]/);
+                            var closed_formatting = /^[^\]]*\]/.test(output);
                             output = prev_format + output;
                             if (closed_formatting) {
                                 prev_format = '';
@@ -5846,7 +5863,7 @@
                             if (last[last.length - 1] !== ']') {
                                 prev_format = last.match(format_begin_re)[1];
                                 output += ']';
-                            } else if (output.match(format_end_re)) {
+                            } else if (format_end_re.test(output)) {
                                 output = output.replace(format_end_re, '');
                                 prev_format = last.match(format_begin_re)[1];
                             }
@@ -6308,7 +6325,7 @@
         // ---------------------------------------------------------------------
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
-        length: function(string, raw) {
+        length: function length(string, raw) {
             if (!string) {
                 return 0;
             }
@@ -6318,6 +6335,9 @@
         // :: split characters handling emoji, surogate pairs and combine chars
         // ---------------------------------------------------------------------
         split_characters: function split_characters(string) {
+            if (is_simple_text(string)) {
+                return string.split('');
+            }
             var result = [];
             var get_next_character = make_next_char_fun(string);
             while (string.length) {
@@ -6331,7 +6351,7 @@
         // :: return string where array items are in columns padded spaces
         // :: after adding align tabs arr.join('\t\t') looks much better
         // ---------------------------------------------------------------------
-        columns: function(array, cols, space) {
+        columns: function columns(array, cols, space) {
             array = array.map(function(value) {
                 if (typeof value !== 'string') {
                     return String(value);
