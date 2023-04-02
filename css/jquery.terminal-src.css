@@ -231,6 +231,9 @@ body.full-screen-terminal .terminal {
 .cmd .cmd-prompt > span, .cmd .cmd-prompt:empty {
     float: left;
 }
+.cmd-prompt [data-text] > span {
+    white-space: pre;
+}
 .cmd [data-text] span,
 .terminal [data-text] span {
     display: inline-block;

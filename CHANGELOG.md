@@ -3,6 +3,7 @@
 * split_equal accept optional object as 3rd argument with two options `trim` and `keepWords`
 ### Bugfix
 * fix leading spaces in text wrapping
+* fix glitch in typing animation when text have hyphen
 
 ## 2.35.3
 ### Bugfix
