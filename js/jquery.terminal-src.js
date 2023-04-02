@@ -5805,7 +5805,6 @@
                     result.push(line);
                     continue;
                 }
-                var space = /\s/;
                 $.terminal.iterate_formatting(line, function callback(data) {
                     var chr, substring;
                     if (data.length >= length || data.last ||
