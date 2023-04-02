@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 02 Apr 2023 17:38:57 +0000
+ * Date: Sun, 02 Apr 2023 22:40:51 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5274,7 +5274,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 02 Apr 2023 17:38:57 +0000',
+        date: 'Sun, 02 Apr 2023 22:40:51 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5463,11 +5463,17 @@
         // ---------------------------------------------------------------------
         iterate_formatting: function iterate_formatting(string, callback) {
             function is_space(i) {
+                if (!have_entities) {
+                    return string[i - 1] === '\n';
+                }
                 return string.slice(i - 6, i) === '&nbsp;' ||
-                    space_re.test(string.slice(i - 1, i));
+                    string[i - 1] === '\n';
             }
             // ----------------------------------------------------------------
             function match_entity(index) {
+                if (!have_entities) {
+                    return null;
+                }
                 return string.slice(index).match(entity_re);
             }
             // ----------------------------------------------------------------
@@ -5517,6 +5523,7 @@
             }
             // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
+            var have_entities = entity_re.test(string);
             var formatting = '';
             var in_text = false;
             var count = 0;
@@ -5553,7 +5560,7 @@
                     space = i;
                     space_count = count;
                 }
-                var braket = string[i].match(/[[\]]/);
+                var braket = string[i] === ']' || string[i] === '[';
                 offset = 0;
                 if (not_formatting) {
                     // treat entity as one character
@@ -5789,6 +5796,7 @@
             var prev_format = '';
             var result = [];
             var array = $.terminal.normalize(str).split(/\n/g);
+            var have_formatting = $.terminal.have_formatting(str);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');
@@ -5801,7 +5809,7 @@
                 var line_length = line.length;
                 var last_bracket = /\[\[[^\]]+\](?:[^\][]|\\\])+\]$/.test(line);
                 var leading_spaces = /^(&nbsp;|\s)/.test(line);
-                if (!$.terminal.have_formatting(str) && line_length < length) {
+                if (!have_formatting && line_length < length) {
                     result.push(line);
                     continue;
                 }
