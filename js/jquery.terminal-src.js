@@ -5462,12 +5462,16 @@
         // :: string and execute callback with text count and other data
         // ---------------------------------------------------------------------
         iterate_formatting: function iterate_formatting(string, callback) {
+            function is_any_space(str) {
+                return str === ' ' || str === '\t' || str === '\n';
+            }
+            // ----------------------------------------------------------------
             function is_space(i) {
                 if (!have_entities) {
-                    return string[i - 1] === '\n';
+                    return is_any_space(string[i - 1]);
                 }
                 return string.slice(i - 6, i) === '&nbsp;' ||
-                    string[i - 1] === '\n';
+                    is_any_space(string[i - 1]);
             }
             // ----------------------------------------------------------------
             function match_entity(index) {
@@ -5484,6 +5488,10 @@
             function is_escape_bracket(i) {
                 return string[i - 1] !== '\\' && string[i] === '\\' &&
                     string[i + 1] === ']';
+            }
+            // ----------------------------------------------------------------
+            function is_bracket(i) {
+                return string[i] === ']' || string[i] === '[';
             }
             // ----------------------------------------------------------------
             function is_text(i) {
@@ -5560,7 +5568,7 @@
                     space = i;
                     space_count = count;
                 }
-                var braket = string[i] === ']' || string[i] === '[';
+                var braket = is_bracket(i);
                 offset = 0;
                 if (not_formatting) {
                     // treat entity as one character

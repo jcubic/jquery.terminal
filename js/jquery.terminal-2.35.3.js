@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 02 Apr 2023 22:40:51 +0000
+ * Date: Mon, 03 Apr 2023 12:34:35 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5274,7 +5274,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 02 Apr 2023 22:40:51 +0000',
+        date: 'Mon, 03 Apr 2023 12:34:35 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5462,12 +5462,16 @@
         // :: string and execute callback with text count and other data
         // ---------------------------------------------------------------------
         iterate_formatting: function iterate_formatting(string, callback) {
+            function is_any_space(str) {
+                return str === ' ' || str === '\t' || str === '\n';
+            }
+            // ----------------------------------------------------------------
             function is_space(i) {
                 if (!have_entities) {
-                    return string[i - 1] === '\n';
+                    return is_any_space(string[i - 1]);
                 }
                 return string.slice(i - 6, i) === '&nbsp;' ||
-                    string[i - 1] === '\n';
+                    is_any_space(string[i - 1]);
             }
             // ----------------------------------------------------------------
             function match_entity(index) {
@@ -5484,6 +5488,10 @@
             function is_escape_bracket(i) {
                 return string[i - 1] !== '\\' && string[i] === '\\' &&
                     string[i + 1] === ']';
+            }
+            // ----------------------------------------------------------------
+            function is_bracket(i) {
+                return string[i] === ']' || string[i] === '[';
             }
             // ----------------------------------------------------------------
             function is_text(i) {
@@ -5560,7 +5568,7 @@
                     space = i;
                     space_count = count;
                 }
-                var braket = string[i] === ']' || string[i] === '[';
+                var braket = is_bracket(i);
                 offset = 0;
                 if (not_formatting) {
                     // treat entity as one character
