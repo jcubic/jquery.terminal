@@ -5,8 +5,8 @@
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
  *           \/              /____/
- * Example plugin using JQuery Terminal Emulator
- * Copyright (c) 2014-2022 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Example plugin using jQuery Terminal Emulator
+ * Copyright (c) 2014-2023 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
