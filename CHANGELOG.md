@@ -4,6 +4,7 @@
 ### Bugfix
 * fix leading spaces in text wrapping
 * fix glitch in typing animation when text have hyphen
+* fix regression in cursor animation color [#869](https://github.com/jcubic/jquery.terminal/issues/869)
 
 ## 2.35.3
 ### Bugfix

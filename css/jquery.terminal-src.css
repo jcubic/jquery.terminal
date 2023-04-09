@@ -396,7 +396,10 @@ terminal .terminal-output > div {
  * so span can have --color for selection
  */
 .cmd {
-    --original-color: var(--color, #aaa);
+    --original-color: var(
+    --color, #aaa);
+--original-background: var(
+    --background);
 }
 .cmd a[href] {
     --original-color: var(--link-color, #3377FF);
@@ -407,7 +410,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
@@ -415,7 +418,7 @@ terminal .terminal-output > div {
         background-color: inherit;
         /* original background is set in emoji that need different style */
         color: inherit;
-        color: var(--original-background, var(--original-color, #aaa));
+        color: var(--original-color, #aaa)
     }
 }
 @-moz-keyframes terminal-blink {
@@ -423,14 +426,14 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
         color: inherit;
-        color: var(--original-background, var(--original-color, #aaa));
+        color: var(--original-color, #aaa);
     }
 }
 @keyframes terminal-blink {
@@ -438,14 +441,14 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
         color: inherit;
-        color: var(--original-background, var(--original-color, #aaa));
+        color: var(--original-color, #aaa);
         -webkit-box-shadow: none;
         box-shadow: none;
     }
@@ -456,7 +459,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         box-shadow: 0 0 3px #aaa;
         -webkit-box-shadow: 0 0 3px var(--color, #aaa);
         box-shadow: 0 0 3px var(--color, #aaa);
@@ -473,7 +476,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         box-shadow: 0 0 3px #aaa;
         -moz-box-shadow: 0 0 3px var(--color, #aaa);
         box-shadow: 0 0 3px var(--color, #aaa);
@@ -490,7 +493,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         box-shadow: 0 0 3px #aaa;
         box-shadow: 0 0 3px var(--color, #aaa);
     }
@@ -562,7 +565,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
@@ -582,7 +585,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
