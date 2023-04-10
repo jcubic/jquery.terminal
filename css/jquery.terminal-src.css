@@ -800,7 +800,7 @@ terminal .terminal-output > div {
     box-sizing: border-box;
 }
 .terminal-scroller, .terminal .terminal-fill, .cmd-editable {
-    padding: calc(10px / var(--pixel-density, 1));
+    padding: calc(1px * var(--padding, 10) / var(--pixel-density, 1));
 }
 .cmd-editable {
     padding-top: 0;
@@ -818,7 +818,7 @@ terminal .terminal-output > div {
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
 }
 .terminal .cmd {
-    margin-bottom: calc(10px / var(--pixel-density, 1));
+    margin-bottom: calc(1px * var(--padding, 10) / var(--pixel-density, 1));
     position: relative;
 }
 .terminal .partial, .terminal .partial > div {
@@ -965,6 +965,11 @@ terminal .terminal-output > div {
   syntax: '<number>';
   inherits: true;
   initial-value: 1;
+}
+@property --padding {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 10;
 }
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,
