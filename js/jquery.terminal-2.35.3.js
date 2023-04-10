@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 03 Apr 2023 12:39:04 +0000
+ * Date: Mon, 10 Apr 2023 15:22:41 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5274,7 +5274,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 03 Apr 2023 12:39:04 +0000',
+        date: 'Mon, 10 Apr 2023 15:22:41 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7250,8 +7250,8 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var fill = terminal.find('.terminal-fill');
-        var height = fill.height();
+        var filler = terminal.find('.terminal-fill');
+        var height = filler.height();
         return Math.floor(height / char_size.height);
     }
     // -----------------------------------------------------------------------
@@ -8464,7 +8464,7 @@
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
-            return fill.outerWidth() !== self.outerWidth();
+            return filler.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
         // :: Helper function that restore state. Call import_view or exec
@@ -9372,6 +9372,32 @@
             );
         }
         // ---------------------------------------------------------------------
+        // :: 3 functions used to calculate visible padding on the terminal
+        // :: they are in fact not on .terminal object only on scroller
+        // :: and on cmd plugin margin-bottom, but they are all reflected
+        // :: on filler object
+        // ---------------------------------------------------------------------
+        function get_prop_number(style, prop) {
+            return parseInt(style.getPropertyValue(prop), 10) || 0;
+        }
+        // ---------------------------------------------------------------------
+        function get_padding() {
+            var style = window.getComputedStyle(filler[0]);
+            function padding(name) {
+                return get_prop_number(style, 'padding-' + name);
+            }
+            var left = padding('left');
+            var right = padding('right');
+            var top = padding('top');
+            var bottom = padding('bottom');
+            return {
+                top: top,
+                left: left,
+                right: right,
+                bottom: bottom
+            };
+        }
+        // ---------------------------------------------------------------------
         var self = this;
         if (this.length > 1) {
             return this.each(function() {
@@ -9935,24 +9961,17 @@
             // :: Return size of the terminal instance
             // -------------------------------------------------------------
             geometry: function() {
-                var style = window.getComputedStyle(scroller[0]);
-                function padding(name) {
-                    return parseInt(style.getPropertyValue('padding-' + name), 10) || 0;
-                }
-                var left = padding('left');
-                var right = padding('right');
-                var top = padding('top');
-                var bottom = padding('bottom');
+                const padding = get_padding();
                 return {
                     terminal: {
                         padding: {
-                            left: left,
-                            right: right,
-                            top: top,
-                            bottom: bottom
+                            left: padding.left,
+                            right: padding.right,
+                            top: padding.top,
+                            bottom: padding.bottom
                         },
-                        width: old_width + left + right,
-                        height: old_height + top + bottom
+                        width: old_width + padding.left + padding.right,
+                        height: old_height + padding.top + padding.bottom
                     },
                     density: pixel_density,
                     char: char_size,
@@ -11575,7 +11594,7 @@
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var pixel_resizer = $('<div class="terminal-pixel"/>').appendTo(self);
-        var fill = $('<div class="terminal-fill"/>').appendTo(scroller);
+        var filler = $('<div class="terminal-fill"/>').appendTo(scroller);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
@@ -11800,7 +11819,7 @@
                 onCommandChange: function(command) {
                     // resize is not triggered when insert called just after init
                     //  and scrollbar appear
-                    if (old_width !== fill.width()) {
+                    if (old_width !== filler.width()) {
                         // resizer handler will update old_width
                         self.resizer();
                     }
@@ -11927,7 +11946,7 @@
                     var ignore_elements = '.terminal-output textarea,' +
                         '.terminal-output input';
                     self.mousedown(function(e) {
-                        if (!scrollbar_event(e, fill, pixel_density)) {
+                        if (!scrollbar_event(e, filler, pixel_density)) {
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
@@ -11995,7 +12014,7 @@
                             var width = 5 * 14;
                             var rect = self[0].getBoundingClientRect();
                             // we need width without scrollbar
-                            var content_width = fill.outerWidth() * pixel_density;
+                            var content_width = filler.outerWidth() * pixel_density;
                             // fix jumping when click near bottom or left edge #592
                             var diff_h = (top + cmd_rect.top + height);
                             diff_h = diff_h - rect.height - rect.top;
@@ -12089,8 +12108,8 @@
             resize();
             function resize() {
                 if (self.is(':visible')) {
-                    var width = fill.width();
-                    var height = fill.height();
+                    var width = scroller.width();
+                    var height = filler.height();
                     var new_pixel_density = get_pixel_size();
                     css(self[0], {
                         '--pixel-density': new_pixel_density
