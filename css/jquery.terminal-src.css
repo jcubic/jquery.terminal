@@ -198,6 +198,11 @@ body.full-screen-terminal .terminal {
     color: var(--background, #000) !important;
     text-decoration: none;
 }
+.terminal a[href] {
+    transition-property: color, background-color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
 .cmd .cmd-cursor {
     display: inline-block;
 }

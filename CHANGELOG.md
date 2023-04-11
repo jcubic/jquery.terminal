@@ -2,6 +2,7 @@
 ### Features
 * split_equal accept optional object as 3rd argument with two options `trim` and `keepWords`
 * add `--padding` CSS Variable [#874](https://github.com/jcubic/jquery.terminal/issues/874)
+* add CSS transition to links [#870](https://github.com/jcubic/jquery.terminal/issues/870)
 ### Bugfix
 * fix leading spaces in text wrapping
 * fix glitch in typing animation when text have hyphen
