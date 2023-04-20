@@ -8,6 +8,7 @@
 * fix glitch in typing animation when text have hyphen
 * fix regression in cursor animation color [#869](https://github.com/jcubic/jquery.terminal/issues/869)
 * fix `term::geometry()` [#873](https://github.com/jcubic/jquery.terminal/issues/873)
+* fix types for `term::push()` [#877](https://github.com/jcubic/jquery.terminal/issues/877)
 
 ## 2.35.3
 ### Bugfix
