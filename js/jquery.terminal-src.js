@@ -7400,9 +7400,7 @@
         linksNoFollow: false,
         processRPCResponse: null,
         completionEscape: true,
-        onCommandChange: null,
         mobileDelete: is_mobile,
-        onPositionChange: null,
         convertLinks: true,
         extra: {},
         tabs: 4,
@@ -7462,6 +7460,8 @@
         onBeforeLogin: null,
         onAfterLogout: null,
         onBeforeLogout: null,
+        onCommandChange: null,
+        onPositionChange: null,
         allowedAttributes: ['title', 'target', 'rel', /^aria-/, 'id', /^data-/],
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
