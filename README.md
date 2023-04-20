@@ -282,6 +282,7 @@ If you want to start with jQuery Terminal you can look at those tutorials:
 
 * [How to create interactive terminal like website?](https://itnext.io/how-to-create-interactive-terminal-like-website-888bb0972288)
 * [How to Build Simple Terminal like Website using jQuery?](https://www.geeksforgeeks.org/how-to-build-simple-terminal-like-website-using-jquery/)
+* [How to create your own custom AI Chatbot with a text editor & 28 lines of Javascript](https://medium.com/@tristwolff/how-to-create-your-own-custom-ai-chatbot-with-a-text-editor-28-lines-of-javascript-29563510a740)
 
 ### Security
 
