@@ -10903,14 +10903,19 @@
                 }
                 if (typeof e.fileName === 'string') {
                     // display filename and line which throw exeption
-                    self.pause(settings.softPause);
+                    var was_pased = self.paused();
+                    if (!was_pased) {
+                        self.pause(settings.softPause);
+                    }
                     $.get(e.fileName, function(file) {
                         var num = e.lineNumber - 1;
                         var line = file.split('\n')[num];
                         if (line) {
                             self.error('[' + e.lineNumber + ']: ' + line);
                         }
-                        self.resume();
+                        if (!was_pased) {
+                            self.resume();
+                        }
                     }, 'text');
                 }
                 if (e.stack) {

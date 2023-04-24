@@ -167,6 +167,7 @@ declare namespace JQueryTerminal {
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
     type MouseWheelCallback = (event: MouseEvent, delta: number, self: JQueryTerminal) => boolean | void;
+    type TouchScrollCallback = MouseWheelCallback;
 
     type execOptions = JQueryTerminal.animationOptions & {
         silent?: boolean;
@@ -178,6 +179,7 @@ declare namespace JQueryTerminal {
         keypress?: KeyEventHandler;
         keydown?: KeyEventHandler;
         mousewheel?: MouseWheelCallback;
+        touchscroll: TouchScrollCallback;
         keymap?: keymapObject;
         history?: boolean;
         name?: string;

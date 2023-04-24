@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 10 Apr 2023 15:22:41 +0000
+ * Date: Mon, 24 Apr 2023 11:34:59 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5274,7 +5274,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 10 Apr 2023 15:22:41 +0000',
+        date: 'Mon, 24 Apr 2023 11:34:59 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7400,9 +7400,7 @@
         linksNoFollow: false,
         processRPCResponse: null,
         completionEscape: true,
-        onCommandChange: null,
         mobileDelete: is_mobile,
-        onPositionChange: null,
         convertLinks: true,
         extra: {},
         tabs: 4,
@@ -7462,6 +7460,8 @@
         onBeforeLogin: null,
         onAfterLogout: null,
         onBeforeLogout: null,
+        onCommandChange: null,
+        onPositionChange: null,
         allowedAttributes: ['title', 'target', 'rel', /^aria-/, 'id', /^data-/],
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
@@ -10903,14 +10903,19 @@
                 }
                 if (typeof e.fileName === 'string') {
                     // display filename and line which throw exeption
-                    self.pause(settings.softPause);
+                    var was_pased = self.paused();
+                    if (!was_pased) {
+                        self.pause(settings.softPause);
+                    }
                     $.get(e.fileName, function(file) {
                         var num = e.lineNumber - 1;
                         var line = file.split('\n')[num];
                         if (line) {
                             self.error('[' + e.lineNumber + ']: ' + line);
                         }
-                        self.resume();
+                        if (!was_pased) {
+                            self.resume();
+                        }
                     }, 'text');
                 }
                 if (e.stack) {
