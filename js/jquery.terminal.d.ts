@@ -179,7 +179,7 @@ declare namespace JQueryTerminal {
         keypress?: KeyEventHandler;
         keydown?: KeyEventHandler;
         mousewheel?: MouseWheelCallback;
-        touchscroll: TouchScrollCallback;
+        touchscroll?: TouchScrollCallback;
         keymap?: keymapObject;
         history?: boolean;
         name?: string;
