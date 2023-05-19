@@ -9,7 +9,7 @@
  *
  * This file is part of jQuery Terminal.
  *
- * Copyright (c) 2011-2022 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2011-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Date: {{DATE}}
@@ -198,6 +198,11 @@ body.full-screen-terminal .terminal {
     color: var(--background, #000) !important;
     text-decoration: none;
 }
+.terminal a[href] {
+    transition-property: color, background-color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
 .cmd .cmd-cursor {
     display: inline-block;
 }
@@ -230,6 +235,9 @@ body.full-screen-terminal .terminal {
 }
 .cmd .cmd-prompt > span, .cmd .cmd-prompt:empty {
     float: left;
+}
+.cmd-prompt [data-text] > span {
+    white-space: pre;
 }
 .cmd [data-text] span,
 .terminal [data-text] span {
@@ -393,7 +401,10 @@ terminal .terminal-output > div {
  * so span can have --color for selection
  */
 .cmd {
-    --original-color: var(--color, #aaa);
+    --original-color: var(
+    --color, #aaa);
+--original-background: var(
+    --background);
 }
 .cmd a[href] {
     --original-color: var(--link-color, #3377FF);
@@ -404,7 +415,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
@@ -412,7 +423,7 @@ terminal .terminal-output > div {
         background-color: inherit;
         /* original background is set in emoji that need different style */
         color: inherit;
-        color: var(--original-background, var(--original-color, #aaa));
+        color: var(--original-color, #aaa)
     }
 }
 @-moz-keyframes terminal-blink {
@@ -420,14 +431,14 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
         color: inherit;
-        color: var(--original-background, var(--original-color, #aaa));
+        color: var(--original-color, #aaa);
     }
 }
 @keyframes terminal-blink {
@@ -435,14 +446,14 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
     50.1%, 100% {
         background-color: inherit;
         color: inherit;
-        color: var(--original-background, var(--original-color, #aaa));
+        color: var(--original-color, #aaa);
         -webkit-box-shadow: none;
         box-shadow: none;
     }
@@ -453,7 +464,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         box-shadow: 0 0 3px #aaa;
         -webkit-box-shadow: 0 0 3px var(--color, #aaa);
         box-shadow: 0 0 3px var(--color, #aaa);
@@ -470,7 +481,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         box-shadow: 0 0 3px #aaa;
         -moz-box-shadow: 0 0 3px var(--color, #aaa);
         box-shadow: 0 0 3px var(--color, #aaa);
@@ -487,7 +498,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         box-shadow: 0 0 3px #aaa;
         box-shadow: 0 0 3px var(--color, #aaa);
     }
@@ -559,7 +570,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
@@ -579,7 +590,7 @@ terminal .terminal-output > div {
         background-color: #aaa;
         background-color: var(--original-color, #aaa);
         color: #000;
-        color: var(--background, #000);
+        color: var(--original-background, #000);
         -webkit-box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
         box-shadow: 0 0 calc(var(--glow) * 3px) var(--color, #aaa);
     }
@@ -794,7 +805,7 @@ terminal .terminal-output > div {
     box-sizing: border-box;
 }
 .terminal-scroller, .terminal .terminal-fill, .cmd-editable {
-    padding: calc(10px / var(--pixel-density, 1));
+    padding: calc(1px * var(--padding, 10) / var(--pixel-density, 1));
 }
 .cmd-editable {
     padding-top: 0;
@@ -812,7 +823,7 @@ terminal .terminal-output > div {
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
 }
 .terminal .cmd {
-    margin-bottom: calc(10px / var(--pixel-density, 1));
+    margin-bottom: calc(1px * var(--padding, 10) / var(--pixel-density, 1));
     position: relative;
 }
 .terminal .partial, .terminal .partial > div {
@@ -959,6 +970,11 @@ terminal .terminal-output > div {
   syntax: '<number>';
   inherits: true;
   initial-value: 1;
+}
+@property --padding {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 10;
 }
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,

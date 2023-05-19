@@ -21,7 +21,7 @@ COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 TOKEN=cat .github.token | tr -d '\n'
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
-UPDATE_CONTRIBUTORS=0
+UPDATE_CONTRIBUTORS=1
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
 
@@ -71,7 +71,7 @@ Makefile: templates/Makefile.in
 	$(SED) -e "s/{{VER""SION}}/"$(VERSION)"/" templates/Makefile.in > Makefile
 
 import.html: templates/import.in
-	$(SED) -e "s/{{BRANCH}}/$(BRANCH)/g" templates/import.in > import.html
+	$(SED) -e "s/{{BRANCH}}/$(BRANCH_SAFE)/g" templates/import.in > import.html
 
 js/terminal.widget.js: js/terminal.widget.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" js/terminal.widget.in > js/terminal.widget.js

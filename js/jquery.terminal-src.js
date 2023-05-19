@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2022 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -1177,6 +1177,7 @@
     // -------------------------------------------------------------------------
     /* eslint-disable */
     var entity_re = /(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);)/i;
+    var space_re = /\s/;
     // regex that match single character at begining and folowing combine character
     // https://en.wikipedia.org/wiki/Combining_character
     var combine_chr_re = /(.(?:[\u0300-\u036F]|[\u1AB0-\u1abE]|[\u1DC0-\u1DF9]|[\u1DFB-\u1DFF]|[\u20D0-\u20F0]|[\uFE20-\uFE2F])+)/;
@@ -2134,7 +2135,7 @@
                 }).addClass('cmd-clipboard').appendTo(self);
                 // some a11y to make lighthouse happy
                 $node.before('<label class="visually-hidden" for="' + id + '">' +
-                             'Clipbard textarea for jQuery Terminal</label>');
+                             'Clipboard textarea for jQuery Terminal</label>');
                 return {
                     $node: $node,
                     val: function(value) {
@@ -4728,7 +4729,7 @@
     }
     // -------------------------------------------------------------------------
     function make_re_fn(re) {
-        return function(string) {
+        return function test_re(string) {
             var m = string.match(re);
             if (starts_with(m)) {
                 return m[1];
@@ -4738,6 +4739,21 @@
     // -------------------------------------------------------------------------
     function starts_with(match) {
         return match && match.index === 0;
+    }
+    // -------------------------------------------------------------------------
+    function is_simple_text(string) {
+        var re = [
+            entity_re,
+            emoji_re,
+            combine_chr_re,
+            astral_symbols_re
+        ];
+        for (var i = 0; i < re.length; ++i) {
+            if (re[i].test(string)) {
+                return false;
+            }
+        }
+        return true;
     }
     // -------------------------------------------------------------------------
     // :: optimized higher order function that it check complex regexes
@@ -4753,12 +4769,12 @@
             emoji_re,
             combine_chr_re
         ].forEach(function(re) {
-            if (string.match(re)) {
+            if (re.test(string)) {
                 tests.push(make_re_fn(re));
             }
         });
-        if (string.match(astral_symbols_re)) {
-            tests.push(function(string) {
+        if (astral_symbols_re.test(string)) {
+            tests.push(function test_astral(string) {
                 var m1 = string.match(astral_symbols_re);
                 if (starts_with(m1)) {
                     var m2 = string.match(combine_chr_re);
@@ -4769,7 +4785,7 @@
                 }
             });
         }
-        return function(string) {
+        return function next_char(string) {
             for (var i = 0; i < tests.length; ++i) {
                 var test = tests[i];
                 var ret = test(string);
@@ -5446,12 +5462,22 @@
         // :: string and execute callback with text count and other data
         // ---------------------------------------------------------------------
         iterate_formatting: function iterate_formatting(string, callback) {
+            function is_any_space(str) {
+                return str === ' ' || str === '\t' || str === '\n';
+            }
+            // ----------------------------------------------------------------
             function is_space(i) {
+                if (!have_entities) {
+                    return is_any_space(string[i - 1]);
+                }
                 return string.slice(i - 6, i) === '&nbsp;' ||
-                    string.slice(i - 1, i).match(/\s/);
+                    is_any_space(string[i - 1]);
             }
             // ----------------------------------------------------------------
             function match_entity(index) {
+                if (!have_entities) {
+                    return null;
+                }
                 return string.slice(index).match(entity_re);
             }
             // ----------------------------------------------------------------
@@ -5462,6 +5488,10 @@
             function is_escape_bracket(i) {
                 return string[i - 1] !== '\\' && string[i] === '\\' &&
                     string[i + 1] === ']';
+            }
+            // ----------------------------------------------------------------
+            function is_bracket(i) {
+                return string[i] === ']' || string[i] === '[';
             }
             // ----------------------------------------------------------------
             function is_text(i) {
@@ -5501,6 +5531,7 @@
             }
             // ----------------------------------------------------------------
             var have_formatting = $.terminal.have_formatting(string);
+            var have_entities = entity_re.test(string);
             var formatting = '';
             var in_text = false;
             var count = 0;
@@ -5537,7 +5568,7 @@
                     space = i;
                     space_count = count;
                 }
-                var braket = string[i].match(/[[\]]/);
+                var braket = is_bracket(i);
                 offset = 0;
                 if (not_formatting) {
                     // treat entity as one character
@@ -5654,7 +5685,7 @@
                 }
                 return string;
             }
-            $.terminal.iterate_formatting(string, function(data) {
+            $.terminal.iterate_formatting(string, function callback(data) {
                 if (data.text) {
                     var text = [];
                     if (data.formatting) {
@@ -5686,7 +5717,7 @@
             var end_formatting = '';
             var prev_index;
             var offset = 1;
-            $.terminal.iterate_formatting(string, function(data) {
+            $.terminal.iterate_formatting(string, function callback(data) {
                 if (start_index && data.count === start_index + 1) {
                     start = data.index;
                     if (data.formatting) {
@@ -5723,7 +5754,7 @@
         // :: data attribute in format function - and fix unclosed &
         // ---------------------------------------------------------------------
         normalize: function normalize(string) {
-            string = string.replace(format_re, function(_, format, text) {
+            string = string.replace(format_re, function callback(_, format, text) {
                 if (format.match(self_closing_re) && text === '') {
                     return '[[' + format + '] ]';
                 }
@@ -5760,10 +5791,20 @@
         // :: split text into lines with equal length so each line can be
         // :: rendered separately (text formatting can be longer then a line).
         // ---------------------------------------------------------------------
-        split_equal: function split_equal(str, length, keep_words) {
+        split_equal: function split_equal(str, length, options) {
+            if (typeof options === 'boolean') {
+                options = {
+                    keepWords: options
+                };
+            }
+            var settings = $.extend({
+                trim: false,
+                keepWords: false
+            }, options);
             var prev_format = '';
             var result = [];
             var array = $.terminal.normalize(str).split(/\n/g);
+            var have_formatting = $.terminal.have_formatting(str);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
                     result.push('');
@@ -5774,22 +5815,26 @@
                 var first_index = 0;
                 var output;
                 var line_length = line.length;
-                var last_bracket = !!line.match(/\[\[[^\]]+\](?:[^\][]|\\\])+\]$/);
-                var leading_spaces = !!line.match(/^(&nbsp;|\s)/);
-                $.terminal.iterate_formatting(line, function(data) {
+                var last_bracket = /\[\[[^\]]+\](?:[^\][]|\\\])+\]$/.test(line);
+                var leading_spaces = /^(&nbsp;|\s)/.test(line);
+                if (!have_formatting && line_length < length) {
+                    result.push(line);
+                    continue;
+                }
+                $.terminal.iterate_formatting(line, function callback(data) {
                     var chr, substring;
                     if (data.length >= length || data.last ||
                         (data.length === length - 1 &&
                          strlen(line[data.index + 1]) === 2)) {
                         var can_break = false;
                         // TODO: this need work
-                        if (keep_words && data.space !== -1) {
+                        if (settings.keepWords && data.space !== -1) {
                             // replace html entities with characters
                             var stripped = text(line).substring(data.space_count);
                             // real length, not counting formatting
                             stripped = stripped.slice(0, length).replace(/\s+$/, '');
                             var text_len = strlen(stripped);
-                            if (stripped.match(/\s/) || text_len < length) {
+                            if (space_re.test(stripped) || text_len < length) {
                                 can_break = true;
                             }
                         }
@@ -5800,7 +5845,7 @@
                             after_index += 1;
                         }
                         var new_index;
-                        if (keep_words && data.space !== -1 &&
+                        if (settings.keepWords && data.space !== -1 &&
                             after_index !== line_length && can_break) {
                             output = line.slice(first_index, data.space);
                             new_index = data.space - 1;
@@ -5813,7 +5858,7 @@
                             }
                             new_index = data.index + chr.length - 1;
                         }
-                        if (keep_words) {
+                        if (settings.trim || settings.keepWords) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
                             if (!leading_spaces) {
                                 output = output.replace(/^(&nbsp;|\s)+/g, '');
@@ -5821,7 +5866,7 @@
                         }
                         first_index = (new_index || data.index) + 1;
                         if (prev_format) {
-                            var closed_formatting = output.match(/^[^\]]*\]/);
+                            var closed_formatting = /^[^\]]*\]/.test(output);
                             output = prev_format + output;
                             if (closed_formatting) {
                                 prev_format = '';
@@ -5833,7 +5878,7 @@
                             if (last[last.length - 1] !== ']') {
                                 prev_format = last.match(format_begin_re)[1];
                                 output += ']';
-                            } else if (output.match(format_end_re)) {
+                            } else if (format_end_re.test(output)) {
                                 output = output.replace(format_end_re, '');
                                 prev_format = last.match(format_begin_re)[1];
                             }
@@ -6295,7 +6340,7 @@
         // ---------------------------------------------------------------------
         // :: return number of characters without formatting
         // ---------------------------------------------------------------------
-        length: function(string, raw) {
+        length: function length(string, raw) {
             if (!string) {
                 return 0;
             }
@@ -6305,6 +6350,9 @@
         // :: split characters handling emoji, surogate pairs and combine chars
         // ---------------------------------------------------------------------
         split_characters: function split_characters(string) {
+            if (is_simple_text(string)) {
+                return string.split('');
+            }
             var result = [];
             var get_next_character = make_next_char_fun(string);
             while (string.length) {
@@ -6318,7 +6366,7 @@
         // :: return string where array items are in columns padded spaces
         // :: after adding align tabs arr.join('\t\t') looks much better
         // ---------------------------------------------------------------------
-        columns: function(array, cols, space) {
+        columns: function columns(array, cols, space) {
             array = array.map(function(value) {
                 if (typeof value !== 'string') {
                     return String(value);
@@ -7202,8 +7250,8 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var fill = terminal.find('.terminal-fill');
-        var height = fill.height();
+        var filler = terminal.find('.terminal-fill');
+        var height = filler.height();
         return Math.floor(height / char_size.height);
     }
     // -----------------------------------------------------------------------
@@ -7275,7 +7323,7 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2022 Jakub T. Jankiewicz ' +
+    var copyright = 'Copyright (c) 2011-2023 Jakub T. Jankiewicz ' +
         '<https://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
@@ -7286,7 +7334,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2022 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2023 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         [
@@ -7352,9 +7400,7 @@
         linksNoFollow: false,
         processRPCResponse: null,
         completionEscape: true,
-        onCommandChange: null,
         mobileDelete: is_mobile,
-        onPositionChange: null,
         convertLinks: true,
         extra: {},
         tabs: 4,
@@ -7414,6 +7460,8 @@
         onBeforeLogin: null,
         onAfterLogout: null,
         onBeforeLogout: null,
+        onCommandChange: null,
+        onPositionChange: null,
         allowedAttributes: ['title', 'target', 'rel', /^aria-/, 'id', /^data-/],
         strings: {
             comletionParameters: 'From version 1.0.0 completion function need to' +
@@ -8249,8 +8297,10 @@
                         var array;
                         var cols = line_settings.cols = self.cols();
                         if (should_wrap(string, line_settings)) {
-                            var words = line_settings.keepWords;
-                            array = $.terminal.split_equal(string, cols, words);
+                            array = $.terminal.split_equal(string, cols, {
+                                keepWords: line_settings.keepWords,
+                                trim: true
+                            });
                         } else if (string.match(/\n/)) {
                             array = string.split(/\n/);
                         }
@@ -8414,7 +8464,7 @@
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
-            return fill.outerWidth() !== self.outerWidth();
+            return filler.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
         // :: Helper function that restore state. Call import_view or exec
@@ -9322,6 +9372,32 @@
             );
         }
         // ---------------------------------------------------------------------
+        // :: 3 functions used to calculate visible padding on the terminal
+        // :: they are in fact not on .terminal object only on scroller
+        // :: and on cmd plugin margin-bottom, but they are all reflected
+        // :: on filler object
+        // ---------------------------------------------------------------------
+        function get_prop_number(style, prop) {
+            return parseInt(style.getPropertyValue(prop), 10) || 0;
+        }
+        // ---------------------------------------------------------------------
+        function get_padding() {
+            var style = window.getComputedStyle(filler[0]);
+            function padding(name) {
+                return get_prop_number(style, 'padding-' + name);
+            }
+            var left = padding('left');
+            var right = padding('right');
+            var top = padding('top');
+            var bottom = padding('bottom');
+            return {
+                top: top,
+                left: left,
+                right: right,
+                bottom: bottom
+            };
+        }
+        // ---------------------------------------------------------------------
         var self = this;
         if (this.length > 1) {
             return this.each(function() {
@@ -9885,24 +9961,17 @@
             // :: Return size of the terminal instance
             // -------------------------------------------------------------
             geometry: function() {
-                var style = window.getComputedStyle(scroller[0]);
-                function padding(name) {
-                    return parseInt(style.getPropertyValue('padding-' + name), 10) || 0;
-                }
-                var left = padding('left');
-                var right = padding('right');
-                var top = padding('top');
-                var bottom = padding('bottom');
+                const padding = get_padding();
                 return {
                     terminal: {
                         padding: {
-                            left: left,
-                            right: right,
-                            top: top,
-                            bottom: bottom
+                            left: padding.left,
+                            right: padding.right,
+                            top: padding.top,
+                            bottom: padding.bottom
                         },
-                        width: old_width + left + right,
-                        height: old_height + top + bottom
+                        width: old_width + padding.left + padding.right,
+                        height: old_height + padding.top + padding.bottom
                     },
                     density: pixel_density,
                     char: char_size,
@@ -10099,7 +10168,7 @@
                         return line.length;
                     });
                     if (Math.max.apply(null, lengths) <= cols) {
-                        return signatures[i].join('\n') + '\n';
+                        return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';
                     }
                 }
                 return '';
@@ -10834,14 +10903,19 @@
                 }
                 if (typeof e.fileName === 'string') {
                     // display filename and line which throw exeption
-                    self.pause(settings.softPause);
+                    var was_pased = self.paused();
+                    if (!was_pased) {
+                        self.pause(settings.softPause);
+                    }
                     $.get(e.fileName, function(file) {
                         var num = e.lineNumber - 1;
                         var line = file.split('\n')[num];
                         if (line) {
                             self.error('[' + e.lineNumber + ']: ' + line);
                         }
-                        self.resume();
+                        if (!was_pased) {
+                            self.resume();
+                        }
                     }, 'text');
                 }
                 if (e.stack) {
@@ -11525,7 +11599,7 @@
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var pixel_resizer = $('<div class="terminal-pixel"/>').appendTo(self);
-        var fill = $('<div class="terminal-fill"/>').appendTo(scroller);
+        var filler = $('<div class="terminal-fill"/>').appendTo(scroller);
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
@@ -11750,7 +11824,7 @@
                 onCommandChange: function(command) {
                     // resize is not triggered when insert called just after init
                     //  and scrollbar appear
-                    if (old_width !== fill.width()) {
+                    if (old_width !== filler.width()) {
                         // resizer handler will update old_width
                         self.resizer();
                     }
@@ -11877,7 +11951,7 @@
                     var ignore_elements = '.terminal-output textarea,' +
                         '.terminal-output input';
                     self.mousedown(function(e) {
-                        if (!scrollbar_event(e, fill, pixel_density)) {
+                        if (!scrollbar_event(e, filler, pixel_density)) {
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
@@ -11945,7 +12019,7 @@
                             var width = 5 * 14;
                             var rect = self[0].getBoundingClientRect();
                             // we need width without scrollbar
-                            var content_width = fill.outerWidth() * pixel_density;
+                            var content_width = filler.outerWidth() * pixel_density;
                             // fix jumping when click near bottom or left edge #592
                             var diff_h = (top + cmd_rect.top + height);
                             diff_h = diff_h - rect.height - rect.top;
@@ -12039,8 +12113,8 @@
             resize();
             function resize() {
                 if (self.is(':visible')) {
-                    var width = fill.width();
-                    var height = fill.height();
+                    var width = scroller.width();
+                    var height = filler.height();
                     var new_pixel_density = get_pixel_size();
                     css(self[0], {
                         '--pixel-density': new_pixel_density

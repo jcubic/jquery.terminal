@@ -167,22 +167,118 @@ declare namespace JQueryTerminal {
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
 
     type MouseWheelCallback = (event: MouseEvent, delta: number, self: JQueryTerminal) => boolean | void;
+    type TouchScrollCallback = MouseWheelCallback;
 
-    type execOptions = {
+    type execOptions = JQueryTerminal.animationOptions & {
         silent?: boolean;
         deferred?: JQuery.Deferred<void>
-    } & JQueryTerminal.animationOptions;
+    };
 
-    type pushOptions = {
-        infiniteLogin?: boolean;
+    type CommonOptions = {
+        completion?: Completion;
+        keypress?: KeyEventHandler;
+        keydown?: KeyEventHandler;
+        mousewheel?: MouseWheelCallback;
+        touchscroll?: TouchScrollCallback;
+        keymap?: keymapObject;
+        history?: boolean;
+        name?: string;
         prompt?: ExtendedPrompt;
         login?: LoginArgument;
-        name?: string;
-        completion?: Completion;
-        onExit?: () => void;
+
+        onFocus?: EventCallback;
+        onClear?: EventCallback;
+        onBlur?: EventCallback;
+        onExit?: EventCallback;
+        onPop?: PushPopCallback;
+        onTerminalChange?: EventCallback;
+        onPush?: PushPopCallback;
+        onAfterRedraw?: EventCallback;
+        onEchoCommand?: (this: JQueryTerminal, div: JQuery, command: string, term: JQueryTerminal) => void;
+        onFlush?: EventCallback;
+        onPaste?: (this: JQueryTerminal, value: string) => TypeOrPromise<string | Blob> | void;
+        onCommandChange?: (this: JQueryTerminal, command: string, term: JQueryTerminal) => void;
+        onPositionChange?: (this: JQueryTerminal, position: number, display_position: number, term: JQueryTerminal) => void;
+        onBeforeCommand?: (this: JQueryTerminal, command: string) => (boolean | void);
+        onAfterCommand?: (this: JQueryTerminal, command: string) => void;
+        onBeforeEcho?: (this: JQueryTerminal, value: echoValue) => (boolean | void);
+        onAfterEcho?: (this: JQueryTerminal, value: echoValue) => void;
+    };
+
+    type TerminalOptions = CommonOptions & {
+        // login events need fixing to work with push
+        onBeforeLogout?: (this: JQueryTerminal) => (boolean | void);
+        onAfterLogout?: (this: JQueryTerminal) => void;
+        onBeforeLogin?: (this: JQueryTerminal, user: string, tokenOrPass: string) => (boolean | void);
+        onAfterLogin?: (this: JQueryTerminal, user: string, token: string) => void;
+
+        exit?: boolean;
+        clear?: boolean;
+        enabled?: boolean;
+        maskCHar?: string;
+        pipe?: boolean;
+        redirects?: {[key:string]: terminalObjectFunction};
+        wrap?: boolean;
+        checkArity?: boolean;
+        invokeMethods?: boolean;
+        useCache?: boolean;
+        anyLinks?: boolean;
+        raw?: boolean;
+        allowedAttributes?: Array<RegExp | string>;
+        tabindex?: number;
+        exceptionHandler?: null | ExceptionHandler;
+        pauseEvents?: boolean;
+        softPause?: boolean;
+        memory?: boolean;
+        cancelableAjax?: boolean;
+        processArguments?: boolean;
+        execAnimation?: boolean;
+        linksNoReferrer?: boolean;
+        javascriptLinks?: boolean;
+        processRPCResponse?: null | processRPCResponseFunction;
+        completionEscape?: boolean;
+        convertLinks?: boolean;
+        unixFormattingEscapeBrackets?: boolean; // provided by unix_formatting
+        extra?: any;
+        tabs?: number;
+        historySize?: number;
+        greetings?: greetingsArg;
+        scrollObject?: null | JQuery.Selector | HTMLElement | JQuery;
+        historyState?: boolean;
+        importHistory?: boolean;
+        historyFilter?: historyFilter;
+        echoCommand?: boolean;
+        scrollOnEcho?: boolean;
+        outputLimit?: number;
+        pasteImage?: boolean;
+        scrollBottomOffset?: boolean;
+        wordAutocomplete?: boolean;
+        caseSensitiveAutocomplete?: boolean;
+        caseSensitiveSearch?: boolean;
+        clickTimeout?: number;
+        holdTimeout?: number;
+        holdRepeatTimeout?: number;
+        repeatTimeoutKeys?: string[];
+        mobileIngoreAutoSpace?: string[];
+        request?: RequestResponseCallback;
+        response?: RequestResponseCallback;
+        describe?: string | false;
+        onRPCError?: RPCErrorCallback;
+        doubleTab?: DoubleTabFunction;
+        doubleTabEchoCommand?: boolean;
+        renderHandler?: (this: JQueryTerminal, obj: any, opts: renderHandlerOptions, term: JQueryTerminal) => (void | string | Element | JQuery<Element> | false);
+        onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status: string, error: string) => void;
+        onInit?: EventCallback;
+        autocompleteMenu?: boolean;
+        mobileDelete?: boolean;
+        strings?: strings;
+        height?: number;
+    };
+
+    type pushOptions = CommonOptions & {
+        infiniteLogin?: boolean;
         onStart?: () => void;
-        mousewheel?: MouseWheelCallback;
-    }
+    };
 
     type historyFilterFunction = (command: string) => boolean;
     type historyFilter = null | RegExp | historyFilterFunction;
@@ -431,7 +527,7 @@ declare namespace JQueryTerminal {
 }
 
 interface JQuery<TElement = HTMLElement> {
-    terminal(interpreter?: TypeOrArray<JQueryTerminal.Interpreter>, options?: TerminalOptions): JQueryTerminal;
+    terminal(interpreter?: TypeOrArray<JQueryTerminal.Interpreter>, options?: JQueryTerminal.TerminalOptions): JQueryTerminal;
     resizer(arg: TypeOrString<anyFunction>): JQuery;
     cmd(options?: CmdOptions): Cmd;
     text_length(): number;
@@ -637,115 +733,6 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     mask<T extends boolean | string>(): T;
 }
 
-type TerminalOption = "prompt" | "name" | "history" | "exit" | "clear" | "enabled" | "maskCHar" |
-    "wrap" | "checkArity" | "invokeMethods" | "anyLinks" | "raw" | "keymap" | "exceptionHandler" |
-    "pauseEvents" | "softPause" | "memory" | "cancelableAjax" | "processArguments" | "onCommandChange" |
-    "linksNoReferrer" | "javascriptLinks" | "processRPCResponse" | "completionEscape" | "convertLinks" |
-    "unixFormattingEscapeBrackets" | "extra" | "tabs" | "historySize" | "greetings" | "scrollObject" |
-    "historyState" | "importHistory" | "historyFilter" | "echoCommand" | "scrollOnEcho" | "login" |
-    "outputLimit" | "onAjaxError" | "pasteImage" | "scrollBottomOffset" | "wordAutocomplete" |
-    "caseSensitiveAutocomplete" | "caseSensitiveSearch" | "clickTimeout" | "holdTimeout" |
-    "holdRepeatTimeout" | "request" | "describe" | "onRPCError" | "doubleTab" | "completion" |
-    "onInit" | "onClear" | "onBlur" | "onFocus" | "onExit" | "onTerminalChange" | "onPush" | "onPaste" |
-    "onPop" | "keypress" | "keydown" | "onAfterRedraw" | "onEchoCommand" | "onFlush" | "strings" |
-    "repeatTimeoutKeys" | "allowedAttributes" | "doubleTabEchoCommand" | "mobileIngoreAutoSpace" |
-    "onBeforeCommand" | "onAfterCommand" | "onBeforeLogout" | "onAfterLogout" | "onBeforeLogin" |
-    "onAfterLogin" | "onBeforeEcho" | "onAfterEcho" | "autocompleteMenu" | "mobileDelete" | "renderHandler" | "pipe" | "redirets";
-
-type TerminalOptions = {
-    prompt?: JQueryTerminal.ExtendedPrompt;
-    name?: string;
-    history?: boolean;
-    exit?: boolean;
-    clear?: boolean;
-    enabled?: boolean;
-    maskCHar?: string;
-    pipe?: boolean;
-    redirects?: {[key:string]: JQueryTerminal.terminalObjectFunction};
-    wrap?: boolean;
-    checkArity?: boolean;
-    invokeMethods?: boolean;
-    useCache?: boolean;
-    anyLinks?: boolean;
-    raw?: boolean;
-    mousewheel?: JQueryTerminal.MouseWheelCallback;
-    allowedAttributes?: Array<RegExp | string>;
-    tabindex?: number;
-    keymap?: JQueryTerminal.keymapObject;
-    exceptionHandler?: null | JQueryTerminal.ExceptionHandler;
-    pauseEvents?: boolean;
-    softPause?: boolean;
-    memory?: boolean;
-    cancelableAjax?: boolean;
-    processArguments?: boolean;
-    execAnimation?: boolean;
-    linksNoReferrer?: boolean;
-    javascriptLinks?: boolean;
-    processRPCResponse?: null | JQueryTerminal.processRPCResponseFunction;
-    completionEscape?: boolean;
-    convertLinks?: boolean;
-    unixFormattingEscapeBrackets?: boolean; // provided by unix_formatting
-    extra?: any;
-    tabs?: number;
-    historySize?: number;
-    greetings?: JQueryTerminal.greetingsArg;
-    scrollObject?: null | JQuery.Selector | HTMLElement | JQuery;
-    historyState?: boolean;
-    importHistory?: boolean;
-    historyFilter?: JQueryTerminal.historyFilter;
-    echoCommand?: boolean;
-    scrollOnEcho?: boolean;
-    login?: JQueryTerminal.LoginArgument;
-    outputLimit?: number;
-    pasteImage?: boolean;
-    scrollBottomOffset?: boolean;
-    wordAutocomplete?: boolean;
-    caseSensitiveAutocomplete?: boolean;
-    caseSensitiveSearch?: boolean;
-    clickTimeout?: number;
-    holdTimeout?: number;
-    holdRepeatTimeout?: number;
-    repeatTimeoutKeys?: string[];
-    mobileIngoreAutoSpace?: string[];
-    request?: JQueryTerminal.RequestResponseCallback;
-    response?: JQueryTerminal.RequestResponseCallback;
-    describe?: string | false;
-    onRPCError?: JQueryTerminal.RPCErrorCallback;
-    doubleTab?: JQueryTerminal.DoubleTabFunction;
-    doubleTabEchoCommand?: boolean;
-    completion?: JQueryTerminal.Completion;
-    keypress?: JQueryTerminal.KeyEventHandler;
-    keydown?: JQueryTerminal.KeyEventHandler;
-    renderHandler?: (this: JQueryTerminal, obj: any, opts: renderHandlerOptions, term: JQueryTerminal) => (void | string | Element | JQuery<Element> | false);
-    onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status: string, error: string) => void;
-    onFocus?: JQueryTerminal.EventCallback;
-    onInit?: JQueryTerminal.EventCallback;
-    onClear?: JQueryTerminal.EventCallback;
-    onBlur?: JQueryTerminal.EventCallback;
-    onExit?: JQueryTerminal.EventCallback;
-    onPop?: JQueryTerminal.PushPopCallback;
-    onTerminalChange?: JQueryTerminal.EventCallback;
-    onPush?: JQueryTerminal.PushPopCallback;
-    onAfterRedraw?: JQueryTerminal.EventCallback;
-    onEchoCommand?: (this: JQueryTerminal, div: JQuery, command: string, term: JQueryTerminal) => void;
-    onFlush?: JQueryTerminal.EventCallback;
-    onPaste?: (this: JQueryTerminal, value: string) => TypeOrPromise<string | Blob> | void;
-    onCommandChange?: (this: JQueryTerminal, command: string, term: JQueryTerminal) => void;
-    onPositionChange?: (this: JQueryTerminal, position: number, display_position: number, term: JQueryTerminal) => void;
-    onBeforeCommand?: (this: JQueryTerminal, command: string) => (boolean | void);
-    onAfterCommand?: (this: JQueryTerminal, command: string) => void;
-    onBeforeLogout?: (this: JQueryTerminal) => (boolean | void);
-    onAfterLogout?: (this: JQueryTerminal) => void;
-    onBeforeLogin?: (this: JQueryTerminal, user: string, tokenOrPass: string) => (boolean | void);
-    onAfterLogin?: (this: JQueryTerminal, user: string, token: string) => void;
-    onBeforeEcho?: (this: JQueryTerminal, value: JQueryTerminal.echoValue) => (boolean | void);
-    onAfterEcho?: (this: JQueryTerminal, value: JQueryTerminal.echoValue) => void;
-    autocompleteMenu?: boolean;
-    mobileDelete?: boolean;
-    strings?: JQueryTerminal.strings;
-    height?: number;
-}
-
 interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_command(command: string): JQueryTerminal;
     id(): number;
@@ -826,7 +813,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     read(message: string, success_or_options?: ((result: string) => void) | JQueryTerminal.readOptions, cancel?: voidFunction): JQuery.Promise<string>;
     push(interpreter: TypeOrArray<JQueryTerminal.Interpreter>, options?: JQueryTerminal.pushOptions): JQueryTerminal;
     pop(echoCommand?: string, silent?: boolean): JQueryTerminal;
-    option(options: TerminalOptions | TerminalOption, value?: any): any;
+    option(option: keyof JQueryTerminal.TerminalOptions, value?: any): any;
+    option(options: JQueryTerminal.TerminalOptions): any;
     invoke_key(shortcut: string): JQueryTerminal;
     keymap(shortcut: string, callback: JQueryTerminal.keymapFunction): JQueryTerminal;
     keymap(shortcut: string): JQueryTerminal.keymapFunctionOptionalArg;

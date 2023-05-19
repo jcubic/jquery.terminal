@@ -7,7 +7,7 @@
  *           \/              /____/                              version {{VER}}
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
- * Copyright (c) 2010-2022 Jakub T. Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2023 Jakub T. Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Image Credit: Author Peter Hamer, source Wikipedia
@@ -3401,7 +3401,7 @@ describe('Terminal plugin', function() {
         });
         it('should have signature', function() {
             var sig = term.find('.terminal-output div div').map(function() { return $(this).text(); }).get().join('\n');
-            expect(nbsp(term.signature())).toEqual(sig);
+            expect(sig).toEqual(nbsp(term.signature()));
         });
         it('should have default prompt', function() {
             var prompt = term.find('.cmd-prompt');
@@ -6409,6 +6409,7 @@ describe('Terminal plugin', function() {
         });
         describe('exception', function() {
             var error = new Error('Some Message');
+            var get;
             var term;
             var lines = [
                 'function foo(a, b) {',
@@ -6421,6 +6422,7 @@ describe('Terminal plugin', function() {
                 term = $('<div/>').terminal($.noop, {
                     greetings: false
                 });
+                get = $.get;
                 if (error.stack) {
                     var length = Math.max.apply(Math, error.stack.split("\n").map(function(line) {
                         return line.length;
@@ -6430,6 +6432,7 @@ describe('Terminal plugin', function() {
             });
             afterEach(function() {
                 term.destroy().remove();
+                $.get = get;
             });
             it('should show exception', function() {
                 term.exception(error, 'ERROR');
@@ -6499,6 +6502,18 @@ describe('Terminal plugin', function() {
                     expect(output(stack.next().next())).toEqual(nbsp(code));
                     done();
                 }, 10);
+            });
+            it('should not resume the terminal', () => {
+                var error = {
+                    message: 'Some Message',
+                    fileName: 'http://localhost/file.js',
+                    lineNumber: 2
+                };
+                term.clear().exception(error, 'foo');
+                term.clear().pause();
+                expect(term.paused()).toBe(true);
+                term.exception(error, 'user');
+                expect(term.paused()).toBe(true);
             });
         });
         describe('scroll', function() {

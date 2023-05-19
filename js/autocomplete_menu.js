@@ -9,7 +9,7 @@
  *
  * Wrapper for options that will create autocomplete menu for jQuery Terminal
  *
- * Copyright (c) 2014-2022 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2023 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
@@ -105,7 +105,7 @@
                 }
             }
             if (e.which === 9) {
-                if (term.complete(matched)) {
+                if (term.complete(matched, {escape: completionEscape})) {
                     word = term.before_cursor(true);
                     regex = new RegExp('^' + $.terminal.escape_regex(word));
                 }
@@ -126,6 +126,7 @@
             var onInit = settings.onInit || $.noop;
             var keydown = settings.keydown || $.noop;
             var completion = settings.completion;
+            var completionEscape = settings.completionEscape;
             delete settings.completion;
             settings.onInit = function(term) {
                 onInit.call(this, term);
