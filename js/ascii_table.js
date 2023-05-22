@@ -69,12 +69,12 @@
             }
         })();
     }
-    // Fix to the algorithm that hanlde newlines by cviejo
-    // ref: https://stackoverflow.com/a/35115703/387194
     function ascii_table(array, header) {
         if (!array.length) {
             return '';
         }
+        // Fix to the algorithm that hanlde newlines by cviejo
+        // ref: https://stackoverflow.com/a/35115703/387194
         for (var i = array.length - 1; i >= 0; i--) {
             var row = array[i];
             var stacks = [];
