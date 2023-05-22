@@ -69,6 +69,8 @@
             }
         })();
     }
+    // Fix to the algorithm that hanlde newlines by cviejo
+    // ref: https://stackoverflow.com/a/35115703/387194
     function ascii_table(array, header) {
         if (!array.length) {
             return '';
