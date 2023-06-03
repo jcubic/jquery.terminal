@@ -3050,6 +3050,7 @@
             } else {
                 prompt = prompt_node.text();
             }
+            prompt = prompt.replace('\u200b', '');
             prompt = $.terminal.escape_brackets(prompt);
             var prompt_marker = get_prompt_marker();
             var re = new RegExp('^' + prompt_marker + $.terminal.escape_regex(prompt));

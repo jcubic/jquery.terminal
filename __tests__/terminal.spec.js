@@ -3774,8 +3774,15 @@ describe('Terminal plugin', function() {
         });
     });
     describe('prompt', function() {
-        var term = $('<div/>').appendTo('body').terminal($.noop, {
-            prompt: '>>> '
+        var term;
+        beforeEach(function() {
+            term = $('<div/>').appendTo('body').terminal($.noop, {
+                prompt: '>>> ',
+                numChars: 10
+            });
+        });
+        afterEach(function() {
+            term.destroy().remove();
         });
         it('should return prompt', function() {
             expect(term.get_prompt()).toEqual('>>> ');
@@ -3799,7 +3806,19 @@ describe('Terminal plugin', function() {
                 callback('[[ub;#fff;]>>>] ');
             });
             expect(term.find('.cmd-prompt').html()).toMatchSnapshot();
-            term.destroy().remove();
+        });
+        it('should wrap text when prompt is empty', function() {
+            term.set_prompt('');
+            var input = [
+                'A'.repeat(10),
+                'B'.repeat(10),
+                'C'.repeat(10)
+            ];
+            term.insert(input.join(''));
+            var output = term.find('.cmd-wrapper div:not(.cmd-cursor-line)').map(function() {
+                return $(this).text();
+            }).get();
+            expect(output).toEqual(input);
         });
     });
     describe('cmd plugin', function() {
