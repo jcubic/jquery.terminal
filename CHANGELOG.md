@@ -1,6 +1,7 @@
 ## 2.36.1
 ### Bugfix
 * fix CMD wrapping when prompt is empty [#882](https://github.com/jcubic/jquery.terminal/issues/882)
+* fix performance of long running typing animations [#820](https://github.com/jcubic/jquery.terminal/issues/820)
 
 ## 2.36.0
 ### Features
