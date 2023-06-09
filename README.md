@@ -9,7 +9,7 @@
 ![bower](https://img.shields.io/badge/bower-2.36.0-yellow.svg)
 [![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch=master&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&3e72c4200d7d20c29890a518cd01cd83)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
-![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
+![downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat&n=1)
 [![Paid Support](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![](https://img.shields.io/badge/paid-support-354465.svg)](https://support.jcubic.pl/)
 [![LICENSE MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
